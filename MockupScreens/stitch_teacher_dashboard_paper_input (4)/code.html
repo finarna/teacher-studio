@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Topic-Wise Visual Question Bank | CBSE Coach AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#141414",
+                        "background-light": "#f7f7f7",
+                        "background-dark": "#191919",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined { font-size: 20px; vertical-align: middle; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 10px; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .dark .glass-card { background: rgba(25, 25, 25, 0.8); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-primary dark:text-white antialiased">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 w-full border-b border-black/5 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary dark:bg-white flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-white dark:text-primary">school</span>
+</div>
+<span class="text-lg font-extrabold tracking-tight">CBSE Coach AI</span>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-semibold opacity-60 hover:opacity-100 transition-opacity" href="#">Dashboard</a>
+<a class="text-sm font-semibold border-b-2 border-primary dark:border-white pb-1" href="#">Question Bank</a>
+<a class="text-sm font-semibold opacity-60 hover:opacity-100 transition-opacity" href="#">Analytics</a>
+<a class="text-sm font-semibold opacity-60 hover:opacity-100 transition-opacity" href="#">Resources</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center bg-background-light dark:bg-white/5 rounded-full px-4 py-1.5 border border-black/5">
+<span class="material-symbols-outlined opacity-40">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 placeholder:text-black/40 dark:placeholder:text-white/40" placeholder="Search curriculum..." type="text"/>
+</div>
+<button class="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-background-dark"></span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary/10 dark:bg-white/10 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Teacher avatar placeholder" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq7-bXJbod-9aMpF_CsvWIrEF5t1bCnerqgRtGkzoijYjJm2WMF1bKcupo7QC3JyjLDYAHMtOLFb0oB_5Q9Hos4yYlpDrwIKiSzmtEwuASHTC1AiiaY7HAgP_EUB1nSOW1QKn_q1J4FPXmQoUl8eikPq9Fq8xTl9a6suOVDEiqZI5QRaDxFv-fdi33salMuDRKHruW4Hzi2I8f9-dCu1h4G7c5tetLenVO-W78Flhz-6dQJXKI8adst_flGVrYRBLcGZQWfwZrGacR"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto flex gap-6 p-6">
+<!-- Sidebar Filter -->
+<aside class="w-72 flex-shrink-0 flex flex-col gap-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
+<div class="flex flex-col gap-1">
+<h2 class="text-xs font-bold uppercase tracking-widest opacity-40 px-2">Discipline</h2>
+<div class="flex flex-col gap-1 mt-2">
+<button class="flex items-center justify-between px-3 py-2 rounded-lg bg-primary text-white font-medium">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined">atm</span> Physics</span>
+<span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">124</span>
+</button>
+<button class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors font-medium">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined">flare</span> Chemistry</span>
+<span class="text-[10px] bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded">86</span>
+</button>
+<button class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors font-medium">
+<span class="flex items-center gap-2"><span class="material-symbols-outlined">genetics</span> Biology</span>
+<span class="text-[10px] bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded">92</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-4 p-4 border border-black/5 dark:border-white/5 rounded-xl bg-white dark:bg-background-dark">
+<div>
+<h3 class="text-sm font-bold mb-3">Difficulty</h3>
+<div class="flex flex-wrap gap-2">
+<label class="cursor-pointer group">
+<input checked="" class="hidden peer" type="checkbox"/>
+<span class="px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 text-xs font-semibold peer-checked:bg-primary peer-checked:text-white transition-all">Easy</span>
+</label>
+<label class="cursor-pointer group">
+<input checked="" class="hidden peer" type="checkbox"/>
+<span class="px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 text-xs font-semibold peer-checked:bg-primary peer-checked:text-white transition-all">Medium</span>
+</label>
+<label class="cursor-pointer group">
+<input class="hidden peer" type="checkbox"/>
+<span class="px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 text-xs font-semibold peer-checked:bg-primary peer-checked:text-white transition-all">Hard</span>
+</label>
+</div>
+</div>
+<div class="pt-4 border-t border-black/5 dark:border-white/5">
+<h3 class="text-sm font-bold mb-3">Illustration Style</h3>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer">
+<input class="rounded border-black/20 text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-sm">Blackboard Sketch</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input checked="" class="rounded border-black/20 text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-sm">3D Rendered</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input checked="" class="rounded border-black/20 text-primary focus:ring-primary w-4 h-4" type="checkbox"/>
+<span class="text-sm">Educational Infographic</span>
+</label>
+</div>
+</div>
+<div class="pt-4 border-t border-black/5 dark:border-white/5">
+<h3 class="text-sm font-bold mb-3">Focus Area</h3>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer">
+<input checked="" class="text-primary focus:ring-primary w-4 h-4" name="focus" type="radio"/>
+<span class="text-sm">Previous Year Papers</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer">
+<input class="text-primary focus:ring-primary w-4 h-4" name="focus" type="radio"/>
+<span class="text-sm">Competency Focused</span>
+</label>
+</div>
+</div>
+</div>
+<button class="mt-auto w-full py-3 bg-primary/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined text-[18px]">print</span> Print Layout Mode
+            </button>
+</aside>
+<!-- Main Content Area -->
+<section class="flex-1 min-w-0 flex flex-col gap-6">
+<!-- Header & Breadcrumbs -->
+<div class="flex flex-col gap-4">
+<nav class="flex items-center gap-2 text-xs font-medium opacity-50">
+<a class="hover:underline" href="#">Dashboard</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<a class="hover:underline" href="#">Physics</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary dark:text-white">Visual Question Bank</span>
+</nav>
+<div class="flex items-end justify-between gap-4">
+<div>
+<h1 class="text-4xl font-black tracking-tight leading-none mb-2">Visual Question Bank</h1>
+<p class="text-black/60 dark:text-white/60 font-medium">Generate AI-powered illustrations and structured marking schemes for board exam preparation.</p>
+</div>
+<button class="bg-primary dark:bg-white text-white dark:text-primary px-6 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 shrink-0">
+<span class="material-symbols-outlined">add</span> Create New Question
+                    </button>
+</div>
+</div>
+<!-- Search & Meta -->
+<div class="bg-white dark:bg-background-dark border border-black/10 dark:border-white/10 rounded-xl p-2 flex items-center gap-2 shadow-sm">
+<div class="flex-1 flex items-center px-4 py-2 bg-background-light dark:bg-white/5 rounded-lg">
+<span class="material-symbols-outlined opacity-40 mr-3">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-black/40" placeholder="Search by topic, concept, or year (e.g., Prism Refraction 2023)" type="text"/>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined">filter_list</span> Recent
+                    </button>
+</div>
+</div>
+<!-- Question List -->
+<div class="flex flex-col gap-4">
+<!-- Question Card 1 -->
+<div class="group border border-black/10 dark:border-white/10 rounded-2xl bg-white dark:bg-background-dark overflow-hidden transition-all hover:shadow-xl hover:shadow-black/5">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="flex flex-wrap gap-2">
+<span class="bg-primary/5 dark:bg-white/5 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border border-black/5 dark:border-white/5">CBSE 2023</span>
+<span class="bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border border-blue-500/20">5 MARKS</span>
+<span class="bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border border-amber-500/20">MEDIUM</span>
+</div>
+<button class="text-black/20 hover:text-primary dark:text-white/20 dark:hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<h3 class="text-xl font-bold leading-snug mb-4 group-hover:text-primary/80 transition-colors">
+                            Explain the phenomenon of refraction of light through a glass prism. Derive the expression for the angle of deviation (δ) in terms of angle of incidence (i), angle of emergence (e), and angle of prism (A).
+                        </h3>
+<div class="flex items-center gap-4 mt-6">
+<button class="bg-primary dark:bg-white text-white dark:text-primary px-5 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[18px]">visibility</span> View Illustrated Answer
+                            </button>
+<button class="text-sm font-bold flex items-center gap-2 opacity-60 hover:opacity-100 px-3 py-2">
+<span class="material-symbols-outlined text-[18px]">bookmark</span> Save to Handout
+                            </button>
+</div>
+</div>
+<!-- Expanded Content (Visible state simulation) -->
+<div class="border-t border-black/10 dark:border-white/10 bg-background-light/50 dark:bg-white/2 flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-black/10 dark:divide-white/10">
+<!-- AI Illustration -->
+<div class="flex-1 p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary/40">image</span>
+<span class="text-xs font-bold uppercase tracking-wider opacity-60">AI Generated: Ray Diagram</span>
+</div>
+<div class="flex gap-2">
+<button class="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md" title="Zoom">
+<span class="material-symbols-outlined text-[18px]">zoom_in</span>
+</button>
+<button class="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-md" title="Regenerate">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+</div>
+</div>
+<div class="relative aspect-video rounded-xl border border-black/5 dark:border-white/5 bg-white overflow-hidden shadow-inner group/img">
+<img class="w-full h-full object-cover" data-alt="Technical ray diagram prism refraction" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwc2_4E6FsEBDARi8tI-KrmPyODCnxP91aaHsjnX5alO9jfPJDAute26-i2YzG7qpK4ylvSBoZD_MtFNajLuWU0qhzkyz8WNLPQtmbs8zujY7ykWLEWHTiX5qnelnm_Pl00d5lNYoiEMNGPNmAtCjF39ZH7EZnlClHC265FQmbcA8kWw_PzZiwTG49qrXew-P4NIKQeeTgLN1vHaWoGUBYjAfuhkUmG-VIRPsuEIo2ZR_Cdq7wOPB-r47nL4_oX08VXRsIVBn8pCHX"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end p-4">
+<p class="text-[10px] text-white/80 font-medium">Refraction of monochromatic light through equilateral prism</p>
+</div>
+</div>
+</div>
+<!-- Marking Scheme -->
+<div class="lg:w-96 p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold uppercase tracking-wider opacity-60">Marking Scheme Breakdown</span>
+<span class="text-[10px] px-1.5 py-0.5 bg-green-500/10 text-green-600 rounded">Verified</span>
+</div>
+<div class="space-y-3">
+<div class="flex gap-3">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">1</span>
+<p class="text-sm font-medium leading-relaxed">Drawing the correct ray diagram with incident, refracted, and emergent rays (1M)</p>
+</div>
+<div class="flex gap-3">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">2</span>
+<p class="text-sm font-medium leading-relaxed">Applying Snell's law at first and second surfaces correctly (1M)</p>
+</div>
+<div class="flex gap-3">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">3</span>
+<p class="text-sm font-medium leading-relaxed">Derivation steps using geometry of triangle and quadrilateral (2M)</p>
+</div>
+<div class="flex gap-3">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">4</span>
+<p class="text-sm font-medium leading-relaxed">Final expression: δ = (i + e) - A (1M)</p>
+</div>
+</div>
+<button class="w-full mt-4 py-2.5 border border-primary dark:border-white text-primary dark:text-white rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all">
+                                Download High-Res Assets
+                            </button>
+</div>
+</div>
+</div>
+<!-- Question Card 2 -->
+<div class="group border border-black/10 dark:border-white/10 rounded-2xl bg-white dark:bg-background-dark overflow-hidden transition-all hover:shadow-xl hover:shadow-black/5">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="flex flex-wrap gap-2">
+<span class="bg-primary/5 dark:bg-white/5 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border border-black/5 dark:border-white/5">CBSE 2022</span>
+<span class="bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border border-blue-500/20">3 MARKS</span>
+<span class="bg-green-500/10 text-green-600 dark:text-green-400 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border border-green-500/20">EASY</span>
+</div>
+</div>
+<h3 class="text-xl font-bold leading-snug mb-4">
+                            State the principle of working of a transformer. Mention two causes of energy loss in a real transformer.
+                        </h3>
+<div class="flex items-center gap-4 mt-6">
+<button class="bg-primary/10 dark:bg-white/10 text-primary dark:text-white px-5 py-2 rounded-lg font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">visibility</span> View Illustrated Answer
+                            </button>
+<button class="text-sm font-bold flex items-center gap-2 opacity-60 hover:opacity-100 px-3 py-2">
+<span class="material-symbols-outlined text-[18px]">bookmark</span> Save to Handout
+                            </button>
+</div>
+</div>
+</div>
+<!-- Question Card 3 -->
+<div class="group border border-black/10 dark:border-white/10 rounded-2xl bg-white dark:bg-background-dark overflow-hidden transition-all hover:shadow-xl hover:shadow-black/5">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="flex flex-wrap gap-2">
+<span class="bg-primary/5 dark:bg-white/5 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border border-black/5 dark:border-white/5">EXEMPLAR</span>
+<span class="bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border border-blue-500/20">5 MARKS</span>
+<span class="bg-red-500/10 text-red-600 dark:text-red-400 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase border border-red-500/20">HARD</span>
+</div>
+</div>
+<h3 class="text-xl font-bold leading-snug mb-4">
+                            Determine the expression for the torque acting on an electric dipole placed in a uniform electric field. What happens when the dipole is placed in a non-uniform field?
+                        </h3>
+<div class="flex items-center gap-4 mt-6">
+<button class="bg-primary/10 dark:bg-white/10 text-primary dark:text-white px-5 py-2 rounded-lg font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">visibility</span> View Illustrated Answer
+                            </button>
+<button class="text-sm font-bold flex items-center gap-2 opacity-60 hover:opacity-100 px-3 py-2">
+<span class="material-symbols-outlined text-[18px]">bookmark</span> Save to Handout
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Empty / Loading State (Hidden) -->
+<div class="hidden flex flex-col items-center justify-center py-20 bg-white/50 dark:bg-white/5 rounded-3xl border-2 border-dashed border-black/5 dark:border-white/5">
+<span class="material-symbols-outlined text-6xl opacity-10 mb-4">search_off</span>
+<p class="text-lg font-bold opacity-40">No matching questions found</p>
+<p class="text-sm opacity-30">Try adjusting your filters or search terms</p>
+<button class="mt-4 text-sm font-bold underline">Reset all filters</button>
+</div>
+</section>
+</main>
+<!-- Floating Footer Action for Mobile/Quick Toggle -->
+<div class="fixed bottom-6 right-6 lg:hidden">
+<button class="w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</body></html>

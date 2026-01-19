@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI-Enhanced Study Materials &amp; Sketch Notes</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Architects+Daughter&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00758a",
+                        "background-light": "#f9fafb",
+                        "background-dark": "#19202e",
+                        "surface-dark": "#2d3748",
+                        "amber-accent": "#F6AD55",
+                        "emerald-accent": "#38A169",
+                        "indigo-creative": "#6366f1"
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "heading": ["Space Grotesk", "sans-serif"],
+                        "sketch": ["Architects Daughter", "cursive"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mind-map-node::before {
+            content: '';
+            position: absolute;
+            left: -1rem;
+            top: 50%;
+            width: 1rem;
+            border-top: 2px solid #2e626b;
+        }
+        .mind-map-container::before {
+            content: '';
+            position: absolute;
+            left: 2rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #2e626b;
+        }
+        .sketch-card {
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .dark .sketch-card {
+            background-image: radial-gradient(#374151 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex min-h-screen">
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 flex flex-col fixed h-full bg-background-light dark:bg-background-dark z-50">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<div>
+<h1 class="text-lg font-bold leading-tight font-heading">God-Mode</h1>
+<p class="text-primary text-xs font-semibold uppercase tracking-wider">CBSE Coaching Aid</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-primary/10 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+<span class="font-medium">Paper Scanning</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-primary/20 text-primary rounded-lg border border-primary/20" href="#">
+<span class="material-symbols-outlined text-fill">dashboard</span>
+<span class="font-bold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-primary/10 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-medium">Creative Studio</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-primary/10 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">library_books</span>
+<span class="font-medium">Material Library</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-primary/10 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-medium">AI Insights</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 bg-slate-100 dark:bg-surface-dark rounded-lg">
+<div class="size-8 rounded-full bg-slate-300 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Teacher profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPrsc1FJQ4Qlg_3kidygtUhIAiIR1TCXSGv0JOpMn8bEW8P1ICW2tC6Jj92kvW-tEbvE7ZMJDPRU3uUBcHM6CSd_vNx1b0ZdSan0cNzjXg8w3MZ9Yhoze3PIeWNXHZLxnhuvTMGAXR65wSXegNTO47GGDeQUyP0avltfjktbc8y2p5-SqQhMtesWA3C7YW9ottMSsgmgBiH8nDHZ4g97rz2zBvgsSZh80x1DXGQcdh0DIv_ydMF2PowAtqvHKajJ9Hics3tnMf5xHa"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold truncate">Dr. Aristhotene</p>
+<p class="text-[10px] text-slate-500 uppercase tracking-tighter">Physics Department</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-sm">settings</span>
+</div>
+</div>
+</aside>
+<main class="flex-1 ml-64">
+<header class="sticky top-0 z-40 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-8 py-4">
+<div class="flex items-center justify-between max-w-6xl mx-auto">
+<div class="flex flex-col">
+<nav class="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
+<a class="hover:text-primary transition-colors" href="#">Home</a>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Analysis</a>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span class="text-slate-900 dark:text-slate-100">AI Creative Studio</span>
+</nav>
+<h2 class="text-2xl font-bold font-heading">AI-Enhanced Study Materials</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-slate-100 dark:bg-surface-dark p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+<button class="px-3 py-1.5 text-xs font-bold rounded-md bg-white dark:bg-background-dark shadow-sm text-primary">2D Technical</button>
+<button class="px-3 py-1.5 text-xs font-bold rounded-md text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">3D Realistic</button>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Export Studio Assets
+                    </button>
+</div>
+</div>
+</header>
+<div class="max-w-6xl mx-auto p-8 space-y-12">
+<section class="space-y-8">
+<div class="flex items-end justify-between">
+<div>
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-creative/10 text-indigo-creative border border-indigo-creative/20 text-xs font-bold uppercase tracking-widest mb-3">
+<span class="material-symbols-outlined text-sm">magic_button</span>
+                            AI Creative Studio
+                        </div>
+<h3 class="text-3xl font-bold font-heading">Visual Concept Deep Dive</h3>
+<p class="text-slate-500 mt-2">Transforming complex electromagnetic theories into intuitive visual narratives.</p>
+</div>
+</div>
+<div class="space-y-6">
+<h4 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-creative">edit_note</span>
+                        AI Sketch Notes
+                    </h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="sketch-card bg-white dark:bg-surface-dark border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-8 relative group hover:border-indigo-creative/50 transition-all cursor-zoom-in">
+<div class="absolute top-4 right-4 bg-indigo-creative/10 text-indigo-creative text-[10px] px-2 py-1 rounded font-bold uppercase">Faraday's Insight</div>
+<div class="font-sketch text-xl text-slate-800 dark:text-slate-200 space-y-6">
+<div class="border-b-2 border-indigo-creative/20 pb-4">
+<h5 class="text-2xl text-indigo-creative mb-2 underline decoration-wavy">Magnetic Flux change?</h5>
+<p>When B-field lines through a loop change...</p>
+</div>
+<div class="flex gap-6 items-start">
+<div class="w-1/2 border-2 border-dashed border-slate-300 dark:border-slate-600 p-4 rounded-xl rotate-1">
+<p class="text-sm text-center italic">"Nature abhors a change in flux!"</p>
+<div class="mt-4 flex justify-center">
+<span class="material-symbols-outlined text-4xl text-primary">cyclone</span>
+</div>
+</div>
+<div class="w-1/2 space-y-4">
+<p class="text-sm">1. Move magnet <span class="text-emerald-accent">→</span></p>
+<p class="text-sm">2. Current starts <span class="text-amber-accent">⚡</span></p>
+<p class="text-sm">3. Opposite B-field created!</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sketch-card bg-white dark:bg-surface-dark border-2 border-slate-200 dark:border-slate-800 rounded-2xl p-8 relative group hover:border-indigo-creative/50 transition-all cursor-zoom-in">
+<div class="absolute top-4 right-4 bg-indigo-creative/10 text-indigo-creative text-[10px] px-2 py-1 rounded font-bold uppercase">Lenz's Rule</div>
+<div class="font-sketch text-xl text-slate-800 dark:text-slate-200 space-y-6">
+<div class="border-b-2 border-indigo-creative/20 pb-4">
+<h5 class="text-2xl text-indigo-creative mb-2 underline decoration-wavy">Which way does it flow?</h5>
+<p>The "No" Law of Induction.</p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-amber-accent/5 p-3 rounded-lg -rotate-2">
+<p class="text-base font-bold">Approach North:</p>
+<p class="text-sm">Ring becomes North to REPEL!</p>
+</div>
+<div class="bg-primary/5 p-3 rounded-lg rotate-1">
+<p class="text-base font-bold">Receding North:</p>
+<p class="text-sm">Ring becomes South to ATTRACT!</p>
+</div>
+</div>
+<p class="text-center text-indigo-creative font-bold">Conservation of Energy in action! ⚡</p>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<h4 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-creative">grid_view</span>
+                            Illustrated Question Bank
+                        </h4>
+<div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase">
+                            Style: <span class="text-indigo-creative">2D Technical</span>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="flex bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-shadow group">
+<div class="w-1/3 bg-slate-50 dark:bg-background-dark/50 p-4 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-center items-center">
+<div class="relative w-full aspect-square border-2 border-primary/20 rounded-lg flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 opacity-20 bg-[radial-gradient(#00758a_1px,transparent_1px)] bg-[size:10px_10px]"></div>
+<span class="material-symbols-outlined text-6xl text-primary/40 group-hover:scale-110 transition-transform">schema</span>
+<div class="absolute bottom-2 right-2 text-[8px] bg-primary text-white px-1.5 py-0.5 rounded font-bold">2D VECTOR</div>
+</div>
+<p class="mt-3 text-[10px] text-slate-400 font-bold uppercase text-center">AI Visual Aid ID: #EM-042</p>
+</div>
+<div class="w-2/3 p-6 space-y-3">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-indigo-creative/10 text-indigo-creative rounded text-[10px] font-bold">5 MARKS</span>
+<span class="text-[10px] text-slate-400 font-bold uppercase">Case Study Based</span>
+</div>
+<p class="text-sm font-semibold leading-relaxed">
+                                    A square loop of side 10 cm and resistance 0.5 Ω is placed vertically in the east-west plane. A uniform magnetic field of 0.10 T is set up across the plane in the north-east direction. Calculate the magnitude of induced current.
+                                </p>
+<button class="text-indigo-creative text-xs font-bold flex items-center gap-1 hover:underline">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                    Reveal Step-by-Step Solution
+                                </button>
+</div>
+</div>
+<div class="flex bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-xl transition-shadow group">
+<div class="w-1/3 bg-slate-50 dark:bg-background-dark/50 p-4 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-center items-center">
+<div class="relative w-full aspect-square border-2 border-amber-accent/20 rounded-lg flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 opacity-20 bg-[radial-gradient(#F6AD55_1px,transparent_1px)] bg-[size:10px_10px]"></div>
+<span class="material-symbols-outlined text-6xl text-amber-accent/40 group-hover:scale-110 transition-transform">model_training</span>
+<div class="absolute bottom-2 right-2 text-[8px] bg-amber-accent text-white px-1.5 py-0.5 rounded font-bold">3D SCHEMATIC</div>
+</div>
+<p class="mt-3 text-[10px] text-slate-400 font-bold uppercase text-center">AI Visual Aid ID: #EM-108</p>
+</div>
+<div class="w-2/3 p-6 space-y-3">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-indigo-creative/10 text-indigo-creative rounded text-[10px] font-bold">3 MARKS</span>
+<span class="text-[10px] text-slate-400 font-bold uppercase">Conceptual</span>
+</div>
+<p class="text-sm font-semibold leading-relaxed">
+                                    Explain why an inductor resists the growth of current in a circuit. Illustrate the process using the concept of back EMF.
+                                </p>
+<button class="text-indigo-creative text-xs font-bold flex items-center gap-1 hover:underline">
+<span class="material-symbols-outlined text-sm">visibility</span>
+                                    Reveal Step-by-Step Solution
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="border-t border-slate-200 dark:border-slate-800 pt-12"></div>
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-2 space-y-4">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold uppercase tracking-widest">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+                        Highest Weightage Topic
+                    </div>
+<p class="text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
+                        This unit constitutes <span class="text-primary font-bold">15% of total marks</span>. Analysis shows it is critical for both conceptual MCQs and high-value 5-mark derivations.
+                    </p>
+</div>
+<div class="flex gap-4">
+<div class="flex-1 bg-surface-dark/40 dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+<p class="text-xs text-slate-500 font-bold uppercase">Frequency</p>
+<p class="text-3xl font-heading font-bold mt-1">High</p>
+<p class="text-emerald-accent text-xs font-bold mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> +12% vs last yr
+                        </p>
+</div>
+<div class="flex-1 bg-surface-dark/40 dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+<p class="text-xs text-slate-500 font-bold uppercase">Avg. Marks</p>
+<p class="text-3xl font-heading font-bold mt-1">8.5</p>
+<p class="text-slate-500 text-xs font-bold mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">remove</span> Stable
+                        </p>
+</div>
+</div>
+</section>
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="text-xl font-bold font-heading flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">account_tree</span>
+                        AI Concept Mind Map
+                    </h3>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+<span class="material-symbols-outlined">zoom_in</span>
+</button>
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors">
+<span class="material-symbols-outlined">fullscreen</span>
+</button>
+</div>
+</div>
+<div class="relative bg-slate-50 dark:bg-surface-dark/20 border border-slate-200 dark:border-slate-800 rounded-2xl p-10 overflow-hidden min-h-[400px] flex items-center">
+<div class="relative z-10 space-y-8 mind-map-container pl-12">
+<div class="relative group">
+<div class="bg-primary text-white px-6 py-3 rounded-xl font-bold shadow-xl shadow-primary/30 inline-block">
+                                Electromagnetic Induction
+                            </div>
+<div class="mt-8 ml-8 space-y-12">
+<div class="relative mind-map-node">
+<div class="bg-slate-200 dark:bg-surface-dark px-4 py-2 rounded-lg font-semibold inline-flex items-center gap-3 border border-slate-300 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+                                        Faraday's Laws
+                                        <span class="bg-primary/20 text-primary text-[10px] px-1.5 py-0.5 rounded uppercase">V. Important</span>
+</div>
+<div class="mt-4 ml-8 space-y-4">
+<div class="relative mind-map-node">
+<div class="bg-slate-100 dark:bg-surface-dark/50 px-3 py-1.5 rounded-md text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">1st Law (Statement)</div>
+</div>
+<div class="relative mind-map-node">
+<div class="bg-slate-100 dark:bg-surface-dark/50 px-3 py-1.5 rounded-md text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">2nd Law (Magnitude)</div>
+</div>
+</div>
+</div>
+<div class="relative mind-map-node">
+<div class="bg-slate-200 dark:bg-surface-dark px-4 py-2 rounded-lg font-semibold inline-flex items-center gap-3 border border-slate-300 dark:border-slate-700 hover:border-primary transition-colors cursor-pointer">
+                                        Inductance
+                                    </div>
+<div class="mt-4 ml-8 space-y-4">
+<div class="relative mind-map-node">
+<div class="bg-slate-100 dark:bg-surface-dark/50 px-3 py-1.5 rounded-md text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">Self Inductance</div>
+</div>
+<div class="relative mind-map-node">
+<div class="bg-slate-100 dark:bg-surface-dark/50 px-3 py-1.5 rounded-md text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">Mutual Inductance</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<div class="absolute inset-0" style="background-image: radial-gradient(#00758a 1px, transparent 1px); background-size: 20px 20px;"></div>
+</div>
+</div>
+</section>
+<section class="space-y-6">
+<h3 class="text-xl font-bold font-heading">Formula Vault</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="bg-surface-dark p-6 rounded-2xl border border-slate-700/50 hover:border-primary/50 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-xs font-bold text-primary uppercase tracking-tighter">Magnetic Flux</span>
+<span class="material-symbols-outlined text-slate-500 text-lg">function</span>
+</div>
+<div class="bg-background-dark/50 p-4 rounded-xl text-center mb-4 border border-slate-800">
+<code class="text-2xl font-heading text-white font-bold">Φ = B ⋅ A cosθ</code>
+</div>
+<div class="space-y-2 text-sm">
+<div class="flex justify-between text-slate-400"><span>SI Unit</span><span class="text-white font-medium">Weber (Wb)</span></div>
+</div>
+</div>
+<div class="bg-surface-dark p-6 rounded-2xl border border-slate-700/50 hover:border-primary/50 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-xs font-bold text-primary uppercase tracking-tighter">Induced EMF</span>
+<span class="material-symbols-outlined text-slate-500 text-lg">function</span>
+</div>
+<div class="bg-background-dark/50 p-4 rounded-xl text-center mb-4 border border-slate-800">
+<code class="text-2xl font-heading text-white font-bold">ε = -dΦ / dt</code>
+</div>
+<div class="space-y-2 text-sm">
+<div class="flex justify-between text-slate-400"><span>Source</span><span class="text-white font-medium">Faraday's Law</span></div>
+</div>
+</div>
+<div class="bg-surface-dark p-6 rounded-2xl border border-slate-700/50 hover:border-primary/50 transition-all group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-xs font-bold text-primary uppercase tracking-tighter">Motional EMF</span>
+<span class="material-symbols-outlined text-slate-500 text-lg">function</span>
+</div>
+<div class="bg-background-dark/50 p-4 rounded-xl text-center mb-4 border border-slate-800">
+<code class="text-2xl font-heading text-white font-bold">ε = Bvl</code>
+</div>
+<div class="space-y-2 text-sm">
+<div class="flex justify-between text-slate-400"><span>Context</span><span class="text-white font-medium">Straight Conductor</span></div>
+</div>
+</div>
+</div>
+</section>
+<section class="space-y-6">
+<h3 class="text-xl font-bold font-heading">The Trap Zone (Pitfalls)</h3>
+<div class="bg-amber-accent/10 border-2 border-amber-accent/50 rounded-2xl p-6 relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-8xl text-amber-accent">warning</span>
+</div>
+<ul class="space-y-4 relative z-10">
+<li class="flex gap-4">
+<span class="material-symbols-outlined text-amber-accent shrink-0">report_problem</span>
+<div>
+<p class="font-bold text-amber-600 dark:text-amber-accent">Direction Confusion</p>
+<p class="text-sm text-slate-600 dark:text-slate-300">Students often forget to apply Lenz's Law when calculating induced current direction.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<section class="pb-20"></section>
+</div>
+</main>
+</div>
+
+</body></html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Sketch Note Gallery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2fb19c",
+                        "background-light": "#f6f2ef",
+                        "background-dark": "#1d2935",
+                        "marker-yellow": "#FFDD47",
+                        "marker-blue": "#5AB9E8",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>.paper-texture {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuCpSGXsv3J1JLk5yZg_f7xJtF4TGLehUNEnhCZ_ADSb6ka82FReB5ROVYqjoPYCF9cA2hATLWgG3hSVuDRruzoJrW9ZU6WC3zcxUms5BXQS3eG_nKFZhF_vBteWCXTdvjGGurSVGoLU-bY8BUPXxXB681KFjvr-xxqs-7lbrshsqvgQcOX-Sw1zMSEQ62xVa_OmJraQrni-E_Da2tzkAMK4qNVZnMKydGmn16zpBnhjH2kw3RKDMPFsnAHYm8CK0xZEnaWlCYCmAUwm)
+    }
+.masonry-grid {
+    columns: 1
+    }
+@media (min-width: 640px) {
+    .masonry-grid {
+        columns: 2
+        }
+    }
+@media (min-width: 1024px) {
+    .masonry-grid {
+        columns: 3
+        }
+    }
+@media (min-width: 1280px) {
+    .masonry-grid {
+        columns: 4
+        }
+    }
+.sketch-card {
+    break-inside: avoid;
+    margin-bottom: 1.5rem
+    }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#101918] dark:text-[#f9fbfb] paper-texture min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-[#e9f1f0] dark:border-white/10">
+<div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between gap-6">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="bg-primary p-1.5 rounded-lg text-white">
+<span class="material-symbols-outlined text-2xl">draw</span>
+</div>
+<h1 class="text-xl font-extrabold tracking-tight hidden md:block">AI Sketch Note Gallery</h1>
+</div>
+<div class="hidden lg:flex items-center gap-1 bg-[#e9f1f0] dark:bg-white/5 rounded-full px-4 py-1.5">
+<span class="material-symbols-outlined text-primary text-xl">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-64 placeholder:text-gray-500" placeholder="Search chapters or topics..." type="text"/>
+</div>
+</div>
+<nav class="flex items-center gap-8">
+<div class="hidden xl:flex items-center gap-6 text-sm font-semibold">
+<a class="hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-primary underline underline-offset-8 decoration-2" href="#">Gallery</a>
+<a class="hover:text-primary transition-colors" href="#">Analysis</a>
+<a class="hover:text-primary transition-colors" href="#">Lesson Plans</a>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-lg">auto_awesome</span>
+<span>Generate New</span>
+</button>
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Teacher profile picture avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsSpdXQYw3wyS6D9SC06uby6b8zaVqKx9MUiob8frCZoRPiAMSt2a6v8hwuhCmAmqWjhtGsHONRw_Z_iAeP9zhEjRLKHqjmCDn0InD34raX9-n1oV_aCtusW05wozohAWO_EMzWao9MUim9l3lIjzOzAxFrhbC1rjobnP7H6FKctDQoUCIUMxvt1qI4q6A0kF4LI3lG6mD39hhnjsk1A2eUwW1k2Q99v7HvjeIm_kCzq6Chlh2E8JOQdM9XTtf5tswZOmapHoqNnwg"/>
+</div>
+</div>
+</nav>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-6 py-8">
+<!-- Breadcrumbs & Heading -->
+<div class="mb-10">
+<div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+<a class="hover:text-primary" href="#">CBSE Class 10</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<a class="hover:text-primary" href="#">Science</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-primary font-medium">Visual Summaries</span>
+</div>
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="max-w-2xl">
+<h2 class="text-4xl font-black mb-2">High-Yield Gallery</h2>
+<p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Curated visual summaries optimized for CBSE Board Paper analysis. Each note is designed for high retention and quick classroom handout distribution.
+                    </p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-lg font-bold text-sm hover:shadow-md transition-shadow">
+<span class="material-symbols-outlined text-lg">download</span>
+                        Export All
+                    </button>
+<button class="flex items-center justify-center p-2 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-lg hover:shadow-md">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="flex flex-wrap gap-2 mb-8">
+<button class="px-4 py-1.5 bg-primary text-white rounded-full text-sm font-bold">All Subjects</button>
+<button class="px-4 py-1.5 bg-white dark:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10 rounded-full text-sm font-medium hover:border-primary transition-colors">Physics</button>
+<button class="px-4 py-1.5 bg-white dark:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10 rounded-full text-sm font-medium hover:border-primary transition-colors">Chemistry</button>
+<button class="px-4 py-1.5 bg-white dark:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10 rounded-full text-sm font-medium hover:border-primary transition-colors">Biology</button>
+<button class="px-4 py-1.5 bg-white dark:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10 rounded-full text-sm font-medium hover:border-primary transition-colors">Maths</button>
+<div class="w-px h-6 bg-gray-300 dark:bg-white/20 mx-2 self-center"></div>
+<button class="px-4 py-1.5 bg-[#FFDD47]/20 text-[#8B7300] dark:text-[#FFDD47] rounded-full text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-base">star</span>
+                High Frequency (5 Years)
+            </button>
+</div>
+<!-- Masonry Grid -->
+<div class="masonry-grid">
+<!-- Card 1 -->
+<div class="sketch-card group relative bg-white dark:bg-[#25323f] rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-white/10 hover:shadow-xl transition-all duration-300">
+<div class="aspect-[4/5] bg-white relative p-6">
+<div class="w-full h-full border-2 border-dashed border-gray-100 rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Sketch note showing Ohm's Law with circuit diagrams and hand-drawn formulas" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaAkFYw3cLKY9KbLhXg5U1vVPbY9itwvVnG2Ctf90wEhwZkSoVQ3KDy7n96U_SEdXhqM1o2O1e3GDGhj9IWA7lEUU2wYKgdmz2hdAnvgrmNH3naHx-jYDDQG2zRCH8y5OrQeV-GIv2uRij7R362I4aR3F4OxgG1Yjib4mdbxey7M30DXk0QCS4uqQeXVFptuKTbOu0b_PaD1WRJa1aEPRn_ckGymdrJeQ3qc1qe4ZgDP6JlCf5xLLF2_L9QHGz6bsqZSzoqoc0SBX1"/>
+<!-- Marker Highlights (Visual simulation) -->
+<div class="absolute top-10 right-10 w-24 h-6 bg-marker-yellow/40 -rotate-12 blur-sm"></div>
+<div class="absolute bottom-20 left-10 w-32 h-8 bg-marker-blue/30 rotate-6 blur-md"></div>
+</div>
+<!-- Hover Actions -->
+<div class="absolute inset-0 bg-primary/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4">
+<button class="bg-white text-primary px-6 py-2 rounded-full font-bold flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+<span class="material-symbols-outlined">fullscreen</span>
+                            Presentation Mode
+                        </button>
+<div class="flex gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform delay-75">
+<button class="p-2 bg-white/20 hover:bg-white/40 text-white rounded-lg backdrop-blur-sm" title="Download PDF">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+</button>
+<button class="p-2 bg-white/20 hover:bg-white/40 text-white rounded-lg backdrop-blur-sm" title="Export Image">
+<span class="material-symbols-outlined">image</span>
+</button>
+<button class="p-2 bg-white/20 hover:bg-white/40 text-white rounded-lg backdrop-blur-sm" title="Add to Lessons">
+<span class="material-symbols-outlined">library_add</span>
+</button>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-gray-100 dark:border-white/5">
+<div class="flex items-start justify-between mb-2">
+<h3 class="font-bold text-lg leading-tight">Ohm's Law &amp; Circuit Components</h3>
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">High Yield</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">science</span> Physics</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">assignment_turned_in</span> 5 Mark Q</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="sketch-card group relative bg-white dark:bg-[#25323f] rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-white/10 hover:shadow-xl transition-all">
+<div class="aspect-[4/3] bg-white relative p-6">
+<div class="w-full h-full border-2 border-dashed border-gray-100 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Visual summary of the Human Digestive System with anatomical doodles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc71Sm8JUtspVJnnTWRZGF9OXQJROOnpziwpZZjPdJPGuI83KPgH31BJLxMiTujiWBgPiDRWyjq2lLwozLHXOPI-jcfmx3jT4fk1fWngXAhU5rGt_IiQiR_0832L_HL8-ri3vNdcYX6H6cUuXPNhteGIBRMoDEDU_vVRAvCwKc5_A8pRWpO-eiAdIF34tkbTcfCX7I1p-PsgzOux5nSmVDnTot9L21e1lSGpJz21aO0aa2rxvbIepBk8P1HhWTjFRV1aGb0u4VjK_Q"/>
+</div>
+<div class="absolute inset-0 bg-primary/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4">
+<button class="bg-white text-primary px-6 py-2 rounded-full font-bold flex items-center gap-2">
+<span class="material-symbols-outlined">fullscreen</span> Present
+                        </button>
+</div>
+</div>
+<div class="p-4 border-t border-gray-100 dark:border-white/5">
+<h3 class="font-bold text-lg leading-tight mb-2">Life Processes: Digestion</h3>
+<div class="flex items-center gap-3 text-xs text-gray-500">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">biotech</span> Biology</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">history_edu</span> 3 Years Gap</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="sketch-card group relative bg-white dark:bg-[#25323f] rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-white/10 hover:shadow-xl transition-all">
+<div class="aspect-[3/4] bg-white relative p-6">
+<div class="w-full h-full border-2 border-dashed border-gray-100 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Chemical Reactions and Equations flowchart with iconographic representations of beaker reactions" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAow-9TL8NwP9ykk-3FdDkZqOe6WYZKAVr441Rt2twjKiRpPvg2mzcFXRLsq9b6WrPeGwhfjhHFYXCOCyT5bRHvm7intxwGGkx6ZrplUW4QVql20JY57VBlLdkD_pUIM_Ql1lVGVP1uxQR3SAW7Y-sHi6-cpWOZPJYruN5BciJs6Sf_q_jAgXc6cm-C6ys_RZNhlAzLO3xaiCU52VHQBIdQKKYEEXJ-QCl0fnlW4hPNuLY2EqwDIkWB93cx9aLVU7kwCYjBC88M-ATn"/>
+</div>
+<div class="absolute inset-0 bg-primary/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4">
+<button class="bg-white text-primary px-6 py-2 rounded-full font-bold flex items-center gap-2">
+<span class="material-symbols-outlined">fullscreen</span> Present
+                        </button>
+</div>
+</div>
+<div class="p-4 border-t border-gray-100 dark:border-white/5">
+<div class="flex items-start justify-between mb-2">
+<h3 class="font-bold text-lg leading-tight">Chemical Equations &amp; Redox</h3>
+<span class="text-xs font-bold text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded">Critical</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-gray-500">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">science</span> Chemistry</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">priority_high</span> Section C</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="sketch-card group relative bg-white dark:bg-[#25323f] rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-white/10 hover:shadow-xl transition-all">
+<div class="aspect-square bg-white relative p-6">
+<div class="w-full h-full border-2 border-dashed border-gray-100 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Periodic Table Trends visual showing arrows for electronegativity and atomic size" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6bEat-kDY9jMXDYPwfkhp9fcjV7Np7aZrSG6m9pnW5N6YHHqE7bRPMLXjjIkmx74g1wl5M0mCiZxIhFsMXDcVzLHgpIeUKKCWf3Q3_j84gBmBj3u7L0Ts1rfRSHPa3baEgcHqyMsYmkHaAHeRXxrDmOEVJKySsOnIg4ASJCmt6Jr18NfPGSvgo8t_UciwYNG1WwPz__-LckL5HFHehrAg1U_gsABRtkoKFiw5opRt4JjSORn4Op73-ZayExQ9uRMOFm4uSA7fsy8n"/>
+</div>
+<div class="absolute inset-0 bg-primary/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4">
+<button class="bg-white text-primary px-6 py-2 rounded-full font-bold flex items-center gap-2">
+<span class="material-symbols-outlined">fullscreen</span> Present
+                        </button>
+</div>
+</div>
+<div class="p-4 border-t border-gray-100 dark:border-white/5">
+<h3 class="font-bold text-lg leading-tight mb-2">Modern Periodic Table Trends</h3>
+<div class="flex items-center gap-3 text-xs text-gray-500">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">science</span> Chemistry</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">equalizer</span> MCQ Focus</span>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="sketch-card group relative bg-white dark:bg-[#25323f] rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-white/10 hover:shadow-xl transition-all">
+<div class="aspect-[4/5] bg-white relative p-6">
+<div class="w-full h-full border-2 border-dashed border-gray-100 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Human Eye and the Colorful World sketch note with lens refraction diagrams" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdd2AasflmSOAx08it2xYFozqiCv0uTMuhL2d-xRzl083MWLNwNj4YE9KPxt6iaO42sbbc_AdZMibCrRj1oQYy_J1iMzqvWDee01EJfLgef-MhxTMWy-cfgo3WOR5xhJltXcKx1vqGILLzEQ7VZN5fQPaA1JLfID6LuEBNlfKu-pFbEEUoE2qUa2vN6LhIuRhzIDCdsjyEh0LsSVbBV71v7xGYo4n1P62iAsx0SHEr42OaEuWejqQ5KSglPlP24VNPWoekI7tNUj9P"/>
+</div>
+<div class="absolute inset-0 bg-primary/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4">
+<button class="bg-white text-primary px-6 py-2 rounded-full font-bold flex items-center gap-2">
+<span class="material-symbols-outlined">fullscreen</span> Present
+                        </button>
+</div>
+</div>
+<div class="p-4 border-t border-gray-100 dark:border-white/5">
+<h3 class="font-bold text-lg leading-tight mb-2">Human Eye: Defects &amp; Corrections</h3>
+<div class="flex items-center gap-3 text-xs text-gray-500">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">visibility</span> Physics</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">grade</span> 5 Years Straight</span>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="sketch-card group relative bg-white dark:bg-[#25323f] rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-white/10 hover:shadow-xl transition-all">
+<div class="aspect-[4/3] bg-white relative p-6">
+<div class="w-full h-full border-2 border-dashed border-gray-100 rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Magnetic Effects of Electric Current visual note with field line diagrams" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUHrn4yMNnRWi1pnfhZi8YdTAYWwX3IAQR5t5Z8aEm_XD__C1dtixlpp8cUJ7bPNnRZiF6jXNqXN6dE-pPXzM5ogXDoLdCcEwDvokFqaVdjoDluewEXYa5F-PvKal-gqac51qan75Nff1E_zKtSRTASx_9oai6u3NHo-EctdOpFNa2qMXR-WbRSRJNwgeZgp38PbcEuSvs0D9j0TsCpeyvZkNIkMzl2_IphhPSS_ezl7zo46Av7BJaqnxNrfRExuwXkwZYpduuW5vQ"/>
+</div>
+<div class="absolute inset-0 bg-primary/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4">
+<button class="bg-white text-primary px-6 py-2 rounded-full font-bold flex items-center gap-2">
+<span class="material-symbols-outlined">fullscreen</span> Present
+                        </button>
+</div>
+</div>
+<div class="p-4 border-t border-gray-100 dark:border-white/5">
+<h3 class="font-bold text-lg leading-tight mb-2">Magnetic Effects &amp; Field Lines</h3>
+<div class="flex items-center gap-3 text-xs text-gray-500">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">bolt</span> Physics</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">school</span> CBSE Exemplar</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button for Mobile / Quick Generate -->
+<div class="fixed bottom-8 right-8 lg:hidden">
+<button class="w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+<!-- Presentation Mode Lightbox Simulation (Hidden by Default) -->
+<!-- In a real app, this would be toggled by JS. Represented here for UI completeness -->
+<div class="fixed inset-0 z-[100] bg-black/90 hidden items-center justify-center p-8">
+<div class="relative w-full h-full flex items-center justify-center">
+<button class="absolute top-0 right-0 text-white p-4">
+<span class="material-symbols-outlined text-4xl">close</span>
+</button>
+<div class="bg-white max-w-4xl w-full h-full rounded-lg overflow-hidden shadow-2xl relative">
+<img class="w-full h-full object-contain" data-alt="Full screen presentation view of high resolution sketch note" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtNAKPJPwCqGw4HS02KZ2j7U0l2Q5qHIxlO5Jg1z9FE9-O0Ozy9w9DM6ODIvDtjHK6fwPALQ2PmbCfROzTasb1D3gFx0wLCxeK6cEY0FRrieYnfggu1ag5UoyWpq3ooz7kSJtmDbXqHS0eUM2JMdlC4DWUvZOchFk9153Z3elefA1Gx5jqPfwnm3ozaZ4OeVHN1bu7j25gZUoGYlML0J38pvhNzWnnxoQI7mlfumnozn7rfn7Pj3KKeuxwCUUpQotNp5md6CW95m8I"/>
+<!-- Toolbar -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-black/60 backdrop-blur-md px-6 py-3 rounded-full text-white">
+<button class="hover:text-primary"><span class="material-symbols-outlined">zoom_in</span></button>
+<button class="hover:text-primary"><span class="material-symbols-outlined">zoom_out</span></button>
+<div class="w-px h-6 bg-white/20 mx-2"></div>
+<button class="flex items-center gap-2 hover:text-primary">
+<span class="material-symbols-outlined">pen_size_2</span>
+                        Laser Pointer
+                    </button>
+<div class="w-px h-6 bg-white/20 mx-2"></div>
+<button class="hover:text-primary"><span class="material-symbols-outlined">download</span></button>
+<button class="hover:text-primary"><span class="material-symbols-outlined">print</span></button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

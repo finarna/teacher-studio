@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Instrument+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --primary-glow: conic-gradient(from 180deg at 50% 50%,
+            #16abff33 0deg,
+            #0885ff33 55deg,
+            #54d6ff33 120deg,
+            #0071ff33 160deg,
+            transparent 360deg);
+    --secondary-glow: radial-gradient(rgba(255, 255, 255, 1),
+            rgba(255, 255, 255, 0));
+}
+
+@layer base {
+    html {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-size: 16px;
+    }
+
+    body {
+        @apply antialiased text-slate-900 bg-[#f8fafc];
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+        line-height: 1.625;
+        /* Optimized for long-form reading */
+        letter-spacing: -0.011em;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'Outfit', sans-serif;
+        letter-spacing: -0.025em;
+        line-height: 1.25;
+        font-weight: 700;
+        @apply text-slate-900;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}
+
+/* Glassmorphism */
+.glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
+}
+
+.glass-dark {
+    @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 shadow-2xl;
+}
+
+/* Typography Enhancements */
+.font-outfit {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.03em;
+}
+
+.font-inter {
+    font-family: 'Inter', sans-serif;
+}
+
+.font-instrument {
+    font-family: 'Instrument Sans', sans-serif;
+}
+
+/* Question Typography - Optimized for readability */
+.question-text {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.75;
+    letter-spacing: -0.01em;
+    @apply font-medium text-slate-800;
+}
+
+.text-balance {
+    text-wrap: balance;
+}
+
+/* Premium Shadows */
+.shadow-premium {
+    @apply shadow-[0_8px_30px_rgb(0, 0, 0, 0.04)] border-slate-200/50;
+}
+
+/* Animations */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 5s ease-in-out infinite;
+}
+
+@keyframes reverse-spin {
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+.animate-reverse-spin {
+    animation: reverse-spin 3s linear infinite;
+}
+
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+/* Hide scrollbar but keep functionality */
+.scroller-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scroller-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Gradient Text */
+.text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600;
+}
+
+/* Card Hover Effects */
+.card-hover {
+    @apply transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl hover:border-primary-200/50;
+}
+
+.selection-primary::selection {
+    @apply bg-primary-500 text-white;
+}
+
+/* 3D Flip Utilities */
+.perspective-1000 {
+    perspective: 1000px;
+}
+
+.transform-style-3d {
+    transform-style: preserve-3d;
+}
+
+.backface-hidden {
+    backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+    transform: rotateY(180deg);
+}
