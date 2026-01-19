@@ -150,9 +150,11 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
       - Memory triggers and mnemonics
       - Important derivation steps
       
-      CRITICAL: Categorize each card into a "domain" (e.g., Mechanics, Electrodynamics, Modern Physics, Optics, Thermodynamics, Waves, Semiconductors) based on the subject.
+      CRITICAL: You MUST output exactly ONE CONTINUOUS PARAGRAPH. Prohibited: No newlines, no breaks, no bullets.
+      MATH FORMATTING: Use only single $ $ for ALL math (e.g., $E=hf$). NEVER use $$ $$. Ensure everything flows as a single sentence string.
+      EXAMPLE: "The **photon Energy** is given by $E = h \nu$, where $h$ is **Planck's constant** and $\nu$ is the **frequency**."
       
-      Return JSON ONLY: { "cards": [ { "term": "concept or question", "def": "clear explanation with $$LaTeX$$", "extra": "formula or key point with $$LaTeX$$", "domain": "String" } ] }`;
+      Return JSON ONLY: { "cards": [ { "term": "Short title ($ $ allowed)", "def": "A single continuous paragraph of pedagogical explanation with integrated $ $ for all variables. NO NEWLINES.", "extra": "Core numeric take-away ($ $ only)", "domain": "String" } ] }`;
 
       const result = await model.generateContent(conceptsPrompt);
       const response = await result.response;
@@ -293,8 +295,8 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
                       <div className="absolute top-0 left-0 w-full h-2 bg-primary-500 rounded-t-2xl"></div>
                       <div className="text-slate-400 font-bold text-[9px] uppercase tracking-[0.3em] mb-4 font-outfit">{displayedCards[currentCard].domain || 'General Concept'}</div>
                       <div className="flex-1 flex items-center justify-center w-full max-h-[calc(100%-120px)] overflow-y-auto px-4">
-                        <div className="text-2xl md:text-3xl font-black text-slate-900 leading-tight font-outfit tracking-tight italic">
-                          <RenderWithMath text={displayedCards[currentCard].term} showOptions={false} />
+                        <div className="text-xl md:text-2xl font-black text-slate-900 leading-tight font-outfit tracking-tight italic">
+                          <RenderWithMath text={displayedCards[currentCard].term} showOptions={false} compact={true} serif={false} />
                         </div>
                       </div>
                       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-300 font-bold text-[9px] uppercase tracking-widest flex items-center gap-2">
@@ -307,20 +309,20 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
                       <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500 rounded-t-2xl"></div>
 
                       {/* Scrollable content area with proper padding */}
-                      <div className="flex-1 w-full overflow-y-auto px-6 pt-6 pb-24">
-                        <div className="flex flex-col items-center justify-start space-y-4">
+                      <div className="flex-1 w-full overflow-y-auto px-8 pt-10 pb-20 scroller-hide">
+                        <div className="flex flex-col items-center justify-center min-h-full space-y-6">
                           {/* Main definition text */}
                           <div className="text-sm md:text-base font-bold text-white leading-relaxed font-outfit italic max-w-xl text-center">
-                            <RenderWithMath text={displayedCards[currentCard].def} showOptions={false} autoSteps={true} dark={true} />
+                            <RenderWithMath text={displayedCards[currentCard].def} showOptions={false} autoSteps={true} dark={true} compact={true} serif={false} />
                           </div>
 
                           {/* Formula section */}
                           {displayedCards[currentCard].extra && (
-                            <div className="w-full max-w-lg space-y-2">
-                              <div className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.3em] text-center">Equation Vault</div>
-                              <div className="bg-white/10 border-2 border-emerald-500/30 px-4 py-3 rounded-xl backdrop-blur-md">
-                                <div className="text-emerald-300 font-bold text-base tracking-tight text-center">
-                                  <RenderWithMath text={displayedCards[currentCard].extra} showOptions={false} autoSteps={true} dark={true} />
+                            <div className="w-full max-w-md">
+                              <div className="bg-emerald-500/10 border border-emerald-500/30 px-6 py-4 rounded-2xl backdrop-blur-xl shadow-2xl relative overflow-hidden group/eqn">
+                                <div className="absolute top-0 right-0 px-3 py-1 bg-emerald-500/20 text-[7px] font-black text-emerald-400 uppercase tracking-widest rounded-bl-lg">Equation Vault</div>
+                                <div className="text-emerald-300 font-bold text-base md:text-lg tracking-tight text-center relative z-10">
+                                  <RenderWithMath text={displayedCards[currentCard].extra} showOptions={false} autoSteps={true} dark={true} compact={true} serif={false} />
                                 </div>
                               </div>
                             </div>

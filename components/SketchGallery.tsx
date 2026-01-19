@@ -246,8 +246,8 @@ RETURN JSON SCHEMA:
     >
       <div className="absolute top-0 right-0 p-6 z-10 pointer-events-none">
         <span className={`text-[9px] font-black px-3 py-1.5 rounded-xl shadow-lg border uppercase tracking-widest ${item.difficulty === 'Hard' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-            item.difficulty === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-              'bg-emerald-50 text-emerald-700 border-emerald-100'
+          item.difficulty === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+            'bg-emerald-50 text-emerald-700 border-emerald-100'
           }`}>
           {item.tag}
         </span>
@@ -421,18 +421,24 @@ RETURN JSON SCHEMA:
               <div className="absolute top-8 left-8 z-10">
                 <div className="flex items-center gap-3">
                   <span className={`px-4 py-2 text-[10px] font-black rounded-xl border shadow-lg uppercase tracking-widest ${selectedSketch.difficulty === 'Hard' ? 'bg-rose-500 text-white border-rose-400' :
-                      selectedSketch.difficulty === 'Medium' ? 'bg-amber-400 text-slate-900 border-amber-300' :
-                        'bg-emerald-500 text-white border-emerald-400'
+                    selectedSketch.difficulty === 'Medium' ? 'bg-amber-400 text-slate-900 border-amber-300' :
+                      'bg-emerald-500 text-white border-emerald-400'
                     }`}>
                     {selectedSketch.difficulty}
                   </span>
                 </div>
               </div>
               <div className="absolute top-8 right-8 z-10 flex gap-3">
-                <button onClick={() => handleGenerate(selectedSketch.id)} disabled={generatingId !== null} className="w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-400 hover:text-primary-600 shadow-md border border-slate-200 transition-all disabled:opacity-50">
+                <button
+                  onClick={() => handleGenerate(selectedSketch.id)}
+                  disabled={generatingId !== null}
+                  className="w-12 h-12 bg-white rounded-xl flex flex-col items-center justify-center text-slate-700 hover:text-primary-600 shadow-xl border border-slate-200 transition-all hover:scale-110 active:scale-95 disabled:opacity-50 group/reg"
+                  title="Regenerate Visual"
+                >
                   {generatingId === selectedSketch.id ? <Loader2 size={20} className="animate-spin" /> : <RotateCw size={20} />}
+                  <span className="text-[7px] font-black uppercase tracking-tighter mt-1 opacity-0 group-hover/reg:opacity-100 transition-opacity">Regen</span>
                 </button>
-                <button onClick={() => setSelectedSketch(null)} className="w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 shadow-md border border-slate-200 transition-all">
+                <button onClick={() => setSelectedSketch(null)} className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-slate-700 hover:text-slate-950 shadow-xl border border-slate-200 transition-all hover:scale-110 active:scale-95">
                   <X size={20} />
                 </button>
               </div>
@@ -444,9 +450,22 @@ RETURN JSON SCHEMA:
                     <img src={selectedSketch.img} alt={selectedSketch.visualConcept} className="w-full h-auto max-h-full rounded-3xl shadow-2xl transition-transform duration-700 hover:scale-105" />
                   )
                 ) : (
-                  <div className="flex flex-col items-center gap-4 text-slate-300">
-                    <Sparkles size={64} className="animate-pulse" />
-                    <p className="font-outfit font-black text-2xl uppercase tracking-[0.2em]">Blueprint Empty</p>
+                  <div className="flex flex-col items-center gap-6 text-slate-300">
+                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-inner border border-slate-100">
+                      <Sparkles size={48} className="text-slate-200" />
+                    </div>
+                    <div className="text-center">
+                      <p className="font-outfit font-black text-2xl uppercase tracking-[0.2em] text-slate-400 mb-2">Blueprint Empty</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest max-w-[240px] leading-relaxed mb-8">Synchronized node data detected. Manifest the visual blueprint to initialize neural anchoring.</p>
+                    </div>
+                    <button
+                      onClick={() => handleGenerate(selectedSketch.id)}
+                      disabled={generatingId !== null}
+                      className="px-10 py-5 bg-slate-900 border-2 border-slate-800 hover:bg-slate-800 text-white font-black rounded-full shadow-2xl transition-all flex items-center gap-4 uppercase tracking-[0.2em] text-xs hover:scale-105 active:scale-95"
+                    >
+                      {generatingId === selectedSketch.id ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} className="text-primary-400" />}
+                      Generate Visual Blueprint
+                    </button>
                   </div>
                 )}
               </div>
@@ -485,7 +504,7 @@ RETURN JSON SCHEMA:
                           <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px] shrink-0 border border-indigo-100 group-hover/step:bg-indigo-600 group-hover/step:text-white transition-colors">
                             {i + 1}
                           </div>
-                          <div className="text-[11px] text-slate-600 font-bold flex-1 leading-normal pt-1 group-hover/step:text-slate-900 transition-colors">
+                          <div className="text-[11px] text-slate-600 font-bold flex-1 leading-normal pt-1 group-hover/step:text-slate-900 transition-colors whitespace-normal">
                             <RenderWithMath text={step} showOptions={false} serif={false} />
                           </div>
                         </div>

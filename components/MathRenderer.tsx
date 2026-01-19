@@ -42,7 +42,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
         ref.current.innerHTML = html;
       } catch (error) {
         console.error('KaTeX error:', error);
-        ref.current.innerText = rawExpression;
+        ref.current.innerText = rawExpression.replace(/\$/g, '');
       }
     } else if (ref.current) {
       ref.current.innerText = rawExpression;
@@ -83,7 +83,15 @@ export const DerivationStep: React.FC<{ index: number, title?: string, content: 
   );
 };
 
-export const RenderWithMath: React.FC<{ text: string, className?: string, showOptions?: boolean, serif?: boolean, autoSteps?: boolean, dark?: boolean }> = ({ text, className, showOptions = true, serif = true, autoSteps = false, dark = false }) => {
+export const RenderWithMath: React.FC<{
+  text: string,
+  className?: string,
+  showOptions?: boolean,
+  serif?: boolean,
+  autoSteps?: boolean,
+  dark?: boolean,
+  compact?: boolean
+}> = ({ text, className, showOptions = true, serif = true, autoSteps = false, dark = false, compact = false }) => {
   if (!text) return null;
 
   // 1. Clean "Junk" from AI output
@@ -97,6 +105,12 @@ export const RenderWithMath: React.FC<{ text: string, className?: string, showOp
   // 2. Handle literal code-like patterns that might come from AI
   cleanText = cleanText.replace(/```latex([\s\S]*?)```/g, '$$$1$$');
   cleanText = cleanText.replace(/```math([\s\S]*?)```/g, '$$$1$$');
+
+  // In compact mode (flashcards), AI might use $$ wrongly or too often. 
+  // Force everything to be inline by temporarily swapping $$ for $ if it's on a single line or if we want single paragraph flow.
+  if (compact) {
+    cleanText = cleanText.replace(/\$\$/g, '$');
+  }
 
   // 3. Auto-detect steps if text is long and has numbering markers
   if (autoSteps && cleanText.length > 200) {
@@ -131,16 +145,23 @@ export const RenderWithMath: React.FC<{ text: string, className?: string, showOp
   const hasCustomColor = className?.includes('text-');
 
   return (
-    <div className={`prose prose-slate max-w-none ${serif ? 'font-serif' : 'font-instrument'} ${className}`}>
-      <div className="space-y-4">
+    <div className={`${compact ? '' : 'prose prose-slate max-w-none'} ${serif ? 'font-serif' : 'font-instrument'} ${className}`}>
+      <div className={compact ? 'space-y-2' : 'space-y-4'}>
         {paragraphs.map((p, i) => {
           // Detect if paragraph is entirely a math block
           if (p.trim().startsWith('$$') && p.trim().endsWith('$$')) {
+            if (compact) {
+              return (
+                <div key={i} className="my-1.5 flex justify-center w-full">
+                  <MathRenderer expression={p.trim().slice(2, -2)} displayMode={false} className={`scale-110 drop-shadow-sm ${dark ? 'text-white' : (hasCustomColor ? '' : 'text-slate-900')}`} />
+                </div>
+              );
+            }
             return (
-              <div key={i} className={`my-8 p-8 border-2 rounded-[2rem] shadow-xl relative group/math overflow-hidden ${dark ? 'bg-slate-900/50 border-white/10' : 'bg-slate-50/50 border-primary-500/10'}`}>
+              <div key={i} className="my-8 p-8 border-2 rounded-[2rem] shadow-xl relative group/math overflow-hidden bg-slate-50/50 border-primary-500/10">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.05] pointer-events-none" />
                 <div className="absolute top-0 right-0 px-4 py-1.5 bg-primary-500/10 border-b border-l border-primary-500/20 rounded-bl-xl text-[8px] font-black text-primary-600 uppercase tracking-widest font-outfit">Equation Vault</div>
-                <MathRenderer expression={p.trim().slice(2, -2)} displayMode={true} className={dark ? 'text-white' : (hasCustomColor ? '' : 'text-slate-900')} />
+                <MathRenderer expression={p.trim().slice(2, -2)} displayMode={true} className={hasCustomColor ? '' : 'text-slate-900'} />
               </div>
             );
           }
@@ -151,26 +172,27 @@ export const RenderWithMath: React.FC<{ text: string, className?: string, showOp
           return (
             <div key={i} className={`leading-[1.9] ${serif ? 'text-lg md:text-xl' : 'text-base font-medium'} ${dark ? 'text-white shrink-0' : (hasCustomColor ? '' : 'text-slate-800')}`}>
               {parts.map((part, pIdx) => {
-                if (part.startsWith('$$') && part.endsWith('$$')) {
+                if (part.startsWith('$$') && part.endsWith('$$') && !compact) {
                   return (
-                    <div key={pIdx} className={`my-10 p-10 border-2 rounded-[3rem] shadow-2xl relative group/math overflow-hidden ${dark ? 'bg-slate-900/50 border-white/10' : 'bg-slate-50/50 border-primary-500/10'}`}>
+                    <div key={pIdx} className="my-10 p-10 border-2 rounded-[3rem] shadow-2xl relative group/math overflow-hidden bg-slate-50/50 border-primary-500/10">
                       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.05] pointer-events-none" />
                       <div className="absolute top-0 right-0 px-6 py-2 bg-primary-600/10 border-b border-l border-primary-500/20 rounded-bl-3xl text-[10px] font-black text-primary-700 uppercase tracking-[0.2em] font-outfit">Formula Insight</div>
                       <MathRenderer expression={part.slice(2, -2)} displayMode={true} className={dark ? 'text-white' : ''} />
                     </div>
                   );
                 }
-                if (part.startsWith('$') && part.endsWith('$')) {
-                  return <MathRenderer key={pIdx} expression={part.slice(1, -1)} inline={true} className="bg-primary-50 px-1 rounded mx-0.5 border border-primary-100/50 text-primary-900 font-bold" />;
+                if ((part.startsWith('$') && part.endsWith('$')) || (compact && part.startsWith('$$') && part.endsWith('$$'))) {
+                  const expr = part.startsWith('$$') ? part.slice(2, -2) : part.slice(1, -1);
+                  return <MathRenderer key={pIdx} expression={expr} inline={true} className={`font-bold ${dark ? 'text-emerald-300' : 'text-primary-700'}`} />;
                 }
 
                 // Fallback for raw LaTeX commands not wrapped in $
                 const rawTriggers = ['\\frac', '\\sqrt', '\\sum', '\\int', '\\alpha', '\\beta', '\\gamma', '\\theta', '\\pi', '\\ce{'];
                 if (rawTriggers.some(t => part.includes(t)) && (part.includes('{') || part.includes('_') || part.includes('^'))) {
-                  return <MathRenderer key={pIdx} expression={part} inline={true} />;
+                  return <MathRenderer key={pIdx} expression={part} inline={true} className={dark ? 'text-emerald-300' : 'text-primary-700'} />;
                 }
 
-                return <span key={pIdx}>{part}</span>;
+                return <span key={pIdx} className="whitespace-normal">{part}</span>;
               })}
             </div>
           );
