@@ -61,7 +61,7 @@ const data = JSON.stringify(mockSample);
 
 const options = {
     hostname: 'localhost',
-    port: 11001,
+    port: 9001,
     path: '/api/scans',
     method: 'POST',
     headers: {

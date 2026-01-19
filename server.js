@@ -3,7 +3,7 @@ import cors from 'cors';
 import Redis from 'ioredis';
 
 const app = express();
-const port = process.env.PORT || 11001;
+const port = process.env.PORT || 9001;
 
 // Redis Configuration
 const redis = new Redis({
