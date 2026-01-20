@@ -22,10 +22,10 @@ import {
   Target
 } from 'lucide-react';
 import { Scan, AnalyzedQuestion } from '../types';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { safeAiParse } from '../utils/aiParser';
 import { RenderWithMath } from './MathRenderer';
 import { cache } from '../utils/cache';
+import { generateSketch, GenerationMethod } from '../utils/sketchGenerators';
 
 interface SketchGalleryProps {
   onBack?: () => void;
@@ -49,6 +49,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
 
   const [selectedGrade, setSelectedGrade] = useState(selectedVaultScan?.grade || 'Class 12');
   const [selectedSubject, setSelectedSubject] = useState(selectedVaultScan?.subject || 'Physics');
+  const [generationMethod, setGenerationMethod] = useState<GenerationMethod>('svg');
 
   useEffect(() => {
     if (!selectedVaultScan && recentScans && recentScans.length > 0) {
@@ -215,36 +216,30 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   const categorizedSketches = useMemo(() => {
     if (!selectedVaultScan && activeTab === 'Exam Specific') return null;
 
-    // Determine which domain map to use
-    let currentSubject = activeTab;
-    if (activeTab === 'Exam Specific') {
-      currentSubject = selectedVaultScan?.subject || 'Physics';
-    }
-
-    const DOMAIN_MAP = DOMAIN_MAPS[currentSubject] || DOMAIN_MAPS['Physics'];
+    // USE AI-GENERATED CATEGORIZATION
+    // Each question now has 'domain' and 'chapter' fields from AI analysis
     const categorized: Record<string, any[]> = {};
     const sketchesToCategorize = filteredSketches;
 
     sketchesToCategorize.forEach(sketch => {
-      const searchStr = `${sketch.visualConcept} ${sketch.description}`.toLowerCase();
-      let matched = false;
+      // Primary: Use AI-generated domain if available
+      const domain = sketch.domain || 'CORE FOUNDATIONS';
 
-      for (const [domain, keywords] of Object.entries(DOMAIN_MAP)) {
-        if (keywords.some(kw => searchStr.includes(kw.toLowerCase()))) {
-          if (!categorized[domain]) categorized[domain] = [];
-          categorized[domain].push(sketch);
-          matched = true;
-          break;
-        }
+      if (!categorized[domain]) {
+        categorized[domain] = [];
       }
-
-      if (!matched) {
-        if (!categorized['General']) categorized['General'] = [];
-        categorized['General'].push(sketch);
-      }
+      categorized[domain].push(sketch);
     });
 
-    return categorized;
+    // Sort domains by number of questions (largest first)
+    const sortedCategorized: Record<string, any[]> = {};
+    Object.keys(categorized)
+      .sort((a, b) => categorized[b].length - categorized[a].length)
+      .forEach(key => {
+        sortedCategorized[key] = categorized[key];
+      });
+
+    return sortedCategorized;
   }, [filteredSketches, selectedVaultScan, activeTab, recentScans]);
 
   const displayedSketches = filteredSketches;
@@ -288,204 +283,79 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
     setSelectedDomain('All');
   }, [activeTab]);
 
-  // Helper function to safely parse JSON from Gemini response
-  const parseGeminiJSON = (responseText: string) => {
-    try {
-      let jsonText = responseText.trim();
-
-      // Remove markdown code blocks
-      if (jsonText.startsWith('```json')) {
-        jsonText = jsonText.replace(/```json\s*/, '').replace(/```\s*$/, '');
-      } else if (jsonText.startsWith('```')) {
-        jsonText = jsonText.replace(/```\s*/, '').replace(/```\s*$/, '');
-      }
-      jsonText = jsonText.trim();
-
-      // Try direct parsing first
-      try {
-        return JSON.parse(jsonText);
-      } catch (firstError) {
-        console.log('First parse attempt failed, attempting recovery...');
-        console.log('Parse error:', firstError);
-
-        // More robust SVG extraction - find svgCode field and extract its value
-        // This handles multi-line SVG content
-        const svgStart = jsonText.indexOf('"svgCode"');
-        if (svgStart !== -1) {
-          const valueStart = jsonText.indexOf('"', svgStart + 9); // Find opening quote of value
-          if (valueStart !== -1) {
-            let valueEnd = valueStart + 1;
-
-            // Find the closing quote, handling escaped quotes
-            while (valueEnd < jsonText.length) {
-              if (jsonText[valueEnd] === '\\') {
-                valueEnd += 2; // Skip escaped character
-                continue;
-              }
-              if (jsonText[valueEnd] === '"') {
-                break;
-              }
-              valueEnd++;
-            }
-
-            if (valueEnd < jsonText.length) {
-              const svgCode = jsonText.substring(valueStart + 1, valueEnd);
-              const before = jsonText.substring(0, svgStart);
-              const after = jsonText.substring(valueEnd + 1);
-
-              // Replace SVG with placeholder
-              const textWithoutSvg = before + '"svgCode":"__SVG_PLACEHOLDER__"' + after;
-
-              // Parse the cleaned JSON
-              const parsed = JSON.parse(textWithoutSvg);
-
-              // Restore the SVG code (decode any escape sequences)
-              parsed.svgCode = svgCode;
-
-              return parsed;
-            }
-          }
-        }
-
-        throw firstError;
-      }
-    } catch (error) {
-      console.error('Failed to parse JSON:', error);
-      console.error('Response text (first 500 chars):', responseText.substring(0, 500));
-      throw new Error('Invalid JSON response from AI');
-    }
-  };
-
   const handleGenerate = async (id: string) => {
-    if (!selectedVaultScan || !onUpdateScan) return;
+    console.log('🎨 handleGenerate called with id:', id);
+    console.log('Vault:', selectedVaultScan?.name, 'Method:', generationMethod);
+
+    if (!selectedVaultScan) {
+      console.error('❌ No vault selected');
+      setGenError('Please select an Analysis Vault first');
+      return;
+    }
+
+    if (!onUpdateScan) {
+      console.error('❌ onUpdateScan not available');
+      setGenError('Update function not available');
+      return;
+    }
+
     setGeneratingId(id);
     setGenError(null);
+
     try {
       const q = scanQuestions.find(it => it.id === id);
-      if (!q) return;
+      if (!q) {
+        console.error('❌ Question not found:', id);
+        setGenError(`Question ${id} not found in vault`);
+        setGeneratingId(null);
+        return;
+      }
+
+      console.log('✓ Found question:', q.topic);
 
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (window as any).process?.env?.GEMINI_API_KEY;
-      if (!apiKey) throw new Error("API Key Missing");
-
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "object",
-            properties: {
-              svgCode: { type: "string" },
-              visualConcept: { type: "string" },
-              detailedNotes: { type: "string" },
-              mentalAnchor: { type: "string" },
-              proceduralLogic: {
-                type: "array",
-                items: { type: "string" }
-              },
-              keyFormulas: {
-                type: "array",
-                items: { type: "string" }
-              },
-              examTip: { type: "string" },
-              pitfalls: {
-                type: "array",
-                items: { type: "string" }
-              }
-            },
-            required: ["svgCode", "visualConcept", "detailedNotes", "mentalAnchor", "proceduralLogic", "keyFormulas", "examTip", "pitfalls"]
-          }
-        }
-      });
-
-      const prompt = `Elite Academic Illustrator & Lead Curriculum Designer: Synthesize a MULTIMODAL PEDAGOGICAL BLUEPRINT.
-CONCEPT: ${q.visualConcept || q.topic}
-CONTEXT: ${q.text}
-
-TASK 1: CREATE A WORLD-CLASS SCIENTIFIC ILLUSTRATION (SVG)
-Requirements:
-- Master-Level Aesthetics: Use <defs> with <linearGradient> for realistic shading, <radialGradient> for spherical bodies, and <filter> for realistic drop-shadows and glows.
-- Textbook Accuracy: No simple lines; use 3D-effect cylinders, glass textures, and metallic brushed gradients.
-- Professional Layout: 1000x800 viewBox. ALL content MUST fit within x="50" to x="950" and y="50" to y="750" boundaries. Leave 50px margins on all sides.
-- Advanced Labeling: Labels in white capsules with shadows. Circular anchors. Keep all text within the safe zone.
-- Scientific Notation: Forces(Red), Velocity(Blue), Fields(Indigo) color-coded with arrowheads.
-- Concept Breakdown: Zoom-In insets if needed.
-- CRITICAL SVG SYNTAX: All path commands must be complete. Bezier curves (C) need 3 coordinate pairs: C x1,y1 x2,y2 x,y. Quadratic curves (Q) need 2 pairs: Q x1,y1 x,y. NO INCOMPLETE PATHS.
-- CRITICAL: Ensure all text, shapes, and elements are completely within the viewBox boundaries.
-
-TASK 2: GENERATE DIMENSIONAL PEDAGOGICAL NOTES
-- First Principles: Deep-dive into 'Why'.
-- Mental Anchor: Power metaphor.
-- Procedural Logic: Problem-solving steps.
-- Key Formulas: LaTeX essential derivations.
-- The Trap: Common pitfall.
-
-You MUST return a valid JSON object (NOT an array) with these exact fields:
-{
-  "svgCode": "complete SVG code as a single string",
-  "visualConcept": "concise title",
-  "detailedNotes": "first principles explanation",
-  "mentalAnchor": "memorable metaphor",
-  "proceduralLogic": ["step 1", "step 2", "step 3", "...as many steps as needed"],
-  "keyFormulas": ["$$formula1$$", "$$formula2$$", "...all relevant formulas"],
-  "examTip": "exam strategy tip",
-  "pitfalls": ["mistake 1", "mistake 2", "mistake 3", "...all common pitfalls"]
-}`;
-
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text() || "{}";
-      console.log('AI Response (first 1000 chars):', responseText.substring(0, 1000));
-
-      let blueprint = parseGeminiJSON(responseText);
-
-      // Handle case where AI returns an array instead of object
-      if (Array.isArray(blueprint)) {
-        console.log('AI returned an array, taking first element');
-        blueprint = blueprint[0];
+      if (!apiKey) {
+        console.error('❌ API Key missing');
+        throw new Error("API Key Missing - Add VITE_GEMINI_API_KEY to .env.local");
       }
 
-      console.log('Parsed blueprint keys:', Object.keys(blueprint));
+      console.log('🚀 Starting generation...');
 
-      if (!blueprint.svgCode) {
-        console.error('Blueprint missing svgCode. Available fields:', Object.keys(blueprint));
-        console.error('Full blueprint:', blueprint);
-        throw new Error(`Invalid blueprint: missing svgCode field. Got: ${Object.keys(blueprint).join(', ')}`);
-      }
+      // Use the selected generation method
+      const result = await generateSketch(
+        generationMethod,
+        q.visualConcept || q.topic,
+        q.text,
+        selectedVaultScan.subject,
+        apiKey,
+        undefined // Status update callback (optional)
+      );
 
-      // Validate SVG syntax before saving
-      try {
-        const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(blueprint.svgCode, 'image/svg+xml');
-        const parseErrors = svgDoc.getElementsByTagName('parsererror');
-        if (parseErrors.length > 0) {
-          const errorText = parseErrors[0].textContent || 'Unknown SVG parse error';
-          console.error('SVG validation failed:', errorText);
-          throw new Error(`Invalid SVG syntax: ${errorText.substring(0, 100)}`);
-        }
-      } catch (err: any) {
-        console.error('SVG validation error:', err);
-        throw new Error(`SVG validation failed: ${err.message}`);
-      }
+      console.log(`✓ Generated using ${generationMethod}, isSvg:`, result.isSvg);
+      console.log(`📊 Image data size: ${(result.imageData.length / 1024).toFixed(2)} KB`);
 
       // Use functional state update to prevent race conditions during batch processing
       let finalUpdatedScan: Scan | null = null;
 
       setSelectedVaultScan(prevScan => {
-        if (!prevScan) return prevScan;
+        if (!prevScan) {
+          console.error('❌ prevScan is null in setState callback!');
+          return prevScan;
+        }
 
         const updatedQuestions = (prevScan.analysisData?.questions || []).map(question =>
           question.id === id ? {
             ...question,
-            sketchSvg: blueprint.svgCode,
-            visualConcept: blueprint.visualConcept || question.visualConcept,
-            examTip: blueprint.examTip || question.examTip,
-            keyFormulas: blueprint.keyFormulas || question.keyFormulas,
-            pitfalls: blueprint.pitfalls || question.pitfalls,
-            solutionSteps: blueprint.proceduralLogic || question.solutionSteps,
+            sketchSvg: result.imageData,
+            visualConcept: result.blueprint.visualConcept || question.visualConcept,
+            examTip: result.blueprint.examTip || question.examTip,
+            keyFormulas: result.blueprint.keyFormulas || question.keyFormulas,
+            pitfalls: result.blueprint.pitfalls || question.pitfalls,
+            solutionSteps: result.blueprint.proceduralLogic || question.solutionSteps,
             masteryMaterial: {
               ...question.masteryMaterial,
-              logic: blueprint.detailedNotes,
-              memoryTrigger: blueprint.mentalAnchor
+              logic: result.blueprint.detailedNotes,
+              memoryTrigger: result.blueprint.mentalAnchor
             }
           } : question
         );
@@ -498,34 +368,81 @@ You MUST return a valid JSON object (NOT an array) with these exact fields:
           }
         };
 
+        console.log(`✓ Updated scan state with new image for question ${id}`);
         finalUpdatedScan = updatedScan;
         return updatedScan;
       });
 
+      // CRITICAL: If selectedVaultScan is null but we still have the scan data,
+      // use it directly to persist
+      if (!finalUpdatedScan && selectedVaultScan) {
+        console.warn('⚠️ Using selectedVaultScan directly (state update may have race condition)');
+        const updatedQuestions = (selectedVaultScan.analysisData?.questions || []).map(question =>
+          question.id === id ? {
+            ...question,
+            sketchSvg: result.imageData,
+            visualConcept: result.blueprint.visualConcept || question.visualConcept,
+            examTip: result.blueprint.examTip || question.examTip,
+            keyFormulas: result.blueprint.keyFormulas || question.keyFormulas,
+            pitfalls: result.blueprint.pitfalls || question.pitfalls,
+            solutionSteps: result.blueprint.proceduralLogic || question.solutionSteps,
+            masteryMaterial: {
+              ...question.masteryMaterial,
+              logic: result.blueprint.detailedNotes,
+              memoryTrigger: result.blueprint.mentalAnchor
+            }
+          } : question
+        );
+
+        finalUpdatedScan = {
+          ...selectedVaultScan,
+          analysisData: {
+            ...selectedVaultScan.analysisData!,
+            questions: updatedQuestions
+          }
+        };
+      }
+
       // Notify parent after state update completes
       if (finalUpdatedScan) {
-        onUpdateScan?.(finalUpdatedScan);
+        console.log(`📤 Calling onUpdateScan to persist data...`);
+        console.log(`📊 Updated scan data:`, {
+          scanId: finalUpdatedScan.id,
+          questionCount: finalUpdatedScan.analysisData?.questions?.length,
+          updatedQuestionId: id,
+          hasSketchSvg: finalUpdatedScan.analysisData?.questions?.find(q => q.id === id)?.sketchSvg ? true : false,
+          sketchSvgSize: finalUpdatedScan.analysisData?.questions?.find(q => q.id === id)?.sketchSvg?.length || 0
+        });
+
+        await onUpdateScan?.(finalUpdatedScan);
+        console.log(`✓ onUpdateScan completed`);
+
+        // Verify the save by checking if the data is actually in the parent state
+        console.log(`🔍 Verifying save...`);
+      } else {
+        console.error('❌ finalUpdatedScan is null - state update may have failed');
       }
 
       // Force re-render to show the new image
       setForceRender(prev => prev + 1);
+      console.log(`✓ Forced re-render to display new image`);
 
-      cache.save(`sketch_${selectedVaultScan.id}_${id}`, blueprint.svgCode, selectedVaultScan.id, 'sketch');
-      cache.save(`blueprint_${selectedVaultScan.id}_${id}`, blueprint, selectedVaultScan.id, 'synthesis');
+      cache.save(`sketch_${generationMethod}_${selectedVaultScan.id}_${id}`, result.imageData, selectedVaultScan.id, 'sketch');
+      cache.save(`blueprint_${selectedVaultScan.id}_${id}`, result.blueprint, selectedVaultScan.id, 'synthesis');
 
       if (selectedSketch && selectedSketch.id === id) {
         setSelectedSketch({
           ...selectedSketch,
-          img: blueprint.svgCode,
-          isSvg: true,
+          img: result.imageData,
+          isSvg: result.isSvg,
           generated: true,
-          visualConcept: blueprint.visualConcept,
-          formulas: blueprint.keyFormulas,
-          tip: blueprint.examTip,
-          pitfalls: blueprint.pitfalls,
-          detailedNotes: blueprint.detailedNotes,
-          proceduralLogic: blueprint.proceduralLogic,
-          mentalAnchor: blueprint.mentalAnchor
+          visualConcept: result.blueprint.visualConcept,
+          formulas: result.blueprint.keyFormulas,
+          tip: result.blueprint.examTip,
+          pitfalls: result.blueprint.pitfalls,
+          detailedNotes: result.blueprint.detailedNotes,
+          proceduralLogic: result.blueprint.proceduralLogic,
+          mentalAnchor: result.blueprint.mentalAnchor
         });
       }
     } catch (err: any) {
@@ -537,29 +454,83 @@ You MUST return a valid JSON object (NOT an array) with these exact fields:
   };
 
   const handleGenerateAll = async () => {
-    const pendingIds = dynamicSketches.filter(s => !s.generated).map(s => s.id);
-    const BATCH_SIZE = 10; // Process 10 at a time
-    let totalFailed = 0;
-
-    setBatchProgress({ current: 0, total: pendingIds.length, failed: 0 });
-
-    for (let i = 0; i < pendingIds.length; i += BATCH_SIZE) {
-      const batch = pendingIds.slice(i, i + BATCH_SIZE);
-      const results = await Promise.allSettled(batch.map(id => handleGenerate(id)));
-
-      // Count failures in this batch
-      const batchFailed = results.filter(r => r.status === 'rejected').length;
-      totalFailed += batchFailed;
-
-      setBatchProgress({
-        current: Math.min(i + BATCH_SIZE, pendingIds.length),
-        total: pendingIds.length,
-        failed: totalFailed
-      });
+    // Validation: Check if vault is selected
+    if (!selectedVaultScan) {
+      setGenError('Please select an Analysis Vault first to generate sketches.');
+      return;
     }
 
+    if (!onUpdateScan) {
+      setGenError('Update function not available.');
+      return;
+    }
+
+    // Get all questions that need generation (either no image or want to regenerate)
+    const allIds = dynamicSketches.map(s => s.id);
+
+    if (allIds.length === 0) {
+      setGenError('No questions found in the selected vault. Please scan a paper first.');
+      return;
+    }
+
+    console.log(`Starting batch generation for ${allIds.length} questions using ${generationMethod}`);
+    console.log(`⚠️ Note: Free tier has rate limits. Processing slowly to avoid hitting limits.`);
+
+    // REDUCED BATCH SIZE to respect API rate limits
+    // Each question makes 2 API calls (content + image)
+    // Free tier: 10 requests/minute for gemini-2.0-flash-exp
+    // So we can only do 2-3 questions per minute safely
+    const BATCH_SIZE = 2; // Process 2 at a time
+    const DELAY_BETWEEN_BATCHES = 15000; // 15 seconds between batches
+    const DELAY_BETWEEN_QUESTIONS = 5000; // 5 seconds between questions
+
+    let totalFailed = 0;
+
+    setBatchProgress({ current: 0, total: allIds.length, failed: 0 });
+
+    for (let i = 0; i < allIds.length; i += BATCH_SIZE) {
+      const batch = allIds.slice(i, i + BATCH_SIZE);
+      console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}, questions:`, batch);
+
+      // Process questions ONE AT A TIME within the batch to avoid rate limits
+      for (const id of batch) {
+        try {
+          await handleGenerate(id);
+          console.log(`✓ Successfully generated sketch for ${id}`);
+        } catch (error: any) {
+          console.error(`✗ Failed to generate sketch for ${id}:`, error.message);
+          totalFailed++;
+        }
+
+        // Update progress after each question
+        const completed = i + batch.indexOf(id) + 1;
+        setBatchProgress({
+          current: completed,
+          total: allIds.length,
+          failed: totalFailed
+        });
+
+        // Wait between questions to respect rate limits
+        if (batch.indexOf(id) < batch.length - 1) {
+          console.log(`⏱️ Waiting ${DELAY_BETWEEN_QUESTIONS/1000}s before next question...`);
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_QUESTIONS));
+        }
+      }
+
+      // Wait between batches
+      if (i + BATCH_SIZE < allIds.length) {
+        console.log(`⏱️ Batch complete. Waiting ${DELAY_BETWEEN_BATCHES/1000}s before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+      }
+    }
+
+    console.log(`Batch generation complete. Success: ${allIds.length - totalFailed}, Failed: ${totalFailed}`);
+
     if (totalFailed > 0) {
-      setGenError(`Generated ${pendingIds.length - totalFailed}/${pendingIds.length} sketches. ${totalFailed} failed - check console for details.`);
+      setGenError(`Generated ${allIds.length - totalFailed}/${allIds.length} sketches. ${totalFailed} failed - check console for details. Tip: Upgrade your API plan for higher rate limits.`);
+    } else {
+      // Success message
+      setGenError(null);
     }
 
     setBatchProgress(null);
@@ -569,21 +540,20 @@ You MUST return a valid JSON object (NOT an array) with these exact fields:
     <div
       key={item.id}
       onClick={() => setSelectedSketch(item)}
-      className="bg-white rounded-[1.25rem] p-5 group cursor-pointer border border-slate-100 hover:border-primary-500/50 hover:shadow-xl transition-all duration-500 flex flex-col relative overflow-hidden shadow-sm"
+      className="bg-white rounded-2xl overflow-hidden group cursor-pointer border border-slate-200/50 hover:border-primary-400/60 hover:shadow-2xl transition-all duration-500 flex flex-col relative"
     >
-      <div className="absolute top-0 right-0 p-6 z-10 pointer-events-none">
-        <span className={`text-[9px] font-black px-3 py-1.5 rounded-xl shadow-lg border uppercase tracking-widest ${item.difficulty === 'Hard' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-          item.difficulty === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-            'bg-emerald-50 text-emerald-700 border-emerald-100'
-          }`}>
+      {/* Marks badge - positioned absolutely over image */}
+      <div className="absolute top-4 right-4 z-10 pointer-events-none">
+        <span className="text-[10px] font-black px-3 py-1.5 rounded-lg shadow-lg backdrop-blur-md bg-white/90 border border-slate-200/50 uppercase tracking-widest text-slate-700">
           {item.tag}
         </span>
       </div>
 
-      <div className="aspect-[4/3] bg-slate-50 rounded-[2rem] mb-6 overflow-hidden relative flex items-center justify-center border border-slate-100 shadow-inner group-hover:scale-95 transition-transform duration-500">
+      {/* Image area - edge to edge, maximum space */}
+      <div className="aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100/50 overflow-hidden relative flex items-center justify-center">
         {item.img ? (
           item.isSvg ? (
-            <div className="w-full h-full p-5 flex items-center justify-center">
+            <div className="w-full h-full p-6 flex items-center justify-center">
               <div
                 className="card-svg-container"
                 style={{
@@ -606,60 +576,58 @@ You MUST return a valid JSON object (NOT an array) with these exact fields:
               `}</style>
             </div>
           ) : (
-            <img src={item.img} alt={item.visualConcept} className="w-full h-full object-cover mix-blend-multiply transition-transform duration-1000 group-hover:scale-110" />
+            <img
+              src={item.img}
+              alt={item.visualConcept}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
           )
         ) : (
-          <div className="flex flex-col items-center justify-center text-slate-400 gap-3 p-6 text-center w-full h-full">
+          <div className="flex flex-col items-center justify-center text-slate-400 gap-4 p-6 text-center w-full h-full">
             {generatingId === item.id ? (
               <div className="flex flex-col items-center">
-                <Sparkles className="animate-spin text-primary-500 mb-2" size={32} />
-                <p className="text-[9px] font-bold text-primary-600 uppercase tracking-widest">AI Synthesis...</p>
+                <Sparkles className="animate-spin text-primary-500 mb-3" size={36} />
+                <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest">Generating...</p>
               </div>
             ) : (
               <>
-                <ImageIcon size={40} className="text-slate-200 opacity-30" />
+                <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-2">
+                  <ImageIcon size={32} className="text-slate-300" />
+                </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleGenerate(item.id); }}
-                  className="mt-3 text-[10px] bg-white border border-slate-200 text-slate-900 px-6 py-2.5 rounded-full font-black hover:bg-slate-900 hover:text-white transition-all shadow-md uppercase tracking-widest"
+                  className="text-[10px] bg-slate-900 text-white px-6 py-2.5 rounded-full font-black hover:bg-slate-800 transition-all shadow-lg uppercase tracking-widest"
                 >
-                  Sync Sketch
+                  Generate
                 </button>
               </>
             )}
           </div>
         )}
 
+        {/* Hover overlay with regenerate */}
         {item.generated && (
-          <div className="absolute inset-0 bg-slate-900/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-md p-8 text-center overflow-hidden">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white mb-2 animate-bounce">
-              <Maximize2 size={24} />
-            </div>
-            <div className="text-xs text-white font-bold leading-relaxed line-clamp-3 italic opacity-80 mb-4 overflow-hidden">
-              <RenderWithMath text={item.description} showOptions={false} serif={false} dark={true} className="text-white text-xs" />
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={(e) => { e.stopPropagation(); handleGenerate(item.id); }}
-                disabled={generatingId !== null}
-                className="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl transition-all flex items-center gap-2 group/reg"
-              >
-                {generatingId === item.id ? <Loader2 size={14} className="animate-spin" /> : <RotateCw size={14} className="group-hover/reg:rotate-180 transition-transform duration-500" />}
-                {generatingId === item.id ? 'Syncing...' : 'Regenerate'}
-              </button>
-            </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-end p-6 pb-8">
+            <button
+              onClick={(e) => { e.stopPropagation(); handleGenerate(item.id); }}
+              disabled={generatingId !== null}
+              className="px-5 py-2.5 bg-white/95 hover:bg-white text-slate-900 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl transition-all flex items-center gap-2 backdrop-blur-sm"
+            >
+              {generatingId === item.id ? <Loader2 size={14} className="animate-spin" /> : <RotateCw size={14} />}
+              Regenerate
+            </button>
           </div>
         )}
       </div>
 
-      <div className="px-1 pb-1">
-        <h3 className="font-bold text-slate-900 leading-tight text-lg line-clamp-2 mb-1.5 font-outfit tracking-tight">
+      {/* Compact title area */}
+      <div className="px-4 py-4 bg-white">
+        <h3 className="font-bold text-slate-900 leading-snug text-base line-clamp-2 mb-2 font-outfit">
           <RenderWithMath text={item.visualConcept} showOptions={false} serif={false} />
         </h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-[9px] text-slate-500 font-bold uppercase tracking-wider">
           <div className={`w-1.5 h-1.5 rounded-full ${item.subject === 'Physics' ? 'bg-indigo-500' : item.subject === 'Chemistry' ? 'bg-amber-500' : 'bg-emerald-500'}`}></div>
-          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider font-outfit">
-            {item.id} <span className="mx-1.5 text-slate-200">/</span> {item.subject}
-          </span>
+          <span>{item.subject}</span>
         </div>
       </div>
     </div>
@@ -683,24 +651,61 @@ You MUST return a valid JSON object (NOT an array) with these exact fields:
           </p>
         </div>
         <div className="flex flex-col gap-3">
-          {recentScans && recentScans.length > 0 && (
+          <div className="flex gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Selected Analysis Vault</label>
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Analysis Vault</label>
               <select
                 value={selectedVaultScan?.id || ''}
                 onChange={(e) => {
-                  const selected = recentScans.find(s => s.id === e.target.value);
-                  if (selected) setSelectedVaultScan(selected);
+                  const selected = recentScans?.find(s => s.id === e.target.value);
+                  if (selected) {
+                    setSelectedVaultScan(selected);
+                    setActiveTab('Exam Specific');
+                  }
                 }}
-                className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer min-w-[200px]"
+                className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer min-w-[220px]"
+                disabled={!recentScans || recentScans.length === 0}
               >
-                <option value="">Select from Vault...</option>
-                {recentScans.map(s => (
-                  <option key={s.id} value={s.id}>{s.name} ({s.subject})</option>
+                <option value="">
+                  {!recentScans || recentScans.length === 0
+                    ? 'No scans available - scan a paper first'
+                    : 'Select from Vault...'}
+                </option>
+                {recentScans?.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.subject}) - {s.analysisData?.questions?.length || 0} questions
+                  </option>
                 ))}
               </select>
+              {selectedVaultScan && (
+                <div className="text-[8px] text-emerald-600 font-bold px-1 leading-relaxed flex items-center gap-1">
+                  ✓ {selectedVaultScan.name} • {selectedVaultScan.analysisData?.questions?.length || 0} questions
+                </div>
+              )}
+              {(!recentScans || recentScans.length === 0) && (
+                <div className="text-[8px] text-amber-600 font-medium px-1 leading-relaxed">
+                  💡 Scan a paper in "Paper Scan" to create sketch notes
+                </div>
+              )}
             </div>
-          )}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Generation Method</label>
+              <select
+                value={generationMethod}
+                onChange={(e) => setGenerationMethod(e.target.value as GenerationMethod)}
+                className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer min-w-[220px]"
+              >
+                <option value="svg">SVG (Programmatic)</option>
+                <option value="gemini-3-pro-image">Gemini 3 Pro Image ⭐</option>
+                <option value="gemini-2.5-flash-image">Gemini 2.5 Flash Image</option>
+              </select>
+              <div className="text-[8px] text-slate-500 font-medium px-1 leading-relaxed">
+                {generationMethod === 'svg' && '🎨 Scalable vector graphics • Crisp & editable'}
+                {generationMethod === 'gemini-3-pro-image' && '⭐ Best quality • Advanced text rendering • High-res (1K-4K)'}
+                {generationMethod === 'gemini-2.5-flash-image' && '⚡ Fast & balanced • Good quality • Cost-effective'}
+              </div>
+            </div>
+          </div>
           <div className="flex gap-3">
             <button onClick={() => setGroupByDomain(!groupByDomain)} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-[10px] font-black uppercase tracking-widest hover:border-primary-400 transition-all shadow-sm">
               {groupByDomain ? 'Show All' : 'Group by Domain'}
@@ -714,6 +719,25 @@ You MUST return a valid JSON object (NOT an array) with these exact fields:
           </div>
         </div>
       </div>
+
+      {batchProgress && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+            <Loader2 className="animate-spin text-blue-600" size={18} />
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-black text-blue-900 mb-1">Batch Generation in Progress</h4>
+            <p className="text-xs text-blue-700 font-medium mb-2">
+              Processing slowly to respect API rate limits (Free tier: 10 req/min)
+            </p>
+            <div className="text-[10px] text-blue-600 font-medium space-y-1">
+              <div>• Each question needs ~20 seconds (2 API calls per question)</div>
+              <div>• For 10 questions: approximately 3-5 minutes total</div>
+              <div>• Upgrade your API plan for faster generation</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {genError && (
         <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3">
@@ -755,38 +779,63 @@ You MUST return a valid JSON object (NOT an array) with these exact fields:
         ))}
       </div>
 
-      {(activeTab === 'Exam Specific' || activeTab === 'Physics' || activeTab === 'Chemistry' || activeTab === 'Biology') && availableDomains.length > 1 && (
-        <div className="flex items-center gap-3 mb-8 overflow-x-auto pb-3 scroller-hide">
-          {availableDomains.map(domain => (
-            <button
-              key={domain}
-              onClick={() => setSelectedDomain(domain)}
-              className={`px-5 py-2 rounded-lg text-[8px] uppercase tracking-[0.12em] font-black whitespace-nowrap transition-all ${selectedDomain === domain ? 'bg-primary-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200'
-                }`}
-            >
-              {domain} {domain !== 'All' && categorizedSketches && categorizedSketches[domain] ? `(${categorizedSketches[domain].length})` : ''}
-            </button>
-          ))}
+      {/* Hierarchical Domain -> Chapter Display */}
+      {groupByDomain && categorizedSketches && Object.keys(categorizedSketches).length > 0 ? (
+        <div className="space-y-6">
+          {Object.entries(categorizedSketches).map(([domain, sketches]) => {
+            // Group by chapter within each domain
+            const chapterGroups: Record<string, any[]> = {};
+            sketches.forEach(sketch => {
+              const chapter = sketch.chapter || 'General';
+              if (!chapterGroups[chapter]) chapterGroups[chapter] = [];
+              chapterGroups[chapter].push(sketch);
+            });
+
+            return (
+              <div key={domain} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                {/* Domain Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest font-outfit">
+                    {domain}
+                  </h3>
+                  <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                    {sketches.length}
+                  </span>
+                </div>
+
+                {/* Chapters Pills */}
+                <div className="flex gap-2 flex-wrap mb-6">
+                  {Object.entries(chapterGroups)
+                    .sort((a, b) => b[1].length - a[1].length) // Sort by count
+                    .map(([chapter, chapterSketches]) => (
+                      <button
+                        key={chapter}
+                        className="px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/50 transition-all"
+                      >
+                        {chapter} <span className="text-slate-400 ml-1">({chapterSketches.length})</span>
+                      </button>
+                    ))}
+                </div>
+
+                {/* Cards Grid for this domain */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {sketches.map(item => renderCard(item))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {displayedSketches.map(item => renderCard(item))}
         </div>
       )}
-
-      {(() => {
-        const sketchesToDisplay = selectedDomain === 'All'
-          ? displayedSketches
-          : (categorizedSketches && categorizedSketches[selectedDomain]) || [];
-
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {sketchesToDisplay.map(item => renderCard(item))}
-          </div>
-        );
-      })()}
 
       {selectedSketch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl" onClick={() => setSelectedSketch(null)} />
           <div className="relative w-full max-w-7xl h-full max-h-[90vh] bg-slate-50 rounded-[3rem] shadow-2xl flex flex-col md:flex-row overflow-hidden border border-white/20">
-            <div className="flex-1 bg-[#f8fafc] relative overflow-hidden flex items-center justify-center p-12 group cursor-zoom-in min-h-[400px]">
+            <div className="flex-1 bg-[#f8fafc] relative overflow-hidden flex items-center justify-center group min-h-[400px]">
               <div className="absolute top-8 left-8 z-10">
                 <div className="flex items-center gap-3">
                   <span className={`px-4 py-2 text-[10px] font-black rounded-xl border shadow-lg uppercase tracking-widest ${selectedSketch.difficulty === 'Hard' ? 'bg-rose-500 text-white border-rose-400' :
@@ -811,14 +860,23 @@ You MUST return a valid JSON object (NOT an array) with these exact fields:
                   <X size={20} />
                 </button>
               </div>
-              <div className="w-full h-full flex items-center justify-center relative p-8">
-                {selectedSketch.img ? (
-                  selectedSketch.isSvg ? (
-                    <div className="w-full h-full flex items-center justify-center" dangerouslySetInnerHTML={{ __html: selectedSketch.img }} />
-                  ) : (
-                    <img src={selectedSketch.img} alt={selectedSketch.visualConcept} className="w-full h-auto max-w-full max-h-full object-contain rounded-3xl shadow-2xl" />
-                  )
+              {selectedSketch.img ? (
+                selectedSketch.isSvg ? (
+                  <div className="absolute inset-0 w-full h-full p-8 flex items-center justify-center" dangerouslySetInnerHTML={{ __html: selectedSketch.img }} />
                 ) : (
+                  <img
+                    src={selectedSketch.img}
+                    alt={selectedSketch.visualConcept}
+                    className="absolute inset-0 w-full h-full object-contain p-4"
+                    style={{
+                      objectFit: 'contain',
+                      maxWidth: '100%',
+                      maxHeight: '100%'
+                    }}
+                  />
+                )
+              ) : (
+                <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                   <div className="flex flex-col items-center gap-6 text-slate-300">
                     <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-inner border border-slate-100">
                       <Sparkles size={48} className="text-slate-200" />
@@ -836,8 +894,8 @@ You MUST return a valid JSON object (NOT an array) with these exact fields:
                       Generate Visual Blueprint
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             <div className="w-full md:w-[450px] bg-white border-l border-slate-200 flex flex-col h-full shadow-[-20px_0_50px_rgba(0,0,0,0.05)]">

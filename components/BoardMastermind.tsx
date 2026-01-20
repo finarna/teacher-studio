@@ -103,8 +103,40 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         RULES:
         1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise in the text.
         2. Use high fidelity LaTeX for all formulas.
-        
-        SCHEMA: { "questions": [{ "id": "Q1", "text": "...", "options": ["..."], "marks": 1, "difficulty": "...", "topic": "...", "blooms": "..." }] }`;
+        3. Classify each question into the correct NCERT Class 12 ${selectedSubject} domain and chapter.
+
+        ${selectedSubject === 'Physics' ? `
+        PHYSICS DOMAINS & CHAPTERS (Class 12 NCERT):
+        - MECHANICS: Circular Motion, Laws of Motion, Work Energy and Power, System of Particles and Rotational Motion, Gravitation, Kinematics, Mechanical Properties of Solids, Mechanical Properties of Fluids, Thermodynamics
+        - ELECTRODYNAMICS: Current Electricity, Moving Charges and Magnetism, Electromagnetic Induction, Alternating Current, Electrostatics, Magnetism and Matter, Electrostatic Potential and Capacitance, Electromagnetic Waves, Semiconductor Electronics
+        - MODERN PHYSICS: Atoms, Nuclei, Dual Nature of Radiation and Matter
+        - OPTICS: Wave Optics, Ray Optics and Optical Instruments
+        - OSCILLATIONS & WAVES: Oscillations, Waves
+        ` : selectedSubject === 'Chemistry' ? `
+        CHEMISTRY DOMAINS & CHAPTERS (Class 12 NCERT):
+        - PHYSICAL CHEMISTRY: Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, Solid State
+        - ORGANIC CHEMISTRY: Alcohols Phenols and Ethers, Aldehydes Ketones and Carboxylic Acids, Amines, Biomolecules, Polymers, Chemistry in Everyday Life, Haloalkanes and Haloarenes
+        - INORGANIC CHEMISTRY: p-Block Elements, d and f Block Elements, Coordination Compounds, General Principles and Processes of Isolation of Elements
+        ` : `
+        BIOLOGY DOMAINS & CHAPTERS (Class 12 NCERT):
+        - GENETICS & EVOLUTION: Heredity and Variation, Molecular Basis of Inheritance, Evolution
+        - BIOLOGY IN HUMAN WELFARE: Human Health and Disease, Strategies for Enhancement in Food Production, Microbes in Human Welfare
+        - BIOTECHNOLOGY: Biotechnology Principles and Processes, Biotechnology and its Applications
+        - ECOLOGY: Organisms and Populations, Ecosystem, Biodiversity and Conservation, Environmental Issues
+        - REPRODUCTION: Reproduction in Organisms, Sexual Reproduction in Flowering Plants, Human Reproduction, Reproductive Health
+        `}
+
+        SCHEMA: { "questions": [{
+          "id": "Q1",
+          "text": "...",
+          "options": ["..."],
+          "marks": 1,
+          "difficulty": "...",
+          "topic": "...",
+          "blooms": "...",
+          "domain": "MECHANICS | ELECTRODYNAMICS | etc. (major domain from above)",
+          "chapter": "Specific chapter name from the list above that best matches this question"
+        }] }`;
 
         const result = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]);
         const data = safeAiParse<any>(result.response.text(), { questions: [] }, true);
@@ -221,7 +253,40 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       RULES:
       1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise.
       2. Use LaTeX for all formulas.
-      SCHEMA: { "questions": [{ "id": "Q1", "text": "...", "options": ["..."], "marks": 1, "difficulty": "...", "topic": "...", "blooms": "..." }] }`;
+      3. Classify each question into the correct NCERT ${selectedGrade} ${selectedSubject} domain and chapter.
+
+      ${selectedSubject === 'Physics' ? `
+      PHYSICS DOMAINS & CHAPTERS (Class 12 NCERT):
+      - MECHANICS: Circular Motion, Laws of Motion, Work Energy and Power, System of Particles and Rotational Motion, Gravitation, Kinematics, Mechanical Properties of Solids, Mechanical Properties of Fluids, Thermodynamics
+      - ELECTRODYNAMICS: Current Electricity, Moving Charges and Magnetism, Electromagnetic Induction, Alternating Current, Electrostatics, Magnetism and Matter, Electrostatic Potential and Capacitance, Electromagnetic Waves, Semiconductor Electronics
+      - MODERN PHYSICS: Atoms, Nuclei, Dual Nature of Radiation and Matter
+      - OPTICS: Wave Optics, Ray Optics and Optical Instruments
+      - OSCILLATIONS & WAVES: Oscillations, Waves
+      ` : selectedSubject === 'Chemistry' ? `
+      CHEMISTRY DOMAINS & CHAPTERS (Class 12 NCERT):
+      - PHYSICAL CHEMISTRY: Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, Solid State
+      - ORGANIC CHEMISTRY: Alcohols Phenols and Ethers, Aldehydes Ketones and Carboxylic Acids, Amines, Biomolecules, Polymers, Chemistry in Everyday Life, Haloalkanes and Haloarenes
+      - INORGANIC CHEMISTRY: p-Block Elements, d and f Block Elements, Coordination Compounds, General Principles and Processes of Isolation of Elements
+      ` : selectedSubject === 'Biology' ? `
+      BIOLOGY DOMAINS & CHAPTERS (Class 12 NCERT):
+      - GENETICS & EVOLUTION: Heredity and Variation, Molecular Basis of Inheritance, Evolution
+      - BIOLOGY IN HUMAN WELFARE: Human Health and Disease, Strategies for Enhancement in Food Production, Microbes in Human Welfare
+      - BIOTECHNOLOGY: Biotechnology Principles and Processes, Biotechnology and its Applications
+      - ECOLOGY: Organisms and Populations, Ecosystem, Biodiversity and Conservation, Environmental Issues
+      - REPRODUCTION: Reproduction in Organisms, Sexual Reproduction in Flowering Plants, Human Reproduction, Reproductive Health
+      ` : ''}
+
+      SCHEMA: { "questions": [{
+        "id": "Q1",
+        "text": "...",
+        "options": ["..."],
+        "marks": 1,
+        "difficulty": "...",
+        "topic": "...",
+        "blooms": "...",
+        "domain": "MECHANICS | ELECTRODYNAMICS | etc. (major domain from above)",
+        "chapter": "Specific chapter name from the list above that best matches this question"
+      }] }`;
 
       // Track 2: Pedagogical Meta-Analysis (Charts/Summary)
       const analysisPrompt = `Synthesize structural analysis for this ${selectedSubject} paper.

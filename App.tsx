@@ -78,13 +78,26 @@ const App: React.FC = () => {
 
   const syncScanToRedis = async (scan: Scan) => {
     try {
-      await fetch('/api/scans', {
+      console.log(`🔄 Syncing scan to Redis: ${scan.id}`, {
+        subject: scan.subject,
+        questionCount: scan.analysisData?.questions?.length,
+        questionsWithSketches: scan.analysisData?.questions?.filter(q => q.sketchSvg).length || 0
+      });
+
+      const response = await fetch('/api/scans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(scan)
       });
+
+      const result = await response.json();
+      console.log(`✅ Scan synced to Redis:`, result);
+
+      if (!response.ok) {
+        console.error(`❌ Failed to sync scan: HTTP ${response.status}`, result);
+      }
     } catch (err) {
-      console.error('Failed to sync scan to Redis:', err);
+      console.error('❌ Failed to sync scan to Redis:', err);
     }
   };
 
