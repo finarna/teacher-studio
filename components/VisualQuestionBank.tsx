@@ -173,7 +173,22 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
 
       const result = await model.generateContent(prompt);
       const text = result.response.text();
-      const data = JSON.parse(text || "{}");
+
+      // Sanitize JSON response - fix common issues from LLM output
+      const sanitizeJson = (str: string): string => {
+        if (!str) return "{}";
+        let cleaned = str.trim();
+        // Remove markdown code blocks if present
+        cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
+        // Fix trailing commas before } or ]
+        cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+        // Fix single quotes to double quotes (careful with apostrophes in text)
+        cleaned = cleaned.replace(/(\s*)'([^']*)'(\s*:)/g, '$1"$2"$3');
+        cleaned = cleaned.replace(/:\s*'([^']*)'/g, ': "$1"');
+        return cleaned;
+      };
+
+      const data = JSON.parse(sanitizeJson(text));
 
       if (data.questions && Array.isArray(data.questions)) {
         const formatted = data.questions.map((q: any) => ({
