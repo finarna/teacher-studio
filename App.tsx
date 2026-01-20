@@ -57,6 +57,10 @@ const App: React.FC = () => {
         if (res.ok) {
           const data = await res.json();
           setRecentScans(data);
+          // Auto-select the latest scan if none is selected
+          if (data.length > 0 && !selectedScan) {
+            setSelectedScan(data[0]);
+          }
         }
       } catch (err) {
         console.error('Failed to initial sync with Redis:', err);
@@ -64,6 +68,13 @@ const App: React.FC = () => {
     };
     fetchScans();
   }, []);
+
+  // Auto-select latest scan when switching to analysis view
+  useEffect(() => {
+    if (godModeView === 'analysis' && !selectedScan && recentScans.length > 0) {
+      setSelectedScan(recentScans[0]);
+    }
+  }, [godModeView, selectedScan, recentScans]);
 
   const syncScanToRedis = async (scan: Scan) => {
     try {
@@ -388,6 +399,8 @@ const App: React.FC = () => {
                     setSelectedScan(updatedScan);
                     syncScanToRedis(updatedScan);
                   }}
+                  recentScans={recentScans}
+                  onSelectScan={setSelectedScan}
                 />
               </div>
             )}

@@ -23,6 +23,7 @@ interface Flashcard {
   def: string;
   extra?: string;
   domain?: string;
+  topic?: string;
 }
 
 interface Scan {
@@ -52,9 +53,10 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
   const groupedCards = useMemo(() => {
     const groups: Record<string, Flashcard[]> = { 'All': cards };
     cards.forEach(card => {
-      const domain = card.domain || 'General';
-      if (!groups[domain]) groups[domain] = [];
-      groups[domain].push(card);
+      // Use topic if available, otherwise domain for backwards compatibility
+      const category = card.topic || card.domain || 'General';
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(card);
     });
     return groups;
   }, [cards]);
@@ -110,6 +112,55 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
     loadCachedCards();
   }, [selectedScan]);
 
+  // Helper function to safely parse JSON from Gemini response
+  const parseGeminiJSON = (responseText: string) => {
+    try {
+      // Remove markdown code blocks if present
+      let jsonText = responseText.trim();
+      if (jsonText.startsWith('```json')) {
+        jsonText = jsonText.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      } else if (jsonText.startsWith('```')) {
+        jsonText = jsonText.replace(/```\s*/, '').replace(/```\s*$/, '');
+      }
+
+      jsonText = jsonText.trim();
+
+      // Try parsing directly first
+      try {
+        return JSON.parse(jsonText);
+      } catch (firstError) {
+        console.log('First parse attempt failed, trying to fix common issues...');
+
+        // Fix control characters and escape issues in JSON string values
+        // This is a more aggressive approach that sanitizes the JSON
+        let fixedText = jsonText;
+
+        // Remove actual control characters (newlines, tabs, etc.) from within JSON strings
+        // We need to be careful to only fix content within quoted strings
+        fixedText = fixedText.replace(/"([^"]*)"/g, (match, content) => {
+          // Escape control characters within the string
+          let fixed = content
+            .replace(/\n/g, ' ')  // Replace newlines with spaces
+            .replace(/\r/g, '')   // Remove carriage returns
+            .replace(/\t/g, ' ')  // Replace tabs with spaces
+            .replace(/[\x00-\x1F\x7F]/g, ''); // Remove other control characters
+
+          // Fix unescaped backslashes (for LaTeX)
+          // Only escape backslashes that aren't already part of valid escape sequences
+          fixed = fixed.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+
+          return `"${fixed}"`;
+        });
+
+        return JSON.parse(fixedText);
+      }
+    } catch (error) {
+      console.error('Failed to parse JSON:', error);
+      console.error('Response text:', responseText);
+      throw new Error('Invalid JSON response from AI');
+    }
+  };
+
   const fetchCards = async () => {
     if (!selectedScan) {
       alert('Please select an analysis from your vault first');
@@ -135,7 +186,7 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
       );
 
       const conceptsPrompt = `You are an elite academic specialist. Extract ${cardCount} high-yield flashcard concepts from these ${scan.subject} ${scan.grade} questions and their solutions.
-      
+
       Questions Data:
       ${JSON.stringify(questionsWithDerivations.slice(0, 20).map(q => ({
         text: q.text,
@@ -143,22 +194,24 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
         steps: q.solutionSteps,
         mastery: q.masteryMaterial
       })))}
-      
+
       Generate ${cardCount} flashcards focusing on:
       - Key formulas and their applications
       - Core concepts and definitions
       - Memory triggers and mnemonics
       - Important derivation steps
-      
+
       CRITICAL: You MUST output exactly ONE CONTINUOUS PARAGRAPH. Prohibited: No newlines, no breaks, no bullets.
       MATH FORMATTING: Use only single $ $ for ALL math (e.g., $E=hf$). NEVER use $$ $$. Ensure everything flows as a single sentence string.
-      EXAMPLE: "The **photon Energy** is given by $E = h \nu$, where $h$ is **Planck's constant** and $\nu$ is the **frequency**."
-      
-      Return JSON ONLY: { "cards": [ { "term": "Short title ($ $ allowed)", "def": "A single continuous paragraph of pedagogical explanation with integrated $ $ for all variables. NO NEWLINES.", "extra": "Core numeric take-away ($ $ only)", "domain": "String" } ] }`;
+      EXAMPLE: "The **photon Energy** is given by $E = h \\nu$, where $h$ is **Planck's constant** and $\\nu$ is the **frequency**."
+
+      IMPORTANT: All backslashes in LaTeX must be properly escaped in JSON (use double backslashes: \\\\nu not \\nu).
+
+      Return JSON ONLY: { "cards": [ { "term": "Descriptive concept title capturing the key idea in 4-8 words ($ $ allowed for math terms)", "def": "A single continuous paragraph of pedagogical explanation with integrated $ $ for all variables. NO NEWLINES.", "extra": "Core numeric take-away ($ $ only)", "topic": "The topic/domain from the original question" } ] }`;
 
       const result = await model.generateContent(conceptsPrompt);
       const response = await result.response;
-      const data = JSON.parse(response.text() || "{}");
+      const data = parseGeminiJSON(response.text() || "{}");
 
       if (data.cards && data.cards.length > 0) {
         setCards(data.cards);
@@ -293,7 +346,7 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
                     {/* Card Front */}
                     <div className="absolute inset-0 backface-hidden bg-white rounded-2xl p-10 shadow-xl flex flex-col items-center text-center justify-center border border-slate-100 overflow-hidden">
                       <div className="absolute top-0 left-0 w-full h-2 bg-primary-500 rounded-t-2xl"></div>
-                      <div className="text-slate-400 font-bold text-[9px] uppercase tracking-[0.3em] mb-4 font-outfit">{displayedCards[currentCard].domain || 'General Concept'}</div>
+                      <div className="text-slate-400 font-bold text-[9px] uppercase tracking-[0.3em] mb-4 font-outfit">{displayedCards[currentCard].topic || displayedCards[currentCard].domain || 'General Concept'}</div>
                       <div className="flex-1 flex items-center justify-center w-full max-h-[calc(100%-120px)] overflow-y-auto px-4">
                         <div className="text-xl md:text-2xl font-black text-slate-900 leading-tight font-outfit tracking-tight italic">
                           <RenderWithMath text={displayedCards[currentCard].term} showOptions={false} compact={true} serif={false} />

@@ -61,9 +61,11 @@ interface ExamAnalysisProps {
   scan: Scan | null;
   onGenerateTraining?: () => void;
   onUpdateScan?: (scan: Scan) => void;
+  recentScans?: Scan[];
+  onSelectScan?: (scan: Scan) => void;
 }
 
-const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan }) => {
+const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan, recentScans = [], onSelectScan }) => {
   const [isSynthesizingAll, setIsSynthesizingAll] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'vault'>('overview');
   const [expandedQuestionId, setExpandedQuestionId] = useState<string | null>(null);
@@ -512,6 +514,26 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan 
             </div>
           </div>
         </div>
+
+        {recentScans && recentScans.length > 0 && onSelectScan && (
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Selected Analysis Vault</label>
+            <select
+              value={scan.id}
+              onChange={(e) => {
+                const selected = recentScans.find(s => s.id === e.target.value);
+                if (selected && onSelectScan) {
+                  onSelectScan(selected);
+                }
+              }}
+              className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer min-w-[250px] hover:border-accent-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all"
+            >
+              {recentScans.map(s => (
+                <option key={s.id} value={s.id}>{s.name} ({s.subject})</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-4">
