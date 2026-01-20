@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "server": "node server.js",
-    "dev:all": "PORT=11001 node server.js & vite --port 11000",
+    "dev:all": "PORT=9001 node server.js & vite --port 9000",
     "build": "vite build",
     "preview": "vite preview"
   },

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Configuration
-FRONTEND_PORT=11000
-BACKEND_PORT=11001
+FRONTEND_PORT=9000
+BACKEND_PORT=9001
 
 echo "🚀 Starting EduJourney Studio on High-Range Ports..."
 echo "📡 Frontend: http://localhost:$FRONTEND_PORT"

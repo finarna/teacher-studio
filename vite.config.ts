@@ -6,11 +6,12 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
     server: {
-      port: 11000,
+      port: 9000,
       host: '0.0.0.0',
+      allowedHosts: ['learn.dataziv.com'],
       proxy: {
         '/api': {
-          target: 'http://127.0.0.1:11001',
+          target: 'http://127.0.0.1:9001',
           changeOrigin: true,
         },
       },
