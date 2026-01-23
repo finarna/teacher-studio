@@ -166,6 +166,13 @@ export interface AnalyzedQuestion {
   source?: string; // NEW: Identification of origin paper
   correctOptionIndex?: number;
   sketchSvg?: string;
+  // Enhanced image support for scanned papers
+  hasVisualElement?: boolean; // Indicates if question has diagram/table/image
+  visualElementType?: 'diagram' | 'table' | 'graph' | 'illustration' | 'chart' | 'image';
+  visualElementDescription?: string; // AI description of the visual element
+  visualElementPosition?: 'above' | 'below' | 'inline' | 'side'; // Position relative to question text
+  visualBoundingBox?: { pageNumber: number; x: string; y: string; width: string; height: string }; // Gemini-provided percentage coordinates (e.g., x: "10%")
+  extractedImages?: string[]; // Base64 image data URLs extracted from PDF
 }
 
 export interface ChapterInsight {

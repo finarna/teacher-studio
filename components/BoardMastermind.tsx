@@ -74,11 +74,11 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
       const genAI = new GoogleGenerativeAI(apiKey);
       const genModel = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.0-flash-lite',  // Lite version has higher rate limits
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.1,
-          maxOutputTokens: 8192
+          maxOutputTokens: 32768  // Increased from 8192 to handle all questions in one response
         }
       });
 
@@ -99,11 +99,29 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         const base64Data = await base64Promise;
         const mimeType = file.type || 'application/pdf';
 
+        // Extract images from PDF (if PDF file)
+        let fileImageMapping: Map<number, any[]> | null = null;
+        if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+          try {
+            console.log(`🖼️ [BULK PDF EXTRACTOR] Starting image extraction from ${file.name}...`);
+            const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+            fileImageMapping = await extractAndMapImages(file);
+            console.log(`✅ [BULK PDF EXTRACTOR] ${file.name}: Extracted images for`, fileImageMapping.size, 'questions');
+          } catch (err) {
+            console.warn(`⚠️ [BULK PDF EXTRACTOR] ${file.name}: Image extraction failed:`, err);
+          }
+        }
+
         const extractionPrompt = `Extract ALL questions verbatim from this ${selectedSubject} paper.
         RULES:
         1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise in the text.
         2. Use high fidelity LaTeX for all formulas.
         3. Classify each question into the correct NCERT Class 12 ${selectedSubject} domain and chapter.
+        4. VISUAL ELEMENT DETECTION:
+           - If question has a diagram/figure/table/graph nearby OR text mentions "shown"/"following figure", set hasVisualElement=true and visualElementDescription="[Brief 1-sentence description]"
+           - If no visual, set hasVisualElement=false
+
+        5. Extract ALL questions. Use minimal text in descriptions to fit everything.
 
         ${selectedSubject === 'Physics' ? `
         PHYSICS DOMAINS & CHAPTERS (Class 12 NCERT):
@@ -135,19 +153,47 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           "topic": "...",
           "blooms": "...",
           "domain": "MECHANICS | ELECTRODYNAMICS | etc. (major domain from above)",
-          "chapter": "Specific chapter name from the list above that best matches this question"
+          "chapter": "Specific chapter name from the list above that best matches this question",
+          "hasVisualElement": true | false,
+          "visualElementType": "diagram" | "table" | "graph" | "illustration" | "chart" | "image" (if hasVisualElement is true),
+          "visualElementDescription": "Detailed description of the diagram/table/image content, including all labels, values, and key features" (if hasVisualElement is true),
+          "visualElementPosition": "above" | "below" | "inline" | "side" (if hasVisualElement is true)
         }] }`;
 
         const result = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]);
         const data = safeAiParse<any>(result.response.text(), { questions: [] }, true);
 
+        // Debug: Log visual element detection for this file
+        console.log(`🔍 [BULK SCAN DEBUG] File: ${file.name}, Questions: ${data.questions?.length || 0}`);
+        if (data.questions && data.questions.length > 0) {
+          const questionsWithVisuals = data.questions.filter((q: any) => q.hasVisualElement);
+          console.log(`🖼️ [BULK SCAN DEBUG] ${file.name}: Questions with visual elements:`, questionsWithVisuals.length);
+        }
+
         if (data.questions) {
           const filePrefix = file.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 10);
-          const taggedQuestions = data.questions.map((q: any, idx: number) => ({
-            ...q,
-            id: q.id ? `${filePrefix}-${q.id}` : `${filePrefix}-q-${idx}`,
-            source: file.name
-          }));
+          const taggedQuestions = data.questions.map((q: any, idx: number) => {
+            const newQuestion: any = {
+              ...q,
+              id: q.id ? `${filePrefix}-${q.id}` : `${filePrefix}-q-${idx}`,
+              source: file.name
+            };
+
+            // Merge extracted images if available
+            if (fileImageMapping) {
+              const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+              if (questionNumMatch) {
+                const questionNum = parseInt(questionNumMatch[1]);
+                const images = fileImageMapping.get(questionNum);
+                if (images && images.length > 0) {
+                  newQuestion.extractedImages = images.map(img => img.imageData);
+                  console.log(`🔗 [BULK IMAGE MERGE] ${file.name}: Attached ${images.length} image(s) to question ${questionNum}`);
+                }
+              }
+            }
+
+            return newQuestion;
+          });
           allExtractedQuestions.push(...taggedQuestions);
         }
       }
@@ -234,17 +280,20 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       const base64Data = await base64Promise;
       const mimeType = file.type || 'application/pdf';
 
+      // Image mapping will be done after Gemini provides bounding boxes
+      let imageMapping: Map<number, any[]> | null = null;
+
       // --- PHASE 1: PARALLEL NEURAL TRACKS ---
       updatePipelineStatus('extraction', 'active');
       updatePipelineStatus('analysis', 'active');
       setLoadingStage(`Analyzing ${file.name}...`);
 
       const genModel = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.0-flash-lite',  // Lite version has higher rate limits
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.1,
-          maxOutputTokens: 8192
+          maxOutputTokens: 32768  // Increased from 8192 to handle all questions in one response
         }
       });
 
@@ -254,6 +303,22 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise.
       2. Use LaTeX for all formulas.
       3. Classify each question into the correct NCERT ${selectedGrade} ${selectedSubject} domain and chapter.
+      4. VISUAL ELEMENT DETECTION WITH PRECISE LOCATION:
+         - If question has a diagram/figure/table/graph nearby OR text mentions "shown"/"following figure":
+           * Set hasVisualElement=true
+           * Provide visualElementDescription="[Detailed description]"
+           * CRITICAL: Provide visualBoundingBox with PERCENTAGE-BASED coordinates from page edges:
+             {
+               "pageNumber": 3,
+               "x": "10%",  (distance from left edge as %)
+               "y": "45%",  (distance from top edge as %)
+               "width": "80%",  (width of diagram as % of page width)
+               "height": "25%"  (height of diagram as % of page height)
+             }
+           * This gives us pixel-perfect extraction of the diagram
+         - If no visual, set hasVisualElement=false
+
+      5. CRITICAL: Extract ALL 50 questions. Use minimal text in descriptions to fit all questions in response.
 
       ${selectedSubject === 'Physics' ? `
       PHYSICS DOMAINS & CHAPTERS (Class 12 NCERT):
@@ -285,7 +350,12 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         "topic": "...",
         "blooms": "...",
         "domain": "MECHANICS | ELECTRODYNAMICS | etc. (major domain from above)",
-        "chapter": "Specific chapter name from the list above that best matches this question"
+        "chapter": "Specific chapter name from the list above that best matches this question",
+        "hasVisualElement": true | false,
+        "visualElementType": "diagram" | "table" | "graph" | "illustration" | "chart" | "image" (if hasVisualElement is true),
+        "visualElementDescription": "Detailed description of the diagram/table/image content, including all labels, values, and key features" (if hasVisualElement is true),
+        "visualElementPosition": "above" | "below" | "inline" | "side" (if hasVisualElement is true),
+        "visualBoundingBox": { "pageNumber": 3, "x": "10%", "y": "45%", "width": "80%", "height": "25%" } (if hasVisualElement is true, percentage coordinates from page edges)
       }] }`;
 
       // Track 2: Pedagogical Meta-Analysis (Charts/Summary)
@@ -308,16 +378,171 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       const rawExtract = extractRes.response.text();
       const rawAnalysis = analysisRes.response.text();
 
+      // Debug: Log raw response length and preview
+      console.log('📥 [RAW RESPONSE DEBUG] Extraction response length:', rawExtract.length, 'chars');
+      console.log('📥 [RAW RESPONSE DEBUG] First 500 chars:', rawExtract.substring(0, 500));
+      console.log('📥 [RAW RESPONSE DEBUG] Last 500 chars:', rawExtract.substring(Math.max(0, rawExtract.length - 500)));
+
+      // Check if JSON is truncated
+      const openBraces = (rawExtract.match(/\{/g) || []).length;
+      const closeBraces = (rawExtract.match(/\}/g) || []).length;
+      const openBrackets = (rawExtract.match(/\[/g) || []).length;
+      const closeBrackets = (rawExtract.match(/\]/g) || []).length;
+      console.warn('⚠️ [JSON STRUCTURE] Open braces:', openBraces, 'Close braces:', closeBraces, 'Diff:', openBraces - closeBraces);
+      console.warn('⚠️ [JSON STRUCTURE] Open brackets:', openBrackets, 'Close brackets:', closeBrackets, 'Diff:', openBrackets - closeBrackets);
+
       const extractionId = Date.now().toString().slice(-4);
       const extractedData = safeAiParse<any>(rawExtract, { questions: [] }, true);
       const analyticData = safeAiParse<any>(rawAnalysis, {}, false);
 
+      console.log('🔧 [PARSER DEBUG] Parsed questions count:', extractedData.questions?.length || 0);
+      if (extractedData.questions?.length === 1 && rawExtract.length > 10000) {
+        console.error('🚨 [PARSER ERROR] Large response but only 1 question parsed - JSON is likely truncated!');
+      }
+
+      // Detect truncation: if JSON structure is incomplete (unmatched braces/brackets), trigger second pass
+      const isTruncated = (openBraces !== closeBraces) || (openBrackets !== closeBrackets);
+
+      // If extraction seems incomplete (truncated or suspiciously low count), try a second pass for remaining questions
+      if (extractedData.questions && extractedData.questions.length > 0 && (isTruncated || extractedData.questions.length < 45)) {
+        console.warn('⚠️ [INCOMPLETE EXTRACTION] Got', extractedData.questions.length, 'questions (truncated:', isTruncated, '), attempting second pass for remaining questions...');
+        try {
+          const lastQNum = extractedData.questions.length;
+          const remainingPrompt = `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${selectedSubject} paper.
+
+Use SAME SCHEMA including visual detection:
+{
+  "id": "Q${lastQNum + 1}",
+  "text": "...",
+  "hasVisualElement": true|false,
+  "visualElementType": "diagram"|"table"|"graph" (if has visual),
+  "visualElementDescription": "..." (if has visual),
+  "visualBoundingBox": { "pageNumber": X, "x": "10%", "y": "20%", "width": "80%", "height": "30%" } (if has visual, approximate percentages from page edges)
+}`;
+
+          const remainingRes = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, remainingPrompt]);
+          const remainingData = safeAiParse<any>(remainingRes.response.text(), { questions: [] }, true);
+
+          if (remainingData.questions && remainingData.questions.length > 0) {
+            console.log('✅ [SECOND PASS] Extracted additional', remainingData.questions.length, 'questions');
+            extractedData.questions.push(...remainingData.questions);
+          }
+        } catch (err) {
+          console.error('❌ [SECOND PASS] Failed:', err);
+        }
+      }
+
+      // Debug: Log visual element detection
+      console.log('🔍 [SCAN DEBUG] Extracted questions count:', extractedData.questions?.length || 0);
+      if (extractedData.questions && extractedData.questions.length > 0) {
+        const questionsWithVisuals = extractedData.questions.filter((q: any) => q.hasVisualElement);
+        console.log('🖼️ [SCAN DEBUG] Questions with visual elements:', questionsWithVisuals.length);
+        if (questionsWithVisuals.length > 0) {
+          console.log('🖼️ [SCAN DEBUG] Sample visual element:', {
+            id: questionsWithVisuals[0].id,
+            hasVisualElement: questionsWithVisuals[0].hasVisualElement,
+            visualElementType: questionsWithVisuals[0].visualElementType,
+            visualElementDescription: questionsWithVisuals[0].visualElementDescription?.substring(0, 100) + '...',
+            visualElementPosition: questionsWithVisuals[0].visualElementPosition
+          });
+        }
+      }
+
+      // --- VISION-GUIDED IMAGE EXTRACTION (if PDF with visual elements) ---
+      if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) &&
+          extractedData.questions && extractedData.questions.length > 0) {
+        try {
+          // Collect all questions with visual bounding boxes
+          const questionsWithBoundingBoxes = extractedData.questions
+            .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
+            .map((q: any) => {
+              const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+              const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
+              return {
+                questionNumber,
+                boundingBox: q.visualBoundingBox
+              };
+            })
+            .filter((item: any) => item.questionNumber !== null);
+
+          if (questionsWithBoundingBoxes.length > 0) {
+            console.log('🎯 [VISION-GUIDED] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
+            const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+            imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
+            console.log('✅ [VISION-GUIDED] Extracted images for', imageMapping.size, 'questions');
+          } else {
+            console.log('ℹ️ [VISION-GUIDED] No bounding boxes provided, skipping image extraction');
+          }
+        } catch (err) {
+          console.warn('⚠️ [VISION-GUIDED] Image extraction failed:', err);
+          // Continue without images - not a critical failure
+        }
+      }
+
+      console.log('🔍 [MERGE CHECKPOINT] About to check extractedData.questions. Has questions?', !!extractedData.questions, 'Count:', extractedData.questions?.length);
+      console.log('🔍 [MERGE CHECKPOINT] imageMapping still available?', !!imageMapping, 'Size:', imageMapping?.size);
+
       if (extractedData.questions) {
-        extractedData.questions = extractedData.questions.map((q: any, idx: number) => ({
-          ...q,
-          id: q.id ? `${extractionId}-${q.id}` : `${extractionId}-q-${idx}`,
-          source: file.name
-        }));
+        console.log('✅ [MERGE CHECKPOINT] Inside merge block! Processing', extractedData.questions.length, 'questions');
+
+        // Debug image mapping
+        if (imageMapping && imageMapping.size > 0) {
+          console.log('🔍 [IMAGE MERGE DEBUG] imageMapping has', imageMapping.size, 'question numbers with images');
+          console.log('🔍 [IMAGE MERGE DEBUG] Question numbers with images:', Array.from(imageMapping.keys()));
+        } else {
+          console.warn('⚠️ [IMAGE MERGE DEBUG] imageMapping is null or empty');
+        }
+
+        extractedData.questions = extractedData.questions.map((q: any, idx: number) => {
+          const newQuestion: any = {
+            ...q,
+            id: q.id ? `${extractionId}-${q.id}` : `${extractionId}-q-${idx}`,
+            source: file.name
+          };
+
+          // Merge extracted images if available
+          if (imageMapping) {
+            // Extract question number from ID (e.g., "Q1" -> 1, "Q5" -> 5)
+            const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+            if (questionNumMatch) {
+              const questionNum = parseInt(questionNumMatch[1]);
+              const images = imageMapping.get(questionNum);
+              if (images && images.length > 0) {
+                newQuestion.extractedImages = images.map(img => img.imageData);
+                console.log(`🔗 [IMAGE MERGE] Attached ${images.length} image(s) to question ${questionNum}`);
+              } else {
+                // Debug why no images for this question
+                if (idx < 5) { // Only log first 5 to avoid spam
+                  console.log(`🔍 [IMAGE MERGE DEBUG] Q${questionNum}: No images (original ID: ${q.id})`);
+                }
+              }
+            } else {
+              console.warn(`⚠️ [IMAGE MERGE DEBUG] Could not extract number from question ID: ${q.id}`);
+            }
+          }
+
+          return newQuestion;
+        });
+
+        // Debug: Check if extractedImages actually made it onto the questions
+        if (imageMapping && imageMapping.size > 0) {
+          const questionNumbersWithImages = Array.from(imageMapping.keys());
+          const sampleQuestionsWithImages = extractedData.questions.filter((q: any) => {
+            const numMatch = q.id?.match(/Q(\d+)/i);
+            if (numMatch) {
+              const num = parseInt(numMatch[1]);
+              return questionNumbersWithImages.includes(num);
+            }
+            return false;
+          });
+
+          console.log(`🔍 [POST-MERGE DEBUG] Questions ${questionNumbersWithImages.join(', ')} after merge:`, sampleQuestionsWithImages.map((q: any) => ({
+            id: q.id,
+            hasExtractedImages: !!q.extractedImages,
+            extractedImagesCount: q.extractedImages?.length || 0,
+            extractedImagesPreview: q.extractedImages?.[0]?.substring(0, 50)
+          })));
+        }
       }
 
       updatePipelineStatus('extraction', 'complete');

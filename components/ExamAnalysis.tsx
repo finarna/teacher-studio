@@ -88,6 +88,23 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const analysis = scan.analysisData;
   const questions = analysis.questions || [];
 
+  // Debug: Log visual elements in vault questions
+  React.useEffect(() => {
+    console.log('📊 [VAULT DEBUG] Total questions in vault:', questions.length);
+    const questionsWithVisuals = questions.filter(q => q.hasVisualElement);
+    console.log('🖼️ [VAULT DEBUG] Questions with visual elements:', questionsWithVisuals.length);
+    if (questionsWithVisuals.length > 0) {
+      console.log('🖼️ [VAULT DEBUG] Sample visual question:', {
+        id: questionsWithVisuals[0].id,
+        text: questionsWithVisuals[0].text?.substring(0, 50) + '...',
+        hasVisualElement: questionsWithVisuals[0].hasVisualElement,
+        visualElementType: questionsWithVisuals[0].visualElementType,
+        visualElementDescription: questionsWithVisuals[0].visualElementDescription?.substring(0, 100) + '...',
+        visualElementPosition: questionsWithVisuals[0].visualElementPosition
+      });
+    }
+  }, [questions]);
+
   const toggleQuestion = (id: string) => {
     const isExpanding = expandedQuestionId !== id;
     setExpandedQuestionId(isExpanding ? id : null);
@@ -112,26 +129,41 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
         generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
       });
 
-      const prompt = `Elite Academic Specialist: Synthesize pedagogical solution for the ${scan.subject} ${scan.grade} question: "${question.text}".
-      
-      LATEX RULES:
-      1. Use $$ ... $$ for EVERY important formula, equation, or derivation step.
-      2. Use $ ... $ for inline variables (e.g. $x$, $v_0$).
-      3. Ensure LaTeX is clean and professional.
-      
-      Return JSON ONLY. 
-      Schema: { 
-        "solutionSteps": ["Step Title ::: Explanation with $$公式$$ blocks"], 
-        "masteryMaterial": { 
-          "coreConcept": "Professional summary with $$Key Formula$$", 
-          "logic": "Bulleted reasoning", 
-          "memoryTrigger": "Mnemonic/Rule" 
-        } 
-      }`;
+      // Simple, effective prompt with JSON escaping guidance
+      const prompt = `Elite Academic Specialist: Generate pedagogical solution for ${scan.subject} ${scan.grade}: "${question.text}".
 
+CRITICAL: You are returning JSON. In JSON strings, backslashes must be DOUBLED.
+- Write \\\\times to get \\times after JSON parsing
+- Write \\\\frac to get \\frac after JSON parsing
+- Write \\\\oint to get \\oint after JSON parsing
+- Write \\\\vec{B} to get \\vec{B} after JSON parsing
+
+LATEX RULES:
+1. Use $$ ... $$ for display formulas (e.g., $$E = mc^2$$, $$F = \\\\frac{GMm}{r^2}$$)
+2. Use $ ... $ for inline variables (e.g., $x$, $v_0$, $T_1$)
+3. All LaTeX commands need double backslashes in JSON: \\\\frac, \\\\times, \\\\sqrt, \\\\theta, \\\\oint, \\\\vec
+4. NEVER add extra curly braces around commands (e.g., write \\\\oint NOT \\\\{\\\\oint})
+
+CORRECT: $$\\\\oint \\\\vec{B} \\\\cdot d\\\\vec{A} = 0$$
+WRONG: $$\\\\{\\\\oint} \\\\vec{B} \\\\cdot d\\\\vec{A} = 0$$
+
+Return JSON ONLY.
+Schema: {
+  "solutionSteps": ["Step Title ::: Explanation with $$Formula$$ blocks"],
+  "masteryMaterial": {
+    "coreConcept": "Professional summary with $$Key Formula$$",
+    "logic": "Bulleted reasoning",
+    "memoryTrigger": "Mnemonic/Rule"
+  }
+}`;
+
+      console.log('🚀 SENDING PROMPT:', prompt);
       const res = await model.generateContent(prompt);
       const rawText = res.response.text();
+      console.log('📥 AI RESPONSE:', rawText.substring(0, 300) + '...');
+
       let qData = safeAiParse<any>(rawText, null);
+      console.log('✅ PARSED DATA:', qData ? 'Success' : 'Failed');
 
       // FIX: Handle array responses from AI (sometimes returns [{...}] instead of {...})
       if (Array.isArray(qData) && qData.length > 0) {
@@ -139,6 +171,17 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
       }
 
       if (qData && (qData.solutionSteps || qData.masteryMaterial)) {
+        // Check for corruption (but NOT inside valid \text{...} commands)
+        const firstStep = qData.solutionSteps?.[0] || '';
+        // Remove valid \text{...} commands before checking
+        const withoutText = firstStep.replace(/\\text\{[^}]*\}/g, '');
+        const hasCorruption = /\brac\b|\bimes\b|\bheta\b/.test(withoutText) || /(?<!\\)ext\b/.test(withoutText);
+        console.log(hasCorruption ? '⚠️  CORRUPTED FORMULAS DETECTED' : '✨ FORMULAS CLEAN');
+        if (hasCorruption) {
+          console.log('Corruption found:', withoutText.substring(0, 150));
+        } else {
+          console.log('First step preview:', firstStep.substring(0, 150));
+        }
         // Deep clone for React state detection & Redis sync
         const clonedQuestions = JSON.parse(JSON.stringify(scan.analysisData.questions));
         const finalQuestions = clonedQuestions.map((q: any) =>
@@ -184,20 +227,20 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
       for (let i = 0; i < unSolved.length; i += batchSize) {
         const batch = unSolved.slice(i, i + batchSize);
         const batchPromises = batch.map(async (q) => {
-          const prompt = `Elite Academic Specialist: Synthesize pedagogical solution for ${scan.subject} ${scan.grade}: "${q.text || ''}". 
-          
-          LATEX RULES:
-          1. Wrap all formulas and derivations in $$ ... $$ for block rendering.
-          2. Use $ ... $ for inline variables.
-          
-          Return JSON ONLY: { 
-            "solutionSteps": ["Step Title ::: Explanation using $$Formula Block$$"], 
-            "masteryMaterial": { 
-              "coreConcept": "Summary with $$Key Formula$$", 
-              "logic": "...", 
-              "memoryTrigger": "..." 
-            } 
-          }`;
+          const prompt = `Elite Academic Specialist: Synthesize pedagogical solution for ${scan.subject} ${scan.grade}: "${q.text || ''}".
+
+LATEX RULES:
+1. Wrap all formulas and derivations in $$ ... $$ for block rendering.
+2. Use $ ... $ for inline variables.
+
+Return JSON ONLY: {
+  "solutionSteps": ["Step Title ::: Explanation using $$Formula Block$$"],
+  "masteryMaterial": {
+    "coreConcept": "Summary with $$Key Formula$$",
+    "logic": "...",
+    "memoryTrigger": "..."
+  }
+}`;
           try {
             const res = await model.generateContent(prompt);
             const data = safeAiParse<any>(res.response.text(), null);
@@ -1040,9 +1083,29 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
                               >
                                 {isActive && <div className="absolute top-0 left-0 w-1 h-full bg-accent-500" />}
                                 <div className="flex items-center justify-between">
-                                  <span className={`text-[9px] font-black uppercase tracking-tighter ${isActive ? 'text-accent-500' : 'text-slate-400'}`}>
-                                    {q.marks}M • {q.difficulty}
-                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    {/* Extract and display question number */}
+                                    {(() => {
+                                      const qNumMatch = q.id?.match(/Q(\d+)/i);
+                                      const qNum = qNumMatch ? qNumMatch[1] : null;
+                                      return qNum ? (
+                                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tight ${isActive ? 'bg-accent-500 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                                          Q{qNum}
+                                        </span>
+                                      ) : null;
+                                    })()}
+                                    <span className={`text-[9px] font-black uppercase tracking-tighter ${isActive ? 'text-accent-500' : 'text-slate-400'}`}>
+                                      {q.marks}M • {q.difficulty}
+                                    </span>
+                                    {(q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0)) && (
+                                      <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[7px] font-black uppercase rounded tracking-widest border border-blue-200 flex items-center gap-0.5">
+                                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        Visual
+                                      </span>
+                                    )}
+                                  </div>
                                   <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-slate-400' : 'text-slate-300'}`}>
                                     {q.source?.substring(0, 15)}...
                                   </span>
@@ -1066,6 +1129,16 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
                   (() => {
                     const selectedQ = questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`))!;
                     const qId = selectedQ.id || 'frag-0';
+
+                    // Debug: Check if extractedImages is present on selectedQ
+                    console.log('🔍 [VAULT DISPLAY DEBUG] Selected question:', {
+                      id: selectedQ.id,
+                      hasExtractedImages: !!selectedQ.extractedImages,
+                      extractedImagesCount: selectedQ.extractedImages?.length || 0,
+                      extractedImagesType: typeof selectedQ.extractedImages,
+                      hasVisualElement: selectedQ.hasVisualElement,
+                      questionKeys: Object.keys(selectedQ)
+                    });
 
                     return (
                       <div className="animate-in fade-in slide-in-from-right-4 duration-500">
@@ -1094,6 +1167,67 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
                           <div className="text-lg font-bold text-slate-800 leading-relaxed font-instrument border-l-4 border-accent-500/20 pl-6 py-4 mb-8 bg-slate-50/50 rounded-xl">
                             <RenderWithMath text={selectedQ.text || ''} showOptions={false} serif={false} />
                           </div>
+
+                          {/* Visual Element Information */}
+                          {((selectedQ.hasVisualElement && selectedQ.visualElementDescription) || (selectedQ.extractedImages && selectedQ.extractedImages.length > 0)) && (
+                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6 shadow-lg">
+                              <div className="flex items-start gap-4">
+                                <div className="flex-shrink-0 w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
+                                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <h4 className="text-[11px] font-black text-blue-900 uppercase tracking-widest">Visual Element Detected</h4>
+                                    {selectedQ.visualElementType && (
+                                      <span className="px-2 py-0.5 bg-blue-200 text-blue-800 text-[8px] font-black uppercase rounded-md tracking-wide">
+                                        {selectedQ.visualElementType}
+                                      </span>
+                                    )}
+                                    {selectedQ.visualElementPosition && (
+                                      <span className="px-2 py-0.5 bg-indigo-200 text-indigo-800 text-[8px] font-black uppercase rounded-md tracking-wide">
+                                        Position: {selectedQ.visualElementPosition}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* AI-generated visual description */}
+                                  {selectedQ.visualElementDescription && (
+                                    <div className="text-sm font-semibold text-slate-700 leading-relaxed bg-white/60 rounded-lg p-4 border border-blue-100">
+                                      <p className="text-[10px] font-black text-blue-700 uppercase tracking-wider mb-2">Description:</p>
+                                      <RenderWithMath text={selectedQ.visualElementDescription} showOptions={false} serif={false} />
+                                    </div>
+                                  )}
+
+                                  {/* Display extracted images if available */}
+                                  {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (
+                                    <div className="mt-4 space-y-3">
+                                      <p className="text-[10px] font-black text-blue-700 uppercase tracking-wider">Extracted Image(s):</p>
+                                      <div className="grid grid-cols-1 gap-3">
+                                        {selectedQ.extractedImages.map((imgData, idx) => (
+                                          <div key={idx} className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm">
+                                            <img
+                                              src={imgData}
+                                              alt={`Question visual ${idx + 1}`}
+                                              className="w-full h-auto rounded-md border border-slate-200"
+                                            />
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  <div className="mt-3 text-[9px] font-bold text-blue-600 uppercase tracking-wide flex items-center gap-2">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                    </svg>
+                                    This question contains a visual element in the original paper. Use the description above to understand the diagram/table/illustration.
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
 
                           {isSynthesizingQuestion === qId ? (
                             <div className="flex flex-col items-center justify-center py-20 text-center">
