@@ -36,6 +36,16 @@ interface SketchGalleryProps {
 
 const STATIC_SKETCHES: any[] = [];
 
+// Helper function to convert LaTeX delimiters
+const convertLatexDelimiters = (text: string): string => {
+  if (!text) return text;
+  // Convert \(...\) to $...$
+  let converted = text.replace(/\\\((.*?)\\\)/g, '$$$1$$');
+  // Convert \[...\] to $$...$$
+  converted = converted.replace(/\\\[(.*?)\\\]/g, '$$$$$$1$$$$');
+  return converted;
+};
+
 const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateScan, recentScans }) => {
   const [activeTab, setActiveTab] = useState(scan ? 'Exam Specific' : 'All Subjects');
   const [generatingId, setGeneratingId] = useState<string | null>(null);
@@ -50,6 +60,9 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   const [selectedGrade, setSelectedGrade] = useState(selectedVaultScan?.grade || 'Class 12');
   const [selectedSubject, setSelectedSubject] = useState(selectedVaultScan?.subject || 'Physics');
   const [generationMethod, setGenerationMethod] = useState<GenerationMethod>('svg');
+  const [selectedChapterPerDomain, setSelectedChapterPerDomain] = useState<Record<string, string>>({});
+  const [selectedDomainInGroupedView, setSelectedDomainInGroupedView] = useState<string | null>(null);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
 
   useEffect(() => {
     if (!selectedVaultScan && recentScans && recentScans.length > 0) {
@@ -128,7 +141,9 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
         pitfalls: q.pitfalls || [],
         detailedNotes: q.masteryMaterial?.logic || "",
         mentalAnchor: q.masteryMaterial?.memoryTrigger || "",
-        proceduralLogic: q.solutionSteps || []
+        proceduralLogic: q.solutionSteps || [],
+        domain: q.domain,
+        chapter: q.chapter
       };
     });
   }, [scanQuestions, selectedVaultScan, forceRender]);
@@ -200,6 +215,8 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                 detailedNotes: q.masteryMaterial?.logic || "",
                 mentalAnchor: q.masteryMaterial?.memoryTrigger || "",
                 proceduralLogic: q.solutionSteps || [],
+                domain: q.domain,
+                chapter: q.chapter,
                 scanId: scan.id,
                 scanName: scan.name
               });
@@ -244,6 +261,22 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
 
   const displayedSketches = filteredSketches;
 
+  // Get currently visible sketches based on active filters
+  const currentlyVisibleSketches = useMemo(() => {
+    if (groupByDomain && selectedDomainInGroupedView && categorizedSketches?.[selectedDomainInGroupedView]) {
+      const domainSketches = categorizedSketches[selectedDomainInGroupedView];
+      const selectedChapter = selectedChapterPerDomain[selectedDomainInGroupedView];
+
+      if (!selectedChapter) {
+        return domainSketches;
+      }
+
+      return domainSketches.filter(item => (item.chapter || 'General') === selectedChapter);
+    }
+
+    return displayedSketches;
+  }, [groupByDomain, selectedDomainInGroupedView, categorizedSketches, selectedChapterPerDomain, displayedSketches]);
+
   // Calculate subject counts - only from selected vault if available
   const subjectCounts = useMemo(() => {
     const counts: Record<string, number> = { Physics: 0, Chemistry: 0, Biology: 0 };
@@ -281,10 +314,20 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   // Reset domain selection when changing tabs
   useEffect(() => {
     setSelectedDomain('All');
+    setSelectedChapterPerDomain({});
   }, [activeTab]);
 
-  const handleGenerate = async (id: string) => {
-    console.log('🎨 handleGenerate called with id:', id);
+  // Set initial selected domain when categorizedSketches changes
+  useEffect(() => {
+    if (groupByDomain && categorizedSketches && Object.keys(categorizedSketches).length > 0) {
+      if (!selectedDomainInGroupedView || !categorizedSketches[selectedDomainInGroupedView]) {
+        setSelectedDomainInGroupedView(Object.keys(categorizedSketches)[0]);
+      }
+    }
+  }, [categorizedSketches, groupByDomain]);
+
+  const handleGenerate = async (id: string, skipSync: boolean = false) => {
+    console.log('🎨 handleGenerate called with id:', id, 'skipSync:', skipSync);
     console.log('Vault:', selectedVaultScan?.name, 'Method:', generationMethod);
 
     if (!selectedVaultScan) {
@@ -293,7 +336,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
       return;
     }
 
-    if (!onUpdateScan) {
+    if (!onUpdateScan && !skipSync) {
       console.error('❌ onUpdateScan not available');
       setGenError('Update function not available');
       return;
@@ -334,9 +377,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
       console.log(`✓ Generated using ${generationMethod}, isSvg:`, result.isSvg);
       console.log(`📊 Image data size: ${(result.imageData.length / 1024).toFixed(2)} KB`);
 
-      // Use functional state update to prevent race conditions during batch processing
-      let finalUpdatedScan: Scan | null = null;
-
+      // Update state with the new image - simplified approach
       setSelectedVaultScan(prevScan => {
         if (!prevScan) {
           console.error('❌ prevScan is null in setState callback!');
@@ -369,59 +410,17 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
         };
 
         console.log(`✓ Updated scan state with new image for question ${id}`);
-        finalUpdatedScan = updatedScan;
+
+        // If NOT in batch mode, sync immediately to Redis
+        if (!skipSync && onUpdateScan) {
+          console.log(`📤 Syncing to Redis immediately (single generation mode)...`);
+          onUpdateScan(updatedScan);
+        } else if (skipSync) {
+          console.log(`⏭️ Skipping immediate sync (batch mode - will sync periodically)`);
+        }
+
         return updatedScan;
       });
-
-      // CRITICAL: If selectedVaultScan is null but we still have the scan data,
-      // use it directly to persist
-      if (!finalUpdatedScan && selectedVaultScan) {
-        console.warn('⚠️ Using selectedVaultScan directly (state update may have race condition)');
-        const updatedQuestions = (selectedVaultScan.analysisData?.questions || []).map(question =>
-          question.id === id ? {
-            ...question,
-            sketchSvg: result.imageData,
-            visualConcept: result.blueprint.visualConcept || question.visualConcept,
-            examTip: result.blueprint.examTip || question.examTip,
-            keyFormulas: result.blueprint.keyFormulas || question.keyFormulas,
-            pitfalls: result.blueprint.pitfalls || question.pitfalls,
-            solutionSteps: result.blueprint.proceduralLogic || question.solutionSteps,
-            masteryMaterial: {
-              ...question.masteryMaterial,
-              logic: result.blueprint.detailedNotes,
-              memoryTrigger: result.blueprint.mentalAnchor
-            }
-          } : question
-        );
-
-        finalUpdatedScan = {
-          ...selectedVaultScan,
-          analysisData: {
-            ...selectedVaultScan.analysisData!,
-            questions: updatedQuestions
-          }
-        };
-      }
-
-      // Notify parent after state update completes
-      if (finalUpdatedScan) {
-        console.log(`📤 Calling onUpdateScan to persist data...`);
-        console.log(`📊 Updated scan data:`, {
-          scanId: finalUpdatedScan.id,
-          questionCount: finalUpdatedScan.analysisData?.questions?.length,
-          updatedQuestionId: id,
-          hasSketchSvg: finalUpdatedScan.analysisData?.questions?.find(q => q.id === id)?.sketchSvg ? true : false,
-          sketchSvgSize: finalUpdatedScan.analysisData?.questions?.find(q => q.id === id)?.sketchSvg?.length || 0
-        });
-
-        await onUpdateScan?.(finalUpdatedScan);
-        console.log(`✓ onUpdateScan completed`);
-
-        // Verify the save by checking if the data is actually in the parent state
-        console.log(`🔍 Verifying save...`);
-      } else {
-        console.error('❌ finalUpdatedScan is null - state update may have failed');
-      }
 
       // Force re-render to show the new image
       setForceRender(prev => prev + 1);
@@ -465,66 +464,93 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
       return;
     }
 
-    // Get all questions that need generation (either no image or want to regenerate)
-    const allIds = dynamicSketches.map(s => s.id);
+    // Get currently visible/filtered questions for generation
+    const allIds = currentlyVisibleSketches.map(s => s.id);
 
     if (allIds.length === 0) {
-      setGenError('No questions found in the selected vault. Please scan a paper first.');
+      setGenError('No questions found in the current view. Please adjust filters or scan a paper first.');
       return;
     }
 
-    console.log(`Starting batch generation for ${allIds.length} questions using ${generationMethod}`);
+    const filterInfo = groupByDomain && selectedDomainInGroupedView
+      ? ` (filtered: ${selectedDomainInGroupedView}${selectedChapterPerDomain[selectedDomainInGroupedView] ? ' > ' + selectedChapterPerDomain[selectedDomainInGroupedView] : ''})`
+      : '';
+
+    console.log(`Starting batch generation for ${allIds.length} questions${filterInfo} using ${generationMethod}`);
     console.log(`⚠️ Note: Free tier has rate limits. Processing slowly to avoid hitting limits.`);
 
-    // REDUCED BATCH SIZE to respect API rate limits
-    // Each question makes 2 API calls (content + image)
-    // Free tier: 10 requests/minute for gemini-2.0-flash-exp
-    // So we can only do 2-3 questions per minute safely
-    const BATCH_SIZE = 2; // Process 2 at a time
-    const DELAY_BETWEEN_BATCHES = 15000; // 15 seconds between batches
-    const DELAY_BETWEEN_QUESTIONS = 5000; // 5 seconds between questions
+    // API Rate Limits: gemini-2.0-flash-exp free tier = 10 requests/minute
+    // Each question makes 2 API calls (content + image) = 5 questions/minute max
+    // We'll be conservative: 4 questions/minute = 1 question every 15 seconds
+    const DELAY_BETWEEN_QUESTIONS = 3000; // 3 seconds between questions
+    const SYNC_INTERVAL = 5; // Sync to Redis every 5 images (safer than waiting until end)
 
     let totalFailed = 0;
+    let totalSynced = 0;
 
     setBatchProgress({ current: 0, total: allIds.length, failed: 0 });
 
-    for (let i = 0; i < allIds.length; i += BATCH_SIZE) {
-      const batch = allIds.slice(i, i + BATCH_SIZE);
-      console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}, questions:`, batch);
+    // Helper function to sync current state to Redis
+    const syncCurrentState = async () => {
+      return new Promise<void>((resolve) => {
+        // Wait a bit for React state to settle
+        setTimeout(() => {
+          setSelectedVaultScan(currentScan => {
+            if (currentScan && onUpdateScan) {
+              const questionsWithImages = currentScan.analysisData?.questions?.filter(q => q.sketchSvg).length || 0;
+              console.log(`💾 Syncing to Redis: ${questionsWithImages} images...`);
+              onUpdateScan(currentScan);
+            }
+            resolve();
+            return currentScan;
+          });
+        }, 100);
+      });
+    };
 
-      // Process questions ONE AT A TIME within the batch to avoid rate limits
-      for (const id of batch) {
-        try {
-          await handleGenerate(id);
-          console.log(`✓ Successfully generated sketch for ${id}`);
-        } catch (error: any) {
-          console.error(`✗ Failed to generate sketch for ${id}:`, error.message);
-          totalFailed++;
-        }
+    for (let i = 0; i < allIds.length; i++) {
+      const id = allIds[i];
 
-        // Update progress after each question
-        const completed = i + batch.indexOf(id) + 1;
-        setBatchProgress({
-          current: completed,
-          total: allIds.length,
-          failed: totalFailed
-        });
-
-        // Wait between questions to respect rate limits
-        if (batch.indexOf(id) < batch.length - 1) {
-          console.log(`⏱️ Waiting ${DELAY_BETWEEN_QUESTIONS/1000}s before next question...`);
-          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_QUESTIONS));
-        }
+      try {
+        // Skip individual Redis sync - we'll sync periodically
+        await handleGenerate(id, true);
+        console.log(`✓ Successfully generated sketch for ${id}`);
+      } catch (error: any) {
+        console.error(`✗ Failed to generate sketch for ${id}:`, error.message);
+        totalFailed++;
       }
 
-      // Wait between batches
-      if (i + BATCH_SIZE < allIds.length) {
-        console.log(`⏱️ Batch complete. Waiting ${DELAY_BETWEEN_BATCHES/1000}s before next batch...`);
-        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+      // Update progress after each question
+      const completed = i + 1;
+      setBatchProgress({
+        current: completed,
+        total: allIds.length,
+        failed: totalFailed
+      });
+
+      // PERIODIC SYNC: Save to Redis every SYNC_INTERVAL images to prevent data loss
+      if (completed % SYNC_INTERVAL === 0 && completed < allIds.length) {
+        console.log(`📊 Checkpoint: ${completed}/${allIds.length} completed. Syncing to Redis...`);
+        await syncCurrentState();
+        totalSynced = completed - totalFailed;
+        console.log(`✅ Synced ${totalSynced} images to Redis`);
+      }
+
+      // Wait between questions to respect rate limits (except for last question)
+      if (i < allIds.length - 1) {
+        console.log(`⏱️ Waiting ${DELAY_BETWEEN_QUESTIONS/1000}s before next question...`);
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_QUESTIONS));
       }
     }
 
-    console.log(`Batch generation complete. Success: ${allIds.length - totalFailed}, Failed: ${totalFailed}`);
+    console.log(`🎉 Batch generation complete. Success: ${allIds.length - totalFailed}, Failed: ${totalFailed}`);
+
+    // FINAL SYNC: Ensure all remaining images are synced
+    console.log(`📤 Final sync to Redis...`);
+    await syncCurrentState();
+
+    const finalQuestionsWithImages = selectedVaultScan?.analysisData?.questions?.filter(q => q.sketchSvg).length || 0;
+    console.log(`✅ All done! Total images in Redis: ${finalQuestionsWithImages}`);
 
     if (totalFailed > 0) {
       setGenError(`Generated ${allIds.length - totalFailed}/${allIds.length} sketches. ${totalFailed} failed - check console for details. Tip: Upgrade your API plan for higher rate limits.`);
@@ -536,21 +562,127 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
     setBatchProgress(null);
   };
 
+  // Download all images with sketches
+  const handleDownloadAll = () => {
+    const sketchesWithImages = currentlyVisibleSketches.filter(s => s.img && s.img.length > 0);
+
+    if (sketchesWithImages.length === 0) {
+      alert('No images to download in current view');
+      return;
+    }
+
+    console.log(`📥 Downloading ${sketchesWithImages.length} images...`);
+
+    sketchesWithImages.forEach((sketch, index) => {
+      const link = document.createElement('a');
+      const timestamp = Date.now();
+      const filename = `${sketch.id}_${sketch.visualConcept.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 50)}_${timestamp}.${sketch.isSvg ? 'svg' : 'png'}`;
+
+      if (sketch.isSvg) {
+        // SVG: Create blob and download
+        const blob = new Blob([sketch.img], { type: 'image/svg+xml' });
+        link.href = URL.createObjectURL(blob);
+      } else {
+        // PNG/JPG: Use data URL directly
+        link.href = sketch.img;
+      }
+
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cleanup blob URL
+      if (sketch.isSvg) {
+        URL.revokeObjectURL(link.href);
+      }
+    });
+
+    console.log(`✅ Downloaded ${sketchesWithImages.length} images`);
+    alert(`Downloaded ${sketchesWithImages.length} images successfully!`);
+  };
+
+  // Manual force sync to Redis
+  const handleForceSync = async () => {
+    if (!selectedVaultScan || !onUpdateScan) {
+      alert('No scan selected or update function not available');
+      return;
+    }
+
+    const questionsWithImages = selectedVaultScan.analysisData?.questions?.filter(q => q.sketchSvg).length || 0;
+
+    if (questionsWithImages === 0) {
+      alert('No images to sync');
+      return;
+    }
+
+    const confirm = window.confirm(
+      `Force sync ${questionsWithImages} images to Redis?\n\n` +
+      `Scan: ${selectedVaultScan.name}\n` +
+      `Total Questions: ${selectedVaultScan.analysisData?.questions?.length}\n` +
+      `Questions with Images: ${questionsWithImages}`
+    );
+
+    if (!confirm) return;
+
+    console.log(`🔄 Force syncing to Redis...`);
+    console.log(`📊 Scan:`, selectedVaultScan.name);
+    console.log(`📊 Images:`, questionsWithImages);
+
+    try {
+      await onUpdateScan(selectedVaultScan);
+      console.log(`✅ Force sync successful!`);
+      alert(`✅ Successfully synced ${questionsWithImages} images to Redis!`);
+    } catch (err) {
+      console.error(`❌ Force sync failed:`, err);
+      alert(`❌ Force sync failed. Check console for details.`);
+    }
+  };
+
+  // Export scan data as JSON backup
+  const handleExportBackup = () => {
+    if (!selectedVaultScan) {
+      alert('No scan selected');
+      return;
+    }
+
+    const backup = {
+      exportDate: new Date().toISOString(),
+      scan: selectedVaultScan
+    };
+
+    const dataStr = JSON.stringify(backup, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `backup_${selectedVaultScan.id}_${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    const questionsWithImages = selectedVaultScan.analysisData?.questions?.filter(q => q.sketchSvg).length || 0;
+    console.log(`💾 Exported backup with ${questionsWithImages} images`);
+    alert(`💾 Backup exported successfully!\n${questionsWithImages} images included`);
+  };
+
   const renderCard = (item: any) => (
     <div
       key={item.id}
       onClick={() => setSelectedSketch(item)}
-      className="bg-white rounded-2xl overflow-hidden group cursor-pointer border border-slate-200/50 hover:border-primary-400/60 hover:shadow-2xl transition-all duration-500 flex flex-col relative"
+      className="bg-white rounded-2xl overflow-hidden cursor-pointer border border-slate-200 hover:border-primary-400 flex flex-col relative shadow-sm hover:shadow-md"
     >
       {/* Marks badge - positioned absolutely over image */}
       <div className="absolute top-4 right-4 z-10 pointer-events-none">
-        <span className="text-[10px] font-black px-3 py-1.5 rounded-lg shadow-lg backdrop-blur-md bg-white/90 border border-slate-200/50 uppercase tracking-widest text-slate-700">
+        <span className="text-[10px] font-black px-3 py-1.5 rounded-lg shadow-md bg-white border border-slate-200 uppercase tracking-widest text-slate-700">
           {item.tag}
         </span>
       </div>
 
       {/* Image area - edge to edge, maximum space */}
-      <div className="aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100/50 overflow-hidden relative flex items-center justify-center">
+      <div className="aspect-[4/3] bg-slate-50 overflow-hidden relative flex items-center justify-center">
         {item.img ? (
           item.isSvg ? (
             <div className="w-full h-full p-6 flex items-center justify-center">
@@ -579,7 +711,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
             <img
               src={item.img}
               alt={item.visualConcept}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="w-full h-full object-cover"
             />
           )
         ) : (
@@ -596,7 +728,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleGenerate(item.id); }}
-                  className="text-[10px] bg-slate-900 text-white px-6 py-2.5 rounded-full font-black hover:bg-slate-800 transition-all shadow-lg uppercase tracking-widest"
+                  className="text-[10px] bg-slate-900 text-white px-6 py-2.5 rounded-full font-black hover:bg-slate-800 shadow-lg uppercase tracking-widest"
                 >
                   Generate
                 </button>
@@ -605,18 +737,16 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
           </div>
         )}
 
-        {/* Hover overlay with regenerate */}
+        {/* Regenerate button - simple, no overlay */}
         {item.generated && (
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-end p-6 pb-8">
-            <button
-              onClick={(e) => { e.stopPropagation(); handleGenerate(item.id); }}
-              disabled={generatingId !== null}
-              className="px-5 py-2.5 bg-white/95 hover:bg-white text-slate-900 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl transition-all flex items-center gap-2 backdrop-blur-sm"
-            >
-              {generatingId === item.id ? <Loader2 size={14} className="animate-spin" /> : <RotateCw size={14} />}
-              Regenerate
-            </button>
-          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleGenerate(item.id); }}
+            disabled={generatingId !== null}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-white text-slate-900 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2 border border-slate-200"
+          >
+            {generatingId === item.id ? <Loader2 size={12} className="animate-spin" /> : <RotateCw size={12} />}
+            Regen
+          </button>
         )}
       </div>
 
@@ -634,202 +764,363 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   );
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-slate-50 p-8 font-instrument text-slate-900 scroller-hide selection:bg-primary-500 selection:text-white">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
-        <div>
-          <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-slate-900 mb-3 transition-all font-bold text-[9px] uppercase tracking-widest group">
-            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to Mastermind
-          </button>
-          <div className="flex items-center gap-2 text-primary-600 mb-1.5 text-[9px] uppercase tracking-[0.2em] font-bold font-outfit">
-            <span>{selectedGrade}</span> <ChevronRight size={10} /> <span>{selectedSubject}</span> <ChevronRight size={10} /> <span>Visual Blueprint</span>
-          </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight font-outfit">
-            {selectedVaultScan ? `Visual Notes: ${selectedVaultScan.name}` : 'High-Yield Sketch Gallery'}
-          </h1>
-          <p className="text-slate-500 mt-3 max-w-2xl text-base font-medium italic leading-relaxed">
-            AI-generated visual concepts optimized for board retention.
-          </p>
-        </div>
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Analysis Vault</label>
-              <select
-                value={selectedVaultScan?.id || ''}
-                onChange={(e) => {
-                  const selected = recentScans?.find(s => s.id === e.target.value);
-                  if (selected) {
-                    setSelectedVaultScan(selected);
-                    setActiveTab('Exam Specific');
-                  }
-                }}
-                className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer min-w-[220px]"
-                disabled={!recentScans || recentScans.length === 0}
-              >
-                <option value="">
-                  {!recentScans || recentScans.length === 0
-                    ? 'No scans available - scan a paper first'
-                    : 'Select from Vault...'}
-                </option>
-                {recentScans?.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.subject}) - {s.analysisData?.questions?.length || 0} questions
-                  </option>
-                ))}
-              </select>
-              {selectedVaultScan && (
-                <div className="text-[8px] text-emerald-600 font-bold px-1 leading-relaxed flex items-center gap-1">
-                  ✓ {selectedVaultScan.name} • {selectedVaultScan.analysisData?.questions?.length || 0} questions
-                </div>
-              )}
-              {(!recentScans || recentScans.length === 0) && (
-                <div className="text-[8px] text-amber-600 font-medium px-1 leading-relaxed">
-                  💡 Scan a paper in "Paper Scan" to create sketch notes
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Generation Method</label>
-              <select
-                value={generationMethod}
-                onChange={(e) => setGenerationMethod(e.target.value as GenerationMethod)}
-                className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer min-w-[220px]"
-              >
-                <option value="svg">SVG (Programmatic)</option>
-                <option value="gemini-3-pro-image">Gemini 3 Pro Image ⭐</option>
-                <option value="gemini-2.5-flash-image">Gemini 2.5 Flash Image</option>
-              </select>
-              <div className="text-[8px] text-slate-500 font-medium px-1 leading-relaxed">
-                {generationMethod === 'svg' && '🎨 Scalable vector graphics • Crisp & editable'}
-                {generationMethod === 'gemini-3-pro-image' && '⭐ Best quality • Advanced text rendering • High-res (1K-4K)'}
-                {generationMethod === 'gemini-2.5-flash-image' && '⚡ Fast & balanced • Good quality • Cost-effective'}
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <button onClick={() => setGroupByDomain(!groupByDomain)} className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-[10px] font-black uppercase tracking-widest hover:border-primary-400 transition-all shadow-sm">
-              {groupByDomain ? 'Show All' : 'Group by Domain'}
+    <div className="flex-1 h-screen overflow-y-auto bg-slate-50 font-instrument text-slate-900 scroller-hide selection:bg-primary-500 selection:text-white">
+      {/* Ultra-Minimal Header - Single Line */}
+      <div className="bg-white border-b border-slate-200 px-4 py-2 sticky top-0 z-20 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <button onClick={onBack} className="text-slate-400 hover:text-slate-900 transition-all">
+              <ArrowLeft size={18} />
             </button>
-            <button onClick={handleGenerateAll} disabled={batchProgress !== null} className="px-6 py-2 bg-slate-900 text-white font-bold rounded-lg flex items-center gap-2.5 shadow-lg hover:bg-slate-800 transition-all uppercase tracking-widest text-[10px] disabled:opacity-50 min-w-[180px]">
-              {batchProgress ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} className="text-primary-400" />}
-              {batchProgress ? (
-                <span>{batchProgress.current}/{batchProgress.total} {batchProgress.failed > 0 && <span className="text-rose-400">({batchProgress.failed} ✗)</span>}</span>
-              ) : 'Generate All'}
-            </button>
+            <div className="h-6 w-px bg-slate-200" />
+            <h1 className="text-sm font-bold text-slate-900 truncate">
+              {selectedVaultScan?.name || 'Sketch Notes'}
+            </h1>
+            <span className="text-xs text-slate-400 shrink-0">
+              {displayedSketches.length} cards
+            </span>
           </div>
-        </div>
-      </div>
 
-      {batchProgress && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
-          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-            <Loader2 className="animate-spin text-blue-600" size={18} />
-          </div>
-          <div className="flex-1">
-            <h4 className="text-sm font-black text-blue-900 mb-1">Batch Generation in Progress</h4>
-            <p className="text-xs text-blue-700 font-medium mb-2">
-              Processing slowly to respect API rate limits (Free tier: 10 req/min)
-            </p>
-            <div className="text-[10px] text-blue-600 font-medium space-y-1">
-              <div>• Each question needs ~20 seconds (2 API calls per question)</div>
-              <div>• For 10 questions: approximately 3-5 minutes total</div>
-              <div>• Upgrade your API plan for faster generation</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {genError && (
-        <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3">
-          <div className="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center shrink-0">
-            <span className="text-rose-600 font-black text-sm">!</span>
-          </div>
-          <div className="flex-1">
-            <h4 className="text-sm font-black text-rose-900 mb-1">Generation Error</h4>
-            <p className="text-xs text-rose-700 font-medium">{genError}</p>
-            <button
-              onClick={() => setGenError(null)}
-              className="mt-2 text-xs text-rose-600 hover:text-rose-800 font-bold uppercase tracking-widest"
+          <div className="flex items-center gap-2 shrink-0">
+            <select
+              value={selectedVaultScan?.id || ''}
+              onChange={(e) => {
+                const selected = recentScans?.find(s => s.id === e.target.value);
+                if (selected) {
+                  setSelectedVaultScan(selected);
+                  setActiveTab('Exam Specific');
+                }
+              }}
+              className="bg-slate-50 border border-slate-200 text-slate-700 rounded px-2 py-1 text-[9px] font-semibold outline-none cursor-pointer hover:border-slate-300"
+              disabled={!recentScans || recentScans.length === 0}
             >
-              Dismiss
+              <option value="">{!recentScans || recentScans.length === 0 ? 'No Vaults' : 'Vault...'}</option>
+              {recentScans?.map(s => (
+                <option key={s.id} value={s.id}>{s.name.substring(0, 25)}</option>
+              ))}
+            </select>
+
+            <button
+              onClick={() => setFilterPanelOpen(!filterPanelOpen)}
+              className={`px-3 py-1 rounded flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider transition-all ${
+                filterPanelOpen || groupByDomain || activeTab !== 'Exam Specific'
+                  ? 'bg-slate-900 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              <Filter size={12} />
+              Filters
             </button>
+
+            <button
+              onClick={handleGenerateAll}
+              disabled={batchProgress !== null}
+              className="px-3 py-1 bg-primary-600 text-white font-bold rounded flex items-center gap-1.5 hover:bg-primary-700 transition-all text-[9px] uppercase tracking-wider disabled:opacity-50 shadow-md"
+            >
+              {batchProgress ? (
+                <>
+                  <Loader2 className="animate-spin" size={11} />
+                  {batchProgress.current}/{batchProgress.total}
+                </>
+              ) : (
+                <>
+                  <Sparkles size={11} />
+                  Generate ({currentlyVisibleSketches.length})
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleDownloadAll}
+              disabled={currentlyVisibleSketches.filter(s => s.img).length === 0}
+              className="px-3 py-1 bg-emerald-600 text-white font-bold rounded flex items-center gap-1.5 hover:bg-emerald-700 transition-all text-[9px] uppercase tracking-wider disabled:opacity-50 shadow-md"
+              title="Download all images in current view"
+            >
+              <Download size={11} />
+              Download ({currentlyVisibleSketches.filter(s => s.img).length})
+            </button>
+
+            <button
+              onClick={handleForceSync}
+              disabled={!selectedVaultScan || (selectedVaultScan.analysisData?.questions?.filter(q => q.sketchSvg).length || 0) === 0}
+              className="px-3 py-1 bg-orange-600 text-white font-bold rounded flex items-center gap-1.5 hover:bg-orange-700 transition-all text-[9px] uppercase tracking-wider disabled:opacity-50 shadow-md"
+              title="Force sync all images to Redis"
+            >
+              <Zap size={11} />
+              Force Sync
+            </button>
+
+            <button
+              onClick={handleExportBackup}
+              disabled={!selectedVaultScan}
+              className="px-3 py-1 bg-slate-600 text-white font-bold rounded flex items-center gap-1.5 hover:bg-slate-700 transition-all text-[9px] uppercase tracking-wider disabled:opacity-50 shadow-md"
+              title="Export full backup as JSON"
+            >
+              <Target size={11} />
+              Backup
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Filter Panel */}
+      {filterPanelOpen && (
+        <div className="fixed inset-0 z-30 flex justify-end" onClick={() => setFilterPanelOpen(false)}>
+          <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-md bg-white shadow-2xl overflow-y-auto scroller-hide animate-in slide-in-from-right duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Panel Header */}
+            <div className="sticky top-0 bg-white border-b border-slate-200 p-4 flex items-center justify-between z-10">
+              <div>
+                <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">Filters</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Refine your sketch cards</p>
+              </div>
+              <button
+                onClick={() => setFilterPanelOpen(false)}
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-all"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Panel Content */}
+            <div className="p-4 space-y-6">
+              {/* Subject Filter */}
+              <div>
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Subject</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedVaultScan && (
+                    <button
+                      onClick={() => setActiveTab('Exam Specific')}
+                      className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                        activeTab === 'Exam Specific'
+                          ? 'bg-slate-900 text-white shadow-md'
+                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+                      }`}
+                    >
+                      Exam Paper ({dynamicSketches.length})
+                    </button>
+                  )}
+                  {['Physics', 'Chemistry', 'Biology'].map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                        activeTab === tab
+                          ? 'bg-slate-900 text-white shadow-md'
+                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+                      }`}
+                    >
+                      {tab} ({subjectCounts[tab] || 0})
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category Filter */}
+              {categorizedSketches && Object.keys(categorizedSketches).length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</h3>
+                    <button
+                      onClick={() => setGroupByDomain(!groupByDomain)}
+                      className="text-[9px] font-bold text-primary-600 hover:text-primary-700 uppercase tracking-wider"
+                    >
+                      {groupByDomain ? 'Show All' : 'Group'}
+                    </button>
+                  </div>
+                  {groupByDomain && (
+                    <div className="space-y-2">
+                      {Object.entries(categorizedSketches).map(([domain, sketches]) => (
+                        <button
+                          key={domain}
+                          onClick={() => setSelectedDomainInGroupedView(domain)}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-all flex items-center justify-between ${
+                            selectedDomainInGroupedView === domain
+                              ? 'bg-slate-900 text-white shadow-md'
+                              : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          <span className="text-[10px] font-bold uppercase tracking-wide">{domain}</span>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
+                            selectedDomainInGroupedView === domain ? 'bg-white/20' : 'bg-slate-200'
+                          }`}>
+                            {sketches.length}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Chapter Filter (for selected category) */}
+              {groupByDomain && selectedDomainInGroupedView && categorizedSketches?.[selectedDomainInGroupedView] && (() => {
+                const sketches = categorizedSketches[selectedDomainInGroupedView];
+                const chapterGroups: Record<string, any[]> = {};
+                sketches.forEach(sketch => {
+                  const chapter = sketch.chapter || 'General';
+                  if (!chapterGroups[chapter]) chapterGroups[chapter] = [];
+                  chapterGroups[chapter].push(sketch);
+                });
+
+                return Object.keys(chapterGroups).length > 1 ? (
+                  <div>
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Chapter</h3>
+                    <div className="space-y-1">
+                      <button
+                        onClick={() => {
+                          setSelectedChapterPerDomain(prev => ({ ...prev, [selectedDomainInGroupedView]: '' }));
+                        }}
+                        className={`w-full text-left px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                          !selectedChapterPerDomain[selectedDomainInGroupedView]
+                            ? 'bg-slate-900 text-white'
+                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        All Chapters ({sketches.length})
+                      </button>
+                      {Object.entries(chapterGroups)
+                        .sort((a, b) => b[1].length - a[1].length)
+                        .map(([chapter, chapterSketches]) => (
+                          <button
+                            key={chapter}
+                            onClick={() => {
+                              setSelectedChapterPerDomain(prev => ({ ...prev, [selectedDomainInGroupedView]: chapter }));
+                            }}
+                            className={`w-full text-left px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                              selectedChapterPerDomain[selectedDomainInGroupedView] === chapter
+                                ? 'bg-slate-900 text-white'
+                                : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                            }`}
+                          >
+                            {chapter} ({chapterSketches.length})
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+
+              {/* Generation Settings */}
+              <div>
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Generation Method</h3>
+                <div className="space-y-2">
+                  {[
+                    { value: 'svg', label: 'SVG (Programmatic)', desc: 'Crisp & editable vectors' },
+                    { value: 'gemini-3-pro-image', label: 'Gemini 3 Pro ⭐', desc: 'Best quality, high-res' },
+                    { value: 'gemini-2.5-flash-image', label: 'Gemini 2.5 Flash', desc: 'Fast & balanced' },
+                  ].map(method => (
+                    <button
+                      key={method.value}
+                      onClick={() => setGenerationMethod(method.value as GenerationMethod)}
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+                        generationMethod === method.value
+                          ? 'bg-slate-900 text-white shadow-md'
+                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+                      }`}
+                    >
+                      <div className="text-[10px] font-bold uppercase">{method.label}</div>
+                      <div className={`text-[9px] mt-0.5 ${generationMethod === method.value ? 'text-slate-300' : 'text-slate-500'}`}>
+                        {method.desc}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      <div className="flex items-center gap-3 mb-6 overflow-x-auto pb-3 border-b border-slate-200 scroller-hide">
-        {selectedVaultScan && (
-          <button
-            onClick={() => setActiveTab('Exam Specific')}
-            className={`px-6 py-2.5 rounded-xl text-[9px] uppercase tracking-[0.15em] font-bold whitespace-nowrap transition-all ${activeTab === 'Exam Specific' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900 bg-white border border-slate-100 shadow-sm'
-              }`}
-          >
-            Exam Specific ({dynamicSketches.length})
-          </button>
-        )}
-        {['Physics', 'Chemistry', 'Biology'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2.5 rounded-xl text-[9px] uppercase tracking-[0.15em] font-bold whitespace-nowrap transition-all ${activeTab === tab ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900 bg-white border border-slate-100 shadow-sm'
-              }`}
-          >
-            {tab} ({subjectCounts[tab] || 0})
-          </button>
-        ))}
-      </div>
-
-      {/* Hierarchical Domain -> Chapter Display */}
-      {groupByDomain && categorizedSketches && Object.keys(categorizedSketches).length > 0 ? (
-        <div className="space-y-6">
-          {Object.entries(categorizedSketches).map(([domain, sketches]) => {
-            // Group by chapter within each domain
-            const chapterGroups: Record<string, any[]> = {};
-            sketches.forEach(sketch => {
-              const chapter = sketch.chapter || 'General';
-              if (!chapterGroups[chapter]) chapterGroups[chapter] = [];
-              chapterGroups[chapter].push(sketch);
-            });
-
-            return (
-              <div key={domain} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                {/* Domain Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest font-outfit">
-                    {domain}
-                  </h3>
-                  <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                    {sketches.length}
-                  </span>
-                </div>
-
-                {/* Chapters Pills */}
-                <div className="flex gap-2 flex-wrap mb-6">
-                  {Object.entries(chapterGroups)
-                    .sort((a, b) => b[1].length - a[1].length) // Sort by count
-                    .map(([chapter, chapterSketches]) => (
-                      <button
-                        key={chapter}
-                        className="px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/50 transition-all"
-                      >
-                        {chapter} <span className="text-slate-400 ml-1">({chapterSketches.length})</span>
-                      </button>
-                    ))}
-                </div>
-
-                {/* Cards Grid for this domain */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {sketches.map(item => renderCard(item))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {displayedSketches.map(item => renderCard(item))}
+      {/* Active Filters Display */}
+      {(groupByDomain || activeTab !== 'Exam Specific' || selectedChapterPerDomain[selectedDomainInGroupedView || '']) && (
+        <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center gap-2 flex-wrap">
+          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Active:</span>
+          {activeTab !== 'Exam Specific' && (
+            <button
+              onClick={() => setActiveTab('Exam Specific')}
+              className="px-2 py-1 bg-white border border-slate-200 rounded text-[9px] font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1"
+            >
+              {activeTab}
+              <X size={10} />
+            </button>
+          )}
+          {groupByDomain && selectedDomainInGroupedView && (
+            <button
+              onClick={() => setGroupByDomain(false)}
+              className="px-2 py-1 bg-white border border-slate-200 rounded text-[9px] font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1"
+            >
+              {selectedDomainInGroupedView}
+              <X size={10} />
+            </button>
+          )}
+          {selectedChapterPerDomain[selectedDomainInGroupedView || ''] && (
+            <button
+              onClick={() => {
+                setSelectedChapterPerDomain(prev => ({ ...prev, [selectedDomainInGroupedView || '']: '' }));
+              }}
+              className="px-2 py-1 bg-white border border-slate-200 rounded text-[9px] font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1"
+            >
+              {selectedChapterPerDomain[selectedDomainInGroupedView || '']}
+              <X size={10} />
+            </button>
+          )}
         </div>
       )}
+
+      {/* Compact Inline Alerts */}
+      <div className="px-4 pt-2">
+        {batchProgress && (
+          <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded flex items-center gap-2 text-xs">
+            <Loader2 className="animate-spin text-blue-600" size={13} />
+            <span className="font-bold text-blue-900">Generating {batchProgress.current}/{batchProgress.total}...</span>
+          </div>
+        )}
+
+        {genError && (
+          <div className="mb-2 p-2 bg-rose-50 border border-rose-200 rounded flex items-center justify-between gap-2 text-xs">
+            <span className="font-bold text-rose-900">{genError}</span>
+            <button onClick={() => setGenError(null)} className="text-rose-600 hover:text-rose-800">
+              <X size={13} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Cards Grid - All filtering is in the panel */}
+      <div className="px-4 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+          {groupByDomain && selectedDomainInGroupedView && categorizedSketches?.[selectedDomainInGroupedView] ? (
+            categorizedSketches[selectedDomainInGroupedView]
+              .filter(item => {
+                const selectedChapter = selectedChapterPerDomain[selectedDomainInGroupedView];
+                if (!selectedChapter) return true;
+                return (item.chapter || 'General') === selectedChapter;
+              })
+              .map(item => renderCard(item))
+          ) : (
+            displayedSketches.map(item => renderCard(item))
+          )}
+        </div>
+
+        {/* Empty State */}
+        {displayedSketches.length === 0 && (
+          <div className="text-center py-20">
+            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+              <PenTool size={32} className="text-slate-300" />
+            </div>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+              No sketch cards found
+            </p>
+            <p className="text-xs text-slate-400 mt-2">
+              Try adjusting your filters or generate new sketches
+            </p>
+          </div>
+        )}
+      </div>
 
       {selectedSketch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
@@ -952,11 +1243,16 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                     <div className="absolute top-0 right-0 p-4 opacity-20"><Sigma size={48} /></div>
                     <h4 className="text-[9px] font-black text-primary-400 uppercase tracking-[0.2em] mb-4 relative z-10">Mathematical DNA</h4>
                     <div className="space-y-4 relative z-10">
-                      {selectedSketch.formulas.map((f: string, i: number) => (
-                        <div key={i} className="py-2.5 border-b border-white/10 last:border-0">
-                          <RenderWithMath text={f.includes('$') ? f : `$$${f}$$`} showOptions={false} serif={false} />
-                        </div>
-                      ))}
+                      {selectedSketch.formulas.map((f: string, i: number) => {
+                        // Convert LaTeX delimiters \(...\) to $...$ and \[...\] to $$...$$
+                        const converted = convertLatexDelimiters(f);
+                        const formula = converted.includes('$') ? converted : `$$${converted}$$`;
+                        return (
+                          <div key={i} className="py-2.5 border-b border-white/10 last:border-0">
+                            <RenderWithMath text={formula} showOptions={false} serif={false} />
+                          </div>
+                        );
+                      })}
                     </div>
                   </section>
                 )}

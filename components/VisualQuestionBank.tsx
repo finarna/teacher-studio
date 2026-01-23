@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { safeAiParse } from '../utils/aiParser';
 import {
   Search,
   Plus,
@@ -35,6 +36,12 @@ interface Question {
   markingScheme: { step: string; mark: string }[];
   visualConcept?: string;
   domain?: string;
+  // Enhanced image support for scanned papers
+  hasVisualElement?: boolean;
+  visualElementType?: 'diagram' | 'table' | 'graph' | 'illustration' | 'chart' | 'image';
+  visualElementDescription?: string;
+  visualElementPosition?: 'above' | 'below' | 'inline' | 'side';
+  extractedImages?: string[]; // Base64 image data URLs extracted from PDF
 }
 
 interface VisualQuestionBankProps {
@@ -42,6 +49,10 @@ interface VisualQuestionBankProps {
 }
 
 const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [] }) => {
+  console.log('🚀 [QuestionBank] Component mounted/updated');
+  console.log('📚 [QuestionBank] Available scans:', recentScans.length);
+  console.log('📋 [QuestionBank] Scans:', recentScans.map(s => ({ id: s.id, name: s.name, subject: s.subject, questions: s.analysisData?.questions?.length || 0 })));
+
   const [activeTab, setActiveTab] = useState('Physics');
   const [selectedGrade, setSelectedGrade] = useState('Class 12');
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<string>('');
@@ -94,7 +105,13 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
   }, [recentScans, selectedGrade, activeTab]);
 
   const selectedAnalysis = useMemo(() => {
-    return filteredVault.find(s => s.id === selectedAnalysisId);
+    const analysis = filteredVault.find(s => s.id === selectedAnalysisId);
+    if (analysis) {
+      console.log('📋 [QuestionBank] Selected analysis:', analysis.name);
+      console.log('📊 [QuestionBank] Analysis has questions:', analysis.analysisData?.questions?.length || 0);
+      console.log('🔑 [QuestionBank] Analysis ID:', analysis.id);
+    }
+    return analysis;
   }, [filteredVault, selectedAnalysisId]);
 
   // Default selection for vault
@@ -104,15 +121,49 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
     }
   }, [filteredVault, selectedAnalysisId]);
 
-  // Load cached questions
+  // Load cached questions from Redis
   React.useEffect(() => {
-    const key = selectedAnalysisId ? `qbank_${selectedAnalysisId}` : `qbank_${activeTab}_${selectedGrade}`;
-    const cached = cache.get(key);
-    if (cached) {
-      setQuestions(cached);
-    } else {
-      setQuestions([]);
-    }
+    const loadQuestions = async () => {
+      const key = selectedAnalysisId ? `qbank_${selectedAnalysisId}` : `qbank_${activeTab}_${selectedGrade}`;
+      console.log('🔍 [QuestionBank] Loading from Redis with key:', key);
+
+      try {
+        // Try Redis first via API
+        const response = await fetch(`/api/questionbank/${key}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.questions && data.questions.length > 0) {
+            console.log('✅ [QuestionBank] Found in Redis:', data.questions.length, 'questions');
+            setQuestions(data.questions);
+            // Also save to localStorage as backup
+            cache.save(key, data.questions, selectedAnalysisId || 'general', 'question');
+            return;
+          }
+        }
+
+        // Fallback to localStorage cache
+        console.log('⚠️ [QuestionBank] Not in Redis, checking localStorage...');
+        const cached = cache.get(key);
+        if (cached) {
+          console.log('✅ [QuestionBank] Found in localStorage:', cached.length, 'questions');
+          setQuestions(cached);
+        } else {
+          console.log('❌ [QuestionBank] No cached questions found');
+          setQuestions([]);
+        }
+      } catch (err) {
+        console.error('Failed to load from Redis:', err);
+        // Fallback to localStorage
+        const cached = cache.get(key);
+        if (cached) {
+          setQuestions(cached);
+        } else {
+          setQuestions([]);
+        }
+      }
+    };
+
+    loadQuestions();
   }, [selectedAnalysisId, activeTab, selectedGrade]);
 
   const avgQCount = useMemo(() => {
@@ -133,7 +184,11 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({
         model: 'gemini-2.0-flash',
-        generationConfig: { responseMimeType: "application/json" }
+        generationConfig: {
+          responseMimeType: "application/json",
+          maxOutputTokens: 16384,  // Increased to handle multiple questions with detailed marking schemes
+          temperature: 0.3
+        }
       });
 
       // Extract characteristics from selected analysis if available
@@ -153,42 +208,50 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
         }
       }
 
-      const prompt = `Elite Academic Researcher: Generate a COMPREHENSIVE set of ${avgQCount} high-yield CBSE ${selectedGrade} ${activeTab} questions with professional marking schemes.
+      const prompt = `Generate ${avgQCount} CBSE ${selectedGrade} ${activeTab} questions with marking schemes.
 
       ${analysisContext}
 
-      GOALS:
-      1. COVERAGE: Ensure questions cover ALL major domains mentioned in the analysis.
-      2. PREDICTION: Include at least 2 questions based on the "PREDICTED TOPICS" from the analysis.
-      3. VARIETY: Mix MCQs, Short Answer (2-3M), and Long Answer (5M) following the standard CBSE pattern.
-      4. RIGOR: Match the "OVERALL DIFFICULTY" and "DIFFICULTY DISTRIBUTION" of the analyzed vault.
-
       RULES:
-      1. LaTeX formatting for all math ($...$ or $$...$$).
-      2. Logical marking scheme steps for every question.
-      3. Year should be "2025 Prediction" for predicted topics, or similar to analyzed ones.
+      1. Cover major domains from analysis. Include 2+ predicted topics.
+      2. Mix MCQs (1M), Short (2-3M), Long (5M). Match difficulty distribution.
+      3. Use LaTeX for math: $...$ or $$...$$
+      4. CRITICAL: Double backslash for LaTeX in JSON: "\\\\frac{1}{2}" not "\\frac{1}{2}"
+      5. Keep marking schemes concise (2-4 steps max per question)
+      6. Year: "2025 Prediction"
 
-      RETURN JSON ONLY.
-      Schema: { "questions": [{ "text": "...", "marks": "...", "year": "2025 Prediction", "diff": "Hard", "topic": "...", "domain": "...", "markingScheme": [{ "step": "Logic step with LaTeX $...$", "mark": "1" }] }] }`;
+      RETURN VALID JSON ONLY.
+      Schema: { "questions": [{ "text": "...", "marks": "...", "year": "2025 Prediction", "diff": "Hard", "topic": "...", "domain": "...", "markingScheme": [{ "step": "Brief step with LaTeX", "mark": "1" }] }] }`;
 
       const result = await model.generateContent(prompt);
       const text = result.response.text();
 
-      // Sanitize JSON response - fix common issues from LLM output
-      const sanitizeJson = (str: string): string => {
-        if (!str) return "{}";
-        let cleaned = str.trim();
-        // Remove markdown code blocks if present
-        cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '');
-        // Fix trailing commas before } or ]
-        cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
-        // Fix single quotes to double quotes (careful with apostrophes in text)
-        cleaned = cleaned.replace(/(\s*)'([^']*)'(\s*:)/g, '$1"$2"$3');
-        cleaned = cleaned.replace(/:\s*'([^']*)'/g, ': "$1"');
-        return cleaned;
-      };
+      console.log('🔍 [QuestionBank] Raw AI response length:', text.length);
+      console.log('🔍 [QuestionBank] First 500 chars:', text.substring(0, 500));
+      console.log('🔍 [QuestionBank] Last 300 chars:', text.substring(Math.max(0, text.length - 300)));
 
-      const data = JSON.parse(sanitizeJson(text));
+      // Check for JSON truncation
+      const openBraces = (text.match(/\{/g) || []).length;
+      const closeBraces = (text.match(/\}/g) || []).length;
+      const openBrackets = (text.match(/\[/g) || []).length;
+      const closeBrackets = (text.match(/\]/g) || []).length;
+      console.log('⚠️ [JSON STRUCTURE] Braces:', openBraces, 'open,', closeBraces, 'close, Diff:', openBraces - closeBraces);
+      console.log('⚠️ [JSON STRUCTURE] Brackets:', openBrackets, 'open,', closeBrackets, 'close, Diff:', openBrackets - closeBrackets);
+
+      if (openBraces !== closeBraces || openBrackets !== closeBrackets) {
+        console.warn('⚠️ [QuestionBank] JSON appears truncated! Response may be incomplete.');
+      }
+
+      // Use safeAiParse which handles truncated JSON and common AI formatting issues
+      const data = safeAiParse<any>(text, { questions: [] }, true);
+
+      if (!data.questions || data.questions.length === 0) {
+        console.error('❌ [QuestionBank] No questions generated');
+        alert(`⚠️ Failed to generate questions.\n\nThe AI did not return valid questions. This can happen if:\n- Token limit was exceeded\n- Response was truncated\n- JSON was malformed\n\nPlease try again.`);
+        throw new Error('No questions generated');
+      }
+
+      console.log('✅ [QuestionBank] Successfully parsed', data.questions.length, 'questions');
 
       if (data.questions && Array.isArray(data.questions)) {
         const formatted = data.questions.map((q: any) => ({
@@ -198,11 +261,41 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
         const newQuestions = [...formatted, ...questions];
         setQuestions(newQuestions);
         const key = selectedAnalysisId ? `qbank_${selectedAnalysisId}` : `qbank_${activeTab}_${selectedGrade}`;
+        console.log('💾 [QuestionBank] Saving', newQuestions.length, 'questions to Redis with key:', key);
+
+        // Save to Redis first
+        try {
+          await fetch('/api/questionbank', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key, questions: newQuestions })
+          });
+          console.log('✅ [QuestionBank] Saved to Redis successfully');
+        } catch (err) {
+          console.error('Failed to save to Redis:', err);
+        }
+
+        // Also save to localStorage as backup
         cache.save(key, newQuestions, selectedAnalysisId || 'general', 'question');
       } else if (data.question) {
         const newQuestions = [{ ...data.question, id: `Q${Math.floor(Math.random() * 10000)}` }, ...questions];
         setQuestions(newQuestions);
         const key = selectedAnalysisId ? `qbank_${selectedAnalysisId}` : `qbank_${activeTab}_${selectedGrade}`;
+        console.log('💾 [QuestionBank] Saving 1 question to Redis with key:', key);
+
+        // Save to Redis first
+        try {
+          await fetch('/api/questionbank', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key, questions: newQuestions })
+          });
+          console.log('✅ [QuestionBank] Saved to Redis successfully');
+        } catch (err) {
+          console.error('Failed to save to Redis:', err);
+        }
+
+        // Also save to localStorage as backup
         cache.save(key, newQuestions, selectedAnalysisId || 'general', 'question');
       }
     } catch (e) {
@@ -407,12 +500,30 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
 
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
+                      {/* Extract and display question number */}
+                      {(() => {
+                        const qNumMatch = q.id?.match(/Q(\d+)/i);
+                        const qNum = qNumMatch ? qNumMatch[1] : null;
+                        return qNum ? (
+                          <span className="px-3 py-1 bg-primary-600 text-white text-[9px] font-black uppercase rounded-lg tracking-tight shadow-sm">
+                            Q{qNum}
+                          </span>
+                        ) : null;
+                      })()}
                       <span className="px-3 py-1 bg-slate-100 text-slate-600 text-[9px] font-black uppercase rounded-lg tracking-widest border border-slate-200 shadow-sm">{q.year}</span>
                       <span className={`px-3 py-1 text-[9px] font-black uppercase rounded-lg tracking-widest border shadow-sm ${q.diff === 'Hard' ? 'bg-rose-50 text-rose-600 border-rose-100' :
                         q.diff === 'Moderate' ? 'bg-amber-50 text-amber-700 border-amber-200' :
                           'bg-emerald-50 text-emerald-700 border-emerald-100'
                         }`}>{q.diff}</span>
                       <span className="px-3 py-1 bg-primary-50 text-primary-700 text-[9px] font-black uppercase rounded-lg tracking-widest border border-primary-100 shadow-sm">{q.marks} Marks</span>
+                      {(q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0)) && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-[8px] font-black uppercase rounded-lg tracking-widest border border-blue-200 shadow-sm flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          Visual
+                        </span>
+                      )}
                       {expandedId !== q.id && q.domain && (
                         <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-3 border-l border-slate-100 ml-2">{q.domain}</span>
                       )}
@@ -453,6 +564,69 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
 
                   {expandedId === q.id && (
                     <>
+                      {/* Visual Element Information */}
+                      {((q.hasVisualElement && q.visualElementDescription) || (q.extractedImages && q.extractedImages.length > 0)) && (
+                        <div className="mb-8 pl-10 animate-in fade-in slide-in-from-top-4 duration-500">
+                          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6 shadow-lg">
+                            <div className="flex items-start gap-4">
+                              <div className="flex-shrink-0 w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <h4 className="text-[11px] font-black text-blue-900 uppercase tracking-widest">Visual Element Detected</h4>
+                                  {q.visualElementType && (
+                                    <span className="px-2 py-0.5 bg-blue-200 text-blue-800 text-[8px] font-black uppercase rounded-md tracking-wide">
+                                      {q.visualElementType}
+                                    </span>
+                                  )}
+                                  {q.visualElementPosition && (
+                                    <span className="px-2 py-0.5 bg-indigo-200 text-indigo-800 text-[8px] font-black uppercase rounded-md tracking-wide">
+                                      Position: {q.visualElementPosition}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* AI-generated visual description */}
+                                {q.visualElementDescription && (
+                                  <div className="text-sm font-semibold text-slate-700 leading-relaxed bg-white/60 rounded-lg p-4 border border-blue-100">
+                                    <p className="text-[10px] font-black text-blue-700 uppercase tracking-wider mb-2">Description:</p>
+                                    <RenderWithMath text={q.visualElementDescription} showOptions={false} />
+                                  </div>
+                                )}
+
+                                {/* Display extracted images if available */}
+                                {q.extractedImages && q.extractedImages.length > 0 && (
+                                  <div className="mt-4 space-y-3">
+                                    <p className="text-[10px] font-black text-blue-700 uppercase tracking-wider">Extracted Image(s):</p>
+                                    <div className="grid grid-cols-1 gap-3">
+                                      {q.extractedImages.map((imgData, idx) => (
+                                        <div key={idx} className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm">
+                                          <img
+                                            src={imgData}
+                                            alt={`Question visual ${idx + 1}`}
+                                            className="w-full h-auto rounded-md border border-slate-200"
+                                          />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="mt-3 text-[9px] font-bold text-blue-600 uppercase tracking-wide flex items-center gap-2">
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                  </svg>
+                                  This question contains a visual element in the original paper. Use the description above to understand the diagram/table/illustration.
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {q.domain && (
                         <div className="mt-4 flex items-center gap-2 mb-10 pl-10">
                           <div className="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-[8px] font-black uppercase tracking-widest">{q.domain}</div>

@@ -24,7 +24,8 @@ redis.on('connect', () => {
 });
 
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '500mb' })); // Increased for large image payloads
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -40,6 +41,83 @@ app.get('/api/health', (req, res) => {
 
 // Redis and In-Memory Fallback
 let inMemoryCache = new Map();
+
+// Clear ALL caches endpoint (NUCLEAR - clears everything including scans)
+app.post('/api/cache/clear', async (req, res) => {
+    try {
+        let clearedCount = 0;
+
+        // Clear Redis
+        if (redis.status === 'ready') {
+            const patterns = ['scan:*', 'questionbank:*', 'flashcards:*'];
+            for (const pattern of patterns) {
+                const keys = await redis.keys(pattern);
+                if (keys.length > 0) {
+                    await redis.del(...keys);
+                    clearedCount += keys.length;
+                }
+            }
+        }
+
+        // Clear in-memory scan cache
+        const memoryCount = inMemoryCache.size;
+        inMemoryCache.clear();
+
+        res.json({
+            status: 'success',
+            redis_cleared: clearedCount,
+            memory_cleared: memoryCount,
+            message: '✅ All caches cleared! You need to re-upload your scans.'
+        });
+    } catch (err) {
+        console.error('Failed to clear caches:', err);
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+// Clear only solution data (keeps scans intact)
+app.post('/api/cache/clear-solutions', async (req, res) => {
+    try {
+        let clearedCount = 0;
+
+        // Get all scans and clear only their solution fields
+        if (redis.status === 'ready') {
+            const scanKeys = await redis.keys('scan:*');
+            for (const key of scanKeys) {
+                const scanData = await redis.get(key);
+                if (scanData) {
+                    const scan = JSON.parse(scanData);
+                    if (scan.analysisData && scan.analysisData.questions) {
+                        // Clear solution data from each question
+                        scan.analysisData.questions = scan.analysisData.questions.map(q => ({
+                            id: q.id,
+                            text: q.text,
+                            type: q.type,
+                            difficulty: q.difficulty,
+                            // Remove solution fields
+                            solutionSteps: undefined,
+                            masteryMaterial: undefined
+                        }));
+                        await redis.set(key, JSON.stringify(scan));
+                        clearedCount++;
+                    }
+                }
+            }
+
+            // Also clear in-memory cache to force reload
+            inMemoryCache.clear();
+        }
+
+        res.json({
+            status: 'success',
+            scans_cleaned: clearedCount,
+            message: '✅ Solutions cleared! Your scans are intact. Click "Sync All" to regenerate.'
+        });
+    } catch (err) {
+        console.error('Failed to clear solutions:', err);
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
 
 // GET all scans
 app.get('/api/scans', async (req, res) => {
@@ -95,6 +173,65 @@ app.delete('/api/scans/:id', async (req, res) => {
     } catch (err) {
         console.error('Failed to delete scan:', err);
         res.status(500).json({ error: 'Failed to delete scan' });
+    }
+});
+
+// Question Bank caching endpoints
+let questionBankCache = new Map();
+
+// GET question bank for a specific key (scanId or subject_grade)
+app.get('/api/questionbank/:key', async (req, res) => {
+    try {
+        const { key } = req.params;
+
+        // Try Redis first
+        if (redis.status === 'ready') {
+            const cached = await redis.get(`questionbank:${key}`);
+            if (cached) {
+                const questions = JSON.parse(cached);
+                questionBankCache.set(key, questions);
+                return res.json({ questions, cached: true });
+            }
+        }
+
+        // Fallback to memory cache
+        if (questionBankCache.has(key)) {
+            return res.json({ questions: questionBankCache.get(key), cached: true });
+        }
+
+        // No cached questions found
+        res.json({ questions: null, cached: false });
+    } catch (err) {
+        console.error('Failed to fetch question bank:', err);
+        res.json({ questions: questionBankCache.get(req.params.key) || null, cached: false });
+    }
+});
+
+// POST question bank for a specific key
+app.post('/api/questionbank', async (req, res) => {
+    try {
+        const { key, questions } = req.body;
+        if (!key || !questions) {
+            return res.status(400).json({ error: 'Invalid question bank data' });
+        }
+
+        // Always update memory cache
+        questionBankCache.set(key, questions);
+
+        // Attempt Redis sync with 30-day TTL
+        if (redis.status === 'ready') {
+            await redis.set(
+                `questionbank:${key}`,
+                JSON.stringify(questions),
+                'EX',
+                60 * 60 * 24 * 30 // 30 days
+            );
+        }
+
+        res.json({ status: 'success', synced: redis.status === 'ready' });
+    } catch (err) {
+        console.error('Failed to save question bank:', err);
+        res.json({ status: 'success', synced: false });
     }
 });
 

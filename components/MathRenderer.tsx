@@ -19,13 +19,48 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
   const ref = useRef<HTMLSpanElement>(null);
   const rawExpression = expression || content || '';
   const isDisplayMode = displayMode !== undefined ? displayMode : !inline;
+  const [katexReady, setKatexReady] = React.useState(false);
+  const hasWarnedRef = useRef(false);
+
+  // Check if KaTeX is loaded - single check on mount
+  useEffect(() => {
+    if (window.katex) {
+      setKatexReady(true);
+      return;
+    }
+
+    // If not loaded, wait and check periodically
+    const maxAttempts = 50; // 5 seconds max
+    let attempts = 0;
+
+    const checkKatex = () => {
+      attempts++;
+      if (window.katex) {
+        setKatexReady(true);
+      } else if (attempts < maxAttempts) {
+        setTimeout(checkKatex, 100);
+      } else if (!hasWarnedRef.current) {
+        hasWarnedRef.current = true;
+        console.error('❌ KaTeX failed to load after 5 seconds');
+      }
+    };
+
+    checkKatex();
+  }, []);
 
   useEffect(() => {
-    if (ref.current && window.katex && typeof rawExpression === 'string' && rawExpression.trim()) {
+    if (!ref.current) return;
+
+    if (!katexReady) {
+      ref.current.innerText = rawExpression;
+      return;
+    }
+
+    if (typeof rawExpression === 'string' && rawExpression.trim()) {
       try {
         const cleanExpression = rawExpression
-          .replace(/\\n/g, ' ')
-          .replace(/\\r/g, '')
+          .replace(/\n/g, ' ')      // Remove actual newline characters (NOT \n in LaTeX)
+          .replace(/\r/g, '')       // Remove actual carriage returns (NOT \r in LaTeX)
           .replace(/\s+/g, ' ')
           .trim();
 
@@ -39,15 +74,24 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
             "\\label": "\\href{###1}"
           }
         });
+
+        // Check if KaTeX rendered an error (contains katex-error class or color="red")
+        if (html.includes('katex-error') || html.includes('color:#cc0000') || html.includes('\\color{red}')) {
+          console.error('❌ KaTeX PARSE ERROR detected in output:', {
+            expression: cleanExpression.substring(0, 200),
+            htmlSnippet: html.substring(0, 300)
+          });
+        }
+
         ref.current.innerHTML = html;
       } catch (error) {
-        console.error('KaTeX error:', error);
+        console.error('❌ KaTeX rendering error:', error, 'Expression:', rawExpression);
         ref.current.innerText = rawExpression.replace(/\$/g, '');
       }
     } else if (ref.current) {
       ref.current.innerText = rawExpression;
     }
-  }, [rawExpression, isDisplayMode]);
+  }, [rawExpression, isDisplayMode, katexReady]);
 
   return (
     <span
@@ -95,18 +139,41 @@ export const RenderWithMath: React.FC<{
   if (!text) return null;
 
   // 1. Clean "Junk" from AI output
-  // Restore real newlines if AI sent literal \n strings
+  // CRITICAL: Do NOT replace single backslashes - they're needed for LaTeX commands!
+  // Only handle double-escaped sequences from JSON like \\n -> \n
   let cleanText = text
-    .replace(/\\n/g, '\n')
-    .replace(/\\r/g, '\r')
-    .replace(/\\"/g, '"')
+    .replace(/\\\\n/g, '\n')  // Double backslash-n to newline (from JSON)
+    .replace(/\\\\r/g, '\r')  // Double backslash-r to carriage return (from JSON)
+    .replace(/\\\\"/g, '"')   // Double backslash-quote to quote (from JSON)
     .replace(/\n{3,}/g, '\n\n'); // Collapse excessive newlines
 
-  // 2. Handle literal code-like patterns that might come from AI
+  // 2. Convert LaTeX \(...\) to $...$ and \[...\] to $$...$$
+  // Handle escaped backslashes first: \\( becomes \(
+  cleanText = cleanText.replace(/\\\\\(/g, '<<<ESCAPED_PAREN>>>');
+  cleanText = cleanText.replace(/\\\\\)/g, '<<<ESCAPED_PAREN_CLOSE>>>');
+  cleanText = cleanText.replace(/\\\\\[/g, '<<<ESCAPED_BRACKET>>>');
+  cleanText = cleanText.replace(/\\\\\]/g, '<<<ESCAPED_BRACKET_CLOSE>>>');
+
+  // Now convert LaTeX delimiters to $ delimiters
+  cleanText = cleanText.replace(/\\\(/g, '$');
+  cleanText = cleanText.replace(/\\\)/g, '$');
+  cleanText = cleanText.replace(/\\\[/g, '$$');
+  cleanText = cleanText.replace(/\\\]/g, '$$');
+
+  // Restore escaped versions
+  cleanText = cleanText.replace(/<<<ESCAPED_PAREN>>>/g, '\\(');
+  cleanText = cleanText.replace(/<<<ESCAPED_PAREN_CLOSE>>>/g, '\\)');
+  cleanText = cleanText.replace(/<<<ESCAPED_BRACKET>>>/g, '\\[');
+  cleanText = cleanText.replace(/<<<ESCAPED_BRACKET_CLOSE>>>/g, '\\]');
+
+  // 3. Handle literal code-like patterns that might come from AI
   cleanText = cleanText.replace(/```latex([\s\S]*?)```/g, '$$$1$$');
   cleanText = cleanText.replace(/```math([\s\S]*?)```/g, '$$$1$$');
 
-  // In compact mode (flashcards), AI might use $$ wrongly or too often. 
+  // 4. MINIMAL cleanup - Don't corrupt the formulas!
+  // The aggressive regex was BREAKING formulas, not fixing them
+
+  // In compact mode (flashcards), AI might use $$ wrongly or too often.
   // Force everything to be inline by temporarily swapping $$ for $ if it's on a single line or if we want single paragraph flow.
   if (compact) {
     cleanText = cleanText.replace(/\$\$/g, '$');
@@ -187,8 +254,18 @@ export const RenderWithMath: React.FC<{
                 }
 
                 // Fallback for raw LaTeX commands not wrapped in $
-                const rawTriggers = ['\\frac', '\\sqrt', '\\sum', '\\int', '\\alpha', '\\beta', '\\gamma', '\\theta', '\\pi', '\\ce{'];
-                if (rawTriggers.some(t => part.includes(t)) && (part.includes('{') || part.includes('_') || part.includes('^'))) {
+                const rawTriggers = [
+                  '\\frac', '\\sqrt', '\\sum', '\\int', '\\prod', '\\lim',
+                  '\\alpha', '\\beta', '\\gamma', '\\delta', '\\epsilon', '\\theta', '\\lambda', '\\mu', '\\nu', '\\pi', '\\rho', '\\sigma', '\\tau', '\\phi', '\\omega',
+                  '\\Delta', '\\Omega', '\\Theta', '\\Lambda', '\\Sigma', '\\Phi',
+                  '\\ce{', '\\text{', '\\mathrm{', '\\mathbf{',
+                  '\\times', '\\cdot', '\\infty', '\\partial', '\\nabla'
+                ];
+                // Detect LaTeX commands OR subscripts/superscripts with underscores/carets
+                const hasLatexCommand = rawTriggers.some(t => part.includes(t));
+                const hasSubSuperscript = /[a-zA-Z0-9]+[_^][{a-zA-Z0-9]/.test(part);
+
+                if (hasLatexCommand || (hasSubSuperscript && (part.includes('{') || part.includes('_') || part.includes('^')))) {
                   return <MathRenderer key={pIdx} expression={part} inline={true} className={dark ? 'text-emerald-300' : 'text-primary-700'} />;
                 }
 
