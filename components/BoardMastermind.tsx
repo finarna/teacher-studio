@@ -20,6 +20,9 @@ import {
 } from 'lucide-react';
 import { Scan, ExamAnalysisData, AnalyzedQuestion } from '../types';
 import { safeAiParse, normalizeData } from '../utils/aiParser';
+import { generateMathExtractionInstructions, generateStreamlinedMathInstructions } from '../utils/mathLatexReference';
+import { generatePhysicsExtractionInstructions } from '../utils/physicsNotationReference';
+import { processQuestionsUnicode } from '../utils/unicodeToLatex'; // Latest: fixed escape char regex patterns
 
 interface BoardMastermindProps {
   onNavigate: (view: string) => void;
@@ -115,13 +118,37 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         const extractionPrompt = `Extract ALL questions verbatim from this ${selectedSubject} paper.
         RULES:
         1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise in the text.
-        2. Use high fidelity LaTeX for all formulas.
-        3. Classify each question into the correct NCERT Class 12 ${selectedSubject} domain and chapter.
-        4. VISUAL ELEMENT DETECTION:
+        2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
+           - Wrap ALL math in $ delimiters: inline math uses $...$ and display math uses $$...$$
+           - Convert ALL Unicode symbols (√, θ, π, ∑, ∫, etc.) to proper LaTeX commands
+           - NEVER output corrupted text like "2 2 2 2cos8" - use proper nested LaTeX like "$\\sqrt{2+\\sqrt{2+\\sqrt{2+2\\cos 8\\theta}}}$"
+           - NEVER output raw Unicode or plaintext for math - ALWAYS use LaTeX
+           - CRITICAL TRIG FUNCTIONS: ALWAYS use backslash! Write \\sin, \\cos, \\tan, \\sec, \\csc, \\cot, \\sinh, \\cosh, \\tanh NOT sin, cos, tan, etc.
+           - CRITICAL EXPRESSION INTEGRITY: NEVER break expressions across multiple lines or close $ delimiters mid-expression
+             Example WRONG: "$x = e^\\theta$$\\sin\\theta, y = e^\\theta$" or "$x = e^\\theta$\\n$\\sin\\theta, y = e^\\theta$"
+             Example RIGHT: "$x = e^\\theta \\sin\\theta, y = e^\\theta \\cos\\theta$"
+           - CRITICAL SQRT: ALWAYS use \\sqrt{} with curly braces! Write \\sqrt{x}, \\sqrt{2}, \\sqrt{x^2+1} NOT sqrt x or sqrtx
+           - ⚠️ CRITICAL: Extract EXACTLY what you see - DO NOT add/move variables based on what "should" be there
+        ${selectedSubject === 'Math' ? `3. CRITICAL MATH NOTATION - READ CAREFULLY:
+
+${generateStreamlinedMathInstructions()}
+` : selectedSubject === 'Physics' ? `3. CRITICAL PHYSICS NOTATION - READ CAREFULLY:
+
+${generatePhysicsExtractionInstructions()}
+` : ''}.
+        ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '4' : '3'}. Classify each question into the correct NCERT Class 12 ${selectedSubject} domain and chapter.
+        ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '5' : '4'}. VISUAL ELEMENT DETECTION:
            - If question has a diagram/figure/table/graph nearby OR text mentions "shown"/"following figure", set hasVisualElement=true and visualElementDescription="[Brief 1-sentence description]"
            - If no visual, set hasVisualElement=false
+           ${selectedSubject === 'Math' ? `
+           - MATH-SPECIFIC VISUALS: Look for coordinate planes, geometric figures (triangles, circles), 3D diagrams, matrices, number lines, Venn diagrams, tree diagrams (probability), or flowcharts
+           - Set appropriate visualElementType: coordinate-plane, geometric-figure, 3d-diagram, matrix, number-line, venn-diagram, tree-diagram, or flowchart
+           ` : selectedSubject === 'Physics' ? `
+           - PHYSICS-SPECIFIC VISUALS: Look for circuit diagrams (resistors, capacitors, batteries, switches), ray diagrams (lenses, mirrors, prisms, light paths), free body diagrams (forces with arrows), wave diagrams (interference patterns, standing waves), field diagrams (electric/magnetic field lines), energy level diagrams (atomic transitions)
+           - Set appropriate visualElementType: circuit-diagram, ray-diagram, free-body-diagram, wave-diagram, field-diagram, or energy-level-diagram
+           ` : ''}
 
-        5. Extract ALL questions. Use minimal text in descriptions to fit everything.
+        ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '6' : '5'}. Extract ALL questions. Use minimal text in descriptions to fit everything.
 
         ${selectedSubject === 'Physics' ? `
         PHYSICS DOMAINS & CHAPTERS (Class 12 NCERT):
@@ -135,6 +162,13 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         - PHYSICAL CHEMISTRY: Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, Solid State
         - ORGANIC CHEMISTRY: Alcohols Phenols and Ethers, Aldehydes Ketones and Carboxylic Acids, Amines, Biomolecules, Polymers, Chemistry in Everyday Life, Haloalkanes and Haloarenes
         - INORGANIC CHEMISTRY: p-Block Elements, d and f Block Elements, Coordination Compounds, General Principles and Processes of Isolation of Elements
+        ` : selectedSubject === 'Math' ? `
+        MATHEMATICS DOMAINS & CHAPTERS (Class 12 NCERT):
+        - ALGEBRA: Relations and Functions, Inverse Trigonometric Functions, Matrices, Determinants, Continuity and Differentiability, Application of Derivatives, Maxima and Minima, Rate of Change, Monotonicity
+        - CALCULUS: Integrals, Indefinite Integration, Definite Integration, Applications of Integrals, Area under Curves, Differential Equations, Variable Separable, Linear Differential Equations, Homogeneous Equations
+        - VECTORS & 3D GEOMETRY: Vectors, Scalar and Vector Products, Dot Product, Cross Product, Scalar Triple Product, Three Dimensional Geometry, Direction Cosines, Direction Ratios, Equation of Line, Equation of Plane, Angle Between Lines, Angle Between Planes, Distance Formulae
+        - LINEAR PROGRAMMING: Linear Programming Problems, Optimization, Feasible Region, Objective Function, Constraints, Graphical Method, Corner Point Method
+        - PROBABILITY: Probability, Conditional Probability, Bayes Theorem, Multiplication Theorem, Independent Events, Random Variables, Probability Distributions, Binomial Distribution, Mean and Variance
         ` : `
         BIOLOGY DOMAINS & CHAPTERS (Class 12 NCERT):
         - GENETICS & EVOLUTION: Heredity and Variation, Molecular Basis of Inheritance, Evolution
@@ -150,18 +184,46 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           "options": ["..."],
           "marks": 1,
           "difficulty": "...",
-          "topic": "...",
+          "topic": "Same as chapter name OR more specific sub-topic (e.g., 'Differential Equations' or 'Matrices'). NEVER leave empty!",
           "blooms": "...",
           "domain": "MECHANICS | ELECTRODYNAMICS | etc. (major domain from above)",
           "chapter": "Specific chapter name from the list above that best matches this question",
           "hasVisualElement": true | false,
-          "visualElementType": "diagram" | "table" | "graph" | "illustration" | "chart" | "image" (if hasVisualElement is true),
-          "visualElementDescription": "Detailed description of the diagram/table/image content, including all labels, values, and key features" (if hasVisualElement is true),
-          "visualElementPosition": "above" | "below" | "inline" | "side" (if hasVisualElement is true)
+          "visualElementType": "diagram" | "table" | "graph" | "illustration" | "chart" | "image" | "coordinate-plane" | "geometric-figure" | "3d-diagram" | "matrix" | "number-line" | "venn-diagram" | "tree-diagram" | "flowchart" | "circuit-diagram" | "ray-diagram" | "free-body-diagram" | "wave-diagram" | "field-diagram" | "energy-level-diagram" (if hasVisualElement is true),
+          "visualElementDescription": "Detailed description of the diagram/table/image content, including all labels, values, and key features. For Math: describe axes, equations, vertices, measurements. For Physics: describe circuit components, ray paths, forces, field directions, etc." (if hasVisualElement is true),
+          "visualElementPosition": "above" | "below" | "inline" | "side" (if hasVisualElement is true),
+          "visualBoundingBox": { "pageNumber": 3, "x": "10%", "y": "45%", "width": "80%", "height": "25%" } (if hasVisualElement is true, percentage coordinates from page edges)
         }] }`;
 
         const result = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]);
         const data = safeAiParse<any>(result.response.text(), { questions: [] }, true);
+
+        // 🐛 DEBUG: Log BEFORE Unicode conversion to see raw extraction
+        if (data.questions && data.questions.length > 0) {
+          console.log(`🔍 [RAW EXTRACTION DEBUG] First 3 questions BEFORE Unicode conversion:`,
+            data.questions.slice(0, 3).map((q: any) => ({
+              id: q.id,
+              text: q.text?.substring(0, 100),
+              topic: q.topic,
+              domain: q.domain
+            }))
+          );
+        }
+
+        // ⭐ CRITICAL: Convert Unicode symbols (θ, √, etc.) to LaTeX before processing
+        if (data.questions && data.questions.length > 0) {
+          data.questions = processQuestionsUnicode(data.questions);
+          console.log(`✨ [UNICODE CONVERSION] ${file.name}: Processed ${data.questions.length} questions for Unicode→LaTeX conversion`);
+
+          // 🐛 DEBUG: Log topic assignments for classification debugging
+          const topicSummary = data.questions.slice(0, 10).map((q: any) => ({
+            id: q.id,
+            text: q.text?.substring(0, 60),
+            topic: q.topic,
+            domain: q.domain
+          }));
+          console.log(`📊 [TOPIC DEBUG] ${file.name} topic assignments (first 10):`, topicSummary);
+        }
 
         // Debug: Log visual element detection for this file
         console.log(`🔍 [BULK SCAN DEBUG] File: ${file.name}, Questions: ${data.questions?.length || 0}`);
@@ -172,6 +234,29 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
         if (data.questions) {
           const filePrefix = file.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 10);
+
+          // Try vision-guided extraction first (if bounding boxes provided), fallback to proximity-based
+          let visionGuidedMapping: Map<number, any[]> | null = null;
+          const questionsWithBoundingBoxes = data.questions
+            .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
+            .map((q: any) => {
+              const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+              const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
+              return { questionNumber, boundingBox: q.visualBoundingBox };
+            })
+            .filter((item: any) => item.questionNumber !== null);
+
+          if (questionsWithBoundingBoxes.length > 0) {
+            try {
+              console.log(`🎯 [BULK VISION-GUIDED] ${file.name}: Found ${questionsWithBoundingBoxes.length} questions with bounding boxes`);
+              const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+              visionGuidedMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
+              console.log(`✅ [BULK VISION-GUIDED] ${file.name}: Extracted images for ${visionGuidedMapping.size} questions`);
+            } catch (err) {
+              console.warn(`⚠️ [BULK VISION-GUIDED] ${file.name}: Vision-guided extraction failed, using proximity-based:`, err);
+            }
+          }
+
           const taggedQuestions = data.questions.map((q: any, idx: number) => {
             const newQuestion: any = {
               ...q,
@@ -179,15 +264,23 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
               source: file.name
             };
 
-            // Merge extracted images if available
-            if (fileImageMapping) {
-              const questionNumMatch = q.id?.match(/Q?(\d+)/i);
-              if (questionNumMatch) {
-                const questionNum = parseInt(questionNumMatch[1]);
+            const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+            if (questionNumMatch) {
+              const questionNum = parseInt(questionNumMatch[1]);
+
+              // Prioritize vision-guided images over proximity-based
+              if (visionGuidedMapping && visionGuidedMapping.has(questionNum)) {
+                const visionImages = visionGuidedMapping.get(questionNum);
+                if (visionImages && visionImages.length > 0) {
+                  newQuestion.extractedImages = visionImages.map(img => img.imageData);
+                  console.log(`🔗 [BULK VISION MERGE] ${file.name}: Attached ${visionImages.length} vision-guided image(s) to Q${questionNum}`);
+                }
+              } else if (fileImageMapping && fileImageMapping.has(questionNum)) {
+                // Fallback to proximity-based images
                 const images = fileImageMapping.get(questionNum);
                 if (images && images.length > 0) {
                   newQuestion.extractedImages = images.map(img => img.imageData);
-                  console.log(`🔗 [BULK IMAGE MERGE] ${file.name}: Attached ${images.length} image(s) to question ${questionNum}`);
+                  console.log(`🔗 [BULK IMAGE MERGE] ${file.name}: Attached ${images.length} proximity-based image(s) to Q${questionNum}`);
                 }
               }
             }
@@ -301,9 +394,24 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       const extractionPrompt = `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
       RULES:
       1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise.
-      2. Use LaTeX for all formulas.
-      3. Classify each question into the correct NCERT ${selectedGrade} ${selectedSubject} domain and chapter.
-      4. VISUAL ELEMENT DETECTION WITH PRECISE LOCATION:
+      2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
+         - Wrap ALL math in $ delimiters: inline math uses $...$ and display math uses $$...$$
+         - Convert ALL Unicode symbols (√, θ, π, ∑, ∫, etc.) to proper LaTeX commands
+         - NEVER output corrupted text like "2 2 2 2cos8" - use proper nested LaTeX like "$\\sqrt{2+\\sqrt{2+\\sqrt{2+2\\cos 8\\theta}}}$"
+         - NEVER output raw Unicode or plaintext for math - ALWAYS use LaTeX
+         - CRITICAL TRIG FUNCTIONS: ALWAYS use backslash! Write \\sin, \\cos, \\tan, \\sec, \\csc, \\cot, \\sinh, \\cosh, \\tanh NOT sin, cos, tan, etc.
+         - CRITICAL EXPRESSION INTEGRITY: NEVER break expressions across multiple lines or close $ delimiters mid-expression
+         - CRITICAL SQRT: ALWAYS use \\sqrt{} with curly braces! Write \\sqrt{x}, \\sqrt{2}, \\sqrt{x^2+1} NOT sqrt x or sqrtx
+         - ⚠️ CRITICAL: Extract EXACTLY what you see - DO NOT add/move variables based on what "should" be there
+      ${selectedSubject === 'Math' ? `3. CRITICAL MATH NOTATION - READ CAREFULLY:
+
+${generateStreamlinedMathInstructions()}
+` : selectedSubject === 'Physics' ? `3. CRITICAL PHYSICS NOTATION - READ CAREFULLY:
+
+${generatePhysicsExtractionInstructions()}
+` : ''}.
+      ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '4' : '3'}. Classify each question into the correct NCERT ${selectedGrade} ${selectedSubject} domain and chapter.
+      ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '5' : '4'}. VISUAL ELEMENT DETECTION WITH PRECISE LOCATION:
          - If question has a diagram/figure/table/graph nearby OR text mentions "shown"/"following figure":
            * Set hasVisualElement=true
            * Provide visualElementDescription="[Detailed description]"
@@ -317,8 +425,15 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
              }
            * This gives us pixel-perfect extraction of the diagram
          - If no visual, set hasVisualElement=false
+         ${selectedSubject === 'Math' ? `
+         - MATH-SPECIFIC VISUALS: Look for coordinate planes, geometric figures (triangles, circles), 3D diagrams, matrices, number lines, Venn diagrams, tree diagrams (probability), or flowcharts
+         - Set appropriate visualElementType: coordinate-plane, geometric-figure, 3d-diagram, matrix, number-line, venn-diagram, tree-diagram, or flowchart
+         ` : selectedSubject === 'Physics' ? `
+         - PHYSICS-SPECIFIC VISUALS: Look for circuit diagrams (resistors, capacitors, batteries, switches), ray diagrams (lenses, mirrors, prisms, light paths), free body diagrams (forces with arrows), wave diagrams (interference patterns, standing waves), field diagrams (electric/magnetic field lines), energy level diagrams (atomic transitions)
+         - Set appropriate visualElementType: circuit-diagram, ray-diagram, free-body-diagram, wave-diagram, field-diagram, or energy-level-diagram
+         ` : ''}
 
-      5. CRITICAL: Extract ALL 50 questions. Use minimal text in descriptions to fit all questions in response.
+      ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '6' : '5'}. CRITICAL: Extract ALL questions from the paper (scan every page, no limit). Use minimal text in descriptions to fit all questions in response.
 
       ${selectedSubject === 'Physics' ? `
       PHYSICS DOMAINS & CHAPTERS (Class 12 NCERT):
@@ -332,6 +447,13 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       - PHYSICAL CHEMISTRY: Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, Solid State
       - ORGANIC CHEMISTRY: Alcohols Phenols and Ethers, Aldehydes Ketones and Carboxylic Acids, Amines, Biomolecules, Polymers, Chemistry in Everyday Life, Haloalkanes and Haloarenes
       - INORGANIC CHEMISTRY: p-Block Elements, d and f Block Elements, Coordination Compounds, General Principles and Processes of Isolation of Elements
+      ` : selectedSubject === 'Math' ? `
+      MATHEMATICS DOMAINS & CHAPTERS (Class 12 NCERT):
+      - ALGEBRA: Relations and Functions, Inverse Trigonometric Functions, Matrices, Determinants, Continuity and Differentiability, Application of Derivatives, Maxima and Minima, Rate of Change, Monotonicity
+      - CALCULUS: Integrals, Indefinite Integration, Definite Integration, Applications of Integrals, Area under Curves, Differential Equations, Variable Separable, Linear Differential Equations, Homogeneous Equations
+      - VECTORS & 3D GEOMETRY: Vectors, Scalar and Vector Products, Dot Product, Cross Product, Scalar Triple Product, Three Dimensional Geometry, Direction Cosines, Direction Ratios, Equation of Line, Equation of Plane, Angle Between Lines, Angle Between Planes, Distance Formulae
+      - LINEAR PROGRAMMING: Linear Programming Problems, Optimization, Feasible Region, Objective Function, Constraints, Graphical Method, Corner Point Method
+      - PROBABILITY: Probability, Conditional Probability, Bayes Theorem, Multiplication Theorem, Independent Events, Random Variables, Probability Distributions, Binomial Distribution, Mean and Variance
       ` : selectedSubject === 'Biology' ? `
       BIOLOGY DOMAINS & CHAPTERS (Class 12 NCERT):
       - GENETICS & EVOLUTION: Heredity and Variation, Molecular Basis of Inheritance, Evolution
@@ -347,13 +469,13 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         "options": ["..."],
         "marks": 1,
         "difficulty": "...",
-        "topic": "...",
+        "topic": "Same as chapter name OR more specific sub-topic (e.g., 'Differential Equations' or 'Matrices'). NEVER leave empty!",
         "blooms": "...",
         "domain": "MECHANICS | ELECTRODYNAMICS | etc. (major domain from above)",
         "chapter": "Specific chapter name from the list above that best matches this question",
         "hasVisualElement": true | false,
-        "visualElementType": "diagram" | "table" | "graph" | "illustration" | "chart" | "image" (if hasVisualElement is true),
-        "visualElementDescription": "Detailed description of the diagram/table/image content, including all labels, values, and key features" (if hasVisualElement is true),
+        "visualElementType": "diagram" | "table" | "graph" | "illustration" | "chart" | "image" | "coordinate-plane" | "geometric-figure" | "3d-diagram" | "matrix" | "number-line" | "venn-diagram" | "tree-diagram" | "flowchart" | "circuit-diagram" | "ray-diagram" | "free-body-diagram" | "wave-diagram" | "field-diagram" | "energy-level-diagram" (if hasVisualElement is true),
+        "visualElementDescription": "Detailed description of the diagram/table/image content, including all labels, values, and key features. For Math: describe axes, equations, vertices, measurements. For Physics: describe circuit components, ray paths, forces, field directions, etc." (if hasVisualElement is true),
         "visualElementPosition": "above" | "below" | "inline" | "side" (if hasVisualElement is true),
         "visualBoundingBox": { "pageNumber": 3, "x": "10%", "y": "45%", "width": "80%", "height": "25%" } (if hasVisualElement is true, percentage coordinates from page edges)
       }] }`;
@@ -395,6 +517,33 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       const extractedData = safeAiParse<any>(rawExtract, { questions: [] }, true);
       const analyticData = safeAiParse<any>(rawAnalysis, {}, false);
 
+      // 🐛 DEBUG: Log BEFORE Unicode conversion to see raw extraction
+      if (extractedData.questions && extractedData.questions.length > 0) {
+        console.log(`🔍 [RAW EXTRACTION DEBUG] First 3 questions BEFORE Unicode conversion:`,
+          extractedData.questions.slice(0, 3).map((q: any) => ({
+            id: q.id,
+            text: q.text?.substring(0, 100),
+            topic: q.topic,
+            domain: q.domain
+          }))
+        );
+      }
+
+      // ⭐ CRITICAL: Convert Unicode symbols (θ, √, etc.) to LaTeX before processing
+      if (extractedData.questions && extractedData.questions.length > 0) {
+        extractedData.questions = processQuestionsUnicode(extractedData.questions);
+        console.log(`✨ [UNICODE CONVERSION] Processed ${extractedData.questions.length} questions for Unicode→LaTeX conversion`);
+
+        // 🐛 DEBUG: Log topic assignments for classification debugging
+        const topicSummary = extractedData.questions.slice(0, 10).map((q: any) => ({
+          id: q.id,
+          text: q.text?.substring(0, 60),
+          topic: q.topic,
+          domain: q.domain
+        }));
+        console.log(`📊 [TOPIC DEBUG] Single paper - topic assignments (first 10):`, topicSummary);
+      }
+
       console.log('🔧 [PARSER DEBUG] Parsed questions count:', extractedData.questions?.length || 0);
       if (extractedData.questions?.length === 1 && rawExtract.length > 10000) {
         console.error('🚨 [PARSER ERROR] Large response but only 1 question parsed - JSON is likely truncated!');
@@ -410,21 +559,39 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           const lastQNum = extractedData.questions.length;
           const remainingPrompt = `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${selectedSubject} paper.
 
-Use SAME SCHEMA including visual detection:
+CRITICAL RULES:
+1. Use high fidelity LaTeX for ALL math (wrap in $ delimiters)
+2. Convert ALL Unicode symbols to LaTeX commands (\sin, \cos, \theta, \pi, \int, etc.)
+3. NEVER skip LaTeX conversion - expressions like "xex" must be "xe^x"
+4. CRITICAL TRIG FUNCTIONS: ALWAYS use backslash! Write \\sin, \\cos, \\tan, \\sec, \\csc, \\cot NOT sin, cos, tan
+5. CRITICAL EXPRESSION INTEGRITY: NEVER break expressions across multiple lines or close $ delimiters mid-expression
+   Example WRONG: "$x = e^\\theta$$\\sin\\theta$" or "$x = e^\\theta$\\n$\\sin\\theta$"
+   Example RIGHT: "$x = e^\\theta \\sin\\theta, y = e^\\theta \\cos\\theta$"
+6. CRITICAL SQRT: ALWAYS use \\sqrt{} with curly braces! Write \\sqrt{x}, \\sqrt{2} NOT sqrt x or sqrtx
+7. Use the FULL SCHEMA with ALL fields (especially topic, chapter, domain):
 {
   "id": "Q${lastQNum + 1}",
-  "text": "...",
+  "text": "... (with proper LaTeX wrapped in $ delimiters)",
+  "options": ["(A) ...", "(B) ...", "(C) ...", "(D) ..."],
+  "marks": 1,
+  "difficulty": "Easy|Moderate|Hard",
+  "topic": "Same as chapter name OR specific sub-topic (e.g., 'Differential Equations', 'Matrices'). NEVER leave empty!",
+  "blooms": "Knowledge|Understand|Apply|Analyze|Evaluate|Create",
+  "domain": "${selectedSubject === 'Math' ? 'ALGEBRA|CALCULUS|VECTORS & 3D GEOMETRY|LINEAR PROGRAMMING|PROBABILITY' : selectedSubject === 'Physics' ? 'MECHANICS|ELECTRODYNAMICS|MODERN PHYSICS|OPTICS|OSCILLATIONS & WAVES' : 'Domain from subject'}",
+  "chapter": "Specific chapter name from NCERT Class 12 ${selectedSubject} syllabus",
   "hasVisualElement": true|false,
-  "visualElementType": "diagram"|"table"|"graph" (if has visual),
+  "visualElementType": "diagram"|"table"|"graph"|"coordinate-plane"|"circuit-diagram" (if has visual),
   "visualElementDescription": "..." (if has visual),
-  "visualBoundingBox": { "pageNumber": X, "x": "10%", "y": "20%", "width": "80%", "height": "30%" } (if has visual, approximate percentages from page edges)
+  "visualBoundingBox": { "pageNumber": X, "x": "10%", "y": "20%", "width": "80%", "height": "30%" } (if has visual)
 }`;
 
           const remainingRes = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, remainingPrompt]);
           const remainingData = safeAiParse<any>(remainingRes.response.text(), { questions: [] }, true);
 
           if (remainingData.questions && remainingData.questions.length > 0) {
-            console.log('✅ [SECOND PASS] Extracted additional', remainingData.questions.length, 'questions');
+            // ⭐ Convert Unicode to LaTeX for second pass questions too
+            remainingData.questions = processQuestionsUnicode(remainingData.questions);
+            console.log('✅ [SECOND PASS] Extracted additional', remainingData.questions.length, 'questions (Unicode converted)');
             extractedData.questions.push(...remainingData.questions);
           }
         } catch (err) {

@@ -65,13 +65,17 @@ export const repairJson = (raw: string): string => {
                 continue;
             }
 
-            // Handle literal newlines in strings - standard JSON doesn't allow these
+            // Handle literal newlines and tabs in strings - standard JSON doesn't allow these
             if (char === '\n') {
                 repaired += '\\n';
                 continue;
             }
             if (char === '\r') {
                 repaired += '\\r';
+                continue;
+            }
+            if (char === '\t') {
+                repaired += '\\t';
                 continue;
             }
 
@@ -194,7 +198,7 @@ export const normalizeData = (obj: any): any => {
         return {
             ...q,
             marks: isNaN(marks) || marks < 1 ? 1 : marks,
-            topic: q.topic || 'General',
+            topic: q.topic || q.chapter || 'General',  // ⭐ FIX: Use chapter as fallback for topic
             blooms: b,
             difficulty: d
         };

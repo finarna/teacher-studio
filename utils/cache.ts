@@ -4,7 +4,7 @@ interface CacheEntry {
     data: any;
     timestamp: number;
     scanId: string;
-    type: 'sketch' | 'flashcard' | 'question' | 'synthesis';
+    type: 'sketch' | 'flashcard' | 'question' | 'synthesis' | 'topic-sketch';
 }
 
 const CACHE_PREFIX = 'edujourney_v1_';

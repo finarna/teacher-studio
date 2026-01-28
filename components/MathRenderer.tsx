@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { LATEX_MACROS, LATEX_PATTERNS } from '../utils/mathLatexReference';
 
 // Declare global katex since we loaded it via script tag
 declare global {
@@ -70,9 +71,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
           output: 'html',
           strict: false,
           trust: true,
-          macros: {
-            "\\label": "\\href{###1}"
-          }
+          macros: LATEX_MACROS
         });
 
         // Check if KaTeX rendered an error (contains katex-error class or color="red")
@@ -254,15 +253,8 @@ export const RenderWithMath: React.FC<{
                 }
 
                 // Fallback for raw LaTeX commands not wrapped in $
-                const rawTriggers = [
-                  '\\frac', '\\sqrt', '\\sum', '\\int', '\\prod', '\\lim',
-                  '\\alpha', '\\beta', '\\gamma', '\\delta', '\\epsilon', '\\theta', '\\lambda', '\\mu', '\\nu', '\\pi', '\\rho', '\\sigma', '\\tau', '\\phi', '\\omega',
-                  '\\Delta', '\\Omega', '\\Theta', '\\Lambda', '\\Sigma', '\\Phi',
-                  '\\ce{', '\\text{', '\\mathrm{', '\\mathbf{',
-                  '\\times', '\\cdot', '\\infty', '\\partial', '\\nabla'
-                ];
-                // Detect LaTeX commands OR subscripts/superscripts with underscores/carets
-                const hasLatexCommand = rawTriggers.some(t => part.includes(t));
+                // Use shared LATEX_PATTERNS from mathLatexReference.ts
+                const hasLatexCommand = LATEX_PATTERNS.some(t => part.includes(t));
                 const hasSubSuperscript = /[a-zA-Z0-9]+[_^][{a-zA-Z0-9]/.test(part);
 
                 if (hasLatexCommand || (hasSubSuperscript && (part.includes('{') || part.includes('_') || part.includes('^')))) {

@@ -36,6 +36,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Scan, AnalyzedQuestion } from '../types';
 import { RenderWithMath, DerivationStep } from './MathRenderer';
 import { safeAiParse } from '../utils/aiParser';
+import { generateSketch } from '../utils/sketchGenerators';
 
 interface MetricCardProps {
   title: string;
@@ -71,6 +72,10 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const [expandedQuestionId, setExpandedQuestionId] = useState<string | null>(null);
   const [expandedDomainId, setExpandedDomainId] = useState<string | null>(null);
   const [isSynthesizingQuestion, setIsSynthesizingQuestion] = useState<string | null>(null);
+  const [intelligenceBreakdownTab, setIntelligenceBreakdownTab] = useState<'logic' | 'visual'>('logic');
+  const [isGeneratingVisual, setIsGeneratingVisual] = useState<string | null>(null);
+  const [selectedImageModel, setSelectedImageModel] = useState<'gemini-2.5-flash-image' | 'gemini-3-pro-image'>('gemini-2.5-flash-image');
+  const [enlargedVisualNote, setEnlargedVisualNote] = useState<{ imageUrl: string, questionId: string } | null>(null);
 
   if (!scan || !scan.analysisData) {
     return (
@@ -276,42 +281,183 @@ Return JSON ONLY: {
     }
   };
 
+  const handleGenerateVisual = async (qId: string) => {
+    if (!onUpdateScan || !scan || !scan.analysisData) return;
+
+    const question = scan.analysisData.questions.find(q => q.id === qId);
+    if (!question) return;
+
+    setIsGeneratingVisual(qId);
+
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        alert("API Key Missing - Add VITE_GEMINI_API_KEY to .env.local");
+        return;
+      }
+
+      console.log(`🎨 Generating visual note for question ${qId}...`);
+
+      const result = await generateSketch(
+        selectedImageModel, // Use selected model
+        question.visualConcept || question.topic,
+        question.text,
+        scan.subject,
+        apiKey,
+        (status) => console.log(`📊 ${status}`)
+      );
+
+      console.log(`✓ Generated visual note for ${qId}`);
+
+      // Update the scan with the new visual note
+      const updatedQuestions = scan.analysisData.questions.map(q =>
+        q.id === qId ? { ...q, sketchSvg: result.imageData } : q
+      );
+
+      const updatedScan: Scan = {
+        ...scan,
+        analysisData: {
+          ...scan.analysisData,
+          questions: updatedQuestions
+        }
+      };
+
+      onUpdateScan(updatedScan);
+    } catch (err: any) {
+      console.error(err);
+      alert(`Failed to generate visual note: ${err.message}`);
+    } finally {
+      setIsGeneratingVisual(null);
+    }
+  };
+
+  const handleGenerateAllVisuals = async () => {
+    if (!onUpdateScan || !scan || !scan.analysisData) return;
+
+    const questionsWithoutVisuals = scan.analysisData.questions.filter(q => !q.sketchSvg);
+
+    if (questionsWithoutVisuals.length === 0) {
+      alert("All questions already have visual notes generated!");
+      return;
+    }
+
+    const confirmed = confirm(`Generate visual notes for ${questionsWithoutVisuals.length} questions? This may take several minutes.`);
+    if (!confirmed) return;
+
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      alert("API Key Missing - Add VITE_GEMINI_API_KEY to .env.local");
+      return;
+    }
+
+    console.log(`🎨 Starting bulk visual note generation for ${questionsWithoutVisuals.length} questions...`);
+
+    for (const question of questionsWithoutVisuals) {
+      try {
+        setIsGeneratingVisual(question.id);
+        console.log(`🎨 Generating visual note for ${question.id}...`);
+
+        const result = await generateSketch(
+          selectedImageModel,
+          question.visualConcept || question.topic,
+          question.text,
+          scan.subject,
+          apiKey,
+          (status) => console.log(`📊 ${status}`)
+        );
+
+        console.log(`✓ Generated visual note for ${question.id}`);
+
+        // Update scan incrementally for each question
+        const updatedQuestions = scan.analysisData.questions.map(q =>
+          q.id === question.id ? { ...q, sketchSvg: result.imageData } : q
+        );
+
+        const updatedScan: Scan = {
+          ...scan,
+          analysisData: {
+            ...scan.analysisData,
+            questions: updatedQuestions
+          }
+        };
+
+        onUpdateScan(updatedScan);
+
+        // Small delay to avoid rate limits
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (err: any) {
+        console.error(`Failed to generate visual for ${question.id}:`, err);
+        // Continue with next question even if one fails
+      }
+    }
+
+    setIsGeneratingVisual(null);
+    alert(`✓ Bulk generation complete! Generated ${questionsWithoutVisuals.length} visual notes.`);
+  };
+
   const SUBJECT_DOMAIN_MAPS: Record<string, Record<string, { domain: string, chapters: string[], friction: string }>> = {
     'Physics': {
       'Mechanics': {
         domain: 'Mechanics',
-        chapters: ['Fluid', 'Rotational', 'Motion', 'Gravitation', 'Gravity', 'Work', 'Energy', 'Power', 'Kinematics', 'Dynamics', 'Units', 'Measurement', 'Properties of Matter', 'Circular', 'Friction', 'Collision', 'Momentum', 'Force', 'Newton', 'Projectile', 'Velocity', 'Acceleration', 'Mass', 'Density', 'Pressure'],
+        chapters: ['Circular Motion', 'Laws of Motion', 'Work Energy and Power', 'System of Particles and Rotational Motion', 'Gravitation', 'Kinematics', 'Mechanical Properties of Solids', 'Mechanical Properties of Fluids', 'Fluid', 'Rotational', 'Motion', 'Gravity', 'Work', 'Energy', 'Power', 'Dynamics', 'Units', 'Measurement', 'Properties of Matter', 'Circular', 'Friction', 'Collision', 'Momentum', 'Force', 'Newton', 'Projectile', 'Velocity', 'Acceleration', 'Mass', 'Density', 'Pressure'],
         friction: 'Advanced calculus-based modeling and 3D rigid body constraints.'
       },
       'Electrodynamics': {
         domain: 'Electrodynamics',
-        chapters: ['Capacitor', 'Magnetic', 'Current', 'EM Wave', 'Charge', 'Magnetism', 'EMI', 'Alternating', 'Electrostatic', 'Electric', 'Circuit', 'Induction', 'Potentiometer', 'Resistance', 'Ohm', 'Voltage', 'Battery', 'Conductor', 'Insulator', 'Dielectric', 'Flux', 'Gauss', 'Coulomb'],
+        chapters: ['Current Electricity', 'Moving Charges and Magnetism', 'Electromagnetic Induction', 'Alternating Current', 'Electrostatics', 'Magnetism and Matter', 'Electrostatic Potential and Capacitance', 'Electromagnetic Waves', 'Semiconductor Electronics', 'Capacitor', 'Magnetic', 'Current', 'EM Wave', 'Charge', 'Magnetism', 'EMI', 'Alternating', 'Electrostatic', 'Electric', 'Circuit', 'Induction', 'Potentiometer', 'Resistance', 'Ohm', 'Voltage', 'Battery', 'Conductor', 'Insulator', 'Dielectric', 'Flux', 'Gauss', 'Coulomb'],
         friction: 'Multi-field interactions (Lorentz Force) and non-standard topographies.'
       },
       'Modern Physics': {
         domain: 'Modern Physics',
-        chapters: ['Modern', 'Bohr', 'De-Broglie', 'Atomic', 'Atom', 'Nuclei', 'Nuclear', 'Photoelectric', 'Quantum', 'Radioactivity', 'Radioactive', 'X-Ray', 'Photon', 'Electron', 'Proton', 'Neutron', 'Isotope', 'Fission', 'Fusion', 'Planck', 'Einstein', 'Compton'],
+        chapters: ['Atoms', 'Nuclei', 'Dual Nature of Radiation and Matter', 'Modern', 'Bohr', 'De-Broglie', 'Atomic', 'Atom', 'Nuclear', 'Photoelectric', 'Quantum', 'Radioactivity', 'Radioactive', 'X-Ray', 'Photon', 'Electron', 'Proton', 'Neutron', 'Isotope', 'Fission', 'Fusion', 'Planck', 'Einstein', 'Compton'],
         friction: 'Numerical precision with physical constants and proportional scaling.'
       },
       'Optics': {
         domain: 'Optics',
-        chapters: ['Ray Optic', 'Wave Optic', 'Lens', 'Mirror', 'Interference', 'Diffraction', 'Polarization', 'Prism', 'Refraction', 'Reflection', 'Light', 'Spectrum', 'Dispersion', 'Focal', 'Image', 'Magnification', 'Telescope', 'Microscope'],
+        chapters: ['Wave Optics', 'Ray Optics and Optical Instruments', 'Ray Optic', 'Wave Optic', 'Lens', 'Mirror', 'Interference', 'Diffraction', 'Polarization', 'Prism', 'Refraction', 'Reflection', 'Light', 'Spectrum', 'Dispersion', 'Focal', 'Image', 'Magnification', 'Telescope', 'Microscope'],
         friction: 'Spatial visualization of wave-fronts and geometric alignment.'
       },
       'Thermodynamics': {
         domain: 'Thermodynamics',
-        chapters: ['Kinetic Theory', 'Heat', 'Gas', 'Thermodynamic', 'Thermal', 'Temperature', 'Efficiency', 'Entropy', 'Conduction', 'Convection', 'Radiation', 'Calorimetry', 'Expansion', 'Ideal Gas', 'Carnot', 'Kelvin', 'Celsius'],
+        chapters: ['Thermodynamics', 'Kinetic Theory', 'Heat', 'Gas', 'Thermodynamic', 'Thermal', 'Temperature', 'Efficiency', 'Entropy', 'Conduction', 'Convection', 'Radiation', 'Calorimetry', 'Expansion', 'Ideal Gas', 'Carnot', 'Kelvin', 'Celsius'],
         friction: 'Multi-variable state tracking during system transitions.'
       },
       'Waves': {
         domain: 'Oscillations & Waves',
-        chapters: ['SHM', 'Simple Harmonic', 'Oscillation', 'Spring', 'Sound', 'Wave', 'Beat', 'Doppler', 'Resonance', 'Frequency', 'Amplitude', 'Period', 'Pendulum', 'Vibration'],
+        chapters: ['Oscillations', 'Waves', 'SHM', 'Simple Harmonic', 'Oscillation', 'Spring', 'Sound', 'Wave', 'Beat', 'Doppler', 'Resonance', 'Frequency', 'Amplitude', 'Period', 'Pendulum', 'Vibration'],
         friction: 'Dynamic variable dependencies mass loss vs frequency.'
       },
       'Semiconductors': {
         domain: 'Semiconductors',
-        chapters: ['Logic Gate', 'Rectifier', 'Transistor', 'Diode', 'P-N Junction', 'Electronic Device', 'Semiconductor', 'LED', 'Amplifier', 'Oscillator', 'Digital', 'Analog'],
+        chapters: ['Semiconductor Electronics', 'Logic Gate', 'Rectifier', 'Transistor', 'Diode', 'P-N Junction', 'Electronic Device', 'Semiconductor', 'LED', 'Amplifier', 'Oscillator', 'Digital', 'Analog'],
         friction: 'Boolean implementation vs gate bias determination.'
+      }
+    },
+    'Math': {
+      'Algebra': {
+        domain: 'Algebra',
+        chapters: ['Relations and Functions', 'Inverse Trigonometric Functions', 'Matrices', 'Determinants', 'Continuity and Differentiability', 'Application of Derivatives', 'Maxima and Minima', 'Rate of Change', 'Monotonicity', 'Relation', 'Function', 'Inverse Trigonometric', 'Trigonometric', 'Matrix', 'Determinant', 'Continuity', 'Differentiability', 'Derivative', 'Limit', 'Differentiation', 'Maxima', 'Minima', 'Extrema', 'Tangent', 'Normal', 'Increasing', 'Decreasing', 'Monotonic', 'Rolle', 'LMVT', 'Lagrange'],
+        friction: 'Abstract symbolic manipulation and multi-step algebraic transformations.'
+      },
+      'Calculus': {
+        domain: 'Calculus',
+        chapters: ['Integrals', 'Indefinite Integration', 'Definite Integration', 'Applications of Integrals', 'Area under Curves', 'Differential Equations', 'Variable Separable', 'Linear Differential Equations', 'Homogeneous Equations', 'Integration', 'Integral', 'Indefinite', 'Definite', 'Area', 'Area under Curve', 'Differential Equation', 'Substitution', 'Partial Fraction', 'By Parts', 'Integration by Parts', 'Fundamental Theorem', 'Linear Differential', 'Homogeneous', 'Non-Homogeneous', 'Application of Integral'],
+        friction: 'Multi-variable integration techniques and proper selection of integration methods.'
+      },
+      'Vectors & 3D': {
+        domain: 'Vectors & 3D Geometry',
+        chapters: ['Vectors', 'Scalar and Vector Products', 'Dot Product', 'Cross Product', 'Scalar Triple Product', 'Three Dimensional Geometry', 'Direction Cosines', 'Direction Ratios', 'Equation of Line', 'Equation of Plane', 'Angle Between Lines', 'Angle Between Planes', 'Distance Formulae', 'Vector', 'Vector Triple', 'Direction Cosine', 'Direction Ratio', 'Plane', 'Line in Space', '3D', 'Three Dimensional', 'Cartesian', 'Skew Lines', 'Coplanar', 'Distance Formula', 'Angle Between', 'Shortest Distance', 'Perpendicular'],
+        friction: 'Spatial visualization and coordinate transformation in 3D space.'
+      },
+      'Linear Programming': {
+        domain: 'Linear Programming',
+        chapters: ['Linear Programming Problems', 'Optimization', 'Feasible Region', 'Objective Function', 'Constraints', 'Graphical Method', 'Corner Point Method', 'Linear Programming', 'LPP', 'Constraint', 'Maximize', 'Minimize', 'Corner Point', 'Inequalit', 'Optimal Solution'],
+        friction: 'Constraint formulation and geometric interpretation of feasible region.'
+      },
+      'Probability': {
+        domain: 'Probability & Statistics',
+        chapters: ['Probability', 'Conditional Probability', 'Bayes Theorem', 'Multiplication Theorem', 'Independent Events', 'Random Variables', 'Probability Distributions', 'Binomial Distribution', 'Mean and Variance', 'Conditional', 'Bayes', 'Random Variable', 'Expectation', 'Variance', 'Binomial', 'Distribution', 'Mean', 'Standard Deviation', 'Independent Event', 'Mutually Exclusive', 'Bernoulli', 'Total Probability', 'Combination', 'Permutation'],
+        friction: 'Conditional probability interpretation and distribution identification.'
       }
     }
   };
@@ -357,8 +503,20 @@ Return JSON ONLY: {
         }
       }
 
+      // Debug: Log first few classifications
+      if (questions.indexOf(q) < 5) {
+        console.log(`🔍 [CLASSIFICATION DEBUG] Q${questions.indexOf(q) + 1}: topic="${topic}" → matched="${matchedKey}" (score: ${maxMatchScore})`);
+      }
+
       return { ...q, mappedKey: maxMatchScore > 0 ? matchedKey : 'General' };
     });
+
+    // Debug: Log classification summary
+    const classificationSummary: Record<string, number> = {};
+    mappedQuestions.forEach(q => {
+      classificationSummary[q.mappedKey] = (classificationSummary[q.mappedKey] || 0) + 1;
+    });
+    console.log(`📊 [CLASSIFICATION SUMMARY] Subject: ${scan.subject}, Distribution:`, classificationSummary);
 
     // 2. Aggregate metrics by domain
     const domainsFound: Record<string, any> = {};
@@ -1144,29 +1302,84 @@ Return JSON ONLY: {
                       <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                         {/* Header Section */}
                         <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                              <span className="px-2 py-0.5 bg-accent-100 text-accent-700 text-[9px] font-black uppercase rounded tracking-widest">Pedagogical Logic</span>
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {selectedQ.id} • {selectedQ.marks} Marks</span>
+                          <div className="flex flex-col gap-3 flex-1">
+                            <div className="flex items-center justify-between">
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="px-2 py-0.5 bg-accent-100 text-accent-700 text-[9px] font-black uppercase rounded tracking-widest">Pedagogical Logic</span>
+                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {selectedQ.id} • {selectedQ.marks} Marks</span>
+                                </div>
+                                <h2 className="text-xl font-black text-slate-900 font-outfit uppercase tracking-tight">Intelligence <span className="text-accent-600">Breakdown</span></h2>
+                              </div>
+                              <div className="flex gap-2">
+                                <button className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-900 transition-all shadow-sm">
+                                  <Share2 size={16} />
+                                </button>
+                                <select
+                                  value={selectedImageModel}
+                                  onChange={(e) => setSelectedImageModel(e.target.value as any)}
+                                  className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-700 hover:border-slate-300 transition-all shadow-sm cursor-pointer"
+                                >
+                                  <option value="gemini-2.5-flash-image">Gemini 2.5 Flash (Fast)</option>
+                                  <option value="gemini-3-pro-image">Gemini 3 Pro (Quality)</option>
+                                </select>
+                                <button
+                                  onClick={handleGenerateAllVisuals}
+                                  disabled={isGeneratingVisual !== null}
+                                  className="flex items-center gap-2 px-4 py-2 bg-accent-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-700 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {isGeneratingVisual !== null ? (
+                                    <>
+                                      <Loader2 size={14} className="animate-spin" /> Generating...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Sparkles size={14} /> Generate All Visuals
+                                    </>
+                                  )}
+                                </button>
+                                <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-600 transition-all shadow-lg active:scale-95">
+                                  <Download size={14} /> Export
+                                </button>
+                              </div>
                             </div>
-                            <h2 className="text-xl font-black text-slate-900 font-outfit uppercase tracking-tight">Intelligence <span className="text-accent-600">Breakdown</span></h2>
-                          </div>
-                          <div className="flex gap-2">
-                            <button className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-900 transition-all shadow-sm">
-                              <Share2 size={16} />
-                            </button>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-600 transition-all shadow-lg active:scale-95">
-                              <Download size={14} /> Export
-                            </button>
+
+                            {/* Tab Navigation */}
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={() => setIntelligenceBreakdownTab('logic')}
+                                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                                  intelligenceBreakdownTab === 'logic'
+                                    ? 'bg-slate-900 text-white shadow-md'
+                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                }`}
+                              >
+                                Logic & Steps
+                              </button>
+                              <button
+                                onClick={() => setIntelligenceBreakdownTab('visual')}
+                                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
+                                  intelligenceBreakdownTab === 'visual'
+                                    ? 'bg-slate-900 text-white shadow-md'
+                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                }`}
+                              >
+                                Visual Note
+                              </button>
+                            </div>
                           </div>
                         </div>
 
                         {/* Content */}
                         <div className="space-y-10">
-                          {/* Question Text */}
+                          {/* Question Text - Always visible */}
                           <div className="text-lg font-bold text-slate-800 leading-relaxed font-instrument border-l-4 border-accent-500/20 pl-6 py-4 mb-8 bg-slate-50/50 rounded-xl">
                             <RenderWithMath text={selectedQ.text || ''} showOptions={false} serif={false} />
                           </div>
+
+                          {/* Conditional Content based on tab */}
+                          {intelligenceBreakdownTab === 'logic' ? (
+                            <div className="space-y-10">
 
                           {/* Visual Element Information */}
                           {((selectedQ.hasVisualElement && selectedQ.visualElementDescription) || (selectedQ.extractedImages && selectedQ.extractedImages.length > 0)) && (
@@ -1281,6 +1494,79 @@ Return JSON ONLY: {
                               </button>
                             </div>
                           )}
+                            </div>
+                          ) : (
+                            /* Visual Tab Content */
+                            <div className="space-y-6">
+                              {selectedQ.sketchSvg ? (
+                                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-lg">
+                                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+                                    <div className="p-2 bg-accent-100 rounded-lg">
+                                      <Sparkles size={16} className="text-accent-600" />
+                                    </div>
+                                    <h4 className="text-[10px] font-black text-slate-700 uppercase tracking-widest font-outfit">
+                                      AI-Generated Visual Learning Note
+                                    </h4>
+                                  </div>
+                                  <div
+                                    className="rounded-xl overflow-hidden border border-slate-200 bg-slate-50 cursor-pointer hover:border-accent-500 transition-all group relative"
+                                    onClick={() => setEnlargedVisualNote({ imageUrl: selectedQ.sketchSvg!, questionId: selectedQ.id })}
+                                  >
+                                    <img
+                                      src={selectedQ.sketchSvg}
+                                      alt={`Visual note for ${selectedQ.topic}`}
+                                      className="w-full h-auto group-hover:scale-[1.02] transition-transform"
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg">
+                                        <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                          </svg>
+                                          Click to Enlarge
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p className="text-[10px] text-blue-800 font-bold uppercase tracking-wider flex items-center gap-2">
+                                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                      </svg>
+                                      This visual note provides a comprehensive learning aid for this specific question with formulas, steps, and exam tips.
+                                    </p>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center justify-center py-16 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                                  {isGeneratingVisual === selectedQ.id ? (
+                                    <>
+                                      <Loader2 size={48} className="text-accent-500 mb-4 animate-spin" />
+                                      <p className="text-[10px] font-black text-accent-600 uppercase tracking-widest mb-3">Generating Visual Note...</p>
+                                      <p className="text-[9px] text-slate-500 max-w-md text-center leading-relaxed">
+                                        AI is creating a comprehensive visual learning aid with formulas, steps, and exam strategies.
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Sparkles size={48} className="text-slate-300 mb-4" />
+                                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">No Visual Note Generated</p>
+                                      <p className="text-[9px] text-slate-500 max-w-md text-center mb-6 leading-relaxed">
+                                        Generate an AI-powered visual learning aid with formulas, solution steps, and exam strategies for this question.
+                                      </p>
+                                      <button
+                                        onClick={() => handleGenerateVisual(selectedQ.id)}
+                                        disabled={isGeneratingVisual !== null}
+                                        className="px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-600 transition-all flex items-center gap-3 shadow-2xl shadow-slate-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      >
+                                        <Sparkles size={14} /> Generate Visual Note
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -1290,6 +1576,41 @@ Return JSON ONLY: {
                     Select a fragment to synchronize intelligence...
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Enlarged Visual Note Modal */}
+        {enlargedVisualNote && (
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setEnlargedVisualNote(null)}
+          >
+            <div className="relative max-w-6xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 z-10">
+                <button
+                  onClick={() => setEnlargedVisualNote(null)}
+                  className="p-2 bg-slate-900/90 hover:bg-slate-900 text-white rounded-xl shadow-lg transition-all active:scale-95"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6">
+                <div className="mb-4">
+                  <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Visual Learning Note</h3>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">Question ID: {enlargedVisualNote.questionId}</p>
+                </div>
+                <div className="overflow-auto max-h-[calc(90vh-120px)]">
+                  <img
+                    src={enlargedVisualNote.imageUrl}
+                    alt="Enlarged visual note"
+                    className="w-full h-auto rounded-xl"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
               </div>
             </div>
           </div>

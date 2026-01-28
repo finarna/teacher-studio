@@ -168,7 +168,30 @@ export interface AnalyzedQuestion {
   sketchSvg?: string;
   // Enhanced image support for scanned papers
   hasVisualElement?: boolean; // Indicates if question has diagram/table/image
-  visualElementType?: 'diagram' | 'table' | 'graph' | 'illustration' | 'chart' | 'image';
+  visualElementType?:
+    // Generic types (all subjects)
+    | 'diagram'
+    | 'table'
+    | 'graph'
+    | 'illustration'
+    | 'chart'
+    | 'image'
+    // Math-specific types
+    | 'coordinate-plane'    // Cartesian plane with function graphs
+    | 'geometric-figure'    // Triangles, circles, polygons with measurements
+    | '3d-diagram'          // 3D geometry (cuboids, spheres, cones)
+    | 'matrix'              // Matrix/determinant representation
+    | 'number-line'         // Number line for inequalities
+    | 'venn-diagram'        // Set theory diagrams
+    | 'tree-diagram'        // Probability tree diagrams
+    | 'flowchart'           // Algorithm/logic flow diagrams
+    // Physics-specific types
+    | 'circuit-diagram'     // Electrical circuits with resistors, capacitors, batteries
+    | 'ray-diagram'         // Optics: ray paths through lenses, mirrors, prisms
+    | 'free-body-diagram'   // Mechanics: forces acting on objects
+    | 'wave-diagram'        // Wave patterns, interference, standing waves
+    | 'field-diagram'       // Electric/magnetic field lines and equipotentials
+    | 'energy-level-diagram'; // Atomic energy levels, transitions
   visualElementDescription?: string; // AI description of the visual element
   visualElementPosition?: 'above' | 'below' | 'inline' | 'side'; // Position relative to question text
   visualBoundingBox?: { pageNumber: number; x: string; y: string; width: string; height: string }; // Gemini-provided percentage coordinates (e.g., x: "10%")
@@ -200,6 +223,7 @@ export interface ExamAnalysisData {
   strategy: string[];
   chapterInsights?: ChapterInsight[]; // NEW: Grouped chapter data
   questions: AnalyzedQuestion[]; // Specific questions from paper
+  topicBasedSketches?: Record<string, any>; // NEW: Topic-based flip book sketches (stored as Record to avoid circular dependency)
 }
 
 export interface Scan {
