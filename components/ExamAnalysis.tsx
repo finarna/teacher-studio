@@ -1377,6 +1377,28 @@ Return JSON ONLY: {
                             <RenderWithMath text={selectedQ.text || ''} showOptions={false} serif={false} />
                           </div>
 
+                          {/* Options Display */}
+                          {selectedQ.options && selectedQ.options.length > 0 && (
+                            <div className="mb-8 space-y-3">
+                              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Answer Options</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {selectedQ.options.map((option: string, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-accent-400 transition-all group"
+                                  >
+                                    <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-accent-100 text-slate-600 group-hover:text-accent-600 flex items-center justify-center text-[10px] font-black transition-colors">
+                                      {['A', 'B', 'C', 'D'][idx]}
+                                    </div>
+                                    <div className="flex-1 text-[13px] font-bold text-slate-700 leading-relaxed">
+                                      <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           {/* Conditional Content based on tab */}
                           {intelligenceBreakdownTab === 'logic' ? (
                             <div className="space-y-10">

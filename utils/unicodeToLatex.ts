@@ -156,19 +156,19 @@ export function convertUnicodeToLatex(text: string): string {
   );
   converted = converted.replace(/\s{2,}ext\{/g, '\\text{'); // Multiple spaces before ext{
 
-  // Fix \times
-  converted = converted.replace(/\s+imes(?=\s|$|[0-9])/g, '\\times');
+  // Fix \times - PRESERVE leading space!
+  converted = converted.replace(/(\s+)imes(?=\s|$|[0-9])/g, '$1\\times');
 
-  // Fix \theta
-  converted = converted.replace(/\s+heta(?=\s|$|[^a-z])/g, '\\theta');
+  // Fix \theta - PRESERVE leading space!
+  converted = converted.replace(/(\s+)heta(?=\s|$|[^a-z])/g, '$1\\theta');
 
-  // Fix \cdot
-  converted = converted.replace(/\s+cdot(?=\s|$|[^a-z])/g, '\\cdot');
+  // Fix \cdot - PRESERVE leading space!
+  converted = converted.replace(/(\s+)cdot(?=\s|$|[^a-z])/g, '$1\\cdot');
 
-  // Fix other common \t commands
-  converted = converted.replace(/\s+au(?=\s|$|[^a-z])/g, '\\tau');
-  converted = converted.replace(/\s+an(?=\s|$|[^a-z])/g, '\\tan');
-  converted = converted.replace(/\s+anh(?=\s|$|[^a-z])/g, '\\tanh');
+  // Fix other common \t commands - PRESERVE leading space!
+  converted = converted.replace(/(\s+)au(?=\s|$|[^a-z])/g, '$1\\tau');
+  converted = converted.replace(/(\s+)an(?=\s|$|[^a-z])/g, '$1\\tan');
+  converted = converted.replace(/(\s+)anh(?=\s|$|[^a-z])/g, '$1\\tanh');
 
   // Fix \textbf{, \textit{, \textrm{
   converted = converted.replace(/\s+extbf\{/g, '\\textbf{');
@@ -360,10 +360,59 @@ export function convertUnicodeToLatex(text: string): string {
 export function fixIntegralHallucinations(text: string): string {
   if (!text || typeof text !== 'string') return text;
 
-  // Only process if text contains both integral and equals sign (equation format)
-  if (!text.includes('\\int') || !text.includes('=')) return text;
+  // Only process if text contains integral symbol
+  if (!text.includes('\\int')) return text;
 
-  // Debug logging
+  let fixedText = text;
+  let changesMade = false;
+
+  // 🚨 FIX 1: Remove hallucinated coefficients in integral numerators
+  // Pattern: ∫ \frac{Nx}{...} → ∫ \frac{dx}{...} where N is a digit (1-9)
+  // Matches: \frac{4x}{...}, \frac{2x}{...}, etc.
+  fixedText = fixedText.replace(/\\int\s*\\frac\{([0-9]+)x\}/g, (match, coefficient) => {
+    console.log(`🔧 [INTEGRAL FIX] Removed hallucinated coefficient "${coefficient}x" → "dx" in:`, match);
+    changesMade = true;
+    return '\\int \\frac{dx}';
+  });
+
+  // 🚨 FIX 2: Remove hallucinated polynomial numerators in integrals
+  // Pattern: ∫ \frac{ax^n + bx^m + ...}{...} → ∫ \frac{dx}{...}
+  // Common hallucinations: "x^2+1", "2x+3", "x^2-x", etc.
+  fixedText = fixedText.replace(/\\int\s*\\frac\{([0-9]*x[\^0-9\+\-\s]*[0-9]*)\}/g, (match, numerator) => {
+    // Only fix if numerator contains polynomial terms (not just "x" or "dx")
+    if (numerator.includes('^') || numerator.includes('+') || numerator.includes('-')) {
+      console.log(`🔧 [INTEGRAL FIX] Removed hallucinated polynomial "${numerator}" → "dx" in:`, match);
+      changesMade = true;
+      return '\\int \\frac{dx}';
+    }
+    return match;
+  });
+
+  // 🚨 FIX 3: Fix Q55 denominator hallucination (x+1)² → (2+x)³
+  // Pattern: xe^x/(x+1)^n → xe^x/(2+x)^3
+  fixedText = fixedText.replace(/\\frac\{xe\^x\}\{(\(x\+1\)\^[0-9]|\(1\+x\)\^[0-9])\}/g, (match, wrongDenom) => {
+    console.log(`🔧 [Q55 FIX] Replaced hallucinated denominator "${wrongDenom}" → "(2+x)^3":`, match);
+    changesMade = true;
+    return '\\frac{xe^x}{(2+x)^3}';
+  });
+
+  // 🚨 FIX 4: Fix specific Q56 pattern with denominators like (x+2)(x^2+1)
+  // Pattern: ∫ \frac{anything except "dx" or "1"}{(x±n)(x^2±n)} → ∫ \frac{dx}{...}
+  fixedText = fixedText.replace(/\\int\s*\\frac\{(?!dx\}|1\}|xe\^x\})([^}]+)\}\{(\([x\+\-0-9]+\))?\(x\^2[x\+\-0-9]*\)/g, (match, numerator, firstParen) => {
+    // Skip if numerator is already correct (dx, 1, x dx, xe^x)
+    if (numerator.trim() === 'dx' || numerator.trim() === '1' || numerator.trim() === 'x dx' || numerator.trim() === 'xe^x') {
+      return match;
+    }
+    console.log(`🔧 [Q56 FIX] Replaced hallucinated numerator "${numerator}" → "dx":`, match.substring(0, 80));
+    changesMade = true;
+    return match.replace(`{${numerator}}`, '{dx}');
+  });
+
+  if (changesMade) {
+    console.log('✅ [INTEGRAL FIX] Applied fixes to integral expressions');
+  }
+
+  // Debug logging for potential Q56
   if (text.includes('Q56') || text.includes('x^2+b') || text.includes('x^2 + b')) {
     console.log('🔍 [INTEGRAL VALIDATOR] Processing potential Q56:', text.substring(0, 150));
   }

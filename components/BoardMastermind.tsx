@@ -22,6 +22,7 @@ import { Scan, ExamAnalysisData, AnalyzedQuestion } from '../types';
 import { safeAiParse, normalizeData } from '../utils/aiParser';
 import { generateMathExtractionInstructions, generateStreamlinedMathInstructions } from '../utils/mathLatexReference';
 import { generatePhysicsExtractionInstructions } from '../utils/physicsNotationReference';
+import { generateCleanMathPrompt, validateExtraction } from '../utils/cleanMathExtractor';
 import { processQuestionsUnicode } from '../utils/unicodeToLatex'; // Latest: fixed escape char regex patterns
 
 interface BoardMastermindProps {
@@ -34,6 +35,7 @@ interface BoardMastermindProps {
 const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentScans, onAddScan, onSelectScan }) => {
   const [selectedSubject, setSelectedSubject] = useState('Physics');
   const [selectedGrade, setSelectedGrade] = useState('Class 12');
+  const [selectedModel, setSelectedModel] = useState('gemini-2.0-flash-lite');
   const [isProcessing, setIsProcessing] = useState(false);
   const [loadingStage, setLoadingStage] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -77,11 +79,11 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
       const genAI = new GoogleGenerativeAI(apiKey);
       const genModel = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash-lite',  // Lite version has higher rate limits
+        model: selectedModel,
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.1,
-          maxOutputTokens: 32768  // Increased from 8192 to handle all questions in one response
+          maxOutputTokens: 65536  // Max allowed - handle all 60 questions in one response
         }
       });
 
@@ -115,7 +117,10 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           }
         }
 
-        const extractionPrompt = `Extract ALL questions verbatim from this ${selectedSubject} paper.
+        // 🧪 Use CLEAN Math extraction prompt (fixes space-stripping, hallucinations, missing options)
+        const extractionPrompt = selectedSubject === 'Math'
+          ? generateCleanMathPrompt(selectedGrade)
+          : `Extract ALL questions verbatim from this ${selectedSubject} paper.
         RULES:
         1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise in the text.
         2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
@@ -382,16 +387,19 @@ ${generatePhysicsExtractionInstructions()}
       setLoadingStage(`Analyzing ${file.name}...`);
 
       const genModel = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash-lite',  // Lite version has higher rate limits
+        model: selectedModel,
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.1,
-          maxOutputTokens: 32768  // Increased from 8192 to handle all questions in one response
+          maxOutputTokens: 65536  // Max allowed - handle all 60 questions in one response
         }
       });
 
       // Track 1: Verbatim Intelligence Extraction (Questions Only)
-      const extractionPrompt = `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
+      // 🧪 Use CLEAN Math extraction prompt (fixes space-stripping, hallucinations, missing options)
+      const extractionPrompt = selectedSubject === 'Math'
+        ? generateCleanMathPrompt(selectedGrade)
+        : `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
       RULES:
       1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise.
       2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
@@ -534,10 +542,24 @@ ${generatePhysicsExtractionInstructions()}
         extractedData.questions = processQuestionsUnicode(extractedData.questions);
         console.log(`✨ [UNICODE CONVERSION] Processed ${extractedData.questions.length} questions for Unicode→LaTeX conversion`);
 
+        // ⭐ VALIDATION: Check for common extraction errors (Math only)
+        if (selectedSubject === 'Math') {
+          const validation = validateExtraction(extractedData);
+          console.log(`🔍 [VALIDATION] Questions: ${validation.questionCount}, Valid: ${validation.valid}, Errors: ${validation.errors.length}`);
+
+          if (validation.errors.length > 0) {
+            console.error('❌ [VALIDATION ERRORS]', validation.errors.slice(0, 10)); // Show first 10
+            validation.errors.forEach(err => {
+              console.warn(`  - ${err.questionId} [${err.field}]: ${err.error}`);
+            });
+          }
+        }
+
         // 🐛 DEBUG: Log topic assignments for classification debugging
         const topicSummary = extractedData.questions.slice(0, 10).map((q: any) => ({
           id: q.id,
           text: q.text?.substring(0, 60),
+          options: q.options?.length || 0,
           topic: q.topic,
           domain: q.domain
         }));
@@ -552,16 +574,36 @@ ${generatePhysicsExtractionInstructions()}
       // Detect truncation: if JSON structure is incomplete (unmatched braces/brackets), trigger second pass
       const isTruncated = (openBraces !== closeBraces) || (openBrackets !== closeBrackets);
 
-      // If extraction seems incomplete (truncated or suspiciously low count), try a second pass for remaining questions
-      if (extractedData.questions && extractedData.questions.length > 0 && (isTruncated || extractedData.questions.length < 45)) {
-        console.warn('⚠️ [INCOMPLETE EXTRACTION] Got', extractedData.questions.length, 'questions (truncated:', isTruncated, '), attempting second pass for remaining questions...');
+      // 🔄 RECURSIVE SECOND PASS: Keep extracting until we have all questions (Math papers typically have 60 questions)
+      const expectedQuestions = selectedSubject === 'Math' ? 60 : 50; // Math = 60, others ~50
+      let passNumber = 2;
+      const MAX_PASSES = 5; // Safety limit to prevent infinite loops
+
+      while (
+        extractedData.questions &&
+        extractedData.questions.length > 0 &&
+        extractedData.questions.length < expectedQuestions &&
+        passNumber <= MAX_PASSES
+      ) {
+        console.warn(`⚠️ [INCOMPLETE EXTRACTION - PASS ${passNumber}] Got ${extractedData.questions.length}/${expectedQuestions} questions, attempting another pass...`);
+
         try {
           const lastQNum = extractedData.questions.length;
-          const remainingPrompt = `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${selectedSubject} paper.
+
+          // Use CLEAN Math prompt for second pass if subject is Math
+          console.log(`🔍 [PASS ${passNumber} DEBUG] Subject: ${selectedSubject}, Using clean Math prompt: ${selectedSubject === 'Math'}`);
+
+          const remainingPrompt = selectedSubject === 'Math'
+            ? generateCleanMathPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
+
+Already extracted: Q1-Q${lastQNum}
+NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
+DO NOT repeat Q1-Q${lastQNum}`
+            : `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${selectedSubject} paper.
 
 CRITICAL RULES:
 1. Use high fidelity LaTeX for ALL math (wrap in $ delimiters)
-2. Convert ALL Unicode symbols to LaTeX commands (\sin, \cos, \theta, \pi, \int, etc.)
+2. Convert ALL Unicode symbols to LaTeX commands (\\sin, \\cos, \\theta, \\pi, \\int, etc.)
 3. NEVER skip LaTeX conversion - expressions like "xex" must be "xe^x"
 4. CRITICAL TRIG FUNCTIONS: ALWAYS use backslash! Write \\sin, \\cos, \\tan, \\sec, \\csc, \\cot NOT sin, cos, tan
 5. CRITICAL EXPRESSION INTEGRITY: NEVER break expressions across multiple lines or close $ delimiters mid-expression
@@ -589,14 +631,23 @@ CRITICAL RULES:
           const remainingData = safeAiParse<any>(remainingRes.response.text(), { questions: [] }, true);
 
           if (remainingData.questions && remainingData.questions.length > 0) {
-            // ⭐ Convert Unicode to LaTeX for second pass questions too
+            // ⭐ Convert Unicode to LaTeX for additional pass questions too
             remainingData.questions = processQuestionsUnicode(remainingData.questions);
-            console.log('✅ [SECOND PASS] Extracted additional', remainingData.questions.length, 'questions (Unicode converted)');
+            console.log(`✅ [PASS ${passNumber}] Extracted additional ${remainingData.questions.length} questions (Unicode converted)`);
             extractedData.questions.push(...remainingData.questions);
+            passNumber++;
+          } else {
+            console.warn(`⚠️ [PASS ${passNumber}] No more questions extracted, stopping at ${extractedData.questions.length} total`);
+            break; // No more questions found, exit loop
           }
         } catch (err) {
-          console.error('❌ [SECOND PASS] Failed:', err);
+          console.error(`❌ [PASS ${passNumber}] Failed:`, err);
+          break; // Exit on error
         }
+      }
+
+      if (passNumber > 2) {
+        console.log(`✅ [EXTRACTION COMPLETE] Total passes: ${passNumber - 1}, Final count: ${extractedData.questions.length}/${expectedQuestions} questions`);
       }
 
       // Debug: Log visual element detection
@@ -774,6 +825,16 @@ CRITICAL RULES:
           <select value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}
             className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-accent-500/10 shadow-sm outline-none cursor-pointer hover:border-accent-300 transition-colors">
             <option>Physics</option><option>Math</option><option>Chemistry</option><option>Biology</option>
+          </select>
+          <div className="h-6 w-px bg-slate-200" />
+          <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}
+            className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-accent-500/10 shadow-sm outline-none cursor-pointer hover:border-accent-300 transition-colors">
+            <option value="gemini-2.0-flash-lite">GEMINI 2.0 FLASH LITE (FAST)</option>
+            <option value="gemini-2.5-flash-latest">GEMINI 2.5 FLASH</option>
+            <option value="gemini-2.0-flash-exp">GEMINI 2.0 FLASH EXP</option>
+            <option value="gemini-1.5-pro">GEMINI 1.5 PRO</option>
+            <option value="gemini-2.0-pro-exp">GEMINI 2.0 PRO EXP</option>
+            <option value="gemini-3-pro">GEMINI 3 PRO</option>
           </select>
         </div>
       </div>
