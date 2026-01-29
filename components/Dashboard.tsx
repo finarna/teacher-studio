@@ -29,11 +29,56 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectLesson, customLessons, on
   const [searchQuery, setSearchQuery] = useState('');
 
   const subjects = [
-    { name: 'All', icon: Sparkles, color: 'text-slate-900', bg: 'bg-white', border: 'border-slate-200' },
-    { name: 'Math', icon: BookOpen, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-    { name: 'Physics', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
-    { name: 'Chemistry', icon: Activity, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100' },
-    { name: 'Biology', icon: Dna, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
+    {
+      name: 'All',
+      icon: Sparkles,
+      color: 'text-slate-600',
+      activeColor: 'text-slate-900',
+      bg: 'bg-white',
+      activeBg: 'bg-slate-50',
+      border: 'border-slate-200',
+      activeBorder: 'border-slate-300'
+    },
+    {
+      name: 'Math',
+      icon: BookOpen,
+      color: 'text-blue-500',
+      activeColor: 'text-blue-900',
+      bg: 'bg-blue-50',
+      activeBg: 'bg-blue-100',
+      border: 'border-blue-100',
+      activeBorder: 'border-blue-300'
+    },
+    {
+      name: 'Physics',
+      icon: Zap,
+      color: 'text-amber-500',
+      activeColor: 'text-amber-900',
+      bg: 'bg-amber-50',
+      activeBg: 'bg-amber-100',
+      border: 'border-amber-100',
+      activeBorder: 'border-amber-300'
+    },
+    {
+      name: 'Chemistry',
+      icon: Activity,
+      color: 'text-rose-500',
+      activeColor: 'text-rose-900',
+      bg: 'bg-rose-50',
+      activeBg: 'bg-rose-100',
+      border: 'border-rose-100',
+      activeBorder: 'border-rose-300'
+    },
+    {
+      name: 'Biology',
+      icon: Dna,
+      color: 'text-emerald-500',
+      activeColor: 'text-emerald-900',
+      bg: 'bg-emerald-50',
+      activeBg: 'bg-emerald-100',
+      border: 'border-emerald-100',
+      activeBorder: 'border-emerald-300'
+    },
   ];
 
   const dynamicLessonPreviews: LessonPreview[] = customLessons.map(cl => ({
@@ -117,18 +162,42 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectLesson, customLessons, on
                   </h1>
                 </div>
                 <div className="flex gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200 shadow-inner">
-                  {subjects.map((s) => (
-                    <button
-                      key={s.name}
-                      onClick={() => setActiveSubject(s.name as Subject | 'All')}
-                      className={`px-5 py-2 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest ${activeSubject === s.name
-                        ? 'bg-white text-slate-900 shadow-md border border-slate-200'
-                        : 'text-slate-400 hover:text-slate-600'
-                        }`}
-                    >
-                      {s.name}
-                    </button>
-                  ))}
+                  {subjects.map((s) => {
+                    const Icon = s.icon;
+                    const isActive = activeSubject === s.name;
+
+                    // Define complete class strings for Tailwind JIT
+                    let buttonClasses = 'flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-[9px] font-black uppercase tracking-widest border ';
+
+                    if (isActive) {
+                      buttonClasses += 'bg-white shadow-md ';
+                      // Active state colors per subject
+                      if (s.name === 'All') buttonClasses += 'text-slate-900 border-slate-300';
+                      else if (s.name === 'Math') buttonClasses += 'text-blue-900 border-blue-300';
+                      else if (s.name === 'Physics') buttonClasses += 'text-amber-900 border-amber-300';
+                      else if (s.name === 'Chemistry') buttonClasses += 'text-rose-900 border-rose-300';
+                      else if (s.name === 'Biology') buttonClasses += 'text-emerald-900 border-emerald-300';
+                    } else {
+                      buttonClasses += 'bg-transparent border-transparent ';
+                      // Inactive state colors per subject
+                      if (s.name === 'All') buttonClasses += 'text-slate-600 hover:bg-slate-50';
+                      else if (s.name === 'Math') buttonClasses += 'text-blue-500 hover:bg-blue-100';
+                      else if (s.name === 'Physics') buttonClasses += 'text-amber-500 hover:bg-amber-100';
+                      else if (s.name === 'Chemistry') buttonClasses += 'text-rose-500 hover:bg-rose-100';
+                      else if (s.name === 'Biology') buttonClasses += 'text-emerald-500 hover:bg-emerald-100';
+                    }
+
+                    return (
+                      <button
+                        key={s.name}
+                        onClick={() => setActiveSubject(s.name as Subject | 'All')}
+                        className={buttonClasses}
+                      >
+                        <Icon size={14} className={`transition-all ${isActive ? 'scale-110' : ''}`} />
+                        <span>{s.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

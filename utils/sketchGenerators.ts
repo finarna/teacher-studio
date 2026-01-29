@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export type GenerationMethod = 'gemini-3-pro-image' | 'gemini-2.5-flash-image';
+export type GenerationMethod = 'gemini-3-flash-preview' | 'gemini-2.0-flash-lite' | 'gemini-2.5-flash-latest' | 'gemini-1.5-pro' | 'gemini-2.0-pro-exp' | 'gemini-3-pro';
 
 export interface GenerationResult {
   imageData: string; // Base64 encoded PNG image
@@ -165,7 +165,7 @@ export const generateGemini3ProImage = async (
   // STEP 1: Generate pedagogical content
   onStatusUpdate?.('Professor is drafting the core logic...');
   const textModel = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash-exp',
+    model: 'gemini-3-flash-preview',
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -312,7 +312,7 @@ export const generateGemini25FlashImage = async (
   // STEP 1: Generate pedagogical content
   onStatusUpdate?.('Professor is drafting the core logic...');
   const textModel = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash-exp',
+    model: 'gemini-3-flash-preview',
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -501,7 +501,7 @@ export const generateImagen3Sketch = async (
   // STEP 1: Generate pedagogical content
   onStatusUpdate?.('Professor is drafting the core logic...');
   const textModel = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash-exp',
+    model: 'gemini-3-flash-preview',
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -725,7 +725,7 @@ const validateGeneratedContent = async (
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const visionModel = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp' // Using vision-capable model
+      model: 'gemini-3-flash-preview' // Using vision-capable model
     });
 
     // Convert base64 to format Gemini expects
@@ -867,7 +867,7 @@ export const generateTopicBasedSketch = async (
   onStatusUpdate?.(`Analyzing ${questions.length} questions in ${topic}...`);
 
   const textModel = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash-exp',
+    model: 'gemini-3-flash-preview',
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -1274,6 +1274,138 @@ GOAL: Student should be able to scan this page in 30 seconds before exam and rem
 };
 
 /**
+ * Unified generation function that works with all Gemini models
+ * Maps text models to their corresponding image generation models
+ */
+const generateUnifiedSketch = async (
+  modelName: string,
+  topic: string,
+  questionText: string,
+  subject: string,
+  apiKey: string,
+  onStatusUpdate?: (status: string) => void
+): Promise<GenerationResult> => {
+  const genAI = new GoogleGenerativeAI(apiKey);
+
+  // Map text models to image models (image models support both text and image generation)
+  const imageModelMap: Record<string, string> = {
+    'gemini-3-flash-preview': 'gemini-3-pro-image-preview',
+    'gemini-2.0-flash-lite': 'gemini-2.5-flash-image',
+    'gemini-2.5-flash-latest': 'gemini-2.5-flash-image',
+    'gemini-1.5-pro': 'gemini-3-pro-image-preview',
+    'gemini-2.0-pro-exp': 'gemini-3-pro-image-preview',
+    'gemini-3-pro': 'gemini-3-pro-image-preview'
+  };
+
+  // Use image model for both steps (image models can do text generation too)
+  const actualImageModel = imageModelMap[modelName] || 'gemini-3-pro-image-preview';
+
+  // STEP 1: Generate pedagogical content using image model (it can also do text)
+  onStatusUpdate?.('Generating pedagogical content...');
+  const textModel = genAI.getGenerativeModel({
+    model: actualImageModel,
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "object",
+        properties: {
+          visualConcept: { type: "string" },
+          detailedNotes: { type: "string" },
+          mentalAnchor: { type: "string" },
+          keyPoints: {
+            type: "array",
+            items: { type: "string" }
+          },
+          examStrategies: {
+            type: "array",
+            items: { type: "string" }
+          },
+          quickReference: { type: "string" }
+        },
+        required: ["visualConcept", "detailedNotes", "mentalAnchor", "keyPoints", "examStrategies", "quickReference"]
+      }
+    }
+  });
+
+  const textPrompt = `You are an expert educator creating a comprehensive visual learning note for: "${topic}"
+
+Question Context: ${questionText}
+Subject: ${subject}
+
+Generate a structured pedagogical blueprint with:
+
+1. **Visual Concept** (2-3 sentences): Core concept that translates well to a hand-drawn sketchnote
+2. **Detailed Notes** (4-6 points): Step-by-step breakdown with formulas, key equations, and explanations
+3. **Mental Anchor** (1 sentence): Memorable phrase or analogy
+4. **Key Points** (3-5 items): Critical facts, formulas, or concepts
+5. **Exam Strategies** (2-3 items): Problem-solving tips and common pitfalls
+6. **Quick Reference** (1 sentence): One-line summary for quick revision
+
+Focus on clarity, visual hierarchy, and educational value.`;
+
+  const textResult = await textModel.generateContent(textPrompt);
+  const blueprint = JSON.parse(textResult.response.text());
+
+  // STEP 2: Generate image using the same image model
+  onStatusUpdate?.('Generating visual sketchnote...');
+
+  const imagePrompt = `Create a professional hand-drawn educational sketchnote on white background for:
+
+**Topic**: ${topic}
+**Subject**: ${subject}
+
+**Visual Concept**: ${blueprint.visualConcept}
+
+**Content Structure**:
+${blueprint.detailedNotes}
+
+**Key Points**:
+${blueprint.keyPoints.map((p: string, i: number) => `${i + 1}. ${p}`).join('\n')}
+
+**Mental Anchor**: ${blueprint.mentalAnchor}
+
+**Quick Reference**: ${blueprint.quickReference}
+
+**Style Requirements**:
+- Hand-drawn sketchnote aesthetic with clean lines
+- Use bullet points, arrows, boxes, and visual hierarchy
+- Include formulas and equations prominently
+- Add small icons and visual anchors
+- Use different text sizes for hierarchy
+- Black ink on white background
+- Educational poster style
+- Clear, readable handwriting style
+- Organized layout with good spacing`;
+
+  const imageModel = genAI.getGenerativeModel({
+    model: actualImageModel
+  });
+
+  const imageResult = await imageModel.generateContent(imagePrompt);
+
+  // Extract image data from response (correct format for image models)
+  const imagePart = imageResult.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
+
+  if (!imagePart?.inlineData) {
+    throw new Error(`No image was generated by ${actualImageModel}`);
+  }
+
+  const imageDataUrl = `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
+
+  return {
+    imageData: imageDataUrl,
+    blueprint: {
+      visualConcept: blueprint.visualConcept,
+      detailedNotes: blueprint.detailedNotes,
+      mentalAnchor: blueprint.mentalAnchor,
+      keyPoints: blueprint.keyPoints,
+      examStrategies: blueprint.examStrategies,
+      quickReference: blueprint.quickReference
+    }
+  };
+};
+
+/**
  * Master generation function that routes to the selected method
  */
 export const generateSketch = async (
@@ -1284,12 +1416,6 @@ export const generateSketch = async (
   apiKey: string,
   onStatusUpdate?: (status: string) => void
 ): Promise<GenerationResult> => {
-  switch (method) {
-    case 'gemini-3-pro-image':
-      return generateGemini3ProImage(topic, questionText, subject, apiKey, onStatusUpdate);
-    case 'gemini-2.5-flash-image':
-      return generateGemini25FlashImage(topic, questionText, subject, apiKey, onStatusUpdate);
-    default:
-      throw new Error(`Unknown generation method: ${method}`);
-  }
+  // Use the selected model for both text and image generation
+  return generateUnifiedSketch(method, topic, questionText, subject, apiKey, onStatusUpdate);
 };

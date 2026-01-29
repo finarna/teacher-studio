@@ -200,3 +200,214 @@
 .rotate-y-180 {
     transform: rotateY(180deg);
 }
+
+/* Enhanced Progress Animations */
+@keyframes shimmer-fast {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.animate-shimmer-fast {
+    animation: shimmer-fast 2s linear infinite;
+}
+
+@keyframes shimmer-slow {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.animate-shimmer-slow {
+    animation: shimmer-slow 4s linear infinite;
+}
+
+@keyframes float-slow {
+    0%, 100% {
+        transform: translateY(0px) translateX(0px);
+    }
+    50% {
+        transform: translateY(-20px) translateX(10px);
+    }
+}
+
+.animate-float-slow {
+    animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes float-medium {
+    0%, 100% {
+        transform: translateY(0px) translateX(0px);
+    }
+    50% {
+        transform: translateY(-15px) translateX(-8px);
+    }
+}
+
+.animate-float-medium {
+    animation: float-medium 4s ease-in-out infinite;
+}
+
+@keyframes float-fast {
+    0%, 100% {
+        transform: translateY(0px) translateX(0px);
+    }
+    50% {
+        transform: translateY(-12px) translateX(8px);
+    }
+}
+
+.animate-float-fast {
+    animation: float-fast 3s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.animate-gradient-shift {
+    animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-gentle {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+.animate-pulse-gentle {
+    animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ENHANCED KATEX FORMULA RENDERING
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Better spacing and sizing for mathematical formulas */
+.katex {
+    font-size: 1.1em !important;
+    line-height: 1.5 !important;
+}
+
+/* Display mode (block equations) - centered and prominent */
+.katex-display {
+    margin: 1.25rem 0 !important;
+    padding: 0.75rem 0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Inline math - better vertical alignment */
+.katex-html {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Chemistry formulas - slightly smaller and distinct color */
+.katex .mhchem {
+    color: #0f766e !important; /* Teal for chemistry */
+    font-size: 0.95em;
+}
+
+/* Physics units - distinct styling */
+.katex .pu {
+    color: #1e40af !important; /* Blue for physics units */
+    font-size: 0.9em;
+}
+
+/* Better rendering for fractions */
+.katex .frac-line {
+    border-bottom-width: 0.06em !important;
+}
+
+/* Matrices and arrays - better spacing */
+.katex .arraycolsep {
+    width: 0.5em !important;
+}
+
+/* Subscripts and superscripts - improved readability */
+.katex .msupsub {
+    text-rendering: optimizeLegibility;
+}
+
+/* Square roots - smoother rendering */
+.katex .sqrt {
+    border-color: currentColor !important;
+}
+
+/* Better contrast for parentheses and brackets */
+.katex .delimsizing {
+    color: #334155 !important;
+}
+
+/* Smooth scrolling for long equations */
+.katex-display > .katex {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Chemistry reaction arrows - more prominent */
+.katex .mhchem-arrow {
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+/* Enhanced readability in Vidya chat */
+.rich-markdown .katex {
+    max-width: 100%;
+}
+
+.rich-markdown .katex-display {
+    background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 50%, #f8fafc 100%);
+    border-radius: 8px;
+    padding: 1rem !important;
+    margin: 1.5rem 0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VIDYA V3 - CUSTOM ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Slow spin animation for sparkle effect on FAB button */
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+}

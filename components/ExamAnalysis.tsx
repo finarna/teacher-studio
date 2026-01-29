@@ -17,6 +17,7 @@ import {
   ArrowLeft,
   RefreshCw,
   ChevronDown,
+  ChevronRight,
   Target,
   ChevronUp,
   FileText,
@@ -74,8 +75,10 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const [isSynthesizingQuestion, setIsSynthesizingQuestion] = useState<string | null>(null);
   const [intelligenceBreakdownTab, setIntelligenceBreakdownTab] = useState<'logic' | 'visual'>('logic');
   const [isGeneratingVisual, setIsGeneratingVisual] = useState<string | null>(null);
-  const [selectedImageModel, setSelectedImageModel] = useState<'gemini-2.5-flash-image' | 'gemini-3-pro-image'>('gemini-2.5-flash-image');
+  const [selectedImageModel, setSelectedImageModel] = useState<string>('gemini-3-flash-preview');
   const [enlargedVisualNote, setEnlargedVisualNote] = useState<{ imageUrl: string, questionId: string } | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isGroupedView, setIsGroupedView] = useState(false);
 
   if (!scan || !scan.analysisData) {
     return (
@@ -699,70 +702,269 @@ Return JSON ONLY: {
   }, [portfolioStats]);
 
   return (
-    <div className="p-4 h-full flex flex-col gap-4 font-instrument bg-slate-50/50 overflow-hidden">
-      <div className="flex items-center justify-between shrink-0 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-900 transition-all group">
-            <ArrowLeft size={16} className="group-hover:-translate-x-0.5" />
+    <div className="h-full flex flex-col font-instrument bg-slate-50 overflow-hidden">
+      {/* Ultra-Minimal Top Bar - 40px */}
+      <div className="h-10 px-4 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
+        {/* Left: Breadcrumb Navigation */}
+        <div className="flex items-center gap-2 text-[11px]">
+          <button onClick={onBack} className="p-1 hover:bg-slate-100 rounded transition-colors">
+            <ArrowLeft size={14} className="text-slate-500" />
           </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black text-slate-900 font-outfit uppercase tracking-tight italic">Intelligence <span className="text-accent-600">Sync</span></h2>
-              <span className="px-2 py-0.5 bg-slate-100 text-[9px] font-black text-slate-500 rounded uppercase tracking-widest">{scan.subject}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[200px]">{scan.name}</span>
-            </div>
-          </div>
+          <span className="text-slate-400">/</span>
+          <span className="text-slate-600 font-semibold">Intelligence Sync</span>
+          <span className="text-slate-400">/</span>
+          <span className="text-slate-900 font-bold">{scan.subject}</span>
+          <span className="text-slate-400">/</span>
+          <span className="text-slate-500 text-[10px] truncate max-w-[200px]">{scan.name}</span>
         </div>
 
-        {recentScans && recentScans.length > 0 && onSelectScan && (
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Selected Analysis Vault</label>
+        {/* Right: Quick Actions */}
+        <div className="flex items-center gap-2">
+          {recentScans && recentScans.length > 1 && onSelectScan && (
             <select
               value={scan.id}
               onChange={(e) => {
                 const selected = recentScans.find(s => s.id === e.target.value);
-                if (selected && onSelectScan) {
-                  onSelectScan(selected);
-                }
+                if (selected && onSelectScan) onSelectScan(selected);
               }}
-              className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer min-w-[250px] hover:border-accent-400 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-all"
+              className="bg-slate-50 border border-slate-200 text-slate-700 rounded-md px-2 py-1 text-[10px] font-semibold outline-none cursor-pointer hover:border-slate-300 transition-all"
             >
               {recentScans.map(s => (
-                <option key={s.id} value={s.id}>{s.name} ({s.subject})</option>
+                <option key={s.id} value={s.id}>{s.name.substring(0, 30)}...</option>
               ))}
             </select>
-          </div>
-        )}
+          )}
+          <button className="p-1.5 hover:bg-slate-100 rounded transition-colors">
+            <Share2 size={14} className="text-slate-500" />
+          </button>
+          <button className="px-2 py-1 bg-slate-900 text-white rounded-md text-[10px] font-bold hover:bg-slate-800 transition-colors flex items-center gap-1">
+            <Download size={12} /> Export
+          </button>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5 p-1 bg-slate-50 border border-slate-200 rounded-xl">
-          {(['overview', 'intelligence', 'vault'] as const).map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)} className={`px-5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.1em] transition-all font-outfit ${activeTab === tab ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>
-              {tab}
-            </button>
-          ))}
+      {/* Main Layout: Sidebar + Content */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Collapsible Left Sidebar */}
+        <div className={`bg-white border-r border-slate-200 flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-0'} overflow-hidden`}>
+          {/* Sidebar Header - Tabs */}
+          <div className="p-3 border-b border-slate-200 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg">
+              {(['overview', 'intelligence', 'vault'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wide transition-all ${activeTab === tab ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  {tab.substring(0, 4)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Vault Sidebar Content */}
+          {activeTab === 'vault' && (
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Search & View Toggle */}
+              <div className="p-2 border-b border-slate-100 space-y-2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search questions..."
+                    className="w-full px-3 py-1.5 text-[11px] border border-slate-200 rounded-lg outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-400/20 transition-all pl-8"
+                  />
+                  <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                {/* View Toggle */}
+                <div className="flex items-center gap-1 bg-slate-100 rounded-md p-0.5">
+                  <button
+                    onClick={() => setIsGroupedView(false)}
+                    className={`flex-1 px-2 py-1 text-[9px] font-semibold rounded transition-all ${
+                      !isGroupedView ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+                    }`}
+                  >
+                    List
+                  </button>
+                  <button
+                    onClick={() => setIsGroupedView(true)}
+                    className={`flex-1 px-2 py-1 text-[9px] font-semibold rounded transition-all ${
+                      isGroupedView ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+                    }`}
+                  >
+                    Group
+                  </button>
+                </div>
+              </div>
+
+              {/* Question List - Plain View */}
+              {!isGroupedView && (
+                <div className="flex-1 overflow-y-auto scroller-hide p-2 space-y-1.5">
+                  {questions.map((q, i) => {
+                    const qId = q.id || `frag-${i}`;
+                    const isActive = (expandedQuestionId || questions[0]?.id) === qId;
+                    const qNumMatch = q.id?.match(/Q(\d+)/i);
+                    const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
+                    const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
+
+                    return (
+                      <button
+                        key={qId}
+                        onClick={() => toggleQuestion(qId)}
+                        className={`w-full text-left p-2 rounded-md transition-all border ${
+                          isActive
+                            ? 'bg-accent-50 border-accent-300 shadow-sm'
+                            : 'bg-white hover:bg-slate-50 border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`flex items-center justify-center w-6 h-6 rounded text-[11px] font-bold ${
+                            isActive
+                              ? 'bg-accent-600 text-white'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {qNum}
+                          </span>
+                          <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-semibold rounded">
+                            {q.marks}M
+                          </span>
+                          {hasVisual && (
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" title="Has diagram/image" />
+                          )}
+                          <div className="flex-1 text-[10px] text-slate-600 line-clamp-1 leading-tight">
+                            <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Question List - Grouped View */}
+              {isGroupedView && (
+                <div className="flex-1 overflow-y-auto scroller-hide p-2 space-y-3">
+                  {aggregatedDomains.map((domain) => {
+                    const isDomainExpanded = expandedDomainId === domain.name;
+                    const domainQuestions = domain.catQuestions || [];
+
+                    if (domainQuestions.length === 0) return null;
+
+                    return (
+                      <div key={domain.name} className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+                        <button
+                          onClick={() => setExpandedDomainId(isDomainExpanded ? null : domain.name)}
+                          className="w-full flex flex-col gap-2 p-2.5 bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-150 transition-all"
+                        >
+                          <div className="flex items-start justify-between w-full gap-2">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              {isDomainExpanded ? (
+                                <ChevronDown size={14} className="text-slate-600 flex-shrink-0 mt-0.5" />
+                              ) : (
+                                <ChevronRight size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
+                              )}
+                              <span className="text-[10px] font-bold text-slate-800 uppercase tracking-wide leading-tight">
+                                {domain.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <span className="px-1.5 py-0.5 bg-white text-slate-600 text-[8px] font-bold rounded">
+                                {domainQuestions.length}Q
+                              </span>
+                              <span className="px-1.5 py-0.5 bg-white text-slate-600 text-[8px] font-bold rounded">
+                                {domain.totalMarks}M
+                              </span>
+                              <span className={`px-1.5 py-0.5 text-[8px] font-semibold rounded ${
+                                domain.difficultyDNA === 'Hard' ? 'bg-red-100 text-red-700' :
+                                domain.difficultyDNA === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
+                              }`}>
+                                {domain.difficultyDNA}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                        {isDomainExpanded && (
+                          <div className="p-2 space-y-1.5 bg-slate-50/50">
+                            {domainQuestions.map((q, i) => {
+                              const qId = q.id || `frag-${i}`;
+                              const isActive = (expandedQuestionId || questions[0]?.id) === qId;
+                              const qNumMatch = q.id?.match(/Q(\d+)/i);
+                              const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
+                              const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
+
+                              return (
+                                <button
+                                  key={qId}
+                                  onClick={() => toggleQuestion(qId)}
+                                  className={`w-full text-left p-2 rounded-md transition-all border ${
+                                    isActive
+                                      ? 'bg-accent-50 border-accent-300 shadow-sm'
+                                      : 'bg-white hover:bg-slate-50 border-slate-200'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className={`flex items-center justify-center w-6 h-6 rounded text-[11px] font-bold ${
+                                      isActive
+                                        ? 'bg-accent-600 text-white'
+                                        : 'bg-slate-100 text-slate-600'
+                                    }`}>
+                                      {qNum}
+                                    </span>
+                                    <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-semibold rounded">
+                                      {q.marks}M
+                                    </span>
+                                    {hasVisual && (
+                                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" title="Has diagram/image" />
+                                    )}
+                                    <div className="flex-1 text-[10px] text-slate-600 line-clamp-1 leading-tight">
+                                      <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
+                                    </div>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Sidebar Footer */}
+              <div className="p-2 border-t border-slate-100">
+                <button
+                  onClick={synthesizeAllSolutions}
+                  disabled={isSynthesizingAll}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-accent-600 text-white rounded-lg text-[9px] font-bold hover:bg-accent-700 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {isSynthesizingAll ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                  Sync All
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {activeTab === 'vault' && (
-          <button
-            onClick={synthesizeAllSolutions}
-            disabled={isSynthesizingAll}
-            className="flex items-center gap-2 px-4 py-2 bg-accent-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-700 transition-all shadow-lg shadow-accent-600/20 active:scale-95 disabled:opacity-50"
-          >
-            {isSynthesizingAll ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-            Sync All
-          </button>
-        )}
-      </div>
+        {/* Toggle Sidebar Button */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-6 h-12 bg-white border border-slate-200 rounded-r-lg flex items-center justify-center hover:bg-slate-50 transition-all shadow-sm"
+          style={{ marginLeft: sidebarOpen ? '256px' : '0px', transition: 'margin-left 300ms' }}
+        >
+          <svg className={`w-3 h-3 text-slate-400 transition-transform ${sidebarOpen ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
 
-      <div className="flex-1 min-h-0 overflow-y-auto scroller-hide">
-        {activeTab === 'overview' && (
-          <div className="space-y-6 pb-8">
-            {/* Top Level Intelligence Matrix */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto scroller-hide">
+          {activeTab === 'overview' && (
+            <div className="p-6 space-y-6">
+              {/* Top Level Intelligence Matrix */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <MetricCard title="SYNTHESIZED FRAGMENTS" content={questions.length} label="Units" icon={<FileText size={16} />} />
               <MetricCard title="PORTFOLIO SOURCE" content={Array.from(new Set(questions.map(q => q.source))).length || 1} label="Papers" icon={<FolderOpen size={16} />} />
               <MetricCard title="COGNITIVE WEIGHT" content={questions.reduce((a, b) => a + (Number(b.marks) || 0), 0)} label="Marks" icon={<Sigma size={16} />} />
@@ -1097,8 +1299,8 @@ Return JSON ONLY: {
           </div>
         )}
 
-        {activeTab === 'intelligence' && (
-          <div className="grid grid-cols-12 gap-4 pb-8">
+          {activeTab === 'intelligence' && (
+            <div className="p-6 grid grid-cols-12 gap-4">
             <div className="col-span-12 xl:col-span-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-sm min-h-[500px] min-w-0 flex flex-col">
               <div className="flex items-center justify-between mb-10">
                 <div>
@@ -1198,92 +1400,9 @@ Return JSON ONLY: {
         )}
 
         {activeTab === 'vault' && (
-          <div className="h-full flex flex-col pt-2 pb-4 overflow-hidden">
-            <div className="flex-1 lg:grid lg:grid-cols-12 gap-4 overflow-hidden">
-              {/* Master List (Left Column) */}
-              {/* Master List (Left Column) - Grouped by Domain */}
-              <div className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto pr-2 scroller-hide">
-                {aggregatedDomains.map((domain, dIdx) => {
-                  const isDomainExpanded = expandedDomainId === domain.name || (expandedDomainId === null && dIdx === 0);
-                  const domainQuestions = domain.catQuestions || [];
-
-                  if (domainQuestions.length === 0) return null;
-
-                  return (
-                    <div key={domain.name} className="flex flex-col gap-2">
-                      <button
-                        onClick={() => setExpandedDomainId(expandedDomainId === domain.name ? '' : domain.name)}
-                        className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 ${isDomainExpanded ? 'bg-slate-900 border-slate-800 shadow-xl' : 'bg-white border-slate-100 hover:border-slate-200'}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${isDomainExpanded ? 'bg-accent-500/20 text-accent-400' : 'bg-slate-50 text-slate-400'}`}>
-                            <Compass size={16} />
-                          </div>
-                          <div className="text-left">
-                            <p className={`text-[10px] font-black uppercase tracking-[0.15em] transition-colors ${isDomainExpanded ? 'text-white' : 'text-slate-900'}`}>{domain.name}</p>
-                            <p className={`text-[8px] font-bold uppercase tracking-widest ${isDomainExpanded ? 'text-slate-500' : 'text-slate-400'}`}>{domainQuestions.length} Questions Indexed</p>
-                          </div>
-                        </div>
-                        {isDomainExpanded ? <ChevronUp size={14} className="text-slate-500" /> : <ChevronDown size={14} className="text-slate-400" />}
-                      </button>
-
-                      {isDomainExpanded && (
-                        <div className="flex flex-col gap-2 pl-4 border-l-2 border-slate-100 animate-in slide-in-from-top-2 duration-300 ml-4">
-                          {domainQuestions.map((q, i) => {
-                            const qId = q.id || `frag-${dIdx}-${i}`;
-                            const isActive = (expandedQuestionId || questions[0]?.id) === qId;
-
-                            return (
-                              <div
-                                key={qId}
-                                onClick={() => toggleQuestion(qId)}
-                                className={`p-4 transition-all cursor-pointer rounded-2xl border flex flex-col gap-2 group relative overflow-hidden ${isActive ? 'bg-white border-accent-500 shadow-xl ring-1 ring-accent-500/20' : 'bg-slate-50 border-transparent hover:border-slate-200'}`}
-                              >
-                                {isActive && <div className="absolute top-0 left-0 w-1 h-full bg-accent-500" />}
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    {/* Extract and display question number */}
-                                    {(() => {
-                                      const qNumMatch = q.id?.match(/Q(\d+)/i);
-                                      const qNum = qNumMatch ? qNumMatch[1] : null;
-                                      return qNum ? (
-                                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tight ${isActive ? 'bg-accent-500 text-white' : 'bg-slate-200 text-slate-700'}`}>
-                                          Q{qNum}
-                                        </span>
-                                      ) : null;
-                                    })()}
-                                    <span className={`text-[9px] font-black uppercase tracking-tighter ${isActive ? 'text-accent-500' : 'text-slate-400'}`}>
-                                      {q.marks}M • {q.difficulty}
-                                    </span>
-                                    {(q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0)) && (
-                                      <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[7px] font-black uppercase rounded tracking-widest border border-blue-200 flex items-center gap-0.5">
-                                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        Visual
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-slate-400' : 'text-slate-300'}`}>
-                                    {q.source?.substring(0, 15)}...
-                                  </span>
-                                </div>
-                                <div className={`text-[11px] font-bold leading-relaxed line-clamp-2 font-instrument ${isActive ? 'text-slate-900' : 'text-slate-500'}`}>
-                                  <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Detail Panel (Right Column) */}
-              <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-y-auto scroller-hide p-6 md:p-8 relative">
-                {questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`)) ? (
+          <div className="p-6 space-y-6">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8">
+              {questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`)) ? (
                   (() => {
                     const selectedQ = questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`))!;
                     const qId = selectedQ.id || 'frag-0';
@@ -1299,289 +1418,225 @@ Return JSON ONLY: {
                     });
 
                     return (
-                      <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                        {/* Header Section */}
-                        <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
-                          <div className="flex flex-col gap-3 flex-1">
-                            <div className="flex items-center justify-between">
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="px-2 py-0.5 bg-accent-100 text-accent-700 text-[9px] font-black uppercase rounded tracking-widest">Pedagogical Logic</span>
-                                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {selectedQ.id} • {selectedQ.marks} Marks</span>
-                                </div>
-                                <h2 className="text-xl font-black text-slate-900 font-outfit uppercase tracking-tight">Intelligence <span className="text-accent-600">Breakdown</span></h2>
-                              </div>
-                              <div className="flex gap-2">
-                                <button className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-900 transition-all shadow-sm">
-                                  <Share2 size={16} />
-                                </button>
-                                <select
-                                  value={selectedImageModel}
-                                  onChange={(e) => setSelectedImageModel(e.target.value as any)}
-                                  className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-700 hover:border-slate-300 transition-all shadow-sm cursor-pointer"
-                                >
-                                  <option value="gemini-2.5-flash-image">Gemini 2.5 Flash (Fast)</option>
-                                  <option value="gemini-3-pro-image">Gemini 3 Pro (Quality)</option>
-                                </select>
-                                <button
-                                  onClick={handleGenerateAllVisuals}
-                                  disabled={isGeneratingVisual !== null}
-                                  className="flex items-center gap-2 px-4 py-2 bg-accent-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-700 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  {isGeneratingVisual !== null ? (
-                                    <>
-                                      <Loader2 size={14} className="animate-spin" /> Generating...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Sparkles size={14} /> Generate All Visuals
-                                    </>
-                                  )}
-                                </button>
-                                <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-600 transition-all shadow-lg active:scale-95">
-                                  <Download size={14} /> Export
-                                </button>
-                              </div>
-                            </div>
+                      <>
+                        {/* Single Row Question Header */}
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+                          {/* Left - Question Info */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-bold text-slate-900">{selectedQ.id}</span>
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-semibold rounded">
+                              {selectedQ.marks}M
+                            </span>
+                            {selectedQ.difficulty && (
+                              <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${
+                                selectedQ.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                                selectedQ.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
+                              }`}>
+                                {selectedQ.difficulty}
+                              </span>
+                            )}
+                            {selectedQ.blooms && (
+                              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-semibold rounded">
+                                {selectedQ.blooms}
+                              </span>
+                            )}
+                            {selectedQ.topic && (
+                              <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-medium rounded max-w-[200px] truncate">
+                                {selectedQ.topic}
+                              </span>
+                            )}
+                            {(selectedQ.hasVisualElement || (selectedQ.extractedImages && selectedQ.extractedImages.length > 0)) && (
+                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-semibold rounded flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                                Diagram
+                              </span>
+                            )}
+                          </div>
 
-                            {/* Tab Navigation */}
-                            <div className="flex gap-2 mt-2">
-                              <button
-                                onClick={() => setIntelligenceBreakdownTab('logic')}
-                                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                                  intelligenceBreakdownTab === 'logic'
-                                    ? 'bg-slate-900 text-white shadow-md'
-                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                                }`}
-                              >
-                                Logic & Steps
-                              </button>
-                              <button
-                                onClick={() => setIntelligenceBreakdownTab('visual')}
-                                className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                                  intelligenceBreakdownTab === 'visual'
-                                    ? 'bg-slate-900 text-white shadow-md'
-                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                                }`}
-                              >
-                                Visual Note
-                              </button>
-                            </div>
+                          {/* Right - Actions */}
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={selectedImageModel}
+                              onChange={(e) => setSelectedImageModel(e.target.value)}
+                              className="px-2 py-1 text-[9px] font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded hover:border-slate-300 transition-all outline-none"
+                              title="Select AI model"
+                            >
+                              <option value="gemini-3-flash-preview">Flash Preview</option>
+                              <option value="gemini-2.0-flash-lite">Flash Lite</option>
+                              <option value="gemini-2.5-flash-latest">Flash 2.5</option>
+                              <option value="gemini-1.5-pro">Pro 1.5</option>
+                              <option value="gemini-2.0-pro-exp">Pro 2.0 Exp</option>
+                              <option value="gemini-3-pro">Pro 3</option>
+                            </select>
+                            <div className="h-4 w-px bg-slate-200"></div>
+                            <button
+                              onClick={() => synthesizeQuestionDetails(qId)}
+                              disabled={isSynthesizingQuestion === qId}
+                              className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all disabled:opacity-50"
+                              title="Sync this question"
+                            >
+                              {isSynthesizingQuestion === qId ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                            </button>
+                            <button
+                              onClick={() => handleGenerateVisual(selectedQ.id)}
+                              disabled={isGeneratingVisual !== null}
+                              className="p-2 text-purple-500 hover:bg-purple-50 rounded-lg transition-all disabled:opacity-50"
+                              title="Generate visual for this question"
+                            >
+                              {isGeneratingVisual === selectedQ.id ? (
+                                <Loader2 size={16} className="animate-spin text-purple-500" />
+                              ) : (
+                                <Sparkles size={16} />
+                              )}
+                            </button>
+                            <button
+                              onClick={handleGenerateAllVisuals}
+                              disabled={isGeneratingVisual !== null}
+                              className="p-2 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-all disabled:opacity-50"
+                              title="Generate all visuals"
+                            >
+                              {(isGeneratingVisual !== null && isGeneratingVisual !== selectedQ.id) ? (
+                                <Loader2 size={16} className="animate-spin text-yellow-500" />
+                              ) : (
+                                <Zap size={16} />
+                              )}
+                            </button>
                           </div>
                         </div>
 
-                        {/* Content */}
-                        <div className="space-y-10">
-                          {/* Question Text - Always visible */}
-                          <div className="text-lg font-bold text-slate-800 leading-relaxed font-instrument border-l-4 border-accent-500/20 pl-6 py-4 mb-8 bg-slate-50/50 rounded-xl">
+                        {/* Question Text */}
+                        <div className="text-base text-slate-900 leading-relaxed mb-6">
                             <RenderWithMath text={selectedQ.text || ''} showOptions={false} serif={false} />
                           </div>
 
-                          {/* Options Display */}
-                          {selectedQ.options && selectedQ.options.length > 0 && (
-                            <div className="mb-8 space-y-3">
-                              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Answer Options</h4>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {selectedQ.options.map((option: string, idx: number) => (
-                                  <div
+                        {/* Options - Minimal */}
+                        {selectedQ.options && selectedQ.options.length > 0 && (
+                          <div className="grid grid-cols-2 gap-2 mb-6">
+                            {selectedQ.options.map((option: string, idx: number) => (
+                              <div
+                                key={idx}
+                                className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                              >
+                                <span className="flex-shrink-0 w-5 h-5 rounded bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold">
+                                  {['A', 'B', 'C', 'D'][idx]}
+                                </span>
+                                <div className="flex-1 text-sm text-slate-700">
+                                  <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Content Container with Tab Switcher */}
+                        <div className="relative border-t border-slate-200 pt-6">
+                          {/* Tab Switcher - Top Right of Content */}
+                          <div className="absolute top-0 right-0 flex items-center gap-1 bg-white px-2 py-1 -translate-y-1/2 rounded-lg border border-slate-200 shadow-sm">
+                            <button
+                              onClick={() => setIntelligenceBreakdownTab('logic')}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                                intelligenceBreakdownTab === 'logic'
+                                  ? 'bg-slate-900 text-white shadow-sm'
+                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                              }`}
+                            >
+                              <span className="text-sm">📝</span>
+                              <span>Logic</span>
+                            </button>
+                            <button
+                              onClick={() => setIntelligenceBreakdownTab('visual')}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                                intelligenceBreakdownTab === 'visual'
+                                  ? 'bg-slate-900 text-white shadow-sm'
+                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                              }`}
+                            >
+                              <span className="text-sm">👁</span>
+                              <span>Visual</span>
+                            </button>
+                          </div>
+
+                          {/* Content Tabs */}
+                          {intelligenceBreakdownTab === 'logic' ? (
+                            <div className="space-y-4">
+                            {/* Extracted Images - Minimal */}
+                            {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (
+                              <div className="mb-4">
+                                {selectedQ.extractedImages.map((imgData, idx) => (
+                                  <img
                                     key={idx}
-                                    className="flex items-start gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-accent-400 transition-all group"
-                                  >
-                                    <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-accent-100 text-slate-600 group-hover:text-accent-600 flex items-center justify-center text-[10px] font-black transition-colors">
-                                      {['A', 'B', 'C', 'D'][idx]}
-                                    </div>
-                                    <div className="flex-1 text-[13px] font-bold text-slate-700 leading-relaxed">
-                                      <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
-                                    </div>
-                                  </div>
+                                    src={imgData}
+                                    alt={`Diagram ${idx + 1}`}
+                                    className="w-full rounded-lg border border-slate-200"
+                                  />
                                 ))}
                               </div>
-                            </div>
-                          )}
+                            )}
 
-                          {/* Conditional Content based on tab */}
-                          {intelligenceBreakdownTab === 'logic' ? (
-                            <div className="space-y-10">
-
-                          {/* Visual Element Information */}
-                          {((selectedQ.hasVisualElement && selectedQ.visualElementDescription) || (selectedQ.extractedImages && selectedQ.extractedImages.length > 0)) && (
-                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6 shadow-lg">
-                              <div className="flex items-start gap-4">
-                                <div className="flex-shrink-0 w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
-                                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                  </svg>
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-3">
-                                    <h4 className="text-[11px] font-black text-blue-900 uppercase tracking-widest">Visual Element Detected</h4>
-                                    {selectedQ.visualElementType && (
-                                      <span className="px-2 py-0.5 bg-blue-200 text-blue-800 text-[8px] font-black uppercase rounded-md tracking-wide">
-                                        {selectedQ.visualElementType}
-                                      </span>
-                                    )}
-                                    {selectedQ.visualElementPosition && (
-                                      <span className="px-2 py-0.5 bg-indigo-200 text-indigo-800 text-[8px] font-black uppercase rounded-md tracking-wide">
-                                        Position: {selectedQ.visualElementPosition}
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  {/* AI-generated visual description */}
-                                  {selectedQ.visualElementDescription && (
-                                    <div className="text-sm font-semibold text-slate-700 leading-relaxed bg-white/60 rounded-lg p-4 border border-blue-100">
-                                      <p className="text-[10px] font-black text-blue-700 uppercase tracking-wider mb-2">Description:</p>
-                                      <RenderWithMath text={selectedQ.visualElementDescription} showOptions={false} serif={false} />
-                                    </div>
-                                  )}
-
-                                  {/* Display extracted images if available */}
-                                  {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (
-                                    <div className="mt-4 space-y-3">
-                                      <p className="text-[10px] font-black text-blue-700 uppercase tracking-wider">Extracted Image(s):</p>
-                                      <div className="grid grid-cols-1 gap-3">
-                                        {selectedQ.extractedImages.map((imgData, idx) => (
-                                          <div key={idx} className="bg-white rounded-lg p-3 border border-blue-200 shadow-sm">
-                                            <img
-                                              src={imgData}
-                                              alt={`Question visual ${idx + 1}`}
-                                              className="w-full h-auto rounded-md border border-slate-200"
-                                            />
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  <div className="mt-3 text-[9px] font-bold text-blue-600 uppercase tracking-wide flex items-center gap-2">
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                    </svg>
-                                    This question contains a visual element in the original paper. Use the description above to understand the diagram/table/illustration.
-                                  </div>
-                                </div>
+                            {/* Solution Steps - Minimal */}
+                            {isSynthesizingQuestion === qId ? (
+                              <div className="flex items-center justify-center py-8">
+                                <Loader2 className="animate-spin text-accent-500" size={20} />
                               </div>
-                            </div>
-                          )}
-
-                          {isSynthesizingQuestion === qId ? (
-                            <div className="flex flex-col items-center justify-center py-20 text-center">
-                              <Loader2 className="animate-spin text-accent-600 mb-6" size={40} />
-                              <p className="text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Synthesizing Pedagogical Logic...</p>
-                            </div>
-                          ) : selectedQ.solutionSteps ? (
-                            <div className="space-y-12">
-                              {/* Core Logic Callout */}
-                              <div className="p-6 md:p-8 bg-accent-50 border border-accent-100 rounded-[2rem] relative overflow-hidden shadow-sm">
-                                <div className="absolute top-0 right-0 p-6 opacity-[0.05] -rotate-12"><Zap size={100} /></div>
-                                <h4 className="text-[10px] font-black text-accent-600 uppercase tracking-widest mb-3 flex items-center gap-2 font-outfit">
-                                  <div className="w-2 h-2 rounded-full bg-accent-500 animate-pulse outline outline-4 outline-accent-500/10"></div>
-                                  Core Domain Logic
-                                </h4>
-                                <div className="text-lg font-bold text-slate-900 leading-relaxed italic border-l-2 border-accent-200 pl-6 font-instrument">
-                                  <RenderWithMath text={selectedQ.masteryMaterial?.coreConcept} showOptions={false} serif={false} />
-                                </div>
-                              </div>
-
-                              {/* Derivation Steps */}
-                              <div className="space-y-8">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-4 font-outfit">
-                                  Structural Breakdown <div className="h-px bg-slate-100 flex-1"></div>
-                                </h4>
+                            ) : selectedQ.solutionSteps ? (
+                              <div className="space-y-3">
                                 {selectedQ.solutionSteps.map((step: string, sIdx: number) => {
-                                  const [title, content] = step.includes(':::') ? step.split(':::') : [`Step ${sIdx + 1}`, step];
+                                  const [title, content] = step.includes(':::') ? step.split(':::') : [`${sIdx + 1}`, step];
                                   return (
-                                    <div key={sIdx} className="relative pl-6 border-l border-slate-100 last:border-0 pb-6">
-                                      <div className="absolute top-0 -left-[5px] w-2.5 h-2.5 rounded-full bg-white border-2 border-accent-500" />
-                                      <div className="flex flex-col gap-1">
-                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{title}</div>
-                                        <div className="text-base font-bold text-slate-700 leading-relaxed">
-                                          <RenderWithMath text={content} showOptions={false} serif={false} />
-                                        </div>
+                                    <div key={sIdx} className="flex gap-3 pb-3 border-b border-slate-100 last:border-0">
+                                      <span className="flex-shrink-0 w-5 h-5 rounded bg-slate-100 text-slate-600 flex items-center justify-center text-[10px] font-semibold">
+                                        {sIdx + 1}
+                                      </span>
+                                      <div className="flex-1 text-sm text-slate-700 leading-relaxed">
+                                        <RenderWithMath text={content} showOptions={false} serif={false} />
                                       </div>
                                     </div>
                                   );
                                 })}
                               </div>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center py-16 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                              <HelpCircle size={48} className="text-slate-300 mb-4" />
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">No Logic Fragments Found</p>
-                              <button
-                                onClick={() => synthesizeQuestionDetails(qId)}
-                                className="px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-600 transition-all flex items-center gap-3 shadow-2xl shadow-slate-900/20 active:scale-95"
-                              >
-                                <Zap size={14} /> Synthesize Logic Fragments
-                              </button>
-                            </div>
-                          )}
-                            </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center py-8">
+                                <p className="text-xs text-slate-400 mb-3">No solution available</p>
+                                <button
+                                  onClick={() => synthesizeQuestionDetails(qId)}
+                                  className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-medium hover:bg-slate-800 transition-colors"
+                                >
+                                  Generate
+                                </button>
+                              </div>
+                            )}
+                          </div>
                           ) : (
                             /* Visual Tab Content */
-                            <div className="space-y-6">
+                            <div className="space-y-4">
                               {selectedQ.sketchSvg ? (
-                                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-lg">
-                                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
-                                    <div className="p-2 bg-accent-100 rounded-lg">
-                                      <Sparkles size={16} className="text-accent-600" />
-                                    </div>
-                                    <h4 className="text-[10px] font-black text-slate-700 uppercase tracking-widest font-outfit">
-                                      AI-Generated Visual Learning Note
-                                    </h4>
-                                  </div>
-                                  <div
-                                    className="rounded-xl overflow-hidden border border-slate-200 bg-slate-50 cursor-pointer hover:border-accent-500 transition-all group relative"
-                                    onClick={() => setEnlargedVisualNote({ imageUrl: selectedQ.sketchSvg!, questionId: selectedQ.id })}
-                                  >
-                                    <img
-                                      src={selectedQ.sketchSvg}
-                                      alt={`Visual note for ${selectedQ.topic}`}
-                                      className="w-full h-auto group-hover:scale-[1.02] transition-transform"
-                                    />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg">
-                                        <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                          </svg>
-                                          Click to Enlarge
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                    <p className="text-[10px] text-blue-800 font-bold uppercase tracking-wider flex items-center gap-2">
-                                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                      </svg>
-                                      This visual note provides a comprehensive learning aid for this specific question with formulas, steps, and exam tips.
-                                    </p>
-                                  </div>
+                                <div
+                                  className="rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:border-accent-400 transition-colors"
+                                  onClick={() => setEnlargedVisualNote({ imageUrl: selectedQ.sketchSvg!, questionId: selectedQ.id })}
+                                >
+                                  <img
+                                    src={selectedQ.sketchSvg}
+                                    alt="Visual note"
+                                    className="w-full h-auto"
+                                  />
                                 </div>
                               ) : (
-                                <div className="flex flex-col items-center justify-center py-16 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                                <div className="flex flex-col items-center justify-center py-8">
                                   {isGeneratingVisual === selectedQ.id ? (
                                     <>
-                                      <Loader2 size={48} className="text-accent-500 mb-4 animate-spin" />
-                                      <p className="text-[10px] font-black text-accent-600 uppercase tracking-widest mb-3">Generating Visual Note...</p>
-                                      <p className="text-[9px] text-slate-500 max-w-md text-center leading-relaxed">
-                                        AI is creating a comprehensive visual learning aid with formulas, steps, and exam strategies.
-                                      </p>
+                                      <Loader2 size={20} className="text-accent-500 mb-2 animate-spin" />
+                                      <p className="text-xs text-slate-500">Generating...</p>
                                     </>
                                   ) : (
                                     <>
-                                      <Sparkles size={48} className="text-slate-300 mb-4" />
-                                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">No Visual Note Generated</p>
-                                      <p className="text-[9px] text-slate-500 max-w-md text-center mb-6 leading-relaxed">
-                                        Generate an AI-powered visual learning aid with formulas, solution steps, and exam strategies for this question.
-                                      </p>
+                                      <p className="text-xs text-slate-400 mb-3">No visual note</p>
                                       <button
                                         onClick={() => handleGenerateVisual(selectedQ.id)}
                                         disabled={isGeneratingVisual !== null}
-                                        className="px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-accent-600 transition-all flex items-center gap-3 shadow-2xl shadow-slate-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
                                       >
-                                        <Sparkles size={14} /> Generate Visual Note
+                                        Generate
                                       </button>
                                     </>
                                   )}
@@ -1590,53 +1645,53 @@ Return JSON ONLY: {
                             </div>
                           )}
                         </div>
-                      </div>
+                      </>
                     );
                   })()
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-slate-300 italic">
-                    Select a fragment to synchronize intelligence...
-                  </div>
-                )}
-              </div>
+                <div className="flex flex-col items-center justify-center py-16 text-slate-300 italic">
+                  Select a fragment to synchronize intelligence...
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Enlarged Visual Note Modal */}
-        {enlargedVisualNote && (
-          <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setEnlargedVisualNote(null)}
-          >
-            <div className="relative max-w-6xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 z-10">
-                <button
-                  onClick={() => setEnlargedVisualNote(null)}
-                  className="p-2 bg-slate-900/90 hover:bg-slate-900 text-white rounded-xl shadow-lg transition-all active:scale-95"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className="p-6">
-                <div className="mb-4">
-                  <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Visual Learning Note</h3>
-                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">Question ID: {enlargedVisualNote.questionId}</p>
+          {/* Enlarged Visual Note Modal */}
+          {enlargedVisualNote && (
+            <div
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setEnlargedVisualNote(null)}
+            >
+              <div className="relative max-w-6xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 z-10">
+                  <button
+                    onClick={() => setEnlargedVisualNote(null)}
+                    className="p-2 bg-slate-900/90 hover:bg-slate-900 text-white rounded-xl shadow-lg transition-all active:scale-95"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
-                <div className="overflow-auto max-h-[calc(90vh-120px)]">
-                  <img
-                    src={enlargedVisualNote.imageUrl}
-                    alt="Enlarged visual note"
-                    className="w-full h-auto rounded-xl"
-                    onClick={(e) => e.stopPropagation()}
-                  />
+                <div className="p-6">
+                  <div className="mb-4">
+                    <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Visual Learning Note</h3>
+                    <p className="text-[9px] text-slate-500 uppercase tracking-wider">Question ID: {enlargedVisualNote.questionId}</p>
+                  </div>
+                  <div className="overflow-auto max-h-[calc(90vh-120px)]">
+                    <img
+                      src={enlargedVisualNote.imageUrl}
+                      alt="Enlarged visual note"
+                      className="w-full h-auto rounded-xl"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

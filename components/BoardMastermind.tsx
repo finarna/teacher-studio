@@ -24,6 +24,7 @@ import { generateMathExtractionInstructions, generateStreamlinedMathInstructions
 import { generatePhysicsExtractionInstructions } from '../utils/physicsNotationReference';
 import { generateCleanMathPrompt, validateExtraction } from '../utils/cleanMathExtractor';
 import { processQuestionsUnicode } from '../utils/unicodeToLatex'; // Latest: fixed escape char regex patterns
+import { extractQuestionsSimplified } from '../utils/simpleMathExtractor'; // NEW: Simplified extraction
 
 interface BoardMastermindProps {
   onNavigate: (view: string) => void;
@@ -35,7 +36,8 @@ interface BoardMastermindProps {
 const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentScans, onAddScan, onSelectScan }) => {
   const [selectedSubject, setSelectedSubject] = useState('Physics');
   const [selectedGrade, setSelectedGrade] = useState('Class 12');
-  const [selectedModel, setSelectedModel] = useState('gemini-2.0-flash-lite');
+  const [selectedModel, setSelectedModel] = useState('gemini-3-flash-preview');
+  const [useSimplifiedExtraction, setUseSimplifiedExtraction] = useState(true); // NEW: Toggle for simplified extraction
   const [isProcessing, setIsProcessing] = useState(false);
   const [loadingStage, setLoadingStage] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -117,10 +119,34 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           }
         }
 
-        // 🧪 Use CLEAN Math extraction prompt (fixes space-stripping, hallucinations, missing options)
-        const extractionPrompt = selectedSubject === 'Math'
-          ? generateCleanMathPrompt(selectedGrade)
-          : `Extract ALL questions verbatim from this ${selectedSubject} paper.
+        // 🎯 SIMPLIFIED EXTRACTION (if enabled for Math)
+        let extractedData: any;
+        if (useSimplifiedExtraction && selectedSubject === 'Math') {
+          console.log('🚀 [SIMPLIFIED MODE] Using schema-driven extraction with @google/genai');
+          const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel);
+          // Convert simplified format to our existing format
+          extractedData = {
+            questions: simpleQuestions.map((sq: any) => ({
+              id: `Q${sq.id}`,
+              text: sq.text,
+              options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
+              marks: 1,
+              difficulty: 'Moderate',
+              topic: 'Mathematics',
+              blooms: 'Apply',
+              domain: 'ALGEBRA',
+              chapter: 'General Mathematics',
+              hasVisualElement: false,
+              visualElementType: null,
+              visualElementDescription: null,
+              source: `${file.name}`
+            }))
+          };
+        } else {
+          // Legacy extraction
+          const extractionPrompt = selectedSubject === 'Math'
+            ? generateCleanMathPrompt(selectedGrade)
+            : `Extract ALL questions verbatim from this ${selectedSubject} paper.
         RULES:
         1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise in the text.
         2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
@@ -200,49 +226,52 @@ ${generatePhysicsExtractionInstructions()}
           "visualBoundingBox": { "pageNumber": 3, "x": "10%", "y": "45%", "width": "80%", "height": "25%" } (if hasVisualElement is true, percentage coordinates from page edges)
         }] }`;
 
-        const result = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]);
-        const data = safeAiParse<any>(result.response.text(), { questions: [] }, true);
+          const result = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]);
+          const data = safeAiParse<any>(result.response.text(), { questions: [] }, true);
 
-        // 🐛 DEBUG: Log BEFORE Unicode conversion to see raw extraction
-        if (data.questions && data.questions.length > 0) {
-          console.log(`🔍 [RAW EXTRACTION DEBUG] First 3 questions BEFORE Unicode conversion:`,
-            data.questions.slice(0, 3).map((q: any) => ({
+          // 🐛 DEBUG: Log BEFORE Unicode conversion to see raw extraction
+          if (data.questions && data.questions.length > 0) {
+            console.log(`🔍 [RAW EXTRACTION DEBUG] First 3 questions BEFORE Unicode conversion:`,
+              data.questions.slice(0, 3).map((q: any) => ({
+                id: q.id,
+                text: q.text?.substring(0, 100),
+                topic: q.topic,
+                domain: q.domain
+              }))
+            );
+          }
+
+          // ⭐ CRITICAL: Convert Unicode symbols (θ, √, etc.) to LaTeX before processing
+          if (data.questions && data.questions.length > 0) {
+            data.questions = processQuestionsUnicode(data.questions);
+            console.log(`✨ [UNICODE CONVERSION] ${file.name}: Processed ${data.questions.length} questions for Unicode→LaTeX conversion`);
+
+            // 🐛 DEBUG: Log topic assignments for classification debugging
+            const topicSummary = data.questions.slice(0, 10).map((q: any) => ({
               id: q.id,
-              text: q.text?.substring(0, 100),
+              text: q.text?.substring(0, 60),
               topic: q.topic,
               domain: q.domain
-            }))
-          );
-        }
+            }));
+            console.log(`📊 [TOPIC DEBUG] ${file.name} topic assignments (first 10):`, topicSummary);
+          }
 
-        // ⭐ CRITICAL: Convert Unicode symbols (θ, √, etc.) to LaTeX before processing
-        if (data.questions && data.questions.length > 0) {
-          data.questions = processQuestionsUnicode(data.questions);
-          console.log(`✨ [UNICODE CONVERSION] ${file.name}: Processed ${data.questions.length} questions for Unicode→LaTeX conversion`);
-
-          // 🐛 DEBUG: Log topic assignments for classification debugging
-          const topicSummary = data.questions.slice(0, 10).map((q: any) => ({
-            id: q.id,
-            text: q.text?.substring(0, 60),
-            topic: q.topic,
-            domain: q.domain
-          }));
-          console.log(`📊 [TOPIC DEBUG] ${file.name} topic assignments (first 10):`, topicSummary);
-        }
+          extractedData = data;
+        } // End of legacy extraction
 
         // Debug: Log visual element detection for this file
-        console.log(`🔍 [BULK SCAN DEBUG] File: ${file.name}, Questions: ${data.questions?.length || 0}`);
-        if (data.questions && data.questions.length > 0) {
-          const questionsWithVisuals = data.questions.filter((q: any) => q.hasVisualElement);
+        console.log(`🔍 [BULK SCAN DEBUG] File: ${file.name}, Questions: ${extractedData.questions?.length || 0}`);
+        if (extractedData.questions && extractedData.questions.length > 0) {
+          const questionsWithVisuals = extractedData.questions.filter((q: any) => q.hasVisualElement);
           console.log(`🖼️ [BULK SCAN DEBUG] ${file.name}: Questions with visual elements:`, questionsWithVisuals.length);
         }
 
-        if (data.questions) {
+        if (extractedData.questions) {
           const filePrefix = file.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 10);
 
           // Try vision-guided extraction first (if bounding boxes provided), fallback to proximity-based
           let visionGuidedMapping: Map<number, any[]> | null = null;
-          const questionsWithBoundingBoxes = data.questions
+          const questionsWithBoundingBoxes = extractedData.questions
             .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
             .map((q: any) => {
               const questionNumMatch = q.id?.match(/Q?(\d+)/i);
@@ -262,7 +291,7 @@ ${generatePhysicsExtractionInstructions()}
             }
           }
 
-          const taggedQuestions = data.questions.map((q: any, idx: number) => {
+          const taggedQuestions = extractedData.questions.map((q: any, idx: number) => {
             const newQuestion: any = {
               ...q,
               id: q.id ? `${filePrefix}-${q.id}` : `${filePrefix}-q-${idx}`,
@@ -396,10 +425,36 @@ ${generatePhysicsExtractionInstructions()}
       });
 
       // Track 1: Verbatim Intelligence Extraction (Questions Only)
-      // 🧪 Use CLEAN Math extraction prompt (fixes space-stripping, hallucinations, missing options)
-      const extractionPrompt = selectedSubject === 'Math'
-        ? generateCleanMathPrompt(selectedGrade)
-        : `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
+      // 🎯 SIMPLIFIED EXTRACTION (if enabled for Math)
+      let extractedData: any;
+      let analyticData: any;
+      const extractionId = Date.now().toString().slice(-4); // Unique ID for this extraction
+
+      if (useSimplifiedExtraction && selectedSubject === 'Math') {
+        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE] Using schema-driven extraction with @google/genai');
+        const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel);
+        // Convert simplified format to our existing format
+        extractedData = {
+          questions: simpleQuestions.map((sq: any) => ({
+            id: `Q${sq.id}`,
+            text: sq.text,
+            options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
+            marks: 1,
+            difficulty: 'Moderate',
+            topic: 'Mathematics',
+            blooms: 'Apply',
+            domain: 'ALGEBRA',
+            chapter: 'General Mathematics',
+            hasVisualElement: false,
+            visualElementType: null,
+            visualElementDescription: null
+          }))
+        };
+      } else {
+        // Legacy extraction
+        const extractionPrompt = selectedSubject === 'Math'
+          ? generateCleanMathPrompt(selectedGrade)
+          : `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
       RULES:
       1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise.
       2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
@@ -488,42 +543,55 @@ ${generatePhysicsExtractionInstructions()}
         "visualBoundingBox": { "pageNumber": 3, "x": "10%", "y": "45%", "width": "80%", "height": "25%" } (if hasVisualElement is true, percentage coordinates from page edges)
       }] }`;
 
-      // Track 2: Pedagogical Meta-Analysis (Charts/Summary)
-      const analysisPrompt = `Synthesize structural analysis for this ${selectedSubject} paper.
-      SCHEMA: { 
-        "summary": "Full paper meta-analysis...", 
-        "overallDifficulty": "Moderate", 
-        "difficultyDistribution": [{"name": "Easy", "percentage": 30, "color": "#10b981"}, ...], 
-        "bloomsTaxonomy": [{"name": "Remembering", "percentage": 20, "color": "#6366f1"}, ...], 
-        "topicWeightage": [{"name": "Optics", "marks": 14, "color": "#f59e0b"}, ...], 
-        "predictiveTopics": [{"topic": "Compound Microscope", "probability": 85, "reason": "High-yield derivation frequency in late-stage board cycles."}], 
-        "strategy": ["Prioritize derivation A...", "Logic focus on B..."] 
-      }`;
+        // Track 2: Pedagogical Meta-Analysis (Charts/Summary)
+        const analysisPrompt = `Synthesize structural analysis for this ${selectedSubject} paper.
+        SCHEMA: {
+          "summary": "Full paper meta-analysis...",
+          "overallDifficulty": "Moderate",
+          "difficultyDistribution": [{"name": "Easy", "percentage": 30, "color": "#10b981"}, ...],
+          "bloomsTaxonomy": [{"name": "Remembering", "percentage": 20, "color": "#6366f1"}, ...],
+          "topicWeightage": [{"name": "Optics", "marks": 14, "color": "#f59e0b"}, ...],
+          "predictiveTopics": [{"topic": "Compound Microscope", "probability": 85, "reason": "High-yield derivation frequency in late-stage board cycles."}],
+          "strategy": ["Prioritize derivation A...", "Logic focus on B..."]
+        }`;
 
-      const [extractRes, analysisRes] = await Promise.all([
-        genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]),
-        genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, analysisPrompt])
-      ]);
+        const [extractRes, analysisRes] = await Promise.all([
+          genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]),
+          genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, analysisPrompt])
+        ]);
 
-      const rawExtract = extractRes.response.text();
-      const rawAnalysis = analysisRes.response.text();
+        const rawExtract = extractRes.response.text();
+        const rawAnalysis = analysisRes.response.text();
 
-      // Debug: Log raw response length and preview
-      console.log('📥 [RAW RESPONSE DEBUG] Extraction response length:', rawExtract.length, 'chars');
-      console.log('📥 [RAW RESPONSE DEBUG] First 500 chars:', rawExtract.substring(0, 500));
-      console.log('📥 [RAW RESPONSE DEBUG] Last 500 chars:', rawExtract.substring(Math.max(0, rawExtract.length - 500)));
+        // Debug: Log raw response length and preview
+        console.log('📥 [RAW RESPONSE DEBUG] Extraction response length:', rawExtract.length, 'chars');
+        console.log('📥 [RAW RESPONSE DEBUG] First 500 chars:', rawExtract.substring(0, 500));
+        console.log('📥 [RAW RESPONSE DEBUG] Last 500 chars:', rawExtract.substring(Math.max(0, rawExtract.length - 500)));
 
-      // Check if JSON is truncated
-      const openBraces = (rawExtract.match(/\{/g) || []).length;
-      const closeBraces = (rawExtract.match(/\}/g) || []).length;
-      const openBrackets = (rawExtract.match(/\[/g) || []).length;
-      const closeBrackets = (rawExtract.match(/\]/g) || []).length;
-      console.warn('⚠️ [JSON STRUCTURE] Open braces:', openBraces, 'Close braces:', closeBraces, 'Diff:', openBraces - closeBraces);
-      console.warn('⚠️ [JSON STRUCTURE] Open brackets:', openBrackets, 'Close brackets:', closeBrackets, 'Diff:', openBrackets - closeBrackets);
+        // Check if JSON is truncated
+        const openBraces = (rawExtract.match(/\{/g) || []).length;
+        const closeBraces = (rawExtract.match(/\}/g) || []).length;
+        const openBrackets = (rawExtract.match(/\[/g) || []).length;
+        const closeBrackets = (rawExtract.match(/\]/g) || []).length;
+        console.warn('⚠️ [JSON STRUCTURE] Open braces:', openBraces, 'Close braces:', closeBraces, 'Diff:', openBraces - closeBraces);
+        console.warn('⚠️ [JSON STRUCTURE] Open brackets:', openBrackets, 'Close brackets:', closeBrackets, 'Diff:', openBrackets - closeBrackets);
 
-      const extractionId = Date.now().toString().slice(-4);
-      const extractedData = safeAiParse<any>(rawExtract, { questions: [] }, true);
-      const analyticData = safeAiParse<any>(rawAnalysis, {}, false);
+        extractedData = safeAiParse<any>(rawExtract, { questions: [] }, true);
+        analyticData = safeAiParse<any>(rawAnalysis, {}, false);
+      } // End of legacy extraction
+
+      // For simplified mode, set minimal analysis data
+      if (useSimplifiedExtraction && selectedSubject === 'Math') {
+        analyticData = {
+          summary: 'Questions extracted using simplified mode',
+          overallDifficulty: 'Moderate',
+          difficultyDistribution: [],
+          bloomsTaxonomy: [],
+          topicWeightage: [],
+          predictiveTopics: [],
+          strategy: []
+        };
+      }
 
       // 🐛 DEBUG: Log BEFORE Unicode conversion to see raw extraction
       if (extractedData.questions && extractedData.questions.length > 0) {
@@ -538,7 +606,8 @@ ${generatePhysicsExtractionInstructions()}
       }
 
       // ⭐ CRITICAL: Convert Unicode symbols (θ, √, etc.) to LaTeX before processing
-      if (extractedData.questions && extractedData.questions.length > 0) {
+      // SKIP for simplified mode - it already produces correct double-backslash LaTeX
+      if (extractedData.questions && extractedData.questions.length > 0 && !(useSimplifiedExtraction && selectedSubject === 'Math')) {
         extractedData.questions = processQuestionsUnicode(extractedData.questions);
         console.log(`✨ [UNICODE CONVERSION] Processed ${extractedData.questions.length} questions for Unicode→LaTeX conversion`);
 
@@ -564,22 +633,20 @@ ${generatePhysicsExtractionInstructions()}
           domain: q.domain
         }));
         console.log(`📊 [TOPIC DEBUG] Single paper - topic assignments (first 10):`, topicSummary);
+      } else if (useSimplifiedExtraction && selectedSubject === 'Math') {
+        console.log(`✅ [SIMPLIFIED MODE] Skipping Unicode conversion - LaTeX already correct with double backslashes`);
       }
 
       console.log('🔧 [PARSER DEBUG] Parsed questions count:', extractedData.questions?.length || 0);
-      if (extractedData.questions?.length === 1 && rawExtract.length > 10000) {
-        console.error('🚨 [PARSER ERROR] Large response but only 1 question parsed - JSON is likely truncated!');
-      }
-
-      // Detect truncation: if JSON structure is incomplete (unmatched braces/brackets), trigger second pass
-      const isTruncated = (openBraces !== closeBraces) || (openBrackets !== closeBrackets);
 
       // 🔄 RECURSIVE SECOND PASS: Keep extracting until we have all questions (Math papers typically have 60 questions)
+      // SKIP for simplified mode - it extracts all questions in one pass
       const expectedQuestions = selectedSubject === 'Math' ? 60 : 50; // Math = 60, others ~50
       let passNumber = 2;
       const MAX_PASSES = 5; // Safety limit to prevent infinite loops
 
       while (
+        !(useSimplifiedExtraction && selectedSubject === 'Math') &&
         extractedData.questions &&
         extractedData.questions.length > 0 &&
         extractedData.questions.length < expectedQuestions &&
@@ -829,6 +896,7 @@ CRITICAL RULES:
           <div className="h-6 w-px bg-slate-200" />
           <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}
             className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-accent-500/10 shadow-sm outline-none cursor-pointer hover:border-accent-300 transition-colors">
+            <option value="gemini-3-flash-preview">GEMINI 3 FLASH PREVIEW ⚡</option>
             <option value="gemini-2.0-flash-lite">GEMINI 2.0 FLASH LITE (FAST)</option>
             <option value="gemini-2.5-flash-latest">GEMINI 2.5 FLASH</option>
             <option value="gemini-2.0-flash-exp">GEMINI 2.0 FLASH EXP</option>
@@ -836,6 +904,17 @@ CRITICAL RULES:
             <option value="gemini-2.0-pro-exp">GEMINI 2.0 PRO EXP</option>
             <option value="gemini-3-pro">GEMINI 3 PRO</option>
           </select>
+          <div className="h-6 w-px bg-slate-200" />
+          <button
+            onClick={() => setUseSimplifiedExtraction(!useSimplifiedExtraction)}
+            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${
+              useSimplifiedExtraction
+                ? 'bg-emerald-500 text-white border-2 border-emerald-600'
+                : 'bg-white text-slate-400 border-2 border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            {useSimplifiedExtraction ? '✓ SIMPLIFIED MODE' : 'LEGACY MODE'}
+          </button>
         </div>
       </div>
 
@@ -845,102 +924,149 @@ CRITICAL RULES:
         <div className="col-span-12 xl:col-span-8 flex flex-col gap-6 min-h-0">
 
           {/* Ingestion Zone */}
-          <div className={`bg-white border border-slate-200 rounded-[2rem] flex flex-col items-center justify-center text-center relative overflow-hidden group/zone shadow-sm transition-all duration-700 ${isProcessing ? 'p-8 md:p-12 min-h-[450px] border-accent-100 shadow-xl shadow-accent-500/5' : 'p-8 border-dashed'}`}>
+          <div className={`bg-white border border-slate-200 rounded-[2rem] flex flex-col items-center justify-center text-center relative overflow-hidden group/zone shadow-sm transition-all duration-700 ${isProcessing ? 'p-6 md:p-8 min-h-[380px] border-accent-100 shadow-2xl shadow-accent-500/10' : 'p-8 border-dashed'}`}>
             {isProcessing && (
-              <div className="absolute inset-x-0 top-0 h-1.5 bg-accent-500/10 overflow-hidden">
-                <div className="w-full h-full bg-accent-500/40 animate-pulse-glow" />
-              </div>
+              <>
+                {/* Animated top gradient bar */}
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent-500 via-purple-500 to-accent-500 animate-shimmer-fast" style={{backgroundSize: '200% 100%'}} />
+
+                {/* Floating particles */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <div className="absolute top-10 left-10 w-2 h-2 bg-accent-400/30 rounded-full animate-float-slow" />
+                  <div className="absolute top-20 right-16 w-1.5 h-1.5 bg-purple-400/30 rounded-full animate-float-medium" />
+                  <div className="absolute bottom-20 left-20 w-1 h-1 bg-accent-300/40 rounded-full animate-float-fast" />
+                  <div className="absolute bottom-32 right-12 w-2 h-2 bg-purple-300/30 rounded-full animate-float-slow" />
+                </div>
+              </>
             )}
             {isProcessing ? (
-              <div className="w-full space-y-6 animate-in fade-in zoom-in-95 duration-500 py-4 px-6 max-w-2xl mx-auto">
-                {/* Master Header - Compact */}
-                <div className="flex items-center gap-6 p-6 bg-slate-900 rounded-3xl relative overflow-hidden shadow-2xl">
-                  <div className="absolute inset-0 bg-accent-600/10 animate-pulse" />
-                  <div className="relative w-16 h-16 bg-white border-4 border-slate-800 rounded-2xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden">
-                    <Cpu size={28} className="text-slate-900 animate-spin-slow" />
-                    <div className="absolute bottom-0 inset-x-0 h-1 bg-accent-500 animate-shimmer" />
-                  </div>
-                  <div className="text-left space-y-1 relative z-10">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-black text-white font-outfit uppercase tracking-tight">Synthesizing <span className="text-accent-400">Logic</span></h3>
-                      <div className="w-2 h-2 rounded-full bg-accent-500 animate-ping" />
-                    </div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">
-                      AI Ops Pipeline: {bulkProgress.total > 1 ? `Processing Portfolio (${bulkProgress.current}/${bulkProgress.total})` : 'Processing Multimodal Input'}
-                    </p>
+              <div className="w-full space-y-4 animate-in fade-in zoom-in-95 duration-500 py-2 px-4 max-w-xl mx-auto">
+                {/* Compact Header with Glassmorphism */}
+                <div className="relative p-5 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+                  {/* Animated gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-accent-600/20 via-purple-600/20 to-accent-600/20 animate-gradient-shift" style={{backgroundSize: '200% 200%'}} />
 
-                    {/* Compact Progress Bar */}
-                    <div className="pt-2">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-[9px] font-black text-accent-400 uppercase">
-                          {bulkProgress.total > 1 ? `Global File Progress: ${bulkProgress.current}/${bulkProgress.total}` : 'Fidelity Health'}
-                        </span>
-                        <span className="text-[9px] font-black text-white">
-                          {bulkProgress.total > 1
-                            ? Math.round((bulkProgress.current / bulkProgress.total) * 100)
-                            : Math.round((pipelineLogs.filter(p => p.status === 'complete').length / pipelineLogs.length) * 100)}%
-                        </span>
+                  <div className="relative flex items-center gap-4">
+                    {/* Compact animated icon */}
+                    <div className="relative w-12 h-12 bg-gradient-to-br from-white to-slate-100 rounded-xl flex items-center justify-center shadow-lg shrink-0 overflow-hidden border-2 border-slate-700">
+                      <Cpu size={22} className="text-slate-900 animate-spin-slow" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-accent-500/30 to-transparent animate-pulse-slow" />
+                    </div>
+
+                    <div className="flex-1 text-left space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-black text-white font-outfit uppercase tracking-tight">
+                          AI <span className="text-accent-400">Pipeline</span>
+                        </h3>
+                        <div className="flex gap-0.5">
+                          <div className="w-1 h-1 rounded-full bg-accent-400 animate-pulse [animation-delay:0ms]" />
+                          <div className="w-1 h-1 rounded-full bg-accent-400 animate-pulse [animation-delay:200ms]" />
+                          <div className="w-1 h-1 rounded-full bg-accent-400 animate-pulse [animation-delay:400ms]" />
+                        </div>
                       </div>
-                      <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-accent-500 transition-all duration-700"
-                          style={{
-                            width: `${bulkProgress.total > 1
-                              ? (bulkProgress.current / bulkProgress.total) * 100
-                              : (pipelineLogs.filter(p => p.status === 'complete').length / pipelineLogs.length) * 100}%`
-                          }}
-                        />
+
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                        {bulkProgress.total > 1 ? `Portfolio ${bulkProgress.current}/${bulkProgress.total}` : 'Multimodal Analysis'}
+                      </p>
+
+                      {/* Sleek progress bar */}
+                      <div className="pt-1">
+                        <div className="flex justify-between items-center mb-0.5">
+                          <span className="text-[8px] font-black text-accent-400 uppercase tracking-wide">
+                            Progress
+                          </span>
+                          <span className="text-[8px] font-black text-white tabular-nums">
+                            {bulkProgress.total > 1
+                              ? Math.round((bulkProgress.current / bulkProgress.total) * 100)
+                              : Math.round((pipelineLogs.filter(p => p.status === 'complete').length / pipelineLogs.length) * 100)}%
+                          </span>
+                        </div>
+                        <div className="relative h-1.5 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+                          <div
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-accent-500 via-purple-500 to-accent-400 rounded-full transition-all duration-700 ease-out shadow-lg shadow-accent-500/50"
+                            style={{
+                              width: `${bulkProgress.total > 1
+                                ? (bulkProgress.current / bulkProgress.total) * 100
+                                : (pipelineLogs.filter(p => p.status === 'complete').length / pipelineLogs.length) * 100}%`
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer-slow" style={{backgroundSize: '200% 100%'}} />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Pipeline Steps - Compact Grid */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Ultra Compact Pipeline Steps - Horizontal Flow */}
+                <div className="flex gap-2 items-center justify-center">
                   {pipelineLogs.map((log, i) => (
-                    <div key={i} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${log.status === 'active'
-                      ? 'bg-white border-accent-400 shadow-xl ring-4 ring-accent-500/5 translate-y-[-2px]'
-                      : log.status === 'complete'
-                        ? 'bg-emerald-50/30 border-emerald-100 opacity-100'
-                        : 'bg-white border-slate-100 opacity-50'
-                      }`}>
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${log.status === 'complete'
-                        ? 'bg-emerald-500 text-white'
-                        : log.status === 'active'
-                          ? 'bg-accent-600 text-white shadow-lg shadow-accent-500/20'
-                          : 'bg-slate-50 text-slate-300 border border-slate-100'
+                    <React.Fragment key={i}>
+                      <div className={`group relative flex flex-col items-center gap-1.5 transition-all duration-500 ${log.status === 'active' ? 'scale-110' : ''}`}>
+                        {/* Icon circle */}
+                        <div className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-500 shadow-lg ${
+                          log.status === 'complete'
+                            ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-emerald-500/30'
+                            : log.status === 'active'
+                              ? 'bg-gradient-to-br from-accent-500 to-purple-600 text-white shadow-accent-500/40 animate-pulse-gentle'
+                              : 'bg-slate-100 text-slate-300 border-2 border-slate-200'
                         }`}>
-                        {log.status === 'complete' ? <CheckCircle2 size={18} /> :
-                          log.status === 'active' ? <Activity size={18} className="animate-pulse" /> :
-                            <Clock size={18} />}
-                      </div>
-                      <div className="flex-1 text-left min-w-0">
-                        <p className={`text-[10px] font-black uppercase tracking-widest truncate ${log.status === 'active' ? 'text-accent-700' : 'text-slate-900'}`}>{log.label}</p>
-                        {log.status === 'active' ? (
-                          <div className="flex flex-col mt-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className="flex gap-1">
-                                <span className="w-1 h-1 bg-accent-500 rounded-full animate-bounce [animation-delay:0ms]" />
-                                <span className="w-1 h-1 bg-accent-500 rounded-full animate-bounce [animation-delay:150ms]" />
-                                <span className="w-1 h-1 bg-accent-500 rounded-full animate-bounce [animation-delay:300ms]" />
-                              </span>
-                              <span className="text-[8px] font-bold text-accent-500 truncate">{loadingStage}</span>
+                          {log.status === 'complete' ? (
+                            <CheckCircle2 size={18} className="animate-in zoom-in duration-300" />
+                          ) : log.status === 'active' ? (
+                            <Activity size={18} className="animate-pulse" />
+                          ) : (
+                            <Clock size={16} />
+                          )}
+
+                          {/* Active glow effect */}
+                          {log.status === 'active' && (
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent-400 to-purple-500 animate-ping opacity-30" />
+                          )}
+                        </div>
+
+                        {/* Label */}
+                        <div className="text-center max-w-[70px]">
+                          <p className={`text-[8px] font-black uppercase tracking-wider leading-tight transition-colors duration-300 ${
+                            log.status === 'active' ? 'text-accent-600' : log.status === 'complete' ? 'text-emerald-600' : 'text-slate-400'
+                          }`}>
+                            {log.label.split(' ')[0]}
+                          </p>
+
+                          {/* Active indicator */}
+                          {log.status === 'active' && (
+                            <div className="flex items-center justify-center gap-0.5 mt-0.5">
+                              <span className="w-1 h-1 bg-accent-500 rounded-full animate-bounce [animation-delay:0ms]" />
+                              <span className="w-1 h-1 bg-accent-500 rounded-full animate-bounce [animation-delay:150ms]" />
+                              <span className="w-1 h-1 bg-accent-500 rounded-full animate-bounce [animation-delay:300ms]" />
                             </div>
-                          </div>
-                        ) : log.status === 'complete' ? (
-                          <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-tighter">Synchronized</span>
-                        ) : (
-                          <span className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter">Awaiting Sync</span>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
+
+                      {/* Connector line */}
+                      {i < pipelineLogs.length - 1 && (
+                        <div className={`h-0.5 w-6 transition-all duration-500 rounded-full ${
+                          pipelineLogs[i + 1].status === 'complete' || pipelineLogs[i + 1].status === 'active'
+                            ? 'bg-gradient-to-r from-emerald-400 to-accent-400'
+                            : 'bg-slate-200'
+                        }`} />
+                      )}
+                    </React.Fragment>
                   ))}
                 </div>
 
-                {/* Assurance Footer */}
-                <div className="flex items-center justify-center gap-2 border-t border-slate-100 pt-6">
-                  <Terminal size={12} className="text-slate-400" />
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Holographic Analysis Engine v2.0-Flash</p>
+                {/* Current Stage Indicator */}
+                {loadingStage && (
+                  <div className="flex items-center justify-center gap-2 py-2 px-4 bg-gradient-to-r from-accent-50 to-purple-50 rounded-xl border border-accent-100">
+                    <div className="w-1.5 h-1.5 bg-accent-500 rounded-full animate-pulse" />
+                    <span className="text-[9px] font-bold text-accent-700 uppercase tracking-wide">{loadingStage}</span>
+                  </div>
+                )}
+
+                {/* Minimal Footer */}
+                <div className="flex items-center justify-center gap-2 pt-2 opacity-60">
+                  <Terminal size={10} className="text-slate-400" />
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">AI Engine v2.0</p>
                 </div>
               </div>
             ) : (
