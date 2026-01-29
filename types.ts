@@ -236,3 +236,41 @@ export interface Scan {
   subject: string;
   analysisData?: ExamAnalysisData;
 }
+
+// --- VIDYA AI CHATBOT TYPES ---
+
+export type VidyaRole = 'user' | 'assistant';
+
+export interface VidyaMessage {
+  id: string;
+  role: VidyaRole;
+  content: string;
+  timestamp: Date;
+  isStreaming?: boolean;
+}
+
+export interface VidyaChatState {
+  messages: VidyaMessage[];
+  isOpen: boolean;
+  isThinking: boolean;
+  error: string | null;
+}
+
+export type UserRole = 'student' | 'teacher';
+
+export interface VidyaAppContext {
+  // Teacher Mode Context
+  scannedPapers?: Scan[];
+  selectedScan?: Scan | null;
+  customLessons?: LessonContract[];
+  currentView?: string;
+
+  // Student Mode Context
+  currentLesson?: LessonContract | null;
+  userProgress?: {
+    masteryScore: number;
+    currentModule: string;
+    quizHistory: any[];
+    misconceptions: string[];
+  };
+}

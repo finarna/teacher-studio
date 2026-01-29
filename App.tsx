@@ -19,11 +19,19 @@ import RapidRecall from './components/RapidRecall';
 import VisualQuestionBank from './components/VisualQuestionBank';
 import TrainingStudio from './components/TrainingStudio';
 import TrainingViewer from './components/TrainingViewer';
+import VidyaV2 from './components/VidyaV2';
+import VidyaV3 from './components/VidyaV3';
+import { ToastProvider, useToast } from './components/ToastNotification';
+import { ConfirmProvider, useConfirm } from './components/ConfirmDialog';
 import { ProfessorTrainingContract } from './types';
+import { VidyaActions } from './types/vidya';
 import { useAdaptiveLogic } from './hooks/useAdaptiveLogic';
+import { isFeatureEnabled } from './utils/featureFlags';
 import { Home, LayoutDashboard, GraduationCap, ArrowLeft, Bell, Search, User } from 'lucide-react';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { showToast } = useToast();
+  const { confirm } = useConfirm();
   const [onBoarding, setOnBoarding] = useState(true);
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
@@ -467,6 +475,60 @@ const App: React.FC = () => {
               </div>
             )}
           </main>
+
+          {/* Vidya AI Assistant - Feature Flag: V2 or V3 */}
+          {isFeatureEnabled('useVidyaV3') ? (
+            <VidyaV3
+              appContext={{
+                scannedPapers: recentScans,
+                selectedScan: selectedScan,
+                currentView: godModeView,
+              }}
+            />
+          ) : (
+            <VidyaV2
+              userRole="teacher"
+              appContext={{
+                scannedPapers: recentScans,
+                selectedScan: selectedScan,
+                customLessons: customLessons,
+                currentView: godModeView,
+              }}
+              actions={{
+                navigateTo: (view) => setGodModeView(view),
+                goBack: () => setGodModeView('mastermind'),
+                scanPaper: () => setGodModeView('mastermind'),
+                createLesson: () => setIsCreatorOpen(true),
+                viewAnalysis: (scanId) => {
+                  const scan = recentScans.find((s) => s.id === scanId);
+                  if (scan) setSelectedScan(scan);
+                  setGodModeView('analysis');
+                },
+                generateSketches: (scanId) => {
+                  const scan = recentScans.find((s) => s.id === scanId);
+                  if (scan) setSelectedScan(scan);
+                  setGodModeView('sketches');
+                },
+                exportData: async (type, data) => {
+                  console.log(`Exporting as ${type}:`, data);
+                  // TODO: Implement actual export logic
+                },
+                showNotification: (message, type) => {
+                  showToast(message, type);
+                },
+                confirmAction: async (title, message, type = 'danger') => {
+                  return await confirm({ title, message, type });
+                },
+                openModal: (modalId, props) => {
+                  console.log('Open modal:', modalId, props);
+                  // TODO: Implement modal system
+                },
+                closeModal: () => {
+                  console.log('Close modal');
+                },
+              }}
+            />
+          )}
         </div>
       </div>
     );
@@ -534,7 +596,74 @@ const App: React.FC = () => {
       <main className="flex-1 overflow-hidden relative">
         {renderModule()}
       </main>
+
+      {/* Vidya AI Assistant - Feature Flag: V2 or V3 */}
+      {isFeatureEnabled('useVidyaV3') ? (
+        <VidyaV3
+          appContext={{
+            currentView: currentModule?.type,
+          }}
+        />
+      ) : (
+        <VidyaV2
+          userRole="student"
+          appContext={{
+            currentLesson: currentLesson,
+            userProgress: {
+              masteryScore: userState.masteryScore,
+              currentModule: currentModule?.title || '',
+              quizHistory: userState.quizHistory,
+              misconceptions: userState.misconceptions,
+            },
+            currentView: currentModule?.type,
+          }}
+          actions={{
+            navigateTo: (view) => {
+              console.log('Navigate to:', view);
+              // Student mode navigation (limited)
+            },
+            goBack: handleBackToDashboard,
+            scanPaper: () => {
+              console.log('Students cannot scan papers');
+            },
+            createLesson: () => {
+              console.log('Students cannot create lessons');
+            },
+            viewAnalysis: (scanId) => {
+              console.log('View analysis:', scanId);
+            },
+            generateSketches: (scanId) => {
+              console.log('Generate sketches:', scanId);
+            },
+            exportData: async (type, data) => {
+              console.log(`Export as ${type}:`, data);
+            },
+            showNotification: (message, type) => {
+              showToast(message, type);
+            },
+            confirmAction: async (title, message, type = 'danger') => {
+              return await confirm({ title, message, type });
+            },
+            openModal: (modalId, props) => {
+              console.log('Open modal:', modalId, props);
+            },
+            closeModal: () => {
+              console.log('Close modal');
+            },
+          }}
+        />
+      )}
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <ToastProvider>
+      <ConfirmProvider>
+        <AppContent />
+      </ConfirmProvider>
+    </ToastProvider>
   );
 };
 
