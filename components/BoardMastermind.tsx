@@ -212,7 +212,8 @@ ${generatePhysicsExtractionInstructions()}
         SCHEMA: { "questions": [{
           "id": "Q1",
           "text": "...",
-          "options": ["..."],
+          "options": ["(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4"],
+          "correctOptionIndex": 0 (0-based index: 0=A, 1=B, 2=C, 3=D. REQUIRED for MCQs. Identify from answer key/marking scheme),
           "marks": 1,
           "difficulty": "...",
           "topic": "Same as chapter name OR more specific sub-topic (e.g., 'Differential Equations' or 'Matrices'). NEVER leave empty!",
@@ -224,7 +225,9 @@ ${generatePhysicsExtractionInstructions()}
           "visualElementDescription": "Detailed description of the diagram/table/image content, including all labels, values, and key features. For Math: describe axes, equations, vertices, measurements. For Physics: describe circuit components, ray paths, forces, field directions, etc." (if hasVisualElement is true),
           "visualElementPosition": "above" | "below" | "inline" | "side" (if hasVisualElement is true),
           "visualBoundingBox": { "pageNumber": 3, "x": "10%", "y": "45%", "width": "80%", "height": "25%" } (if hasVisualElement is true, percentage coordinates from page edges)
-        }] }`;
+        }] }
+
+        IMPORTANT: For MCQ questions, you MUST identify and include the correctOptionIndex from the answer key/marking scheme in the paper.`;
 
           const result = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]);
           const data = safeAiParse<any>(result.response.text(), { questions: [] }, true);

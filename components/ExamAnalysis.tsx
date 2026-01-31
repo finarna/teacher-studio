@@ -75,9 +75,9 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const [isSynthesizingQuestion, setIsSynthesizingQuestion] = useState<string | null>(null);
   const [intelligenceBreakdownTab, setIntelligenceBreakdownTab] = useState<'logic' | 'visual'>('logic');
   const [isGeneratingVisual, setIsGeneratingVisual] = useState<string | null>(null);
-  const [selectedImageModel, setSelectedImageModel] = useState<string>('gemini-3-flash-preview');
+  // Use best default model for visual generation
+  const selectedImageModel = 'gemini-2.0-flash-exp-image-01';
   const [enlargedVisualNote, setEnlargedVisualNote] = useState<{ imageUrl: string, questionId: string } | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isGroupedView, setIsGroupedView] = useState(false);
 
   if (!scan || !scan.analysisData) {
@@ -137,27 +137,21 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
         generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
       });
 
-      // Simple, effective prompt with JSON escaping guidance
-      const prompt = `Elite Academic Specialist: Generate pedagogical solution for ${scan.subject} ${scan.grade}: "${question.text}".
+      // Build options string if question has options (MCQ)
+      const optionsText = question.options && question.options.length > 0
+        ? `\n\nOPTIONS:\n${question.options.map((opt, idx) => `${['A', 'B', 'C', 'D'][idx]}: ${opt}`).join('\n')}`
+        : '';
 
-CRITICAL: You are returning JSON. In JSON strings, backslashes must be DOUBLED.
-- Write \\\\times to get \\times after JSON parsing
-- Write \\\\frac to get \\frac after JSON parsing
-- Write \\\\oint to get \\oint after JSON parsing
-- Write \\\\vec{B} to get \\vec{B} after JSON parsing
+      // Generate pedagogical solution with JSON escaping examples
+      const prompt = `Elite Academic Specialist: Generate pedagogical solution for ${scan.subject} ${scan.grade}: "${question.text}"${optionsText}
 
-LATEX RULES:
-1. Use $$ ... $$ for display formulas (e.g., $$E = mc^2$$, $$F = \\\\frac{GMm}{r^2}$$)
-2. Use $ ... $ for inline variables (e.g., $x$, $v_0$, $T_1$)
-3. All LaTeX commands need double backslashes in JSON: \\\\frac, \\\\times, \\\\sqrt, \\\\theta, \\\\oint, \\\\vec
-4. NEVER add extra curly braces around commands (e.g., write \\\\oint NOT \\\\{\\\\oint})
+CRITICAL: In JSON strings, double ALL backslashes for LaTeX.
+Examples: "\\\\frac{1}{4}", "\\\\bar{A}", "\\\\sqrt{x}", "\\\\begin{bmatrix}"
+(Write "\frac" → becomes "rac" after JSON parsing ❌. Write "\\\\frac" → becomes "\frac" ✓)
 
-CORRECT: $$\\\\oint \\\\vec{B} \\\\cdot d\\\\vec{A} = 0$$
-WRONG: $$\\\\{\\\\oint} \\\\vec{B} \\\\cdot d\\\\vec{A} = 0$$
-
-Return JSON ONLY.
 Schema: {
   "solutionSteps": ["Step Title ::: Explanation with $$Formula$$ blocks"],
+  ${question.options && question.options.length > 0 ? '"correctOptionIndex": 0-3 (REQUIRED: 0=A, 1=B, 2=C, 3=D),' : ''}
   "masteryMaterial": {
     "coreConcept": "Professional summary with $$Key Formula$$",
     "logic": "Bulleted reasoning",
@@ -190,10 +184,25 @@ Schema: {
         } else {
           console.log('First step preview:', firstStep.substring(0, 150));
         }
+
+        // DEBUG: Log correctOptionIndex
+        console.log('🎯 [CORRECT ANSWER DEBUG] AI returned correctOptionIndex:', qData.correctOptionIndex);
+        console.log('🎯 [CORRECT ANSWER DEBUG] Question has options:', question.options?.length > 0);
+        if (qData.correctOptionIndex !== undefined) {
+          console.log('✅ [CORRECT ANSWER] Will save correctOptionIndex:', qData.correctOptionIndex);
+        } else {
+          console.log('❌ [CORRECT ANSWER] AI did not return correctOptionIndex');
+        }
         // Deep clone for React state detection & Redis sync
         const clonedQuestions = JSON.parse(JSON.stringify(scan.analysisData.questions));
         const finalQuestions = clonedQuestions.map((q: any) =>
-          q.id === qId ? { ...q, ...qData } : q
+          q.id === qId ? {
+            ...q,
+            solutionSteps: qData.solutionSteps,
+            masteryMaterial: qData.masteryMaterial,
+            // Update correctOptionIndex if AI provided it (for MCQs)
+            ...(qData.correctOptionIndex !== undefined && { correctOptionIndex: qData.correctOptionIndex })
+          } : q
         );
 
         const updatedScan = {
@@ -225,28 +234,49 @@ Schema: {
         generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
       });
 
+      // Find questions that need syncing:
+      // 1. Questions without solutions
+      // 2. MCQs with solutions but missing correctOptionIndex
       const unSolved = questions.filter(q => !q.solutionSteps || q.solutionSteps.length === 0);
-      if (unSolved.length === 0) return;
+      const mcqsMissingAnswer = questions.filter(q =>
+        q.options && q.options.length > 0 &&
+        q.solutionSteps && q.solutionSteps.length > 0 &&
+        q.correctOptionIndex === undefined
+      );
+
+      const questionsToSync = [...unSolved, ...mcqsMissingAnswer];
+
+      console.log('🔄 [SYNC ALL] Questions without solutions:', unSolved.length);
+      console.log('🎯 [SYNC ALL] MCQs missing correctOptionIndex:', mcqsMissingAnswer.length);
+      console.log('📊 [SYNC ALL] Total questions to sync:', questionsToSync.length);
+
+      if (questionsToSync.length === 0) return;
 
       // Process in batches of 3 to prevent timeouts/stalls
       const batchSize = 3;
       let currentQuestions = [...scan.analysisData!.questions];
 
-      for (let i = 0; i < unSolved.length; i += batchSize) {
-        const batch = unSolved.slice(i, i + batchSize);
+      for (let i = 0; i < questionsToSync.length; i += batchSize) {
+        const batch = questionsToSync.slice(i, i + batchSize);
         const batchPromises = batch.map(async (q) => {
-          const prompt = `Elite Academic Specialist: Synthesize pedagogical solution for ${scan.subject} ${scan.grade}: "${q.text || ''}".
+          // Build options string if question has options (MCQ)
+          const optionsText = q.options && q.options.length > 0
+            ? `\n\nOPTIONS:\n${q.options.map((opt, idx) => `${['A', 'B', 'C', 'D'][idx]}: ${opt}`).join('\n')}`
+            : '';
 
-LATEX RULES:
-1. Wrap all formulas and derivations in $$ ... $$ for block rendering.
-2. Use $ ... $ for inline variables.
+          const prompt = `Elite Academic Specialist: Synthesize pedagogical solution for ${scan.subject} ${scan.grade}: "${q.text || ''}"${optionsText}
 
-Return JSON ONLY: {
-  "solutionSteps": ["Step Title ::: Explanation using $$Formula Block$$"],
+CRITICAL: In JSON strings, double ALL backslashes for LaTeX.
+Examples: "\\\\frac{1}{4}", "\\\\bar{A}", "\\\\sqrt{x}", "\\\\begin{bmatrix}"
+(Write "\frac" → becomes "rac" after JSON parsing ❌. Write "\\\\frac" → becomes "\frac" ✓)
+
+Schema: {
+  "solutionSteps": ["Step Title ::: Explanation with $$Formula$$ blocks"],
+  ${q.options && q.options.length > 0 ? '"correctOptionIndex": 0-3 (REQUIRED: 0=A, 1=B, 2=C, 3=D),' : ''}
   "masteryMaterial": {
-    "coreConcept": "Summary with $$Key Formula$$",
-    "logic": "...",
-    "memoryTrigger": "..."
+    "coreConcept": "Professional summary with $$Key Formula$$",
+    "logic": "Bulleted reasoning",
+    "memoryTrigger": "Mnemonic/Rule"
   }
 }`;
           try {
@@ -264,7 +294,13 @@ Return JSON ONLY: {
         // Update local array for next batch iteration
         currentQuestions = currentQuestions.map(q => {
           const result = results.find(r => r.id === q.id && r.data);
-          return result ? { ...q, ...result.data } : q;
+          return result ? {
+            ...q,
+            solutionSteps: result.data.solutionSteps,
+            masteryMaterial: result.data.masteryMaterial,
+            // Update correctOptionIndex if AI provided it (for MCQs)
+            ...(result.data.correctOptionIndex !== undefined && { correctOptionIndex: result.data.correctOptionIndex })
+          } : q;
         });
 
         // Progressive update so user sees items populating
@@ -462,6 +498,45 @@ Return JSON ONLY: {
         chapters: ['Probability', 'Conditional Probability', 'Bayes Theorem', 'Multiplication Theorem', 'Independent Events', 'Random Variables', 'Probability Distributions', 'Binomial Distribution', 'Mean and Variance', 'Conditional', 'Bayes', 'Random Variable', 'Expectation', 'Variance', 'Binomial', 'Distribution', 'Mean', 'Standard Deviation', 'Independent Event', 'Mutually Exclusive', 'Bernoulli', 'Total Probability', 'Combination', 'Permutation'],
         friction: 'Conditional probability interpretation and distribution identification.'
       }
+    },
+    'Chemistry': {
+      'Physical Chemistry': {
+        domain: 'Physical Chemistry',
+        chapters: ['Solid State', 'Solutions', 'Electrochemistry', 'Chemical Kinetics', 'Surface Chemistry', 'Crystal Lattice', 'Unit Cell', 'Molarity', 'Molality', 'Mole Fraction', 'Raoult Law', 'Colligative Properties', 'Osmotic Pressure', 'Elevation', 'Depression', 'Galvanic Cell', 'Electrolytic Cell', 'Nernst Equation', 'Conductance', 'Electrode Potential', 'Rate of Reaction', 'Order of Reaction', 'Molecularity', 'Activation Energy', 'Arrhenius Equation', 'Half Life', 'Rate Constant', 'Integrated Rate', 'Adsorption', 'Catalysis', 'Colloid', 'Emulsion', 'Coagulation', 'Tyndall', 'Brownian'],
+        friction: 'Quantitative calculations with multiple equilibrium constants and ionic interactions.'
+      },
+      'Inorganic Chemistry': {
+        domain: 'Inorganic Chemistry',
+        chapters: ['d and f Block Elements', 'Coordination Compounds', 'Transition Elements', 'Inner Transition Elements', 'Lanthanoids', 'Actinoids', 'Complex', 'Ligand', 'Coordination Number', 'Coordination Entity', 'Werner Theory', 'IUPAC Nomenclature', 'Isomerism', 'Crystal Field Theory', 'CFT', 'Magnetic Properties', 'Color', 'Oxidation State', 'Catalytic Properties', 'Interstitial Compounds', 'Alloy', 'Chromium', 'Manganese', 'Iron', 'Copper', 'Zinc', 'Silver', 'Gold', 'Platinum'],
+        friction: 'Complex nomenclature rules and electronic configuration of d-block elements.'
+      },
+      'Organic Chemistry': {
+        domain: 'Organic Chemistry',
+        chapters: ['Haloalkanes and Haloarenes', 'Alcohols Phenols and Ethers', 'Aldehydes Ketones and Carboxylic Acids', 'Amines', 'Biomolecules', 'Polymers', 'Chemistry in Everyday Life', 'Halogen', 'Nucleophilic Substitution', 'SN1', 'SN2', 'Elimination', 'Alcohol', 'Phenol', 'Ether', 'Aldehyde', 'Ketone', 'Carboxylic Acid', 'Carbonyl', 'Amine', 'Diazonium', 'Carbohydrate', 'Glucose', 'Fructose', 'Sucrose', 'Starch', 'Cellulose', 'Protein', 'Amino Acid', 'Enzyme', 'Vitamin', 'Nucleic Acid', 'DNA', 'RNA', 'Polymer', 'Addition Polymerization', 'Condensation Polymerization', 'Nylon', 'Polyester', 'Bakelite', 'Drug', 'Antibiotic', 'Analgesic', 'Antipyretic', 'Tranquilizer', 'Antiseptic', 'Disinfectant', 'Detergent', 'Soap'],
+        friction: 'Mechanism-based reasoning and structural isomer identification.'
+      }
+    },
+    'Biology': {
+      'Reproduction': {
+        domain: 'Reproduction',
+        chapters: ['Reproduction in Organisms', 'Sexual Reproduction in Flowering Plants', 'Human Reproduction', 'Reproductive Health', 'Asexual Reproduction', 'Vegetative Reproduction', 'Budding', 'Fragmentation', 'Pollination', 'Fertilization', 'Double Fertilization', 'Embryo', 'Seed', 'Fruit', 'Male Reproductive System', 'Female Reproductive System', 'Menstrual Cycle', 'Gametogenesis', 'Spermatogenesis', 'Oogenesis', 'Pregnancy', 'Parturition', 'Lactation', 'Contraception', 'STD', 'Infertility', 'ART', 'IVF', 'GIFT', 'ICSI', 'MTP'],
+        friction: 'Detailed reproductive cycles and hormonal regulation mechanisms.'
+      },
+      'Genetics & Evolution': {
+        domain: 'Genetics & Evolution',
+        chapters: ['Principles of Inheritance and Variation', 'Molecular Basis of Inheritance', 'Evolution', 'Mendel Law', 'Monohybrid Cross', 'Dihybrid Cross', 'Incomplete Dominance', 'Co-dominance', 'Multiple Alleles', 'Pleiotropy', 'Polygenic Inheritance', 'Chromosome', 'Linkage', 'Crossing Over', 'Sex Determination', 'Genetic Disorder', 'Pedigree Analysis', 'DNA', 'RNA', 'Replication', 'Transcription', 'Translation', 'Genetic Code', 'Mutation', 'Central Dogma', 'Operon', 'Lac Operon', 'Human Genome Project', 'DNA Fingerprinting', 'Darwin Theory', 'Natural Selection', 'Adaptation', 'Speciation', 'Hardy Weinberg', 'Genetic Drift', 'Gene Flow', 'Founder Effect', 'Bottleneck'],
+        friction: 'Multi-generational probability calculations and molecular mechanism integration.'
+      },
+      'Biology and Human Welfare': {
+        domain: 'Biology & Human Welfare',
+        chapters: ['Human Health and Disease', 'Strategies for Enhancement in Food Production', 'Microbes in Human Welfare', 'Pathogen', 'Immunity', 'Immune System', 'Antibody', 'Antigen', 'Vaccination', 'Immunization', 'Cancer', 'AIDS', 'Malaria', 'Typhoid', 'Pneumonia', 'Drug Abuse', 'Addiction', 'Animal Husbandry', 'Plant Breeding', 'Tissue Culture', 'Single Cell Protein', 'Biofortification', 'Green Revolution', 'Fermentation', 'Antibiotic Production', 'Biogas', 'Biofertilizer', 'Nitrogen Fixation', 'Mycorrhiza', 'Curd', 'Yogurt', 'Cheese', 'Bread'],
+        friction: 'Disease mechanisms and biotechnological application contexts.'
+      },
+      'Biotechnology & Ecology': {
+        domain: 'Biotechnology & Ecology',
+        chapters: ['Biotechnology Principles and Processes', 'Biotechnology and its Applications', 'Organisms and Populations', 'Ecosystem', 'Biodiversity and Conservation', 'Environmental Issues', 'Genetic Engineering', 'Recombinant DNA', 'PCR', 'Gel Electrophoresis', 'Cloning Vector', 'Restriction Enzyme', 'Plasmid', 'Transgenic', 'GMO', 'Bt Cotton', 'Golden Rice', 'Gene Therapy', 'Insulin', 'Population', 'Population Growth', 'Natality', 'Mortality', 'Age Pyramid', 'Logistic Growth', 'Exponential Growth', 'Food Chain', 'Food Web', 'Trophic Level', 'Energy Flow', 'Ecological Pyramid', 'Nutrient Cycling', 'Carbon Cycle', 'Nitrogen Cycle', 'Phosphorus Cycle', 'Biodiversity', 'Hotspot', 'Endangered Species', 'Extinction', 'Conservation', 'In-situ', 'Ex-situ', 'Pollution', 'Greenhouse Effect', 'Global Warming', 'Ozone Depletion', 'Deforestation', 'Eutrophication'],
+        friction: 'Ecological relationships and biotechnology process applications.'
+      }
     }
   };
 
@@ -470,45 +545,61 @@ Return JSON ONLY: {
 
     // 1. Assign each question to exactly ONE domain with improved matching
     const mappedQuestions = questions.map(q => {
-      const topic = (q.topic || '').toLowerCase().trim();
+      // Use chapter field as fallback if topic is missing or generic
+      const qData = q as any;
+      const rawTopic = q.topic || qData.chapter || '';
+      const topic = rawTopic.toLowerCase().trim();
       let matchedKey = 'General';
       let maxMatchScore = 0;
 
-      // Try to match against each domain's keywords
-      for (const key in currentMap) {
-        const keywords = currentMap[key].chapters;
-        let matchScore = 0;
+      // Skip if topic is empty or too generic
+      const isGeneric = !topic || topic.length < 3 ||
+                       topic === 'general' ||
+                       topic === 'mathematics' ||
+                       topic === 'math' ||
+                       topic === 'physics' ||
+                       topic === 'chemistry' ||
+                       topic === 'biology' ||
+                       /^q\d+$/i.test(topic) ||
+                       /^question\s*\d+$/i.test(topic);
 
-        for (const keyword of keywords) {
-          const kw = keyword.toLowerCase();
-          // Check for exact word match or partial match
-          if (topic === kw || topic.includes(kw) || kw.includes(topic)) {
-            matchScore += 10; // Strong match
-          } else {
-            // Check for word boundary matches (e.g., "electric" matches "electricity")
-            const topicWords = topic.split(/\s+/);
-            const kwWords = kw.split(/\s+/);
-            for (const tw of topicWords) {
-              for (const kw of kwWords) {
-                if (tw.length > 3 && kw.length > 3) {
-                  if (tw.startsWith(kw) || kw.startsWith(tw)) {
-                    matchScore += 5; // Partial word match
+      if (!isGeneric) {
+        // Try to match against each domain's keywords
+        for (const key in currentMap) {
+          const keywords = currentMap[key].chapters;
+          let matchScore = 0;
+
+          for (const keyword of keywords) {
+            const kw = keyword.toLowerCase();
+            // Check for exact word match or partial match
+            if (topic === kw || topic.includes(kw) || kw.includes(topic)) {
+              matchScore += 10; // Strong match
+            } else {
+              // Check for word boundary matches (e.g., "electric" matches "electricity")
+              const topicWords = topic.split(/\s+/);
+              const kwWords = kw.split(/\s+/);
+              for (const tw of topicWords) {
+                for (const kwWord of kwWords) {
+                  if (tw.length > 3 && kwWord.length > 3) {
+                    if (tw.startsWith(kwWord) || kwWord.startsWith(tw)) {
+                      matchScore += 5; // Partial word match
+                    }
                   }
                 }
               }
             }
           }
-        }
 
-        if (matchScore > maxMatchScore) {
-          maxMatchScore = matchScore;
-          matchedKey = key;
+          if (matchScore > maxMatchScore) {
+            maxMatchScore = matchScore;
+            matchedKey = key;
+          }
         }
       }
 
       // Debug: Log first few classifications
       if (questions.indexOf(q) < 5) {
-        console.log(`🔍 [CLASSIFICATION DEBUG] Q${questions.indexOf(q) + 1}: topic="${topic}" → matched="${matchedKey}" (score: ${maxMatchScore})`);
+        console.log(`🔍 [CLASSIFICATION DEBUG] Q${questions.indexOf(q) + 1}: topic="${q.topic}" | chapter="${qData.chapter || 'N/A'}" | using="${rawTopic}" → matched="${matchedKey}" (score: ${maxMatchScore})`);
       }
 
       return { ...q, mappedKey: maxMatchScore > 0 ? matchedKey : 'General' };
@@ -743,226 +834,35 @@ Return JSON ONLY: {
         </div>
       </div>
 
-      {/* Main Layout: Sidebar + Content */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Collapsible Left Sidebar */}
-        <div className={`bg-white border-r border-slate-200 flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-0'} overflow-hidden`}>
-          {/* Sidebar Header - Tabs */}
-          <div className="p-3 border-b border-slate-200 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg">
-              {(['overview', 'intelligence', 'vault'] as const).map(tab => (
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Tabs Header */}
+        <div className="bg-white border-b border-slate-200 px-6 pt-4 pb-0 shrink-0">
+          <div className="flex items-center gap-1">
+            {(['overview', 'intelligence', 'vault'] as const).map(tab => {
+              const TabIcon = tab === 'overview' ? HelpCircle : tab === 'intelligence' ? Activity : FolderOpen;
+              return (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wide transition-all ${activeTab === tab ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-[11px] font-bold uppercase tracking-wide transition-all border-b-2 ${
+                    activeTab === tab
+                      ? 'bg-slate-50 text-slate-900 border-accent-600'
+                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-transparent'
+                  }`}
                 >
-                  {tab.substring(0, 4)}
+                  <TabIcon size={16} />
+                  {tab}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
-
-          {/* Vault Sidebar Content */}
-          {activeTab === 'vault' && (
-            <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Search & View Toggle */}
-              <div className="p-2 border-b border-slate-100 space-y-2">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search questions..."
-                    className="w-full px-3 py-1.5 text-[11px] border border-slate-200 rounded-lg outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-400/20 transition-all pl-8"
-                  />
-                  <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                {/* View Toggle */}
-                <div className="flex items-center gap-1 bg-slate-100 rounded-md p-0.5">
-                  <button
-                    onClick={() => setIsGroupedView(false)}
-                    className={`flex-1 px-2 py-1 text-[9px] font-semibold rounded transition-all ${
-                      !isGroupedView ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
-                    }`}
-                  >
-                    List
-                  </button>
-                  <button
-                    onClick={() => setIsGroupedView(true)}
-                    className={`flex-1 px-2 py-1 text-[9px] font-semibold rounded transition-all ${
-                      isGroupedView ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
-                    }`}
-                  >
-                    Group
-                  </button>
-                </div>
-              </div>
-
-              {/* Question List - Plain View */}
-              {!isGroupedView && (
-                <div className="flex-1 overflow-y-auto scroller-hide p-2 space-y-1.5">
-                  {questions.map((q, i) => {
-                    const qId = q.id || `frag-${i}`;
-                    const isActive = (expandedQuestionId || questions[0]?.id) === qId;
-                    const qNumMatch = q.id?.match(/Q(\d+)/i);
-                    const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
-                    const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
-
-                    return (
-                      <button
-                        key={qId}
-                        onClick={() => toggleQuestion(qId)}
-                        className={`w-full text-left p-2 rounded-md transition-all border ${
-                          isActive
-                            ? 'bg-accent-50 border-accent-300 shadow-sm'
-                            : 'bg-white hover:bg-slate-50 border-slate-200'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={`flex items-center justify-center w-6 h-6 rounded text-[11px] font-bold ${
-                            isActive
-                              ? 'bg-accent-600 text-white'
-                              : 'bg-slate-100 text-slate-600'
-                          }`}>
-                            {qNum}
-                          </span>
-                          <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-semibold rounded">
-                            {q.marks}M
-                          </span>
-                          {hasVisual && (
-                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" title="Has diagram/image" />
-                          )}
-                          <div className="flex-1 text-[10px] text-slate-600 line-clamp-1 leading-tight">
-                            <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Question List - Grouped View */}
-              {isGroupedView && (
-                <div className="flex-1 overflow-y-auto scroller-hide p-2 space-y-3">
-                  {aggregatedDomains.map((domain) => {
-                    const isDomainExpanded = expandedDomainId === domain.name;
-                    const domainQuestions = domain.catQuestions || [];
-
-                    if (domainQuestions.length === 0) return null;
-
-                    return (
-                      <div key={domain.name} className="border border-slate-200 rounded-lg overflow-hidden bg-white">
-                        <button
-                          onClick={() => setExpandedDomainId(isDomainExpanded ? null : domain.name)}
-                          className="w-full flex flex-col gap-2 p-2.5 bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-150 transition-all"
-                        >
-                          <div className="flex items-start justify-between w-full gap-2">
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              {isDomainExpanded ? (
-                                <ChevronDown size={14} className="text-slate-600 flex-shrink-0 mt-0.5" />
-                              ) : (
-                                <ChevronRight size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
-                              )}
-                              <span className="text-[10px] font-bold text-slate-800 uppercase tracking-wide leading-tight">
-                                {domain.name}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              <span className="px-1.5 py-0.5 bg-white text-slate-600 text-[8px] font-bold rounded">
-                                {domainQuestions.length}Q
-                              </span>
-                              <span className="px-1.5 py-0.5 bg-white text-slate-600 text-[8px] font-bold rounded">
-                                {domain.totalMarks}M
-                              </span>
-                              <span className={`px-1.5 py-0.5 text-[8px] font-semibold rounded ${
-                                domain.difficultyDNA === 'Hard' ? 'bg-red-100 text-red-700' :
-                                domain.difficultyDNA === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-green-100 text-green-700'
-                              }`}>
-                                {domain.difficultyDNA}
-                              </span>
-                            </div>
-                          </div>
-                        </button>
-                        {isDomainExpanded && (
-                          <div className="p-2 space-y-1.5 bg-slate-50/50">
-                            {domainQuestions.map((q, i) => {
-                              const qId = q.id || `frag-${i}`;
-                              const isActive = (expandedQuestionId || questions[0]?.id) === qId;
-                              const qNumMatch = q.id?.match(/Q(\d+)/i);
-                              const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
-                              const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
-
-                              return (
-                                <button
-                                  key={qId}
-                                  onClick={() => toggleQuestion(qId)}
-                                  className={`w-full text-left p-2 rounded-md transition-all border ${
-                                    isActive
-                                      ? 'bg-accent-50 border-accent-300 shadow-sm'
-                                      : 'bg-white hover:bg-slate-50 border-slate-200'
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span className={`flex items-center justify-center w-6 h-6 rounded text-[11px] font-bold ${
-                                      isActive
-                                        ? 'bg-accent-600 text-white'
-                                        : 'bg-slate-100 text-slate-600'
-                                    }`}>
-                                      {qNum}
-                                    </span>
-                                    <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-semibold rounded">
-                                      {q.marks}M
-                                    </span>
-                                    {hasVisual && (
-                                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" title="Has diagram/image" />
-                                    )}
-                                    <div className="flex-1 text-[10px] text-slate-600 line-clamp-1 leading-tight">
-                                      <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
-                                    </div>
-                                  </div>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Sidebar Footer */}
-              <div className="p-2 border-t border-slate-100">
-                <button
-                  onClick={synthesizeAllSolutions}
-                  disabled={isSynthesizingAll}
-                  className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-accent-600 text-white rounded-lg text-[9px] font-bold hover:bg-accent-700 transition-all active:scale-95 disabled:opacity-50"
-                >
-                  {isSynthesizingAll ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-                  Sync All
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Toggle Sidebar Button */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-6 h-12 bg-white border border-slate-200 rounded-r-lg flex items-center justify-center hover:bg-slate-50 transition-all shadow-sm"
-          style={{ marginLeft: sidebarOpen ? '256px' : '0px', transition: 'margin-left 300ms' }}
-        >
-          <svg className={`w-3 h-3 text-slate-400 transition-transform ${sidebarOpen ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto scroller-hide">
+        {/* Tab Content */}
+        <div className="flex-1 overflow-hidden">
           {activeTab === 'overview' && (
-            <div className="p-6 space-y-6">
+            <div className="h-full overflow-y-auto scroller-hide p-6 space-y-6">
               {/* Top Level Intelligence Matrix */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <MetricCard title="SYNTHESIZED FRAGMENTS" content={questions.length} label="Units" icon={<FileText size={16} />} />
@@ -1300,7 +1200,7 @@ Return JSON ONLY: {
         )}
 
           {activeTab === 'intelligence' && (
-            <div className="p-6 grid grid-cols-12 gap-4">
+            <div className="h-full overflow-y-auto scroller-hide p-6 grid grid-cols-12 gap-4">
             <div className="col-span-12 xl:col-span-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-sm min-h-[500px] min-w-0 flex flex-col">
               <div className="flex items-center justify-between mb-10">
                 <div>
@@ -1400,8 +1300,193 @@ Return JSON ONLY: {
         )}
 
         {activeTab === 'vault' && (
-          <div className="p-6 space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8">
+          <div className="h-full flex overflow-hidden">
+            {/* Left Column - Questions List */}
+            <div className="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
+              {/* Search & View Toggle */}
+              <div className="p-4 border-b border-slate-100 space-y-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search questions..."
+                    className="w-full px-3 py-2 text-[11px] border border-slate-200 rounded-lg outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-400/20 transition-all pl-8"
+                  />
+                  <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                {/* View Toggle */}
+                <div className="flex items-center gap-1 bg-slate-100 rounded-md p-0.5">
+                  <button
+                    onClick={() => setIsGroupedView(false)}
+                    className={`flex-1 px-2 py-1.5 text-[9px] font-semibold rounded transition-all ${
+                      !isGroupedView ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+                    }`}
+                  >
+                    List
+                  </button>
+                  <button
+                    onClick={() => setIsGroupedView(true)}
+                    className={`flex-1 px-2 py-1.5 text-[9px] font-semibold rounded transition-all ${
+                      isGroupedView ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+                    }`}
+                  >
+                    Group
+                  </button>
+                </div>
+              </div>
+
+              {/* Question List - Plain View */}
+              {!isGroupedView && (
+                <div className="flex-1 overflow-y-auto scroller-hide p-3 space-y-2">
+                  {questions.map((q, i) => {
+                    const qId = q.id || `frag-${i}`;
+                    const isActive = (expandedQuestionId || questions[0]?.id) === qId;
+                    const qNumMatch = q.id?.match(/Q(\d+)/i);
+                    const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
+                    const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
+
+                    return (
+                      <button
+                        key={qId}
+                        onClick={() => toggleQuestion(qId)}
+                        className={`w-full text-left p-2.5 rounded-lg transition-all border ${
+                          isActive
+                            ? 'bg-accent-50 border-accent-300 shadow-sm'
+                            : 'bg-white hover:bg-slate-50 border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className={`flex items-center justify-center w-7 h-7 rounded text-[11px] font-bold ${
+                            isActive
+                              ? 'bg-accent-600 text-white'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {qNum}
+                          </span>
+                          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-semibold rounded">
+                            {q.marks}M
+                          </span>
+                          {hasVisual && (
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" title="Has diagram/image" />
+                          )}
+                        </div>
+                        <div className="text-[10px] text-slate-600 line-clamp-2 leading-tight">
+                          <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Question List - Grouped View */}
+              {isGroupedView && (
+                <div className="flex-1 overflow-y-auto scroller-hide p-3 space-y-3">
+                  {aggregatedDomains.map((domain) => {
+                    const isDomainExpanded = expandedDomainId === domain.name;
+                    const domainQuestions = domain.catQuestions || [];
+
+                    if (domainQuestions.length === 0) return null;
+
+                    return (
+                      <div key={domain.name} className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+                        <button
+                          onClick={() => setExpandedDomainId(isDomainExpanded ? null : domain.name)}
+                          className="w-full flex flex-col gap-2 p-2.5 bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-150 transition-all"
+                        >
+                          <div className="flex items-start justify-between w-full gap-2">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              {isDomainExpanded ? (
+                                <ChevronDown size={14} className="text-slate-600 flex-shrink-0 mt-0.5" />
+                              ) : (
+                                <ChevronRight size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
+                              )}
+                              <span className="text-[10px] font-bold text-slate-800 uppercase tracking-wide leading-tight">
+                                {domain.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <span className="px-1.5 py-0.5 bg-white text-slate-600 text-[8px] font-bold rounded">
+                                {domainQuestions.length}Q
+                              </span>
+                              <span className="px-1.5 py-0.5 bg-white text-slate-600 text-[8px] font-bold rounded">
+                                {domain.totalMarks}M
+                              </span>
+                              <span className={`px-1.5 py-0.5 text-[8px] font-semibold rounded ${
+                                domain.difficultyDNA === 'Hard' ? 'bg-red-100 text-red-700' :
+                                domain.difficultyDNA === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
+                              }`}>
+                                {domain.difficultyDNA}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                        {isDomainExpanded && (
+                          <div className="p-2 space-y-2 bg-slate-50/50">
+                            {domainQuestions.map((q, i) => {
+                              const qId = q.id || `frag-${i}`;
+                              const isActive = (expandedQuestionId || questions[0]?.id) === qId;
+                              const qNumMatch = q.id?.match(/Q(\d+)/i);
+                              const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
+                              const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
+
+                              return (
+                                <button
+                                  key={qId}
+                                  onClick={() => toggleQuestion(qId)}
+                                  className={`w-full text-left p-2 rounded-lg transition-all border ${
+                                    isActive
+                                      ? 'bg-accent-50 border-accent-300 shadow-sm'
+                                      : 'bg-white hover:bg-slate-50 border-slate-200'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <span className={`flex items-center justify-center w-6 h-6 rounded text-[11px] font-bold ${
+                                      isActive
+                                        ? 'bg-accent-600 text-white'
+                                        : 'bg-slate-100 text-slate-600'
+                                    }`}>
+                                      {qNum}
+                                    </span>
+                                    <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-semibold rounded">
+                                      {q.marks}M
+                                    </span>
+                                    {hasVisual && (
+                                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" title="Has diagram/image" />
+                                    )}
+                                  </div>
+                                  <div className="text-[10px] text-slate-600 line-clamp-2 leading-tight">
+                                    <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Footer */}
+              <div className="p-3 border-t border-slate-100">
+                <button
+                  onClick={synthesizeAllSolutions}
+                  disabled={isSynthesizingAll}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-accent-600 text-white rounded-lg text-[10px] font-bold hover:bg-accent-700 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {isSynthesizingAll ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                  Sync All Solutions
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column - Question Details */}
+            <div className="flex-1 overflow-y-auto scroller-hide p-6">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8">
               {questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`)) ? (
                   (() => {
                     const selectedQ = questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`))!;
@@ -1455,37 +1540,23 @@ Return JSON ONLY: {
                           </div>
 
                           {/* Right - Actions */}
-                          <div className="flex items-center gap-2">
-                            <select
-                              value={selectedImageModel}
-                              onChange={(e) => setSelectedImageModel(e.target.value)}
-                              className="px-2 py-1 text-[9px] font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded hover:border-slate-300 transition-all outline-none"
-                              title="Select AI model"
-                            >
-                              <option value="gemini-3-flash-preview">Flash Preview</option>
-                              <option value="gemini-2.0-flash-lite">Flash Lite</option>
-                              <option value="gemini-2.5-flash-latest">Flash 2.5</option>
-                              <option value="gemini-1.5-pro">Pro 1.5</option>
-                              <option value="gemini-2.0-pro-exp">Pro 2.0 Exp</option>
-                              <option value="gemini-3-pro">Pro 3</option>
-                            </select>
-                            <div className="h-4 w-px bg-slate-200"></div>
+                          <div className="flex items-center gap-1">
                             <button
                               onClick={() => synthesizeQuestionDetails(qId)}
                               disabled={isSynthesizingQuestion === qId}
-                              className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-all disabled:opacity-50"
-                              title="Sync this question"
+                              className="p-2 text-slate-600 hover:bg-slate-100 hover:text-primary-600 rounded-lg transition-all disabled:opacity-50"
+                              title="Generate/update solution"
                             >
                               {isSynthesizingQuestion === qId ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
                             </button>
                             <button
                               onClick={() => handleGenerateVisual(selectedQ.id)}
                               disabled={isGeneratingVisual !== null}
-                              className="p-2 text-purple-500 hover:bg-purple-50 rounded-lg transition-all disabled:opacity-50"
-                              title="Generate visual for this question"
+                              className="p-2 text-slate-600 hover:bg-slate-100 hover:text-purple-600 rounded-lg transition-all disabled:opacity-50"
+                              title="Generate visual diagram"
                             >
                               {isGeneratingVisual === selectedQ.id ? (
-                                <Loader2 size={16} className="animate-spin text-purple-500" />
+                                <Loader2 size={16} className="animate-spin text-purple-600" />
                               ) : (
                                 <Sparkles size={16} />
                               )}
@@ -1513,19 +1584,37 @@ Return JSON ONLY: {
                         {/* Options - Minimal */}
                         {selectedQ.options && selectedQ.options.length > 0 && (
                           <div className="grid grid-cols-2 gap-2 mb-6">
-                            {selectedQ.options.map((option: string, idx: number) => (
-                              <div
-                                key={idx}
-                                className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
-                              >
-                                <span className="flex-shrink-0 w-5 h-5 rounded bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold">
-                                  {['A', 'B', 'C', 'D'][idx]}
-                                </span>
-                                <div className="flex-1 text-sm text-slate-700">
-                                  <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
+                            {selectedQ.options.map((option: string, idx: number) => {
+                              const isCorrect = selectedQ.correctOptionIndex !== undefined && idx === selectedQ.correctOptionIndex;
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`flex items-center gap-2 p-3 rounded-lg transition-colors relative ${
+                                    isCorrect
+                                      ? 'bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-300'
+                                      : 'bg-slate-50 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  {isCorrect && (
+                                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-md">
+                                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    </div>
+                                  )}
+                                  <span className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold ${
+                                    isCorrect
+                                      ? 'bg-emerald-600 text-white'
+                                      : 'bg-slate-200 text-slate-700'
+                                  }`}>
+                                    {['A', 'B', 'C', 'D'][idx]}
+                                  </span>
+                                  <div className={`flex-1 text-sm ${isCorrect ? 'text-emerald-900 font-semibold' : 'text-slate-700'}`}>
+                                    <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
 
@@ -1655,43 +1744,44 @@ Return JSON ONLY: {
               )}
             </div>
           </div>
+          </div>
         )}
+        </div>
 
-          {/* Enlarged Visual Note Modal */}
-          {enlargedVisualNote && (
-            <div
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-              onClick={() => setEnlargedVisualNote(null)}
-            >
-              <div className="relative max-w-6xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 z-10">
-                  <button
-                    onClick={() => setEnlargedVisualNote(null)}
-                    className="p-2 bg-slate-900/90 hover:bg-slate-900 text-white rounded-xl shadow-lg transition-all active:scale-95"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+        {/* Enlarged Visual Note Modal */}
+        {enlargedVisualNote && (
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setEnlargedVisualNote(null)}
+          >
+            <div className="relative max-w-6xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 z-10">
+                <button
+                  onClick={() => setEnlargedVisualNote(null)}
+                  className="p-2 bg-slate-900/90 hover:bg-slate-900 text-white rounded-xl shadow-lg transition-all active:scale-95"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-6">
+                <div className="mb-4">
+                  <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Visual Learning Note</h3>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">Question ID: {enlargedVisualNote.questionId}</p>
                 </div>
-                <div className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Visual Learning Note</h3>
-                    <p className="text-[9px] text-slate-500 uppercase tracking-wider">Question ID: {enlargedVisualNote.questionId}</p>
-                  </div>
-                  <div className="overflow-auto max-h-[calc(90vh-120px)]">
-                    <img
-                      src={enlargedVisualNote.imageUrl}
-                      alt="Enlarged visual note"
-                      className="w-full h-auto rounded-xl"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
+                <div className="overflow-auto max-h-[calc(90vh-120px)]">
+                  <img
+                    src={enlargedVisualNote.imageUrl}
+                    alt="Enlarged visual note"
+                    className="w-full h-auto rounded-xl"
+                    onClick={(e) => e.stopPropagation()}
+                  />
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

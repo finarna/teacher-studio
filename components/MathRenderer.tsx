@@ -59,7 +59,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
 
     if (typeof rawExpression === 'string' && rawExpression.trim()) {
       try {
-        const cleanExpression = rawExpression
+        let cleanExpression = rawExpression
           .replace(/\n/g, ' ')      // Remove actual newline characters (NOT \n in LaTeX)
           .replace(/\r/g, '')       // Remove actual carriage returns (NOT \r in LaTeX)
           .replace(/\s+/g, ' ')
@@ -74,11 +74,10 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
           macros: LATEX_MACROS
         });
 
-        // Check if KaTeX rendered an error (contains katex-error class or color="red")
-        if (html.includes('katex-error') || html.includes('color:#cc0000') || html.includes('\\color{red}')) {
-          console.error('❌ KaTeX PARSE ERROR detected in output:', {
-            expression: cleanExpression.substring(0, 200),
-            htmlSnippet: html.substring(0, 300)
+        // Only log actual KaTeX errors (katex-error class means parsing failed)
+        if (html.includes('katex-error')) {
+          console.error('❌ KaTeX parse error:', {
+            expression: cleanExpression.substring(0, 100)
           });
         }
 
@@ -101,25 +100,96 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
 };
 
 export const DerivationStep: React.FC<{ index: number, title?: string, content: string }> = ({ index, title, content }) => {
+  const [isExpanded, setIsExpanded] = React.useState(true);
+  const [isCopied, setIsCopied] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   return (
-    <div className="mb-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
-      <div className="flex items-center gap-6 mb-4">
-        <div className="w-11 h-11 rounded-[14px] bg-slate-950 text-white flex items-center justify-center text-sm font-black shadow-2xl shadow-slate-900/40 shrink-0 transform -rotate-3 hover:rotate-0 transition-transform duration-500">
+    <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-700 group/container">
+      {/* Step Header - Always Visible */}
+      <div
+        className="flex items-center gap-4 mb-3 cursor-pointer select-none"
+        onClick={() => setIsExpanded(!isExpanded)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Step Number Badge */}
+        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 text-white flex items-center justify-center text-sm font-black shadow-lg shrink-0 transition-all duration-300 ${
+          isExpanded ? 'scale-100' : 'scale-90 opacity-70'
+        } ${isHovered ? 'ring-4 ring-primary-500/20' : ''}`}>
           {index}
         </div>
-        <div className="flex-1 flex items-center gap-4">
-          <div className="text-[12px] font-black text-slate-900 uppercase tracking-[0.3em] font-outfit italic bg-slate-100/50 px-4 py-1.5 rounded-full border border-slate-200/50 shadow-sm">
-            {title || `Derivation Lead ${index}`}
+
+        {/* Title */}
+        <div className="flex-1 flex items-center gap-3 min-w-0">
+          <div className={`text-[11px] font-bold text-slate-700 uppercase tracking-wider font-outfit transition-colors duration-300 truncate ${
+            isHovered ? 'text-slate-900' : ''
+          }`}>
+            {title || `Step ${index}`}
           </div>
-          <div className="h-[2px] bg-gradient-to-r from-slate-200 to-transparent flex-1"></div>
+          {!isExpanded && (
+            <div className="text-[9px] text-slate-400 font-medium px-2 py-0.5 bg-slate-100 rounded-full">
+              Click to expand
+            </div>
+          )}
+        </div>
+
+        {/* Expand/Collapse Icon */}
+        <div className={`transition-transform duration-300 text-slate-400 ${isExpanded ? 'rotate-180' : ''}`}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-[1.5rem] p-6 md:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.02)] relative overflow-hidden group/step hover:shadow-[0_20px_40px_rgba(0,0,0,0.04)] transition-all duration-700 ease-out">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.03] pointer-events-none" />
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary-500/20 to-transparent opacity-0 group-hover/step:opacity-100 transition-opacity duration-700" />
-        <div className="relative z-10">
-          <RenderWithMath text={content} className="text-xl md:text-2xl font-serif text-slate-800 leading-[1.9]" showOptions={false} />
+      {/* Step Content - Collapsible */}
+      <div className={`transition-all duration-500 ease-out ${
+        isExpanded ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'
+      }`}>
+        <div className="ml-13 relative group/step">
+          {/* Connecting Line */}
+          <div className="absolute left-[-26px] top-0 bottom-0 w-[2px] bg-gradient-to-b from-slate-200 via-slate-200 to-transparent" />
+
+          {/* Content Card */}
+          <div className="bg-gradient-to-br from-white to-slate-50/30 border border-slate-200/60 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md relative overflow-hidden transition-all duration-500">
+            {/* Subtle Grid Background */}
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.02] pointer-events-none" />
+
+            {/* Top Gradient Accent */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary-500/30 to-transparent" />
+
+            {/* Action Buttons - Show on Hover */}
+            <div className={`absolute top-3 right-3 flex items-center gap-1.5 transition-opacity duration-300 ${
+              isHovered ? 'opacity-100' : 'opacity-0'
+            }`}>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleCopy(); }}
+                className="p-1.5 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm group/btn"
+                title="Copy step"
+              >
+                {isCopied ? (
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4 text-slate-600 group-hover/btn:text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            {/* Math Content */}
+            <div className="relative z-10 pr-12">
+              <RenderWithMath text={content} className="text-lg md:text-xl font-serif text-slate-800 leading-[1.85]" showOptions={false} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -133,8 +203,9 @@ export const RenderWithMath: React.FC<{
   serif?: boolean,
   autoSteps?: boolean,
   dark?: boolean,
-  compact?: boolean
-}> = ({ text, className, showOptions = true, serif = true, autoSteps = false, dark = false, compact = false }) => {
+  compact?: boolean,
+  correctOptionIndex?: number
+}> = ({ text, className, showOptions = true, serif = true, autoSteps = false, dark = false, compact = false, correctOptionIndex }) => {
   if (!text) return null;
 
   // 1. Clean "Junk" from AI output
@@ -224,10 +295,29 @@ export const RenderWithMath: React.FC<{
               );
             }
             return (
-              <div key={i} className="my-8 p-8 border-2 rounded-[2rem] shadow-xl relative group/math overflow-hidden bg-slate-50/50 border-primary-500/10">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.05] pointer-events-none" />
-                <div className="absolute top-0 right-0 px-4 py-1.5 bg-primary-500/10 border-b border-l border-primary-500/20 rounded-bl-xl text-[8px] font-black text-primary-600 uppercase tracking-widest font-outfit">Equation Vault</div>
-                <MathRenderer expression={p.trim().slice(2, -2)} displayMode={true} className={hasCustomColor ? '' : 'text-slate-900'} />
+              <div key={i} className="my-6 relative group/math">
+                <div className="bg-gradient-to-br from-white via-slate-50/40 to-white border border-slate-200/70 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+                  {/* Subtle Grid Background */}
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.015] pointer-events-none" />
+
+                  {/* Top Accent Line */}
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary-500/20 via-primary-500/40 to-primary-500/20" />
+
+                  {/* Formula Insight Badge */}
+                  <div className="absolute top-3 right-3 px-2.5 py-1 bg-primary-500/10 backdrop-blur-sm border border-primary-500/20 rounded-lg">
+                    <div className="text-[9px] font-bold text-primary-700 uppercase tracking-wide font-outfit flex items-center gap-1.5">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      Formula
+                    </div>
+                  </div>
+
+                  {/* Math Content */}
+                  <div className="relative z-10 pt-2">
+                    <MathRenderer expression={p.trim().slice(2, -2)} displayMode={true} className={hasCustomColor ? '' : 'text-slate-900'} />
+                  </div>
+                </div>
               </div>
             );
           }
@@ -240,10 +330,29 @@ export const RenderWithMath: React.FC<{
               {parts.map((part, pIdx) => {
                 if (part.startsWith('$$') && part.endsWith('$$') && !compact) {
                   return (
-                    <div key={pIdx} className="my-10 p-10 border-2 rounded-[3rem] shadow-2xl relative group/math overflow-hidden bg-slate-50/50 border-primary-500/10">
-                      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.05] pointer-events-none" />
-                      <div className="absolute top-0 right-0 px-6 py-2 bg-primary-600/10 border-b border-l border-primary-500/20 rounded-bl-3xl text-[10px] font-black text-primary-700 uppercase tracking-[0.2em] font-outfit">Formula Insight</div>
-                      <MathRenderer expression={part.slice(2, -2)} displayMode={true} className={dark ? 'text-white' : ''} />
+                    <div key={pIdx} className="my-6 relative group/math">
+                      <div className="bg-gradient-to-br from-white via-slate-50/40 to-white border border-slate-200/70 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+                        {/* Subtle Grid Background */}
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.015] pointer-events-none" />
+
+                        {/* Top Accent Line */}
+                        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary-500/20 via-primary-500/40 to-primary-500/20" />
+
+                        {/* Formula Insight Badge */}
+                        <div className="absolute top-3 right-3 px-2.5 py-1 bg-primary-500/10 backdrop-blur-sm border border-primary-500/20 rounded-lg">
+                          <div className="text-[9px] font-bold text-primary-700 uppercase tracking-wide font-outfit flex items-center gap-1.5">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            Formula
+                          </div>
+                        </div>
+
+                        {/* Math Content */}
+                        <div className="relative z-10 pt-2">
+                          <MathRenderer expression={part.slice(2, -2)} displayMode={true} className={dark ? 'text-white' : ''} />
+                        </div>
+                      </div>
                     </div>
                   );
                 }
@@ -274,10 +383,29 @@ export const RenderWithMath: React.FC<{
             const labelMatch = opt.match(/\(([1-4A-D])\)/);
             const label = labelMatch ? labelMatch[1] : (i + 1).toString();
             const content = opt.replace(/\([1-4A-D]\)/, '').trim();
+            const isCorrect = correctOptionIndex !== undefined && i === correctOptionIndex;
+
             return (
-              <div key={i} className="flex gap-4 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-xl hover:border-primary-200 transition-all group/opt">
-                <div className="w-12 h-12 rounded-xl bg-slate-950 text-white flex items-center justify-center text-xs font-black shrink-0 group-hover/opt:bg-primary-600 transition-colors shadow-2xl shadow-slate-900/10 transform -rotate-2 group-hover/opt:rotate-0">{label}</div>
-                <div className="text-sm font-bold text-slate-800 pt-3 flex-1 leading-relaxed">
+              <div key={i} className={`flex gap-4 p-6 border rounded-[2rem] shadow-sm hover:shadow-xl transition-all group/opt relative ${
+                isCorrect
+                  ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-300 hover:border-emerald-400'
+                  : 'bg-white border-slate-100 hover:border-primary-200'
+              }`}>
+                {isCorrect && (
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+                <div className={`w-12 h-12 rounded-xl text-white flex items-center justify-center text-xs font-black shrink-0 transition-all shadow-2xl transform -rotate-2 group-hover/opt:rotate-0 ${
+                  isCorrect
+                    ? 'bg-emerald-600 group-hover/opt:bg-emerald-700 shadow-emerald-900/20'
+                    : 'bg-slate-950 group-hover/opt:bg-primary-600 shadow-slate-900/10'
+                }`}>{label}</div>
+                <div className={`text-sm font-bold pt-3 flex-1 leading-relaxed ${
+                  isCorrect ? 'text-emerald-900' : 'text-slate-800'
+                }`}>
                   <RenderWithMath text={content} showOptions={false} serif={false} />
                 </div>
               </div>
