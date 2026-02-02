@@ -9,11 +9,12 @@
 
 /**
  * Detect and auto-wrap common LaTeX commands that are missing delimiters
+ * CONSERVATIVE APPROACH: Only wrap isolated LaTeX commands, don't break existing text
  */
 export function autoWrapLaTeX(text: string): string {
   let processed = text;
 
-  // Pattern 1: Detect \frac{}{} without $ delimiters
+  // Pattern 1: Detect \frac{}{} without $ delimiters (isolated, not part of larger expression)
   processed = processed.replace(
     /(?<!\$)\\frac\{[^}]+\}\{[^}]+\}(?!\$)/g,
     (match) => `$${match}$`
@@ -37,7 +38,7 @@ export function autoWrapLaTeX(text: string): string {
     }
   );
 
-  // Pattern 4: Detect Greek letters without delimiters
+  // Pattern 4: Detect Greek letters without delimiters (isolated only)
   const greekLetters = [
     'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'theta', 'lambda',
     'mu', 'pi', 'sigma', 'tau', 'omega', 'phi', 'psi'
@@ -58,6 +59,22 @@ export function autoWrapLaTeX(text: string): string {
   processed = processed.replace(
     /(?<!\$)\\ce\{[^}]+\}(?!\$)/g,
     (match) => `$${match}$`
+  );
+
+  // Pattern 7: Detect square brackets with math content (dimensions like [MLT^{-2}])
+  // Only convert if it contains clear LaTeX syntax or dimensional analysis notation
+  processed = processed.replace(
+    /(?<!\$)\[([^\[\]]+)\](?!\$)/g,
+    (match, inner) => {
+      // Only wrap if it contains LaTeX operators or looks like dimensional analysis
+      const hasLatexSyntax = /[\^_{}\\]/.test(inner);
+      const isDimensionalAnalysis = /^[A-Z]{1,5}[\^_\-0-9{}]*$/.test(inner.trim());
+
+      if (hasLatexSyntax || isDimensionalAnalysis) {
+        return `$\\left[${inner}\\right]$`;
+      }
+      return match;
+    }
   );
 
   return processed;
@@ -83,6 +100,10 @@ export function cleanLaTeX(text: string): string {
  * Main formatter: Apply all fixes
  */
 export function formatMathInResponse(response: string): string {
+  // TEMPORARILY DISABLED - focusing on getting AI to generate correct format
+  return response;
+
+  /* ORIGINAL CODE - keeping for reference
   let formatted = response;
 
   // Step 1: Clean up over-escaping
@@ -92,4 +113,5 @@ export function formatMathInResponse(response: string): string {
   formatted = autoWrapLaTeX(formatted);
 
   return formatted;
+  */
 }

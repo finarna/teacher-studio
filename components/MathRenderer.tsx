@@ -65,6 +65,29 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
           .replace(/\s+/g, ' ')
           .trim();
 
+        // Fix common LaTeX errors
+        // 1. Fix invalid superscript+spacing: \,^\circ → ^\circ
+        cleanExpression = cleanExpression.replace(/\\,\s*\^\\circ/g, '^\\circ');
+
+        // 2. Fix double superscripts: 10^{-5}^\circ → 10^{-5\circ}
+        cleanExpression = cleanExpression.replace(/\^(\{[^}]+\})\s*\^(\{[^}]+\})/g, '^{$1$2}');
+        cleanExpression = cleanExpression.replace(/\^(\{[^}]+\})\s*\^(\\[a-zA-Z]+)/g, '^{$1$2}');
+
+        // 3. Fix \begin{tabular} → \begin{array} (KaTeX doesn't support tabular)
+        cleanExpression = cleanExpression.replace(/\\begin\{tabular\}/g, '\\begin{array}');
+        cleanExpression = cleanExpression.replace(/\\end\{tabular\}/g, '\\end{array}');
+
+        // 2. Detect incomplete table rows (has & and \\ but no array wrapper)
+        // If expression contains & and ends with \\, wrap it in array
+        if (cleanExpression.includes('&') && cleanExpression.trim().endsWith('\\\\')) {
+          // Don't auto-wrap if already in array/matrix/aligned environment
+          if (!cleanExpression.includes('\\begin{') && !cleanExpression.includes('\\end{')) {
+            // Skip wrapping - these are likely fragments that shouldn't be rendered alone
+            // Just render as-is and KaTeX will show error (better than corrupting valid math)
+            console.warn('⚠️ Detected table fragment without array wrapper:', cleanExpression.substring(0, 50));
+          }
+        }
+
         const html = window.katex.renderToString(cleanExpression, {
           throwOnError: false,
           displayMode: isDisplayMode,

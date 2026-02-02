@@ -98,11 +98,11 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
 
   // Debug: Log visual elements in vault questions
   React.useEffect(() => {
-    console.log('📊 [VAULT DEBUG] Total questions in vault:', questions.length);
+    console.debug('📊 [VAULT DEBUG] Total questions in vault:', questions.length);
     const questionsWithVisuals = questions.filter(q => q.hasVisualElement);
-    console.log('🖼️ [VAULT DEBUG] Questions with visual elements:', questionsWithVisuals.length);
+    console.debug('🖼️ [VAULT DEBUG] Questions with visual elements:', questionsWithVisuals.length);
     if (questionsWithVisuals.length > 0) {
-      console.log('🖼️ [VAULT DEBUG] Sample visual question:', {
+      console.debug('🖼️ [VAULT DEBUG] Sample visual question:', {
         id: questionsWithVisuals[0].id,
         text: questionsWithVisuals[0].text?.substring(0, 50) + '...',
         hasVisualElement: questionsWithVisuals[0].hasVisualElement,
@@ -1493,7 +1493,7 @@ Schema: {
                     const qId = selectedQ.id || 'frag-0';
 
                     // Debug: Check if extractedImages is present on selectedQ
-                    console.log('🔍 [VAULT DISPLAY DEBUG] Selected question:', {
+                    console.debug('🔍 [VAULT DISPLAY DEBUG] Selected question:', {
                       id: selectedQ.id,
                       hasExtractedImages: !!selectedQ.extractedImages,
                       extractedImagesCount: selectedQ.extractedImages?.length || 0,

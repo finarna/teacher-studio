@@ -29,3 +29,4 @@ dist-ssr
 *.zip
 *.mp4
 
+.env

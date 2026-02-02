@@ -52,17 +52,22 @@ export async function extractImagesFromPDF(file: File, pageFilter?: number[] | n
   for (const pageNum of pagesToProcess) {
     try {
       const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 1.0 });
+      // Use 2x scale for higher quality image extraction (prevents truncation/pixelation)
+      const viewport = page.getViewport({ scale: 2.0 });
 
       // Render page to canvas to ensure all objects are loaded
       const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext('2d', {
+        willReadFrequently: true,
+        alpha: true
+      });
       canvas.width = viewport.width;
       canvas.height = viewport.height;
 
       await page.render({
         canvasContext: context!,
-        viewport: viewport
+        viewport: viewport,
+        intent: 'display' // Use display intent for better quality
       }).promise;
 
       // Now get operator list after rendering
@@ -123,10 +128,15 @@ export async function extractImagesFromPDF(file: File, pageFilter?: number[] | n
             const ctx = canvas.getContext('2d');
 
             if (pageResources.bitmap) {
-              // ImageBitmap case
+              // ImageBitmap case - use actual dimensions for full quality
               canvas.width = pageResources.bitmap.width;
               canvas.height = pageResources.bitmap.height;
-              ctx?.drawImage(pageResources.bitmap, 0, 0);
+              // Use high-quality image smoothing
+              if (ctx) {
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(pageResources.bitmap, 0, 0);
+              }
             } else if (pageResources.data) {
               // Raw image data case
               canvas.width = pageResources.width || 100;
@@ -139,7 +149,8 @@ export async function extractImagesFromPDF(file: File, pageFilter?: number[] | n
               ctx?.putImageData(imageData, 0, 0);
             }
 
-            const imageDataUrl = canvas.toDataURL('image/png');
+            // Use PNG for lossless quality (not JPEG which can truncate/compress)
+            const imageDataUrl = canvas.toDataURL('image/png', 1.0);
 
             // Use current CTM for positioning
             const x = currentCTM[4] || 0;

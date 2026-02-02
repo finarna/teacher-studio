@@ -245,7 +245,8 @@ export function useVidyaChatV3(
           routing.toolParams || {}
         );
 
-        // Add tool result as message
+        // Add tool result as message with math formatting
+        const formattedToolResult = formatMathInResponse(formatToolResult(toolResult));
         setState(prev => ({
           ...prev,
           messages: [
@@ -253,7 +254,7 @@ export function useVidyaChatV3(
             {
               id: Date.now().toString(),
               role: 'assistant',
-              content: formatToolResult(toolResult),
+              content: formattedToolResult,
               timestamp: new Date(),
             },
           ],
@@ -315,10 +316,12 @@ export function useVidyaChatV3(
           const now = Date.now();
           // Debounce: only update UI every UPDATE_INTERVAL ms
           if (now - lastUpdateTime > UPDATE_INTERVAL) {
+            // Apply math formatter for LaTeX safety
+            const formattedText = formatMathInResponse(fullText);
             setState(prev => ({
               ...prev,
               messages: prev.messages.map(m =>
-                m.id === botMsgId ? { ...m, content: fullText } : m
+                m.id === botMsgId ? { ...m, content: formattedText } : m
               ),
             }));
             lastUpdateTime = now;
@@ -326,11 +329,16 @@ export function useVidyaChatV3(
         }
       }
 
-      // Final update with complete text
+      // Final update with complete text + math formatting
+      console.debug('[VidyaV3] Raw AI response (first 500 chars):', fullText.substring(0, 500));
+      const formattedFinalText = formatMathInResponse(fullText);
+      console.debug('[VidyaV3] Formatted response (first 500 chars):', formattedFinalText.substring(0, 500));
+      console.debug('[VidyaV3] Formatter made changes:', fullText !== formattedFinalText);
+
       setState(prev => ({
         ...prev,
         messages: prev.messages.map(m =>
-          m.id === botMsgId ? { ...m, content: fullText } : m
+          m.id === botMsgId ? { ...m, content: formattedFinalText } : m
         ),
       }));
 

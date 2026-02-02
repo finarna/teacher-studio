@@ -72,7 +72,7 @@ export function getCachedContext(cacheKey: string): VidyaContextPayload | null {
   // Cache hit
   cached.hits++;
   cacheStats.hits++;
-  console.log('[Performance] Context cache HIT', {
+  console.debug('[Performance] Context cache HIT', {
     key: cacheKey,
     age: `${Math.round((now - cached.timestamp) / 1000)}s`,
     hits: cached.hits,
@@ -100,7 +100,7 @@ export function setCachedContext(
     hits: 0,
   });
 
-  console.log('[Performance] Context cached', {
+  console.debug('[Performance] Context cached', {
     key: cacheKey,
     cacheSize: contextCache.size,
   });
@@ -123,7 +123,7 @@ function evictOldestEntry(): void {
   if (oldestKey) {
     contextCache.delete(oldestKey);
     cacheStats.evictions++;
-    console.log('[Performance] Cache entry evicted', { key: oldestKey });
+    console.debug('[Performance] Cache entry evicted', { key: oldestKey });
   }
 }
 
@@ -143,7 +143,7 @@ export function cleanExpiredCache(): void {
 
   if (cleaned > 0) {
     cacheStats.evictions += cleaned;
-    console.log('[Performance] Cleaned expired cache entries', { count: cleaned });
+    console.debug('[Performance] Cleaned expired cache entries', { count: cleaned });
   }
 }
 
@@ -153,7 +153,7 @@ export function cleanExpiredCache(): void {
 export function invalidateContextCache(reason?: string): void {
   const size = contextCache.size;
   contextCache.clear();
-  console.log('[Performance] Context cache invalidated', {
+  console.debug('[Performance] Context cache invalidated', {
     reason: reason || 'manual',
     entriesCleared: size,
   });
@@ -173,7 +173,7 @@ export function invalidateCachePattern(pattern: RegExp): void {
   }
 
   if (cleared > 0) {
-    console.log('[Performance] Cache pattern invalidated', {
+    console.debug('[Performance] Cache pattern invalidated', {
       pattern: pattern.toString(),
       entriesCleared: cleared,
     });
@@ -208,7 +208,7 @@ export function resetCacheStats(): void {
     totalBuildTime: 0,
     totalCachedTime: 0,
   };
-  console.log('[Performance] Cache statistics reset');
+  console.debug('[Performance] Cache statistics reset');
 }
 
 /**

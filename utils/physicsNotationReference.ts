@@ -27,26 +27,37 @@ CRITICAL PHYSICS NOTATION - Convert Visual Symbols to Proper LaTeX
 YOU ARE EXTRACTING FROM A PRINTED/PDF PHYSICS PAPER. Physical quantities,
 units, and symbols MUST be converted to proper LaTeX format.
 
+⚠️ CRITICAL TEXT EXTRACTION RULE - PRESERVE SPACES!
+────────────────────────────────────────────────────────────────────────────
+MANDATORY: Preserve ALL spaces between words in question text!
+WRONG: "Asmalltelescopehas tan objectiveoffocallength"
+RIGHT: "A small telescope has tan objective of focal length"
+
+If OCR fails to detect spaces, use context to insert proper word breaks.
+NEVER output text without spaces between words!
+
 ═══════════════════════════════════════════════════════════════════════════
 
 1. VECTORS (CRITICAL - Bold notation or arrow notation)
    ────────────────────────────────────────────────────────────────────────
-   Visual: **F**, **v**, **a** (bold letters)     → LaTeX: $\\mathbf{F}$, $\\mathbf{v}$, $\\mathbf{a}$
-   Visual: →F, F→, F⃗ (arrow notation)             → LaTeX: $\\vec{F}$ or $\\mathbf{F}$
-   Visual: F̂, v̂ (unit vectors)                   → LaTeX: $\\hat{F}$, $\\hat{v}$
+   ⚠️ CRITICAL: Use DOUBLE backslashes in LaTeX! (JSON escaping requires this)
+
+   Visual: **F**, **v**, **a** (bold letters)     → LaTeX: $\\\\mathbf{F}$, $\\\\mathbf{v}$, $\\\\mathbf{a}$
+   Visual: →F, F→, F⃗ (arrow notation)             → LaTeX: $\\\\vec{F}$ or $\\\\mathbf{F}$
+   Visual: F̂, v̂ (unit vectors)                   → LaTeX: $\\\\hat{F}$, $\\\\hat{v}$
 
    COMMON PHYSICS VECTORS:
-   - Force: **F** → $\\mathbf{F}$ or $\\vec{F}$
-   - Velocity: **v** → $\\mathbf{v}$ or $\\vec{v}$
-   - Acceleration: **a** → $\\mathbf{a}$ or $\\vec{a}$
-   - Electric Field: **E** → $\\mathbf{E}$ or $\\vec{E}$
-   - Magnetic Field: **B** → $\\mathbf{B}$ or $\\vec{B}$
-   - Displacement: **r** → $\\mathbf{r}$ or $\\vec{r}$
-   - Momentum: **p** → $\\mathbf{p}$ or $\\vec{p}$
+   - Force: **F** → $\\\\mathbf{F}$ or $\\\\vec{F}$
+   - Velocity: **v** → $\\\\mathbf{v}$ or $\\\\vec{v}$
+   - Acceleration: **a** → $\\\\mathbf{a}$ or $\\\\vec{a}$
+   - Electric Field: **E** → $\\\\mathbf{E}$ or $\\\\vec{E}$
+   - Magnetic Field: **B** → $\\\\mathbf{B}$ or $\\\\vec{B}$
+   - Displacement: **r** → $\\\\mathbf{r}$ or $\\\\vec{r}$
+   - Momentum: **p** → $\\\\mathbf{p}$ or $\\\\vec{p}$
 
    EXAMPLE CONVERSIONS:
-   - "Net force F = ma" → "Net force $\\mathbf{F} = m\\mathbf{a}$"
-   - "Electric field E at point P" → "Electric field $\\mathbf{E}$ at point P"
+   - "Net force F = ma" → "Net force $\\\\mathbf{F} = m\\\\mathbf{a}$"
+   - "Electric field E at point P" → "Electric field $\\\\mathbf{E}$ at point P"
 
 ═══════════════════════════════════════════════════════════════════════════
 
@@ -60,9 +71,9 @@ units, and symbols MUST be converted to proper LaTeX format.
    Visual: m², cm³ (squared/cubed units)         → LaTeX: $\\text{m}^2$, $\\text{cm}^3$
 
    EXAMPLE CONVERSIONS:
-   - "v0 = 10 m/s" → "$v_0 = 10\\,\\text{m/s}$" (initial velocity)
-   - "Ek = 1/2 mv²" → "$E_k = \\frac{1}{2}mv^2$" (kinetic energy)
-   - "Resistance R1 = 5Ω" → "Resistance $R_1 = 5\\,\\Omega$"
+   - "v0 = 10 m/s" → "$v_0 = 10\\\\,\\\\text{m/s}$" (initial velocity)
+   - "Ek = 1/2 mv²" → "$E_k = \\\\frac{1}{2}mv^2$" (kinetic energy)
+   - "Resistance R1 = 5Ω" → "Resistance $R_1 = 5\\\\,\\\\Omega$"
 
 ═══════════════════════════════════════════════════════════════════════════
 
@@ -74,7 +85,7 @@ units, and symbols MUST be converted to proper LaTeX format.
    Visual: 9.8 m/s²              → LaTeX: $9.8\\,\\text{m/s}^2$
    Visual: 100 N                 → LaTeX: $100\\,\\text{N}$
    Visual: 5 kg                  → LaTeX: $5\\,\\text{kg}$
-   Visual: 20°C                  → LaTeX: $20\\,^\\circ\\text{C}$
+   Visual: 20°C                  → LaTeX: $20^{\\circ}\\text{C}$ (NO space before degree)
    Visual: 3 × 10⁸ m/s           → LaTeX: $3 \\times 10^8\\,\\text{m/s}$
    Visual: 5Ω (ohms)             → LaTeX: $5\\,\\Omega$
    Visual: 10μF (microfarads)    → LaTeX: $10\\,\\mu\\text{F}$
@@ -119,28 +130,30 @@ units, and symbols MUST be converted to proper LaTeX format.
 
 5. GREEK LETTERS (Common in Physics formulas)
    ────────────────────────────────────────────────────────────────────────
-   α (alpha) - angle, angular acceleration     → $\\alpha$
-   β (beta) - angle, velocity ratio            → $\\beta$
-   γ (gamma) - Lorentz factor, gamma rays      → $\\gamma$
-   δ (delta) - small change                    → $\\delta$
-   Δ (Delta) - change, difference              → $\\Delta$
-   ε (epsilon) - permittivity, emf             → $\\epsilon$ or $\\varepsilon$
-   θ (theta) - angle                           → $\\theta$
-   λ (lambda) - wavelength                     → $\\lambda$
-   μ (mu) - coefficient of friction, permeability → $\\mu$
-   ν (nu) - frequency                          → $\\nu$
-   ρ (rho) - density, resistivity              → $\\rho$
-   σ (sigma) - surface charge density, stress  → $\\sigma$
-   τ (tau) - torque, time constant             → $\\tau$
-   φ (phi) - angle, magnetic flux              → $\\phi$ or $\\varphi$
-   Φ (Phi) - flux                              → $\\Phi$
-   ω (omega) - angular velocity                → $\\omega$
-   Ω (Omega) - ohm (unit)                      → $\\Omega$
+   ⚠️ CRITICAL: Use DOUBLE backslashes in LaTeX! (JSON escaping requires this)
+
+   α (alpha) - angle, angular acceleration     → $\\\\alpha$
+   β (beta) - angle, velocity ratio            → $\\\\beta$
+   γ (gamma) - Lorentz factor, gamma rays      → $\\\\gamma$
+   δ (delta) - small change                    → $\\\\delta$
+   Δ (Delta) - change, difference              → $\\\\Delta$
+   ε (epsilon) - permittivity, emf             → $\\\\epsilon$ or $\\\\varepsilon$
+   θ (theta) - angle                           → $\\\\theta$
+   λ (lambda) - wavelength                     → $\\\\lambda$
+   μ (mu) - coefficient of friction, permeability → $\\\\mu$
+   ν (nu) - frequency                          → $\\\\nu$
+   ρ (rho) - density, resistivity              → $\\\\rho$
+   σ (sigma) - surface charge density, stress  → $\\\\sigma$
+   τ (tau) - torque, time constant             → $\\\\tau$
+   φ (phi) - angle, magnetic flux              → $\\\\phi$ or $\\\\varphi$
+   Φ (Phi) - flux                              → $\\\\Phi$
+   ω (omega) - angular velocity                → $\\\\omega$
+   Ω (Omega) - ohm (unit)                      → $\\\\Omega$
 
    EXAMPLE CONVERSIONS:
-   - "angular velocity ω = 2πf" → "angular velocity $\\omega = 2\\pi f$"
-   - "wavelength λ = 500nm" → "wavelength $\\lambda = 500\\,\\text{nm}$"
-   - "coefficient of friction μ = 0.3" → "coefficient of friction $\\mu = 0.3$"
+   - "angular velocity ω = 2πf" → "angular velocity $\\\\omega = 2\\\\pi f$"
+   - "wavelength λ = 500nm" → "wavelength $\\\\lambda = 500\\\\,\\\\text{nm}$"
+   - "coefficient of friction μ = 0.3" → "coefficient of friction $\\\\mu = 0.3$"
 
 ═══════════════════════════════════════════════════════════════════════════
 
@@ -198,19 +211,19 @@ COMPLETE REAL-WORLD EXAMPLES:
 ────────────────────────────────────────────────────────────────────────────
 
 WRONG: "A body of mass 2kg moving with velocity 10m/s has kinetic energy Ek = 1/2mv²"
-RIGHT: "A body of mass $2\\,\\text{kg}$ moving with velocity $10\\,\\text{m/s}$ has kinetic energy $E_k = \\frac{1}{2}mv^2$"
+RIGHT: "A body of mass $2\\\\,\\\\text{kg}$ moving with velocity $10\\\\,\\\\text{m/s}$ has kinetic energy $E_k = \\\\frac{1}{2}mv^2$"
 
 WRONG: "The force F = 20N acts at angle θ = 30° with displacement 5m"
-RIGHT: "The force $F = 20\\,\\text{N}$ acts at angle $\\theta = 30^\\circ$ with displacement $5\\,\\text{m}$"
+RIGHT: "The force $F = 20\\\\,\\\\text{N}$ acts at angle $\\\\theta = 30^\\\\circ$ with displacement $5\\\\,\\\\text{m}$"
 
 WRONG: "Resistance R1 = 10Ω and R2 = 20Ω connected in series. Total R = R1 + R2"
-RIGHT: "Resistance $R_1 = 10\\,\\Omega$ and $R_2 = 20\\,\\Omega$ connected in series. Total $R = R_1 + R_2$"
+RIGHT: "Resistance $R_1 = 10\\\\,\\\\Omega$ and $R_2 = 20\\\\,\\\\Omega$ connected in series. Total $R = R_1 + R_2$"
 
 WRONG: "Speed of light c = 3 x 10^8 m/s"
-RIGHT: "Speed of light $c = 3 \\times 10^8\\,\\text{m/s}$"
+RIGHT: "Speed of light $c = 3 \\\\times 10^8\\\\,\\\\text{m/s}$"
 
 WRONG: "Wavelength λ = 500nm, frequency f = 6 x 10^14 Hz"
-RIGHT: "Wavelength $\\lambda = 500\\,\\text{nm}$, frequency $f = 6 \\times 10^{14}\\,\\text{Hz}$"
+RIGHT: "Wavelength $\\\\lambda = 500\\\\,\\\\text{nm}$, frequency $f = 6 \\\\times 10^{14}\\\\,\\\\text{Hz}$"
 
 ══════════════════════════════════════════════════════════════════════════
 END OF PHYSICS NOTATION GUIDE

@@ -1133,12 +1133,17 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                                 {q.extractedImages && q.extractedImages.length > 0 && (
                                   <div className="grid grid-cols-1 gap-2 mt-2">
                                     {q.extractedImages.map((imgData, idx) => (
-                                      <img
-                                        key={idx}
-                                        src={imgData}
-                                        alt={`Visual ${idx + 1}`}
-                                        className="w-full rounded-lg border border-blue-200"
-                                      />
+                                      <div key={idx} className="bg-white rounded-lg border border-blue-200 overflow-hidden">
+                                        <img
+                                          src={imgData}
+                                          alt={`Visual ${idx + 1}`}
+                                          className="w-full h-auto object-contain max-h-[300px]"
+                                          style={{
+                                            imageRendering: 'high-quality',
+                                            objectFit: 'contain'
+                                          }}
+                                        />
+                                      </div>
                                     ))}
                                   </div>
                                 )}
@@ -1275,26 +1280,65 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
               {/* Modal Content */}
               <div className="p-6">
                 {modalType === 'solution' && activeQuestion.markingScheme && activeQuestion.markingScheme.length > 0 ? (
-                  <div className="space-y-3">
-                    {activeQuestion.markingScheme.map((item, idx) => (
-                      <div key={idx} className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-7 h-7 bg-slate-800 text-white rounded-md flex items-center justify-center font-bold text-xs">
-                            {idx + 1}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                                {item.mark} Mark{parseInt(item.mark) > 1 ? 's' : ''}
-                              </span>
+                  <div className="space-y-5">
+                    {/* Solution Steps */}
+                    <div className="space-y-3">
+                      {activeQuestion.markingScheme.map((item, idx) => (
+                        <div key={idx} className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-7 h-7 bg-slate-800 text-white rounded-md flex items-center justify-center font-bold text-xs">
+                              {idx + 1}
                             </div>
-                            <div className="text-sm text-slate-700 leading-relaxed">
-                              <RenderWithMath text={item.step} showOptions={false} />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                                  {item.mark} Mark{parseInt(item.mark) > 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              <div className="text-sm text-slate-700 leading-relaxed">
+                                <RenderWithMath text={item.step} showOptions={false} />
+                              </div>
                             </div>
                           </div>
                         </div>
+                      ))}
+                    </div>
+
+                    {/* Extracted Images - Fit to Available Space */}
+                    {activeQuestion.extractedImages && activeQuestion.extractedImages.length > 0 && (
+                      <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-xl p-5">
+                        <div className="flex items-center gap-2 mb-4">
+                          <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                            Reference Diagrams ({activeQuestion.extractedImages.length})
+                          </h4>
+                        </div>
+                        <div className="space-y-4">
+                          {activeQuestion.extractedImages.map((imgData, idx) => (
+                            <div key={idx} className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                              <img
+                                src={imgData}
+                                alt={`Diagram ${idx + 1}${activeQuestion.visualElementDescription ? ` - ${activeQuestion.visualElementDescription}` : ''}`}
+                                className="w-full h-auto object-contain max-h-[500px] bg-white"
+                                style={{
+                                  imageRendering: 'high-quality',
+                                  objectFit: 'contain'
+                                }}
+                              />
+                              {activeQuestion.visualElementDescription && idx === 0 && (
+                                <div className="px-4 py-2 bg-slate-50 border-t border-slate-200">
+                                  <p className="text-xs text-slate-600">
+                                    <RenderWithMath text={activeQuestion.visualElementDescription} showOptions={false} serif={false} />
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    ))}
+                    )}
                   </div>
                 ) : modalType === 'insights' ? (
                   <div className="space-y-5">

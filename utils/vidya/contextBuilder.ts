@@ -429,21 +429,21 @@ export function buildContextPayload(appContext: {
   const cached = getCachedContext(cacheKey);
   if (cached) {
     const duration = performance.now() - startTime;
-    console.log('[Performance] Context retrieved from cache', {
+    console.debug('[Performance] Context retrieved from cache', {
       duration: `${duration.toFixed(2)}ms`,
     });
     return cached;
   }
 
   // Build new context
-  console.log('[Performance] Building new context');
+  console.debug('[Performance] Building new context');
   const payload = buildContextPayloadInternal(appContext, userRole);
 
   // Cache it
   setCachedContext(cacheKey, payload);
 
   const duration = performance.now() - startTime;
-  console.log('[Performance] Context built and cached', {
+  console.debug('[Performance] Context built and cached', {
     duration: `${duration.toFixed(2)}ms`,
     questionCount: payload.questions.length,
     payloadSize: `${(JSON.stringify(payload).length / 1024).toFixed(2)} KB`,

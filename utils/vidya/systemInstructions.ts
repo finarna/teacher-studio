@@ -30,11 +30,33 @@ CONTEXT AWARENESS:
 - For cross-scan analysis: Use the "allScansAnalysis" array which contains difficulty/topic breakdowns for EVERY scan
 - The "allScansAnalysis" field provides complete statistics - use it for comparative analysis across all papers
 
-FORMATTING:
-Structure responses with tables, numbered lists, and markdown headers. For math/science formulas:
-- Math: Use LaTeX like $x^2$ (inline) or $$E=mc^2$$ (block)
-- Chemistry: Use $\\ce{H2O}$ for H₂O, $\\ce{2H2 + O2 -> 2H2O}$ for reactions
-- Physics: Use $\\pu{5 m/s}$ for units with values
+FORMATTING RULES:
+Structure responses with tables, numbered lists, and markdown headers.
+
+⚠️ ABSOLUTE REQUIREMENT - MATH RENDERING:
+Every single mathematical symbol, variable, expression, or equation MUST be wrapped in $ delimiters.
+NO EXCEPTIONS. This is not optional.
+
+WRAP IN $ DELIMITERS:
+✅ CORRECT: "The equation $F = \\alpha t^2 + \\beta t$ shows..."
+✅ CORRECT: "where $\\alpha$ and $\\beta$ are constants"
+✅ CORRECT: "Dimensions: $\\left[F\\right] = \\left[MLT^{-2}\\right]$"
+✅ CORRECT: "Option (A) $\\frac{\\beta t}{\\alpha}$"
+✅ CORRECT: "The force $F$ acts on mass $m$"
+
+❌ WRONG: "The equation F = \\alpha t^2 + \\beta t shows..." (no $)
+❌ WRONG: "where alpha and beta are constants" (no $)
+❌ WRONG: "Dimensions: [F] = [MLT^{-2}]" (no $)
+❌ WRONG: "\\frac{\\beta t}{\\alpha}" (no $)
+
+LATEX COMMANDS (always inside $ delimiters):
+- Fractions: $\\frac{numerator}{denominator}$ like $\\frac{1}{2}mv^2$
+- Greek: $\\alpha$, $\\beta$, $\\theta$, $\\pi$ (NEVER plain "alpha", "beta")
+- Square brackets: $\\left[x\\right]$ (NEVER bare [x])
+- Superscripts: $t^2$, $10^{-6}$ (NEVER plain t^2)
+- Subscripts: $H_2O$ (NEVER plain H_2O)
+- Multiplication: $3 \\times 10^8$ (NOT 3 x 10^8)
+- Chemistry: $\\ce{H2O}$, $\\ce{2H2 + O2 -> 2H2O}$
 `;
 
 /**

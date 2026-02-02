@@ -23,15 +23,47 @@ import VidyaV2 from './components/VidyaV2';
 import VidyaV3 from './components/VidyaV3';
 import { ToastProvider, useToast } from './components/ToastNotification';
 import { ConfirmProvider, useConfirm } from './components/ConfirmDialog';
+import { AuthProvider, useAuth, AuthLoading } from './components/AuthProvider';
+import { LoginForm } from './components/LoginForm';
+import { SignupForm } from './components/SignupForm';
+import { supabase } from './lib/supabase';
 import { ProfessorTrainingContract } from './types';
 import { VidyaActions } from './types/vidya';
 import { useAdaptiveLogic } from './hooks/useAdaptiveLogic';
 import { isFeatureEnabled } from './utils/featureFlags';
-import { Home, LayoutDashboard, GraduationCap, ArrowLeft, Bell, Search, User } from 'lucide-react';
+import { Home, LayoutDashboard, GraduationCap, ArrowLeft, Bell, Search, User, LogOut } from 'lucide-react';
+
+/**
+ * Authentication Gate Component
+ * Shows login/signup screens when user is not authenticated
+ */
+const AuthGate: React.FC = () => {
+  const [showLogin, setShowLogin] = useState(true);
+
+  return showLogin ? (
+    <LoginForm
+      onSwitchToSignup={() => setShowLogin(false)}
+      onSuccess={() => {
+        // Success is handled by AuthProvider's state change
+      }}
+    />
+  ) : (
+    <SignupForm
+      onSwitchToLogin={() => setShowLogin(true)}
+      onSuccess={() => {
+        // Success is handled by AuthProvider's state change
+      }}
+    />
+  );
+};
 
 const AppContent: React.FC = () => {
+  // ===== ALL HOOKS MUST BE AT THE TOP (before any conditional returns) =====
   const { showToast } = useToast();
   const { confirm } = useConfirm();
+  const { user, loading: authLoading, signOut } = useAuth();
+
+  // App State
   const [onBoarding, setOnBoarding] = useState(true);
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
@@ -57,11 +89,27 @@ const AppContent: React.FC = () => {
 
   const { shouldUnlockExam } = useAdaptiveLogic();
 
-  // Redis Sync Logic
+  // ===== EFFECTS (must be before conditional returns) =====
+  // Supabase Backend Sync Logic (Port 9001)
   useEffect(() => {
+    if (!user) return; // Only fetch when user is authenticated
+
     const fetchScans = async () => {
       try {
-        const res = await fetch('/api/scans');
+        // Get auth token from Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+
+        // Add auth token if available
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch('http://localhost:9001/api/scans', { headers });
         if (res.ok) {
           const data = await res.json();
           setRecentScans(data);
@@ -71,11 +119,11 @@ const AppContent: React.FC = () => {
           }
         }
       } catch (err) {
-        console.error('Failed to initial sync with Redis:', err);
+        console.error('Failed to sync with Supabase backend:', err);
       }
     };
     fetchScans();
-  }, []);
+  }, [user]);
 
   // Auto-select latest scan when switching to analysis view
   useEffect(() => {
@@ -84,28 +132,55 @@ const AppContent: React.FC = () => {
     }
   }, [godModeView, selectedScan, recentScans]);
 
-  const syncScanToRedis = async (scan: Scan) => {
+  // ===== CONDITIONAL RENDERING (after all hooks) =====
+  // Show loading screen while auth is initializing
+  if (authLoading) {
+    return <AuthLoading />;
+  }
+
+  // Show login/signup if not authenticated
+  if (!user) {
+    return <AuthGate />;
+  }
+
+  const syncScanToSupabase = async (scan: Scan) => {
     try {
-      console.log(`🔄 Syncing scan to Redis: ${scan.id}`, {
+      console.log(`🔄 Syncing scan to Supabase: ${scan.id}`, {
         subject: scan.subject,
         questionCount: scan.analysisData?.questions?.length,
         questionsWithSketches: scan.analysisData?.questions?.filter(q => q.sketchSvg).length || 0
       });
 
-      const response = await fetch('/api/scans', {
+      // Get auth token from Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add auth token if available
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // Always POST - backend has upsert logic (checks if scan exists and updates/creates accordingly)
+      console.log(`📝 Upserting scan ${scan.id}`);
+
+      const response = await fetch('http://localhost:9001/api/scans', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(scan)
       });
 
       const result = await response.json();
-      console.log(`✅ Scan synced to Redis:`, result);
+      console.log(`✅ Scan upserted in Supabase:`, result);
 
       if (!response.ok) {
         console.error(`❌ Failed to sync scan: HTTP ${response.status}`, result);
       }
     } catch (err) {
-      console.error('❌ Failed to sync scan to Redis:', err);
+      console.error('❌ Failed to sync scan to Supabase:', err);
     }
   };
 
@@ -275,11 +350,33 @@ const AppContent: React.FC = () => {
                 <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary-500 rounded-full border border-white" />
               </button>
               <div className="h-6 w-px bg-slate-200" />
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg">
+                <User size={14} className="text-slate-600" />
+                <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">
+                  {user?.email?.split('@')[0] || 'User'}
+                </span>
+              </div>
               <button
                 onClick={() => setViewMode('STUDENT')}
                 className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white hover:bg-primary-600 rounded-lg text-[10px] font-black transition-all shadow-sm uppercase tracking-widest"
               >
                 <GraduationCap size={14} /> Student View
+              </button>
+              <button
+                onClick={async () => {
+                  const confirmed = await confirm({
+                    title: 'Sign Out',
+                    message: 'Are you sure you want to sign out?',
+                    type: 'warning',
+                  });
+                  if (confirmed) {
+                    await signOut();
+                    showToast('Signed out successfully', 'success');
+                  }
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-[10px] font-black transition-all shadow-sm uppercase tracking-widest"
+              >
+                <LogOut size={14} /> Logout
               </button>
             </div>
           </header>
@@ -418,7 +515,7 @@ const AppContent: React.FC = () => {
                   onUpdateScan={(updatedScan) => {
                     setRecentScans(prev => prev.map(s => s.id === updatedScan.id ? updatedScan : s));
                     setSelectedScan(updatedScan);
-                    syncScanToRedis(updatedScan);
+                    syncScanToSupabase(updatedScan);
                   }}
                   recentScans={recentScans}
                   onSelectScan={setSelectedScan}
@@ -454,7 +551,7 @@ const AppContent: React.FC = () => {
                   onUpdateScan={(updatedScan) => {
                     setRecentScans(prev => prev.map(s => s.id === updatedScan.id ? updatedScan : s));
                     setSelectedScan(updatedScan);
-                    syncScanToRedis(updatedScan);
+                    syncScanToSupabase(updatedScan);
                   }}
                 />
               </div>
@@ -468,7 +565,7 @@ const AppContent: React.FC = () => {
                   recentScans={recentScans}
                   onAddScan={(scan) => {
                     setRecentScans(prev => [...prev, scan]);
-                    syncScanToRedis(scan);
+                    syncScanToSupabase(scan);
                   }}
                   onSelectScan={(scan) => setSelectedScan(scan)}
                 />
@@ -659,11 +756,13 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <ToastProvider>
-      <ConfirmProvider>
-        <AppContent />
-      </ConfirmProvider>
-    </ToastProvider>
+    <AuthProvider>
+      <ToastProvider>
+        <ConfirmProvider>
+          <AppContent />
+        </ConfirmProvider>
+      </ToastProvider>
+    </AuthProvider>
   );
 };
 

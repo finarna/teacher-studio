@@ -23,8 +23,10 @@ import { safeAiParse, normalizeData } from '../utils/aiParser';
 import { generateMathExtractionInstructions, generateStreamlinedMathInstructions } from '../utils/mathLatexReference';
 import { generatePhysicsExtractionInstructions } from '../utils/physicsNotationReference';
 import { generateCleanMathPrompt, validateExtraction } from '../utils/cleanMathExtractor';
+import { generateCleanPhysicsPrompt } from '../utils/cleanPhysicsExtractor';
 import { processQuestionsUnicode } from '../utils/unicodeToLatex'; // Latest: fixed escape char regex patterns
 import { extractQuestionsSimplified } from '../utils/simpleMathExtractor'; // NEW: Simplified extraction
+import { extractPhysicsQuestionsSimplified } from '../utils/simplePhysicsExtractor'; // NEW: Simplified Physics extraction
 
 interface BoardMastermindProps {
   onNavigate: (view: string) => void;
@@ -38,6 +40,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
   const [selectedGrade, setSelectedGrade] = useState('Class 12');
   const [selectedModel, setSelectedModel] = useState('gemini-3-flash-preview');
   const [useSimplifiedExtraction, setUseSimplifiedExtraction] = useState(true); // NEW: Toggle for simplified extraction
+  const [enableVisionExtraction, setEnableVisionExtraction] = useState(false); // NEW: Toggle for vision-guided image extraction (slow)
   const [isProcessing, setIsProcessing] = useState(false);
   const [loadingStage, setLoadingStage] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -119,11 +122,36 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           }
         }
 
-        // 🎯 SIMPLIFIED EXTRACTION (if enabled for Math)
+        // 🎯 SIMPLIFIED EXTRACTION (if enabled for Math or Physics)
         let extractedData: any;
         if (useSimplifiedExtraction && selectedSubject === 'Math') {
-          console.log('🚀 [SIMPLIFIED MODE] Using schema-driven extraction with @google/genai');
+          console.log('🚀 [SIMPLIFIED MODE - MATH] Using schema-driven extraction with @google/genai');
           const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel);
+          // Convert simplified format to our existing format
+          extractedData = {
+            questions: simpleQuestions.map((sq: any) => ({
+              id: `Q${sq.id}`,
+              text: sq.text,
+              options: sq.options,
+              marks: 1,
+              difficulty: sq.difficulty || 'Medium',
+              topic: sq.topic || 'General',
+              domain: sq.domain || 'ALGEBRA',
+              blooms: sq.blooms || 'Apply',
+              hasVisualElement: false,
+              visualElementType: null,
+              visualElementDescription: null,
+              source: `${file.name}`
+            }))
+          };
+
+          // Extract images for Math (basic mode, no vision guidance)
+          if (fileImageMapping) {
+            console.log('🖼️ [BULK - SIMPLIFIED MATH] Using pre-extracted images:', fileImageMapping.size);
+          }
+        } else if (useSimplifiedExtraction && selectedSubject === 'Physics') {
+          console.log('🚀 [SIMPLIFIED MODE - PHYSICS] Using schema-driven extraction with @google/genai');
+          const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel);
           // Convert simplified format to our existing format
           extractedData = {
             questions: simpleQuestions.map((sq: any) => ({
@@ -131,23 +159,34 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
               text: sq.text,
               options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
               marks: 1,
-              difficulty: 'Moderate',
-              topic: 'Mathematics',
-              blooms: 'Apply',
-              domain: 'ALGEBRA',
-              chapter: 'General Mathematics',
-              hasVisualElement: false,
-              visualElementType: null,
-              visualElementDescription: null,
+              difficulty: sq.difficulty || 'Medium',
+              topic: sq.topic || 'Physics',
+              domain: sq.domain || 'MECHANICS',
+              blooms: sq.blooms || 'Apply',
+              hasVisualElement: sq.hasVisualElement || false,
+              visualElementType: sq.visualElementType || null,
+              visualElementDescription: sq.visualElementDescription || null,
+              visualBoundingBox: sq.visualBoundingBox || null,
               source: `${file.name}`
             }))
           };
+
+          // Extract images for Physics (use pre-extracted images from line 118)
+          if (fileImageMapping) {
+            console.log('🖼️ [BULK - SIMPLIFIED PHYSICS] Using pre-extracted images:', fileImageMapping.size);
+          }
         } else {
           // Legacy extraction
           const extractionPrompt = selectedSubject === 'Math'
             ? generateCleanMathPrompt(selectedGrade)
+            : selectedSubject === 'Physics'
+            ? generateCleanPhysicsPrompt(selectedGrade)
             : `Extract ALL questions verbatim from this ${selectedSubject} paper.
         RULES:
+        0. ⚠️ CRITICAL TEXT EXTRACTION: PRESERVE ALL SPACES BETWEEN WORDS!
+           - WRONG: "Asmalltelescopehas tan objectiveoffocallength"
+           - RIGHT: "A small telescope has tan objective of focal length"
+           - If OCR fails to detect spaces, use context to insert proper word breaks. NEVER output text without spaces!
         1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise in the text.
         2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
            - Wrap ALL math in $ delimiters: inline math uses $...$ and display math uses $$...$$
@@ -281,7 +320,22 @@ ${generatePhysicsExtractionInstructions()}
               const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
               return { questionNumber, boundingBox: q.visualBoundingBox };
             })
-            .filter((item: any) => item.questionNumber !== null);
+            .filter((item: any) => {
+              // Validate: must have question number AND complete bounding box with all fields
+              if (!item.questionNumber) return false;
+              const bb = item.boundingBox;
+              if (!bb) return false;
+              // Check all required fields are present and valid
+              const isValid = bb.pageNumber &&
+                            bb.x && typeof bb.x === 'string' &&
+                            bb.y && typeof bb.y === 'string' &&
+                            bb.width && typeof bb.width === 'string' &&
+                            bb.height && typeof bb.height === 'string';
+              if (!isValid) {
+                console.warn(`⚠️ [BULK VISION-GUIDED] Q${item.questionNumber} has incomplete bounding box, skipping:`, bb);
+              }
+              return isValid;
+            });
 
           if (questionsWithBoundingBoxes.length > 0) {
             try {
@@ -361,7 +415,7 @@ ${generatePhysicsExtractionInstructions()}
       });
 
       const newScan: Scan = {
-        id: 'bulk-' + Date.now(),
+        id: crypto.randomUUID(), // Generate proper UUID for database compatibility
         name: `Portfolio: ${files.length} ${selectedSubject} Papers [${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]`,
         date: new Date().toLocaleDateString(),
         timestamp: Date.now(),
@@ -434,7 +488,7 @@ ${generatePhysicsExtractionInstructions()}
       const extractionId = Date.now().toString().slice(-4); // Unique ID for this extraction
 
       if (useSimplifiedExtraction && selectedSubject === 'Math') {
-        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE] Using schema-driven extraction with @google/genai');
+        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - MATH] Using schema-driven extraction with @google/genai');
         const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel);
         // Convert simplified format to our existing format
         extractedData = {
@@ -443,20 +497,84 @@ ${generatePhysicsExtractionInstructions()}
             text: sq.text,
             options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
             marks: 1,
-            difficulty: 'Moderate',
-            topic: 'Mathematics',
-            blooms: 'Apply',
-            domain: 'ALGEBRA',
-            chapter: 'General Mathematics',
+            difficulty: sq.difficulty || 'Medium',
+            topic: sq.topic || 'Mathematics',
+            blooms: sq.blooms || 'Apply',
+            domain: sq.domain || 'ALGEBRA',
+            chapter: sq.topic || 'General Mathematics',
             hasVisualElement: false,
             visualElementType: null,
             visualElementDescription: null
           }))
         };
+
+        // --- IMAGE EXTRACTION FOR SIMPLIFIED MATH (if any diagrams) ---
+        if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
+          try {
+            console.log('🖼️ [SIMPLIFIED MATH] Extracting images...');
+            const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+            imageMapping = await extractAndMapImages(file);
+            console.log('✅ [SIMPLIFIED MATH] Extracted', imageMapping?.size || 0, 'images');
+          } catch (err) {
+            console.warn('⚠️ [SIMPLIFIED MATH - IMAGE] Failed:', err);
+          }
+        }
+      } else if (useSimplifiedExtraction && selectedSubject === 'Physics') {
+        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - PHYSICS] Using schema-driven extraction with @google/genai');
+        const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel);
+        // Convert simplified format to our existing format
+        extractedData = {
+          questions: simpleQuestions.map((sq: any) => ({
+            id: `Q${sq.id}`,
+            text: sq.text,
+            options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
+            marks: 1,
+            difficulty: sq.difficulty || 'Medium',
+            topic: sq.topic || 'Physics',
+            domain: sq.domain || 'MECHANICS',
+            blooms: sq.blooms || 'Apply',
+            hasVisualElement: sq.hasVisualElement || false,
+            visualElementType: sq.visualElementType || null,
+            visualElementDescription: sq.visualElementDescription || null,
+            visualBoundingBox: sq.visualBoundingBox || null,
+            source: `${file.name}`
+          }))
+        };
+
+        // --- IMAGE EXTRACTION FOR SIMPLIFIED PHYSICS ---
+        if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
+          try {
+            if (enableVisionExtraction) {
+              const questionsWithBoundingBoxes = extractedData.questions
+                .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
+                .map((q: any) => ({
+                  questionNumber: parseInt(q.id.replace(/\D/g, '')),
+                  boundingBox: q.visualBoundingBox
+                }))
+                .filter((item: any) => item.questionNumber && item.boundingBox);
+
+              if (questionsWithBoundingBoxes.length > 0) {
+                console.log('🎯 [SIMPLIFIED PHYSICS - VISION] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
+                const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+                imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
+                console.log('✅ [SIMPLIFIED PHYSICS - VISION] Extracted', imageMapping.size, 'images');
+              }
+            } else {
+              console.log('🖼️ [SIMPLIFIED PHYSICS - BASIC] Extracting images...');
+              const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+              imageMapping = await extractAndMapImages(file);
+              console.log('✅ [SIMPLIFIED PHYSICS - BASIC] Extracted', imageMapping?.size || 0, 'images');
+            }
+          } catch (err) {
+            console.warn('⚠️ [SIMPLIFIED PHYSICS - IMAGE] Failed:', err);
+          }
+        }
       } else {
         // Legacy extraction
         const extractionPrompt = selectedSubject === 'Math'
           ? generateCleanMathPrompt(selectedGrade)
+          : selectedSubject === 'Physics'
+          ? generateCleanPhysicsPrompt(selectedGrade)
           : `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
       RULES:
       1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise.
@@ -584,9 +702,9 @@ ${generatePhysicsExtractionInstructions()}
       } // End of legacy extraction
 
       // For simplified mode, set minimal analysis data
-      if (useSimplifiedExtraction && selectedSubject === 'Math') {
+      if (useSimplifiedExtraction && (selectedSubject === 'Math' || selectedSubject === 'Physics')) {
         analyticData = {
-          summary: 'Questions extracted using simplified mode',
+          summary: `Questions extracted using simplified mode for ${selectedSubject}`,
           overallDifficulty: 'Moderate',
           difficultyDistribution: [],
           bloomsTaxonomy: [],
@@ -610,7 +728,8 @@ ${generatePhysicsExtractionInstructions()}
 
       // ⭐ CRITICAL: Convert Unicode symbols (θ, √, etc.) to LaTeX before processing
       // SKIP for simplified mode - it already produces correct double-backslash LaTeX
-      if (extractedData.questions && extractedData.questions.length > 0 && !(useSimplifiedExtraction && selectedSubject === 'Math')) {
+      const isSimplifiedMode = useSimplifiedExtraction && (selectedSubject === 'Math' || selectedSubject === 'Physics');
+      if (extractedData.questions && extractedData.questions.length > 0 && !isSimplifiedMode) {
         extractedData.questions = processQuestionsUnicode(extractedData.questions);
         console.log(`✨ [UNICODE CONVERSION] Processed ${extractedData.questions.length} questions for Unicode→LaTeX conversion`);
 
@@ -636,8 +755,8 @@ ${generatePhysicsExtractionInstructions()}
           domain: q.domain
         }));
         console.log(`📊 [TOPIC DEBUG] Single paper - topic assignments (first 10):`, topicSummary);
-      } else if (useSimplifiedExtraction && selectedSubject === 'Math') {
-        console.log(`✅ [SIMPLIFIED MODE] Skipping Unicode conversion - LaTeX already correct with double backslashes`);
+      } else if (isSimplifiedMode) {
+        console.log(`✅ [SIMPLIFIED MODE - ${selectedSubject}] Skipping Unicode conversion - LaTeX already correct with double backslashes`);
       }
 
       console.log('🔧 [PARSER DEBUG] Parsed questions count:', extractedData.questions?.length || 0);
@@ -649,7 +768,7 @@ ${generatePhysicsExtractionInstructions()}
       const MAX_PASSES = 5; // Safety limit to prevent infinite loops
 
       while (
-        !(useSimplifiedExtraction && selectedSubject === 'Math') &&
+        !isSimplifiedMode && // Skip recursive passes for both Math AND Physics simplified modes
         extractedData.questions &&
         extractedData.questions.length > 0 &&
         extractedData.questions.length < expectedQuestions &&
@@ -665,6 +784,12 @@ ${generatePhysicsExtractionInstructions()}
 
           const remainingPrompt = selectedSubject === 'Math'
             ? generateCleanMathPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
+
+Already extracted: Q1-Q${lastQNum}
+NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
+DO NOT repeat Q1-Q${lastQNum}`
+            : selectedSubject === 'Physics'
+            ? generateCleanPhysicsPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
 
 Already extracted: Q1-Q${lastQNum}
 NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
@@ -718,6 +843,22 @@ CRITICAL RULES:
 
       if (passNumber > 2) {
         console.log(`✅ [EXTRACTION COMPLETE] Total passes: ${passNumber - 1}, Final count: ${extractedData.questions.length}/${expectedQuestions} questions`);
+
+        // Deduplicate questions by ID (fix duplicate keys from recursive passes)
+        const seenIds = new Set<string>();
+        const deduplicatedQuestions = extractedData.questions.filter((q: any) => {
+          if (seenIds.has(q.id)) {
+            console.warn(`⚠️ [DEDUPLICATION] Removing duplicate question: ${q.id}`);
+            return false;
+          }
+          seenIds.add(q.id);
+          return true;
+        });
+
+        if (deduplicatedQuestions.length < extractedData.questions.length) {
+          console.log(`🔧 [DEDUPLICATION] Removed ${extractedData.questions.length - deduplicatedQuestions.length} duplicate questions`);
+          extractedData.questions = deduplicatedQuestions;
+        }
       }
 
       // Debug: Log visual element detection
@@ -736,33 +877,57 @@ CRITICAL RULES:
         }
       }
 
-      // --- VISION-GUIDED IMAGE EXTRACTION (if PDF with visual elements) ---
+      // --- IMAGE EXTRACTION (vision-guided if enabled, otherwise basic) ---
       if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) &&
           extractedData.questions && extractedData.questions.length > 0) {
         try {
-          // Collect all questions with visual bounding boxes
-          const questionsWithBoundingBoxes = extractedData.questions
-            .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
-            .map((q: any) => {
-              const questionNumMatch = q.id?.match(/Q?(\d+)/i);
-              const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
-              return {
-                questionNumber,
-                boundingBox: q.visualBoundingBox
-              };
-            })
-            .filter((item: any) => item.questionNumber !== null);
+          if (enableVisionExtraction) {
+            // VISION-GUIDED MODE: Use AI-provided bounding boxes for precise extraction
+            // ⚡ PERFORMANCE: Adds 1-2 minutes per upload
+            const questionsWithBoundingBoxes = extractedData.questions
+              .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
+              .map((q: any) => {
+                const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+                const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
+                return {
+                  questionNumber,
+                  boundingBox: q.visualBoundingBox
+                };
+              })
+              .filter((item: any) => {
+                // Validate: must have question number AND complete bounding box with all fields
+                if (!item.questionNumber) return false;
+                const bb = item.boundingBox;
+                if (!bb) return false;
+                // Check all required fields are present and valid
+                const isValid = bb.pageNumber &&
+                              bb.x && typeof bb.x === 'string' &&
+                              bb.y && typeof bb.y === 'string' &&
+                              bb.width && typeof bb.width === 'string' &&
+                              bb.height && typeof bb.height === 'string';
+                if (!isValid) {
+                  console.warn(`⚠️ [VISION-GUIDED] Q${item.questionNumber} has incomplete bounding box, skipping:`, bb);
+                }
+                return isValid;
+              });
 
-          if (questionsWithBoundingBoxes.length > 0) {
-            console.log('🎯 [VISION-GUIDED] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
-            const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
-            imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
-            console.log('✅ [VISION-GUIDED] Extracted images for', imageMapping.size, 'questions');
+            if (questionsWithBoundingBoxes.length > 0) {
+              console.log('🎯 [VISION-GUIDED] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
+              const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+              imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
+              console.log('✅ [VISION-GUIDED] Extracted images for', imageMapping.size, 'questions');
+            } else {
+              console.log('ℹ️ [VISION-GUIDED] No bounding boxes provided, skipping image extraction');
+            }
           } else {
-            console.log('ℹ️ [VISION-GUIDED] No bounding boxes provided, skipping image extraction');
+            // BASIC MODE: Extract all images from PDF pages (faster, less precise)
+            console.log('🖼️ [BASIC IMAGE EXTRACTION] Extracting images from PDF pages...');
+            const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+            imageMapping = await extractAndMapImages(file);
+            console.log('✅ [BASIC IMAGE EXTRACTION] Extracted images for', imageMapping?.size || 0, 'question pages');
           }
         } catch (err) {
-          console.warn('⚠️ [VISION-GUIDED] Image extraction failed:', err);
+          console.warn('⚠️ [IMAGE EXTRACTION] Failed:', err);
           // Continue without images - not a critical failure
         }
       }
@@ -846,7 +1011,7 @@ CRITICAL RULES:
       };
 
       const newScan: Scan = {
-        id: 'scan-' + Date.now(),
+        id: crypto.randomUUID(), // Generate proper UUID for database compatibility
         name: `${file.name.split('.')[0]} [${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]`,
         date: new Date().toLocaleDateString(),
         timestamp: Date.now(),
@@ -917,6 +1082,18 @@ CRITICAL RULES:
             }`}
           >
             {useSimplifiedExtraction ? '✓ SIMPLIFIED MODE' : 'LEGACY MODE'}
+          </button>
+          <div className="h-6 w-px bg-slate-200" />
+          <button
+            onClick={() => setEnableVisionExtraction(!enableVisionExtraction)}
+            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${
+              enableVisionExtraction
+                ? 'bg-purple-500 text-white border-2 border-purple-600'
+                : 'bg-white text-slate-400 border-2 border-slate-200 hover:border-slate-300'
+            }`}
+            title="Extract diagrams from PDFs using vision AI (adds 1-2 min processing time)"
+          >
+            {enableVisionExtraction ? '✓ DIAGRAM EXTRACTION' : 'DIAGRAM EXTRACTION'}
           </button>
         </div>
       </div>
