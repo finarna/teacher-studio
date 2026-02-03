@@ -27,6 +27,9 @@ import { safeAiParse } from '../utils/aiParser';
 import { RenderWithMath } from './MathRenderer';
 import { cache } from '../utils/cache';
 import { generateSketch, GenerationMethod, generateTopicBasedSketch, TopicBasedSketchResult } from '../utils/sketchGenerators';
+import { useFilteredScans } from '../hooks/useFilteredScans';
+import { useAppContext } from '../contexts/AppContext';
+import { useSubjectTheme } from '../hooks/useSubjectTheme';
 
 interface SketchGalleryProps {
   onBack?: () => void;
@@ -48,18 +51,27 @@ const convertLatexDelimiters = (text: string): string => {
 };
 
 const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateScan, recentScans }) => {
+  // Use AppContext for filtering and theming
+  const { subjectConfig, activeSubject } = useAppContext();
+  const theme = useSubjectTheme();
+  const { scans: filteredScans } = useFilteredScans(recentScans || []);
+
   const [activeTab, setActiveTab] = useState(scan ? 'Exam Specific' : 'All Subjects');
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [selectedSketch, setSelectedSketch] = useState<any | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
-  const [selectedVaultScan, setSelectedVaultScan] = useState<Scan | null>(scan);
+  // Only use scan prop if it matches the active subject
+  const [selectedVaultScan, setSelectedVaultScan] = useState<Scan | null>(
+    scan && scan.subject === activeSubject ? scan : null
+  );
   const [groupByDomain, setGroupByDomain] = useState(true);
   const [selectedDomain, setSelectedDomain] = useState<string>('All');
   const [batchProgress, setBatchProgress] = useState<{current: number, total: number, failed: number} | null>(null);
   const [forceRender, setForceRender] = useState(0);
 
-  const [selectedGrade, setSelectedGrade] = useState(selectedVaultScan?.grade || 'Class 12');
-  const [selectedSubject, setSelectedSubject] = useState(selectedVaultScan?.subject || 'Physics');
+  // Use context values instead of local state
+  const selectedGrade = 'Class 12';
+  const selectedSubject = activeSubject;
   const [generationMethod, setGenerationMethod] = useState<GenerationMethod>('gemini-2.5-flash-image');
   const [selectedChapterPerDomain, setSelectedChapterPerDomain] = useState<Record<string, string>>({});
   const [selectedDomainInGroupedView, setSelectedDomainInGroupedView] = useState<string | null>(null);
@@ -88,6 +100,29 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // CRITICAL FIX: Auto-clear selectedVaultScan when subject changes and current scan doesn't match
+  // Use ref to prevent infinite loops
+  const lastClearedScanRef = React.useRef<string | null>(null);
+
+  useEffect(() => {
+    if (selectedVaultScan) {
+      const isStillValid = filteredScans?.some(s => s.id === selectedVaultScan.id);
+
+      // If current scan doesn't match subject and we haven't cleared it yet
+      if (!isStillValid && lastClearedScanRef.current !== selectedVaultScan.id) {
+        lastClearedScanRef.current = selectedVaultScan.id;
+
+        // Clear selectedVaultScan - will allow user to select from filtered scans
+        setSelectedVaultScan(null);
+        // Clear topics when clearing scan
+        setTopicBasedSketches({});
+      }
+    } else {
+      // Reset tracking when scan is null
+      lastClearedScanRef.current = null;
+    }
+  }, [activeSubject, selectedVaultScan, filteredScans]);
 
   const handleFlipPage = (direction: 'forward' | 'backward') => {
     if (isFlipping) return;
@@ -174,20 +209,16 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [flipBookOpen, flipBookCurrentPage, showPrintView, isFlipping]);
 
+  // Auto-select first filtered scan if no scan is selected
   useEffect(() => {
-    if (!selectedVaultScan && recentScans && recentScans.length > 0) {
-      const latest = recentScans[0];
+    if (!selectedVaultScan && filteredScans && filteredScans.length > 0) {
+      const latest = filteredScans[0]; // Use filteredScans, not recentScans
       setSelectedVaultScan(latest);
       setActiveTab('Exam Specific');
     }
-  }, [recentScans, selectedVaultScan]);
+  }, [filteredScans, selectedVaultScan]);
 
-  useEffect(() => {
-    if (selectedVaultScan) {
-      setSelectedGrade(selectedVaultScan.grade);
-      setSelectedSubject(selectedVaultScan.subject);
-    }
-  }, [selectedVaultScan]);
+  // Removed: selectedGrade and selectedSubject now come from context, not local state
 
   // Load topic-based sketches when scan changes (from DB/Redis via scan object)
   useEffect(() => {
@@ -1078,17 +1109,17 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
             <select
               value={selectedVaultScan?.id || ''}
               onChange={(e) => {
-                const selected = recentScans?.find(s => s.id === e.target.value);
+                const selected = filteredScans?.find(s => s.id === e.target.value);
                 if (selected) {
                   setSelectedVaultScan(selected);
                   setActiveTab('Exam Specific');
                 }
               }}
               className="bg-slate-50 border border-slate-200 text-slate-700 rounded px-2 py-1 text-[9px] font-semibold outline-none cursor-pointer hover:border-slate-300"
-              disabled={!recentScans || recentScans.length === 0}
+              disabled={!filteredScans || filteredScans.length === 0}
             >
-              <option value="">{!recentScans || recentScans.length === 0 ? 'No Vaults' : 'Vault...'}</option>
-              {recentScans?.map(s => (
+              <option value="">{!filteredScans || filteredScans.length === 0 ? `No ${subjectConfig.name} Papers` : `${subjectConfig.name} Paper...`}</option>
+              {filteredScans?.map(s => (
                 <option key={s.id} value={s.id}>{s.name.substring(0, 25)}</option>
               ))}
             </select>

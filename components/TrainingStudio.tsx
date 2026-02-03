@@ -78,9 +78,12 @@ const TrainingStudio: React.FC<TrainingStudioProps> = ({ onClose, onTrainingCrea
         setStatuses(prev => prev.map(s => ({ ...s, status: 'pending' })));
 
         try {
+            // Get model from Settings
+            const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+
             const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({
-                model: 'gemini-2.0-flash',
+                model: selectedModel,
                 generationConfig: { responseMimeType: "application/json" }
             });
 

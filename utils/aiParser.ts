@@ -257,10 +257,19 @@ export const normalizeData = (obj: any): any => {
             qId = `${prefix}-${qId}-${idx}`;
         }
         seenIds.add(qId);
+
+        // Extract text field with defensive type checking
+        // Ensure text is always a string, not an object
+        let textValue = q.text || q.question || q.content || "";
+        if (typeof textValue !== 'string') {
+            console.warn(`⚠️ Question ${qId} has non-string text field (type: ${typeof textValue}). Converting to string.`);
+            textValue = JSON.stringify(textValue);
+        }
+
         return {
             ...q,
             id: qId,
-            text: q.text || q.question || q.content || ""
+            text: textValue
         };
     });
 

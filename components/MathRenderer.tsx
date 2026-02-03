@@ -53,11 +53,18 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
     if (!ref.current) return;
 
     if (!katexReady) {
-      ref.current.innerText = rawExpression;
+      ref.current.innerText = typeof rawExpression === 'string' ? rawExpression : String(rawExpression);
       return;
     }
 
-    if (typeof rawExpression === 'string' && rawExpression.trim()) {
+    // Defensive check: if rawExpression is not a string, convert it
+    if (typeof rawExpression !== 'string') {
+      console.error('❌ MathRenderer received non-string expression:', typeof rawExpression, rawExpression);
+      ref.current.innerText = String(rawExpression);
+      return;
+    }
+
+    if (rawExpression.trim()) {
       try {
         let cleanExpression = rawExpression
           .replace(/\n/g, ' ')      // Remove actual newline characters (NOT \n in LaTeX)
@@ -77,7 +84,44 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
         cleanExpression = cleanExpression.replace(/\\begin\{tabular\}/g, '\\begin{array}');
         cleanExpression = cleanExpression.replace(/\\end\{tabular\}/g, '\\end{array}');
 
-        // 2. Detect incomplete table rows (has & and \\ but no array wrapper)
+        // 4. Fix dimensional analysis brackets: [ ] → ( )
+        // KaTeX has issues with square brackets, use parentheses instead for dimensional analysis
+        // This is mathematically equivalent and renders cleanly
+        cleanExpression = cleanExpression.replace(/\[/g, '(').replace(/\]/g, ')');
+
+        // 5. Fix Greek letter names to LaTeX symbols (for physics/dimensional analysis)
+        // Use simple string replacement with space boundaries
+        cleanExpression = cleanExpression.replace(/ alpha /g, ' \\alpha ');
+        cleanExpression = cleanExpression.replace(/ beta /g, ' \\beta ');
+        cleanExpression = cleanExpression.replace(/ gamma /g, ' \\gamma ');
+        cleanExpression = cleanExpression.replace(/ delta /g, ' \\delta ');
+        cleanExpression = cleanExpression.replace(/ epsilon /g, ' \\epsilon ');
+        cleanExpression = cleanExpression.replace(/ zeta /g, ' \\zeta ');
+        cleanExpression = cleanExpression.replace(/ eta /g, ' \\eta ');
+        cleanExpression = cleanExpression.replace(/ theta /g, ' \\theta ');
+        cleanExpression = cleanExpression.replace(/ lambda /g, ' \\lambda ');
+        cleanExpression = cleanExpression.replace(/ mu /g, ' \\mu ');
+        cleanExpression = cleanExpression.replace(/ nu /g, ' \\nu ');
+        cleanExpression = cleanExpression.replace(/ rho /g, ' \\rho ');
+        cleanExpression = cleanExpression.replace(/ sigma /g, ' \\sigma ');
+        cleanExpression = cleanExpression.replace(/ tau /g, ' \\tau ');
+        cleanExpression = cleanExpression.replace(/ phi /g, ' \\phi ');
+        cleanExpression = cleanExpression.replace(/ omega /g, ' \\omega ');
+        // Also handle at start/end of expression
+        cleanExpression = cleanExpression.replace(/^eta /g, '\\eta ');
+        cleanExpression = cleanExpression.replace(/ eta$/g, ' \\eta');
+        cleanExpression = cleanExpression.replace(/\(eta /g, '(\\eta ');
+        cleanExpression = cleanExpression.replace(/ eta\)/g, ' \\eta)');
+        cleanExpression = cleanExpression.replace(/^beta /g, '\\beta ');
+        cleanExpression = cleanExpression.replace(/ beta$/g, ' \\beta');
+        cleanExpression = cleanExpression.replace(/\(beta /g, '(\\beta ');
+        cleanExpression = cleanExpression.replace(/ beta\)/g, ' \\beta)');
+        cleanExpression = cleanExpression.replace(/^alpha /g, '\\alpha ');
+        cleanExpression = cleanExpression.replace(/ alpha$/g, ' \\alpha');
+        cleanExpression = cleanExpression.replace(/\(alpha /g, '(\\alpha ');
+        cleanExpression = cleanExpression.replace(/ alpha\)/g, ' \\alpha)');
+
+        // 6. Detect incomplete table rows (has & and \\ but no array wrapper)
         // If expression contains & and ends with \\, wrap it in array
         if (cleanExpression.includes('&') && cleanExpression.trim().endsWith('\\\\')) {
           // Don't auto-wrap if already in array/matrix/aligned environment
@@ -231,10 +275,14 @@ export const RenderWithMath: React.FC<{
 }> = ({ text, className, showOptions = true, serif = true, autoSteps = false, dark = false, compact = false, correctOptionIndex }) => {
   if (!text) return null;
 
+  // Defensive type check: Ensure text is always a string
+  // This prevents KaTeX errors when text is accidentally passed as an object
+  const textStr = typeof text === 'string' ? text : JSON.stringify(text);
+
   // 1. Clean "Junk" from AI output
   // CRITICAL: Do NOT replace single backslashes - they're needed for LaTeX commands!
   // Only handle double-escaped sequences from JSON like \\n -> \n
-  let cleanText = text
+  let cleanText = textStr
     .replace(/\\\\n/g, '\n')  // Double backslash-n to newline (from JSON)
     .replace(/\\\\r/g, '\r')  // Double backslash-r to carriage return (from JSON)
     .replace(/\\\\"/g, '"')   // Double backslash-quote to quote (from JSON)
@@ -258,6 +306,28 @@ export const RenderWithMath: React.FC<{
   cleanText = cleanText.replace(/<<<ESCAPED_PAREN_CLOSE>>>/g, '\\)');
   cleanText = cleanText.replace(/<<<ESCAPED_BRACKET>>>/g, '\\[');
   cleanText = cleanText.replace(/<<<ESCAPED_BRACKET_CLOSE>>>/g, '\\]');
+
+  // 2.5. Fix Greek letters in dimensional analysis - convert name to LaTeX symbol
+  // Must happen BEFORE $ delimiter wrapping
+  cleanText = cleanText.replace(/\(alpha\s/g, '(\\alpha ');
+  cleanText = cleanText.replace(/\(beta\s/g, '(\\beta ');
+  cleanText = cleanText.replace(/\(eta\s/g, '(\\eta ');
+  cleanText = cleanText.replace(/\(theta\s/g, '(\\theta ');
+  cleanText = cleanText.replace(/\(alpha\)/g, '(\\alpha)');
+  cleanText = cleanText.replace(/\(beta\)/g, '(\\beta)');
+  cleanText = cleanText.replace(/\(eta\)/g, '(\\eta)');
+  cleanText = cleanText.replace(/\(theta\)/g, '(\\theta)');
+
+  // 2.6. Auto-wrap dimensional analysis that lacks $ delimiters
+  // More lenient pattern - match any dimensional equation
+  // Examples: (\eta t) = (MLT^{-2}) or (\eta) (T) = (MLT^{-2}) or (\eta) = (MLT^{-3})
+  cleanText = cleanText.replace(/\([^)]+\)\s*=\s*\([^)]+\)/g, (match) => {
+    // Only wrap if it contains LaTeX backslash and uppercase letters (dimensional notation)
+    if (match.includes('\\') && /[A-Z]/.test(match)) {
+      return `$${match}$`;
+    }
+    return match;
+  });
 
   // 3. Handle literal code-like patterns that might come from AI
   cleanText = cleanText.replace(/```latex([\s\S]*?)```/g, '$$$1$$');

@@ -17,6 +17,9 @@ import {
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RenderWithMath } from './MathRenderer';
 import { cache } from '../utils/cache';
+import { useFilteredScans } from '../hooks/useFilteredScans';
+import { useAppContext } from '../contexts/AppContext';
+import { useSubjectTheme } from '../hooks/useSubjectTheme';
 
 interface Flashcard {
   term: string;
@@ -41,6 +44,11 @@ interface RapidRecallProps {
 }
 
 const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
+  // Use AppContext for filtering
+  const { subjectConfig } = useAppContext();
+  const theme = useSubjectTheme();
+  const { scans: filteredScans } = useFilteredScans(recentScans);
+
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -68,6 +76,34 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
     setCurrentCard(0);
     setIsFlipped(false);
   }, [selectedDomain]);
+
+  // CRITICAL FIX: Auto-clear selectedScan when subject changes and current scan doesn't match
+  // Use ref to prevent infinite loops
+  const lastClearedScanRef = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    if (selectedScan) {
+      const isStillValid = filteredScans?.some(s => s.id === selectedScan);
+
+      // If current scan doesn't match subject and we haven't cleared it yet
+      if (!isStillValid && lastClearedScanRef.current !== selectedScan) {
+        lastClearedScanRef.current = selectedScan;
+
+        // Clear selectedScan
+        setSelectedScan('');
+        setCards([]);
+        setIsCached(false);
+      }
+    } else {
+      // Reset tracking when scan is null
+      lastClearedScanRef.current = null;
+
+      // Auto-select if there's exactly one filtered scan
+      if (filteredScans && filteredScans.length === 1 && !selectedScan) {
+        setSelectedScan(filteredScans[0].id);
+      }
+    }
+  }, [subjectConfig, selectedScan, filteredScans]);
 
   // Fetch cached cards when scan is selected
   React.useEffect(() => {
@@ -174,9 +210,12 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
         throw new Error('No analysis data found');
       }
 
+      // Get model from Settings
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: selectedModel,
         generationConfig: { responseMimeType: "application/json" }
       });
 
@@ -273,18 +312,29 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
           <div className="h-8 w-[2px] bg-slate-100 mx-2"></div>
 
           <div className="flex gap-3">
-            <select
-              value={selectedScan}
-              onChange={(e) => setSelectedScan(e.target.value)}
-              className="bg-white border border-slate-200 text-[11px] font-bold text-slate-700 rounded-lg px-3 py-1.5 outline-none focus:ring-4 focus:ring-primary-500/10 shadow-sm transition-all cursor-pointer min-w-[200px]"
-            >
-              <option value="">Select Analysis...</option>
-              {recentScans.map(scan => (
-                <option key={scan.id} value={scan.id}>
-                  {scan.name} ({scan.subject})
-                </option>
-              ))}
-            </select>
+            {/* Show dropdown only if multiple scans */}
+            {filteredScans.length > 1 ? (
+              <select
+                value={selectedScan}
+                onChange={(e) => setSelectedScan(e.target.value)}
+                className="bg-white border border-slate-200 text-[11px] font-bold text-slate-700 rounded-lg px-3 py-1.5 outline-none focus:ring-4 focus:ring-primary-500/10 shadow-sm transition-all cursor-pointer min-w-[200px]"
+              >
+                <option value="">Select {subjectConfig.name} Paper...</option>
+                {filteredScans.map(scan => (
+                  <option key={scan.id} value={scan.id}>
+                    {scan.name}
+                  </option>
+                ))}
+              </select>
+            ) : filteredScans.length === 1 ? (
+              <div className="px-3 py-1.5 rounded-lg text-[11px] font-bold" style={{ backgroundColor: theme.colorLight, color: theme.colorDark }}>
+                {filteredScans[0].name}
+              </div>
+            ) : (
+              <div className="px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-400 bg-slate-100">
+                No {subjectConfig.name} papers
+              </div>
+            )}
             <select
               value={cardCount}
               onChange={(e) => setCardCount(Number(e.target.value))}
