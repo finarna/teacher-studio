@@ -21,6 +21,7 @@ import TrainingStudio from './components/TrainingStudio';
 import TrainingViewer from './components/TrainingViewer';
 import VidyaV2 from './components/VidyaV2';
 import VidyaV3 from './components/VidyaV3';
+import SettingsPanel from './components/SettingsPanel';
 import { ToastProvider, useToast } from './components/ToastNotification';
 import { ConfirmProvider, useConfirm } from './components/ConfirmDialog';
 import { AuthProvider, useAuth, AuthLoading } from './components/AuthProvider';
@@ -32,6 +33,8 @@ import { VidyaActions } from './types/vidya';
 import { useAdaptiveLogic } from './hooks/useAdaptiveLogic';
 import { isFeatureEnabled } from './utils/featureFlags';
 import { Home, LayoutDashboard, GraduationCap, ArrowLeft, Bell, Search, User, LogOut } from 'lucide-react';
+import { AppContextProvider } from './contexts/AppContext';
+import { SubjectSwitcher } from './components/SubjectSwitcher';
 
 /**
  * Authentication Gate Component
@@ -327,17 +330,29 @@ const AppContent: React.FC = () => {
   if (viewMode === 'GOD_MODE') {
     return (
       <div className="flex h-screen bg-white text-slate-900 font-instrument overflow-hidden">
-        <Sidebar activeView={godModeView} onNavigate={setGodModeView} />
+        <Sidebar
+          activeView={godModeView}
+          onNavigate={setGodModeView}
+          userName={user?.email?.split('@')[0] || 'User'}
+          onStudentView={() => setViewMode('STUDENT')}
+          onLogout={async () => {
+            const confirmed = await confirm({
+              title: 'Sign Out',
+              message: 'Are you sure you want to sign out?',
+              type: 'warning',
+            });
+            if (confirmed) {
+              await signOut();
+              showToast('Signed out successfully', 'success');
+            }
+          }}
+        />
 
         <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50/50">
 
           {/* Global Compact Header for Desktop */}
           <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 z-40 shrink-0">
             <div className="flex items-center gap-4">
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                Teacher Panel <span className="opacity-30">/</span> <span className="text-primary-600 italic">Central Intelligence</span>
-              </div>
-              <div className="h-4 w-px bg-slate-200" />
               <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1">
                 <Search size={12} className="text-slate-400" />
                 <input type="text" placeholder="Global Search..." className="bg-transparent border-0 outline-none text-[10px] font-black text-slate-900 w-32 placeholder:text-slate-400 uppercase tracking-widest" />
@@ -345,38 +360,12 @@ const AppContent: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
+              {/* GLOBAL Subject Switcher - Primary Control */}
+              <SubjectSwitcher />
+              <div className="h-6 w-px bg-slate-200" />
               <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors relative">
                 <Bell size={18} />
                 <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary-500 rounded-full border border-white" />
-              </button>
-              <div className="h-6 w-px bg-slate-200" />
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg">
-                <User size={14} className="text-slate-600" />
-                <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">
-                  {user?.email?.split('@')[0] || 'User'}
-                </span>
-              </div>
-              <button
-                onClick={() => setViewMode('STUDENT')}
-                className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white hover:bg-primary-600 rounded-lg text-[10px] font-black transition-all shadow-sm uppercase tracking-widest"
-              >
-                <GraduationCap size={14} /> Student View
-              </button>
-              <button
-                onClick={async () => {
-                  const confirmed = await confirm({
-                    title: 'Sign Out',
-                    message: 'Are you sure you want to sign out?',
-                    type: 'warning',
-                  });
-                  if (confirmed) {
-                    await signOut();
-                    showToast('Signed out successfully', 'success');
-                  }
-                }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-[10px] font-black transition-all shadow-sm uppercase tracking-widest"
-              >
-                <LogOut size={14} /> Logout
               </button>
             </div>
           </header>
@@ -558,6 +547,11 @@ const AppContent: React.FC = () => {
             )}
             {godModeView === 'recall' && <div className="h-full overflow-y-auto scroller-hide"><RapidRecall recentScans={recentScans} /></div>}
             {godModeView === 'questions' && <div className="h-full overflow-y-auto scroller-hide"><VisualQuestionBank recentScans={recentScans} /></div>}
+            {godModeView === 'settings' && (
+              <div className="h-full">
+                <SettingsPanel onBack={() => setGodModeView('mastermind')} />
+              </div>
+            )}
             {godModeView === 'scanning' && (
               <div className="h-full overflow-y-auto scroller-hide">
                 <BoardMastermind
@@ -757,11 +751,13 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <ToastProvider>
-        <ConfirmProvider>
-          <AppContent />
-        </ConfirmProvider>
-      </ToastProvider>
+      <AppContextProvider>
+        <ToastProvider>
+          <ConfirmProvider>
+            <AppContent />
+          </ConfirmProvider>
+        </ToastProvider>
+      </AppContextProvider>
     </AuthProvider>
   );
 };

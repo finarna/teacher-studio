@@ -38,6 +38,9 @@ import { Scan, AnalyzedQuestion } from '../types';
 import { RenderWithMath, DerivationStep } from './MathRenderer';
 import { safeAiParse } from '../utils/aiParser';
 import { generateSketch } from '../utils/sketchGenerators';
+import { useAppContext } from '../contexts/AppContext';
+import { useSubjectTheme } from '../hooks/useSubjectTheme';
+import { useFilteredScans } from '../hooks/useFilteredScans';
 
 interface MetricCardProps {
   title: string;
@@ -68,6 +71,11 @@ interface ExamAnalysisProps {
 }
 
 const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan, recentScans = [], onSelectScan }) => {
+  // Use AppContext for subject/exam awareness
+  const { subjectConfig, examConfig, activeSubject } = useAppContext();
+  const theme = useSubjectTheme();
+  const { scans: filteredScans } = useFilteredScans(recentScans);
+
   const [isSynthesizingAll, setIsSynthesizingAll] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'vault'>('overview');
   const [expandedQuestionId, setExpandedQuestionId] = useState<string | null>(null);
@@ -80,26 +88,57 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const [enlargedVisualNote, setEnlargedVisualNote] = useState<{ imageUrl: string, questionId: string } | null>(null);
   const [isGroupedView, setIsGroupedView] = useState(false);
 
-  if (!scan || !scan.analysisData) {
-    return (
-      <div className="flex-1 bg-slate-50 flex flex-col items-center justify-center p-12 text-center h-full">
-        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 text-slate-400 border border-slate-200 shadow-xl">
-          <AlertTriangle size={32} />
-        </div>
-        <h2 className="text-xl font-black text-slate-900 mb-2 font-outfit uppercase tracking-tight">System Void</h2>
-        <p className="text-[11px] text-slate-500 max-w-sm mb-10 font-bold uppercase tracking-widest italic">Initialize the holographic pipeline to synthesize paper intelligence.</p>
-        <button onClick={onBack} className="px-10 py-3 bg-slate-900 text-white font-black rounded-xl shadow-lg transition-all active:scale-95 text-[10px] uppercase tracking-widest">Reboot Dashboard</button>
-      </div>
-    );
-  }
+  // CRITICAL FIX: Auto-select first scan if none selected or scan doesn't match active subject
+  // Use ref to track last selected scan ID to prevent infinite loops
+  const lastSelectedScanRef = React.useRef<string | null>(null);
 
-  const analysis = scan.analysisData;
+  React.useEffect(() => {
+    if (!onSelectScan) return;
+
+    // Case 1: No scan selected but we have filtered scans - auto-select first one
+    if (!scan && filteredScans.length > 0) {
+      if (lastSelectedScanRef.current !== filteredScans[0].id) {
+        lastSelectedScanRef.current = filteredScans[0].id;
+        onSelectScan(filteredScans[0]);
+      }
+      return;
+    }
+
+    // Case 2: Current scan doesn't match active subject - switch to first filtered scan
+    if (scan && scan.subject !== activeSubject) {
+      // Prevent infinite loop by checking if we already cleared this scan
+      if (lastSelectedScanRef.current !== scan.id) {
+        lastSelectedScanRef.current = scan.id;
+
+        // Select first filtered scan or null
+        if (filteredScans.length > 0) {
+          onSelectScan(filteredScans[0]);
+        } else {
+          onSelectScan(null as any);
+        }
+      }
+      return;
+    }
+
+    // Case 3: Valid scan selected - reset the ref
+    if (scan && scan.subject === activeSubject) {
+      lastSelectedScanRef.current = scan.id;
+    }
+  }, [activeSubject, scan?.id, filteredScans.length]);
+
+  // Extract analysis data with safe defaults (MUST be before any conditional returns)
+  const analysis = scan?.analysisData || { questions: [] };
   const questions = analysis.questions || [];
+  // Safe subject value for useMemo dependencies
+  const safeSubject = scan?.subject || activeSubject;
 
   // Debug: Log visual elements in vault questions
   React.useEffect(() => {
-    console.debug('📊 [VAULT DEBUG] Total questions in vault:', questions.length);
-    const questionsWithVisuals = questions.filter(q => q.hasVisualElement);
+    if (!scan || !scan.analysisData) return;
+
+    const questionsData = scan.analysisData.questions || [];
+    console.debug('📊 [VAULT DEBUG] Total questions in vault:', questionsData.length);
+    const questionsWithVisuals = questionsData.filter(q => q.hasVisualElement);
     console.debug('🖼️ [VAULT DEBUG] Questions with visual elements:', questionsWithVisuals.length);
     if (questionsWithVisuals.length > 0) {
       console.debug('🖼️ [VAULT DEBUG] Sample visual question:', {
@@ -111,7 +150,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
         visualElementPosition: questionsWithVisuals[0].visualElementPosition
       });
     }
-  }, [questions]);
+  }, [scan]);
 
   const toggleQuestion = (id: string) => {
     const isExpanding = expandedQuestionId !== id;
@@ -131,9 +170,12 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
       const question = questions.find(q => q.id === qId);
       if (!question) return;
 
+      // Get model from Settings
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: selectedModel,
         generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
       });
 
@@ -228,9 +270,12 @@ Schema: {
     if (!onUpdateScan || !analysis || !scan) return;
     setIsSynthesizingAll(true);
     try {
+      // Get model from Settings
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: selectedModel,
         generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
       });
 
@@ -541,7 +586,7 @@ Schema: {
   };
 
   const aggregatedDomains = React.useMemo(() => {
-    const currentMap = SUBJECT_DOMAIN_MAPS[scan.subject] || SUBJECT_DOMAIN_MAPS['Physics'];
+    const currentMap = SUBJECT_DOMAIN_MAPS[safeSubject] || SUBJECT_DOMAIN_MAPS['Physics'];
 
     // 1. Assign each question to exactly ONE domain with improved matching
     const mappedQuestions = questions.map(q => {
@@ -610,7 +655,7 @@ Schema: {
     mappedQuestions.forEach(q => {
       classificationSummary[q.mappedKey] = (classificationSummary[q.mappedKey] || 0) + 1;
     });
-    console.log(`📊 [CLASSIFICATION SUMMARY] Subject: ${scan.subject}, Distribution:`, classificationSummary);
+    console.log(`📊 [CLASSIFICATION SUMMARY] Subject: ${safeSubject}, Distribution:`, classificationSummary);
 
     // 2. Aggregate metrics by domain
     const domainsFound: Record<string, any> = {};
@@ -659,7 +704,7 @@ Schema: {
     }
 
     return Object.values(domainsFound).sort((a, b) => b.totalMarks - a.totalMarks);
-  }, [scan.subject, questions]);
+  }, [safeSubject, questions]);
 
   const portfolioStats = React.useMemo(() => {
     // Collect all valid sources (filenames or identifiers)
@@ -669,7 +714,7 @@ Schema: {
     const hasBaseline = sources.length === 1;
     const processingSources = hasBaseline ? ['Standard Baseline', sources[0]] : sources;
 
-    const currentMap = SUBJECT_DOMAIN_MAPS[scan.subject] || SUBJECT_DOMAIN_MAPS['Physics'];
+    const currentMap = SUBJECT_DOMAIN_MAPS[safeSubject] || SUBJECT_DOMAIN_MAPS['Physics'];
 
     return processingSources.map((source, idx) => {
       // If baseline, provide simulated standard values
@@ -760,7 +805,7 @@ Schema: {
         focus
       };
     }).filter(Boolean);
-  }, [questions, scan.subject]);
+  }, [questions, safeSubject]);
 
   const topicTrendData = React.useMemo(() => {
     if (!portfolioStats) return null;
@@ -771,10 +816,10 @@ Schema: {
   }, [portfolioStats]);
 
   const domainNames = React.useMemo(() => {
-    const list = Array.from(new Set(Object.values(SUBJECT_DOMAIN_MAPS[scan.subject] || SUBJECT_DOMAIN_MAPS['Physics']).map(d => d.domain)));
+    const list = Array.from(new Set(Object.values(SUBJECT_DOMAIN_MAPS[safeSubject] || SUBJECT_DOMAIN_MAPS['Physics']).map(d => d.domain)));
     list.push('Core Foundations');
     return list;
-  }, [scan.subject]);
+  }, [safeSubject]);
 
   const COLORS = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -792,70 +837,94 @@ Schema: {
     return findings;
   }, [portfolioStats]);
 
+  // Show empty state if no scan (after all hooks are called)
+  if (!scan || !scan.analysisData) {
+    return (
+      <div className="flex-1 bg-slate-50 flex flex-col items-center justify-center p-12 text-center h-full">
+        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 text-slate-400 border border-slate-200 shadow-xl">
+          <AlertTriangle size={32} />
+        </div>
+        <h2 className="text-xl font-black text-slate-900 mb-2 font-outfit uppercase tracking-tight">System Void</h2>
+        <p className="text-[11px] text-slate-500 max-w-sm mb-10 font-bold uppercase tracking-widest italic">
+          No {subjectConfig.displayName} papers uploaded yet. Initialize the holographic pipeline to synthesize paper intelligence.
+        </p>
+        <button onClick={onBack} className="px-10 py-3 bg-slate-900 text-white font-black rounded-xl shadow-lg transition-all active:scale-95 text-[10px] uppercase tracking-widest">
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col font-instrument bg-slate-50 overflow-hidden">
-      {/* Ultra-Minimal Top Bar - 40px */}
-      <div className="h-10 px-4 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
-        {/* Left: Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-[11px]">
-          <button onClick={onBack} className="p-1 hover:bg-slate-100 rounded transition-colors">
-            <ArrowLeft size={14} className="text-slate-500" />
-          </button>
-          <span className="text-slate-400">/</span>
-          <span className="text-slate-600 font-semibold">Intelligence Sync</span>
-          <span className="text-slate-400">/</span>
-          <span className="text-slate-900 font-bold">{scan.subject}</span>
-          <span className="text-slate-400">/</span>
-          <span className="text-slate-500 text-[10px] truncate max-w-[200px]">{scan.name}</span>
-        </div>
-
-        {/* Right: Quick Actions */}
-        <div className="flex items-center gap-2">
-          {recentScans && recentScans.length > 1 && onSelectScan && (
-            <select
-              value={scan.id}
-              onChange={(e) => {
-                const selected = recentScans.find(s => s.id === e.target.value);
-                if (selected && onSelectScan) onSelectScan(selected);
-              }}
-              className="bg-slate-50 border border-slate-200 text-slate-700 rounded-md px-2 py-1 text-[10px] font-semibold outline-none cursor-pointer hover:border-slate-300 transition-all"
-            >
-              {recentScans.map(s => (
-                <option key={s.id} value={s.id}>{s.name.substring(0, 30)}...</option>
-              ))}
-            </select>
-          )}
-          <button className="p-1.5 hover:bg-slate-100 rounded transition-colors">
-            <Share2 size={14} className="text-slate-500" />
-          </button>
-          <button className="px-2 py-1 bg-slate-900 text-white rounded-md text-[10px] font-bold hover:bg-slate-800 transition-colors flex items-center gap-1">
-            <Download size={12} /> Export
-          </button>
-        </div>
-      </div>
-
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Tabs Header */}
+        {/* Header Bar - Tabs + Scan Selection */}
         <div className="bg-white border-b border-slate-200 px-6 pt-4 pb-0 shrink-0">
-          <div className="flex items-center gap-1">
-            {(['overview', 'intelligence', 'vault'] as const).map(tab => {
-              const TabIcon = tab === 'overview' ? HelpCircle : tab === 'intelligence' ? Activity : FolderOpen;
-              return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-[11px] font-bold uppercase tracking-wide transition-all border-b-2 ${
-                    activeTab === tab
-                      ? 'bg-slate-50 text-slate-900 border-accent-600'
-                      : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-transparent'
-                  }`}
-                >
-                  <TabIcon size={16} />
-                  {tab}
-                </button>
-              );
-            })}
+          <div className="flex items-center justify-between">
+            {/* Left: Tabs */}
+            <div className="flex items-center gap-1">
+              {(['overview', 'intelligence', 'vault'] as const).map(tab => {
+                const TabIcon = tab === 'overview' ? HelpCircle : tab === 'intelligence' ? Activity : FolderOpen;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-[11px] font-bold uppercase tracking-wide transition-all border-b-2 ${
+                      activeTab === tab
+                        ? 'bg-slate-50 text-slate-900 border-accent-600'
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-transparent'
+                    }`}
+                  >
+                    <TabIcon size={16} />
+                    {tab}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right: Scan Selection + Back Button */}
+            <div className="flex items-center gap-4">
+              {/* Source Paper Label + Dropdown */}
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">
+                  Source Paper
+                </span>
+
+                {filteredScans && filteredScans.length > 1 && onSelectScan ? (
+                  <select
+                    value={scan?.id || ''}
+                    onChange={(e) => {
+                      const selected = filteredScans.find(s => s.id === e.target.value);
+                      if (selected && onSelectScan) onSelectScan(selected);
+                    }}
+                    className="bg-white border-2 rounded-full px-5 py-2.5 text-base font-bold outline-none cursor-pointer hover:shadow-md transition-all appearance-none pr-10 bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpath d=%27m6 9 6 6 6-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[center_right_1rem]"
+                    style={{
+                      borderColor: theme.color + '80',
+                      color: theme.color
+                    }}
+                  >
+                    {filteredScans.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div
+                    className="bg-white border-2 rounded-full px-5 py-2.5 text-base font-bold"
+                    style={{
+                      borderColor: theme.color + '80',
+                      color: theme.color
+                    }}
+                  >
+                    {scan.name}
+                  </div>
+                )}
+              </div>
+
+              <button onClick={onBack} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
+                <ArrowLeft size={16} className="text-slate-500" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1248,7 +1317,7 @@ Schema: {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 9, fontWeight: 800 }} />
                       <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase' }} />
-                      <Bar dataKey="marks" fill="#0f172a" radius={[8, 8, 0, 0]} barSize={48} />
+                      <Bar dataKey="marks" fill={theme.color} radius={[8, 8, 0, 0]} barSize={48} />
                     </BarChart>
                   )}
                 </ResponsiveContainer>

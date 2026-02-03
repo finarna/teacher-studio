@@ -27,6 +27,9 @@ import { generateCleanPhysicsPrompt } from '../utils/cleanPhysicsExtractor';
 import { processQuestionsUnicode } from '../utils/unicodeToLatex'; // Latest: fixed escape char regex patterns
 import { extractQuestionsSimplified } from '../utils/simpleMathExtractor'; // NEW: Simplified extraction
 import { extractPhysicsQuestionsSimplified } from '../utils/simplePhysicsExtractor'; // NEW: Simplified Physics extraction
+import { useAppContext } from '../contexts/AppContext';
+import { useFilteredScans, useSubjectStats } from '../hooks/useFilteredScans';
+import { EmptyState } from './EmptyState';
 
 interface BoardMastermindProps {
   onNavigate: (view: string) => void;
@@ -36,8 +39,15 @@ interface BoardMastermindProps {
 }
 
 const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentScans, onAddScan, onSelectScan }) => {
-  const [selectedSubject, setSelectedSubject] = useState('Physics');
-  const [selectedGrade, setSelectedGrade] = useState('Class 12');
+  // Use AppContext for subject/exam instead of local state
+  const { activeSubject, activeExamContext, subjectConfig, examConfig } = useAppContext();
+  const { scans: filteredScans, hasScans } = useFilteredScans(recentScans);
+  const stats = useSubjectStats(recentScans);
+
+  // Use context values instead of local state
+  const selectedSubject = activeSubject;
+  const selectedGrade = 'Class 12'; // Can be derived from examConfig if needed
+
   const [selectedModel, setSelectedModel] = useState('gemini-3-flash-preview');
   const [useSimplifiedExtraction, setUseSimplifiedExtraction] = useState(true); // NEW: Toggle for simplified extraction
   const [enableVisionExtraction, setEnableVisionExtraction] = useState(false); // NEW: Toggle for vision-guided image extraction (slow)
@@ -422,6 +432,7 @@ ${generatePhysicsExtractionInstructions()}
         status: 'Complete',
         grade: selectedGrade || 'Class 12',
         subject: selectedSubject,
+        examContext: activeExamContext, // Multi-subject context
         analysisData: brainData
       };
 
@@ -1018,6 +1029,7 @@ CRITICAL RULES:
         status: 'Complete',
         grade: selectedGrade || 'Class 12',
         subject: selectedSubject,
+        examContext: activeExamContext, // Multi-subject context
         analysisData: brainData
       };
 
@@ -1049,18 +1061,21 @@ CRITICAL RULES:
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
-            {['Class 10', 'Class 12'].map(g => (
-              <button key={g} onClick={() => setSelectedGrade(g)} className={`px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${selectedGrade === g ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>
-                {g}
-              </button>
-            ))}
+          {/* Removed Grade/Subject controls - now controlled by top SubjectSwitcher */}
+          {/* Current Context Badge */}
+          <div
+            className="px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm"
+            style={{
+              backgroundColor: subjectConfig.colorLight,
+              color: subjectConfig.colorDark,
+              border: `2px solid ${subjectConfig.color}40`
+            }}
+          >
+            <span className="text-base">{subjectConfig.iconEmoji}</span>
+            <span>{subjectConfig.displayName}</span>
+            <span className="opacity-60">•</span>
+            <span>{examConfig.name}</span>
           </div>
-          <div className="h-6 w-px bg-slate-200" />
-          <select value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}
-            className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-accent-500/10 shadow-sm outline-none cursor-pointer hover:border-accent-300 transition-colors">
-            <option>Physics</option><option>Math</option><option>Chemistry</option><option>Biology</option>
-          </select>
           <div className="h-6 w-px bg-slate-200" />
           <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}
             className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-accent-500/10 shadow-sm outline-none cursor-pointer hover:border-accent-300 transition-colors">
@@ -1264,12 +1279,12 @@ CRITICAL RULES:
             )}
           </div>
 
-          {/* Data Monitoring (Dense) */}
+          {/* Data Monitoring (Dense) - Subject-specific stats */}
           <div className="grid grid-cols-3 gap-6">
             {[
-              { label: 'Total Scans', value: recentScans.length, icon: Layers, color: 'text-accent-600' },
-              { label: 'Intelligence Depth', value: '4 Layers', icon: BrainCircuit, color: 'text-rose-600' },
-              { label: 'Global Frags', value: '4.2k+', icon: Sparkles, color: 'text-amber-600' }
+              { label: `${subjectConfig.name} Papers`, value: stats.totalScans, icon: Layers, color: 'text-accent-600' },
+              { label: 'Total Questions', value: stats.totalQuestions, icon: BrainCircuit, color: 'text-rose-600' },
+              { label: 'Topics Covered', value: stats.uniqueTopics, icon: Sparkles, color: 'text-amber-600' }
             ].map((stat, i) => (
               <div key={i} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all group">
                 <div className="flex items-center gap-3 mb-3">
@@ -1291,7 +1306,7 @@ CRITICAL RULES:
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3 scroller-hide bg-slate-50/30">
-              {recentScans.length > 0 ? [...recentScans].reverse().map(scan => (
+              {hasScans ? [...filteredScans].reverse().map(scan => (
                 <button key={scan.id} onClick={() => { onSelectScan(scan); onNavigate('analysis'); }}
                   className="w-full text-left p-4 bg-white border border-slate-100 rounded-xl hover:border-primary-300 hover:shadow-lg transition-all group/item flex items-center gap-4">
                   <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 group-hover/item:bg-primary-600 group-hover/item:text-white transition-colors">
@@ -1307,9 +1322,13 @@ CRITICAL RULES:
                   <ChevronRight size={14} className="text-slate-300 group-hover/item:text-primary-600 transform group-hover/item:translate-x-1 transition-all" />
                 </button>
               )) : (
-                <div className="flex flex-col items-center justify-center h-full opacity-30 text-center py-20 px-10">
-                  <Layers size={48} className="text-slate-300 mb-4" />
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Secure Encryption Active</p>
+                <div className="flex flex-col items-center justify-center h-full text-center py-10 px-6">
+                  <div style={{ color: subjectConfig.color }}>
+                    <Layers size={32} className="mx-auto mb-3" />
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                    No {subjectConfig.name} papers yet
+                  </p>
                 </div>
               )}
             </div>

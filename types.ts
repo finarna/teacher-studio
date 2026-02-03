@@ -1,6 +1,49 @@
 
 export type Subject = 'Math' | 'Physics' | 'Chemistry' | 'Biology';
 export type Grade = 'Class 10' | 'Class 11' | 'Class 12';
+export type ExamContext = 'KCET' | 'NEET' | 'JEE' | 'CBSE';
+
+// Multi-Subject Configuration Types
+export interface SubjectConfiguration {
+  id: Subject;
+  name: string;
+  displayName: string;
+  color: string;
+  colorLight: string;
+  colorDark: string;
+  icon: string;
+  iconEmoji: string;
+  domains: string[];
+  supportedExams: ExamContext[];
+}
+
+export interface ExamConfiguration {
+  id: ExamContext;
+  name: string;
+  fullName: string;
+  pattern: {
+    totalQuestions: number;
+    duration: number; // minutes
+    marksPerQuestion: number;
+    negativeMarking: boolean;
+    negativeMarkingValue?: number;
+  };
+  syllabus: {
+    subjects: Subject[];
+    weights: Record<Subject, number>; // Percentage weightage
+  };
+  difficultyProfile: {
+    easy: number;
+    moderate: number;
+    hard: number;
+  };
+}
+
+export interface UserPreferences {
+  activeSubject: Subject;
+  activeExamContext: ExamContext;
+  lastUpdated: number;
+}
 
 export interface SimulationParams {
   [key: string]: number;
@@ -234,6 +277,7 @@ export interface Scan {
   status: 'Processing' | 'Complete' | 'Failed';
   grade: string;
   subject: string;
+  examContext?: ExamContext; // Optional for backward compatibility
   analysisData?: ExamAnalysisData;
 }
 

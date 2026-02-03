@@ -37,6 +37,9 @@ import {
 import { RenderWithMath, DerivationStep } from './MathRenderer';
 import { Scan, AnalyzedQuestion } from '../types';
 import { cache } from '../utils/cache';
+import { useAppContext } from '../contexts/AppContext';
+import { useFilteredScans } from '../hooks/useFilteredScans';
+import { useSubjectTheme } from '../hooks/useSubjectTheme';
 
 interface Question {
   id: string;
@@ -77,13 +80,21 @@ interface VisualQuestionBankProps {
 }
 
 const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [] }) => {
-  const [activeTab, setActiveTab] = useState('Physics');
-  const [selectedGrade, setSelectedGrade] = useState('Class 12');
+  // Use AppContext instead of local state
+  const { activeSubject, subjectConfig, examConfig } = useAppContext();
+  const theme = useSubjectTheme();
+  const { scans: filteredScans } = useFilteredScans(recentScans);
+
+  // Use context values instead of local state
+  const activeTab = activeSubject;
+  const selectedGrade = 'Class 12'; // Can be derived from examConfig if needed
   const [selectedAnalysisId, setSelectedAnalysisId] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [viewTab, setViewTab] = useState<'summary' | 'questions'>('summary');
   const [savedIds, setSavedIds] = useState<Set<string>>(() => {
     const cached = localStorage.getItem('saved_questions');
     return new Set(cached ? JSON.parse(cached) : []);
@@ -225,53 +236,172 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
     };
   }, [questions, selectedAnalysisId]);
 
-  const filteredVault = useMemo(() => {
-    return recentScans.filter(s => s.grade === selectedGrade && s.subject === activeTab);
-  }, [recentScans, selectedGrade, activeTab]);
+  // Use filteredScans from context instead of manual filtering
+  const filteredVault = filteredScans;
 
   const selectedAnalysis = useMemo(() => {
     return filteredVault.find(s => s.id === selectedAnalysisId);
   }, [filteredVault, selectedAnalysisId]);
 
+  // Use ref to prevent redundant loads
+  const lastLoadedScanIdRef = React.useRef<string | null>(null);
+
+  // CRITICAL: Clear all data when switching to subject with no scans, OR auto-select first scan
   React.useEffect(() => {
+    // Case 1: No scans for this subject - clear everything
+    if (filteredVault.length === 0) {
+      lastLoadedScanIdRef.current = null;
+      setSelectedAnalysisId('');
+      setQuestions([]);
+      setUserAnswers(new Map());
+      setValidatedAnswers(new Map());
+      setExpandedId(null);
+      setShowInsights(null);
+      return;
+    }
+
+    // Case 2: Have scans, but selected scan is invalid (wrong subject)
+    if (selectedAnalysisId) {
+      const isStillValid = filteredVault.some(s => s.id === selectedAnalysisId);
+      if (!isStillValid) {
+        lastLoadedScanIdRef.current = null; // Reset to trigger reload
+        setSelectedAnalysisId(filteredVault[0].id);
+        return;
+      }
+    }
+
+    // Case 3: No scan selected, but we have scans - auto-select first one
     if (!selectedAnalysisId && filteredVault.length > 0) {
+      lastLoadedScanIdRef.current = null; // Reset to trigger reload
       setSelectedAnalysisId(filteredVault[0].id);
     }
-  }, [filteredVault, selectedAnalysisId]);
+  }, [activeSubject, filteredVault, selectedAnalysisId]);
 
   React.useEffect(() => {
     const loadQuestions = async () => {
+      console.log(`🔄 [LOAD START] Subject: ${activeSubject}, SelectedID: ${selectedAnalysisId}, LastLoaded: ${lastLoadedScanIdRef.current}`);
+
+      // Don't load questions if no scans are available for this subject
+      if (!selectedAnalysisId && filteredVault.length === 0) {
+        console.log(`❌ [LOAD ABORT] No scans available for ${activeSubject}`);
+        setIsLoadingQuestions(false);
+        setQuestions([]);
+        lastLoadedScanIdRef.current = null;
+        return;
+      }
+
+      // Wait for selectedAnalysisId to be set
+      if (!selectedAnalysisId) {
+        console.log(`⏳ [LOAD WAIT] Waiting for scan selection...`);
+        setIsLoadingQuestions(false);
+        return;
+      }
+
+      // CRITICAL: Verify selected scan belongs to active subject (prevent race condition)
+      if (selectedAnalysis && selectedAnalysis.subject !== activeSubject) {
+        console.log(`⚠️ [LOAD ABORT] Scan subject mismatch! Scan: ${selectedAnalysis.subject}, Active: ${activeSubject}`);
+        setIsLoadingQuestions(false);
+        return;
+      }
+
+      // Skip if we already loaded this scan
+      if (lastLoadedScanIdRef.current === selectedAnalysisId) {
+        console.log(`✅ [LOAD SKIP] Already loaded scan ${selectedAnalysisId}`);
+        setIsLoadingQuestions(false);
+        return;
+      }
+
+      // Start loading
+      console.log(`📥 [LOAD BEGIN] Question Bank should generate NEW questions, not load from scan`);
+      setIsLoadingQuestions(true);
+
+      // SKIP scan questions - Question Bank generates NEW practice questions
+      // Scan questions are shown in Exam Intelligence → Vault, not here
+
+      // Load from Question Bank API/cache (AI-generated practice questions)
       const key = selectedAnalysisId ? `qbank_${selectedAnalysisId}` : `qbank_${activeTab}_${selectedGrade}`;
 
+      // Get auth token
+      const token = localStorage.getItem('sb-auth-token');
+
+      // Clear stale frontend cache before loading
+      const cachedData = cache.get(key);
+      if (cachedData && cachedData.length > 0) {
+        const firstQ = cachedData[0];
+        // If cached questions look like scan questions, clear them
+        if (firstQ.id && firstQ.id.includes('-Q') && firstQ.source) {
+          console.log(`🗑️ [CACHE CLEAR] Removing stale scan questions from frontend cache`);
+          cache.remove(key);
+        }
+      }
+
       try {
-        const response = await fetch(`/api/questionbank/${key}`);
+        const response = await fetch(`/api/questionbank/${key}`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
         if (response.ok) {
           const data = await response.json();
           if (data.questions && data.questions.length > 0) {
+            console.log(`💾 [LOAD] Loading ${data.questions.length} questions from Question Bank API`);
             setQuestions(data.questions);
             cache.save(key, data.questions, selectedAnalysisId || 'general', 'question');
+            lastLoadedScanIdRef.current = selectedAnalysisId;
+            setIsLoadingQuestions(false);
             return;
           }
         }
 
+        // Check cache but validate questions are AI-generated, not from scan
         const cached = cache.get(key);
-        if (cached) {
-          setQuestions(cached);
+        if (cached && cached.length > 0) {
+          // Validate: If questions have the scan's question IDs, they're scan questions, not generated
+          const firstCachedQ = cached[0];
+          const isScanQuestion = firstCachedQ.id && firstCachedQ.id.includes('Q') && selectedAnalysisId && firstCachedQ.id.includes(selectedAnalysisId.substring(0, 4));
+
+          if (isScanQuestion) {
+            console.log(`⚠️ [CACHE INVALID] Cache contains scan questions, not generated questions. Clearing...`);
+            cache.remove(key);
+            setQuestions([]);
+            lastLoadedScanIdRef.current = selectedAnalysisId;
+          } else {
+            console.log(`📦 [LOAD] Loading ${cached.length} AI-generated questions from cache`);
+            setQuestions(cached);
+            lastLoadedScanIdRef.current = selectedAnalysisId;
+          }
         } else {
+          console.log(`❌ [LOAD] No generated questions found. Click "Generate Questions" to create practice questions.`);
           setQuestions([]);
+          lastLoadedScanIdRef.current = selectedAnalysisId;
         }
+        setIsLoadingQuestions(false);
       } catch (err) {
+        // Check cache but validate questions are AI-generated, not from scan
         const cached = cache.get(key);
-        if (cached) {
-          setQuestions(cached);
+        if (cached && cached.length > 0) {
+          const firstCachedQ = cached[0];
+          const isScanQuestion = firstCachedQ.id && firstCachedQ.id.includes('Q') && selectedAnalysisId && firstCachedQ.id.includes(selectedAnalysisId.substring(0, 4));
+
+          if (isScanQuestion) {
+            console.log(`⚠️ [CACHE INVALID] Cache contains scan questions, not generated questions. Clearing...`);
+            cache.remove(key);
+            setQuestions([]);
+            lastLoadedScanIdRef.current = selectedAnalysisId;
+          } else {
+            console.log(`📦 [LOAD] Loading ${cached.length} AI-generated questions from cache (API error)`);
+            setQuestions(cached);
+            lastLoadedScanIdRef.current = selectedAnalysisId;
+          }
         } else {
+          console.log(`❌ [LOAD] No questions available (API error, no cache)`);
           setQuestions([]);
+          lastLoadedScanIdRef.current = selectedAnalysisId;
         }
+        setIsLoadingQuestions(false);
       }
     };
 
     loadQuestions();
-  }, [selectedAnalysisId, activeTab, selectedGrade]);
+  }, [selectedAnalysisId, activeSubject, filteredVault.length]);
 
   const avgQCount = useMemo(() => {
     if (!selectedAnalysis || !selectedAnalysis.analysisData?.questions) return 5;
@@ -287,13 +417,17 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (process as any).env?.GEMINI_API_KEY;
       if (!apiKey) throw new Error("API Key Missing");
 
+      // Get model and temperature from Settings
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+      const temperature = parseFloat(localStorage.getItem('ai_temperature') || '0.7');
+
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: selectedModel,
         generationConfig: {
           responseMimeType: "application/json",
           maxOutputTokens: 16384,
-          temperature: 0.3
+          temperature: temperature
         }
       });
 
@@ -444,10 +578,16 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
         setQuestions(newQuestions);
         const key = selectedAnalysisId ? `qbank_${selectedAnalysisId}` : `qbank_${activeTab}_${selectedGrade}`;
 
+        // Get auth token
+        const token = localStorage.getItem('sb-auth-token');
+
         try {
           await fetch('/api/questionbank', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
             body: JSON.stringify({ key, questions: newQuestions })
           });
         } catch (err) {
@@ -496,124 +636,156 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
   return (
     <div className="flex h-full bg-slate-50/50 font-instrument text-slate-900 overflow-hidden">
 
-      {/* Sidebar */}
-      <aside className="w-72 border-r border-slate-200 bg-white flex flex-col shrink-0">
-        <div className="p-6 border-b border-slate-100">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center text-white">
-              <BookOpen size={16} />
-            </div>
-            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest font-outfit">Question Vault</h2>
-          </div>
+      {/* Removed sidebar - moved controls to header */}
 
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Grade Context</h3>
-          <div className="flex gap-2 mb-6">
-            {['Class 10', 'Class 12'].map(g => (
-              <button
-                key={g}
-                onClick={() => setSelectedGrade(g)}
-                className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${selectedGrade === g ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-400 border-slate-200'}`}
-              >
-                {g}
-              </button>
-            ))}
-          </div>
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
 
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Subject</h3>
-          <div className="space-y-1">
-            {[
-              { name: 'Physics', icon: Atom, color: 'indigo' },
-              { name: 'Chemistry', icon: FlaskConical, color: 'amber' },
-              { name: 'Biology', icon: Dna, color: 'emerald' },
-              { name: 'Math', icon: PenTool, color: 'rose' },
-            ].map((sub) => (
-              <button
-                key={sub.name}
-                onClick={() => {
-                  setActiveTab(sub.name);
-                  setSelectedAnalysisId('');
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all ${activeTab === sub.name ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}`}
-              >
-                <div className={`p-1.5 rounded-lg ${activeTab === sub.name ? 'bg-primary-400 text-slate-900' : 'bg-slate-100 text-slate-400'}`}>
-                  <sub.icon size={14} />
+        {/* Header - Single Bar Design */}
+        <div className="h-auto border-b border-slate-200 bg-white shrink-0">
+          {filteredVault.length > 0 ? (
+            <div className="px-8 py-4">
+              <div className="flex items-center gap-4">
+                {/* Left: Title + Tabs */}
+                <div className="flex items-center gap-6 shrink-0">
+                  <h1 className="text-2xl font-black text-slate-900 font-outfit tracking-tight leading-none">
+                    Question Bank
+                  </h1>
+                  {/* Tabs */}
+                  <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+                    <button
+                      onClick={() => setViewTab('summary')}
+                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                        viewTab === 'summary'
+                          ? 'bg-white text-slate-900 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      Summary
+                    </button>
+                    <button
+                      onClick={() => setViewTab('questions')}
+                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                        viewTab === 'questions'
+                          ? 'bg-white text-slate-900 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      Questions
+                    </button>
+                  </div>
                 </div>
-                {sub.name}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        <div className="p-6 flex-1 overflow-y-auto scroller-hide">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Source Paper</h3>
+                {/* Middle: Source Paper Controls */}
+                <div className="flex items-center gap-3 shrink-0">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider shrink-0">
+                    Source Paper
+                  </label>
+                  <select
+                    value={selectedAnalysisId}
+                    onChange={(e) => {
+                      lastLoadedScanIdRef.current = null; // Reset to trigger reload
+                      setSelectedAnalysisId(e.target.value);
+                    }}
+                    className="bg-white border-2 border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-300 focus:border-slate-400 outline-none cursor-pointer min-w-[200px] hover:border-slate-300 transition-all"
+                    style={{
+                      borderColor: selectedAnalysisId ? theme.color + '60' : undefined,
+                      color: selectedAnalysisId ? theme.colorDark : undefined
+                    }}
+                  >
+                    <option value="">Fresh Generation</option>
+                    {filteredVault.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                  {selectedAnalysis && (
+                    <div
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg border shrink-0"
+                      style={{
+                        backgroundColor: theme.colorLight,
+                        borderColor: theme.color + '40'
+                      }}
+                    >
+                      <Sparkles size={14} style={{ color: theme.color }} />
+                      <span className="text-xs font-black tracking-wide" style={{ color: theme.colorDark }}>
+                        AI ALIGNED
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-          <div className="space-y-2">
-            <select
-              value={selectedAnalysisId}
-              onChange={(e) => setSelectedAnalysisId(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-primary-500/10 shadow-sm outline-none cursor-pointer"
-            >
-              <option value="">Fresh Generation</option>
-              {filteredVault.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
-          </div>
+                <div className="flex-1"></div>
 
-          {selectedAnalysis && (
-            <div className="p-4 bg-primary-50 border border-primary-100 rounded-2xl mt-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles size={12} className="text-primary-600" />
-                <span className="text-[9px] font-black text-primary-900 uppercase tracking-widest">AI Aligned</span>
+                {/* Right: Action Buttons + Subject Badge */}
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={generateNewQuestion}
+                    disabled={isGenerating}
+                    className="flex items-center justify-center gap-2.5 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold disabled:opacity-50 hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl active:scale-[0.98] group whitespace-nowrap"
+                  >
+                    {isGenerating ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Sparkles size={16} className="text-emerald-400 group-hover:rotate-12 transition-transform" />
+                    )}
+                    <span className="uppercase tracking-wide">
+                      {isGenerating ? 'Generating...' : 'Generate Questions'}
+                    </span>
+                  </button>
+
+                  <button
+                    className="p-2.5 bg-white border-2 border-slate-200 text-slate-600 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all shrink-0"
+                    title="Filter questions"
+                  >
+                    <Filter size={18} />
+                  </button>
+                  <button
+                    className="p-2.5 bg-white border-2 border-slate-200 text-slate-600 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all shrink-0"
+                    title="Export paper"
+                  >
+                    <Printer size={18} />
+                  </button>
+                </div>
               </div>
-              <p className="text-[10px] text-primary-700 font-bold leading-relaxed italic">Questions aligned with {selectedAnalysis.name} patterns.</p>
+            </div>
+          ) : (
+            <div className="px-8 py-6">
+              <div className="flex items-center justify-between gap-6">
+                {/* Left: Title */}
+                <div className="flex items-center gap-6 flex-1">
+                  <h1 className="text-2xl font-black text-slate-900 font-outfit tracking-tight shrink-0">
+                    Question Bank
+                  </h1>
+                </div>
+
+                {/* Right: Empty State Message */}
+                <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 shrink-0">
+                  <FileQuestion size={20} className="text-slate-400" />
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-slate-600 leading-tight">
+                      No {subjectConfig.displayName} papers
+                    </p>
+                    <p className="text-[10px] text-slate-400 leading-tight">
+                      Upload to generate questions
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50">
-          <button
-            onClick={generateNewQuestion}
-            disabled={isGenerating}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-slate-900 text-white rounded-[1.25rem] text-[11px] font-black uppercase tracking-[0.2em] disabled:opacity-50 hover:bg-slate-800 transition-all shadow-xl active:scale-95 group"
-          >
-            {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} className="text-primary-400 group-hover:rotate-12 transition-transform" />}
-            {isGenerating ? 'Generating...' : 'Generate Questions'}
-          </button>
-        </div>
-      </aside>
-
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-
-        {/* Header */}
-        <div className="h-20 border-b border-slate-200 bg-white flex items-center justify-between px-8 shrink-0">
-          <div className="flex items-center gap-6 flex-1">
-            <h1 className="text-2xl font-black text-slate-900 font-outfit tracking-tighter">Question Bank</h1>
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 w-full max-w-md">
-              <Search size={16} className="text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search questions..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent border-0 outline-none text-[12px] font-bold text-slate-900 w-full placeholder:text-slate-400"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <button className="p-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
-              <Filter size={18} />
-            </button>
-            <button className="flex items-center gap-3 px-6 py-2.5 bg-white border border-slate-200 text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-slate-900 transition-all shadow-sm">
-              <Printer size={16} /> Export Paper
-            </button>
-          </div>
-        </div>
-
         <div className="flex-1 overflow-y-auto p-6 scroller-hide bg-slate-50/20">
-          <div className="max-w-7xl mx-auto space-y-4 pb-16">
-            {paperStats && (
+          {/* Loading Spinner */}
+          {isLoadingQuestions ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <Loader2 className="w-16 h-16 animate-spin mb-4" style={{ color: theme.color }} />
+              <p className="text-lg font-bold text-slate-600">Loading questions...</p>
+              <p className="text-sm text-slate-400 mt-2">Please wait while we fetch your data</p>
+            </div>
+          ) : (
+            <div className="max-w-7xl mx-auto space-y-4 pb-16">
+              {viewTab === 'summary' && (
+                (paperStats && filteredVault.length > 0) ? (
               <div className="space-y-4">
                 {/* Row 1: Headline Stats */}
                 <div className="grid grid-cols-12 gap-4">
@@ -909,10 +1081,22 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                   )}
                 </div>
               </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-32 text-center rounded-3xl border-4 border-dashed border-slate-200 bg-white">
+                  <div className="w-24 h-24 bg-slate-50 border-2 border-slate-100 rounded-3xl flex items-center justify-center mb-6 text-slate-200">
+                    <BarChart3 size={48} />
+                  </div>
+                  <h2 className="text-3xl font-black text-slate-900 mb-4 font-outfit uppercase tracking-tighter">No Summary Available</h2>
+                  <p className="text-sm text-slate-500 font-bold max-w-md leading-relaxed">
+                    Generate questions to see detailed statistics and analytics.
+                  </p>
+                </div>
+              )
             )}
 
-            {filteredQuestions.length > 0 ? (
-              filteredQuestions.map((q) => {
+            {viewTab === 'questions' && (
+              (filteredQuestions.length > 0 && filteredVault.length > 0) ? (
+                filteredQuestions.map((q) => {
                 const selectedAnswer = userAnswers.get(q.id);
                 const validatedAnswer = validatedAnswers.get(q.id);
                 const hasValidated = validatedAnswer !== undefined;
@@ -1211,8 +1395,10 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                   Click "Generate Questions" to create AI-powered questions based on exam patterns.
                 </p>
               </div>
+            )
             )}
-          </div>
+            </div>
+          )}
         </div>
 
       </div>
