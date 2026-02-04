@@ -1,0 +1,200 @@
+name: Deploy to VPS (Docker + PM2)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  NODE_VERSION: '18'
+  DEPLOY_PATH: '/var/www/edujourney'
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      # ============================================
+      # CHECKOUT & SETUP
+      # ============================================
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # ============================================
+      # BUILD FRONTEND
+      # ============================================
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      # ============================================
+      # CREATE DEPLOYMENT PACKAGE
+      # ============================================
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy-package
+
+          # Copy built frontend
+          cp -r dist deploy-package/
+
+          # Copy backend files
+          cp server-supabase.js deploy-package/
+          cp package*.json deploy-package/
+
+          # Copy other necessary files
+          cp -r migrations deploy-package/ 2>/dev/null || true
+          cp -r lib deploy-package/ 2>/dev/null || true
+          cp -r utils deploy-package/ 2>/dev/null || true
+          cp -r scripts deploy-package/ 2>/dev/null || true
+
+          # Create ecosystem.config.js for PM2
+          cat > deploy-package/ecosystem.config.js << 'EOF'
+          module.exports = {
+            apps: [{
+              name: 'edujourney-server',
+              script: './server-supabase.js',
+              instances: 1,
+              exec_mode: 'cluster',
+              autorestart: true,
+              watch: false,
+              max_memory_restart: '500M',
+              env: {
+                NODE_ENV: 'production',
+                PORT: 9001
+              }
+            }]
+          };
+          EOF
+
+      - name: Create tarball
+        run: |
+          cd deploy-package
+          tar -czf ../deploy.tar.gz .
+          cd ..
+          ls -lh deploy.tar.gz
+
+      # ============================================
+      # DEPLOY TO VPS
+      # ============================================
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            # Create deployment directory
+            mkdir -p ${{ env.DEPLOY_PATH }}
+
+            # Backup current deployment
+            if [ -d "${{ env.DEPLOY_PATH }}/current" ]; then
+              echo "📦 Creating backup..."
+              cp -r ${{ env.DEPLOY_PATH }}/current ${{ env.DEPLOY_PATH }}/backup-$(date +%Y%m%d-%H%M%S)
+            fi
+
+            # Clean up old backups (keep last 5)
+            ls -t ${{ env.DEPLOY_PATH }}/backup-* 2>/dev/null | tail -n +6 | xargs rm -rf 2>/dev/null || true
+
+      - name: Copy deployment package to VPS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "deploy.tar.gz"
+          target: ${{ env.DEPLOY_PATH }}
+
+      - name: Extract and restart services
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+
+            # Extract new deployment
+            echo "📂 Extracting deployment package..."
+            rm -rf current
+            mkdir -p current
+            tar -xzf deploy.tar.gz -C current
+            rm deploy.tar.gz
+
+            # Install production dependencies
+            echo "📦 Installing dependencies..."
+            cd current
+            npm ci --production --ignore-scripts
+
+            # Copy environment variables (should be pre-configured on server)
+            if [ -f ../.env.production ]; then
+              cp ../.env.production .env.local
+              echo "✅ Environment variables copied"
+            else
+              echo "⚠️  Warning: .env.production not found on server"
+            fi
+
+            # Restart PM2 services
+            echo "🔄 Restarting services..."
+            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
+            pm2 save
+
+            # Show status
+            pm2 status
+
+            echo "✅ Deployment complete!"
+            echo "🌐 Frontend: Check your Nginx/Apache configuration"
+            echo "🔧 Backend: Running on port 9001"
+
+      # ============================================
+      # HEALTH CHECK
+      # ============================================
+      - name: Health check
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            echo "🏥 Running health checks..."
+
+            # Wait for server to start
+            sleep 5
+
+            # Check if PM2 process is running
+            pm2 list | grep edujourney-server
+
+            # Check if server responds
+            curl -f http://localhost:9001/api/health || echo "⚠️  Health check endpoint not responding"
+
+            echo "✅ Health check complete"
+
+      # ============================================
+      # NOTIFICATION
+      # ============================================
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Server**: ${{ secrets.VPS_HOST }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deploy Path**: ${{ env.DEPLOY_PATH }}" >> $GITHUB_STEP_SUMMARY
