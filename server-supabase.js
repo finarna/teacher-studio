@@ -150,6 +150,7 @@ function transformDbScanToApi(dbScan) {
     status: dbScan.status,
     grade: dbScan.grade,
     subject: dbScan.subject,
+    examContext: dbScan.exam_context || 'KCET', // Default to KCET if not set
     analysisData: dbScan.analysis_data || {
       summary: dbScan.summary,
       overallDifficulty: dbScan.overall_difficulty,
@@ -179,10 +180,17 @@ function transformApiScanToDb(apiScan) {
     return 'Moderate'; // Safe default
   };
 
+  // Default exam context based on subject if not provided
+  const defaultExamContext = (subject) => {
+    if (subject === 'Biology') return 'NEET';
+    return 'KCET';
+  };
+
   return {
     name: apiScan.name,
     grade: apiScan.grade,
     subject: apiScan.subject,
+    exam_context: apiScan.examContext || defaultExamContext(apiScan.subject),
     status: apiScan.status || 'Processing',
     summary: apiScan.analysisData?.summary,
     overall_difficulty: normalizeDifficulty(apiScan.analysisData?.overallDifficulty),
@@ -309,13 +317,30 @@ app.post('/api/cache/clear', async (req, res) => {
 
 /**
  * Get All Scans
+ * Supports filtering: ?subject=Physics&examContext=KCET
  */
 app.get('/api/scans', async (req, res) => {
   try {
     const userId = req.userId;
+    const { subject, examContext } = req.query;
 
-    // Fetch from Supabase
-    const { data: dbScans, error } = await getUserScans(userId);
+    // Fetch from Supabase with optional filters
+    let query = supabaseAdmin
+      .from('scans')
+      .select('*')
+      .eq('user_id', userId);
+
+    // Apply subject filter
+    if (subject) {
+      query = query.eq('subject', subject);
+    }
+
+    // Apply examContext filter
+    if (examContext) {
+      query = query.eq('exam_context', examContext);
+    }
+
+    const { data: dbScans, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
       throw new Error(error.message);
@@ -370,6 +395,16 @@ app.post('/api/scans', async (req, res) => {
 
     if (!apiScan || !apiScan.id) {
       return res.status(400).json({ error: 'Invalid scan data' });
+    }
+
+    // Validate examContext if provided
+    const validExamContexts = ['KCET', 'NEET', 'JEE', 'CBSE'];
+    if (apiScan.examContext && !validExamContexts.includes(apiScan.examContext)) {
+      return res.status(400).json({
+        error: `Invalid examContext: ${apiScan.examContext}`,
+        valid: validExamContexts,
+        hint: 'Must be one of: KCET, NEET, JEE, CBSE'
+      });
     }
 
     // Check if scan already exists
@@ -646,6 +681,49 @@ app.post('/api/flashcards', async (req, res) => {
 });
 
 /**
+ * Get Subject/Exam Statistics
+ * Returns aggregated stats for multi-subject view
+ */
+app.get('/api/stats/subjects', async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // Fetch all scans for user
+    const { data: scans, error } = await supabaseAdmin
+      .from('scans')
+      .select('subject, exam_context, analysis_data')
+      .eq('user_id', userId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Aggregate stats by subject and exam
+    const stats = {
+      Math: { scans: 0, questions: 0, exams: {} },
+      Physics: { scans: 0, questions: 0, exams: {} },
+      Chemistry: { scans: 0, questions: 0, exams: {} },
+      Biology: { scans: 0, questions: 0, exams: {} }
+    };
+
+    scans.forEach(scan => {
+      if (stats[scan.subject]) {
+        stats[scan.subject].scans++;
+        stats[scan.subject].questions += scan.analysis_data?.questions?.length || 0;
+
+        const examKey = scan.exam_context || 'KCET';
+        stats[scan.subject].exams[examKey] = (stats[scan.subject].exams[examKey] || 0) + 1;
+      }
+    });
+
+    res.json(stats);
+  } catch (err) {
+    console.error('Failed to fetch subject stats:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * 404 Handler
  */
 app.use((req, res) => {
@@ -659,6 +737,7 @@ app.use((req, res) => {
       'GET /api/scans/:id',
       'POST /api/scans',
       'DELETE /api/scans/:id',
+      'GET /api/stats/subjects',
       'GET /api/questionbank/:key',
       'POST /api/questionbank',
       'GET /api/flashcards/:scanId',

@@ -13,7 +13,8 @@
     "setup:storage": "npx tsx scripts/setup-supabase-storage.ts",
     "verify:db": "npx tsx scripts/verify-database.ts",
     "migrate:images": "npx tsx scripts/migrate-images-to-supabase.ts",
-    "migrate:data": "npx tsx scripts/migrate-data-to-supabase.ts"
+    "migrate:data": "npx tsx scripts/migrate-data-to-supabase.ts",
+    "migrate:exam-context": "npx tsx scripts/migrate-exam-context.ts"
   },
   "dependencies": {
     "@google/genai": "^1.34.0",
