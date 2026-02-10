@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Scans Data</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .scan { border: 1px solid #ccc; margin: 10px 0; padding: 10px; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Debug: Scans Data</h1>
+    <div id="output"></div>
+
+    <script>
+        // Open browser console and paste this to check scans data
+        console.log('=== CHECKING RECENT SCANS ===');
+
+        // Try to access the scans from the app state
+        // This should be run in the browser console on your app page
+
+        const checkScans = () => {
+            const output = document.getElementById('output');
+
+            // Get scans from localStorage
+            const cacheKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.includes('scan')) {
+                    cacheKeys.push(key);
+                }
+            }
+
+            output.innerHTML = `<h2>Found ${cacheKeys.length} cache keys</h2>`;
+
+            cacheKeys.forEach(key => {
+                try {
+                    const data = JSON.parse(localStorage.getItem(key));
+                    const div = document.createElement('div');
+                    div.className = 'scan';
+
+                    let html = `<h3>${key}</h3>`;
+                    html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+                    // Check for examContext
+                    if (data.examContext) {
+                        html += `<p class="success">✅ Has examContext: ${data.examContext}</p>`;
+                    } else if (data.exam_context) {
+                        html += `<p class="warning">⚠️ Has exam_context (DB format): ${data.exam_context}</p>`;
+                    } else {
+                        html += `<p class="error">❌ NO examContext field!</p>`;
+                    }
+
+                    div.innerHTML = html;
+                    output.appendChild(div);
+                } catch (e) {
+                    console.error('Error parsing', key, e);
+                }
+            });
+        };
+
+        checkScans();
+
+        // Also log instructions
+        console.log('To check scans from React app, run this in console:');
+        console.log('1. Check recentScans prop in BoardMastermind');
+        console.log('2. Check if scans have examContext field');
+        console.log('3. Run: window.localStorage');
+    </script>
+</body>
+</html>

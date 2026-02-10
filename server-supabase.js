@@ -13,6 +13,8 @@
 import express from 'express';
 import cors from 'cors';
 import Redis from 'ioredis';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
 import {
   supabaseAdmin,
   getUserScans,
@@ -28,9 +30,26 @@ import {
   saveFlashcards,
   checkDatabaseConnection,
 } from './lib/supabaseServer.ts';
+import { handleWebhook } from './lib/webhookHandlers.ts';
 
 const app = express();
 const port = process.env.PORT || 9001;
+
+// =====================================================
+// RAZORPAY CONFIGURATION
+// =====================================================
+let razorpay = null;
+const RAZORPAY_ENABLED = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET;
+
+if (RAZORPAY_ENABLED) {
+  razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+  console.log('✅ RazorPay initialized');
+} else {
+  console.log('⚠️ RazorPay not configured (set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET)');
+}
 
 // =====================================================
 // REDIS CONFIGURATION (Optional Cache Layer)
@@ -723,6 +742,343 @@ app.get('/api/stats/subjects', async (req, res) => {
   }
 });
 
+// =====================================================
+// PAYMENT & SUBSCRIPTION ENDPOINTS
+// =====================================================
+
+/**
+ * Get all active pricing plans
+ */
+app.get('/api/pricing/plans', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('pricing_plans')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (err) {
+    console.error('Failed to fetch pricing plans:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Get user's subscription status
+ */
+app.get('/api/subscription/status', async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Get active subscription directly from subscriptions table
+    const { data: subscription, error } = await supabaseAdmin
+      .from('subscriptions')
+      .select(`
+        *,
+        plan:pricing_plans(*)
+      `)
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116 is "no rows returned", which is expected for users without subscription
+      throw error;
+    }
+
+    // Return standardized response
+    const hasActiveSubscription = !!subscription;
+    res.json({
+      hasActiveSubscription,
+      subscription: subscription || null,
+    });
+  } catch (err) {
+    console.error('Failed to fetch subscription status:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Create payment order
+ */
+app.post('/api/payment/create-order', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { plan_id, amount } = req.body;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!razorpay) {
+      return res.status(503).json({ error: 'Payment service not configured' });
+    }
+
+    // Get plan details
+    const { data: plan, error: planError } = await supabaseAdmin
+      .from('pricing_plans')
+      .select('*')
+      .eq('id', plan_id)
+      .single();
+
+    if (planError || !plan) {
+      return res.status(404).json({ error: 'Plan not found' });
+    }
+
+    // Create RazorPay order
+    const orderAmount = amount || plan.price_inr;
+    const receipt = `rcpt_${Date.now()}_${userId.substring(0, 8)}`;
+
+    const razorpayOrder = await razorpay.orders.create({
+      amount: orderAmount,
+      currency: 'INR',
+      receipt,
+      notes: {
+        user_id: userId,
+        plan_id: plan_id,
+        plan_name: plan.name,
+      },
+    });
+
+    // Create subscription record (inactive until payment)
+    const periodEnd = plan.billing_period === 'yearly'
+      ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+      : plan.billing_period === 'monthly'
+      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      : new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000); // 100 years for free/custom
+
+    // DON'T cancel existing subscriptions yet - wait for payment success
+    // The verify endpoint will handle cancellation after payment
+
+    // Create new subscription in 'pending' status
+    const { data: subscription, error: subError} = await supabaseAdmin
+      .from('subscriptions')
+      .insert({
+        user_id: userId,
+        plan_id: plan_id,
+        status: 'pending', // Will be activated after payment verification
+        current_period_start: new Date().toISOString(),
+        current_period_end: periodEnd.toISOString(),
+        scans_limit: plan.limits.scans_per_month || -1,
+      })
+      .select()
+      .single();
+
+    if (subError) throw subError;
+
+    // Create payment record
+    const { error: paymentError } = await supabaseAdmin
+      .from('payments')
+      .insert({
+        user_id: userId,
+        subscription_id: subscription.id,
+        razorpay_order_id: razorpayOrder.id,
+        amount: orderAmount,
+        currency: 'INR',
+        status: 'pending',
+        receipt,
+      });
+
+    if (paymentError) throw paymentError;
+
+    res.json({
+      order_id: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      razorpay_key_id: process.env.RAZORPAY_KEY_ID,
+    });
+  } catch (err) {
+    console.error('Failed to create order:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Verify payment signature
+ */
+app.post('/api/payment/verify', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan_id } = req.body;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Verify signature
+    const generatedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ error: 'Invalid payment signature' });
+    }
+
+    // Update payment record
+    const { data: payment, error: paymentError } = await supabaseAdmin
+      .from('payments')
+      .update({
+        razorpay_payment_id,
+        razorpay_signature,
+        status: 'captured',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('razorpay_order_id', razorpay_order_id)
+      .select()
+      .single();
+
+    if (paymentError) throw paymentError;
+
+    // Activate subscription and cancel old ones
+    if (payment.subscription_id) {
+      // First, cancel any existing active subscriptions for this user
+      await supabaseAdmin
+        .from('subscriptions')
+        .update({
+          status: 'cancelled',
+          cancelled_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .neq('id', payment.subscription_id); // Don't cancel the new one
+
+      // Then activate the new subscription
+      await supabaseAdmin
+        .from('subscriptions')
+        .update({
+          status: 'active',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', payment.subscription_id);
+
+      // Queue welcome email
+      const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId);
+      if (user?.user?.email) {
+        await supabaseAdmin
+          .from('email_queue')
+          .insert({
+            user_id: userId,
+            email: user.user.email,
+            template_type: 'payment_success',
+            template_data: { subscription_id: payment.subscription_id, amount: payment.amount / 100 },
+            status: 'pending',
+          });
+      }
+    }
+
+    res.json({ success: true, payment_id: razorpay_payment_id });
+  } catch (err) {
+    console.error('Failed to verify payment:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Cancel subscription
+ */
+app.post('/api/subscription/cancel', async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Update subscription
+    const { error } = await supabaseAdmin
+      .from('subscriptions')
+      .update({
+        cancel_at_period_end: true,
+        cancelled_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId)
+      .eq('status', 'active');
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Subscription will be cancelled at period end' });
+  } catch (err) {
+    console.error('Failed to cancel subscription:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * RazorPay Webhook Handler
+ */
+app.post('/api/webhook/razorpay', express.raw({ type: 'application/json' }), async (req, res) => {
+  try {
+    const signature = req.headers['x-razorpay-signature'];
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      console.error('❌ RAZORPAY_WEBHOOK_SECRET not configured');
+      return res.status(500).json({ error: 'Webhook secret not configured' });
+    }
+
+    // Verify webhook signature
+    const body = req.body.toString();
+    const expectedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(body)
+      .digest('hex');
+
+    if (signature !== expectedSignature) {
+      console.error('❌ Invalid webhook signature');
+      return res.status(400).json({ error: 'Invalid signature' });
+    }
+
+    // Parse and handle event
+    const event = JSON.parse(body);
+    console.log(`📨 Received webhook: ${event.event}`);
+
+    const result = await handleWebhook(event);
+
+    res.json(result);
+  } catch (err) {
+    console.error('Webhook error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Increment scan usage (called after scan creation)
+ */
+app.post('/api/subscription/increment-usage', async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Call database function to increment usage
+    const { data, error } = await supabaseAdmin
+      .rpc('increment_scan_usage', { p_user_id: userId });
+
+    if (error) throw error;
+
+    if (!data) {
+      return res.status(403).json({ error: 'Scan limit reached' });
+    }
+
+    res.json({ success: true, usage_incremented: true });
+  } catch (err) {
+    console.error('Failed to increment usage:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /**
  * 404 Handler
  */
@@ -742,6 +1098,14 @@ app.use((req, res) => {
       'POST /api/questionbank',
       'GET /api/flashcards/:scanId',
       'POST /api/flashcards',
+      // Payment endpoints
+      'GET /api/pricing/plans',
+      'GET /api/subscription/status',
+      'POST /api/payment/create-order',
+      'POST /api/payment/verify',
+      'POST /api/subscription/cancel',
+      'POST /api/subscription/increment-usage',
+      'POST /api/webhook/razorpay',
     ],
   });
 });

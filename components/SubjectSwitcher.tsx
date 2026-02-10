@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
 import { getAllSubjects, SUBJECT_CONFIGS } from '../config/subjects';
 import { getExamPatternDescription, EXAM_CONFIGS } from '../config/exams';
 import { Subject } from '../types';
+import { X, Zap } from 'lucide-react';
 
 export const SubjectSwitcher: React.FC = () => {
   const {
@@ -18,12 +19,52 @@ export const SubjectSwitcher: React.FC = () => {
   const allSubjects = getAllSubjects();
   const availableExams = getAvailableExams();
 
+  // First-time user guidance
+  const [showHints, setShowHints] = useState(() => {
+    return !localStorage.getItem('edujourney_seen_multi_subject_hints');
+  });
+
+  const dismissHints = () => {
+    setShowHints(false);
+    localStorage.setItem('edujourney_seen_multi_subject_hints', 'true');
+  };
+
   const handleSubjectSwitch = (subject: Subject) => {
     setActiveSubject(subject);
   };
 
+  // Keyboard shortcuts: Ctrl+1/2/3/4 for subjects
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Only trigger if Ctrl (Windows/Linux) or Cmd (Mac) is pressed
+      if (e.ctrlKey || e.metaKey) {
+        switch(e.key) {
+          case '1':
+            e.preventDefault();
+            setActiveSubject('Math');
+            break;
+          case '2':
+            e.preventDefault();
+            setActiveSubject('Physics');
+            break;
+          case '3':
+            e.preventDefault();
+            setActiveSubject('Chemistry');
+            break;
+          case '4':
+            e.preventDefault();
+            setActiveSubject('Biology');
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [setActiveSubject]);
+
   return (
-    <div className="flex items-center gap-3">
+    <div className="relative flex items-center gap-3">
       {/* Subject Dropdown Badge */}
       <div className="relative group">
         <button
@@ -159,6 +200,55 @@ export const SubjectSwitcher: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* First-time user guidance tooltip */}
+      {showHints && (
+        <div
+          className="absolute left-0 top-full mt-4 w-96 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-2xl border-2 border-blue-200 p-4 z-50 animate-slideInDown"
+          style={{
+            animation: 'slideInDown 300ms ease-out'
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <Zap className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-bold text-blue-900 mb-1.5">
+                Multi-Subject Support
+              </h4>
+              <p className="text-xs text-blue-700 leading-relaxed mb-2">
+                Switch between subjects using the dropdowns or keyboard shortcuts:
+              </p>
+              <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono mb-2">
+                <div className="flex items-center gap-1.5">
+                  <kbd className="px-1.5 py-0.5 bg-white rounded border border-blue-300 text-blue-900 font-bold">Ctrl+1</kbd>
+                  <span className="text-blue-600">Math</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <kbd className="px-1.5 py-0.5 bg-white rounded border border-blue-300 text-blue-900 font-bold">Ctrl+2</kbd>
+                  <span className="text-blue-600">Physics</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <kbd className="px-1.5 py-0.5 bg-white rounded border border-blue-300 text-blue-900 font-bold">Ctrl+3</kbd>
+                  <span className="text-blue-600">Chemistry</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <kbd className="px-1.5 py-0.5 bg-white rounded border border-blue-300 text-blue-900 font-bold">Ctrl+4</kbd>
+                  <span className="text-blue-600">Biology</span>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={dismissHints}
+              className="flex-shrink-0 p-1 hover:bg-blue-100 rounded-lg transition-colors"
+              title="Dismiss"
+            >
+              <X className="w-4 h-4 text-blue-600" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

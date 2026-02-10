@@ -35,6 +35,11 @@ import { isFeatureEnabled } from './utils/featureFlags';
 import { Home, LayoutDashboard, GraduationCap, ArrowLeft, Bell, Search, User, LogOut } from 'lucide-react';
 import { AppContextProvider } from './contexts/AppContext';
 import { SubjectSwitcher } from './components/SubjectSwitcher';
+import { checkAndClearOldCache } from './utils/cacheRefresh';
+import LandingPage from './components/landing/LandingPage';
+import PaymentGate from './components/PaymentGate';
+import UserProfile from './components/UserProfile';
+import { getApiUrl } from './lib/api';
 
 /**
  * Authentication Gate Component
@@ -92,7 +97,30 @@ const AppContent: React.FC = () => {
 
   const { shouldUnlockExam } = useAdaptiveLogic();
 
+  // Landing Page State
+  const [showLanding, setShowLanding] = useState(() => {
+    const hasSeenLanding = localStorage.getItem('edujourney_landing_seen') === 'true';
+    return !hasSeenLanding; // Will be checked with !user condition in render
+  });
+
+  // Subscription Status State
+  const [subscriptionStatus, setSubscriptionStatus] = useState<{
+    hasActiveSubscription: boolean;
+    loading: boolean;
+  }>({
+    hasActiveSubscription: false,
+    loading: true,
+  });
+
+  // Subscription refresh trigger
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   // ===== EFFECTS (must be before conditional returns) =====
+  // Clear old cache after migration (runs once on mount)
+  useEffect(() => {
+    checkAndClearOldCache();
+  }, []);
+
   // Supabase Backend Sync Logic (Port 9001)
   useEffect(() => {
     if (!user) return; // Only fetch when user is authenticated
@@ -135,15 +163,91 @@ const AppContent: React.FC = () => {
     }
   }, [godModeView, selectedScan, recentScans]);
 
+  // Check subscription status when user is authenticated
+  useEffect(() => {
+    if (!user) {
+      setSubscriptionStatus({ hasActiveSubscription: false, loading: false });
+      return;
+    }
+
+    const checkSubscription = async () => {
+      try {
+        setSubscriptionStatus(prev => ({ ...prev, loading: true }));
+
+        // Get auth token from Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+        };
+
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(getApiUrl('/api/subscription/status'), { headers });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSubscriptionStatus({
+            hasActiveSubscription: data.hasActiveSubscription,
+            loading: false,
+          });
+        } else {
+          // If API fails, assume no subscription
+          setSubscriptionStatus({
+            hasActiveSubscription: false,
+            loading: false,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to check subscription status:', error);
+        setSubscriptionStatus({
+          hasActiveSubscription: false,
+          loading: false,
+        });
+      }
+    };
+
+    checkSubscription();
+  }, [user, refreshTrigger]);
+
   // ===== CONDITIONAL RENDERING (after all hooks) =====
   // Show loading screen while auth is initializing
   if (authLoading) {
     return <AuthLoading />;
   }
 
+  // Show landing page for first-time visitors
+  if (showLanding && !user) {
+    return (
+      <LandingPage
+        onGetStarted={() => {
+          localStorage.setItem('edujourney_landing_seen', 'true');
+          setShowLanding(false);
+        }}
+      />
+    );
+  }
+
   // Show login/signup if not authenticated
   if (!user) {
     return <AuthGate />;
+  }
+
+  // Check subscription status for authenticated users
+  if (subscriptionStatus.loading) {
+    return <AuthLoading />;
+  }
+
+  // Show payment gate if user has no active subscription
+  if (!subscriptionStatus.hasActiveSubscription) {
+    return (
+      <PaymentGate
+        onRefresh={() => setRefreshTrigger(prev => prev + 1)}
+      />
+    );
   }
 
   const syncScanToSupabase = async (scan: Scan) => {
@@ -547,6 +651,11 @@ const AppContent: React.FC = () => {
             )}
             {godModeView === 'recall' && <div className="h-full overflow-y-auto scroller-hide"><RapidRecall recentScans={recentScans} /></div>}
             {godModeView === 'questions' && <div className="h-full overflow-y-auto scroller-hide"><VisualQuestionBank recentScans={recentScans} /></div>}
+            {godModeView === 'profile' && (
+              <div className="h-full overflow-hidden">
+                <UserProfile onBack={() => setGodModeView('mastermind')} />
+              </div>
+            )}
             {godModeView === 'settings' && (
               <div className="h-full">
                 <SettingsPanel onBack={() => setGodModeView('mastermind')} />

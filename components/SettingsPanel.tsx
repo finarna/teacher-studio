@@ -211,6 +211,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
               </div>
             </div>
 
+
             {/* Storage Info */}
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
@@ -264,12 +265,31 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                     Reset
                   </button>
                 </div>
+
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Landing Page</h3>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                      Reset to see the landing page again
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('edujourney_landing_seen');
+                      alert('Landing page reset! You will see it after logging out.');
+                    }}
+                    className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors"
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
             </div>
 
           </div>
         </div>
       </div>
+
     </div>
   );
 };

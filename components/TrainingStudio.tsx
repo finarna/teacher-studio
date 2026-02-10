@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ProfessorTrainingContract, Subject, Grade, Scan, TrainingModuleType } from '../types';
+import { useAppContext } from '../contexts/AppContext';
+import { useSubjectTheme } from '../hooks/useSubjectTheme';
 
 interface TrainingStudioProps {
     onClose: () => void;
@@ -40,12 +42,17 @@ interface TrainingStatus {
 }
 
 const TrainingStudio: React.FC<TrainingStudioProps> = ({ onClose, onTrainingCreated, selectedScan }) => {
+    const { activeSubject, subjectConfig, examConfig } = useAppContext();
+    const theme = useSubjectTheme();
+
     const [topic, setTopic] = useState(selectedScan?.analysisData?.questions[0]?.topic || '');
-    const [subject, setSubject] = useState<Subject>(selectedScan?.subject as Subject || 'Physics');
     const [grade, setGrade] = useState<Grade>(selectedScan?.grade as Grade || 'Class 12');
     const [syllabus, setSyllabus] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Use activeSubject from context instead of local state
+    const subject = activeSubject;
 
     const [statuses, setStatuses] = useState<TrainingStatus[]>([
         { id: 'strategy', label: 'Pedagogical Strategy', status: 'pending', icon: Presentation },
@@ -203,7 +210,10 @@ const TrainingStudio: React.FC<TrainingStudioProps> = ({ onClose, onTrainingCrea
             <div className="w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[750px] animate-in fade-in zoom-in-95 duration-500">
 
                 {/* Left Panel: Context & Tracking */}
-                <div className="hidden lg:flex lg:w-4/12 bg-primary-600 relative overflow-hidden flex-col justify-between p-10">
+                <div
+                    className="hidden lg:flex lg:w-4/12 relative overflow-hidden flex-col justify-between p-10"
+                    style={{ backgroundColor: theme.color }}
+                >
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-500/50 to-transparent"></div>
 
@@ -278,16 +288,21 @@ const TrainingStudio: React.FC<TrainingStudioProps> = ({ onClose, onTrainingCrea
                                 </div>
                                 <div className="space-y-3">
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Discipline DNA</label>
-                                    <select
-                                        value={subject}
-                                        onChange={(e) => setSubject(e.target.value as Subject)}
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold outline-none appearance-none cursor-pointer text-sm focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all"
+                                    <div
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white font-bold text-sm flex items-center gap-3"
+                                        style={{ borderColor: `${theme.color}40` }}
                                     >
-                                        <option>Physics</option>
-                                        <option>Chemistry</option>
-                                        <option>Math</option>
-                                        <option>Biology</option>
-                                    </select>
+                                        <div
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
+                                            style={{ backgroundColor: theme.colorLight, color: theme.colorDark }}
+                                        >
+                                            {subjectConfig.iconEmoji}
+                                        </div>
+                                        <div>
+                                            <div className="font-black">{subjectConfig.displayName}</div>
+                                            <div className="text-[10px] text-slate-500">{examConfig.fullName}</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

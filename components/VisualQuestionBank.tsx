@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { safeAiParse } from '../utils/aiParser';
 import {
@@ -108,6 +108,35 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
   const [userAnswers, setUserAnswers] = useState<Map<string, number>>(new Map());
   // Track validated answers (after clicking Check Answer)
   const [validatedAnswers, setValidatedAnswers] = useState<Map<string, number>>(new Map());
+
+  // CRITICAL FIX: Clear selectedAnalysisId when subject changes and selected scan doesn't match
+  // Track previous subject to detect actual subject changes (not just scan changes)
+  const prevSubjectRef = React.useRef(activeSubject);
+  const lastLoadedScanIdRef = React.useRef<string | null>(null);
+
+  useEffect(() => {
+    // Only act if subject actually changed
+    if (prevSubjectRef.current !== activeSubject) {
+      prevSubjectRef.current = activeSubject;
+
+      if (selectedAnalysisId) {
+        // Find the currently selected scan
+        const selectedScan = recentScans.find(s => s.id === selectedAnalysisId);
+
+        // If scan doesn't exist or doesn't match the new subject, clear selection
+        if (!selectedScan || selectedScan.subject !== activeSubject) {
+          console.log('🔄 [SUBJECT CHANGE] Clearing stale scan selection:', {
+            oldScanId: selectedAnalysisId,
+            oldScanSubject: selectedScan?.subject,
+            newSubject: activeSubject
+          });
+          setSelectedAnalysisId('');
+          setQuestions([]);
+          lastLoadedScanIdRef.current = null; // CRITICAL: Also reset this to allow reload
+        }
+      }
+    }
+  }, [activeSubject, selectedAnalysisId, recentScans]);
 
   const handleSave = (id: string) => {
     setSavedIds(prev => {
@@ -242,10 +271,6 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
   const selectedAnalysis = useMemo(() => {
     return filteredVault.find(s => s.id === selectedAnalysisId);
   }, [filteredVault, selectedAnalysisId]);
-
-  // Use ref to prevent redundant loads
-  const lastLoadedScanIdRef = React.useRef<string | null>(null);
-
   // CRITICAL: Clear all data when switching to subject with no scans, OR auto-select first scan
   React.useEffect(() => {
     // Case 1: No scans for this subject - clear everything
@@ -297,8 +322,15 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
         return;
       }
 
-      // CRITICAL: Verify selected scan belongs to active subject (prevent race condition)
-      if (selectedAnalysis && selectedAnalysis.subject !== activeSubject) {
+      // CRITICAL: Verify selected scan exists in current subject's vault (prevent race condition)
+      if (!selectedAnalysis) {
+        console.log(`⚠️ [LOAD ABORT] Scan ${selectedAnalysisId} not found in ${activeSubject} vault (race condition)`);
+        setIsLoadingQuestions(false);
+        return;
+      }
+
+      // Double-check subject match
+      if (selectedAnalysis.subject !== activeSubject) {
         console.log(`⚠️ [LOAD ABORT] Scan subject mismatch! Scan: ${selectedAnalysis.subject}, Active: ${activeSubject}`);
         setIsLoadingQuestions(false);
         return;

@@ -24,6 +24,10 @@ export interface VidyaContextPayload {
   userRole: VidyaRole;
   currentView: string;
 
+  // Active subject and exam context for filtering and contextual responses
+  activeSubject?: string;
+  activeExamContext?: string;
+
   scannedPapers: {
     total: number;
     recent: Array<{
@@ -168,6 +172,8 @@ function buildContextPayloadInternal(appContext: {
   currentView?: string;
   scannedPapers?: Scan[];
   selectedScan?: Scan;
+  activeSubject?: string;
+  activeExamContext?: string;
 }, userRole: VidyaRole): VidyaContextPayload {
 
   const scans = appContext.scannedPapers || [];
@@ -357,6 +363,8 @@ function buildContextPayloadInternal(appContext: {
   const payload: VidyaContextPayload = {
     userRole,
     currentView: appContext.currentView || 'dashboard',
+    activeSubject: appContext.activeSubject,
+    activeExamContext: appContext.activeExamContext,
     scannedPapers: {
       total: scans.length,
       recent: recentScans,
@@ -415,6 +423,8 @@ export function buildContextPayload(appContext: {
   currentView?: string;
   scannedPapers?: Scan[];
   selectedScan?: Scan;
+  activeSubject?: string;
+  activeExamContext?: string;
 }, userRole: VidyaRole): VidyaContextPayload {
   const startTime = performance.now();
 
@@ -423,7 +433,14 @@ export function buildContextPayload(appContext: {
   const selectedScanId = appContext.selectedScan?.id || appContext.selectedScan?.name || null;
   const currentView = appContext.currentView || 'general';
 
-  const cacheKey = generateCacheKey(scanIds, selectedScanId, currentView, userRole);
+  const cacheKey = generateCacheKey(
+    scanIds,
+    selectedScanId,
+    currentView,
+    userRole,
+    appContext.activeSubject,
+    appContext.activeExamContext
+  );
 
   // Try to get from cache
   const cached = getCachedContext(cacheKey);

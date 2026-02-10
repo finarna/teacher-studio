@@ -27,9 +27,8 @@ export const useFilteredScans = (allScans: Scan[]): FilteredScansResult => {
       // Filter by subject (required)
       const subjectMatch = scan.subject === activeSubject;
 
-      // Filter by exam context (if present)
-      // For backward compatibility, if examContext is undefined, we still include it
-      const examMatch = !scan.examContext || scan.examContext === activeExamContext;
+      // Filter by exam context (strict matching - no data leakage)
+      const examMatch = scan.examContext === activeExamContext;
 
       return subjectMatch && examMatch;
     });

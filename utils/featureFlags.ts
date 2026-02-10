@@ -8,6 +8,7 @@
 
 export interface FeatureFlags {
   useVidyaV3: boolean; // Use VidyaV3 (clean AI-first) instead of VidyaV2
+  useMultiSubjectContext: boolean; // Enable multi-subject/exam context system
 }
 
 /**
@@ -27,6 +28,7 @@ export function getFeatureFlags(): FeatureFlags {
   // Default flags
   return {
     useVidyaV3: true, // Default to V3 (clean architecture)
+    useMultiSubjectContext: true, // Enable multi-subject by default
   };
 }
 

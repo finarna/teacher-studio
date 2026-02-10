@@ -42,11 +42,15 @@ export function generateCacheKey(
   scanIds: string[],
   selectedScanId: string | null,
   currentView: string,
-  userRole: VidyaRole
+  userRole: VidyaRole,
+  activeSubject?: string,
+  activeExamContext?: string
 ): string {
   const sortedScanIds = [...scanIds].sort().join(',');
   const scanId = selectedScanId || 'none';
-  return `${sortedScanIds}:${scanId}:${currentView}:${userRole}`;
+  const subject = activeSubject || 'all';
+  const exam = activeExamContext || 'all';
+  return `${sortedScanIds}:${scanId}:${currentView}:${userRole}:${subject}:${exam}`;
 }
 
 /**

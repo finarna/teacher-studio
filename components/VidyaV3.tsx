@@ -13,12 +13,17 @@ import RichMarkdownRenderer from './RichMarkdownRenderer';
 import VidyaQuickActions from './vidya/VidyaQuickActions';
 import { getQuickActions, getDefaultQuickActions } from '../utils/vidya/quickActions';
 import { buildContextPayload } from '../utils/vidya/contextBuilder';
+import { useAppContext } from '../contexts/AppContext';
+import { useSubjectTheme } from '../hooks/useSubjectTheme';
 
 interface VidyaV3Props {
   appContext?: VidyaAppContext;
 }
 
 const VidyaV3: React.FC<VidyaV3Props> = ({ appContext }) => {
+  const { activeSubject, subjectConfig, examConfig } = useAppContext();
+  const theme = useSubjectTheme();
+
   const {
     messages,
     isOpen,
@@ -49,6 +54,8 @@ const VidyaV3: React.FC<VidyaV3Props> = ({ appContext }) => {
       currentView: appContext.currentView,
       scannedPapers: appContext.scannedPapers,
       selectedScan: appContext.selectedScan,
+      activeSubject,
+      activeExamContext: examConfig.name,
     }, userRole);
 
     return getQuickActions(userRole, contextPayload);
@@ -75,14 +82,28 @@ const VidyaV3: React.FC<VidyaV3Props> = ({ appContext }) => {
         <div className="w-[420px] h-[650px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
 
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex items-center justify-between shrink-0">
+          <div
+            className="px-4 py-3 flex items-center justify-between shrink-0"
+            style={{
+              background: `linear-gradient(to right, ${theme.color}, ${theme.colorDark})`
+            }}
+          >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
                 <img src="/assets/vidya-avatar.gif" alt="Vidya" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h3 className="text-white font-semibold text-sm">Vidya AI</h3>
-                <p className="text-indigo-100 text-xs">{userRole === 'teacher' ? 'Teacher Mode' : 'Student Mode'}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-white/80 text-xs">{userRole === 'teacher' ? 'Teacher Mode' : 'Student Mode'}</p>
+                  <span className="text-white/50 text-xs">•</span>
+                  <div className="flex items-center gap-1 text-xs text-white/90">
+                    <span>{subjectConfig.iconEmoji}</span>
+                    <span>{subjectConfig.displayName}</span>
+                    <span className="text-white/50">|</span>
+                    <span>{examConfig.name}</span>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-1">

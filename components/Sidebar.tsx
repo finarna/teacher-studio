@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   ScanLine,
@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
+import { supabase } from '../lib/supabase';
+import { getApiUrl } from '../lib/api';
 
 interface SidebarProps {
   activeView: string;
@@ -26,8 +28,41 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onStudentView, onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [planBadge, setPlanBadge] = useState<string>('');
   const { subjectConfig, examConfig } = useAppContext();
   const theme = useSubjectTheme();
+
+  useEffect(() => {
+    fetchUserPlan();
+  }, []);
+
+  const fetchUserPlan = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const response = await fetch(getApiUrl('/api/subscription/status'), {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.subscription?.plan) {
+          // Extract plan name abbreviation (NEET, JEE, KCET, Ultimate)
+          const planName = data.subscription.plan.name;
+          if (planName.includes('NEET')) setPlanBadge('NEET');
+          else if (planName.includes('JEE')) setPlanBadge('JEE');
+          else if (planName.includes('KCET')) setPlanBadge('KCET');
+          else if (planName.includes('Ultimate')) setPlanBadge('PRO');
+          else setPlanBadge('PRO');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user plan:', error);
+    }
+  };
 
   const menuItems = [
     { id: 'mastermind', label: 'Dashboard', icon: LayoutDashboard },
@@ -37,6 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
     { id: 'recall', label: 'Rapid Recall', icon: BrainCircuit },
     { id: 'gallery', label: 'Sketch Notes', icon: Palette },
     { id: 'training_studio', label: 'Pedagogy Studio', icon: GraduationCap },
+    { id: 'profile', label: 'My Profile', icon: User },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -108,19 +144,30 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
       <div className="p-3 border-t border-slate-100 space-y-2">
         {!isCollapsed ? (
           <>
-            {/* User Info with Logout */}
-            <div className="p-2 border border-slate-100 rounded-xl bg-slate-50/50 overflow-hidden">
+            {/* User Info with Plan Badge - Clickable */}
+            <button
+              onClick={() => onNavigate('profile')}
+              className="w-full p-2 border border-slate-100 rounded-xl bg-slate-50/50 overflow-hidden hover:bg-slate-100 transition-colors cursor-pointer"
+            >
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-slate-200 flex items-center justify-center text-xs font-black text-slate-500 shrink-0 border border-white">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-xs font-black text-white shrink-0 border border-white shadow-md">
                   <User size={16} />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 text-left">
                   <h4 className="text-[11px] font-black text-slate-900 truncate font-outfit uppercase">{userName || 'User'}</h4>
+                  {planBadge && (
+                    <span className="inline-block text-[8px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mt-0.5 uppercase tracking-wider">
+                      {planBadge}
+                    </span>
+                  )}
                 </div>
                 {/* Logout Icon Button */}
                 {onLogout && (
                   <button
-                    onClick={onLogout}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onLogout();
+                    }}
                     title="Logout"
                     className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-all shrink-0"
                   >
@@ -128,7 +175,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
                   </button>
                 )}
               </div>
-            </div>
+            </button>
 
             {/* Student View Button */}
             {onStudentView && (
@@ -144,10 +191,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
           <>
             {/* Collapsed View - Icons Only */}
             <button
+              onClick={() => onNavigate('profile')}
               title="User Profile"
-              className="w-full flex items-center justify-center p-2.5 bg-slate-50 rounded-lg"
+              className="w-full flex items-center justify-center p-2.5 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg hover:opacity-90 transition-opacity relative"
             >
-              <User size={18} className="text-slate-600" />
+              <User size={18} className="text-white" />
+              {planBadge && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-white">
+                  <span className="text-[7px] font-black text-slate-900">★</span>
+                </div>
+              )}
             </button>
             {onStudentView && (
               <button

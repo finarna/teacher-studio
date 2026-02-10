@@ -112,6 +112,31 @@ export async function signIn(email: string, password: string) {
 }
 
 /**
+ * Sign in with Google OAuth
+ * @param redirectTo Optional redirect URL after successful auth
+ * @returns { data, error }
+ */
+export async function signInWithGoogle(redirectTo?: string) {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: redirectTo || window.location.origin,
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
+    },
+  });
+
+  if (error) {
+    console.error('Google OAuth error:', error);
+    return { data: null, error };
+  }
+
+  return { data, error: null };
+}
+
+/**
  * Sign out the current user
  * @returns { error }
  */
@@ -121,6 +146,9 @@ export async function signOut() {
   if (error) {
     console.error('Sign out error:', error);
   }
+
+  // Clear landing page flag so user can see it again after logout
+  localStorage.removeItem('edujourney_landing_seen');
 
   return { error };
 }
