@@ -400,6 +400,77 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   SOLUTION STEPS - ENHANCED FORMULA RENDERING
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Solution step content area */
+.solution-step-content {
+    /* Better line spacing for readability */
+    line-height: 2.2 !important;
+}
+
+/* Inline formulas in solution steps - larger and highlighted */
+.solution-step-content .katex {
+    font-size: 1.25em !important;
+    padding: 0.15em 0.35em;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    margin: 0 0.15em;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.solution-step-content .katex:hover {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-color: #94a3b8;
+    box-shadow: 0 2px 8px rgba(71, 85, 105, 0.15);
+}
+
+/* Display mode (block equations) in solution steps */
+.solution-step-content .katex-display {
+    margin: 1.5rem 0 !important;
+    padding: 1.25rem !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%);
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(71, 85, 105, 0.08);
+}
+
+.solution-step-content .katex-display .katex {
+    font-size: 1.35em !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Better spacing around equals signs and operators */
+.solution-step-content .katex .mrel,
+.solution-step-content .katex .mbin {
+    margin: 0 0.4em !important;
+}
+
+/* Improved fraction rendering in solutions */
+.solution-step-content .katex .frac-line {
+    border-bottom-width: 0.08em !important;
+}
+
+/* Darker text for better contrast in solutions */
+.solution-step-content .katex {
+    color: #0f172a !important;
+}
+
+/* Step title formulas - slightly smaller but still highlighted */
+.solution-step-content h3 .katex {
+    font-size: 1.1em !important;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    VIDYA V3 - CUSTOM ANIMATIONS
    ═══════════════════════════════════════════════════════════════════ */
 

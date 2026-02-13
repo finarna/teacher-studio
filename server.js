@@ -1,6 +1,16 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import Redis from 'ioredis';
+import { createClient } from '@supabase/supabase-js';
+
+// Load environment variables from .env.local
+dotenv.config({ path: '.env.local' });
+
+// Supabase Admin Client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 const app = express();
 const port = process.env.PORT || 9001;
@@ -293,6 +303,200 @@ app.post('/api/flashcards', async (req, res) => {
         res.json({ status: 'success', synced: false });
     }
 });
+
+// ============================================================================
+// LEARNING JOURNEY API
+// ============================================================================
+
+/**
+ * GET /api/learning-journey/topics
+ * Aggregate topics for a user (uses SERVICE_ROLE_KEY on server)
+ */
+app.get('/api/learning-journey/topics', async (req, res) => {
+    try {
+        const { userId, subject, examContext } = req.query;
+
+        // Validation
+        if (!userId || !subject || !examContext) {
+            return res.status(400).json({
+                error: 'Missing required parameters: userId, subject, examContext'
+            });
+        }
+
+        const validSubjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
+        const validExamContexts = ['NEET', 'JEE', 'KCET', 'CBSE'];
+
+        if (!validSubjects.includes(subject)) {
+            return res.status(400).json({
+                error: `Invalid subject. Must be one of: ${validSubjects.join(', ')}`
+            });
+        }
+
+        if (!validExamContexts.includes(examContext)) {
+            return res.status(400).json({
+                error: `Invalid examContext. Must be one of: ${validExamContexts.join(', ')}`
+            });
+        }
+
+        // Dynamic import of TypeScript module
+        const { aggregateTopicsForUser } = await import('./lib/topicAggregator.ts');
+
+        // Call aggregator (uses SERVICE_ROLE_KEY on server)
+        const topics = await aggregateTopicsForUser(userId, subject, examContext);
+
+        res.json({
+            success: true,
+            data: topics,
+            meta: {
+                userId,
+                subject,
+                examContext,
+                topicCount: topics.length,
+                topicsWithQuestions: topics.filter(t => t.totalQuestions > 0).length,
+                totalQuestions: topics.reduce((sum, t) => sum + t.totalQuestions, 0)
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in /api/learning-journey/topics:', error);
+        res.status(500).json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Internal server error'
+        });
+    }
+});
+
+/**
+ * GET /api/learning-journey/subjects/:trajectory
+ * Get all subjects with progress for a trajectory
+ */
+app.get('/api/learning-journey/subjects/:trajectory', async (req, res) => {
+    try {
+        const { trajectory } = req.params;
+        const { userId } = req.query;
+
+        if (!userId) {
+            return res.status(400).json({ error: 'Missing userId parameter' });
+        }
+
+        const validTrajectories = ['NEET', 'JEE', 'KCET', 'CBSE'];
+        if (!validTrajectories.includes(trajectory)) {
+            return res.status(400).json({
+                error: `Invalid trajectory. Must be one of: ${validTrajectories.join(', ')}`
+            });
+        }
+
+        const { aggregateTopicsForUser } = await import('./lib/topicAggregator.ts');
+
+        const subjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
+        const subjectProgress = await Promise.all(
+            subjects.map(async (subject) => {
+                const topics = await aggregateTopicsForUser(userId, subject, trajectory);
+
+                return {
+                    subject,
+                    totalTopics: topics.length,
+                    topicsWithQuestions: topics.filter(t => t.totalQuestions > 0).length,
+                    totalQuestions: topics.reduce((sum, t) => sum + t.totalQuestions, 0),
+                    overallMastery: topics.length > 0
+                        ? Math.round(topics.reduce((sum, t) => sum + t.masteryLevel, 0) / topics.length)
+                        : 0
+                };
+            })
+        );
+
+        res.json({
+            success: true,
+            data: subjectProgress
+        });
+
+    } catch (error) {
+        console.error('Error in /api/learning-journey/subjects/:trajectory:', error);
+        res.status(500).json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Internal server error'
+        });
+    }
+});
+
+// ============================================================================
+// SUBSCRIPTION & PRICING ENDPOINTS
+// ============================================================================
+
+/**
+ * GET /api/pricing/plans
+ * Get all active pricing plans
+ */
+app.get('/api/pricing/plans', async (req, res) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('pricing_plans')
+            .select('*')
+            .eq('is_active', true)
+            .order('sort_order', { ascending: true });
+
+        if (error) throw error;
+
+        res.json(data || []);
+    } catch (err) {
+        console.error('Failed to fetch pricing plans:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/**
+ * GET /api/subscription/status
+ * Get user's subscription status
+ */
+app.get('/api/subscription/status', async (req, res) => {
+    try {
+        // Get token from Authorization header
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader) {
+            return res.status(401).json({ error: 'Unauthorized - No token provided' });
+        }
+
+        const token = authHeader.replace('Bearer ', '');
+
+        // Verify token with Supabase
+        const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+
+        if (authError || !user) {
+            return res.status(401).json({ error: 'Unauthorized - Invalid token' });
+        }
+
+        const userId = user.id;
+
+        // Get active subscription directly from subscriptions table
+        const { data: subscription, error } = await supabaseAdmin
+            .from('subscriptions')
+            .select(`
+                *,
+                plan:pricing_plans(*)
+            `)
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            // PGRST116 is "no rows returned", which is expected for users without subscription
+            throw error;
+        }
+
+        // Return standardized response
+        const hasActiveSubscription = !!subscription;
+        res.json({
+            hasActiveSubscription,
+            subscription: subscription || null,
+        });
+    } catch (err) {
+        console.error('Failed to fetch subscription status:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================================================
 
 // 404 Handler
 app.use((req, res) => {

@@ -90,16 +90,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Listen to auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session ? 'session exists' : 'no session');
+      // Only log important auth events, not token refreshes
+      if (event !== 'TOKEN_REFRESHED') {
+        console.log('Auth state changed:', event, session ? 'session exists' : 'no session');
+      }
 
       if (event === 'SIGNED_IN' && session) {
-        setUser(session.user);
+        // Only update if user ID actually changed to prevent unnecessary re-renders
+        setUser(prevUser => {
+          if (prevUser?.id === session.user.id) {
+            return prevUser; // Keep same reference if ID unchanged
+          }
+          return session.user;
+        });
         setSession(session);
         setError(null);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setSession(null);
       } else if (event === 'TOKEN_REFRESHED' && session) {
+        // Silently update session without triggering dependent effects
+        // Don't update user object to prevent re-renders
         setSession(session);
       } else if (event === 'USER_UPDATED' && session) {
         setUser(session.user);

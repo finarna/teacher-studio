@@ -6,7 +6,10 @@
  * Ultra-concise prompt optimized for token efficiency
  */
 
+import { generateTopicInstruction } from './officialTopics';
+
 export function generateCleanMathPrompt(grade: string): string {
+  const topicInstruction = generateTopicInstruction('Math');
   return `# ROLE & EXPERTISE
 You are an expert Mathematics Examination Parser specializing in CBSE/KCET ${grade} grade board exam papers. You have:
 - 15+ years experience in mathematical typesetting and LaTeX notation
@@ -147,10 +150,17 @@ Each option must start with its label:
 For each question, provide:
 - **marks**: 1 (default for MCQ unless specified)
 - **difficulty**: "Easy" | "Moderate" | "Hard" (infer from complexity)
-- **topic**: Specific topic like "Differential Equations", "Matrices", "Integration", "Probability" (NOT "General"!)
 - **blooms**: "Knowledge" | "Understand" | "Apply" | "Analyze" | "Evaluate" | "Create"
-- **domain**: "ALGEBRA" | "CALCULUS" | "VECTORS & 3D GEOMETRY" | "LINEAR PROGRAMMING" | "PROBABILITY"
-- **chapter**: Chapter name from ${grade} syllabus
+- **domain**: The domain from the official syllabus that this topic belongs to:
+  - Use "Algebra" for: Matrices, Determinants, Relations and Functions
+  - Use "Calculus" for: Continuity and Differentiability, Applications of Derivatives, Integrals, Applications of Integrals, Differential Equations
+  - Use "Coordinate Geometry" for: Three Dimensional Geometry
+  - Use "Vector Algebra" for: Vectors
+  - Use "Optimization" for: Linear Programming
+  - Use "Statistics and Probability" for: Probability
+  - Use "Trigonometry" for: Inverse Trigonometric Functions
+
+${topicInstruction}
 
 # OUTPUT FORMAT (STRICT JSON SCHEMA)
 
@@ -169,8 +179,7 @@ For each question, provide:
       "difficulty": "Moderate",
       "topic": "Differential Equations",
       "blooms": "Apply",
-      "domain": "CALCULUS",
-      "chapter": "Differential Equations",
+      "domain": "Calculus",
       "hasVisualElement": false,
       "visualElementType": null,
       "visualElementDescription": null

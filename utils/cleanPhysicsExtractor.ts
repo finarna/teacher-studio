@@ -7,10 +7,13 @@
  * space preservation, and LaTeX conversion.
  */
 
+import { generateTopicInstruction } from './officialTopics';
+
 /**
- * Generate clean Physics extraction prompt
+ * Generate clean Physics extraction prompt with official topic names
  */
 export function generateCleanPhysicsPrompt(grade: string): string {
+  const topicInstruction = generateTopicInstruction('Physics');
   return `# ROLE & EXPERTISE
 
 You are an expert Physics educator specializing in ${grade} exam paper digitization.
@@ -153,10 +156,11 @@ OPTION FORMAT:
 For each question, provide:
 - **marks**: 1 (default for MCQ unless specified)
 - **difficulty**: "Easy" | "Moderate" | "Hard" (infer from complexity)
-- **topic**: Specific topic like "Kinematics", "Newton's Laws", "Electrostatics", "Optics" (NOT "General"!)
 - **blooms**: "Knowledge" | "Understand" | "Apply" | "Analyze" | "Evaluate" | "Create"
 - **domain**: "MECHANICS" | "THERMODYNAMICS" | "ELECTROMAGNETISM" | "OPTICS" | "MODERN PHYSICS"
 - **chapter**: Chapter name from ${grade} syllabus
+
+${topicInstruction}
 
 ## STEP 6: VISUAL ELEMENT DETECTION (CRITICAL - Don't Miss Diagrams!)
 

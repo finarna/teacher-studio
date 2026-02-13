@@ -31,6 +31,18 @@ import {
   checkDatabaseConnection,
 } from './lib/supabaseServer.ts';
 import { handleWebhook } from './lib/webhookHandlers.ts';
+import {
+  getTopics,
+  getTopicResources,
+  updateTopicProgress,
+  recordActivity,
+  generateTest,
+  submitTest,
+  getTestResults,
+  getTestHistory,
+  getSubjectProgress,
+  getTrajectoryProgress
+} from './api/learningJourneyEndpoints.js';
 
 const app = express();
 const port = process.env.PORT || 9001;
@@ -450,6 +462,12 @@ app.post('/api/scans', async (req, res) => {
         if (questionsError) {
           throw new Error(`Failed to create questions: ${questionsError.message}`);
         }
+
+        // Auto-map questions to official topics (if scan is complete)
+        if (apiScan.status === 'Complete') {
+          const { autoMapScanQuestions } = await import('./lib/autoMapScanQuestions.ts');
+          await autoMapScanQuestions(supabaseAdmin, apiScan.id);
+        }
       }
     } else {
       // Create new scan
@@ -467,6 +485,12 @@ app.post('/api/scans', async (req, res) => {
         const { error: questionsError } = await createQuestions(apiScan.id, apiScan.analysisData.questions);
         if (questionsError) {
           throw new Error(`Failed to create questions: ${questionsError.message}`);
+        }
+
+        // Auto-map questions to official topics (if scan is complete)
+        if (apiScan.status === 'Complete') {
+          const { autoMapScanQuestions } = await import('./lib/autoMapScanQuestions.ts');
+          await autoMapScanQuestions(supabaseAdmin, apiScan.id);
         }
       }
     }
@@ -523,6 +547,12 @@ app.put('/api/scans/:id', async (req, res) => {
 
       // Create new questions
       await createQuestions(scanId, apiScan.analysisData.questions);
+
+      // Auto-map questions to official topics (if scan is complete)
+      if (apiScan.status === 'Complete') {
+        const { autoMapScanQuestions } = await import('./lib/autoMapScanQuestions.ts');
+        await autoMapScanQuestions(supabaseAdmin, scanId);
+      }
     }
 
     // Invalidate cache
@@ -1079,6 +1109,202 @@ app.post('/api/subscription/increment-usage', async (req, res) => {
   }
 });
 
+// =====================================================
+// LEARNING JOURNEY ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/topics/:subject/:examContext
+ * Get all topics for a subject in an exam context
+ */
+app.get('/api/topics/:subject/:examContext', getTopics);
+
+/**
+ * GET /api/topics/:topicId/resources
+ * Get all resources for a specific topic
+ */
+app.get('/api/topics/:topicId/resources', getTopicResources);
+
+/**
+ * PUT /api/topics/:topicId/progress
+ * Update topic progress (mastery level, study stage)
+ */
+app.put('/api/topics/:topicId/progress', updateTopicProgress);
+
+/**
+ * POST /api/topics/:topicId/activity
+ * Record a topic activity (viewed notes, practiced question, etc.)
+ */
+app.post('/api/topics/:topicId/activity', recordActivity);
+
+/**
+ * POST /api/tests/generate
+ * Generate a new test (quiz or mock)
+ */
+app.post('/api/tests/generate', generateTest);
+
+/**
+ * POST /api/tests/:attemptId/submit
+ * Submit test responses
+ */
+app.post('/api/tests/:attemptId/submit', submitTest);
+
+/**
+ * GET /api/tests/:attemptId/results
+ * Get test results and analysis
+ */
+app.get('/api/tests/:attemptId/results', getTestResults);
+
+/**
+ * GET /api/tests/history
+ * Get user's test history
+ */
+app.get('/api/tests/history', getTestHistory);
+
+/**
+ * GET /api/progress/subject/:subject/:examContext
+ * Get progress for a subject
+ */
+app.get('/api/progress/subject/:subject/:examContext', getSubjectProgress);
+
+/**
+ * GET /api/progress/trajectory/:examContext
+ * Get overall progress for a trajectory
+ */
+app.get('/api/progress/trajectory/:examContext', getTrajectoryProgress);
+
+// ============================================================================
+// LEARNING JOURNEY API (Server-side aggregation with SERVICE_ROLE_KEY)
+// ============================================================================
+
+/**
+ * GET /api/learning-journey/topics
+ * Aggregate topics for a user (uses SERVICE_ROLE_KEY on server)
+ */
+app.get('/api/learning-journey/topics', async (req, res) => {
+  try {
+    const { userId, subject, examContext } = req.query;
+
+    // Validation
+    if (!userId || !subject || !examContext) {
+      return res.status(400).json({
+        error: 'Missing required parameters: userId, subject, examContext'
+      });
+    }
+
+    const validSubjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
+    const validExamContexts = ['NEET', 'JEE', 'KCET', 'CBSE'];
+
+    if (!validSubjects.includes(subject)) {
+      return res.status(400).json({
+        error: `Invalid subject. Must be one of: ${validSubjects.join(', ')}`
+      });
+    }
+
+    if (!validExamContexts.includes(examContext)) {
+      return res.status(400).json({
+        error: `Invalid examContext. Must be one of: ${validExamContexts.join(', ')}`
+      });
+    }
+
+    // Dynamic import of TypeScript module
+    const { aggregateTopicsForUser } = await import('./lib/topicAggregator.ts');
+
+    // Call aggregator (uses SERVICE_ROLE_KEY on server)
+    const topics = await aggregateTopicsForUser(supabaseAdmin, userId, subject, examContext);
+
+    // DEBUG: Log first question from first topic to verify metadata
+    if (topics.length > 0 && topics[0].questions && topics[0].questions.length > 0) {
+      const firstQ = topics[0].questions[0];
+      console.log('🌐 [API /topics] First Question Metadata:', {
+        topicName: topics[0].topicName,
+        questionId: firstQ.id?.substring(0, 8),
+        marks: firstQ.marks,
+        diff: firstQ.diff,
+        bloomsTaxonomy: firstQ.bloomsTaxonomy,
+        year: firstQ.year,
+        domain: firstQ.domain,
+        pedagogy: firstQ.pedagogy
+      });
+    }
+
+    res.json({
+      success: true,
+      data: topics,
+      meta: {
+        userId,
+        subject,
+        examContext,
+        topicCount: topics.length,
+        topicsWithQuestions: topics.filter(t => t.totalQuestions > 0).length,
+        totalQuestions: topics.reduce((sum, t) => sum + t.totalQuestions, 0)
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in /api/learning-journey/topics:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * GET /api/learning-journey/subjects/:trajectory
+ * Get all subjects with progress for a trajectory
+ */
+app.get('/api/learning-journey/subjects/:trajectory', async (req, res) => {
+  try {
+    const { trajectory } = req.params;
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'Missing userId parameter' });
+    }
+
+    const validTrajectories = ['NEET', 'JEE', 'KCET', 'CBSE'];
+    if (!validTrajectories.includes(trajectory)) {
+      return res.status(400).json({
+        error: `Invalid trajectory. Must be one of: ${validTrajectories.join(', ')}`
+      });
+    }
+
+    const { aggregateTopicsForUser } = await import('./lib/topicAggregator.ts');
+
+    const subjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
+    const subjectProgress = await Promise.all(
+      subjects.map(async (subject) => {
+        const topics = await aggregateTopicsForUser(supabaseAdmin, userId, subject, trajectory);
+
+        return {
+          subject,
+          totalTopics: topics.length,
+          topicsWithQuestions: topics.filter(t => t.totalQuestions > 0).length,
+          totalQuestions: topics.reduce((sum, t) => sum + t.totalQuestions, 0),
+          overallMastery: topics.length > 0
+            ? Math.round(topics.reduce((sum, t) => sum + t.masteryLevel, 0) / topics.length)
+            : 0
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: subjectProgress
+    });
+
+  } catch (error) {
+    console.error('Error in /api/learning-journey/subjects/:trajectory:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// ============================================================================
+
 /**
  * 404 Handler
  */
@@ -1106,6 +1332,17 @@ app.use((req, res) => {
       'POST /api/subscription/cancel',
       'POST /api/subscription/increment-usage',
       'POST /api/webhook/razorpay',
+      // Learning Journey endpoints
+      'GET /api/topics/:subject/:examContext',
+      'GET /api/topics/:topicId/resources',
+      'PUT /api/topics/:topicId/progress',
+      'POST /api/topics/:topicId/activity',
+      'POST /api/tests/generate',
+      'POST /api/tests/:attemptId/submit',
+      'GET /api/tests/:attemptId/results',
+      'GET /api/tests/history',
+      'GET /api/progress/subject/:subject/:examContext',
+      'GET /api/progress/trajectory/:examContext',
     ],
   });
 });

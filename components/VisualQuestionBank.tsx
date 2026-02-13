@@ -77,9 +77,10 @@ interface Question {
 
 interface VisualQuestionBankProps {
   recentScans?: Scan[];
+  topicFilter?: string; // Filter questions by specific topic
 }
 
-const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [] }) => {
+const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [], topicFilter }) => {
   // Use AppContext instead of local state
   const { activeSubject, subjectConfig, examConfig } = useAppContext();
   const theme = useSubjectTheme();
@@ -635,12 +636,25 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
     }
   };
 
-  const filteredQuestions = questions.filter(q =>
-    !trashedIds.has(q.id) && (
+  const filteredQuestions = questions.filter(q => {
+    // Filter out trashed questions
+    if (trashedIds.has(q.id)) return false;
+
+    // Apply topic filter if provided (exact match or contains)
+    if (topicFilter && !q.topic.toLowerCase().includes(topicFilter.toLowerCase())) {
+      return false;
+    }
+
+    // Apply search query filter
+    if (searchQuery && !(
       q.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
       q.topic.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+    )) {
+      return false;
+    }
+
+    return true;
+  });
 
   const getPedagogyColor = (pedagogy?: string) => {
     switch (pedagogy) {

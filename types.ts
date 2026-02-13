@@ -189,10 +189,15 @@ export interface AnalyzedQuestion {
   id: string;
   text: string;
   options?: string[];      // NEW: For MCQs
-  marks: number;
+  marks: number | string;  // Can be number or string for UI compatibility
   difficulty: 'Easy' | 'Moderate' | 'Hard';
+  diff?: string;           // Alias for difficulty (UI compatibility)
   topic: string;
+  domain?: string;         // Subject domain/chapter (e.g., "Mechanics", "Organic Chemistry")
+  year?: string;           // Year of exam paper (e.g., "2024", "2023")
+  pedagogy?: 'Conceptual' | 'Analytical' | 'Problem-Solving' | 'Application' | 'Critical-Thinking' | 'Numerical' | 'Memorization';
   blooms: string;
+  bloomsTaxonomy?: string; // Alias for blooms (UI compatibility)
   masteryMaterial?: {
     logic: string;
     memoryTrigger: string;
@@ -201,6 +206,7 @@ export interface AnalyzedQuestion {
     coreConcept?: string;
   };
   solutionSteps: string[];
+  markingScheme?: { step: string; mark: string }[]; // Marking scheme with marks per step
   examTip?: string;
   visualConcept?: string;
   diagramUrl?: string;
@@ -317,4 +323,164 @@ export interface VidyaAppContext {
     quizHistory: any[];
     misconceptions: string[];
   };
+}
+
+// --- LEARNING JOURNEY TYPES ---
+
+export interface Topic {
+  id: string;
+  subject: Subject;
+  domain: string;
+  name: string;
+  description?: string;
+  difficultyLevel: 'Easy' | 'Moderate' | 'Hard';
+  estimatedStudyHours?: number;
+  examWeightage: Record<ExamContext, number>; // {NEET: 5, JEE: 3, KCET: 4}
+  prerequisiteTopics?: string[]; // Array of topic IDs
+  keyConcepts: string[];
+  createdAt: Date;
+}
+
+export type StudyStage = 'not_started' | 'studying_notes' | 'practicing' | 'taking_quiz' | 'mastered';
+
+export interface TopicResource {
+  id: string;
+  userId: string;
+  topicId: string;
+  topicName: string;
+  subject: Subject;
+  examContext: ExamContext;
+
+  // Aggregated data from scans
+  questions: AnalyzedQuestion[];
+  flashcards: Flashcard[];
+  sketchPages: TopicSketchPage[];
+  chapterInsights: ChapterInsight[];
+
+  // Metadata
+  totalQuestions: number;
+  sourceScanIds: string[];
+  difficultyDistribution: {
+    easy: number;
+    moderate: number;
+    hard: number;
+  };
+
+  // Progress tracking
+  masteryLevel: number; // 0-100
+  studyStage: StudyStage;
+  questionsAttempted: number;
+  questionsCorrect: number;
+  averageAccuracy: number;
+  quizzesTaken: number;
+  averageQuizScore: number;
+  lastPracticed?: Date;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TopicSketchPage {
+  id: string;
+  title: string;
+  content: string;
+  imageUrl: string;
+}
+
+export type ActivityType = 'viewed_notes' | 'practiced_question' | 'completed_quiz' | 'reviewed_flashcard';
+
+export interface TopicActivity {
+  id: string;
+  userId: string;
+  topicResourceId: string;
+  activityType: ActivityType;
+  questionId?: string;
+  isCorrect?: boolean;
+  timeSpent?: number; // seconds
+  activityTimestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+export type TestType = 'topic_quiz' | 'subject_test' | 'full_mock';
+export type TestStatus = 'in_progress' | 'completed' | 'abandoned';
+
+export interface TestAttempt {
+  id: string;
+  userId: string;
+  testType: TestType;
+  testName: string;
+  examContext: ExamContext;
+  subject: Subject;
+  topicId?: string;
+
+  // Configuration
+  totalQuestions: number;
+  durationMinutes: number;
+
+  // Timing
+  startTime: Date;
+  endTime?: Date;
+  totalDuration?: number; // seconds
+
+  // Scoring
+  rawScore?: number;
+  percentage?: number;
+  marksObtained?: number;
+  marksTotal?: number;
+  negativeMarks?: number;
+
+  // Status
+  status: TestStatus;
+  questionsAttempted: number;
+
+  // Analysis
+  topicAnalysis?: Record<string, any>;
+  timeAnalysis?: Record<string, any>;
+  aiReport?: Record<string, any>;
+
+  createdAt: Date;
+  completedAt?: Date;
+}
+
+export interface TestResponse {
+  id: string;
+  attemptId: string;
+  questionId: string;
+  selectedOption?: number;
+  isCorrect?: boolean;
+  timeSpent?: number; // seconds
+  markedForReview: boolean;
+
+  // Denormalized for analytics
+  topic: string;
+  difficulty: 'Easy' | 'Moderate' | 'Hard';
+  marks: number;
+
+  createdAt: Date;
+}
+
+export interface SubjectProgress {
+  id: string;
+  userId: string;
+  trajectoryId: ExamContext;
+  subject: Subject;
+
+  overallMastery: number; // 0-100
+  topicsTotal: number;
+  topicsMastered: number; // mastery >= 85%
+
+  totalQuestionsAttempted: number;
+  overallAccuracy: number;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TopicQuestionMapping {
+  id: string;
+  topicId: string;
+  questionId: string;
+  confidence: number; // 0.0-1.0
+  mappedBy: 'ai' | 'manual';
+  createdAt: Date;
 }

@@ -1,0 +1,265 @@
+{
+  "total": 40,
+  "passed": 40,
+  "failed": 0,
+  "successRate": 100,
+  "results": [
+    {
+      "category": "Database",
+      "test": "Topics table exists",
+      "status": "PASS",
+      "message": "Topics table accessible"
+    },
+    {
+      "category": "Database",
+      "test": "Topic count",
+      "status": "PASS",
+      "message": "Found 54 topics (expected 54)"
+    },
+    {
+      "category": "Database",
+      "test": "Subject distribution",
+      "status": "PASS",
+      "message": "Correct topic counts per subject",
+      "details": {
+        "Physics": 14,
+        "Chemistry": 14,
+        "Biology": 13,
+        "Math": 13
+      }
+    },
+    {
+      "category": "Database",
+      "test": "KCET Chemistry filtering",
+      "status": "PASS",
+      "message": "12/14 Chemistry topics for KCET"
+    },
+    {
+      "category": "Database",
+      "test": "KCET exclusions correct",
+      "status": "PASS",
+      "message": "Surface Chemistry & Chemistry in Everyday Life excluded",
+      "details": [
+        "Chemistry in Everyday Life",
+        "Surface Chemistry"
+      ]
+    },
+    {
+      "category": "Database",
+      "test": "Biology topic count",
+      "status": "PASS",
+      "message": "Found 13 topics (expected 13)"
+    },
+    {
+      "category": "Database",
+      "test": "Biology missing topic added",
+      "status": "PASS",
+      "message": "Food Production topic exists"
+    },
+    {
+      "category": "Database",
+      "test": "exam_weightage structure",
+      "status": "PASS",
+      "message": "All exam contexts present",
+      "details": {
+        "JEE": 4,
+        "CBSE": 4,
+        "KCET": 3,
+        "NEET": 3,
+        "PUCII": 3
+      }
+    },
+    {
+      "category": "Database",
+      "test": "Table topic_resources",
+      "status": "PASS",
+      "message": "Table accessible"
+    },
+    {
+      "category": "Database",
+      "test": "Table topic_activities",
+      "status": "PASS",
+      "message": "Table accessible"
+    },
+    {
+      "category": "Database",
+      "test": "Table test_attempts",
+      "status": "PASS",
+      "message": "Table accessible"
+    },
+    {
+      "category": "Database",
+      "test": "Table test_responses",
+      "status": "PASS",
+      "message": "Table accessible"
+    },
+    {
+      "category": "Database",
+      "test": "Table subject_progress",
+      "status": "PASS",
+      "message": "Table accessible"
+    },
+    {
+      "category": "Database",
+      "test": "Table topic_question_mapping",
+      "status": "PASS",
+      "message": "Table accessible"
+    },
+    {
+      "category": "Filtering",
+      "test": "NEET-Physics",
+      "status": "PASS",
+      "message": "14 topics (expected 14)"
+    },
+    {
+      "category": "Filtering",
+      "test": "NEET-Chemistry",
+      "status": "PASS",
+      "message": "14 topics (expected 14)"
+    },
+    {
+      "category": "Filtering",
+      "test": "NEET-Biology",
+      "status": "PASS",
+      "message": "13 topics (expected 13)"
+    },
+    {
+      "category": "Filtering",
+      "test": "JEE-Physics",
+      "status": "PASS",
+      "message": "14 topics (expected 14)"
+    },
+    {
+      "category": "Filtering",
+      "test": "JEE-Chemistry",
+      "status": "PASS",
+      "message": "14 topics (expected 14)"
+    },
+    {
+      "category": "Filtering",
+      "test": "JEE-Math",
+      "status": "PASS",
+      "message": "13 topics (expected 13)"
+    },
+    {
+      "category": "Filtering",
+      "test": "KCET-Physics",
+      "status": "PASS",
+      "message": "14 topics (expected 14)"
+    },
+    {
+      "category": "Filtering",
+      "test": "KCET-Chemistry",
+      "status": "PASS",
+      "message": "12 topics (expected 12)"
+    },
+    {
+      "category": "Filtering",
+      "test": "KCET-Biology",
+      "status": "PASS",
+      "message": "13 topics (expected 13)"
+    },
+    {
+      "category": "Filtering",
+      "test": "PUCII-Physics",
+      "status": "PASS",
+      "message": "14 topics (expected 14)"
+    },
+    {
+      "category": "Filtering",
+      "test": "PUCII-Chemistry",
+      "status": "PASS",
+      "message": "12 topics (expected 12)"
+    },
+    {
+      "category": "Filtering",
+      "test": "PUCII-Biology",
+      "status": "PASS",
+      "message": "13 topics (expected 13)"
+    },
+    {
+      "category": "Filtering",
+      "test": "KCET = PUC II equivalence",
+      "status": "PASS",
+      "message": "All topics have matching KCET/PUCII weightage"
+    },
+    {
+      "category": "Utility",
+      "test": "getOfficialTopics(Physics)",
+      "status": "PASS",
+      "message": "14 Physics topics returned"
+    },
+    {
+      "category": "Utility",
+      "test": "getOfficialTopics(Chemistry)",
+      "status": "PASS",
+      "message": "14 Chemistry topics returned"
+    },
+    {
+      "category": "Utility",
+      "test": "isOfficialTopic(valid)",
+      "status": "PASS",
+      "message": "Correctly identified official topic"
+    },
+    {
+      "category": "Utility",
+      "test": "isOfficialTopic(invalid)",
+      "status": "PASS",
+      "message": "Correctly rejected informal name"
+    },
+    {
+      "category": "Utility",
+      "test": "matchToOfficialTopic",
+      "status": "PASS",
+      "message": "Correctly mapped \"Electrostatics\" → \"Electric Charges and Fields\""
+    },
+    {
+      "category": "Utility",
+      "test": "generateTopicInstruction",
+      "status": "PASS",
+      "message": "Instruction includes official list + mapping hints"
+    },
+    {
+      "category": "Prompts",
+      "test": "cleanPhysicsExtractor",
+      "status": "PASS",
+      "message": "Prompt includes official topics, instructions, and examples"
+    },
+    {
+      "category": "Prompts",
+      "test": "cleanMathExtractor",
+      "status": "PASS",
+      "message": "Prompt includes official Math topics and instructions"
+    },
+    {
+      "category": "Frontend",
+      "test": "components/TrajectorySelectionPage.tsx",
+      "status": "PASS",
+      "message": "Component file exists"
+    },
+    {
+      "category": "Frontend",
+      "test": "components/SubjectSelectionPage.tsx",
+      "status": "PASS",
+      "message": "Component file exists"
+    },
+    {
+      "category": "Frontend",
+      "test": "components/TopicDashboardPage.tsx",
+      "status": "PASS",
+      "message": "Component file exists"
+    },
+    {
+      "category": "Frontend",
+      "test": "components/TopicDetailPage.tsx",
+      "status": "PASS",
+      "message": "Component file exists"
+    },
+    {
+      "category": "Frontend",
+      "test": "contexts/LearningJourneyContext.tsx",
+      "status": "PASS",
+      "message": "Component file exists"
+    }
+  ]
+}

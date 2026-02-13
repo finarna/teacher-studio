@@ -9,6 +9,13 @@ export default defineConfig(({ mode }) => {
       port: 9000,
       host: '0.0.0.0',
       allowedHosts: ['learn.dataziv.com'],
+      hmr: {
+        overlay: false, // Disable error overlay
+      },
+      watch: {
+        // Reduce file watching to prevent auto-refresh
+        ignored: ['**/node_modules/**', '**/dist/**', '**/.git/**', '**/scripts/**', '**/migrations/**']
+      },
       proxy: {
         '/api': {
           target: 'http://127.0.0.1:9001',

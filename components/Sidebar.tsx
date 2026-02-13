@@ -11,7 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  User
+  User,
+  Map
 } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
@@ -66,6 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
 
   const menuItems = [
     { id: 'mastermind', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'learning_journey', label: 'Learning Journey', icon: Map },
     { id: 'scanning', label: 'Paper Scan', icon: ScanLine },
     { id: 'analysis', label: 'Exam Intelligence', icon: Library },
     { id: 'questions', label: 'Question Bank', icon: FileQuestion },
@@ -145,7 +147,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
         {!isCollapsed ? (
           <>
             {/* User Info with Plan Badge - Clickable */}
-            <button
+            <div
               onClick={() => onNavigate('profile')}
               className="w-full p-2 border border-slate-100 rounded-xl bg-slate-50/50 overflow-hidden hover:bg-slate-100 transition-colors cursor-pointer"
             >
@@ -175,7 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
                   </button>
                 )}
               </div>
-            </button>
+            </div>
 
             {/* Student View Button */}
             {onStudentView && (

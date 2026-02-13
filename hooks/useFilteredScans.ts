@@ -24,11 +24,20 @@ export const useFilteredScans = (allScans: Scan[]): FilteredScansResult => {
     }
 
     return allScans.filter(scan => {
+      // EXCLUDE AI practice placeholder scans (used only for satisfying questions.scan_id foreign key)
+      // These are internal system scans, not user-uploaded exam papers
+      const isPlaceholder = scan.metadata?.is_ai_practice_placeholder === true ||
+                           scan.metadata?.hidden_from_scans_list === true;
+      if (isPlaceholder) {
+        return false; // Don't show placeholder scans in main scans list
+      }
+
       // Filter by subject (required)
       const subjectMatch = scan.subject === activeSubject;
 
-      // Filter by exam context (strict matching - no data leakage)
-      const examMatch = scan.examContext === activeExamContext;
+      // Filter by exam context - if scan has no examContext, include it
+      // This handles legacy scans that were uploaded before exam context was added
+      const examMatch = !scan.examContext || scan.examContext === activeExamContext;
 
       return subjectMatch && examMatch;
     });

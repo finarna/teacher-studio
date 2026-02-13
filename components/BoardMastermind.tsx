@@ -427,7 +427,7 @@ ${generatePhysicsExtractionInstructions()}
       const newScan: Scan = {
         id: crypto.randomUUID(), // Generate proper UUID for database compatibility
         name: `Portfolio: ${files.length} ${selectedSubject} Papers [${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]`,
-        date: new Date().toLocaleDateString(),
+        date: new Date().toISOString(),
         timestamp: Date.now(),
         status: 'Complete',
         grade: selectedGrade || 'Class 12',
@@ -1024,7 +1024,7 @@ CRITICAL RULES:
       const newScan: Scan = {
         id: crypto.randomUUID(), // Generate proper UUID for database compatibility
         name: `${file.name.split('.')[0]} [${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]`,
-        date: new Date().toLocaleDateString(),
+        date: new Date().toISOString(),
         timestamp: Date.now(),
         status: 'Complete',
         grade: selectedGrade || 'Class 12',

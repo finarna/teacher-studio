@@ -161,7 +161,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
   return (
     <span
       ref={ref}
-      className={`math-rendered ${className} ${isDisplayMode ? 'block my-4 text-center scale-110' : 'inline-block mx-0.5'}`}
+      className={`math-rendered ${className} ${isDisplayMode ? 'block my-4 text-center scale-110' : 'inline-block mx-0.5 shadow-sm'}`}
     />
   );
 };
@@ -451,7 +451,7 @@ export const RenderWithMath: React.FC<{
                 }
                 if ((part.startsWith('$') && part.endsWith('$')) || (compact && part.startsWith('$$') && part.endsWith('$$'))) {
                   const expr = part.startsWith('$$') ? part.slice(2, -2) : part.slice(1, -1);
-                  return <MathRenderer key={pIdx} expression={expr} inline={true} className={`font-bold ${dark ? 'text-emerald-300' : 'text-primary-700'}`} />;
+                  return <MathRenderer key={pIdx} expression={expr} inline={true} className={`font-bold px-2 py-0.5 rounded-md ${dark ? 'text-emerald-300 bg-emerald-950/30' : 'text-primary-900 bg-primary-50/80 border border-primary-100/50'}`} />;
                 }
 
                 // Fallback for raw LaTeX commands not wrapped in $
@@ -460,7 +460,7 @@ export const RenderWithMath: React.FC<{
                 const hasSubSuperscript = /[a-zA-Z0-9]+[_^][{a-zA-Z0-9]/.test(part);
 
                 if (hasLatexCommand || (hasSubSuperscript && (part.includes('{') || part.includes('_') || part.includes('^')))) {
-                  return <MathRenderer key={pIdx} expression={part} inline={true} className={dark ? 'text-emerald-300' : 'text-primary-700'} />;
+                  return <MathRenderer key={pIdx} expression={part} inline={true} className={`font-bold px-2 py-0.5 rounded-md ${dark ? 'text-emerald-300 bg-emerald-950/30' : 'text-primary-900 bg-primary-50/80 border border-primary-100/50'}`} />;
                 }
 
                 return <span key={pIdx} className="whitespace-normal">{part}</span>;
