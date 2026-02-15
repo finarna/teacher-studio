@@ -120,6 +120,36 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
     return 'Mastered';
   };
 
+  // Get status badge info based on mastery level and trend
+  const getStatusInfo = (topic: TopicResource): { label: string; icon: string; color: string } => {
+    const mastery = topic.masteryLevel;
+
+    if (mastery === 0) return { label: 'NOT STARTED', icon: '—', color: 'bg-slate-100 text-slate-600 border-slate-200' };
+    if (mastery < 30) return { label: 'CRITICAL', icon: '↓', color: 'bg-red-100 text-red-700 border-red-300' };
+    if (mastery < 50) return { label: 'DECLINING', icon: '↓', color: 'bg-orange-100 text-orange-700 border-orange-300' };
+    if (mastery < 70) return { label: 'IMPROVING', icon: '↗', color: 'bg-blue-100 text-blue-700 border-blue-300' };
+    if (mastery < 85) return { label: 'STABLE', icon: '—', color: 'bg-amber-100 text-amber-700 border-amber-300' };
+    return { label: 'MASTERED', icon: '✓', color: 'bg-emerald-100 text-emerald-700 border-emerald-300' };
+  };
+
+  // Calculate 4-step completion progress
+  const getStepProgress = (topic: TopicResource): number => {
+    const steps = {
+      'not_started': 0,
+      'studying_notes': 1,
+      'practicing': 2,
+      'taking_quiz': 3,
+      'mastered': 4
+    };
+    return steps[topic.studyStage] || 0;
+  };
+
+  // Get completion percentage (0-100)
+  const getCompletionPercentage = (topic: TopicResource): number => {
+    const steps = getStepProgress(topic);
+    return Math.round((steps / 4) * 100);
+  };
+
   const filteredTopics = selectedDomain === 'all'
     ? topics
     : topicsByDomain[selectedDomain] || [];
@@ -195,41 +225,93 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-black text-slate-600 uppercase tracking-wider">
-                  Overall Mastery
-                </span>
-                <span className="text-xs font-black text-slate-900">{averageMastery}%</span>
+          {/* Compact Premium Stats Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {/* Mastered */}
+            <div className="group relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 rounded-xl p-4 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+              <div className="absolute inset-0 bg-grid-white/10 opacity-20"></div>
+              {/* Compact Decorative Background Icon */}
+              <div className="absolute -bottom-2 -right-2 opacity-10 group-hover:opacity-15 transition-all duration-300">
+                <Trophy size={60} className="text-white" />
               </div>
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${averageMastery}%`,
-                    background: `linear-gradient(90deg, ${subjectConfig.color} 0%, ${subjectConfig.colorDark} 100%)`
-                  }}
-                />
+              <div className="relative">
+                <div className="flex items-center justify-between mb-2">
+                  {/* Compact Icon Badge */}
+                  <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                    <Trophy size={20} className="text-white" />
+                  </div>
+                  <div className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-sm">
+                    <span className="text-[8px] font-black text-white uppercase tracking-wider">Elite</span>
+                  </div>
+                </div>
+                <div className="text-3xl font-black text-white mb-1 tracking-tight">{masteredTopics}</div>
+                <div className="text-[10px] font-black text-emerald-100 uppercase tracking-wider">Mastered Topics</div>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 size={14} className="text-emerald-500" />
-                <span className="font-black text-slate-900">{masteredTopics}</span>
-                <span className="font-medium text-slate-500">mastered</span>
+            {/* In Progress */}
+            <div className="group relative bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-xl p-4 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+              <div className="absolute inset-0 bg-grid-white/10 opacity-20"></div>
+              <div className="absolute -bottom-2 -right-2 opacity-10 group-hover:opacity-15 transition-all duration-300">
+                <TrendingUp size={60} className="text-white" />
               </div>
-              <div className="flex items-center gap-1.5">
-                <PlayCircle size={14} className="text-blue-500" />
-                <span className="font-black text-slate-900">{inProgressTopics}</span>
-                <span className="font-medium text-slate-500">in progress</span>
+              <div className="relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                    <TrendingUp size={20} className="text-white" />
+                  </div>
+                  <div className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-sm">
+                    <span className="text-[8px] font-black text-white uppercase tracking-wider">Active</span>
+                  </div>
+                </div>
+                <div className="text-3xl font-black text-white mb-1 tracking-tight">{inProgressTopics}</div>
+                <div className="text-[10px] font-black text-blue-100 uppercase tracking-wider">In Progress</div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Circle size={14} className="text-slate-400" />
-                <span className="font-black text-slate-900">{notStartedTopics}</span>
-                <span className="font-medium text-slate-500">not started</span>
+            </div>
+
+            {/* Not Started */}
+            <div className="group relative bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 rounded-xl p-4 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+              <div className="absolute inset-0 bg-grid-white/10 opacity-20"></div>
+              <div className="absolute -bottom-2 -right-2 opacity-10 group-hover:opacity-15 transition-all duration-300">
+                <Circle size={60} className="text-white" />
+              </div>
+              <div className="relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                    <Circle size={20} className="text-white" />
+                  </div>
+                  <div className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-sm">
+                    <span className="text-[8px] font-black text-white uppercase tracking-wider">Queue</span>
+                  </div>
+                </div>
+                <div className="text-3xl font-black text-white mb-1 tracking-tight">{notStartedTopics}</div>
+                <div className="text-[10px] font-black text-slate-300 uppercase tracking-wider">Not Started</div>
+              </div>
+            </div>
+
+            {/* Average Mastery */}
+            <div className="group relative bg-white rounded-xl p-4 border-2 border-slate-200 overflow-hidden hover:shadow-xl hover:scale-[1.02] hover:border-purple-300 transition-all duration-300 cursor-pointer">
+              <div className="absolute -bottom-2 -right-2 opacity-5 group-hover:opacity-10 transition-all duration-300">
+                <Target size={60} className="text-purple-600" />
+              </div>
+              <div className="relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:bg-purple-200">
+                    <Target size={20} className="text-purple-600" />
+                  </div>
+                  <div className="px-2 py-0.5 rounded-md bg-slate-100 group-hover:bg-purple-100 transition-colors">
+                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-wider group-hover:text-purple-700 transition-colors">Overall</span>
+                  </div>
+                </div>
+                <div className="text-3xl font-black text-slate-900 mb-1 tracking-tight transition-colors group-hover:text-purple-700">{averageMastery}%</div>
+                <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider transition-colors group-hover:text-purple-600">Avg Mastery</div>
+                {/* Compact Progress bar */}
+                <div className="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-purple-500 to-purple-600"
+                    style={{ width: `${averageMastery}%` }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -237,48 +319,79 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-white border-2 border-slate-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Trophy size={18} className="text-amber-500" />
-                  <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
-                    Achievement
+
+        {/* AI Recommendations & Insights */}
+        {(aiRecommendation || topics.filter(t => t.masteryLevel > 0 && t.masteryLevel < 40).length > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {/* AI Recommendation */}
+            {aiRecommendation && (
+              <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-6 text-white overflow-hidden shadow-lg group hover:shadow-xl transition-shadow">
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                    backgroundSize: '24px 24px'
+                  }}></div>
+                </div>
+                <div className="relative">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles size={20} className="animate-pulse" />
+                    <span className="text-xs font-black uppercase tracking-wider">
+                      AI Recommendation
+                    </span>
+                  </div>
+                  <h3 className="font-black text-xl mb-2">{aiRecommendation.topicName}</h3>
+                  <p className="text-sm font-medium opacity-95 mb-4 leading-relaxed">
+                    {aiRecommendation.reason}
+                  </p>
+                  <button
+                    onClick={() => onSelectTopic(aiRecommendation.topicId)}
+                    className="w-full px-4 py-3 bg-white text-primary-600 rounded-xl text-sm font-black hover:bg-primary-50 transition-all shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+                  >
+                    Start Learning Now →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Weak Areas Alert */}
+            {topics.filter(t => t.masteryLevel > 0 && t.masteryLevel < 40).length > 0 && (
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-300 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertCircle size={20} className="text-orange-600" />
+                  <span className="text-sm font-black uppercase tracking-wider text-orange-800">
+                    Needs Your Attention
                   </span>
                 </div>
-                <div className="text-2xl font-black text-slate-900">{masteredTopics}/{totalTopics}</div>
-                <div className="text-xs font-medium text-slate-600">Topics Mastered</div>
-              </div>
-
-              <div className="bg-white border-2 border-slate-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Target size={18} className="text-blue-500" />
-                  <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
-                    Accuracy
-                  </span>
+                <div className="space-y-2">
+                  {topics
+                    .filter(t => t.masteryLevel > 0 && t.masteryLevel < 40)
+                    .slice(0, 3)
+                    .map(topic => (
+                      <button
+                        key={topic.id}
+                        onClick={() => onSelectTopic(topic.topicId)}
+                        className="w-full text-left px-4 py-3 bg-white border-2 border-orange-200 rounded-xl hover:bg-orange-50 hover:border-orange-400 transition-all group"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-black text-sm text-orange-900">{topic.topicName}</div>
+                            <div className="text-xs text-orange-700 font-medium mt-0.5">{topic.masteryLevel}% mastery</div>
+                          </div>
+                          <div className="text-orange-400 group-hover:text-orange-600 transition-colors">
+                            <TrendingUp size={18} />
+                          </div>
+                        </div>
+                      </button>
+                    ))}
                 </div>
-                <div className="text-2xl font-black text-slate-900">
-                  {Math.round(topics.reduce((sum, t) => sum + t.averageAccuracy, 0) / (totalTopics || 1))}%
-                </div>
-                <div className="text-xs font-medium text-slate-600">Average Score</div>
               </div>
+            )}
+          </div>
+        )}
 
-              <div className="bg-white border-2 border-slate-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Flame size={18} className="text-orange-500" />
-                  <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
-                    Streak
-                  </span>
-                </div>
-                <div className="text-2xl font-black text-slate-900">{studyStreak}</div>
-                <div className="text-xs font-medium text-slate-600">Day Streak</div>
-              </div>
-            </div>
-
-            {/* Domain Filter (for list view) */}
+        {/* Main Content */}
+        <div>
+          {/* Domain Filter (for list view) */}
             {viewMode === 'list' && (
               <div className="mb-6">
                 <div className="flex items-center gap-2 overflow-x-auto pb-2">
@@ -309,250 +422,251 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
               </div>
             )}
 
-            {/* Heatmap View */}
+            {/* Premium Card Grid - World-Class UX */}
             {viewMode === 'heatmap' && (
-              <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="font-black text-lg text-slate-900 uppercase tracking-tight">Topic Mastery Heatmap</h2>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-slate-400 uppercase">Mastery:</span>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 bg-slate-100 border border-slate-200 rounded"></div>
-                      <span className="text-[10px] text-slate-400 font-medium">0%</span>
-                      <div className="w-px h-3 bg-slate-200 mx-1"></div>
-                      <div className="w-3 h-3 bg-red-100 border border-red-200 rounded"></div>
-                      <div className="w-3 h-3 bg-orange-100 border border-orange-200 rounded"></div>
-                      <div className="w-3 h-3 bg-yellow-100 border border-yellow-200 rounded"></div>
-                      <div className="w-3 h-3 bg-lime-100 border border-lime-200 rounded"></div>
-                      <div className="w-3 h-3 bg-emerald-100 border border-emerald-200 rounded"></div>
-                      <span className="text-[10px] text-slate-400 font-medium ml-1">100%</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {topics.map(topic => {
+                  const statusInfo = getStatusInfo(topic);
+                  const mastery = topic.masteryLevel;
 
-                <div className="grid grid-cols-5 gap-4">
-                  {topics.map(topic => {
-                    const bgColor = topic.masteryLevel === 0 ? 'bg-slate-50/50' :
-                                    topic.masteryLevel < 30 ? 'bg-red-50/50' :
-                                    topic.masteryLevel < 50 ? 'bg-orange-50/50' :
-                                    topic.masteryLevel < 70 ? 'bg-yellow-50/50' :
-                                    topic.masteryLevel < 85 ? 'bg-lime-50/50' : 'bg-emerald-50/50';
+                  // Premium gradient based on mastery
+                  const getGradient = (m: number) => {
+                    if (m === 0) return 'from-slate-50 to-slate-100/50';
+                    if (m < 30) return 'from-red-50 to-red-100/50';
+                    if (m < 50) return 'from-orange-50 to-orange-100/50';
+                    if (m < 70) return 'from-blue-50 to-blue-100/50';
+                    if (m < 85) return 'from-amber-50 to-amber-100/50';
+                    return 'from-emerald-50 to-emerald-100/50';
+                  };
 
-                    const borderColor = topic.masteryLevel === 0 ? 'border-slate-200' :
-                                      topic.masteryLevel < 30 ? 'border-red-200' :
-                                      topic.masteryLevel < 50 ? 'border-orange-200' :
-                                      topic.masteryLevel < 70 ? 'border-yellow-200' :
-                                      topic.masteryLevel < 85 ? 'border-lime-200' : 'border-emerald-200';
+                  const getBorderColor = (m: number) => {
+                    if (m === 0) return 'border-slate-200/80';
+                    if (m < 30) return 'border-red-200/80';
+                    if (m < 50) return 'border-orange-200/80';
+                    if (m < 70) return 'border-blue-200/80';
+                    if (m < 85) return 'border-amber-200/80';
+                    return 'border-emerald-200/80';
+                  };
 
-                    const textColor = topic.masteryLevel === 0 ? 'text-slate-400' :
-                                      topic.masteryLevel < 30 ? 'text-red-600' :
-                                      topic.masteryLevel < 50 ? 'text-orange-600' :
-                                      topic.masteryLevel < 70 ? 'text-yellow-700' :
-                                      topic.masteryLevel < 85 ? 'text-lime-700' : 'text-emerald-700';
+                  const getAccentColor = (m: number) => {
+                    if (m === 0) return 'bg-slate-500';
+                    if (m < 30) return 'bg-gradient-to-r from-red-500 to-red-600';
+                    if (m < 50) return 'bg-gradient-to-r from-orange-500 to-orange-600';
+                    if (m < 70) return 'bg-gradient-to-r from-blue-500 to-indigo-600';
+                    if (m < 85) return 'bg-gradient-to-r from-amber-500 to-amber-600';
+                    return 'bg-gradient-to-r from-emerald-500 to-emerald-600';
+                  };
 
-                    return (
-                      <button
-                        key={topic.id}
-                        onClick={() => onSelectTopic(topic.topicId)}
-                        className={`relative rounded-xl ${bgColor} border ${borderColor} hover:shadow-lg transition-all p-4 flex flex-col items-center justify-center text-center min-h-[180px]`}
-                      >
-                        <div className={`text-sm font-bold ${textColor} leading-tight mb-4 line-clamp-2`}>
-                          {topic.topicName}
+                  return (
+                    <button
+                      key={topic.id}
+                      onClick={() => onSelectTopic(topic.topicId)}
+                      className={`group relative bg-gradient-to-br ${getGradient(mastery)} border-2 ${getBorderColor(mastery)} rounded-2xl p-6 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 text-left overflow-hidden`}
+                    >
+                      {/* Decorative Elements */}
+                      <div className="absolute top-0 right-0 w-40 h-40 bg-white/30 rounded-full blur-3xl"></div>
+                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>
+
+                      <div className="relative">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-4 mb-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-12 h-12 rounded-xl bg-white/80 backdrop-blur-sm flex items-center justify-center text-2xl shadow-lg border border-white/50">
+                                {subjectConfig.iconEmoji}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-black text-lg text-slate-900 mb-1 leading-tight line-clamp-2">
+                                  {topic.topicName}
+                                </h3>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 backdrop-blur-sm ${statusInfo.color}`}>
+                                <span className="text-xs">{statusInfo.icon}</span>
+                                {statusInfo.label}
+                              </span>
+                              {mastery < 50 && mastery > 0 && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-red-500 text-white border-2 border-red-600 shadow-lg">
+                                  <AlertCircle size={10} />
+                                  CRITICAL
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Mastery Circle */}
+                          <div className="relative">
+                            <div className="w-20 h-20 rounded-2xl bg-white/90 backdrop-blur-sm shadow-xl border-2 border-white/50 flex flex-col items-center justify-center">
+                              <div className={`text-3xl font-black leading-none ${mastery === 0 ? 'text-slate-400' : mastery < 30 ? 'text-red-600' : mastery < 50 ? 'text-orange-600' : mastery < 70 ? 'text-blue-600' : mastery < 85 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                {mastery}
+                              </div>
+                              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">%</div>
+                            </div>
+                            <div className="absolute -top-1 -right-1 px-2 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider">
+                              Mastery
+                            </div>
+                          </div>
                         </div>
-                        <div className={`text-5xl font-black ${textColor} mb-3`}>
-                          {topic.masteryLevel}%
+
+                        {/* Metrics Grid */}
+                        <div className="grid grid-cols-3 gap-3 mb-4">
+                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
+                            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Yield</div>
+                            <div className="text-2xl font-black text-slate-900">{Math.round(topic.averageAccuracy)}%</div>
+                          </div>
+                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
+                            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Points</div>
+                            <div className="text-2xl font-black text-slate-900">{topic.questionsAttempted}</div>
+                          </div>
+                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
+                            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total</div>
+                            <div className="text-2xl font-black text-slate-900">{topic.totalQuestions}</div>
+                          </div>
                         </div>
-                        <div className={`text-xs font-bold uppercase tracking-wider ${textColor} opacity-70`}>
-                          {getMasteryLabel(topic.masteryLevel)}
+
+                        {/* Premium Progress Bar */}
+                        <div className="relative">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Progress</span>
+                            <span className="text-xs font-black text-slate-900">{mastery}%</span>
+                          </div>
+                          <div className="h-2.5 bg-white/60 backdrop-blur-sm rounded-full overflow-hidden border border-white/50 shadow-inner">
+                            <div
+                              className={`h-full ${getAccentColor(mastery)} rounded-full transition-all duration-500 shadow-lg`}
+                              style={{ width: `${mastery}%` }}
+                            />
+                          </div>
                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
-            {/* List View */}
+            {/* Premium List View */}
             {viewMode === 'list' && (
-              <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <div>
-                    <h2 className="font-black text-lg text-slate-900 uppercase tracking-tight">Topic Distribution</h2>
-                    <p className="text-xs text-slate-400 font-medium">Top {filteredTopics.length} most covered topics</p>
-                  </div>
-                  <div className="flex items-center gap-2 bg-primary-50 px-3 py-1.5 rounded-lg">
-                    <span className="text-2xl font-black text-primary-600">{filteredTopics.length}</span>
-                    <span className="text-xs text-slate-500 font-medium">Top Topics</span>
-                  </div>
-                </div>
+              <div className="space-y-3">
+                {filteredTopics.map(topic => {
+                  const statusInfo = getStatusInfo(topic);
+                  const mastery = topic.masteryLevel;
 
-                <div className="space-y-3">
-                  {filteredTopics.map((topic, idx) => {
-                    // Vibrant color palette rotation
-                    const colors = [
-                      { badge: 'bg-blue-500', bar: 'bg-blue-500', text: 'text-blue-600' },
-                      { badge: 'bg-purple-500', bar: 'bg-purple-500', text: 'text-purple-600' },
-                      { badge: 'bg-indigo-500', bar: 'bg-indigo-500', text: 'text-indigo-600' },
-                      { badge: 'bg-violet-500', bar: 'bg-violet-500', text: 'text-violet-600' },
-                      { badge: 'bg-pink-500', bar: 'bg-pink-500', text: 'text-pink-600' },
-                      { badge: 'bg-rose-500', bar: 'bg-rose-500', text: 'text-rose-600' },
-                      { badge: 'bg-orange-500', bar: 'bg-orange-500', text: 'text-orange-600' },
-                      { badge: 'bg-amber-500', bar: 'bg-amber-500', text: 'text-amber-600' },
-                      { badge: 'bg-emerald-500', bar: 'bg-emerald-500', text: 'text-emerald-600' },
-                      { badge: 'bg-teal-500', bar: 'bg-teal-500', text: 'text-teal-600' },
-                    ];
-                    const colorSet = colors[idx % colors.length];
+                  const getGradient = (m: number) => {
+                    if (m === 0) return 'from-slate-50 to-slate-100/50';
+                    if (m < 30) return 'from-red-50 to-red-100/50';
+                    if (m < 50) return 'from-orange-50 to-orange-100/50';
+                    if (m < 70) return 'from-blue-50 to-blue-100/50';
+                    if (m < 85) return 'from-amber-50 to-amber-100/50';
+                    return 'from-emerald-50 to-emerald-100/50';
+                  };
 
-                    // Calculate coverage percentage (based on mastery level)
-                    const coverage = topic.masteryLevel;
+                  const getBorderColor = (m: number) => {
+                    if (m === 0) return 'border-slate-200/80';
+                    if (m < 30) return 'border-red-200/80';
+                    if (m < 50) return 'border-orange-200/80';
+                    if (m < 70) return 'border-blue-200/80';
+                    if (m < 85) return 'border-amber-200/80';
+                    return 'border-emerald-200/80';
+                  };
 
-                    return (
-                      <button
-                        key={topic.id}
-                        onClick={() => onSelectTopic(topic.topicId)}
-                        className="w-full bg-slate-50/50 border border-slate-200 rounded-xl p-4 hover:shadow-lg hover:border-slate-300 transition-all text-left"
-                      >
-                        <div className="flex items-center gap-4">
-                          {/* Numbered Badge */}
-                          <div className={`${colorSet.badge} w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-xl flex-shrink-0 shadow-sm`}>
-                            {topic.totalQuestions}
-                          </div>
+                  const getAccentColor = (m: number) => {
+                    if (m === 0) return 'bg-slate-500';
+                    if (m < 30) return 'bg-gradient-to-r from-red-500 to-red-600';
+                    if (m < 50) return 'bg-gradient-to-r from-orange-500 to-orange-600';
+                    if (m < 70) return 'bg-gradient-to-r from-blue-500 to-indigo-600';
+                    if (m < 85) return 'bg-gradient-to-r from-amber-500 to-amber-600';
+                    return 'bg-gradient-to-r from-emerald-500 to-emerald-600';
+                  };
 
-                          {/* Progress Bar Section */}
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex-1">
-                                <h3 className="font-black text-base text-slate-900 mb-0.5 line-clamp-1">
-                                  {topic.topicName}
-                                </h3>
-                                <p className="text-xs text-slate-500 font-medium">
-                                  {topic.totalQuestions} {topic.totalQuestions === 1 ? 'question' : 'questions'}
-                                </p>
-                              </div>
-                              <div className="text-right ml-4">
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-                                  Coverage
-                                </div>
-                                <div className={`text-3xl font-black ${colorSet.text}`}>
-                                  {coverage}%
-                                </div>
+                  return (
+                    <button
+                      key={topic.id}
+                      onClick={() => onSelectTopic(topic.topicId)}
+                      className={`group relative w-full bg-gradient-to-br ${getGradient(mastery)} border-2 ${getBorderColor(mastery)} rounded-2xl p-6 hover:shadow-2xl hover:scale-[1.005] transition-all duration-300 text-left overflow-hidden`}
+                    >
+                      {/* Decorative Elements */}
+                      <div className="absolute top-0 right-0 w-40 h-40 bg-white/30 rounded-full blur-3xl"></div>
+                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>
+
+                      <div className="relative flex items-start gap-6">
+                        {/* Icon */}
+                        <div className="w-14 h-14 rounded-xl bg-white/80 backdrop-blur-sm flex items-center justify-center text-2xl shadow-lg border border-white/50 flex-shrink-0">
+                          {subjectConfig.iconEmoji}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          {/* Header Row */}
+                          <div className="flex items-start justify-between gap-6 mb-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-black text-lg text-slate-900 mb-2 leading-tight">
+                                {topic.topicName}
+                              </h3>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 backdrop-blur-sm ${statusInfo.color}`}>
+                                  <span className="text-xs">{statusInfo.icon}</span>
+                                  {statusInfo.label}
+                                </span>
+                                {mastery < 50 && mastery > 0 && (
+                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-red-500 text-white border-2 border-red-600 shadow-lg">
+                                    <AlertCircle size={10} />
+                                    CRITICAL
+                                  </span>
+                                )}
                               </div>
                             </div>
 
-                            {/* Progress Bar */}
-                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                            {/* Mastery Badge */}
+                            <div className="relative flex-shrink-0">
+                              <div className="w-20 h-20 rounded-2xl bg-white/90 backdrop-blur-sm shadow-xl border-2 border-white/50 flex flex-col items-center justify-center">
+                                <div className={`text-3xl font-black leading-none ${mastery === 0 ? 'text-slate-400' : mastery < 30 ? 'text-red-600' : mastery < 50 ? 'text-orange-600' : mastery < 70 ? 'text-blue-600' : mastery < 85 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                  {mastery}
+                                </div>
+                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">%</div>
+                              </div>
+                              <div className="absolute -top-1 -right-1 px-2 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider">
+                                Mastery
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Metrics */}
+                          <div className="grid grid-cols-3 gap-3 mb-4">
+                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
+                              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Yield</div>
+                              <div className="text-2xl font-black text-slate-900">{Math.round(topic.averageAccuracy)}%</div>
+                            </div>
+                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
+                              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Points</div>
+                              <div className="text-2xl font-black text-slate-900">{topic.questionsAttempted}</div>
+                            </div>
+                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
+                              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total</div>
+                              <div className="text-2xl font-black text-slate-900">{topic.totalQuestions}</div>
+                            </div>
+                          </div>
+
+                          {/* Progress Bar */}
+                          <div className="relative">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Progress</span>
+                              <span className="text-xs font-black text-slate-900">{mastery}%</span>
+                            </div>
+                            <div className="h-2.5 bg-white/60 backdrop-blur-sm rounded-full overflow-hidden border border-white/50 shadow-inner">
                               <div
-                                className={`h-full ${colorSet.bar} rounded-full transition-all duration-500`}
-                                style={{ width: `${coverage}%` }}
+                                className={`h-full ${getAccentColor(mastery)} rounded-full transition-all duration-500 shadow-lg`}
+                                style={{ width: `${mastery}%` }}
                               />
                             </div>
                           </div>
                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
-          </div>
-
-          {/* AI Insights Sidebar */}
-          <div className="space-y-4">
-            {/* AI Recommendation */}
-            {aiRecommendation && (
-              <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-5 text-white">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles size={18} />
-                  <span className="text-xs font-black uppercase tracking-wider">
-                    AI Recommendation
-                  </span>
-                </div>
-                <h3 className="font-black text-lg mb-2">{aiRecommendation.topicName}</h3>
-                <p className="text-sm font-medium opacity-90 mb-4">
-                  {aiRecommendation.reason}
-                </p>
-                <button
-                  onClick={() => onSelectTopic(aiRecommendation.topicId)}
-                  className="w-full px-4 py-2.5 bg-white text-primary-600 rounded-lg text-sm font-black hover:bg-primary-50 transition-all"
-                >
-                  Start Now
-                </button>
-              </div>
-            )}
-
-            {/* Weak Areas Alert */}
-            {topics.filter(t => t.masteryLevel > 0 && t.masteryLevel < 40).length > 0 && (
-              <div className="bg-white border-2 border-orange-200 rounded-xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertCircle size={18} className="text-orange-500" />
-                  <span className="text-xs font-black uppercase tracking-wider text-orange-700">
-                    Needs Attention
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {topics
-                    .filter(t => t.masteryLevel > 0 && t.masteryLevel < 40)
-                    .slice(0, 3)
-                    .map(topic => (
-                      <button
-                        key={topic.id}
-                        onClick={() => onSelectTopic(topic.topicId)}
-                        className="w-full text-left px-3 py-2 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all"
-                      >
-                        <div className="font-black text-sm text-orange-900">{topic.topicName}</div>
-                        <div className="text-xs text-orange-700">{topic.masteryLevel}% mastery</div>
-                      </button>
-                    ))}
-                </div>
-              </div>
-            )}
-
-            {/* Study Streak */}
-            {studyStreak > 0 && (
-              <div className="bg-white border-2 border-slate-200 rounded-xl p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Flame size={18} className="text-orange-500" />
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                    Study Streak
-                  </span>
-                </div>
-                <div className="text-4xl font-black text-slate-900 mb-1">{studyStreak}</div>
-                <div className="text-sm font-medium text-slate-600 mb-4">
-                  {studyStreak === 1 ? 'day' : 'days'} in a row
-                </div>
-                <div className="text-xs text-slate-500 font-medium">
-                  Keep it up! Study today to maintain your streak.
-                </div>
-              </div>
-            )}
-
-            {/* Quick Stats */}
-            <div className="bg-white border-2 border-slate-200 rounded-xl p-5">
-              <h3 className="font-black text-sm text-slate-900 mb-3 uppercase tracking-wider">
-                Quick Stats
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-600">Total Questions</span>
-                  <span className="text-sm font-black text-slate-900">
-                    {topics.reduce((sum, t) => sum + t.totalQuestions, 0)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-600">Attempted</span>
-                  <span className="text-sm font-black text-slate-900">
-                    {topics.reduce((sum, t) => sum + t.questionsAttempted, 0)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-600">Quizzes Taken</span>
-                  <span className="text-sm font-black text-slate-900">
-                    {topics.reduce((sum, t) => sum + t.quizzesTaken, 0)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

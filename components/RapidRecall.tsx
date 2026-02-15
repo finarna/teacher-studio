@@ -18,6 +18,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RenderWithMath } from './MathRenderer';
 import { cache } from '../utils/cache';
 import { useFilteredScans } from '../hooks/useFilteredScans';
+import { supabase } from '../lib/supabase';
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
 
@@ -124,9 +125,14 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
         return;
       }
 
-      // 2. Check server cache
+      // 2. Check server database
       try {
-        const res = await fetch(`/api/flashcards/${selectedScan}`);
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+
+        const res = await fetch(`/api/flashcards/${selectedScan}`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
         const data = await res.json();
 
         if (data.cards && data.cards.length > 0) {
@@ -261,15 +267,21 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
         // Save to local cache
         cache.save(`flashcards_${selectedScan}`, data.cards, selectedScan, 'flashcard');
 
-        // Save to server cache
+        // Save to server database
         try {
+          const { data: { session } } = await supabase.auth.getSession();
+          const token = session?.access_token;
+
           await fetch('/api/flashcards', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
             body: JSON.stringify({ scanId: selectedScan, cards: data.cards })
           });
         } catch (cacheErr) {
-          console.error('Failed to cache flashcards on server:', cacheErr);
+          console.error('Failed to save flashcards to database:', cacheErr);
         }
       } else {
         throw new Error('No cards generated');
@@ -300,11 +312,11 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
       <header className="h-20 border-b border-slate-200 flex items-center justify-between px-8 bg-white/80 backdrop-blur-md z-20 sticky top-0">
         <div className="flex items-center gap-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
-              <Zap size={20} className="text-primary-400" fill="currentColor" />
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+              <Zap size={20} className="text-purple-200" fill="currentColor" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-slate-900 tracking-tight font-outfit uppercase tracking-tighter">Rapid <span className="text-primary-600">Recall</span></h1>
+              <h1 className="text-xl font-black text-slate-900 tracking-tight font-outfit uppercase tracking-tighter">Rapid <span className="text-purple-600">Recall</span></h1>
               <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em] font-outfit leading-none">High Yield revision</p>
             </div>
           </div>
@@ -350,9 +362,9 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
         <button
           onClick={fetchCards}
           disabled={isGenerating || !selectedScan}
-          className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg flex items-center gap-2.5 disabled:opacity-50 transition-all font-outfit uppercase tracking-wider text-[10px]"
+          className="group px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl flex items-center gap-2.5 disabled:opacity-50 transition-all font-outfit uppercase tracking-wider text-[10px]"
         >
-          {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} className="text-primary-400" />}
+          {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} className="text-purple-200 group-hover:rotate-12 transition-transform" />}
           {isGenerating ? 'Synthesizing...' : isCached ? 'Regenerate Cards' : 'Generate Cards'}
         </button>
         {isCached && cards.length > 0 && (
@@ -371,8 +383,8 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
                 key={domain}
                 onClick={() => setSelectedDomain(domain)}
                 className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${selectedDomain === domain
-                  ? 'bg-slate-900 text-white shadow-lg scale-105'
-                  : 'bg-slate-50 text-slate-400 hover:text-slate-900 border border-slate-100'
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg scale-105'
+                  : 'bg-slate-50 text-slate-400 hover:text-purple-600 hover:bg-purple-50 border border-slate-100 hover:border-purple-200'
                   }`}
               >
                 {domain} ({groupedCards[domain].length})
@@ -391,11 +403,11 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
                 <>
                   <div
                     onClick={() => setIsFlipped(!isFlipped)}
-                    className={`relative w-full aspect-[16/10] transition-all duration-700 transform-style-3d cursor-pointer ${isFlipped ? 'rotate-y-180' : ''}`}
+                    className={`group relative w-full aspect-[16/10] transition-all duration-700 transform-style-3d cursor-pointer hover:scale-105 ${isFlipped ? 'rotate-y-180' : ''}`}
                   >
                     {/* Card Front */}
-                    <div className="absolute inset-0 backface-hidden bg-white rounded-2xl p-10 shadow-xl flex flex-col items-center text-center justify-center border border-slate-100 overflow-hidden">
-                      <div className="absolute top-0 left-0 w-full h-2 bg-primary-500 rounded-t-2xl"></div>
+                    <div className="absolute inset-0 backface-hidden bg-white rounded-2xl p-10 shadow-xl group-hover:shadow-2xl flex flex-col items-center text-center justify-center border border-slate-100 group-hover:border-purple-300 overflow-hidden transition-all">
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-t-2xl"></div>
                       <div className="text-slate-400 font-bold text-[9px] uppercase tracking-[0.3em] mb-4 font-outfit">{displayedCards[currentCard].topic || displayedCards[currentCard].domain || 'General Concept'}</div>
                       <div className="flex-1 flex items-center justify-center w-full max-h-[calc(100%-120px)] overflow-y-auto px-4">
                         <div className="text-xl md:text-2xl font-black text-slate-900 leading-tight font-outfit tracking-tight italic">
@@ -437,11 +449,11 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
 
                   <div className="mt-8 flex items-center justify-between px-4">
                     <div className="flex gap-3">
-                      <button onClick={handlePrev} className="w-14 h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-900 transition-all shadow-sm">
-                        <ChevronLeft size={24} />
+                      <button onClick={handlePrev} className="group w-14 h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-purple-700 hover:border-purple-500 hover:bg-purple-50 transition-all shadow-sm hover:shadow-lg">
+                        <ChevronLeft size={24} className="transition-transform group-hover:-translate-x-1" />
                       </button>
-                      <button onClick={handleNext} className="w-14 h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-900 transition-all shadow-sm">
-                        <ChevronRight size={24} />
+                      <button onClick={handleNext} className="group w-14 h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-purple-700 hover:border-purple-500 hover:bg-purple-50 transition-all shadow-sm hover:shadow-lg">
+                        <ChevronRight size={24} className="transition-transform group-hover:translate-x-1" />
                       </button>
                     </div>
                     <div className="text-slate-400 text-[10px] font-bold uppercase tracking-widest font-outfit">
@@ -459,9 +471,9 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
                   <button
                     onClick={fetchCards}
                     disabled={isGenerating}
-                    className="px-12 py-5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-[2rem] shadow-2xl transition-all active:scale-95 flex items-center gap-4 uppercase tracking-[0.2em] text-sm"
+                    className="group px-12 py-5 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-black rounded-[2rem] shadow-2xl hover:shadow-3xl transition-all active:scale-95 flex items-center gap-4 uppercase tracking-[0.2em] text-sm"
                   >
-                    {isGenerating ? <Loader2 className="animate-spin" size={20} /> : <Sparkles className="text-primary-400" size={20} />}
+                    {isGenerating ? <Loader2 className="animate-spin" size={20} /> : <Sparkles className="text-purple-200 group-hover:rotate-12 transition-transform" size={20} />}
                     {isGenerating ? 'Synthesizing...' : 'Sync AI Deck'}
                   </button>
                 </div>
@@ -476,7 +488,7 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
                 <Trophy size={60} className="text-slate-900" />
               </div>
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="p-1.5 bg-primary-50 rounded-lg"><Trophy size={16} className="text-primary-600" /></div>
+                <div className="p-1.5 bg-purple-50 rounded-lg"><Trophy size={16} className="text-purple-600" /></div>
                 <h4 className="font-bold text-slate-900 uppercase text-[9px] tracking-wider">Strategic Drill</h4>
               </div>
               <p className="text-slate-500 font-medium text-xs leading-relaxed italic relative z-10">
@@ -485,12 +497,12 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
             </div>
 
             <div className="p-6 bg-slate-900 rounded-2xl text-center shadow-lg relative overflow-hidden group">
-              <div className="absolute inset-0 bg-primary-500/5 rotate-45 translate-x-10 translate-y-10 rounded-full blur-2xl group-hover:bg-primary-500/10 transition-all duration-1000"></div>
+              <div className="absolute inset-0 bg-purple-500/5 rotate-45 translate-x-10 translate-y-10 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-all duration-1000"></div>
               <div className="w-12 h-12 bg-white/10 border border-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-white relative z-10">
                 <Clock size={24} />
               </div>
               <h4 className="text-white/60 font-bold mb-0.5 uppercase text-[9px] tracking-wider relative z-10">Integration Progress</h4>
-              <p className="text-4xl font-black text-primary-400 tabular-nums relative z-10 font-outfit">0%</p>
+              <p className="text-4xl font-black text-purple-400 tabular-nums relative z-10 font-outfit">0%</p>
             </div>
           </div>
         </div>

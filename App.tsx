@@ -32,7 +32,7 @@ import { ProfessorTrainingContract } from './types';
 import { VidyaActions } from './types/vidya';
 import { useAdaptiveLogic } from './hooks/useAdaptiveLogic';
 import { isFeatureEnabled } from './utils/featureFlags';
-import { Home, LayoutDashboard, GraduationCap, ArrowLeft, Bell, Search, User, LogOut } from 'lucide-react';
+import { Home, LayoutDashboard, GraduationCap, ArrowLeft, Bell, Search, User, LogOut, CheckCircle2 } from 'lucide-react';
 import { AppContextProvider } from './contexts/AppContext';
 import { SubjectSwitcher } from './components/SubjectSwitcher';
 import { checkAndClearOldCache } from './utils/cacheRefresh';
@@ -42,6 +42,7 @@ import UserProfile from './components/UserProfile';
 import { getApiUrl } from './lib/api';
 import { LearningJourneyProvider } from './contexts/LearningJourneyContext';
 import LearningJourneyApp from './components/LearningJourneyApp';
+import AdminScanApproval from './components/AdminScanApproval';
 
 /**
  * Authentication Gate Component
@@ -627,7 +628,7 @@ const AppContent: React.FC = () => {
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <button
                       onClick={() => setGodModeView('scanning')}
                       className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
@@ -639,11 +640,21 @@ const AppContent: React.FC = () => {
                       <p className="text-xs text-slate-500 font-bold">Upload and analyze exam papers with AI</p>
                     </button>
                     <button
+                      onClick={() => setGodModeView('approval')}
+                      className="bg-white border-2 border-emerald-200 rounded-2xl p-6 hover:border-emerald-400 hover:shadow-lg transition-all text-left group"
+                    >
+                      <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <CheckCircle2 size={24} className="text-emerald-600" />
+                      </div>
+                      <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Review & Publish</h3>
+                      <p className="text-xs text-slate-500 font-bold">Approve scans to make them available system-wide</p>
+                    </button>
+                    <button
                       onClick={() => setGodModeView('recall')}
                       className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
                     >
-                      <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <User size={24} className="text-emerald-600" />
+                      <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <User size={24} className="text-amber-600" />
                       </div>
                       <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Rapid Recall</h3>
                       <p className="text-xs text-slate-500 font-bold">Generate flashcards for quick revision</p>
@@ -752,6 +763,11 @@ const AppContent: React.FC = () => {
               </div>
             )}
             {godModeView === 'recall' && <div className="h-full overflow-y-auto scroller-hide"><RapidRecall recentScans={recentScans} /></div>}
+            {godModeView === 'approval' && (
+              <div className="h-full overflow-y-auto scroller-hide">
+                <AdminScanApproval />
+              </div>
+            )}
             {godModeView === 'learning_journey' && (
               <div className="h-full overflow-y-auto scroller-hide">
                 <LearningJourneyProvider userId={user?.id || ''}>

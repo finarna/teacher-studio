@@ -8,7 +8,8 @@ import {
   Clock,
   Target,
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 import type { ExamContext } from '../types';
 
@@ -42,10 +43,10 @@ const TRAJECTORY_CARDS: TrajectoryCard[] = [
     id: 'NEET',
     name: 'NEET',
     fullName: 'National Eligibility cum Entrance Test',
-    description: 'Medical and dental entrance examination',
+    description: 'MEDICAL PREP TRACK (BIOLOGY FOCUS)',
     icon: FlaskConical,
     color: 'emerald',
-    gradient: 'from-emerald-500 to-teal-600',
+    gradient: 'from-emerald-500 to-emerald-600',
     pattern: {
       totalQuestions: 180,
       duration: 200,
@@ -59,12 +60,12 @@ const TRAJECTORY_CARDS: TrajectoryCard[] = [
   },
   {
     id: 'JEE',
-    name: 'JEE',
+    name: 'JEE MAIN',
     fullName: 'Joint Entrance Examination',
-    description: 'Engineering entrance examination',
+    description: 'ENGINEERING PREP TRACK (MATH FOCUS)',
     icon: Atom,
     color: 'blue',
-    gradient: 'from-blue-500 to-indigo-600',
+    gradient: 'from-blue-500 to-blue-600',
     pattern: {
       totalQuestions: 90,
       duration: 180,
@@ -80,10 +81,10 @@ const TRAJECTORY_CARDS: TrajectoryCard[] = [
     id: 'KCET',
     name: 'KCET',
     fullName: 'Karnataka Common Entrance Test',
-    description: 'State-level engineering & medical entrance',
+    description: 'STATE COMMON PREP TRACK',
     icon: GraduationCap,
-    color: 'amber',
-    gradient: 'from-amber-500 to-orange-600',
+    color: 'orange',
+    gradient: 'from-orange-500 to-orange-600',
     pattern: {
       totalQuestions: 60,
       duration: 80,
@@ -97,12 +98,12 @@ const TRAJECTORY_CARDS: TrajectoryCard[] = [
   },
   {
     id: 'CBSE',
-    name: 'CBSE',
+    name: 'BOARD EXAM',
     fullName: 'Central Board of Secondary Education',
-    description: 'Class 10 & 12 board examinations',
+    description: 'CLASS 12TH SENIOR SECONDARY',
     icon: BookOpen,
-    color: 'violet',
-    gradient: 'from-violet-500 to-purple-600',
+    color: 'pink',
+    gradient: 'from-pink-500 to-pink-600',
     pattern: {
       totalQuestions: 40,
       duration: 180,
@@ -139,7 +140,16 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
         </div>
       </div>
 
-      {/* Trajectory Cards Grid */}
+      {/* PREMIUM DESIGN ACTIVE - You should see this banner! */}
+      <div className="max-w-7xl mx-auto px-6 py-2">
+        <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-2xl mb-4 flex items-center justify-center gap-3 shadow-xl animate-pulse">
+          <Sparkles size={24} className="animate-spin" />
+          <span className="text-sm font-black uppercase tracking-wider">🎨 Premium Design System Active - All Cards Redesigned!</span>
+          <Sparkles size={24} className="animate-spin" />
+        </div>
+      </div>
+
+      {/* Trajectory Cards Grid - Premium Clean Design (Compact) */}
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {TRAJECTORY_CARDS.map((trajectory) => {
@@ -151,105 +161,90 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
               <button
                 key={trajectory.id}
                 onClick={() => onSelectTrajectory(trajectory.id)}
-                className="group relative bg-white rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all duration-300 overflow-hidden text-left shadow-sm hover:shadow-lg"
+                className="group relative bg-white rounded-2xl border border-slate-200/60 hover:border-slate-300 transition-all duration-300 text-left shadow-sm hover:shadow-xl overflow-hidden"
               >
-                {/* Gradient Header */}
-                <div className={`relative h-20 bg-gradient-to-br ${trajectory.gradient} p-4 text-white overflow-hidden`}>
-                  {/* Background Pattern */}
-                  <div className="absolute inset-0 opacity-10">
-                    <div className="absolute inset-0" style={{
-                      backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                      backgroundSize: '20px 20px'
-                    }} />
-                  </div>
-
-                  {/* Icon */}
-                  <div className="relative z-10 flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                        <Icon size={24} className="text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-black text-xl tracking-tight">{trajectory.name}</h3>
-                        <p className="text-white/80 text-[10px] font-medium mt-0.5">{trajectory.fullName}</p>
-                      </div>
+                {/* Card Content */}
+                <div className="p-5">
+                  {/* Large Gradient Icon Badge with Hover Animation */}
+                  <div className="mb-4 relative">
+                    <div className={`inline-flex w-16 h-16 bg-gradient-to-br ${trajectory.gradient} rounded-xl items-center justify-center shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-2xl`}>
+                      <Icon size={32} className="text-white transition-all duration-500 group-hover:scale-110" strokeWidth={2.5} />
                     </div>
-
-                    {/* Progress Indicator */}
-                    {hasProgress && (
-                      <div className="flex flex-col items-end">
-                        <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5">
-                          <TrendingUp size={14} />
-                          <span className="text-xs font-black">{progress.overallMastery}%</span>
-                        </div>
-                        <p className="text-white/70 text-[10px] font-medium mt-1 uppercase tracking-wider">
-                          In Progress
-                        </p>
-                      </div>
-                    )}
+                    {/* Glow effect on hover */}
+                    <div className={`absolute top-0 left-0 w-16 h-16 bg-gradient-to-br ${trajectory.gradient} rounded-xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500`} />
                   </div>
-                </div>
 
-                {/* Content */}
-                <div className="p-4">
-                  <p className="text-slate-600 text-xs font-medium mb-3">
+                  {/* Trajectory Name - Bold & Black with Hover Effect */}
+                  <h3 className="text-2xl font-black text-slate-900 mb-1.5 tracking-tight transition-colors duration-300 group-hover:text-purple-600">
+                    {trajectory.name}
+                  </h3>
+
+                  {/* Description - Uppercase Gray with Hover Effect */}
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 leading-relaxed transition-colors duration-300 group-hover:text-purple-500">
                     {trajectory.description}
                   </p>
 
-                  {/* Exam Pattern Info */}
-                  <div className="flex items-center gap-3 mb-3 pb-3 border-b border-slate-100">
-                    <div className="flex items-center gap-2 text-slate-700">
-                      <Target size={16} className={`text-${trajectory.color}-500`} />
-                      <span className="text-xs font-black">{trajectory.pattern.totalQuestions}Q</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-700">
-                      <Clock size={16} className={`text-${trajectory.color}-500`} />
-                      <span className="text-xs font-black">{trajectory.pattern.duration}min</span>
-                    </div>
-                    <div className="flex-1 text-right">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                        {trajectory.pattern.subjects.join(' • ')}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Highlights */}
-                  <div className="space-y-1.5 mb-3">
-                    {trajectory.highlights.map((highlight, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <CheckCircle2 size={12} className={`text-${trajectory.color}-500 flex-shrink-0`} />
-                        <span className="text-[11px] font-medium text-slate-700">{highlight}</span>
+                  {/* Exam Pattern - Compact Info with Hover Effects */}
+                  <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-7 h-7 bg-gradient-to-br ${trajectory.gradient} rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12`}>
+                        <Target size={14} className="text-white transition-all duration-300 group-hover:scale-110" />
                       </div>
-                    ))}
+                      <div>
+                        <div className="text-base font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{trajectory.pattern.totalQuestions}</div>
+                        <div className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Questions</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-7 h-7 bg-gradient-to-br ${trajectory.gradient} rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12`}>
+                        <Clock size={14} className="text-white transition-all duration-300 group-hover:scale-110" />
+                      </div>
+                      <div>
+                        <div className="text-base font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{trajectory.pattern.duration}</div>
+                        <div className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Minutes</div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Progress Bar (if has progress) */}
+                  {/* Subjects with Hover Effects */}
+                  <div className="mb-4">
+                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Core Subjects</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {trajectory.pattern.subjects.map((subject, idx) => (
+                        <div key={idx} className="px-2.5 py-1 bg-slate-50 rounded-lg border border-slate-200 transition-all duration-300 group-hover:bg-purple-50 group-hover:border-purple-200 group-hover:scale-105">
+                          <span className="text-[11px] font-bold text-slate-700 transition-colors duration-300 group-hover:text-purple-700">{subject}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Progress Indicator (if in progress) with Hover Animation */}
                   {hasProgress && (
-                    <div className="mb-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                          Overall Progress
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                          Your Progress
                         </span>
-                        <span className="text-[10px] font-black text-slate-700">
-                          {progress.subjectsCompleted}/{progress.totalSubjects} subjects
+                        <span className="text-xs font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">
+                          {progress.overallMastery}%
                         </span>
                       </div>
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden group-hover:h-2 transition-all duration-300">
                         <div
-                          className={`h-full bg-gradient-to-r ${trajectory.gradient} rounded-full transition-all duration-500`}
+                          className={`h-full bg-gradient-to-r ${trajectory.gradient} rounded-full transition-all duration-500 group-hover:shadow-lg`}
                           style={{ width: `${progress.overallMastery}%` }}
                         />
                       </div>
                     </div>
                   )}
 
-                  {/* Action Button */}
-                  <div className={`flex items-center justify-between px-4 py-3 bg-gradient-to-r ${trajectory.gradient} rounded-xl text-white group-hover:shadow-lg transition-all`}>
-                    <span className="text-sm font-black tracking-tight">
-                      {hasProgress ? 'Continue Learning' : 'Start Journey'}
+                  {/* Purple Action Button - Premium Style */}
+                  <button className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl text-white group-hover:shadow-2xl group-hover:from-purple-700 group-hover:to-purple-800 transition-all">
+                    <span className="text-xs font-black tracking-tight uppercase">
+                      {hasProgress ? 'Continue Prep Track' : 'Enter Prep Track Port'}
                     </span>
-                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                  </div>
+                    <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" strokeWidth={3} />
+                  </button>
                 </div>
               </button>
             );

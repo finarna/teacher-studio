@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Calculator,
   Atom,
   FlaskConical,
-  Leaf,
+  Dna,
   ArrowRight,
   ChevronLeft,
   TrendingUp,
@@ -11,10 +11,15 @@ import {
   Target,
   AlertCircle,
   Trophy,
-  Zap
+  Zap,
+  Brain,
+  Palette,
+  FileQuestion,
+  Sparkles
 } from 'lucide-react';
 import type { Subject, ExamContext, SubjectProgress } from '../types';
 import { SUBJECT_CONFIGS } from '../config/subjects';
+import { supabase } from '../lib/supabase';
 
 interface SubjectSelectionPageProps {
   examContext: ExamContext;
@@ -27,7 +32,7 @@ const SUBJECT_ICONS: Record<Subject, React.ElementType> = {
   'Math': Calculator,
   'Physics': Atom,
   'Chemistry': FlaskConical,
-  'Biology': Leaf
+  'Biology': Dna
 };
 
 const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
@@ -40,6 +45,150 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
   const availableSubjects = (Object.keys(SUBJECT_CONFIGS) as Subject[]).filter(
     subject => SUBJECT_CONFIGS[subject].supportedExams.includes(examContext)
   );
+
+  // Comprehensive stats state
+  const [comprehensiveStats, setComprehensiveStats] = useState({
+    totalQuestions: 0,
+    totalSketches: 0,
+    totalFlashcards: 0,
+    totalTopics: 0,
+    subjectStats: {} as Record<Subject, {
+      questions: number;
+      sketches: number;
+      flashcards: number;
+      topics: number;
+    }>
+  });
+
+  // Fetch comprehensive stats on mount
+  useEffect(() => {
+    fetchComprehensiveStats();
+  }, [examContext]);
+
+  const fetchComprehensiveStats = async () => {
+    try {
+      // Get all published scans
+      const { data: publishedScans } = await supabase
+        .from('scans')
+        .select('id, subject, exam_context')
+        .eq('is_system_scan', true);
+
+      if (!publishedScans || publishedScans.length === 0) {
+        return;
+      }
+
+      const scanIds = publishedScans.map(s => s.id);
+
+      // Total questions
+      const { count: totalQuestions } = await supabase
+        .from('questions')
+        .select('*', { count: 'exact', head: true })
+        .in('scan_id', scanIds);
+
+      // Total sketches (count from scans.analysis_data only - avoids 404 errors)
+      const { data: scansWithAnalysis } = await supabase
+        .from('scans')
+        .select('analysis_data')
+        .in('id', scanIds);
+
+      let totalSketches = 0;
+      scansWithAnalysis?.forEach(scan => {
+        if (scan.analysis_data?.topicBasedSketches) {
+          totalSketches += Object.keys(scan.analysis_data.topicBasedSketches).length;
+        }
+      });
+
+      // Total flashcards (from flashcards table)
+      // Flashcards are stored as JSONB arrays, need to sum up array lengths
+      const { data: flashcardRecords } = await supabase
+        .from('flashcards')
+        .select('data')
+        .in('scan_id', scanIds);
+
+      let totalFlashcards = 0;
+      flashcardRecords?.forEach(record => {
+        if (record.data && Array.isArray(record.data)) {
+          totalFlashcards += record.data.length;
+        }
+      });
+
+      // Total topics across all subjects
+      const { count: totalTopics } = await supabase
+        .from('topics')
+        .select('*', { count: 'exact', head: true });
+
+      // Per-subject stats
+      const subjectStats: Record<Subject, any> = {} as any;
+
+      for (const subject of availableSubjects) {
+        const subjectScans = publishedScans.filter(s => s.subject === subject);
+        const subjectScanIds = subjectScans.map(s => s.id);
+
+        if (subjectScanIds.length > 0) {
+          const { count: q } = await supabase
+            .from('questions')
+            .select('*', { count: 'exact', head: true })
+            .in('scan_id', subjectScanIds);
+
+          // Sketches (from scans.analysis_data only - avoids 404 errors)
+          const { data: subjectScansWithAnalysis } = await supabase
+            .from('scans')
+            .select('analysis_data')
+            .in('id', subjectScanIds);
+
+          let s = 0;
+          subjectScansWithAnalysis?.forEach(scan => {
+            if (scan.analysis_data?.topicBasedSketches) {
+              s += Object.keys(scan.analysis_data.topicBasedSketches).length;
+            }
+          });
+
+          // Flashcards (from flashcards table)
+          // Count actual cards in JSONB arrays
+          const { data: subjectFlashcardRecords } = await supabase
+            .from('flashcards')
+            .select('data')
+            .in('scan_id', subjectScanIds);
+
+          let f = 0;
+          subjectFlashcardRecords?.forEach(record => {
+            if (record.data && Array.isArray(record.data)) {
+              f += record.data.length;
+            }
+          });
+
+          const { count: t } = await supabase
+            .from('topics')
+            .select('*', { count: 'exact', head: true })
+            .eq('subject', subject);
+
+          subjectStats[subject] = {
+            questions: q || 0,
+            sketches: s || 0,
+            flashcards: f || 0,
+            topics: t || 0
+          };
+        } else {
+          subjectStats[subject] = {
+            questions: 0,
+            sketches: 0,
+            flashcards: 0,
+            topics: 0
+          };
+        }
+      }
+
+      setComprehensiveStats({
+        totalQuestions: totalQuestions || 0,
+        totalSketches: totalSketches || 0,
+        totalFlashcards: totalFlashcards || 0,
+        totalTopics: totalTopics || 0,
+        subjectStats
+      });
+    } catch (error) {
+      console.error('Error fetching comprehensive stats:', error);
+    }
+  };
 
   // Calculate overall stats
   const totalSubjects = availableSubjects.length;
@@ -173,69 +322,152 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
         </div>
       </div>
 
-      {/* Stats Overview - Always show */}
+      {/* PREMIUM DESIGN ACTIVE Banner */}
+      <div className="max-w-7xl mx-auto px-6 py-2">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-2xl mb-2 flex items-center justify-center gap-3 shadow-xl animate-pulse">
+          <Zap size={24} className="animate-bounce" />
+          <span className="text-sm font-black uppercase tracking-wider">⚡ Premium UX Applied - DNA Icon + Animated Stats!</span>
+          <Zap size={24} className="animate-bounce" />
+        </div>
+      </div>
+
+      {/* Stats Overview - Premium Compact Cards with Animations */}
       <div className="max-w-7xl mx-auto px-6 py-3">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {/* Overall Progress */}
-          <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg p-3 text-white">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Trophy size={14} />
-              <span className="text-[9px] font-black uppercase tracking-wider opacity-90">
-                Overall Progress
-              </span>
+          <div className="group relative bg-white rounded-xl border border-slate-200 p-3 overflow-hidden hover:border-blue-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <div className="absolute top-1.5 right-1.5 opacity-5 group-hover:opacity-10 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
+              <Trophy size={60} className="text-blue-600" />
             </div>
-            <div className="text-2xl font-black mb-0.5">{Math.round(averageMastery)}%</div>
-            <div className="text-[10px] font-medium opacity-80">
-              {completedSubjects}/{totalSubjects} subjects mastered
+            <div className="relative">
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center transition-all duration-300 group-hover:bg-blue-200 group-hover:scale-110 group-hover:rotate-6">
+                  <Trophy size={12} className="text-blue-600 transition-all duration-300 group-hover:scale-110" />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+                  Progress
+                </span>
+              </div>
+              <div className="text-3xl font-black text-slate-900 leading-none mb-1 transition-colors duration-300 group-hover:text-blue-600">
+                {Math.round(averageMastery)}%
+              </div>
+              <div className="text-[10px] text-slate-500 font-medium">
+                {completedSubjects}/{totalSubjects} mastered
+              </div>
             </div>
           </div>
 
           {/* Questions Attempted */}
-          <div className="bg-white border-2 border-slate-200 rounded-lg p-3">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <BookOpen size={14} className="text-blue-500" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
-                Questions
-              </span>
+          <div className="group relative bg-white rounded-xl border border-slate-200 p-3 overflow-hidden hover:border-indigo-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <div className="absolute top-1.5 right-1.5 opacity-5 group-hover:opacity-10 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
+              <BookOpen size={60} className="text-indigo-600" />
             </div>
-            <div className="text-xl font-black text-slate-900">
-              {availableSubjects.reduce((sum, s) => sum + (subjectProgress?.[s]?.totalQuestionsAttempted || 0), 0)}
+            <div className="relative">
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center transition-all duration-300 group-hover:bg-indigo-200 group-hover:scale-110 group-hover:rotate-6">
+                  <BookOpen size={12} className="text-indigo-600 transition-all duration-300 group-hover:scale-110" />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+                  Questions
+                </span>
+              </div>
+              <div className="text-3xl font-black text-slate-900 leading-none mb-1 transition-colors duration-300 group-hover:text-indigo-600">
+                {availableSubjects.reduce((sum, s) => sum + (subjectProgress?.[s]?.totalQuestionsAttempted || 0), 0)}
+              </div>
+              <div className="text-[10px] text-slate-500 font-medium">Attempted</div>
             </div>
-            <div className="text-[10px] font-medium text-slate-600">Attempted</div>
           </div>
 
           {/* Average Accuracy */}
-          <div className="bg-white border-2 border-slate-200 rounded-lg p-3">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Target size={14} className="text-emerald-500" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
-                Accuracy
-              </span>
+          <div className="group relative bg-white rounded-xl border border-slate-200 p-3 overflow-hidden hover:border-emerald-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <div className="absolute top-1.5 right-1.5 opacity-5 group-hover:opacity-10 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
+              <Target size={60} className="text-emerald-600" />
             </div>
-            <div className="text-xl font-black text-slate-900">
-              {Math.round(
-                availableSubjects.reduce((sum, s) => sum + (subjectProgress?.[s]?.overallAccuracy || 0), 0) / totalSubjects
-              )}%
+            <div className="relative">
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center transition-all duration-300 group-hover:bg-emerald-200 group-hover:scale-110 group-hover:rotate-6">
+                  <Target size={12} className="text-emerald-600 transition-all duration-300 group-hover:scale-110" />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+                  Accuracy
+                </span>
+              </div>
+              <div className="text-3xl font-black text-slate-900 leading-none mb-1 transition-colors duration-300 group-hover:text-emerald-600">
+                {Math.round(
+                  availableSubjects.reduce((sum, s) => sum + (subjectProgress?.[s]?.overallAccuracy || 0), 0) / totalSubjects
+                )}%
+              </div>
+              <div className="text-[10px] text-slate-500 font-medium">Average</div>
             </div>
-            <div className="text-[10px] font-medium text-slate-600">Average</div>
           </div>
 
-          {/* Total Subjects */}
-          <div className="bg-white border-2 border-slate-200 rounded-lg p-3">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Zap size={14} className="text-blue-500" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
-                Subjects
-              </span>
+          {/* Total Questions (from published scans) */}
+          <div className="group relative bg-white rounded-xl border border-slate-200 p-3 overflow-hidden hover:border-violet-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <div className="absolute top-1.5 right-1.5 opacity-5 group-hover:opacity-10 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
+              <FileQuestion size={60} className="text-violet-600" />
             </div>
-            <div className="text-xl font-black text-slate-900">{totalSubjects}</div>
-            <div className="text-[10px] font-medium text-slate-600">Available</div>
+            <div className="relative">
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center transition-all duration-300 group-hover:bg-violet-200 group-hover:scale-110 group-hover:rotate-6">
+                  <FileQuestion size={12} className="text-violet-600 transition-all duration-300 group-hover:scale-110" />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+                  Questions
+                </span>
+              </div>
+              <div className="text-3xl font-black text-slate-900 leading-none mb-1 transition-colors duration-300 group-hover:text-violet-600">
+                {comprehensiveStats.totalQuestions}
+              </div>
+              <div className="text-[10px] text-slate-500 font-medium">Total Bank</div>
+            </div>
+          </div>
+
+          {/* Sketch Notes */}
+          <div className="group relative bg-white rounded-xl border border-slate-200 p-3 overflow-hidden hover:border-amber-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <div className="absolute top-1.5 right-1.5 opacity-5 group-hover:opacity-10 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
+              <Palette size={60} className="text-amber-600" />
+            </div>
+            <div className="relative">
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center transition-all duration-300 group-hover:bg-amber-200 group-hover:scale-110 group-hover:rotate-6">
+                  <Palette size={12} className="text-amber-600 transition-all duration-300 group-hover:scale-110" />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+                  Sketches
+                </span>
+              </div>
+              <div className="text-3xl font-black text-slate-900 leading-none mb-1 transition-colors duration-300 group-hover:text-amber-600">
+                {comprehensiveStats.totalSketches}
+              </div>
+              <div className="text-[10px] text-slate-500 font-medium">Visual Notes</div>
+            </div>
+          </div>
+
+          {/* Rapid Recall (Flashcards) */}
+          <div className="group relative bg-white rounded-xl border border-slate-200 p-3 overflow-hidden hover:border-purple-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <div className="absolute top-1.5 right-1.5 opacity-5 group-hover:opacity-10 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
+              <Brain size={60} className="text-purple-600" />
+            </div>
+            <div className="relative">
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center transition-all duration-300 group-hover:bg-purple-200 group-hover:scale-110 group-hover:rotate-6">
+                  <Brain size={12} className="text-purple-600 transition-all duration-300 group-hover:scale-110" />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+                  Flashcards
+                </span>
+              </div>
+              <div className="text-3xl font-black text-slate-900 leading-none mb-1 transition-colors duration-300 group-hover:text-purple-600">
+                {comprehensiveStats.totalFlashcards}
+              </div>
+              <div className="text-[10px] text-slate-500 font-medium">Rapid Recall</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Subject Cards */}
-      <div className="max-w-7xl mx-auto px-6 py-3">
+      {/* Subject Cards - Premium Clean Design */}
+      <div className="max-w-7xl mx-auto px-6 py-3 pb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {availableSubjects.map((subject) => {
             const config = SUBJECT_CONFIGS[subject];
@@ -244,145 +476,138 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
             const mastery = progress?.overallMastery || 0;
             const masteryColor = getMasteryColor(mastery);
             const masteryLabel = getMasteryLabel(mastery);
+            const stats = comprehensiveStats.subjectStats[subject] || { questions: 0, sketches: 0, flashcards: 0, topics: 0 };
 
             return (
               <button
                 key={subject}
                 onClick={() => onSelectSubject(subject)}
-                className="group relative bg-white rounded-2xl border-2 border-slate-200 hover:border-slate-300 transition-all duration-300 overflow-hidden text-left shadow-sm hover:shadow-lg"
+                className="group relative bg-white rounded-2xl border border-slate-200/60 hover:border-slate-300 transition-all duration-300 text-left shadow-sm hover:shadow-xl overflow-hidden"
               >
-                {/* Header with Subject Color */}
-                <div
-                  className="relative h-20 p-4 text-white overflow-hidden"
-                  style={{
-                    background: `linear-gradient(135deg, ${config.color} 0%, ${config.colorDark} 100%)`
-                  }}
-                >
-                  {/* Background Pattern */}
-                  <div className="absolute inset-0 opacity-10">
-                    <div className="absolute inset-0" style={{
-                      backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                      backgroundSize: '20px 20px'
-                    }} />
-                  </div>
-
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                        <Icon size={24} className="text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-black text-xl tracking-tight">{config.displayName}</h3>
-                        <p className="text-white/80 text-[9px] font-black uppercase tracking-wider mt-0.5">
-                          {config.domains.length} domains
-                        </p>
-                      </div>
+                {/* Card Content */}
+                <div className="p-5">
+                  {/* Large Gradient Icon Badge with Hover Animation */}
+                  <div className="mb-4">
+                    <div
+                      className="inline-flex w-16 h-16 rounded-xl items-center justify-center shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-2xl"
+                      style={{
+                        background: `linear-gradient(135deg, ${config.color} 0%, ${config.colorDark} 100%)`
+                      }}
+                    >
+                      <Icon size={32} className="text-white transition-all duration-500 group-hover:scale-110" strokeWidth={2.5} />
                     </div>
-
-                    {/* Mastery Ring */}
-                    {progress && (
-                      <div className="relative w-14 h-14">
-                        <svg className="transform -rotate-90 w-14 h-14">
-                          <circle
-                            cx="28"
-                            cy="28"
-                            r="24"
-                            stroke="rgba(255,255,255,0.2)"
-                            strokeWidth="3"
-                            fill="none"
-                          />
-                          <circle
-                            cx="28"
-                            cy="28"
-                            r="24"
-                            stroke="white"
-                            strokeWidth="3"
-                            fill="none"
-                            strokeDasharray={`${(mastery / 100) * 150.8} 150.8`}
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-xs font-black">{Math.round(mastery)}%</span>
-                        </div>
-                      </div>
-                    )}
+                    {/* Glow effect on hover */}
+                    <div
+                      className="absolute top-5 left-5 w-16 h-16 rounded-xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500"
+                      style={{
+                        background: `linear-gradient(135deg, ${config.color} 0%, ${config.colorDark} 100%)`
+                      }}
+                    />
                   </div>
-                </div>
 
-                {/* Content */}
-                <div className="p-4">
-                  {/* Progress Info */}
+                  {/* Subject Name - Bold & Black with Hover Effect */}
+                  <h3 className="text-2xl font-black text-slate-900 mb-1.5 tracking-tight transition-colors duration-300 group-hover:text-purple-600">
+                    {config.displayName}
+                  </h3>
+
+                  {/* Description - Uppercase Gray with Hover Effect */}
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 leading-relaxed transition-colors duration-300 group-hover:text-purple-500">
+                    {config.domains.length} Learning Domains • {progress ? `${progress.topicsTotal} Topics` : 'Expert Mastery Track'}
+                  </p>
+
+                  {/* Progress Info (if has progress) with Hover Effects */}
                   {progress ? (
-                    <div className="space-y-2 mb-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                          Mastery Status
+                    <div className="mb-4 pb-4 border-b border-slate-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                          Mastery Level
                         </span>
-                        <span className={`text-xs font-black text-${masteryColor}-600 uppercase tracking-wider`}>
+                        <span className="text-xs font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">
                           {masteryLabel}
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-medium text-slate-600">
-                          {progress.topicsMastered}/{progress.topicsTotal} topics mastered
-                        </span>
-                        <span className="font-black text-slate-900">
-                          {progress.overallAccuracy.toFixed(1)}% accuracy
-                        </span>
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        <div className="transition-all duration-300 group-hover:scale-105">
+                          <div className="text-lg font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{Math.round(mastery)}%</div>
+                          <div className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Overall</div>
+                        </div>
+                        <div className="transition-all duration-300 group-hover:scale-105">
+                          <div className="text-lg font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{progress.topicsMastered}</div>
+                          <div className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Topics</div>
+                        </div>
+                        <div className="transition-all duration-300 group-hover:scale-105">
+                          <div className="text-lg font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{progress.overallAccuracy.toFixed(0)}%</div>
+                          <div className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Accuracy</div>
+                        </div>
                       </div>
 
-                      {/* Progress Bar */}
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                      {/* Progress Bar with Hover Animation */}
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden group-hover:h-2 transition-all duration-300">
                         <div
-                          className={`h-full bg-${masteryColor}-500 rounded-full transition-all duration-500`}
-                          style={{ width: `${mastery}%` }}
+                          className="h-full rounded-full transition-all duration-500 group-hover:shadow-lg"
+                          style={{
+                            width: `${mastery}%`,
+                            background: `linear-gradient(90deg, ${config.color} 0%, ${config.colorDark} 100%)`
+                          }}
                         />
                       </div>
                     </div>
                   ) : (
-                    <div className="mb-3">
+                    <div className="mb-4 pb-4 border-b border-slate-100">
                       <p className="text-xs text-slate-600 font-medium">
-                        Start your learning journey in {config.displayName}
+                        Begin your journey in {config.displayName}
                       </p>
                     </div>
                   )}
 
-                  {/* Domains Preview */}
-                  <div className="mb-3">
-                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2">
-                      Key Domains
+                  {/* Subject Content Stats */}
+                  <div className="mb-4 pb-4 border-b border-slate-100">
+                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-2">Content Available</div>
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="text-center">
+                        <div className="text-sm font-black text-violet-600">{stats.topics}</div>
+                        <div className="text-[8px] font-bold text-slate-500">Topics</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm font-black text-indigo-600">{stats.questions}</div>
+                        <div className="text-[8px] font-bold text-slate-500">Questions</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm font-black text-amber-600">{stats.sketches}</div>
+                        <div className="text-[8px] font-bold text-slate-500">Sketches</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm font-black text-purple-600">{stats.flashcards}</div>
+                        <div className="text-[8px] font-bold text-slate-500">Flashcards</div>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {config.domains.slice(0, 4).map((domain) => (
-                        <span
-                          key={domain}
-                          className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-medium"
-                        >
-                          {domain}
-                        </span>
+                  </div>
+
+                  {/* Key Domains with Hover Effects */}
+                  <div className="mb-4">
+                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Key Domains</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {config.domains.slice(0, 3).map((domain) => (
+                        <div key={domain} className="px-2.5 py-1 bg-slate-50 rounded-lg border border-slate-200 transition-all duration-300 group-hover:bg-purple-50 group-hover:border-purple-200 group-hover:scale-105">
+                          <span className="text-[11px] font-bold text-slate-700 transition-colors duration-300 group-hover:text-purple-700">{domain}</span>
+                        </div>
                       ))}
-                      {config.domains.length > 4 && (
-                        <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-md text-xs font-medium">
-                          +{config.domains.length - 4} more
-                        </span>
+                      {config.domains.length > 3 && (
+                        <div className="px-2.5 py-1 bg-slate-50 rounded-lg border border-slate-200 transition-all duration-300 group-hover:bg-purple-50 group-hover:border-purple-200 group-hover:scale-105">
+                          <span className="text-[11px] font-bold text-slate-500 transition-colors duration-300 group-hover:text-purple-600">+{config.domains.length - 3}</span>
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Action Button */}
-                  <div
-                    className="flex items-center justify-between px-4 py-3 rounded-xl text-white group-hover:shadow-lg transition-all"
-                    style={{
-                      background: `linear-gradient(135deg, ${config.color} 0%, ${config.colorDark} 100%)`
-                    }}
-                  >
-                    <span className="text-sm font-black tracking-tight">
-                      {progress ? 'Continue Learning' : 'Start Learning'}
+                  {/* Purple Action Button - Premium Style */}
+                  <button className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl text-white group-hover:shadow-2xl group-hover:from-purple-700 group-hover:to-purple-800 transition-all">
+                    <span className="text-xs font-black tracking-tight uppercase">
+                      {progress ? 'Continue Learning' : 'Enter Learning Track'}
                     </span>
-                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                  </div>
+                    <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" strokeWidth={3} />
+                  </button>
                 </div>
               </button>
             );

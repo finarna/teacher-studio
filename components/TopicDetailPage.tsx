@@ -103,14 +103,21 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
             </span>
           </div>
 
-          {/* Topic Header */}
+          {/* Premium Topic Header */}
           <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-4 flex-1">
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-white"
-                style={{ background: `linear-gradient(135deg, ${subjectConfig.color} 0%, ${subjectConfig.colorDark} 100%)` }}
-              >
-                <span className="text-2xl">{subjectConfig.iconEmoji}</span>
+            <div className="flex items-center gap-4 flex-1 group">
+              <div className="relative">
+                <div
+                  className="w-16 h-16 rounded-xl flex items-center justify-center text-white shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-6"
+                  style={{ background: `linear-gradient(135deg, ${subjectConfig.color} 0%, ${subjectConfig.colorDark} 100%)` }}
+                >
+                  <span className="text-3xl transition-all duration-500 group-hover:scale-110">{subjectConfig.iconEmoji}</span>
+                </div>
+                {/* Glow effect */}
+                <div
+                  className="absolute top-0 left-0 w-16 h-16 rounded-xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500"
+                  style={{ background: `linear-gradient(135deg, ${subjectConfig.color} 0%, ${subjectConfig.colorDark} 100%)` }}
+                />
               </div>
               <div>
                 <h1 className="font-black text-2xl tracking-tight text-slate-900">
@@ -120,33 +127,33 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
                   <span className="text-xs font-medium text-slate-500">
                     {subject} • {examContext}
                   </span>
-                  <div className={`px-2.5 py-1 bg-${masteryColor}-100 text-${masteryColor}-700 rounded-md text-xs font-black uppercase tracking-wider`}>
+                  <div className={`px-2.5 py-1 bg-${masteryColor}-100 text-${masteryColor}-700 rounded-lg text-xs font-black uppercase tracking-wider`}>
                     {topicResource.masteryLevel}% Mastery
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Quick Stats */}
+            {/* Premium Quick Stats */}
             <div className="flex items-center gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-black text-slate-900">{totalQuestionsIncludingAI}</div>
-                <div className="text-xs font-medium text-slate-500">Questions</div>
+              <div className="text-center group cursor-pointer">
+                <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{totalQuestionsIncludingAI}</div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Questions</div>
               </div>
               <div className="h-10 w-px bg-slate-200" />
-              <div className="text-center">
-                <div className="text-2xl font-black text-slate-900">{topicResource.averageAccuracy.toFixed(0)}%</div>
-                <div className="text-xs font-medium text-slate-500">Accuracy</div>
+              <div className="text-center group cursor-pointer">
+                <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{topicResource.averageAccuracy.toFixed(0)}%</div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Accuracy</div>
               </div>
               <div className="h-10 w-px bg-slate-200" />
-              <div className="text-center">
-                <div className="text-2xl font-black text-slate-900">{topicResource.quizzesTaken}</div>
-                <div className="text-xs font-medium text-slate-500">Quizzes</div>
+              <div className="text-center group cursor-pointer">
+                <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{topicResource.quizzesTaken}</div>
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Quizzes</div>
               </div>
             </div>
           </div>
 
-          {/* Tab Navigation */}
+          {/* Premium Tab Navigation */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
             {tabs.map(tab => {
               const Icon = tab.icon;
@@ -155,13 +162,13 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`group flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all whitespace-nowrap ${
+                  className={`group flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ${
                     isActive
-                      ? 'bg-slate-900 text-white shadow-sm'
-                      : 'bg-white text-slate-600 hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300'
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:shadow-xl'
+                      : 'bg-white text-slate-600 hover:bg-purple-50 hover:text-purple-600 border-2 border-slate-200 hover:border-purple-300'
                   }`}
                 >
-                  <Icon size={16} />
+                  <Icon size={16} className={`transition-all duration-300 ${isActive ? '' : 'group-hover:scale-110 group-hover:rotate-6'}`} />
                   <div className="text-left">
                     <div className="text-xs font-black uppercase tracking-wider">{tab.label}</div>
                     {!isActive && (
@@ -1691,7 +1698,7 @@ const PracticeTab: React.FC<{
                             key={idx}
                             onClick={() => !hasValidated && handleAnswerSelect(q.id, idx)}
                             disabled={hasValidated}
-                            className={`relative flex items-start gap-3.5 px-5 py-4 rounded-2xl border border-slate-200 transition-all text-left ${bgColor} ${shadowClass} ${ringClass} ${!hasValidated ? 'cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-slate-300 active:scale-[0.99]' : 'cursor-default'}`}
+                            className={`group relative flex items-start gap-3.5 px-5 py-4 rounded-2xl border border-slate-200 transition-all text-left ${bgColor} ${shadowClass} ${ringClass} ${!hasValidated ? 'cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-purple-300 hover:border-purple-200 hover:bg-purple-50 active:scale-[0.99]' : 'cursor-default'}`}
                           >
                             {/* Option Label */}
                             <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center font-bold text-lg transition-all ${
@@ -1701,7 +1708,7 @@ const PracticeTab: React.FC<{
                                 ? 'bg-rose-500 text-white shadow-md'
                                 : isSelected && !hasValidated
                                 ? 'bg-blue-500 text-white shadow-md'
-                                : 'bg-slate-100 text-slate-700'
+                                : 'bg-slate-100 text-slate-700 group-hover:bg-purple-100 group-hover:text-purple-700 group-hover:scale-110'
                             }`}>
                               {optionLabel}
                             </div>
@@ -1745,11 +1752,11 @@ const PracticeTab: React.FC<{
                         onClick={() => {
                           handleValidateAnswer(q.id, q.correctOptionIndex!);
                         }}
-                        className="flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-amber-600 hover:to-orange-700 transition-all"
+                        className="group flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
                         title="Get Answer Evaluated"
                       >
-                        <Award size={20} />
-                        <span className="text-sm font-bold">Get Evaluated</span>
+                        <Award size={20} className="transition-transform group-hover:scale-110 group-hover:rotate-6" />
+                        <span className="text-sm font-bold uppercase tracking-wide">Get Evaluated</span>
                       </button>
                     )}
 
@@ -1765,19 +1772,19 @@ const PracticeTab: React.FC<{
                       <>
                         <button
                           onClick={() => setSolutionModalQuestion(q)}
-                          className="flex items-center gap-2.5 px-5 py-3 bg-slate-700 text-white rounded-xl shadow-md hover:shadow-lg hover:bg-slate-800 transition-all"
+                          className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-lg hover:from-purple-700 hover:to-purple-800 transition-all"
                           title="View Solution"
                         >
-                          <Eye size={18} />
-                          <span className="text-sm font-bold">Solution</span>
+                          <Eye size={18} className="transition-transform group-hover:scale-110" />
+                          <span className="text-sm font-bold uppercase tracking-wide">Solution</span>
                         </button>
                         <button
                           onClick={() => setInsightsModalQuestion(q)}
-                          className="flex items-center gap-2.5 px-5 py-3 bg-slate-700 text-white rounded-xl shadow-md hover:shadow-lg hover:bg-slate-800 transition-all"
+                          className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-lg hover:from-purple-700 hover:to-purple-800 transition-all"
                           title="AI Insights"
                         >
-                          <Lightbulb size={18} />
-                          <span className="text-sm font-bold">Insights</span>
+                          <Lightbulb size={18} className="transition-transform group-hover:scale-110 group-hover:rotate-12" />
+                          <span className="text-sm font-bold uppercase tracking-wide">Insights</span>
                         </button>
                       </>
                     )}
@@ -1840,10 +1847,10 @@ const PracticeTab: React.FC<{
             {/* Action Button */}
             <button
               onClick={() => setShowGenerateModal(true)}
-              className="inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-xl hover:from-primary-700 hover:to-primary-800 transition-all"
+              className="group inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
             >
-              <Sparkles size={20} />
-              Generate Practice Questions
+              <Sparkles size={20} className="transition-transform group-hover:rotate-12 group-hover:scale-110" />
+              <span className="uppercase tracking-wide">Generate Practice Questions</span>
             </button>
 
             {/* Help Text */}
@@ -1919,17 +1926,17 @@ const PracticeTab: React.FC<{
               <button
                 onClick={handleGenerateQuestions}
                 disabled={isGenerating}
-                className="flex-1 px-5 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-bold disabled:opacity-50 hover:from-primary-700 hover:to-primary-800 transition-all flex items-center justify-center gap-2"
+                className="group flex-1 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold disabled:opacity-50 hover:from-purple-700 hover:to-purple-800 transition-all flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
                   <>
                     <Loader2 size={18} className="animate-spin" />
-                    Generating...
+                    <span className="uppercase tracking-wide">Generating...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles size={18} />
-                    Generate
+                    <Sparkles size={18} className="transition-transform group-hover:rotate-12 group-hover:scale-110" />
+                    <span className="uppercase tracking-wide">Generate</span>
                   </>
                 )}
               </button>
@@ -2157,7 +2164,7 @@ Return ONLY valid JSON array:
     return (
       <div className="space-y-6">
         {/* Score Card */}
-        <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl p-8 text-white">
+        <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl p-8 text-white shadow-xl">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-4xl font-black mb-2">{accuracy}%</h2>
@@ -2230,10 +2237,10 @@ Return ONLY valid JSON array:
         <div className="flex gap-4">
           <button
             onClick={retakeQuiz}
-            className="flex-1 px-6 py-4 bg-primary-600 text-white rounded-xl font-black hover:bg-primary-700 transition-all flex items-center justify-center gap-2"
+            className="group flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-black hover:from-purple-700 hover:to-purple-800 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >
-            <RefreshCw size={20} />
-            Retake Quiz
+            <RefreshCw size={20} className="transition-transform group-hover:rotate-180" />
+            <span className="uppercase tracking-wide">Retake Quiz</span>
           </button>
           <button
             onClick={exitQuiz}
@@ -2266,38 +2273,29 @@ Return ONLY valid JSON array:
 
     return (
       <div className="space-y-6">
-        {/* Quiz Header */}
-        <div className="bg-gradient-to-br from-white via-slate-50/30 to-white border-2 border-slate-200 rounded-2xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-lg">
-                {currentQuestion + 1}
+        {/* Compact Quiz Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-4 shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                <div className="text-white font-black text-lg">{currentQuestion + 1}</div>
               </div>
               <div>
-                <h2 className="text-xl font-black text-slate-900">
+                <div className="text-xs font-bold text-white/80 uppercase tracking-wider">Active Quiz</div>
+                <div className="text-sm font-black text-white">
                   Question {currentQuestion + 1} of {questions.length}
-                </h2>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-md border ${getDifficultyColor(currentQ?.difficulty)}`}>
-                    {currentQ?.difficulty || 'Medium'}
-                  </span>
-                  {currentQ?.concept && (
-                    <span className="text-xs text-slate-500 font-medium">
-                      • {currentQ.concept}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-lg border border-slate-200">
-                <Clock size={16} className="text-slate-600" />
-                <span className="font-mono text-sm font-bold text-slate-700">{formatTime(timeElapsed)}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
+                <Clock size={14} className="text-white/80" />
+                <span className="font-mono text-xs font-black text-white">{formatTime(timeElapsed)}</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-primary-50 rounded-lg border border-primary-200">
-                <Target size={16} className="text-primary-600" />
-                <span className="text-sm font-bold text-primary-700">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
+                <Target size={14} className="text-white/80" />
+                <span className="text-xs font-black text-white">
                   {correctCount}/{answeredQuestions.size}
                 </span>
               </div>
@@ -2305,14 +2303,23 @@ Return ONLY valid JSON array:
           </div>
 
           {/* Progress Bar */}
-          <div className="relative h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner">
+          <div className="relative h-2 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
             <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 transition-all duration-500 ease-out rounded-full"
+              className="absolute inset-y-0 left-0 bg-white/90 transition-all duration-500 ease-out rounded-full"
               style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
             />
-            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-600">
-              {Math.round(((currentQuestion + 1) / questions.length) * 100)}%
-            </div>
+          </div>
+
+          {/* Difficulty & Concept Tags */}
+          <div className="flex items-center gap-2 mt-3">
+            <span className={`text-xs font-bold px-2 py-1 rounded-md ${getDifficultyColor(currentQ?.difficulty)}`}>
+              {currentQ?.difficulty || 'Medium'}
+            </span>
+            {currentQ?.concept && (
+              <span className="text-xs font-bold text-white/90 bg-white/20 px-2 py-1 rounded-md backdrop-blur-sm">
+                {currentQ.concept}
+              </span>
+            )}
           </div>
         </div>
 
@@ -2336,9 +2343,9 @@ Return ONLY valid JSON array:
                 }
               } else {
                 if (idx === selectedAnswer) {
-                  buttonClass += "border-primary-500 bg-primary-50 text-primary-900";
+                  buttonClass += "border-purple-500 bg-purple-50 text-purple-900";
                 } else {
-                  buttonClass += "border-slate-200 hover:border-slate-300 hover:bg-slate-50";
+                  buttonClass += "border-slate-200 hover:border-purple-300 hover:bg-purple-50";
                 }
               }
 
@@ -2350,7 +2357,7 @@ Return ONLY valid JSON array:
                   className={buttonClass}
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm ${
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm transition-all ${
                       isAnswered
                         ? idx === currentQ.correctIndex
                           ? 'bg-green-600 text-white'
@@ -2358,7 +2365,7 @@ Return ONLY valid JSON array:
                           ? 'bg-red-600 text-white'
                           : 'bg-slate-300 text-slate-600'
                         : idx === selectedAnswer
-                        ? 'bg-primary-600 text-white'
+                        ? 'bg-purple-600 text-white'
                         : 'bg-slate-200 text-slate-600'
                     }`}>
                       {String.fromCharCode(65 + idx)}
@@ -2392,10 +2399,10 @@ Return ONLY valid JSON array:
           <button
             onClick={submitAnswer}
             disabled={selectedAnswer === null}
-            className="w-full px-6 py-4 bg-primary-600 text-white rounded-xl font-black hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+            className="group w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-black hover:from-purple-700 hover:to-purple-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >
-            <CheckCircle2 size={20} />
-            Submit Answer
+            <CheckCircle2 size={20} className="transition-transform group-hover:scale-110" />
+            <span className="uppercase tracking-wide">Submit Answer</span>
           </button>
         ) : (
           <button
@@ -2429,103 +2436,116 @@ Return ONLY valid JSON array:
   // Main Quiz Setup Screen
   return (
     <div className="space-y-6">
-      {/* Quiz Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white border-2 border-slate-200 rounded-xl p-4">
-          <div className="text-2xl font-black text-slate-900">{topicResource.quizzesTaken}</div>
-          <div className="text-xs font-medium text-slate-600">Quizzes Taken</div>
-        </div>
-        <div className="bg-white border-2 border-slate-200 rounded-xl p-4">
-          <div className="text-2xl font-black text-slate-900">{topicResource.averageQuizScore.toFixed(0)}%</div>
-          <div className="text-xs font-medium text-slate-600">Average Score</div>
-        </div>
-        <div className="bg-white border-2 border-slate-200 rounded-xl p-4">
-          <div className="text-2xl font-black text-slate-900">{topicResource.masteryLevel}%</div>
-          <div className="text-xs font-medium text-slate-600">Mastery Level</div>
-        </div>
-      </div>
-
-      {/* Adaptive Quiz Info */}
-      <div className="bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
+      {/* Compact Quiz Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-4 flex items-center justify-between shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
             <Brain size={20} className="text-white" />
           </div>
-          <div className="flex-1">
-            <h3 className="font-black text-base text-blue-900 mb-2">Adaptive Learning Mode</h3>
-            <p className="text-sm text-blue-800 mb-3 leading-relaxed">
-              This quiz adapts to your performance! Based on your {topicResource.masteryLevel}% mastery level,
-              we'll {topicResource.masteryLevel < 30 ? 'focus on fundamentals' : topicResource.masteryLevel < 60 ? 'provide balanced practice' : 'challenge you with harder questions'}.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <div className="px-3 py-1 bg-white/60 backdrop-blur-sm rounded-lg border border-blue-200">
-                <span className="text-xs font-bold text-blue-700">✓ Difficulty: {topicResource.masteryLevel < 30 ? '70% Easy' : topicResource.masteryLevel < 60 ? '50% Medium' : '50% Hard'}</span>
-              </div>
-              <div className="px-3 py-1 bg-white/60 backdrop-blur-sm rounded-lg border border-blue-200">
-                <span className="text-xs font-bold text-blue-700">✓ Targets weak areas</span>
-              </div>
-              <div className="px-3 py-1 bg-white/60 backdrop-blur-sm rounded-lg border border-blue-200">
-                <span className="text-xs font-bold text-blue-700">✓ Learning tips included</span>
-              </div>
-            </div>
+          <div>
+            <div className="text-xs font-bold text-white/80 uppercase tracking-wider">Adaptive Quiz</div>
+            <div className="text-sm font-black text-white">{topicResource.topicName}</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="text-xs font-black text-white/90 bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+            {topicResource.quizzesTaken} taken
+          </div>
+          <div className="text-xs font-black text-white/90 bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+            {topicResource.averageQuizScore.toFixed(0)}% avg
+          </div>
+          <div className="text-xs font-black text-white/90 bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+            {topicResource.masteryLevel}% mastery
           </div>
         </div>
       </div>
 
-      {/* Quiz Generation */}
-      <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
-        <h2 className="font-black text-lg text-slate-900 mb-4 flex items-center gap-2">
-          <Sparkles size={20} className="text-primary-600" />
-          Generate Adaptive Quiz
-        </h2>
-
-        <div className="space-y-4">
-          {/* Question Count */}
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">
-              Number of Questions: {questionCount}
-            </label>
-            <input
-              type="range"
-              min="5"
-              max="20"
-              step="5"
-              value={questionCount}
-              onChange={(e) => setQuestionCount(Number(e.target.value))}
-              className="w-full accent-primary-600"
-            />
-            <div className="flex justify-between text-xs text-slate-500 font-medium mt-1">
-              <span>5</span>
-              <span>10</span>
-              <span>15</span>
-              <span>20</span>
+      {/* Content Container */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="p-6 space-y-6">
+          {/* Adaptive Quiz Info */}
+          <div className="bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50 border-2 border-blue-200 rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                <Sparkles size={20} className="text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-black text-base text-blue-900 mb-2">Adaptive Learning Mode</h3>
+                <p className="text-sm text-blue-800 mb-3 leading-relaxed">
+                  This quiz adapts to your performance! Based on your {topicResource.masteryLevel}% mastery level,
+                  we'll {topicResource.masteryLevel < 30 ? 'focus on fundamentals' : topicResource.masteryLevel < 60 ? 'provide balanced practice' : 'challenge you with harder questions'}.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <div className="px-3 py-1 bg-white/60 backdrop-blur-sm rounded-lg border border-blue-200">
+                    <span className="text-xs font-bold text-blue-700">✓ Difficulty: {topicResource.masteryLevel < 30 ? '70% Easy' : topicResource.masteryLevel < 60 ? '50% Medium' : '50% Hard'}</span>
+                  </div>
+                  <div className="px-3 py-1 bg-white/60 backdrop-blur-sm rounded-lg border border-blue-200">
+                    <span className="text-xs font-bold text-blue-700">✓ Targets weak areas</span>
+                  </div>
+                  <div className="px-3 py-1 bg-white/60 backdrop-blur-sm rounded-lg border border-blue-200">
+                    <span className="text-xs font-bold text-blue-700">✓ Learning tips included</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Generate Button */}
-          <button
-            onClick={generateQuiz}
-            disabled={isGenerating}
-            className="w-full px-6 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-black hover:from-primary-700 hover:to-primary-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 size={20} className="animate-spin" />
-                Generating Adaptive Quiz...
-              </>
-            ) : (
-              <>
-                <Zap size={20} />
-                Generate AI Quiz
-              </>
-            )}
-          </button>
+          {/* Quiz Generation */}
+          <div>
+            <h2 className="font-black text-lg text-slate-900 mb-4 flex items-center gap-2">
+              <Zap size={20} className="text-blue-600" />
+              Generate Adaptive Quiz
+            </h2>
+
+            <div className="space-y-4">
+              {/* Question Count */}
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">
+                  Number of Questions: {questionCount}
+                </label>
+                <input
+                  type="range"
+                  min="5"
+                  max="20"
+                  step="5"
+                  value={questionCount}
+                  onChange={(e) => setQuestionCount(Number(e.target.value))}
+                  className="w-full accent-blue-600"
+                />
+                <div className="flex justify-between text-xs text-slate-500 font-medium mt-1">
+                  <span>5</span>
+                  <span>10</span>
+                  <span>15</span>
+                  <span>20</span>
+                </div>
+              </div>
+
+              {/* Generate Button */}
+              <button
+                onClick={generateQuiz}
+                disabled={isGenerating}
+                className="group w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 size={20} className="animate-spin" />
+                    <span className="uppercase tracking-wide">Generating Adaptive Quiz...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={20} className="transition-transform group-hover:scale-110 group-hover:rotate-12" />
+                    <span className="uppercase tracking-wide">Generate AI Quiz</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Start Quiz Button */}
       {questions.length > 0 && (
-        <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-6 text-white">
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl p-6 text-white shadow-xl">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-2xl font-black mb-2">
@@ -2540,10 +2560,10 @@ Return ONLY valid JSON array:
 
           <button
             onClick={startQuiz}
-            className="w-full px-6 py-4 bg-white text-primary-600 rounded-xl font-black hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+            className="group w-full px-6 py-4 bg-white text-blue-700 rounded-xl font-black hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >
-            <Play size={20} />
-            Start Quiz
+            <Play size={20} className="transition-transform group-hover:scale-110" />
+            <span className="uppercase tracking-wide">Start Quiz</span>
           </button>
         </div>
       )}
@@ -2553,33 +2573,123 @@ Return ONLY valid JSON array:
 
 // ========== TAB 4: FLASHCARDS ==========
 const FlashcardsTab: React.FC<{ topicResource: TopicResource }> = ({ topicResource }) => {
+  const [currentCard, setCurrentCard] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  const cards = topicResource.flashcards || [];
+  const hasCards = cards.length > 0;
+
+  const handleNext = () => {
+    setIsFlipped(false);
+    if (cards.length === 0) return;
+    setCurrentCard((prev) => (prev + 1) % cards.length);
+  };
+
+  const handlePrev = () => {
+    setIsFlipped(false);
+    if (cards.length === 0) return;
+    setCurrentCard((prev) => (prev - 1 + cards.length) % cards.length);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-        <div className="flex items-center gap-2 mb-4">
-          <CreditCard size={20} />
-          <h2 className="font-black text-xl">RapidRecall Flashcards</h2>
-        </div>
-        <p className="text-white/90 font-medium mb-4">
-          Quick revision cards for {topicResource.topicName}. Master key concepts in minutes.
-        </p>
-        <div className="flex items-center gap-4">
-          <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-            <span className="text-2xl font-black">{topicResource.flashcards.length}</span>
-            <span className="text-sm ml-2 opacity-90">cards available</span>
+      {/* Compact Flashcards Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-4 flex items-center justify-between shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+            <CreditCard size={20} className="text-white" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-white/80 uppercase tracking-wider">RapidRecall</div>
+            <div className="text-sm font-black text-white">{cards.length} flashcards • {topicResource.topicName}</div>
           </div>
         </div>
+        {hasCards && (
+          <div className="text-xs font-black text-white/90 bg-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm">
+            Card {currentCard + 1} / {cards.length}
+          </div>
+        )}
       </div>
 
-      {/* Flashcard Preview - Placeholder for RapidRecall Integration */}
-      <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
-        <div className="text-center py-12 border-2 border-dashed border-slate-300 rounded-lg">
-          <CreditCard size={48} className="text-slate-300 mx-auto mb-4" />
-          <p className="text-sm text-slate-600 font-medium">
-            RapidRecall component will be integrated here with topic filter
-          </p>
+      {/* Flashcard Viewer */}
+      {hasCards ? (
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="p-8">
+            <div className="w-full max-w-3xl mx-auto perspective-1000 relative">
+              <div
+                onClick={() => setIsFlipped(!isFlipped)}
+                className={`group relative w-full aspect-[16/10] transition-all duration-700 transform-style-3d cursor-pointer hover:scale-[1.02] ${isFlipped ? 'rotate-y-180' : ''}`}
+              >
+                {/* Card Front */}
+                <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-white to-purple-50 rounded-2xl p-10 shadow-xl group-hover:shadow-2xl flex flex-col items-center text-center justify-center border-2 border-purple-100 group-hover:border-purple-300 overflow-hidden transition-all">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-t-2xl shadow-lg"></div>
+                  <div className="text-purple-600 font-black text-xs uppercase tracking-[0.3em] mb-6 bg-purple-100 px-4 py-1 rounded-full">{topicResource.topicName}</div>
+                  <div className="flex-1 flex items-center justify-center w-full max-h-[calc(100%-120px)] overflow-y-auto px-4">
+                    <div className="text-2xl md:text-3xl font-black text-slate-900 leading-tight tracking-tight">
+                      <RenderWithMath text={cards[currentCard].term} showOptions={false} compact={false} serif={false} />
+                    </div>
+                  </div>
+                  <div className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em] flex items-center gap-1.5 mt-6">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></div> Click to reveal answer
+                  </div>
+                </div>
+
+                {/* Card Back */}
+                <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-xl flex flex-col border border-slate-700 rotate-y-180 overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-t-2xl"></div>
+
+                  {/* Scrollable content area */}
+                  <div className="flex-1 w-full overflow-y-auto px-8 pt-10 pb-20 scroller-hide">
+                    <div className="flex flex-col items-center justify-center min-h-full space-y-8">
+                      <div className="text-emerald-400 font-black text-sm uppercase tracking-[0.3em] bg-emerald-500/20 px-6 py-2 rounded-full border border-emerald-500/30">Definition</div>
+                      <div className="text-base md:text-lg font-bold text-white leading-relaxed text-center max-w-2xl px-6">
+                        <RenderWithMath text={cards[currentCard].definition} showOptions={false} autoSteps={true} dark={true} compact={false} serif={false} />
+                      </div>
+                      {cards[currentCard].context && (
+                        <div className="text-base text-emerald-200 font-medium italic mt-6 bg-emerald-500/10 px-6 py-3 rounded-xl border border-emerald-500/20">
+                          {cards[currentCard].context}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bottom hint */}
+                  <div className="absolute bottom-6 left-0 right-0 text-center">
+                    <div className="text-xs font-bold text-emerald-300 uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div> Click to flip back
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation */}
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <button
+                  onClick={handlePrev}
+                  className="group w-12 h-12 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-purple-700 hover:border-purple-500 hover:bg-purple-50 transition-all shadow-sm hover:shadow-md"
+                >
+                  <ChevronLeft size={20} className="transition-transform group-hover:-translate-x-0.5" />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="group w-12 h-12 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-purple-700 hover:border-purple-500 hover:bg-purple-50 transition-all shadow-sm hover:shadow-md"
+                >
+                  <ChevronRight size={20} className="transition-transform group-hover:translate-x-0.5" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+          <div className="text-center py-12 border-2 border-dashed border-slate-300 rounded-lg">
+            <CreditCard size={48} className="text-slate-300 mx-auto mb-4" />
+            <p className="text-sm text-slate-600 font-medium">
+              No flashcards available for this topic yet
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -2592,35 +2702,42 @@ const ProgressTab: React.FC<{ topicResource: TopicResource }> = ({ topicResource
       <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
         <h2 className="font-black text-lg text-slate-900 mb-6">Mastery Overview</h2>
         <div className="flex items-center justify-center mb-6">
-          <div className="relative w-48 h-48">
-            <svg className="transform -rotate-90 w-48 h-48">
+          <div className="group relative w-48 h-48">
+            <svg className="transform -rotate-90 w-48 h-48 transition-transform duration-500 group-hover:scale-110">
               <circle cx="96" cy="96" r="88" stroke="#e2e8f0" strokeWidth="12" fill="none" />
               <circle
                 cx="96"
                 cy="96"
                 r="88"
-                stroke="#10b981"
+                stroke="url(#purpleGradient)"
                 strokeWidth="12"
                 fill="none"
                 strokeDasharray={`${(topicResource.masteryLevel / 100) * 552.92} 552.92`}
                 strokeLinecap="round"
+                className="transition-all duration-500"
               />
+              <defs>
+                <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#9333ea" />
+                  <stop offset="100%" stopColor="#7e22ce" />
+                </linearGradient>
+              </defs>
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="text-5xl font-black text-slate-900">{topicResource.masteryLevel}%</div>
-              <div className="text-sm font-medium text-slate-600">Mastery</div>
+              <div className="text-5xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-700">{topicResource.masteryLevel}%</div>
+              <div className="text-sm font-medium text-slate-600 transition-colors duration-300 group-hover:text-purple-600">Mastery</div>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-slate-50 rounded-lg">
-            <div className="text-2xl font-black text-slate-900">{topicResource.questionsAttempted}</div>
-            <div className="text-xs font-medium text-slate-600">Questions Attempted</div>
+          <div className="group text-center p-4 bg-slate-50 rounded-lg hover:bg-purple-50 hover:border hover:border-purple-200 transition-all duration-300 cursor-pointer">
+            <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-700">{topicResource.questionsAttempted}</div>
+            <div className="text-xs font-medium text-slate-600 transition-colors duration-300 group-hover:text-purple-600">Questions Attempted</div>
           </div>
-          <div className="text-center p-4 bg-slate-50 rounded-lg">
-            <div className="text-2xl font-black text-slate-900">{topicResource.questionsCorrect}</div>
-            <div className="text-xs font-medium text-slate-600">Questions Correct</div>
+          <div className="group text-center p-4 bg-slate-50 rounded-lg hover:bg-purple-50 hover:border hover:border-purple-200 transition-all duration-300 cursor-pointer">
+            <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-700">{topicResource.questionsCorrect}</div>
+            <div className="text-xs font-medium text-slate-600 transition-colors duration-300 group-hover:text-purple-600">Questions Correct</div>
           </div>
         </div>
       </div>

@@ -689,31 +689,31 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
         {/* Header - Single Bar Design */}
         <div className="h-auto border-b border-slate-200 bg-white shrink-0">
           {filteredVault.length > 0 ? (
-            <div className="px-8 py-4">
+            <div className="px-6 py-3">
               <div className="flex items-center gap-4">
                 {/* Left: Title + Tabs */}
                 <div className="flex items-center gap-6 shrink-0">
-                  <h1 className="text-2xl font-black text-slate-900 font-outfit tracking-tight leading-none">
+                  <h1 className="text-xl font-black text-slate-900 font-outfit tracking-tight leading-none">
                     Question Bank
                   </h1>
-                  {/* Tabs */}
-                  <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+                  {/* Premium Tabs */}
+                  <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
                     <button
                       onClick={() => setViewTab('summary')}
-                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
                         viewTab === 'summary'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-500 hover:text-slate-700'
+                          ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md'
+                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
                       }`}
                     >
                       Summary
                     </button>
                     <button
                       onClick={() => setViewTab('questions')}
-                      className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${
+                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
                         viewTab === 'questions'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-500 hover:text-slate-700'
+                          ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md'
+                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
                       }`}
                     >
                       Questions
@@ -766,29 +766,29 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                   <button
                     onClick={generateNewQuestion}
                     disabled={isGenerating}
-                    className="flex items-center justify-center gap-2.5 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold disabled:opacity-50 hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl active:scale-[0.98] group whitespace-nowrap"
+                    className="flex items-center justify-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl text-xs font-black disabled:opacity-50 hover:from-purple-700 hover:to-purple-800 hover:shadow-xl transition-all active:scale-[0.98] group whitespace-nowrap"
                   >
                     {isGenerating ? (
                       <Loader2 size={16} className="animate-spin" />
                     ) : (
-                      <Sparkles size={16} className="text-emerald-400 group-hover:rotate-12 transition-transform" />
+                      <Sparkles size={16} className="text-purple-200 group-hover:rotate-12 transition-transform" />
                     )}
-                    <span className="uppercase tracking-wide">
+                    <span className="uppercase tracking-wider">
                       {isGenerating ? 'Generating...' : 'Generate Questions'}
                     </span>
                   </button>
 
                   <button
-                    className="p-2.5 bg-white border-2 border-slate-200 text-slate-600 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all shrink-0"
+                    className="p-2.5 bg-white border-2 border-slate-200 text-slate-600 rounded-xl hover:border-purple-300 hover:bg-purple-50 hover:text-purple-600 transition-all shrink-0 group"
                     title="Filter questions"
                   >
-                    <Filter size={18} />
+                    <Filter size={18} className="transition-all duration-300 group-hover:scale-110 group-hover:rotate-6" />
                   </button>
                   <button
-                    className="p-2.5 bg-white border-2 border-slate-200 text-slate-600 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all shrink-0"
+                    className="p-2.5 bg-white border-2 border-slate-200 text-slate-600 rounded-xl hover:border-purple-300 hover:bg-purple-50 hover:text-purple-600 transition-all shrink-0 group"
                     title="Export paper"
                   >
-                    <Printer size={18} />
+                    <Printer size={18} className="transition-all duration-300 group-hover:scale-110 group-hover:rotate-6" />
                   </button>
                 </div>
               </div>
@@ -821,6 +821,15 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 scroller-hide bg-slate-50/20">
+          {/* PREMIUM DESIGN ACTIVE Banner */}
+          <div className="max-w-7xl mx-auto mb-4">
+            <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-2xl flex items-center justify-center gap-3 shadow-xl animate-pulse">
+              <Sparkles size={24} className="animate-spin" />
+              <span className="text-sm font-black uppercase tracking-wider">✨ Premium Question Bank - Purple Tabs & Buttons Active!</span>
+              <Sparkles size={24} className="animate-spin" />
+            </div>
+          </div>
+
           {/* Loading Spinner */}
           {isLoadingQuestions ? (
             <div className="flex flex-col items-center justify-center h-full">
@@ -1151,7 +1160,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
 
                 return (
                   <div key={q.id}
-                    className="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 transition-all duration-300"
+                    className="group bg-white border-2 border-slate-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:border-purple-300 hover:scale-[1.01] transition-all duration-300"
                   >
                     {/* Card Header - Clean & Organized */}
                     <div className="px-6 py-5 bg-gradient-to-br from-slate-50 to-white border-b-2 border-slate-100">
@@ -1164,11 +1173,15 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                             const qNum = qNumMatch ? qNumMatch[1] : null;
                             return qNum ? (
                               <div className="flex items-center gap-3">
-                                <div className="w-16 h-16 bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl flex items-center justify-center shadow-lg">
-                                  <div className="text-center">
-                                    <div className="text-xs font-bold text-slate-400">Q</div>
-                                    <div className="text-2xl font-black leading-none">{qNum}</div>
+                                <div className="relative">
+                                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-2xl flex items-center justify-center shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-2xl">
+                                    <div className="text-center">
+                                      <div className="text-xs font-bold text-purple-200">Q</div>
+                                      <div className="text-2xl font-black leading-none">{qNum}</div>
+                                    </div>
                                   </div>
+                                  {/* Glow effect on hover */}
+                                  <div className="absolute top-0 left-0 w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500" />
                                 </div>
                                 <div className="h-10 w-px bg-slate-300"></div>
                               </div>
@@ -1178,10 +1191,10 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                           {/* Domain & Topic */}
                           {q.domain && (
                             <div>
-                              <span className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-black uppercase tracking-wider">
+                              <span className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-black uppercase tracking-wider shadow-md transition-all group-hover:scale-105">
                                 {q.domain}
                               </span>
-                              <p className="text-sm font-medium text-slate-500 mt-2">{q.topic}</p>
+                              <p className="text-sm font-medium text-slate-500 mt-2 transition-colors group-hover:text-purple-600">{q.topic}</p>
                             </div>
                           )}
                         </div>
@@ -1294,23 +1307,23 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                                 key={idx}
                                 onClick={() => !hasValidated && handleAnswerSelect(q.id, idx)}
                                 disabled={hasValidated}
-                                className={`relative flex items-start gap-3.5 px-5 py-4 rounded-2xl border border-slate-200 transition-all text-left ${bgColor} ${shadowClass} ${ringClass} ${!hasValidated ? 'cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-slate-300 active:scale-[0.99]' : 'cursor-default'}`}
+                                className={`option-btn group/option relative flex items-start gap-3 px-4 py-3 rounded-xl border border-slate-200 transition-all text-left ${bgColor} ${shadowClass} ${ringClass} ${!hasValidated ? 'cursor-pointer hover:shadow-xl hover:ring-2 hover:ring-purple-400 hover:border-purple-300 hover:bg-purple-50 hover:scale-[1.02] active:scale-[0.99]' : 'cursor-default'}`}
                               >
                                 {/* Option Label */}
-                                <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center font-bold text-lg transition-all ${
+                                <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center font-bold text-base transition-all duration-300 ${
                                   isValidatedCorrect
                                     ? 'bg-emerald-500 text-white shadow-md'
                                     : isValidatedWrong
                                     ? 'bg-rose-500 text-white shadow-md'
                                     : isSelected && !hasValidated
                                     ? 'bg-blue-500 text-white shadow-md'
-                                    : 'bg-slate-100 text-slate-700'
+                                    : 'bg-slate-100 text-slate-700 group-hover/option:bg-purple-100 group-hover/option:text-purple-700 group-hover/option:scale-110 group-hover/option:rotate-3'
                                 }`}>
                                   {optionLabel}
                                 </div>
 
                                 {/* Option Text */}
-                                <div className="flex-1 text-base font-medium text-slate-800 pt-2">
+                                <div className="flex-1 text-sm font-medium text-slate-800 pt-1.5">
                                   <RenderWithMath text={option} showOptions={false} />
                                 </div>
 
@@ -1391,11 +1404,11 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                         {hasSelected && !hasValidated && (
                           <button
                             onClick={() => handleValidateAnswer(q.id)}
-                            className="flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-amber-600 hover:to-orange-700 transition-all"
+                            className="group flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-lg hover:shadow-2xl hover:from-purple-700 hover:to-purple-800 transition-all hover:scale-105"
                             title="Get Answer Evaluated"
                           >
-                            <Award size={20} />
-                            <span className="text-sm font-bold">Get Evaluated</span>
+                            <Award size={20} className="transition-transform group-hover:scale-110 group-hover:rotate-12" />
+                            <span className="text-sm font-bold uppercase tracking-wide">Get Evaluated</span>
                           </button>
                         )}
 
@@ -1404,19 +1417,19 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                           <>
                             <button
                               onClick={() => openModal('solution', q.id)}
-                              className="flex items-center gap-2.5 px-5 py-3 bg-slate-700 text-white rounded-xl shadow-md hover:shadow-lg hover:bg-slate-800 transition-all"
+                              className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
                               title="View Solution"
                             >
-                              <Eye size={18} />
-                              <span className="text-sm font-bold">Solution</span>
+                              <Eye size={18} className="transition-transform group-hover:scale-110" />
+                              <span className="text-sm font-bold uppercase tracking-wide">Solution</span>
                             </button>
                             <button
                               onClick={() => openModal('insights', q.id)}
-                              className="flex items-center gap-2.5 px-5 py-3 bg-slate-700 text-white rounded-xl shadow-md hover:shadow-lg hover:bg-slate-800 transition-all"
+                              className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
                               title="AI Insights"
                             >
-                              <Lightbulb size={18} />
-                              <span className="text-sm font-bold">Insights</span>
+                              <Lightbulb size={18} className="transition-transform group-hover:scale-110 group-hover:rotate-12" />
+                              <span className="text-sm font-bold uppercase tracking-wide">Insights</span>
                             </button>
                           </>
                         )}

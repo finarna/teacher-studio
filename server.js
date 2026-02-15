@@ -245,65 +245,6 @@ app.post('/api/questionbank', async (req, res) => {
     }
 });
 
-// Flashcard caching endpoints
-let flashcardCache = new Map();
-
-// GET flashcards for a specific scan
-app.get('/api/flashcards/:scanId', async (req, res) => {
-    try {
-        const { scanId } = req.params;
-
-        // Try Redis first
-        if (redis.status === 'ready') {
-            const cached = await redis.get(`flashcards:${scanId}`);
-            if (cached) {
-                const cards = JSON.parse(cached);
-                flashcardCache.set(scanId, cards);
-                return res.json({ cards, cached: true });
-            }
-        }
-
-        // Fallback to memory cache
-        if (flashcardCache.has(scanId)) {
-            return res.json({ cards: flashcardCache.get(scanId), cached: true });
-        }
-
-        // No cached cards found
-        res.json({ cards: null, cached: false });
-    } catch (err) {
-        console.error('Failed to fetch flashcards:', err);
-        res.json({ cards: flashcardCache.get(req.params.scanId) || null, cached: false });
-    }
-});
-
-// POST flashcards for a specific scan
-app.post('/api/flashcards', async (req, res) => {
-    try {
-        const { scanId, cards } = req.body;
-        if (!scanId || !cards) {
-            return res.status(400).json({ error: 'Invalid flashcard data' });
-        }
-
-        // Always update memory cache
-        flashcardCache.set(scanId, cards);
-
-        // Attempt Redis sync with 30-day TTL
-        if (redis.status === 'ready') {
-            await redis.set(
-                `flashcards:${scanId}`,
-                JSON.stringify(cards),
-                'EX',
-                60 * 60 * 24 * 30 // 30 days
-            );
-        }
-
-        res.json({ status: 'success', synced: redis.status === 'ready' });
-    } catch (err) {
-        console.error('Failed to save flashcards:', err);
-        res.json({ status: 'success', synced: false });
-    }
-});
-
 // ============================================================================
 // LEARNING JOURNEY API
 // ============================================================================
@@ -493,6 +434,100 @@ app.get('/api/subscription/status', async (req, res) => {
     } catch (err) {
         console.error('Failed to fetch subscription status:', err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================================================
+// Flashcards API
+// ============================================================================
+
+/**
+ * POST /api/flashcards
+ * Save generated flashcards to database
+ */
+app.post('/api/flashcards', async (req, res) => {
+    try {
+        const { scanId, cards } = req.body;
+
+        if (!scanId || !cards || !Array.isArray(cards)) {
+            return res.status(400).json({
+                error: 'Missing required fields: scanId and cards array'
+            });
+        }
+
+        console.log(`💾 Saving ${cards.length} flashcards for scan ${scanId}`);
+
+        // Delete existing flashcards for this scan
+        await supabaseAdmin
+            .from('flashcards')
+            .delete()
+            .eq('scan_id', scanId);
+
+        // Insert new flashcards
+        const flashcardsToInsert = cards.map(card => ({
+            scan_id: scanId,
+            front: card.front,
+            back: card.back,
+            topic: card.topic || null
+        }));
+
+        const { data, error } = await supabaseAdmin
+            .from('flashcards')
+            .insert(flashcardsToInsert)
+            .select();
+
+        if (error) {
+            console.error('❌ Error saving flashcards:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        console.log(`✅ Saved ${data.length} flashcards to database`);
+
+        res.json({
+            success: true,
+            count: data.length,
+            message: `Saved ${data.length} flashcards`
+        });
+    } catch (error) {
+        console.error('❌ Error in POST /api/flashcards:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * GET /api/flashcards/:scanId
+ * Get flashcards for a scan from database
+ */
+app.get('/api/flashcards/:scanId', async (req, res) => {
+    try {
+        const { scanId } = req.params;
+
+        console.log(`📖 Fetching flashcards for scan ${scanId}`);
+
+        const { data, error } = await supabaseAdmin
+            .from('flashcards')
+            .select('*')
+            .eq('scan_id', scanId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('❌ Error fetching flashcards:', error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        // Transform to match the expected format
+        const cards = data.map(fc => ({
+            front: fc.front,
+            back: fc.back,
+            topic: fc.topic
+        }));
+
+        console.log(`✅ Found ${cards.length} flashcards`);
+
+        res.json({ cards });
+    } catch (error) {
+        console.error('❌ Error in GET /api/flashcards:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 

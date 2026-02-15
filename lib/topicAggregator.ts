@@ -130,6 +130,10 @@ export async function aggregateTopicsForUser(
 
       if (flashcardsError) throw flashcardsError;
       flashcardCache = flashcardsData || [];
+      console.log(`🔍 [DEBUG] Flashcard records fetched: ${flashcardCache.length}`);
+      flashcardCache.forEach(fc => {
+        console.log(`  - Scan: ${fc.scan_id?.substring(0, 8)}..., Cards in data: ${fc.data?.length || 0}`);
+      });
     }
 
     // 6. Group questions by OFFICIAL topic ID (using mappings)
@@ -179,18 +183,25 @@ export async function aggregateTopicsForUser(
       const data = fc.data as any;
       if (data && Array.isArray(data)) {
         data.forEach((card: any) => {
-          const topic = card.context || 'General';
+          // Use card.topic (from RapidRecall) or card.context (legacy) for grouping
+          const topic = card.topic || card.context || 'General';
           if (!flashcardsByTopic.has(topic)) {
             flashcardsByTopic.set(topic, []);
           }
           flashcardsByTopic.get(topic)!.push({
             id: card.id || crypto.randomUUID(),
             term: card.term || '',
-            definition: card.definition || '',
-            context: card.context
+            // Map card.def to definition (RapidRecall uses 'def' field)
+            definition: card.def || card.definition || '',
+            context: card.topic || card.context
           });
         });
       }
+    });
+
+    console.log(`🔍 [DEBUG] Flashcards grouped by topic:`);
+    flashcardsByTopic.forEach((cards, topicName) => {
+      console.log(`  - ${topicName}: ${cards.length} cards`);
     });
 
     // 10. Get existing topic_resources to merge with
@@ -222,6 +233,10 @@ export async function aggregateTopicsForUser(
       const topicSketches = sketchesByTopic.get(topicName) || [];
       const topicFlashcards = flashcardsByTopic.get(topicName) || [];
 
+      if (topicFlashcards.length > 0) {
+        console.log(`✅ [DEBUG] Topic "${topicName}" has ${topicFlashcards.length} flashcards`);
+      }
+
       // Calculate difficulty distribution
       const diffDist = calculateDifficultyDistribution(topicQuestions);
 
@@ -247,6 +262,11 @@ export async function aggregateTopicsForUser(
         totalQuestions: topicQuestions.length,
         sourceScanIds: Array.from(new Set(topicQuestions.map(q => q.source || '').filter(Boolean))),
         difficultyDistribution: diffDist,
+
+        // Visual representation (from topics table or existing)
+        representativeSymbol: existing?.representative_symbol || officialTopic.representative_symbol,
+        symbolType: existing?.symbol_type || officialTopic.symbol_type,
+        representativeImageUrl: existing?.representative_image_url || officialTopic.representative_image_url,
 
         // Progress tracking (from existing or defaults)
         masteryLevel,
@@ -317,10 +337,11 @@ export async function getTopicResourceLibrary(
       if (Array.isArray(data)) {
         data.forEach((card: any) => {
           flashcards.push({
-            id: card.id,
-            term: card.term,
-            definition: card.definition,
-            context: card.context
+            id: card.id || crypto.randomUUID(),
+            term: card.term || '',
+            // Map card.def to definition (RapidRecall uses 'def' field)
+            definition: card.def || card.definition || '',
+            context: card.topic || card.context
           });
         });
       }

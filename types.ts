@@ -366,6 +366,11 @@ export interface TopicResource {
     hard: number;
   };
 
+  // Visual representation (AI-generated)
+  representativeSymbol?: string; // Mathematical symbol, emoji, or short text representation
+  symbolType?: 'math' | 'emoji' | 'text'; // Type of symbol for rendering
+  representativeImageUrl?: string; // URL to AI-generated topic image
+
   // Progress tracking
   masteryLevel: number; // 0-100
   studyStage: StudyStage;

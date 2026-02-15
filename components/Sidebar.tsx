@@ -12,7 +12,8 @@ import {
   ChevronRight,
   LogOut,
   User,
-  Map
+  Map,
+  CheckCircle2
 } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
@@ -69,6 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
     { id: 'mastermind', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'learning_journey', label: 'Learning Journey', icon: Map },
     { id: 'scanning', label: 'Paper Scan', icon: ScanLine },
+    { id: 'approval', label: 'Review & Publish', icon: CheckCircle2 },
     { id: 'analysis', label: 'Exam Intelligence', icon: Library },
     { id: 'questions', label: 'Question Bank', icon: FileQuestion },
     { id: 'recall', label: 'Rapid Recall', icon: BrainCircuit },

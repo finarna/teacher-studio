@@ -285,7 +285,7 @@ Return ONLY valid JSON array:
         <div className="flex-1 overflow-y-auto p-8">
           <div className="max-w-4xl mx-auto space-y-6">
             {/* Score Card */}
-            <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl p-8 text-white">
+            <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl p-8 text-white">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-4xl font-black mb-2">{accuracy}%</h2>
@@ -358,10 +358,10 @@ Return ONLY valid JSON array:
             <div className="flex gap-4">
               <button
                 onClick={retakeQuiz}
-                className="flex-1 px-6 py-4 bg-primary-600 text-white rounded-xl font-black hover:bg-primary-700 transition-all flex items-center justify-center gap-2"
+                className="group flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-black hover:from-purple-700 hover:to-purple-800 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
               >
-                <RotateCw size={20} />
-                Retake Quiz
+                <RotateCw size={20} className="transition-transform group-hover:rotate-180" />
+                <span className="uppercase tracking-wide">Retake Quiz</span>
               </button>
               <button
                 onClick={exitQuiz}
@@ -420,7 +420,7 @@ Return ONLY valid JSON array:
           {/* Progress Bar */}
           <div className="mt-4 h-2 bg-slate-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-300"
+              className="h-full bg-gradient-to-r from-purple-600 to-purple-700 transition-all duration-300"
               style={{ width: `${((currentQuestion + 1) / displayedQuestions.length) * 100}%` }}
             />
           </div>
@@ -448,9 +448,9 @@ Return ONLY valid JSON array:
                     }
                   } else {
                     if (idx === selectedAnswer) {
-                      buttonClass += "border-primary-500 bg-primary-50 text-primary-900";
+                      buttonClass += "border-purple-500 bg-purple-50 text-purple-900";
                     } else {
-                      buttonClass += "border-slate-200 hover:border-slate-300 hover:bg-slate-50";
+                      buttonClass += "border-slate-200 hover:border-purple-300 hover:bg-purple-50";
                     }
                   }
 
@@ -470,7 +470,7 @@ Return ONLY valid JSON array:
                               ? 'bg-red-600 text-white'
                               : 'bg-slate-300 text-slate-600'
                             : idx === selectedAnswer
-                            ? 'bg-primary-600 text-white'
+                            ? 'bg-purple-600 text-white'
                             : 'bg-slate-200 text-slate-600'
                         }`}>
                           {String.fromCharCode(65 + idx)}
@@ -504,7 +504,7 @@ Return ONLY valid JSON array:
               <button
                 onClick={submitAnswer}
                 disabled={selectedAnswer === null}
-                className="w-full px-6 py-4 bg-primary-600 text-white rounded-xl font-black hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-6 py-4 bg-purple-600 text-white rounded-xl font-black hover:bg-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {currentQuestion < displayedQuestions.length - 1 ? 'Submit & Next' : 'Submit & Finish'}
                 <ChevronRight size={20} />
@@ -519,7 +519,7 @@ Return ONLY valid JSON array:
                     setShowResults(true);
                   }
                 }}
-                className="w-full px-6 py-4 bg-primary-600 text-white rounded-xl font-black hover:bg-primary-700 transition-all flex items-center justify-center gap-2"
+                className="w-full px-6 py-4 bg-purple-600 text-white rounded-xl font-black hover:bg-purple-700 transition-all flex items-center justify-center gap-2"
               >
                 {currentQuestion < displayedQuestions.length - 1 ? 'Next Question' : 'View Results'}
                 <ChevronRight size={20} />
@@ -580,7 +580,7 @@ Return ONLY valid JSON array:
                 <select
                   value={selectedScan}
                   onChange={(e) => setSelectedScan(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg font-medium focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none"
+                  className="w-full px-4 py-3 border-2 border-slate-200 rounded-lg font-medium focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none"
                 >
                   <option value="">Choose a scan...</option>
                   {filteredScans.map(scan => (
@@ -617,7 +617,7 @@ Return ONLY valid JSON array:
               <button
                 onClick={generateQuiz}
                 disabled={isGenerating || !selectedScan}
-                className="w-full px-6 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-black hover:from-primary-700 hover:to-primary-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-black hover:from-purple-700 hover:to-purple-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
                   <>
@@ -645,7 +645,7 @@ Return ONLY valid JSON array:
                     onClick={() => setSelectedTopic(topic)}
                     className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
                       selectedTopic === topic
-                        ? 'bg-primary-600 text-white'
+                        ? 'bg-purple-600 text-white'
                         : 'bg-white border-2 border-slate-200 text-slate-700 hover:border-slate-300'
                     }`}
                   >
@@ -655,7 +655,7 @@ Return ONLY valid JSON array:
               </div>
 
               {/* Start Quiz Button */}
-              <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-6 text-white">
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-2xl font-black mb-2">
@@ -670,7 +670,7 @@ Return ONLY valid JSON array:
 
                 <button
                   onClick={startQuiz}
-                  className="w-full px-6 py-4 bg-white text-primary-600 rounded-xl font-black hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                  className="group w-full px-6 py-4 bg-white text-purple-700 rounded-xl font-black hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                 >
                   <Play size={20} />
                   Start Quiz

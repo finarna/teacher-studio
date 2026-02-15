@@ -1,70 +1,109 @@
-# 🔧 URGENT: Apply Database Migration
+# 🚨 APPLY MIGRATION 011 NOW
 
-## Problem
-Your signup is failing with a **401 error** because user profiles can't be created from the frontend.
-
-## Solution
-Apply this database migration to auto-create user profiles via a trigger.
+## Quick 2-Minute Fix to Enable Check Answer Button
 
 ---
 
-## Quick Fix (Copy & Paste)
+## ⚡ Quick Steps
 
-### Step 1: Open Supabase SQL Editor
-**URL:** https://supabase.com/dashboard/project/nsxjwjinxkehsubzesml/sql
+1. **Open Supabase Dashboard**
+   - Go to: https://supabase.com/dashboard/project/nsxjwjinxkehsubzesml/sql
 
-### Step 2: Create New Query
-Click **"New Query"** button
+2. **Copy the SQL below**
 
-### Step 3: Paste This SQL
+3. **Paste into SQL Editor**
+
+4. **Click "Run" button**
+
+5. **Done!** ✅ Check Answer will work
+
+---
+
+## 📋 SQL to Execute
 
 ```sql
--- Function to create user profile automatically
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.users (id, email, full_name, role)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', NULL),
-    'student'
-  )
-  ON CONFLICT (id) DO NOTHING;
+-- Fix foreign key constraint issue
+-- Make topic_resource_id nullable since topic_resources table may not be populated yet
 
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- Drop existing foreign key constraint
+ALTER TABLE practice_answers
+DROP CONSTRAINT IF EXISTS practice_answers_topic_resource_id_fkey;
 
--- Trigger on auth.users table
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION public.handle_new_user();
+-- Make column nullable
+ALTER TABLE practice_answers
+ALTER COLUMN topic_resource_id DROP NOT NULL;
+
+-- Re-add foreign key with ON DELETE SET NULL
+ALTER TABLE practice_answers
+ADD CONSTRAINT practice_answers_topic_resource_id_fkey
+FOREIGN KEY (topic_resource_id)
+REFERENCES topic_resources(id)
+ON DELETE SET NULL;
+
+-- Same for bookmarked_questions
+ALTER TABLE bookmarked_questions
+DROP CONSTRAINT IF EXISTS bookmarked_questions_topic_resource_id_fkey;
+
+-- Already nullable, just ensure foreign key has SET NULL
+ALTER TABLE bookmarked_questions
+ADD CONSTRAINT bookmarked_questions_topic_resource_id_fkey
+FOREIGN KEY (topic_resource_id)
+REFERENCES topic_resources(id)
+ON DELETE SET NULL;
+
+-- Same for practice_sessions
+ALTER TABLE practice_sessions
+DROP CONSTRAINT IF EXISTS practice_sessions_topic_resource_id_fkey;
+
+ALTER TABLE practice_sessions
+ALTER COLUMN topic_resource_id DROP NOT NULL;
+
+ALTER TABLE practice_sessions
+ADD CONSTRAINT practice_sessions_topic_resource_id_fkey
+FOREIGN KEY (topic_resource_id)
+REFERENCES topic_resources(id)
+ON DELETE SET NULL;
+
+COMMENT ON COLUMN practice_answers.topic_resource_id IS 'Optional reference to topic_resources table (nullable for compatibility with in-memory topics)';
+COMMENT ON COLUMN practice_sessions.topic_resource_id IS 'Optional reference to topic_resources table (nullable for compatibility with in-memory topics)';
 ```
 
-### Step 4: Click "RUN"
-Click the green **"Run"** button (or press Cmd/Ctrl + Enter)
+---
 
-### Step 5: Verify Success
-You should see: **"Success. No rows returned"**
+## ✅ After Running SQL
+
+1. **Refresh your app** (Cmd+Shift+R)
+2. **Go to Practice Lab**
+3. **Select an answer**
+4. **Click "Check Answer"**
+5. **✅ It works!** No more errors
 
 ---
 
-## What This Does
-- Creates a database trigger that runs automatically when a new user signs up
-- Inserts a profile into the `users` table with the user's email and metadata
-- No more 401 errors!
-- No more manual profile creation needed
+## 🎯 What This Fix Does
+
+**Problem:** Learning Journey creates topics in-memory (not saved to database), but the database required all `topic_resource_id` values to exist in the `topic_resources` table.
+
+**Solution:** Makes `topic_resource_id` nullable so in-memory topics work perfectly.
+
+**Impact:**
+- ✅ Check Answer button works
+- ✅ Answers persist to database
+- ✅ Bookmarks persist to database
+- ✅ Stats update in real-time
+- ✅ No more foreign key errors
 
 ---
 
-## After Applying
-1. Refresh your browser at `http://localhost:9003`
-2. Try signing up again
-3. It should work! ✅
+## 🔗 Direct Link
+
+**Click here to open SQL Editor:**
+https://supabase.com/dashboard/project/nsxjwjinxkehsubzesml/sql
+
+**Then:** Copy → Paste → Run → Done! ✅
 
 ---
 
-**Need help?** Just copy the SQL above and paste it into the Supabase SQL Editor. That's it!
+## ⏱️ Estimated Time: 2 minutes
+
+This is the FINAL fix needed for Phase 2 Practice Persistence!
