@@ -140,18 +140,19 @@ const AdminScanApproval: React.FC = () => {
   const loadScans = async () => {
     setLoading(true);
     try {
-      // Get all scans (not just completed ones - we'll filter by status more flexibly)
+      // OPTIMIZED: Only fetch minimal scan metadata (no heavy JSONB fields)
       const { data: scanData, error: scanError } = await supabase
         .from('scans')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('id, name, subject, exam_context, status, is_system_scan, created_at, year, analysis_data')
+        .order('created_at', { ascending: false })
+        .limit(50); // Limit to 50 most recent
 
       if (scanError) {
         console.error('Error loading scans:', scanError);
         throw scanError;
       }
 
-      console.log('📊 Loaded scans:', scanData);
+      console.log('📊 Loaded scans:', scanData?.length || 0);
 
       // Filter for completed scans (case-insensitive)
       const completedScans = (scanData || []).filter(scan =>
@@ -161,95 +162,104 @@ const AdminScanApproval: React.FC = () => {
 
       console.log('✅ Completed scans:', completedScans.length);
 
-      // For each scan, get question and mapping counts
-      const scansWithCounts = await Promise.all(
-        completedScans.map(async (scan) => {
-          // Get total questions
-          const { count: totalQuestions } = await supabase
-            .from('questions')
-            .select('*', { count: 'exact', head: true })
-            .eq('scan_id', scan.id);
+      if (completedScans.length === 0) {
+        setScans([]);
+        setLoading(false);
+        return;
+      }
 
-          // Get question IDs for this scan
-          const { data: questionIds } = await supabase
-            .from('questions')
-            .select('id')
-            .eq('scan_id', scan.id);
+      // OPTIMIZED: Get all question counts in ONE query using aggregation
+      const scanIds = completedScans.map(s => s.id);
 
-          // Get mapped questions count
-          let mappedQuestions = 0;
-          if (questionIds && questionIds.length > 0) {
-            const questionIdList = questionIds.map(q => q.id);
-            const { count } = await supabase
-              .from('topic_question_mapping')
-              .select('question_id', { count: 'exact', head: true })
-              .in('question_id', questionIdList);
-            mappedQuestions = count || 0;
+      const { data: questionCounts } = await supabase
+        .from('questions')
+        .select('scan_id')
+        .in('scan_id', scanIds);
+
+      // Group by scan_id
+      const countsByScan = (questionCounts || []).reduce((acc, q) => {
+        acc[q.scan_id] = (acc[q.scan_id] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // OPTIMIZED: Get all mapped counts in ONE query
+      const { data: allQuestionIds } = await supabase
+        .from('questions')
+        .select('id, scan_id')
+        .in('scan_id', scanIds);
+
+      const questionIdList = (allQuestionIds || []).map(q => q.id);
+
+      let mappingsByScan: Record<string, number> = {};
+      if (questionIdList.length > 0) {
+        const { data: mappings } = await supabase
+          .from('topic_question_mapping')
+          .select('question_id')
+          .in('question_id', questionIdList);
+
+        // Map back to scan IDs
+        const questionToScan = (allQuestionIds || []).reduce((acc, q) => {
+          acc[q.id] = q.scan_id;
+          return acc;
+        }, {} as Record<string, string>);
+
+        (mappings || []).forEach(m => {
+          const scanId = questionToScan[m.question_id];
+          if (scanId) {
+            mappingsByScan[scanId] = (mappingsByScan[scanId] || 0) + 1;
           }
+        });
+      }
 
-          const questionCount = totalQuestions || 0;
-          const mappedCount = mappedQuestions || 0;
-          const unmappedCount = questionCount - mappedCount;
-          const successRate = questionCount > 0
-            ? Math.round((mappedCount / questionCount) * 100)
-            : 0;
+      // Build scan info with counts (no per-scan queries!)
+      const scansWithCounts = completedScans.map(scan => {
+        const questionCount = countsByScan[scan.id] || 0;
+        const mappedCount = mappingsByScan[scan.id] || 0;
+        const unmappedCount = questionCount - mappedCount;
+        const successRate = questionCount > 0
+          ? Math.round((mappedCount / questionCount) * 100)
+          : 0;
 
-          // Check for visual/sketch notes (multiple sources)
-          // Main source: topicBasedSketches from scan.analysis_data
-          let sketchCount = 0;
-          if (scan.analysis_data?.topicBasedSketches) {
-            sketchCount = Object.keys(scan.analysis_data.topicBasedSketches).length;
-          }
+        // Calculate visual notes count from analysis_data.topicBasedSketches
+        const visualNotesCount = scan.analysis_data?.topicBasedSketches
+          ? Object.keys(scan.analysis_data.topicBasedSketches).length
+          : 0;
 
-          // Check for flashcards from flashcards table
-          // Flashcards are stored as JSONB array in the 'data' column
-          let flashcardCount = 0;
-          const { data: fcData, error: fcError } = await supabase
-            .from('flashcards')
-            .select('data')
-            .eq('scan_id', scan.id)
-            .single();
+        // Debug logging
+        if (scan.id === '4f4b4577-25f2-47d4-9b1b-48e3e6d4b105') {
+          console.log('🔍 [DEBUG] Scan data for Math scan:', {
+            hasAnalysisData: !!scan.analysis_data,
+            hasTopicBasedSketches: !!scan.analysis_data?.topicBasedSketches,
+            topicSketchKeys: scan.analysis_data?.topicBasedSketches ? Object.keys(scan.analysis_data.topicBasedSketches) : [],
+            visualNotesCount
+          });
+        }
 
-          // Count cards in the data array
-          if (!fcError && fcData?.data && Array.isArray(fcData.data)) {
-            flashcardCount = fcData.data.length;
-          }
+        // Calculate flashcards count from analysis_data (TODO: implement when flashcards are added)
+        const flashcardsCount = 0; // Placeholder
 
-          // Check if exam analysis exists (from analysis_data field)
-          const hasExamAnalysis = scan.analysis_data &&
-            (scan.analysis_data.difficulty_distribution ||
-             scan.analysis_data.topic_distribution ||
-             scan.analysis_data.summary);
-
-          return {
-            id: scan.id,
-            paper_name: scan.paper_name || 'Untitled Scan',
-            subject: scan.subject,
-            exam_context: scan.exam_context,
-            status: scan.status,
-            is_system_scan: scan.is_system_scan || false,
-            created_at: scan.created_at,
-            question_count: questionCount,
-            mapped_count: mappedCount,
-            unmapped_count: unmappedCount,
-            mapping_success_rate: successRate,
-            has_visual_notes: (sketchCount || 0) > 0,
-            has_flashcards: (flashcardCount || 0) > 0,
-            has_exam_analysis: hasExamAnalysis || false,
-            visual_notes_count: sketchCount || 0,
-            flashcards_count: flashcardCount || 0
-          };
-        })
-      );
+        return {
+          id: scan.id,
+          paper_name: scan.name || 'Untitled Scan',
+          subject: scan.subject,
+          exam_context: scan.exam_context,
+          status: scan.status,
+          is_system_scan: scan.is_system_scan || false,
+          created_at: scan.created_at,
+          question_count: questionCount,
+          mapped_count: mappedCount,
+          unmapped_count: unmappedCount,
+          mapping_success_rate: successRate,
+          // Actual counts from database
+          has_visual_notes: visualNotesCount > 0,
+          has_flashcards: flashcardsCount > 0,
+          has_exam_analysis: questionCount > 0,
+          visual_notes_count: visualNotesCount,
+          flashcards_count: flashcardsCount
+        };
+      });
 
       setScans(scansWithCounts);
-
-      if (scansWithCounts.length === 0) {
-        console.warn('⚠️ No completed scans found. Total scans in DB:', scanData?.length || 0);
-        if (scanData && scanData.length > 0) {
-          console.log('📋 All scans:', scanData.map(s => ({ id: s.id, paper_name: s.paper_name, status: s.status })));
-        }
-      }
     } catch (error) {
       console.error('❌ Error loading scans:', error);
       alert('Failed to load scans. Check console for details.');
@@ -261,9 +271,17 @@ const AdminScanApproval: React.FC = () => {
   const publishScan = async (scanId: string) => {
     setPublishing(scanId);
     try {
-      // First, unpublish any other scans for the same subject/exam
-      const scan = scans.find(s => s.id === scanId);
-      if (!scan) return;
+      // Fetch fresh scan data from database (with all fields)
+      const { data: scan, error: fetchError } = await supabase
+        .from('scans')
+        .select('*')
+        .eq('id', scanId)
+        .single();
+
+      if (fetchError || !scan) {
+        console.error('❌ Error fetching scan:', fetchError);
+        return;
+      }
 
       console.log(`📤 Publishing scan ${scanId}...`);
 
@@ -303,15 +321,77 @@ const AdminScanApproval: React.FC = () => {
         .eq('exam_context', scan.exam_context)
         .neq('id', scanId);
 
-      // Step 4: Publish this scan
+      // Step 4: Extract year from filename (if not already set)
+      const extractYearFromFilename = (name: string): string | null => {
+        if (!name) return null;
+        // Match 4-digit year (1900-2099)
+        const yearMatch = name.match(/\b(19|20)\d{2}\b/);
+        return yearMatch ? yearMatch[0] : null;
+      };
+
+      console.log(`📋 Scan object:`, { id: scan.id, name: scan.name, year: scan.year, analysis_data_exists: !!scan.analysis_data });
+      const extractedYear = scan.year || extractYearFromFilename(scan.name || '');
+      console.log(`📅 Year extracted: ${extractedYear} from filename: ${scan.name}`);
+
+      // Step 5: Publish this scan with year field
       const { error: publishError } = await supabase
         .from('scans')
-        .update({ is_system_scan: true })
+        .update({
+          is_system_scan: true,
+          year: extractedYear  // ✅ Set year field
+        })
         .eq('id', scanId);
 
       if (publishError) throw publishError;
 
-      // Step 5: Automatically map questions to official topics
+      // Step 5: Copy questions from analysis_data.questions to questions table
+      console.log('📋 Copying questions from analysis_data to questions table...');
+      const questionsToInsert = scan.analysis_data?.questions || [];
+
+      if (questionsToInsert.length > 0) {
+        // Helper function to normalize difficulty values
+        const normalizeDifficulty = (diff: string | undefined): 'Easy' | 'Moderate' | 'Hard' => {
+          if (!diff) return 'Moderate';
+          const normalized = diff.trim().toLowerCase();
+          if (normalized === 'easy') return 'Easy';
+          if (normalized === 'hard') return 'Hard';
+          if (normalized === 'moderate' || normalized === 'medium' || normalized === 'average') return 'Moderate';
+          return 'Moderate'; // Default fallback
+        };
+
+        // Transform analysis_data questions to match questions table schema
+        const questionsData = questionsToInsert.map((q: any, index: number) => ({
+          scan_id: scanId,
+          text: q.text || q.question || '',
+          marks: parseInt(q.marks) || 1,
+          difficulty: normalizeDifficulty(q.difficulty),
+          topic: q.topic || '',
+          domain: q.domain || '',
+          blooms: q.blooms || 'Understanding',
+          options: q.options || [],
+          solution_steps: q.solutionSteps || q.solution_steps || [],
+          exam_tip: q.examTip || q.exam_tip || null,
+          question_order: index,
+          subject: scan.subject,
+          exam_context: scan.exam_context,
+          year: extractedYear || null,  // ✅ Use extracted year
+        }));
+
+        // Insert questions into questions table
+        const { data: insertedQuestions, error: insertError } = await supabase
+          .from('questions')
+          .insert(questionsData)
+          .select('id, topic');
+
+        if (insertError) {
+          console.error('❌ Error inserting questions:', insertError);
+          throw insertError;
+        }
+
+        console.log(`✅ Inserted ${insertedQuestions?.length || 0} questions into questions table`);
+      }
+
+      // Step 6: Automatically map questions to official topics
       console.log('🔗 Auto-mapping questions to topics...');
       await mapScanQuestionsToTopics(scanId, scan.subject);
 

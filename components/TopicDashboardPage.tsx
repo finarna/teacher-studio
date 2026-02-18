@@ -158,8 +158,8 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
     <div className="bg-slate-50/50 font-instrument text-slate-900">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-3">
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-4">
               <button
                 onClick={onBack}
@@ -226,103 +226,85 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
           </div>
 
           {/* Compact Premium Stats Grid */}
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-4 gap-2">
             {/* Mastered */}
-            <div className="group relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 rounded-xl p-4 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
-              <div className="absolute inset-0 bg-grid-white/10 opacity-20"></div>
-              {/* Compact Decorative Background Icon */}
-              <div className="absolute -bottom-2 -right-2 opacity-10 group-hover:opacity-15 transition-all duration-300">
-                <Trophy size={60} className="text-white" />
+            <div className="group relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 rounded-lg p-2.5 overflow-hidden hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer">
+              <div className="absolute -bottom-1 -right-1 opacity-10">
+                <Trophy size={40} className="text-white" />
               </div>
               <div className="relative">
-                <div className="flex items-center justify-between mb-2">
-                  {/* Compact Icon Badge */}
-                  <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
-                    <Trophy size={20} className="text-white" />
+                <div className="flex items-center justify-between mb-1">
+                  <div className="w-7 h-7 rounded-md bg-white/20 flex items-center justify-center">
+                    <Trophy size={14} className="text-white" />
                   </div>
-                  <div className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-sm">
-                    <span className="text-[8px] font-black text-white uppercase tracking-wider">Elite</span>
-                  </div>
+                  <span className="text-[7px] font-black text-white uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20">Elite</span>
                 </div>
-                <div className="text-3xl font-black text-white mb-1 tracking-tight">{masteredTopics}</div>
-                <div className="text-[10px] font-black text-emerald-100 uppercase tracking-wider">Mastered Topics</div>
+                <div className="text-2xl font-black text-white leading-none">{masteredTopics}</div>
+                <div className="text-[9px] font-bold text-emerald-100 uppercase tracking-wide mt-0.5">Mastered</div>
               </div>
             </div>
 
             {/* In Progress */}
-            <div className="group relative bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-xl p-4 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
-              <div className="absolute inset-0 bg-grid-white/10 opacity-20"></div>
-              <div className="absolute -bottom-2 -right-2 opacity-10 group-hover:opacity-15 transition-all duration-300">
-                <TrendingUp size={60} className="text-white" />
+            <div className="group relative bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-lg p-2.5 overflow-hidden hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer">
+              <div className="absolute -bottom-1 -right-1 opacity-10">
+                <TrendingUp size={40} className="text-white" />
               </div>
               <div className="relative">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
-                    <TrendingUp size={20} className="text-white" />
+                <div className="flex items-center justify-between mb-1">
+                  <div className="w-7 h-7 rounded-md bg-white/20 flex items-center justify-center">
+                    <TrendingUp size={14} className="text-white" />
                   </div>
-                  <div className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-sm">
-                    <span className="text-[8px] font-black text-white uppercase tracking-wider">Active</span>
-                  </div>
+                  <span className="text-[7px] font-black text-white uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20">Active</span>
                 </div>
-                <div className="text-3xl font-black text-white mb-1 tracking-tight">{inProgressTopics}</div>
-                <div className="text-[10px] font-black text-blue-100 uppercase tracking-wider">In Progress</div>
+                <div className="text-2xl font-black text-white leading-none">{inProgressTopics}</div>
+                <div className="text-[9px] font-bold text-blue-100 uppercase tracking-wide mt-0.5">In Progress</div>
               </div>
             </div>
 
             {/* Not Started */}
-            <div className="group relative bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 rounded-xl p-4 overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
-              <div className="absolute inset-0 bg-grid-white/10 opacity-20"></div>
-              <div className="absolute -bottom-2 -right-2 opacity-10 group-hover:opacity-15 transition-all duration-300">
-                <Circle size={60} className="text-white" />
+            <div className="group relative bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 rounded-lg p-2.5 overflow-hidden hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer">
+              <div className="absolute -bottom-1 -right-1 opacity-10">
+                <Circle size={40} className="text-white" />
               </div>
               <div className="relative">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
-                    <Circle size={20} className="text-white" />
+                <div className="flex items-center justify-between mb-1">
+                  <div className="w-7 h-7 rounded-md bg-white/20 flex items-center justify-center">
+                    <Circle size={14} className="text-white" />
                   </div>
-                  <div className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-sm">
-                    <span className="text-[8px] font-black text-white uppercase tracking-wider">Queue</span>
-                  </div>
+                  <span className="text-[7px] font-black text-white uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20">Queue</span>
                 </div>
-                <div className="text-3xl font-black text-white mb-1 tracking-tight">{notStartedTopics}</div>
-                <div className="text-[10px] font-black text-slate-300 uppercase tracking-wider">Not Started</div>
+                <div className="text-2xl font-black text-white leading-none">{notStartedTopics}</div>
+                <div className="text-[9px] font-bold text-slate-300 uppercase tracking-wide mt-0.5">Not Started</div>
               </div>
             </div>
 
             {/* Average Mastery */}
-            <div className="group relative bg-white rounded-xl p-4 border-2 border-slate-200 overflow-hidden hover:shadow-xl hover:scale-[1.02] hover:border-purple-300 transition-all duration-300 cursor-pointer">
-              <div className="absolute -bottom-2 -right-2 opacity-5 group-hover:opacity-10 transition-all duration-300">
-                <Target size={60} className="text-purple-600" />
+            <div className="group relative bg-white rounded-lg p-2.5 border-2 border-slate-200 overflow-hidden hover:shadow-lg hover:scale-[1.01] hover:border-purple-300 transition-all cursor-pointer">
+              <div className="absolute -bottom-1 -right-1 opacity-5">
+                <Target size={40} className="text-purple-600" />
               </div>
               <div className="relative">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 group-hover:bg-purple-200">
-                    <Target size={20} className="text-purple-600" />
+                <div className="flex items-center justify-between mb-1">
+                  <div className="w-7 h-7 rounded-md bg-purple-100 flex items-center justify-center group-hover:bg-purple-200">
+                    <Target size={14} className="text-purple-600" />
                   </div>
-                  <div className="px-2 py-0.5 rounded-md bg-slate-100 group-hover:bg-purple-100 transition-colors">
-                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-wider group-hover:text-purple-700 transition-colors">Overall</span>
-                  </div>
+                  <span className="text-[7px] font-black text-slate-600 uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 group-hover:text-purple-700 group-hover:bg-purple-100">Overall</span>
                 </div>
-                <div className="text-3xl font-black text-slate-900 mb-1 tracking-tight transition-colors group-hover:text-purple-700">{averageMastery}%</div>
-                <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider transition-colors group-hover:text-purple-600">Avg Mastery</div>
-                {/* Compact Progress bar */}
-                <div className="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-purple-500 to-purple-600"
-                    style={{ width: `${averageMastery}%` }}
-                  />
+                <div className="text-2xl font-black text-slate-900 leading-none group-hover:text-purple-700">
+                  <span>{averageMastery}</span><span className="text-lg">%</span>
                 </div>
+                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wide mt-0.5 group-hover:text-purple-600">Avg Mastery</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-6 py-3">
 
         {/* AI Recommendations & Insights */}
         {(aiRecommendation || topics.filter(t => t.masteryLevel > 0 && t.masteryLevel < 40).length > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             {/* AI Recommendation */}
             {aiRecommendation && (
               <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-6 text-white overflow-hidden shadow-lg group hover:shadow-xl transition-shadow">
@@ -375,7 +357,9 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="font-black text-sm text-orange-900">{topic.topicName}</div>
-                            <div className="text-xs text-orange-700 font-medium mt-0.5">{topic.masteryLevel}% mastery</div>
+                            <div className="text-xs text-orange-700 font-medium mt-0.5">
+                              <span>{topic.masteryLevel}</span><span className="text-[10px]">%</span> mastery
+                            </div>
                           </div>
                           <div className="text-orange-400 group-hover:text-orange-600 transition-colors">
                             <TrendingUp size={18} />
@@ -393,7 +377,7 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
         <div>
           {/* Domain Filter (for list view) */}
             {viewMode === 'list' && (
-              <div className="mb-6">
+              <div className="mb-3">
                 <div className="flex items-center gap-2 overflow-x-auto pb-2">
                   <button
                     onClick={() => setSelectedDomain('all')}
@@ -424,7 +408,7 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
 
             {/* Premium Card Grid - World-Class UX */}
             {viewMode === 'heatmap' && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                 {topics.map(topic => {
                   const statusInfo = getStatusInfo(topic);
                   const mastery = topic.masteryLevel;
@@ -461,79 +445,52 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                     <button
                       key={topic.id}
                       onClick={() => onSelectTopic(topic.topicId)}
-                      className={`group relative bg-gradient-to-br ${getGradient(mastery)} border-2 ${getBorderColor(mastery)} rounded-2xl p-6 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 text-left overflow-hidden`}
+                      className={`group relative bg-gradient-to-br ${getGradient(mastery)} border-2 ${getBorderColor(mastery)} rounded-lg p-3 hover:shadow-lg hover:scale-[1.005] transition-all text-left overflow-hidden`}
                     >
                       {/* Decorative Elements */}
-                      <div className="absolute top-0 right-0 w-40 h-40 bg-white/30 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full blur-2xl"></div>
 
                       <div className="relative">
                         {/* Header */}
-                        <div className="flex items-start justify-between gap-4 mb-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="w-12 h-12 rounded-xl bg-white/80 backdrop-blur-sm flex items-center justify-center text-2xl shadow-lg border border-white/50">
-                                {subjectConfig.iconEmoji}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-black text-lg text-slate-900 mb-1 leading-tight line-clamp-2">
-                                  {topic.topicName}
-                                </h3>
-                              </div>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-white/80 backdrop-blur-sm flex items-center justify-center text-xl shadow border border-white/50 flex-shrink-0">
+                              {subjectConfig.iconEmoji}
                             </div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 backdrop-blur-sm ${statusInfo.color}`}>
-                                <span className="text-xs">{statusInfo.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-black text-sm text-slate-900 leading-tight line-clamp-1">
+                                {topic.topicName}
+                              </h3>
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border backdrop-blur-sm mt-1 ${statusInfo.color}`}>
+                                <span className="text-[9px]">{statusInfo.icon}</span>
                                 {statusInfo.label}
                               </span>
-                              {mastery < 50 && mastery > 0 && (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-red-500 text-white border-2 border-red-600 shadow-lg">
-                                  <AlertCircle size={10} />
-                                  CRITICAL
-                                </span>
-                              )}
                             </div>
                           </div>
 
-                          {/* Mastery Circle */}
-                          <div className="relative">
-                            <div className="w-20 h-20 rounded-2xl bg-white/90 backdrop-blur-sm shadow-xl border-2 border-white/50 flex flex-col items-center justify-center">
-                              <div className={`text-3xl font-black leading-none ${mastery === 0 ? 'text-slate-400' : mastery < 30 ? 'text-red-600' : mastery < 50 ? 'text-orange-600' : mastery < 70 ? 'text-blue-600' : mastery < 85 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                          {/* Mastery Badge - Compact */}
+                          <div className="relative flex-shrink-0">
+                            <div className="w-14 h-14 rounded-lg bg-white/90 backdrop-blur-sm shadow border border-white/50 flex flex-col items-center justify-center">
+                              <div className={`text-xl font-black leading-none ${mastery === 0 ? 'text-slate-400' : mastery < 30 ? 'text-red-600' : mastery < 50 ? 'text-orange-600' : mastery < 70 ? 'text-blue-600' : mastery < 85 ? 'text-amber-600' : 'text-emerald-600'}`}>
                                 {mastery}
                               </div>
-                              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">%</div>
+                              <div className="text-[8px] font-bold text-slate-500 uppercase">%</div>
                             </div>
-                            <div className="absolute -top-1 -right-1 px-2 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider">
+                            <div className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded bg-slate-900 text-white text-[7px] font-black uppercase tracking-wider">
                               Mastery
                             </div>
                           </div>
                         </div>
 
-                        {/* Metrics Grid */}
-                        <div className="grid grid-cols-3 gap-3 mb-4">
-                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
-                            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Yield</div>
-                            <div className="text-2xl font-black text-slate-900">{Math.round(topic.averageAccuracy)}%</div>
-                          </div>
-                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
-                            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Points</div>
-                            <div className="text-2xl font-black text-slate-900">{topic.questionsAttempted}</div>
-                          </div>
-                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
-                            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total</div>
-                            <div className="text-2xl font-black text-slate-900">{topic.totalQuestions}</div>
-                          </div>
-                        </div>
-
-                        {/* Premium Progress Bar */}
+                        {/* Compact Progress Bar */}
                         <div className="relative">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Progress</span>
-                            <span className="text-xs font-black text-slate-900">{mastery}%</span>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Progress</span>
+                            <span className="text-[9px] font-black text-slate-900">{mastery}%</span>
                           </div>
-                          <div className="h-2.5 bg-white/60 backdrop-blur-sm rounded-full overflow-hidden border border-white/50 shadow-inner">
+                          <div className="h-1.5 bg-white/60 backdrop-blur-sm rounded-full overflow-hidden border border-white/50">
                             <div
-                              className={`h-full ${getAccentColor(mastery)} rounded-full transition-all duration-500 shadow-lg`}
+                              className={`h-full ${getAccentColor(mastery)} rounded-full transition-all duration-500`}
                               style={{ width: `${mastery}%` }}
                             />
                           </div>
@@ -547,7 +504,7 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
 
             {/* Premium List View */}
             {viewMode === 'list' && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {filteredTopics.map(topic => {
                   const statusInfo = getStatusInfo(topic);
                   const mastery = topic.masteryLevel;
@@ -583,81 +540,41 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                     <button
                       key={topic.id}
                       onClick={() => onSelectTopic(topic.topicId)}
-                      className={`group relative w-full bg-gradient-to-br ${getGradient(mastery)} border-2 ${getBorderColor(mastery)} rounded-2xl p-6 hover:shadow-2xl hover:scale-[1.005] transition-all duration-300 text-left overflow-hidden`}
+                      className={`group relative w-full bg-gradient-to-br ${getGradient(mastery)} border-2 ${getBorderColor(mastery)} rounded-lg p-3 hover:shadow-lg hover:scale-[1.002] transition-all text-left overflow-hidden`}
                     >
                       {/* Decorative Elements */}
-                      <div className="absolute top-0 right-0 w-40 h-40 bg-white/30 rounded-full blur-3xl"></div>
-                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full blur-2xl"></div>
 
-                      <div className="relative flex items-start gap-6">
+                      <div className="relative flex items-center gap-3">
                         {/* Icon */}
-                        <div className="w-14 h-14 rounded-xl bg-white/80 backdrop-blur-sm flex items-center justify-center text-2xl shadow-lg border border-white/50 flex-shrink-0">
+                        <div className="w-10 h-10 rounded-lg bg-white/80 backdrop-blur-sm flex items-center justify-center text-xl shadow border border-white/50 flex-shrink-0">
                           {subjectConfig.iconEmoji}
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          {/* Header Row */}
-                          <div className="flex items-start justify-between gap-6 mb-3">
+                          <div className="flex items-center justify-between gap-3">
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-black text-lg text-slate-900 mb-2 leading-tight">
+                              <h3 className="font-black text-sm text-slate-900 leading-tight line-clamp-1 mb-1">
                                 {topic.topicName}
                               </h3>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 backdrop-blur-sm ${statusInfo.color}`}>
-                                  <span className="text-xs">{statusInfo.icon}</span>
-                                  {statusInfo.label}
-                                </span>
-                                {mastery < 50 && mastery > 0 && (
-                                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-red-500 text-white border-2 border-red-600 shadow-lg">
-                                    <AlertCircle size={10} />
-                                    CRITICAL
-                                  </span>
-                                )}
-                              </div>
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border backdrop-blur-sm ${statusInfo.color}`}>
+                                <span className="text-[9px]">{statusInfo.icon}</span>
+                                {statusInfo.label}
+                              </span>
                             </div>
 
-                            {/* Mastery Badge */}
+                            {/* Mastery Badge - Compact */}
                             <div className="relative flex-shrink-0">
-                              <div className="w-20 h-20 rounded-2xl bg-white/90 backdrop-blur-sm shadow-xl border-2 border-white/50 flex flex-col items-center justify-center">
-                                <div className={`text-3xl font-black leading-none ${mastery === 0 ? 'text-slate-400' : mastery < 30 ? 'text-red-600' : mastery < 50 ? 'text-orange-600' : mastery < 70 ? 'text-blue-600' : mastery < 85 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                              <div className="w-14 h-14 rounded-lg bg-white/90 backdrop-blur-sm shadow border border-white/50 flex flex-col items-center justify-center">
+                                <div className={`text-xl font-black leading-none ${mastery === 0 ? 'text-slate-400' : mastery < 30 ? 'text-red-600' : mastery < 50 ? 'text-orange-600' : mastery < 70 ? 'text-blue-600' : mastery < 85 ? 'text-amber-600' : 'text-emerald-600'}`}>
                                   {mastery}
                                 </div>
-                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">%</div>
+                                <div className="text-[8px] font-bold text-slate-500 uppercase">%</div>
                               </div>
-                              <div className="absolute -top-1 -right-1 px-2 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black uppercase tracking-wider">
+                              <div className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded bg-slate-900 text-white text-[7px] font-black uppercase tracking-wider">
                                 Mastery
                               </div>
-                            </div>
-                          </div>
-
-                          {/* Metrics */}
-                          <div className="grid grid-cols-3 gap-3 mb-4">
-                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
-                              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Yield</div>
-                              <div className="text-2xl font-black text-slate-900">{Math.round(topic.averageAccuracy)}%</div>
-                            </div>
-                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
-                              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Points</div>
-                              <div className="text-2xl font-black text-slate-900">{topic.questionsAttempted}</div>
-                            </div>
-                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/50">
-                              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total</div>
-                              <div className="text-2xl font-black text-slate-900">{topic.totalQuestions}</div>
-                            </div>
-                          </div>
-
-                          {/* Progress Bar */}
-                          <div className="relative">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Progress</span>
-                              <span className="text-xs font-black text-slate-900">{mastery}%</span>
-                            </div>
-                            <div className="h-2.5 bg-white/60 backdrop-blur-sm rounded-full overflow-hidden border border-white/50 shadow-inner">
-                              <div
-                                className={`h-full ${getAccentColor(mastery)} rounded-full transition-all duration-500 shadow-lg`}
-                                style={{ width: `${mastery}%` }}
-                              />
                             </div>
                           </div>
                         </div>

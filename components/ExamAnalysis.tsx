@@ -34,13 +34,15 @@ import {
   Download
 } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Scan, AnalyzedQuestion } from '../types';
+import { Scan, AnalyzedQuestion, Subject, ExamContext } from '../types';
 import { RenderWithMath, DerivationStep } from './MathRenderer';
 import { safeAiParse } from '../utils/aiParser';
 import { generateSketch } from '../utils/sketchGenerators';
+import { fixLatexInObject } from '../utils/simpleMathExtractor';
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
 import { useFilteredScans } from '../hooks/useFilteredScans';
+import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 
 interface MetricCardProps {
   title: string;
@@ -68,16 +70,18 @@ interface ExamAnalysisProps {
   onUpdateScan?: (scan: Scan) => void;
   recentScans?: Scan[];
   onSelectScan?: (scan: Scan) => void;
+  showOnlyVault?: boolean;
+  year?: string;
 }
 
-const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan, recentScans = [], onSelectScan }) => {
+const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan, recentScans = [], onSelectScan, showOnlyVault = false, year }) => {
   // Use AppContext for subject/exam awareness
   const { subjectConfig, examConfig, activeSubject } = useAppContext();
   const theme = useSubjectTheme();
   const { scans: filteredScans } = useFilteredScans(recentScans);
 
   const [isSynthesizingAll, setIsSynthesizingAll] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'vault'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'vault'>(showOnlyVault ? 'vault' : 'overview');
   const [expandedQuestionId, setExpandedQuestionId] = useState<string | null>(null);
   const [expandedDomainId, setExpandedDomainId] = useState<string | null>(null);
   const [isSynthesizingQuestion, setIsSynthesizingQuestion] = useState<string | null>(null);
@@ -185,18 +189,72 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
         : '';
 
       // Generate pedagogical solution with JSON escaping examples
+      // Biology-specific rules for space preservation and correct answer validation
+      const isBiology = scan.subject?.toLowerCase() === 'biology';
+      console.log(`[SOLUTION GEN - SINGLE] Subject: ${scan.subject}, isBiology: ${isBiology}, Question: ${question.id}`);
+
+      const biologyRules = isBiology ? `
+1. **PRESERVE SPACES** (Biology): ALL explanation text must have proper spacing between words.
+   ❌ WRONG: "HumanHormone−α−Antitrypsin"
+   ✅ CORRECT: "Human Hormone − α − Antitrypsin"
+
+2. **SCIENTIFIC NAMES** (Biology): Use proper italic LaTeX format for species names.
+   Example: $\\\\textit{Homo sapiens}$, $\\\\textit{Escherichia coli}$
+
+` : '';
+
+      const correctAnswerRule = isBiology && question.options && question.options.length > 0 ? `
+**CORRECT ANSWER** (Biology): You MUST determine which ONE option is correct according to the official ${scan.subject} ${scan.grade} syllabus.
+
+   STEP-BY-STEP PROCESS:
+   1. Read the question carefully and identify the biological concept being tested
+   2. Recall the EXACT definition/principle from NCERT Class 12 Biology textbook
+   3. Compare EACH option (A, B, C, D) against this official definition
+   4. Select the option that EXACTLY matches the NCERT/CBSE/NEET curriculum content
+   5. Reject options that are:
+      - Partially correct but incomplete
+      - True statements but not answering the question asked
+      - Contradicting official textbook content
+
+   There is EXACTLY ONE correct answer per question. Return:
+   - correctOptionIndex: 0 (if A is correct), 1 (if B is correct), 2 (if C is correct), or 3 (if D is correct)
+
+   DO NOT guess. DO NOT select multiple answers. Use your knowledge of NCERT Biology curriculum.
+` : '';
+
       const prompt = `Elite Academic Specialist: Generate pedagogical solution for ${scan.subject} ${scan.grade}: "${question.text}"${optionsText}
 
-CRITICAL: In JSON strings, double ALL backslashes for LaTeX.
-Examples: "\\\\frac{1}{4}", "\\\\bar{A}", "\\\\sqrt{x}", "\\\\begin{bmatrix}"
-(Write "\frac" → becomes "rac" after JSON parsing ❌. Write "\\\\frac" → becomes "\frac" ✓)
+CRITICAL RULES:
+
+${biologyRules}${correctAnswerRule}
+🚨 **LATEX ESCAPING IN JSON** 🚨
+You are outputting JSON. EVERY backslash must be DOUBLED for JSON escaping.
+
+❌ CATASTROPHIC ERRORS (WILL BREAK RENDERING):
+"\\frac{a}{b}" → Becomes "rac{a}{b}" after JSON parsing (BROKEN!)
+"\\int dx" → Becomes "int dx" (BROKEN!)
+"\\tan^{-1}" → Becomes "an^{-1}" (BROKEN!)
+"\\sqrt{x}" → Becomes "sqrt{x}" (BROKEN!)
+"\\bar{A}\\" → Trailing backslash (INVALID!)
+
+✅ CORRECT FORMAT (ALWAYS USE THIS):
+"\\\\frac{a}{b}" → Becomes "\\frac{a}{b}" ✓
+"\\\\int dx" → Becomes "\\int dx" ✓
+"\\\\tan^{-1}" → Becomes "\\tan^{-1}" ✓
+"\\\\sqrt{x}" → Becomes "\\sqrt{x}" ✓
+"\\\\bar{A}" → NO trailing backslash ✓
+
+ALL LaTeX commands need \\\\:
+\\\\frac, \\\\int, \\\\sum, \\\\sin, \\\\cos, \\\\tan, \\\\sqrt, \\\\left, \\\\right, \\\\bar, \\\\vec, \\\\alpha, \\\\beta, \\\\theta, \\\\pi, \\\\leq, \\\\geq
+
+NEVER have trailing backslashes before closing delimiters!
 
 Schema: {
-  "solutionSteps": ["Step Title ::: Explanation with $$Formula$$ blocks"],
-  ${question.options && question.options.length > 0 ? '"correctOptionIndex": 0-3 (REQUIRED: 0=A, 1=B, 2=C, 3=D),' : ''}
+  "solutionSteps": ["Step Title ::: Explanation with ${isBiology ? 'proper spacing and ' : ''}$$Formula$$ blocks"],
+  ${question.options && question.options.length > 0 ? `"correctOptionIndex": 0-3 (REQUIRED${isBiology ? ': Based on official syllabus' : ''} - 0=A, 1=B, 2=C, 3=D),` : ''}
   "masteryMaterial": {
-    "coreConcept": "Professional summary with $$Key Formula$$",
-    "logic": "Bulleted reasoning",
+    "coreConcept": "Professional summary with $$Key Formula$$${isBiology ? ' and proper spacing' : ''}",
+    "logic": "Bulleted reasoning${isBiology ? ' with proper word spacing' : ''}",
     "memoryTrigger": "Mnemonic/Rule"
   }
 }`;
@@ -212,6 +270,12 @@ Schema: {
       // FIX: Handle array responses from AI (sometimes returns [{...}] instead of {...})
       if (Array.isArray(qData) && qData.length > 0) {
         qData = qData[0];
+      }
+
+      // Auto-fix LaTeX errors in solution (safety net for missing backslashes)
+      if (qData) {
+        qData = fixLatexInObject(qData);
+        console.log('🔧 [LATEX FIX] Applied auto-fix to solution LaTeX');
       }
 
       if (qData && (qData.solutionSteps || qData.masteryMaterial)) {
@@ -301,6 +365,10 @@ Schema: {
       const batchSize = 3;
       let currentQuestions = [...scan.analysisData!.questions];
 
+      // Biology-specific rules for batch synthesis
+      const isBiology = scan.subject?.toLowerCase() === 'biology';
+      console.log(`[SOLUTION GEN - BATCH] Subject: ${scan.subject}, isBiology: ${isBiology}, Total questions: ${questionsToSync.length}`);
+
       for (let i = 0; i < questionsToSync.length; i += batchSize) {
         const batch = questionsToSync.slice(i, i + batchSize);
         const batchPromises = batch.map(async (q) => {
@@ -309,24 +377,79 @@ Schema: {
             ? `\n\nOPTIONS:\n${q.options.map((opt, idx) => `${['A', 'B', 'C', 'D'][idx]}: ${opt}`).join('\n')}`
             : '';
 
+          const biologyRules = isBiology ? `
+**PRESERVE SPACES** (Biology): ALL explanation text must have proper spacing between words.
+   ❌ WRONG: "HumanHormone−α−Antitrypsin"
+   ✅ CORRECT: "Human Hormone − α − Antitrypsin"
+
+**SCIENTIFIC NAMES** (Biology): Use proper italic LaTeX format for species names.
+   Example: $\\\\textit{Homo sapiens}$, $\\\\textit{Escherichia coli}$
+
+` : '';
+
+          const correctAnswerRule = isBiology && q.options && q.options.length > 0 ? `
+**CORRECT ANSWER** (Biology): You MUST determine which ONE option is correct according to the official ${scan.subject} ${scan.grade} syllabus.
+
+   STEP-BY-STEP PROCESS:
+   1. Read the question carefully and identify the biological concept being tested
+   2. Recall the EXACT definition/principle from NCERT Class 12 Biology textbook
+   3. Compare EACH option (A, B, C, D) against this official definition
+   4. Select the option that EXACTLY matches the NCERT/CBSE/NEET curriculum content
+   5. Reject options that are:
+      - Partially correct but incomplete
+      - True statements but not answering the question asked
+      - Contradicting official textbook content
+
+   There is EXACTLY ONE correct answer per question. Return:
+   - correctOptionIndex: 0 (if A is correct), 1 (if B is correct), 2 (if C is correct), or 3 (if D is correct)
+
+   DO NOT guess. DO NOT select multiple answers. Use your knowledge of NCERT Biology curriculum.
+
+` : '';
+
           const prompt = `Elite Academic Specialist: Synthesize pedagogical solution for ${scan.subject} ${scan.grade}: "${q.text || ''}"${optionsText}
 
-CRITICAL: In JSON strings, double ALL backslashes for LaTeX.
-Examples: "\\\\frac{1}{4}", "\\\\bar{A}", "\\\\sqrt{x}", "\\\\begin{bmatrix}"
-(Write "\frac" → becomes "rac" after JSON parsing ❌. Write "\\\\frac" → becomes "\frac" ✓)
+CRITICAL RULES:
+
+${biologyRules}${correctAnswerRule}
+🚨 **LATEX ESCAPING IN JSON** 🚨
+You are outputting JSON. EVERY backslash must be DOUBLED for JSON escaping.
+
+❌ CATASTROPHIC ERRORS (WILL BREAK RENDERING):
+"\\frac{a}{b}" → Becomes "rac{a}{b}" after JSON parsing (BROKEN!)
+"\\int dx" → Becomes "int dx" (BROKEN!)
+"\\tan^{-1}" → Becomes "an^{-1}" (BROKEN!)
+"\\sqrt{x}" → Becomes "sqrt{x}" (BROKEN!)
+"\\bar{A}\\" → Trailing backslash (INVALID!)
+
+✅ CORRECT FORMAT (ALWAYS USE THIS):
+"\\\\frac{a}{b}" → Becomes "\\frac{a}{b}" ✓
+"\\\\int dx" → Becomes "\\int dx" ✓
+"\\\\tan^{-1}" → Becomes "\\tan^{-1}" ✓
+"\\\\sqrt{x}" → Becomes "\\sqrt{x}" ✓
+"\\\\bar{A}" → NO trailing backslash ✓
+
+ALL LaTeX commands need \\\\:
+\\\\frac, \\\\int, \\\\sum, \\\\sin, \\\\cos, \\\\tan, \\\\sqrt, \\\\left, \\\\right, \\\\bar, \\\\vec, \\\\alpha, \\\\beta, \\\\theta, \\\\pi, \\\\leq, \\\\geq
+
+NEVER have trailing backslashes before closing delimiters!
 
 Schema: {
-  "solutionSteps": ["Step Title ::: Explanation with $$Formula$$ blocks"],
-  ${q.options && q.options.length > 0 ? '"correctOptionIndex": 0-3 (REQUIRED: 0=A, 1=B, 2=C, 3=D),' : ''}
+  "solutionSteps": ["Step Title ::: Explanation with ${isBiology ? 'proper spacing and ' : ''}$$Formula$$ blocks"],
+  ${q.options && q.options.length > 0 ? `"correctOptionIndex": 0-3 (REQUIRED${isBiology ? ': Based on official syllabus' : ''} - 0=A, 1=B, 2=C, 3=D),` : ''}
   "masteryMaterial": {
-    "coreConcept": "Professional summary with $$Key Formula$$",
-    "logic": "Bulleted reasoning",
+    "coreConcept": "Professional summary with $$Key Formula$$${isBiology ? ' and proper spacing' : ''}",
+    "logic": "Bulleted reasoning${isBiology ? ' with proper word spacing' : ''}",
     "memoryTrigger": "Mnemonic/Rule"
   }
 }`;
           try {
             const res = await model.generateContent(prompt);
-            const data = safeAiParse<any>(res.response.text(), null);
+            let data = safeAiParse<any>(res.response.text(), null);
+            // Auto-fix LaTeX errors in batch solution
+            if (data) {
+              data = fixLatexInObject(data);
+            }
             return { id: q.id, data };
           } catch (err) {
             console.error(`Failed question ${q.id}:`, err);
@@ -859,44 +982,58 @@ Schema: {
     <div className="h-full flex flex-col font-instrument bg-slate-50 overflow-hidden">
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header Bar - Tabs + Scan Selection */}
-        <div className="bg-white border-b border-slate-200 px-6 pt-4 pb-0 shrink-0">
-          <div className="flex items-center justify-between">
-            {/* Left: Tabs */}
-            <div className="flex items-center gap-1">
-              {(['overview', 'intelligence', 'vault'] as const).map(tab => {
-                const TabIcon = tab === 'overview' ? HelpCircle : tab === 'intelligence' ? Activity : FolderOpen;
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-[11px] font-bold uppercase tracking-wide transition-all border-b-2 ${
-                      activeTab === tab
-                        ? 'bg-slate-50 text-slate-900 border-accent-600'
-                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-transparent'
-                    }`}
-                  >
-                    <TabIcon size={16} />
-                    {tab}
-                  </button>
-                );
-              })}
-            </div>
+        {/* Header Bar - Unified or Tabs */}
+        {showOnlyVault ? (
+          <LearningJourneyHeader
+            showBack
+            onBack={onBack}
+            icon={<FolderOpen size={24} className="text-white" />}
+            title="Previous Year Question Vault"
+            subtitle={`${scan?.subject || activeSubject} • ${scan?.examContext || examConfig.code}`}
+            description="Browse and practice exam questions"
+            subject={(scan?.subject || activeSubject) as Subject}
+            trajectory={(scan?.examContext || examConfig.code) as ExamContext}
+            additionalContext={year || undefined}
+            sticky={false}
+          />
+        ) : (
+          <div className="bg-white border-b border-slate-200 px-6 pt-4 pb-0 shrink-0">
+            <div className="flex items-center justify-between">
+              {/* Left: Tabs */}
+              <div className="flex items-center gap-1">
+                {(['overview', 'intelligence', 'vault'] as const).map(tab => {
+                  const TabIcon = tab === 'overview' ? HelpCircle : tab === 'intelligence' ? Activity : FolderOpen;
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-[11px] font-bold uppercase tracking-wide transition-all border-b-2 ${
+                        activeTab === tab
+                          ? 'bg-slate-50 text-slate-900 border-accent-600'
+                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-transparent'
+                      }`}
+                    >
+                      <TabIcon size={16} />
+                      {tab}
+                    </button>
+                  );
+                })}
+              </div>
 
-            {/* Right: Scan Selection + Back Button */}
-            <div className="flex items-center gap-4">
-              {/* Source Paper Label + Dropdown */}
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-black text-slate-400 uppercase tracking-wider">
-                  Source Paper
-                </span>
+              {/* Right: Scan Selection + Back Button */}
+              <div className="flex items-center gap-4">
+                {/* Source Paper Label + Dropdown */}
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-wider">
+                    Source Paper
+                  </span>
 
-                {filteredScans && filteredScans.length > 1 && onSelectScan ? (
-                  <select
-                    value={scan?.id || ''}
-                    onChange={(e) => {
-                      const selected = filteredScans.find(s => s.id === e.target.value);
-                      if (selected && onSelectScan) onSelectScan(selected);
+                  {filteredScans && filteredScans.length > 1 && onSelectScan ? (
+                    <select
+                      value={scan?.id || ''}
+                      onChange={(e) => {
+                        const selected = filteredScans.find(s => s.id === e.target.value);
+                        if (selected && onSelectScan) onSelectScan(selected);
                     }}
                     className="bg-white border-2 rounded-full px-5 py-2.5 text-base font-bold outline-none cursor-pointer hover:shadow-md transition-all appearance-none pr-10 bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpath d=%27m6 9 6 6 6-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[center_right_1rem]"
                     style={{
@@ -921,12 +1058,13 @@ Schema: {
                 )}
               </div>
 
-              <button onClick={onBack} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
-                <ArrowLeft size={16} className="text-slate-500" />
-              </button>
+                <button onClick={onBack} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
+                  <ArrowLeft size={16} className="text-slate-500" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Tab Content */}
         <div className="flex-1 overflow-hidden">
@@ -1371,33 +1509,37 @@ Schema: {
         {activeTab === 'vault' && (
           <div className="h-full flex overflow-hidden">
             {/* Left Column - Questions List */}
-            <div className="w-80 bg-white border-r border-slate-200 flex flex-col shrink-0">
+            <div className="w-80 bg-gradient-to-b from-slate-50 to-white border-r-2 border-slate-200 flex flex-col shrink-0 shadow-sm">
               {/* Search & View Toggle */}
-              <div className="p-4 border-b border-slate-100 space-y-3">
-                <div className="relative">
+              <div className="p-4 border-b-2 border-slate-200 space-y-3 bg-white/50">
+                <div className="relative group">
                   <input
                     type="text"
                     placeholder="Search questions..."
-                    className="w-full px-3 py-2 text-[11px] border border-slate-200 rounded-lg outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-400/20 transition-all pl-8"
+                    className="w-full px-3 py-2.5 text-xs font-medium border-2 border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-100 transition-all pl-9 bg-white hover:border-slate-300 placeholder:text-slate-400"
                   />
-                  <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-purple-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
                 {/* View Toggle */}
-                <div className="flex items-center gap-1 bg-slate-100 rounded-md p-0.5">
+                <div className="flex items-center gap-2 bg-gradient-to-r from-slate-100 to-slate-50 rounded-xl p-1 shadow-inner">
                   <button
                     onClick={() => setIsGroupedView(false)}
-                    className={`flex-1 px-2 py-1.5 text-[9px] font-semibold rounded transition-all ${
-                      !isGroupedView ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+                    className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
+                      !isGroupedView
+                        ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50 scale-[1.02]'
+                        : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
                     List
                   </button>
                   <button
                     onClick={() => setIsGroupedView(true)}
-                    className={`flex-1 px-2 py-1.5 text-[9px] font-semibold rounded transition-all ${
-                      isGroupedView ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
+                    className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
+                      isGroupedView
+                        ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50 scale-[1.02]'
+                        : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
                     Group
@@ -1419,28 +1561,32 @@ Schema: {
                       <button
                         key={qId}
                         onClick={() => toggleQuestion(qId)}
-                        className={`w-full text-left p-2.5 rounded-lg transition-all border ${
+                        className={`group w-full text-left p-3 rounded-xl transition-all duration-200 border-2 ${
                           isActive
-                            ? 'bg-accent-50 border-accent-300 shadow-sm'
-                            : 'bg-white hover:bg-slate-50 border-slate-200'
+                            ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-300 shadow-lg shadow-purple-200/50 scale-[1.02]'
+                            : 'bg-white hover:bg-gradient-to-br hover:from-slate-50 hover:to-white border-slate-200 hover:border-slate-300 hover:shadow-md'
                         }`}
                       >
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className={`flex items-center justify-center w-7 h-7 rounded text-[11px] font-bold ${
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`flex items-center justify-center w-8 h-8 rounded-lg text-xs font-black transition-all duration-200 ${
                             isActive
-                              ? 'bg-accent-600 text-white'
-                              : 'bg-slate-100 text-slate-600'
+                              ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-md shadow-purple-500/30'
+                              : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 group-hover:from-slate-200 group-hover:to-slate-300'
                           }`}>
                             {qNum}
                           </span>
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-semibold rounded">
+                          <span className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-colors ${
+                            isActive
+                              ? 'bg-purple-200 text-purple-700'
+                              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+                          }`}>
                             {q.marks}M
                           </span>
                           {hasVisual && (
-                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" title="Has diagram/image" />
+                            <span className="w-2 h-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-sm" title="Has diagram/image" />
                           )}
                         </div>
-                        <div className="text-[10px] text-slate-600 line-clamp-2 leading-tight">
+                        <div className="text-[11px] text-slate-700 line-clamp-2 leading-relaxed font-medium">
                           <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
                         </div>
                       </button>
@@ -1459,33 +1605,33 @@ Schema: {
                     if (domainQuestions.length === 0) return null;
 
                     return (
-                      <div key={domain.name} className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+                      <div key={domain.name} className="border-2 border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all">
                         <button
                           onClick={() => setExpandedDomainId(isDomainExpanded ? null : domain.name)}
-                          className="w-full flex flex-col gap-2 p-2.5 bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-150 transition-all"
+                          className="w-full flex flex-col gap-2 p-3 bg-gradient-to-r from-slate-50 via-white to-slate-50 hover:from-slate-100 hover:via-slate-50 hover:to-slate-100 transition-all duration-200"
                         >
                           <div className="flex items-start justify-between w-full gap-2">
                             <div className="flex items-center gap-2 min-w-0 flex-1">
                               {isDomainExpanded ? (
-                                <ChevronDown size={14} className="text-slate-600 flex-shrink-0 mt-0.5" />
+                                <ChevronDown size={16} className="text-purple-600 flex-shrink-0 mt-0.5" />
                               ) : (
-                                <ChevronRight size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
+                                <ChevronRight size={16} className="text-slate-400 flex-shrink-0 mt-0.5" />
                               )}
-                              <span className="text-[10px] font-bold text-slate-800 uppercase tracking-wide leading-tight">
+                              <span className="text-[11px] font-black text-slate-900 uppercase tracking-wide leading-tight">
                                 {domain.name}
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 flex-shrink-0">
-                              <span className="px-1.5 py-0.5 bg-white text-slate-600 text-[8px] font-bold rounded">
+                              <span className="px-2 py-1 bg-white border border-slate-200 text-slate-700 text-[9px] font-black rounded-lg shadow-sm">
                                 {domainQuestions.length}Q
                               </span>
-                              <span className="px-1.5 py-0.5 bg-white text-slate-600 text-[8px] font-bold rounded">
+                              <span className="px-2 py-1 bg-white border border-slate-200 text-slate-700 text-[9px] font-black rounded-lg shadow-sm">
                                 {domain.totalMarks}M
                               </span>
-                              <span className={`px-1.5 py-0.5 text-[8px] font-semibold rounded ${
-                                domain.difficultyDNA === 'Hard' ? 'bg-red-100 text-red-700' :
-                                domain.difficultyDNA === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-green-100 text-green-700'
+                              <span className={`px-2 py-1 text-[9px] font-bold rounded-lg shadow-sm ${
+                                domain.difficultyDNA === 'Hard' ? 'bg-gradient-to-br from-red-100 to-red-200 text-red-700 border border-red-300' :
+                                domain.difficultyDNA === 'Moderate' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-700 border border-yellow-300' :
+                                'bg-gradient-to-br from-green-100 to-green-200 text-green-700 border border-green-300'
                               }`}>
                                 {domain.difficultyDNA}
                               </span>
@@ -1493,7 +1639,7 @@ Schema: {
                           </div>
                         </button>
                         {isDomainExpanded && (
-                          <div className="p-2 space-y-2 bg-slate-50/50">
+                          <div className="p-2.5 space-y-2 bg-gradient-to-b from-slate-50 to-white">
                             {domainQuestions.map((q, i) => {
                               const qId = q.id || `frag-${i}`;
                               const isActive = (expandedQuestionId || questions[0]?.id) === qId;
@@ -1505,28 +1651,32 @@ Schema: {
                                 <button
                                   key={qId}
                                   onClick={() => toggleQuestion(qId)}
-                                  className={`w-full text-left p-2 rounded-lg transition-all border ${
+                                  className={`group w-full text-left p-2.5 rounded-xl transition-all duration-200 border-2 ${
                                     isActive
-                                      ? 'bg-accent-50 border-accent-300 shadow-sm'
-                                      : 'bg-white hover:bg-slate-50 border-slate-200'
+                                      ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-300 shadow-lg shadow-purple-200/50'
+                                      : 'bg-white hover:bg-gradient-to-br hover:from-slate-50 hover:to-white border-slate-200 hover:border-slate-300 hover:shadow-md'
                                   }`}
                                 >
                                   <div className="flex items-center gap-2 mb-1.5">
-                                    <span className={`flex items-center justify-center w-6 h-6 rounded text-[11px] font-bold ${
+                                    <span className={`flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-black transition-all duration-200 ${
                                       isActive
-                                        ? 'bg-accent-600 text-white'
-                                        : 'bg-slate-100 text-slate-600'
+                                        ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-md shadow-purple-500/30'
+                                        : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 group-hover:from-slate-200 group-hover:to-slate-300'
                                     }`}>
                                       {qNum}
                                     </span>
-                                    <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-semibold rounded">
+                                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-lg transition-colors ${
+                                      isActive
+                                        ? 'bg-purple-200 text-purple-700'
+                                        : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+                                    }`}>
                                       {q.marks}M
                                     </span>
                                     {hasVisual && (
-                                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" title="Has diagram/image" />
+                                      <span className="w-1.5 h-1.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-sm" title="Has diagram/image" />
                                     )}
                                   </div>
-                                  <div className="text-[10px] text-slate-600 line-clamp-2 leading-tight">
+                                  <div className="text-[11px] text-slate-700 line-clamp-2 leading-relaxed font-medium">
                                     <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
                                   </div>
                                 </button>
@@ -1540,17 +1690,19 @@ Schema: {
                 </div>
               )}
 
-              {/* Footer */}
-              <div className="p-3 border-t border-slate-100">
-                <button
-                  onClick={synthesizeAllSolutions}
-                  disabled={isSynthesizingAll}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-accent-600 text-white rounded-lg text-[10px] font-bold hover:bg-accent-700 transition-all active:scale-95 disabled:opacity-50"
-                >
-                  {isSynthesizingAll ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                  Sync All Solutions
-                </button>
-              </div>
+              {/* Footer (hidden in Learning Journey vault) */}
+              {!showOnlyVault && (
+                <div className="p-3 border-t border-slate-100">
+                  <button
+                    onClick={synthesizeAllSolutions}
+                    disabled={isSynthesizingAll}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-accent-600 text-white rounded-lg text-[10px] font-bold hover:bg-accent-700 transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {isSynthesizingAll ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                    Sync All Solutions
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Right Column - Question Details */}
@@ -1608,41 +1760,43 @@ Schema: {
                             )}
                           </div>
 
-                          {/* Right - Actions */}
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => synthesizeQuestionDetails(qId)}
-                              disabled={isSynthesizingQuestion === qId}
-                              className="p-2 text-slate-600 hover:bg-slate-100 hover:text-primary-600 rounded-lg transition-all disabled:opacity-50"
-                              title="Generate/update solution"
-                            >
-                              {isSynthesizingQuestion === qId ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-                            </button>
-                            <button
-                              onClick={() => handleGenerateVisual(selectedQ.id)}
-                              disabled={isGeneratingVisual !== null}
-                              className="p-2 text-slate-600 hover:bg-slate-100 hover:text-purple-600 rounded-lg transition-all disabled:opacity-50"
-                              title="Generate visual diagram"
-                            >
-                              {isGeneratingVisual === selectedQ.id ? (
-                                <Loader2 size={16} className="animate-spin text-purple-600" />
-                              ) : (
-                                <Sparkles size={16} />
-                              )}
-                            </button>
-                            <button
-                              onClick={handleGenerateAllVisuals}
-                              disabled={isGeneratingVisual !== null}
-                              className="p-2 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-all disabled:opacity-50"
-                              title="Generate all visuals"
-                            >
-                              {(isGeneratingVisual !== null && isGeneratingVisual !== selectedQ.id) ? (
-                                <Loader2 size={16} className="animate-spin text-yellow-500" />
-                              ) : (
-                                <Zap size={16} />
-                              )}
-                            </button>
-                          </div>
+                          {/* Right - Actions (hidden in Learning Journey vault) */}
+                          {!showOnlyVault && (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => synthesizeQuestionDetails(qId)}
+                                disabled={isSynthesizingQuestion === qId}
+                                className="p-2 text-slate-600 hover:bg-slate-100 hover:text-primary-600 rounded-lg transition-all disabled:opacity-50"
+                                title="Generate/update solution"
+                              >
+                                {isSynthesizingQuestion === qId ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                              </button>
+                              <button
+                                onClick={() => handleGenerateVisual(selectedQ.id)}
+                                disabled={isGeneratingVisual !== null}
+                                className="p-2 text-slate-600 hover:bg-slate-100 hover:text-purple-600 rounded-lg transition-all disabled:opacity-50"
+                                title="Generate visual diagram"
+                              >
+                                {isGeneratingVisual === selectedQ.id ? (
+                                  <Loader2 size={16} className="animate-spin text-purple-600" />
+                                ) : (
+                                  <Sparkles size={16} />
+                                )}
+                              </button>
+                              <button
+                                onClick={handleGenerateAllVisuals}
+                                disabled={isGeneratingVisual !== null}
+                                className="p-2 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-all disabled:opacity-50"
+                                title="Generate all visuals"
+                              >
+                                {(isGeneratingVisual !== null && isGeneratingVisual !== selectedQ.id) ? (
+                                  <Loader2 size={16} className="animate-spin text-yellow-500" />
+                                ) : (
+                                  <Zap size={16} />
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         {/* Question Text */}

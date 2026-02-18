@@ -155,10 +155,10 @@ const PracticeInsightsModal: React.FC<PracticeInsightsModalProps> = ({ question,
                             <h5 className="text-sm font-black text-amber-900">{mistakeText}</h5>
                           </div>
                           {whyText && (
-                            <p className="text-xs text-amber-800 mb-3 ml-6 leading-relaxed">
+                            <div className="text-xs text-amber-800 mb-3 ml-6 leading-relaxed">
                               <span className="font-bold">Why this happens: </span>
                               <RenderWithMath text={whyText} showOptions={false} />
-                            </p>
+                            </div>
                           )}
                           {howToAvoidText && (
                             <div className="ml-6 mt-2 p-3 bg-emerald-50 border border-emerald-300 rounded-lg">

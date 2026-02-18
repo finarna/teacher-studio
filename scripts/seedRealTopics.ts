@@ -416,13 +416,22 @@ const BIOLOGY_CLASS12_TOPICS = [
     examWeightage: { NEET: 6, CBSE: 5 }
   },
   {
+    name: 'Microbes in Human Welfare',
+    domain: 'Human Physiology',
+    difficulty: 'Easy' as const,
+    estimatedHours: 6,
+    description: 'Microbes in household products, industrial production, sewage treatment, biogas',
+    keyConcepts: ['Fermentation', 'Antibiotics', 'Sewage Treatment', 'Biogas', 'Biofertilizers'],
+    examWeightage: { KCET: 4, CBSE: 3 }
+  },
+  {
     name: 'Evolution',
     domain: 'Evolution',
     difficulty: 'Moderate' as const,
     estimatedHours: 9,
     description: 'Origin of life, evidences of evolution, natural selection',
     keyConcepts: ['Darwins Theory', 'Natural Selection', 'Evidence of Evolution', 'Human Evolution'],
-    examWeightage: { NEET: 5, CBSE: 5 }
+    examWeightage: { NEET: 5, KCET: 4, CBSE: 5 }
   }
 ];
 
