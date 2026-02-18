@@ -46,10 +46,11 @@ export async function aggregateTopicsForUser(
 
     if (examTopics.length === 0) return [];
 
-    // 3. Get user's scans + system scans (shared question bank)
+    // 3. Get user's scans + system scans (shared question bank) WITHOUT analysis_data
+    // We no longer need to fetch analysis_data here - questions are in the questions table
     const { data: scans, error: scansError } = await supabase
       .from('scans')
-      .select('id, subject')
+      .select('id, subject, exam_context, year')
       .or(`user_id.eq.${userId},is_system_scan.eq.true`)
       .eq('subject', subject);
 
@@ -58,22 +59,29 @@ export async function aggregateTopicsForUser(
     const scanIds = (scans || []).map(s => s.id);
     const hasScans = scanIds.length > 0;
 
-    // 4. Get all questions from scans (if any) WITH topic mappings
-    let questions: any[] = [];
+    // 4. Get ALL questions from questions table (published system scans + user practice)
+    let allQuestions: any[] = [];
     let questionTopicMap = new Map<string, string>(); // questionId -> topicId
 
     if (hasScans) {
-      const { data: questionsData, error: questionsError } = await supabase
+      // Fetch all questions from questions table for these scans
+      const { data: practiceQuestions, error: questionsError } = await supabase
         .from('questions')
         .select('*')
         .in('scan_id', scanIds);
 
-      if (questionsError) throw questionsError;
-      questions = questionsData || [];
+      if (!questionsError && practiceQuestions) {
+        allQuestions = practiceQuestions.map(q => ({
+          ...q,
+          source: 'practice' // All questions from table are practice/published questions
+        }));
+        console.log(`📊 [TOPIC AGGREGATOR] Loaded ${practiceQuestions.length} questions from table`);
+      }
 
-      // Get topic mappings for these questions (batch in chunks of 100 to avoid header overflow)
-      if (questions.length > 0) {
-        const questionIds = questions.map(q => q.id);
+      // 4c. Get topic mappings for all questions
+      const questionIds = allQuestions.map(q => q.id);
+
+      if (questionIds.length > 0) {
         const chunkSize = 100;
         let allMappings: any[] = [];
 
@@ -92,7 +100,11 @@ export async function aggregateTopicsForUser(
         allMappings.forEach(m => {
           questionTopicMap.set(m.question_id, m.topic_id);
         });
+
+        console.log(`📊 [TOPIC AGGREGATOR] Loaded ${allMappings.length} question-topic mappings`);
       }
+
+      console.log(`🗺️  [TOPIC AGGREGATOR] Mapped ${questionTopicMap.size} questions to topics`);
     }
 
     // 5. Get all chapter insights (if scans exist)
@@ -136,9 +148,9 @@ export async function aggregateTopicsForUser(
       });
     }
 
-    // 6. Group questions by OFFICIAL topic ID (using mappings)
+    // 6. Group questions by OFFICIAL topic ID (using mappings from BOTH sources)
     const questionsByTopicId = new Map<string, AnalyzedQuestion[]>();
-    questions.forEach(q => {
+    allQuestions.forEach(q => {
       const topicId = questionTopicMap.get(q.id);
       if (topicId) {
         if (!questionsByTopicId.has(topicId)) {

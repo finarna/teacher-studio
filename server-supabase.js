@@ -109,7 +109,13 @@ if (REDIS_ENABLED) {
 // =====================================================
 // MIDDLEWARE
 // =====================================================
-app.use(cors());
+// Configure CORS to support credentials
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:9000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json({ limit: '500mb' })); // Large payloads for base64 images
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
 
@@ -217,6 +223,16 @@ function transformApiScanToDb(apiScan) {
     return 'KCET';
   };
 
+  // Extract year from filename (e.g., "KCET 2022 Biology.pdf" → "2022")
+  const extractYearFromFilename = (name) => {
+    if (!name) return null;
+    // Match 4-digit year (1900-2099)
+    const yearMatch = name.match(/\b(19|20)\d{2}\b/);
+    return yearMatch ? yearMatch[0] : null;
+  };
+
+  const extractedYear = extractYearFromFilename(apiScan.name);
+
   return {
     name: apiScan.name,
     grade: apiScan.grade,
@@ -234,6 +250,7 @@ function transformApiScanToDb(apiScan) {
     faq: apiScan.analysisData?.faq,
     strategy: apiScan.analysisData?.strategy,
     scan_date: apiScan.date ? new Date(apiScan.date).toISOString() : new Date().toISOString(),
+    year: extractedYear, // Auto-extract year from filename
     metadata: {},
   };
 }
@@ -457,17 +474,79 @@ app.post('/api/scans', async (req, res) => {
         // Delete existing questions first (cascade)
         await supabaseAdmin.from('questions').delete().eq('scan_id', apiScan.id);
 
+        // Transform questions to include subject, exam_context, and year
+        const dbData = transformApiScanToDb(apiScan);
+
+        // Upload sketch SVGs to storage and get URLs
+        const questionsWithMetadata = await Promise.all(
+          apiScan.analysisData.questions.map(async (q, index) => {
+            let sketchSvgUrl = null;
+
+            // If question has sketch SVG data, upload to storage
+            if (q.sketchSvg) {
+              try {
+                const fileName = `sketches/${apiScan.id}/${q.id || `q${index}`}.svg`;
+
+                // Convert base64 or raw SVG to buffer
+                let svgBuffer;
+                if (q.sketchSvg.startsWith('data:image/svg+xml;base64,')) {
+                  svgBuffer = Buffer.from(q.sketchSvg.replace(/^data:image\/svg\+xml;base64,/, ''), 'base64');
+                } else if (q.sketchSvg.startsWith('<svg')) {
+                  svgBuffer = Buffer.from(q.sketchSvg, 'utf-8');
+                } else {
+                  // Assume it's base64 without prefix
+                  svgBuffer = Buffer.from(q.sketchSvg, 'base64');
+                }
+
+                // Upload to Supabase Storage
+                const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+                  .from('question-sketches')
+                  .upload(fileName, svgBuffer, {
+                    contentType: 'image/svg+xml',
+                    upsert: true
+                  });
+
+                if (!uploadError) {
+                  // Get public URL
+                  const { data: urlData } = supabaseAdmin.storage
+                    .from('question-sketches')
+                    .getPublicUrl(fileName);
+
+                  sketchSvgUrl = urlData.publicUrl;
+                  console.log(`✅ Uploaded sketch for ${q.id || `q${index}`}: ${fileName}`);
+                } else {
+                  console.error(`❌ Failed to upload sketch for ${q.id || `q${index}`}:`, uploadError);
+                }
+              } catch (uploadErr) {
+                console.error(`❌ Error uploading sketch:`, uploadErr);
+              }
+            }
+
+            return {
+              ...q,
+              subject: dbData.subject,
+              exam_context: dbData.exam_context,
+              year: dbData.year,
+              sketchSvgUrl, // Add the storage URL
+              sketchSvg: undefined // Remove base64 data to save space
+            };
+          })
+        );
+
         // Create new questions
-        const { error: questionsError } = await createQuestions(apiScan.id, apiScan.analysisData.questions);
+        const { error: questionsError } = await createQuestions(apiScan.id, questionsWithMetadata);
         if (questionsError) {
           throw new Error(`Failed to create questions: ${questionsError.message}`);
         }
 
-        // Auto-map questions to official topics (if scan is complete)
-        if (apiScan.status === 'Complete') {
-          const { autoMapScanQuestions } = await import('./lib/autoMapScanQuestions.ts');
-          await autoMapScanQuestions(supabaseAdmin, apiScan.id);
-        }
+        const sketchCount = questionsWithMetadata.filter(q => q.sketchSvgUrl).length;
+        console.log(`✅ Updated ${questionsWithMetadata.length} questions (${sketchCount} with sketches) for scan ${apiScan.id}`);
+
+        // Auto-map questions to official topics (always, not just for Complete status)
+        console.log(`🔗 Auto-mapping questions to topics for scan ${apiScan.id}...`);
+        const { autoMapScanQuestions } = await import('./lib/autoMapScanQuestions.ts');
+        const result = await autoMapScanQuestions(supabaseAdmin, apiScan.id);
+        console.log(`✅ Mapped ${result.mapped || 0}/${questionsWithMetadata.length} questions to topics`);
       }
     } else {
       // Create new scan
@@ -482,16 +561,78 @@ app.post('/api/scans', async (req, res) => {
 
       // Create questions if provided
       if (apiScan.analysisData?.questions && apiScan.analysisData.questions.length > 0) {
-        const { error: questionsError } = await createQuestions(apiScan.id, apiScan.analysisData.questions);
+        // Transform questions to include subject, exam_context, and year
+        const scanYear = dbData.year;
+
+        // Upload sketch SVGs to storage and get URLs
+        const questionsWithMetadata = await Promise.all(
+          apiScan.analysisData.questions.map(async (q, index) => {
+            let sketchSvgUrl = null;
+
+            // If question has sketch SVG data, upload to storage
+            if (q.sketchSvg) {
+              try {
+                const fileName = `sketches/${apiScan.id}/${q.id || `q${index}`}.svg`;
+
+                // Convert base64 or raw SVG to buffer
+                let svgBuffer;
+                if (q.sketchSvg.startsWith('data:image/svg+xml;base64,')) {
+                  svgBuffer = Buffer.from(q.sketchSvg.replace(/^data:image\/svg\+xml;base64,/, ''), 'base64');
+                } else if (q.sketchSvg.startsWith('<svg')) {
+                  svgBuffer = Buffer.from(q.sketchSvg, 'utf-8');
+                } else {
+                  // Assume it's base64 without prefix
+                  svgBuffer = Buffer.from(q.sketchSvg, 'base64');
+                }
+
+                // Upload to Supabase Storage
+                const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+                  .from('question-sketches')
+                  .upload(fileName, svgBuffer, {
+                    contentType: 'image/svg+xml',
+                    upsert: true
+                  });
+
+                if (!uploadError) {
+                  // Get public URL
+                  const { data: urlData } = supabaseAdmin.storage
+                    .from('question-sketches')
+                    .getPublicUrl(fileName);
+
+                  sketchSvgUrl = urlData.publicUrl;
+                  console.log(`✅ Uploaded sketch for ${q.id || `q${index}`}: ${fileName}`);
+                } else {
+                  console.error(`❌ Failed to upload sketch for ${q.id || `q${index}`}:`, uploadError);
+                }
+              } catch (uploadErr) {
+                console.error(`❌ Error uploading sketch:`, uploadErr);
+              }
+            }
+
+            return {
+              ...q,
+              subject: dbData.subject,
+              exam_context: dbData.exam_context,
+              year: scanYear,
+              sketchSvgUrl, // Add the storage URL
+              sketchSvg: undefined // Remove base64 data to save space
+            };
+          })
+        );
+
+        const { error: questionsError } = await createQuestions(apiScan.id, questionsWithMetadata);
         if (questionsError) {
           throw new Error(`Failed to create questions: ${questionsError.message}`);
         }
 
-        // Auto-map questions to official topics (if scan is complete)
-        if (apiScan.status === 'Complete') {
-          const { autoMapScanQuestions } = await import('./lib/autoMapScanQuestions.ts');
-          await autoMapScanQuestions(supabaseAdmin, apiScan.id);
-        }
+        const sketchCount = questionsWithMetadata.filter(q => q.sketchSvgUrl).length;
+        console.log(`✅ Created ${questionsWithMetadata.length} questions (${sketchCount} with sketches) for scan ${apiScan.id}`);
+
+        // Auto-map questions to official topics (always, not just for Complete status)
+        console.log(`🔗 Auto-mapping questions to topics for scan ${apiScan.id}...`);
+        const { autoMapScanQuestions } = await import('./lib/autoMapScanQuestions.ts');
+        const result = await autoMapScanQuestions(supabaseAdmin, apiScan.id);
+        console.log(`✅ Mapped ${result.mapped || 0}/${questionsWithMetadata.length} questions to topics`);
       }
     }
 
@@ -1296,6 +1437,500 @@ app.get('/api/learning-journey/subjects/:trajectory', async (req, res) => {
 
   } catch (error) {
     console.error('Error in /api/learning-journey/subjects/:trajectory:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * GET /api/learning-journey/weak-topics
+ * Analyze user progress and identify weak topics for custom mock test builder
+ */
+app.get('/api/learning-journey/weak-topics', async (req, res) => {
+  try {
+    const { userId, subject, examContext } = req.query;
+
+    if (!userId || !subject || !examContext) {
+      return res.status(400).json({
+        error: 'Missing required parameters: userId, subject, examContext'
+      });
+    }
+
+    console.log(`🤖 Analyzing weak topics for ${subject} (${examContext}) - User: ${userId}`);
+
+    // Get all topics for this subject
+    const { data: topics, error: topicsError } = await supabaseAdmin
+      .from('topics')
+      .select('id, name, subject')
+      .eq('subject', subject);
+
+    if (topicsError) throw topicsError;
+
+    // Get user's topic progress from topic_resources
+    const { data: topicResources, error: resourcesError } = await supabaseAdmin
+      .from('topic_resources')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
+
+    if (resourcesError) throw resourcesError;
+
+    // Analyze weak topics
+    const weakTopics = [];
+
+    for (const topic of topics || []) {
+      const topicResource = topicResources?.find(tr => tr.topic_id === topic.id);
+
+      // Get practice accuracy for this topic
+      const { data: questions } = await supabaseAdmin
+        .from('questions')
+        .select('id')
+        .eq('subject', subject)
+        .eq('exam_context', examContext)
+        .contains('topics', [topic.topic_name]);
+
+      const questionIds = questions?.map(q => q.id) || [];
+
+      let practiceAccuracy = 0;
+      let totalPractice = 0;
+
+      if (questionIds.length > 0) {
+        const { data: practiceAnswers } = await supabaseAdmin
+          .from('practice_answers')
+          .select('is_correct')
+          .in('question_id', questionIds)
+          .eq('user_id', userId);
+
+        totalPractice = practiceAnswers?.length || 0;
+        const correctPractice = practiceAnswers?.filter(pa => pa.is_correct).length || 0;
+        practiceAccuracy = totalPractice > 0 ? Math.round((correctPractice / totalPractice) * 100) : 0;
+      }
+
+      const masteryLevel = topicResource?.mastery_level || 0;
+
+      // Calculate weakness score
+      let weaknessScore = 0;
+      let reason = '';
+
+      if (masteryLevel < 40) {
+        weaknessScore += 5;
+        reason = `Low mastery level (${masteryLevel}%)`;
+      }
+      if (practiceAccuracy < 60 && totalPractice >= 3) {
+        weaknessScore += 5;
+        reason = `Low accuracy in practice (${practiceAccuracy}%)`;
+      }
+      if (totalPractice === 0) {
+        weaknessScore += 3;
+        reason = 'No practice attempts yet';
+      }
+      if (masteryLevel < 40 && practiceAccuracy < 60) {
+        reason = `Low mastery (${masteryLevel}%) and accuracy (${practiceAccuracy}%)`;
+      }
+
+      if (weaknessScore > 0) {
+        weakTopics.push({
+          topicId: topic.id,
+          topicName: topic.name,
+          masteryLevel,
+          practiceAccuracy,
+          weaknessScore,
+          reason
+        });
+      }
+    }
+
+    weakTopics.sort((a, b) => b.weaknessScore - a.weaknessScore);
+    const topWeakTopics = weakTopics.slice(0, 10);
+
+    res.json({
+      success: true,
+      data: {
+        weakTopics: topWeakTopics,
+        recommendedFocus: topWeakTopics.slice(0, 5).map(wt => wt.topicName)
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in /api/learning-journey/weak-topics:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * POST /api/learning-journey/create-custom-test
+ * Generate a custom mock test with specified configuration
+ */
+app.post('/api/learning-journey/create-custom-test', async (req, res) => {
+  try {
+    const {
+      userId,
+      testName,
+      subject,
+      examContext,
+      topicIds,
+      questionCount,
+      difficultyMix,
+      durationMinutes,
+      saveAsTemplate
+    } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Validate difficulty mix
+    const total = difficultyMix.easy + difficultyMix.moderate + difficultyMix.hard;
+    if (total !== 100) {
+      return res.status(400).json({ error: 'Difficulty mix must total 100%' });
+    }
+
+    console.log(`🎯 AI-Powered Mock Test "${testName}" - ${questionCount} questions`);
+    console.log(`📊 Topics: ${topicIds.length}, Difficulty Mix:`, difficultyMix);
+
+    // Get ALL system scans for this subject and exam context
+    const { data: scans } = await supabaseAdmin
+      .from('scans')
+      .select('id')
+      .eq('is_system_scan', true)
+      .eq('subject', subject);
+
+    const scanIds = scans?.map(s => s.id) || [];
+
+    if (scanIds.length === 0) {
+      return res.status(400).json({ error: 'No questions available for this subject' });
+    }
+
+    console.log(`📚 Found ${scanIds.length} past year papers to pull questions from`);
+
+    // Get user's practice history to identify weak areas
+    const { data: practiceHistory } = await supabaseAdmin
+      .from('practice_answers')
+      .select('question_id, is_correct, domain')
+      .eq('user_id', userId)
+      .limit(1000);
+
+    // Calculate weak domains
+    const domainStats = {};
+    practiceHistory?.forEach(p => {
+      if (p.domain) {
+        if (!domainStats[p.domain]) {
+          domainStats[p.domain] = { correct: 0, total: 0 };
+        }
+        domainStats[p.domain].total++;
+        if (p.is_correct) domainStats[p.domain].correct++;
+      }
+    });
+
+    const weakDomains = Object.entries(domainStats)
+      .map(([domain, stats]) => ({
+        domain,
+        accuracy: stats.total > 0 ? (stats.correct / stats.total) * 100 : 0
+      }))
+      .filter(d => d.accuracy < 70)
+      .map(d => d.domain);
+
+    console.log(`🎯 Identified ${weakDomains.length} weak domains for focus`);
+
+    // Get topic names for filtering
+    const { data: topics } = await supabaseAdmin
+      .from('topics')
+      .select('name')
+      .in('id', topicIds);
+
+    const topicNames = topics?.map(t => t.name) || [];
+
+    // Get ALL questions from selected topics via topic_question_mapping
+    const { data: topicQuestionMapping } = await supabaseAdmin
+      .from('topic_question_mapping')
+      .select('question_id, topic_id')
+      .in('topic_id', topicIds);
+
+    const questionIdsFromTopics = topicQuestionMapping?.map(m => m.question_id) || [];
+
+    console.log(`🔍 Found ${questionIdsFromTopics.length} questions mapped to selected topics`);
+
+    // Fetch ALL questions from these IDs + from scans
+    let allQuestions = [];
+
+    if (questionIdsFromTopics.length > 0) {
+      const { data } = await supabaseAdmin
+        .from('questions')
+        .select('*')
+        .in('id', questionIdsFromTopics)
+        .eq('exam_context', examContext);
+
+      if (data) allQuestions = data;
+    }
+
+    // If still no questions, fall back to domain-based selection
+    if (allQuestions.length === 0) {
+      console.log('⚠️ No questions from topic mapping, falling back to domain matching');
+      const { data } = await supabaseAdmin
+        .from('questions')
+        .select('*')
+        .in('scan_id', scanIds)
+        .eq('exam_context', examContext)
+        .limit(500);
+
+      if (data) allQuestions = data;
+    }
+
+    console.log(`📦 Total question pool: ${allQuestions.length}`);
+
+    if (allQuestions.length === 0) {
+      return res.status(400).json({
+        error: 'No questions available for selected topics. Try selecting more topics or check if past year papers are uploaded.'
+      });
+    }
+
+    // AI-powered selection: prioritize weak domains
+    const prioritizedQuestions = allQuestions.sort((a, b) => {
+      const aIsWeak = weakDomains.includes(a.domain) ? 1 : 0;
+      const bIsWeak = weakDomains.includes(b.domain) ? 1 : 0;
+      return bIsWeak - aIsWeak; // Weak domains first
+    });
+
+    // Calculate questions per difficulty
+    const easyCount = Math.round((questionCount * difficultyMix.easy) / 100);
+    const moderateCount = Math.round((questionCount * difficultyMix.moderate) / 100);
+    const hardCount = questionCount - easyCount - moderateCount;
+
+    // Sample questions by difficulty
+    const selectedQuestions = [];
+
+    // Easy
+    const easyPool = prioritizedQuestions.filter(q => q.diff === 'Easy' || q.diff === 1);
+    if (easyPool.length > 0) {
+      const shuffled = easyPool.sort(() => 0.5 - Math.random());
+      selectedQuestions.push(...shuffled.slice(0, Math.min(easyCount, easyPool.length)));
+    }
+
+    // Moderate
+    const moderatePool = prioritizedQuestions.filter(q => q.diff === 'Moderate' || q.diff === 2);
+    if (moderatePool.length > 0) {
+      const shuffled = moderatePool.sort(() => 0.5 - Math.random());
+      selectedQuestions.push(...shuffled.slice(0, Math.min(moderateCount, moderatePool.length)));
+    }
+
+    // Hard
+    const hardPool = prioritizedQuestions.filter(q => q.diff === 'Hard' || q.diff === 3);
+    if (hardPool.length > 0) {
+      const shuffled = hardPool.sort(() => 0.5 - Math.random());
+      selectedQuestions.push(...shuffled.slice(0, Math.min(hardCount, hardPool.length)));
+    }
+
+    // If we don't have enough, fill with any remaining questions
+    if (selectedQuestions.length < questionCount) {
+      const remaining = prioritizedQuestions
+        .filter(q => !selectedQuestions.includes(q))
+        .sort(() => 0.5 - Math.random())
+        .slice(0, questionCount - selectedQuestions.length);
+      selectedQuestions.push(...remaining);
+    }
+
+    console.log(`✅ Selected ${selectedQuestions.length} questions (Easy: ${selectedQuestions.filter(q => q.diff === 'Easy' || q.diff === 1).length}, Moderate: ${selectedQuestions.filter(q => q.diff === 'Moderate' || q.diff === 2).length}, Hard: ${selectedQuestions.filter(q => q.diff === 'Hard' || q.diff === 3).length})`);
+
+    if (selectedQuestions.length < questionCount) {
+      return res.status(400).json({
+        error: `Insufficient questions. Found ${selectedQuestions.length}, needed ${questionCount}. Try selecting more topics or reducing question count.`
+      });
+    }
+
+    // Shuffle all questions
+    const finalQuestions = selectedQuestions.sort(() => 0.5 - Math.random());
+
+    // Create test attempt
+    const { data: attempt, error: attemptError } = await supabaseAdmin
+      .from('test_attempts')
+      .insert({
+        user_id: userId,
+        test_type: 'custom_mock',
+        test_name: testName,
+        exam_context: examContext,
+        subject,
+        topic_id: null,
+        total_questions: finalQuestions.length,
+        duration_minutes: durationMinutes,
+        start_time: new Date().toISOString(),
+        status: 'in_progress',
+        test_config: { topicIds, difficultyMix, questionCount, durationMinutes }
+      })
+      .select()
+      .single();
+
+    if (attemptError) throw attemptError;
+
+    // Save template if requested
+    let templateId = null;
+    if (saveAsTemplate) {
+      const { data: template } = await supabaseAdmin
+        .from('test_templates')
+        .insert({
+          user_id: userId,
+          template_name: testName,
+          subject,
+          exam_context: examContext,
+          topic_ids: topicIds,
+          difficulty_mix: difficultyMix,
+          question_count: questionCount,
+          duration_minutes: durationMinutes,
+          last_used_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      templateId = template?.id;
+    }
+
+    res.json({
+      success: true,
+      data: { attempt, questions: finalQuestions, templateId }
+    });
+
+  } catch (error) {
+    console.error('Error in /api/learning-journey/create-custom-test:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * GET /api/learning-journey/test-templates
+ * Get user's saved test templates
+ */
+app.get('/api/learning-journey/test-templates', async (req, res) => {
+  try {
+    const { userId, subject, examContext } = req.query;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { data: templates, error } = await supabaseAdmin
+      .from('test_templates')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('subject', subject)
+      .eq('exam_context', examContext)
+      .order('last_used_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: { templates: templates || [] }
+    });
+
+  } catch (error) {
+    console.error('Error in /api/learning-journey/test-templates:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * POST /api/learning-journey/count-available-questions
+ * Count available questions matching specified criteria
+ */
+app.post('/api/learning-journey/count-available-questions', async (req, res) => {
+  try {
+    const {
+      subject,
+      examContext,
+      topicIds,
+      difficultyMix
+    } = req.body;
+
+    if (!subject || !examContext || !topicIds || topicIds.length === 0) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    console.log(`🔢 Counting available questions for ${subject} (${examContext})`);
+
+    // Get topic names for these IDs
+    const { data: topics } = await supabaseAdmin
+      .from('topics')
+      .select('topic_name')
+      .in('id', topicIds);
+
+    const topicNames = topics?.map(t => t.topic_name) || [];
+
+    // Get system scans for this subject
+    const { data: scans } = await supabaseAdmin
+      .from('scans')
+      .select('id')
+      .eq('is_system_scan', true)
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
+
+    const scanIds = scans?.map(s => s.id) || [];
+
+    if (scanIds.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          total: 0,
+          byDifficulty: { easy: 0, moderate: 0, hard: 0 }
+        }
+      });
+    }
+
+    // Count questions by difficulty
+    const counts = { easy: 0, moderate: 0, hard: 0 };
+
+    // Count Easy questions
+    const { count: easyCount } = await supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .in('scan_id', scanIds)
+      .eq('diff', 'Easy')
+      .overlaps('topics', topicNames);
+
+    counts.easy = easyCount || 0;
+
+    // Count Moderate questions
+    const { count: moderateCount } = await supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .in('scan_id', scanIds)
+      .eq('diff', 'Moderate')
+      .overlaps('topics', topicNames);
+
+    counts.moderate = moderateCount || 0;
+
+    // Count Hard questions
+    const { count: hardCount } = await supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .in('scan_id', scanIds)
+      .eq('diff', 'Hard')
+      .overlaps('topics', topicNames);
+
+    counts.hard = hardCount || 0;
+
+    const total = counts.easy + counts.moderate + counts.hard;
+
+    res.json({
+      success: true,
+      data: {
+        total,
+        byDifficulty: counts
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in /api/learning-journey/count-available-questions:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error'

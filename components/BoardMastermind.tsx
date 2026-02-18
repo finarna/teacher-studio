@@ -24,9 +24,12 @@ import { generateMathExtractionInstructions, generateStreamlinedMathInstructions
 import { generatePhysicsExtractionInstructions } from '../utils/physicsNotationReference';
 import { generateCleanMathPrompt, validateExtraction } from '../utils/cleanMathExtractor';
 import { generateCleanPhysicsPrompt } from '../utils/cleanPhysicsExtractor';
+import { generateCleanBiologyPrompt } from '../utils/cleanBiologyExtractor';
 import { processQuestionsUnicode } from '../utils/unicodeToLatex'; // Latest: fixed escape char regex patterns
 import { extractQuestionsSimplified } from '../utils/simpleMathExtractor'; // NEW: Simplified extraction
 import { extractPhysicsQuestionsSimplified } from '../utils/simplePhysicsExtractor'; // NEW: Simplified Physics extraction
+import { extractBiologyQuestionsSimplified } from '../utils/simpleBiologyExtractor'; // NEW: Simplified Biology extraction
+import { mapTopicsFast } from '../utils/topicMapper'; // NEW: Instant keyword-based topic mapping
 import { useAppContext } from '../contexts/AppContext';
 import { useFilteredScans, useSubjectStats } from '../hooks/useFilteredScans';
 import { EmptyState } from './EmptyState';
@@ -191,6 +194,8 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
             ? generateCleanMathPrompt(selectedGrade)
             : selectedSubject === 'Physics'
             ? generateCleanPhysicsPrompt(selectedGrade)
+            : selectedSubject === 'Biology'
+            ? generateCleanBiologyPrompt(activeExamContext)
             : `Extract ALL questions verbatim from this ${selectedSubject} paper.
         RULES:
         0. ⚠️ CRITICAL TEXT EXTRACTION: PRESERVE ALL SPACES BETWEEN WORDS!
@@ -424,6 +429,11 @@ ${generatePhysicsExtractionInstructions()}
         questions: allExtractedQuestions
       });
 
+      // Extract year from filename (e.g., "KCET_2024_Biology..." → "2024")
+      const yearMatch = file.name.match(/20\d{2}|19\d{2}/);
+      const extractedYear = yearMatch ? yearMatch[0] : null;
+      console.log(`📅 [YEAR EXTRACTION] Filename: ${file.name} → Year: ${extractedYear}`);
+
       const newScan: Scan = {
         id: crypto.randomUUID(), // Generate proper UUID for database compatibility
         name: `Portfolio: ${files.length} ${selectedSubject} Papers [${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]`,
@@ -433,6 +443,7 @@ ${generatePhysicsExtractionInstructions()}
         grade: selectedGrade || 'Class 12',
         subject: selectedSubject,
         examContext: activeExamContext, // Multi-subject context
+        year: extractedYear, // Add year for Learning Journey Past Year Exams
         analysisData: brainData
       };
 
@@ -451,6 +462,7 @@ ${generatePhysicsExtractionInstructions()}
   };
 
   const processHolographicPipeline = async (file: File) => {
+    console.log(`📄 [UPLOAD] Starting scan for ${file.name} | Subject: ${selectedSubject} | Exam: ${activeExamContext} | Grade: ${selectedGrade}`);
     setIsProcessing(true);
     setError(null);
     setBulkProgress({ current: 1, total: 1 });
@@ -580,12 +592,64 @@ ${generatePhysicsExtractionInstructions()}
             console.warn('⚠️ [SIMPLIFIED PHYSICS - IMAGE] Failed:', err);
           }
         }
+      } else if (useSimplifiedExtraction && selectedSubject === 'Biology') {
+        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - BIOLOGY] Using schema-driven extraction with @google/genai');
+        const simpleQuestions = await extractBiologyQuestionsSimplified(file, apiKey, selectedModel, activeExamContext);
+        // Convert simplified format to our existing format
+        extractedData = {
+          questions: simpleQuestions.map((sq: any) => ({
+            id: `Q${sq.id}`,
+            text: sq.text,
+            options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
+            marks: 1,
+            difficulty: sq.difficulty || 'Medium',
+            topic: sq.topic || 'Biology',
+            domain: sq.domain || 'Biotechnology',
+            blooms: sq.blooms || 'Apply',
+            hasVisualElement: sq.hasVisualElement || false,
+            visualElementType: sq.visualElementType || null,
+            visualElementDescription: sq.visualElementDescription || null,
+            visualBoundingBox: sq.visualBoundingBox || null,
+            source: `${file.name}`
+          }))
+        };
+
+        // --- IMAGE EXTRACTION FOR SIMPLIFIED BIOLOGY ---
+        if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
+          try {
+            if (enableVisionExtraction) {
+              const questionsWithBoundingBoxes = extractedData.questions
+                .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
+                .map((q: any) => ({
+                  questionNumber: parseInt(q.id.replace(/\D/g, '')),
+                  boundingBox: q.visualBoundingBox
+                }))
+                .filter((item: any) => item.questionNumber && item.boundingBox);
+
+              if (questionsWithBoundingBoxes.length > 0) {
+                console.log('🎯 [SIMPLIFIED BIOLOGY - VISION] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
+                const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+                imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
+                console.log('✅ [SIMPLIFIED BIOLOGY - VISION] Extracted', imageMapping.size, 'images');
+              }
+            } else {
+              console.log('🖼️ [SIMPLIFIED BIOLOGY - BASIC] Extracting images...');
+              const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+              imageMapping = await extractAndMapImages(file);
+              console.log('✅ [SIMPLIFIED BIOLOGY - BASIC] Extracted', imageMapping?.size || 0, 'images');
+            }
+          } catch (err) {
+            console.warn('⚠️ [SIMPLIFIED BIOLOGY - IMAGE] Failed:', err);
+          }
+        }
       } else {
         // Legacy extraction
         const extractionPrompt = selectedSubject === 'Math'
           ? generateCleanMathPrompt(selectedGrade)
           : selectedSubject === 'Physics'
           ? generateCleanPhysicsPrompt(selectedGrade)
+          : selectedSubject === 'Biology'
+          ? generateCleanBiologyPrompt(activeExamContext)
           : `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
       RULES:
       1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise.
@@ -687,6 +751,7 @@ ${generatePhysicsExtractionInstructions()}
           "strategy": ["Prioritize derivation A...", "Logic focus on B..."]
         }`;
 
+        console.log(`🚀 [${selectedSubject.toUpperCase()} EXTRACTION] Starting ${selectedSubject === 'Biology' ? 'cleanBiologyExtractor' : selectedSubject === 'Math' ? 'cleanMathExtractor' : selectedSubject === 'Physics' ? 'cleanPhysicsExtractor' : 'legacy'} for ${file.name}`);
         const [extractRes, analysisRes] = await Promise.all([
           genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]),
           genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, analysisPrompt])
@@ -801,6 +866,12 @@ NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
 DO NOT repeat Q1-Q${lastQNum}`
             : selectedSubject === 'Physics'
             ? generateCleanPhysicsPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
+
+Already extracted: Q1-Q${lastQNum}
+NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
+DO NOT repeat Q1-Q${lastQNum}`
+            : selectedSubject === 'Biology'
+            ? generateCleanBiologyPrompt(activeExamContext) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
 
 Already extracted: Q1-Q${lastQNum}
 NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)

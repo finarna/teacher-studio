@@ -54,7 +54,22 @@ VISUALS:
 - visualElementDescription: 5 words max or null
 - visualBoundingBox: {"pageNumber": N, "x": "10%", "y": "20%", "width": "80%", "height": "30%"} OR null
 
-Map options to A,B,C,D. Set isCorrect if answer shown. Generate ALL questions (no truncation).`;
+DETERMINING CORRECT ANSWER:
+- First, check if answer key is explicitly marked/indicated in document
+- If answer key visible: Mark that option as isCorrect = true
+- If NO answer key visible: You MUST solve the problem and determine correct answer yourself
+
+🚨 STRICT CORRECTNESS POLICY (WHEN DETERMINING ANSWER):
+- Correct answer MUST be EXACTLY correct per CBSE/NCERT Class 12 Physics syllabus
+- DO NOT accept "technically close" or "approximately correct" answers
+- DO NOT mark answers "correct in general" but wrong per NCERT standards
+- Follow NCERT textbook formulas, notation, SI units EXACTLY
+- Only ONE option can be isCorrect = true
+- If options seem close, choose the one using NCERT-standard notation/units
+- Answer must give FULL MARKS in CBSE Class 12 examination
+- When in doubt, solve step-by-step using NCERT methods before marking
+
+Map options to A,B,C,D. Generate ALL questions (no truncation).`;
 
   // Define the schema using the Type enum from @google/genai
   const responseSchema = {

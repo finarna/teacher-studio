@@ -928,7 +928,7 @@ Focus on CBSE Class 12 board exam preparation. Be comprehensive but concise.`;
 
   // STEP 2: Generate multi-page visual study guide
   const imageModel = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash-image"
+    model: "gemini-3-pro-image-preview"
   });
 
   const pages: TopicBasedSketchResult['pages'] = [];

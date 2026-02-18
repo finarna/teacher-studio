@@ -557,25 +557,27 @@ const AppContent: React.FC = () => {
 
         <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50/50">
 
-          {/* Global Compact Header for Desktop */}
-          <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 z-40 shrink-0">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1">
-                <Search size={12} className="text-slate-400" />
-                <input type="text" placeholder="Global Search..." className="bg-transparent border-0 outline-none text-[10px] font-black text-slate-900 w-32 placeholder:text-slate-400 uppercase tracking-widest" />
+          {/* Global Compact Header for Desktop (Hidden in Learning Journey) */}
+          {godModeView !== 'learning_journey' && (
+            <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 z-40 shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1">
+                  <Search size={12} className="text-slate-400" />
+                  <input type="text" placeholder="Global Search..." className="bg-transparent border-0 outline-none text-[10px] font-black text-slate-900 w-32 placeholder:text-slate-400 uppercase tracking-widest" />
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              {/* GLOBAL Subject Switcher - Primary Control */}
-              <SubjectSwitcher />
-              <div className="h-6 w-px bg-slate-200" />
-              <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors relative">
-                <Bell size={18} />
-                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary-500 rounded-full border border-white" />
-              </button>
-            </div>
-          </header>
+              <div className="flex items-center gap-3">
+                {/* GLOBAL Subject Switcher - Primary Control */}
+                <SubjectSwitcher />
+                <div className="h-6 w-px bg-slate-200" />
+                <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors relative">
+                  <Bell size={18} />
+                  <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary-500 rounded-full border border-white" />
+                </button>
+              </div>
+            </header>
+          )}
 
           <main className="flex-1 overflow-y-auto relative">
             {godModeView === 'mastermind' && (

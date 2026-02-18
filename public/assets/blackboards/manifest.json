@@ -1,0 +1,14 @@
+{
+  "Physics": "/assets/blackboards/physics-blackboard-sketch.jpg",
+  "Chemistry": "/assets/blackboards/chemistry-blackboard-sketch.jpg",
+  "Math": "/assets/blackboards/math-blackboard-sketch.jpg",
+  "Biology": "/assets/blackboards/biology-blackboard-sketch.jpg",
+  "description": "Hand-drawn subject-specific sketch illustrations for Past Year Exams cards",
+  "generated": "Manual upload from user's Desktop",
+  "imageMapping": {
+    "Physics": "Atom, F=ma, P=F/A, battery, lightning, magnet, gears (blue theme)",
+    "Chemistry": "Beakers, flasks, NaCl, H₂O, CH₄, periodic table, molecules (green theme)",
+    "Math": "∫x²dx, Σ, π=3.14159, shapes, cityscape, √H₂O (purple theme)",
+    "Biology": "DNA double helix, cells, RNA, photosynthesis, microscope (green/lime theme)"
+  }
+}

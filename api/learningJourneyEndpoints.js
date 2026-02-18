@@ -568,6 +568,450 @@ export async function getTrajectoryProgress(req, res) {
   }
 }
 
+// =====================================================
+// CUSTOM MOCK TEST ENDPOINTS
+// =====================================================
+
+/**
+ * GET /api/learning-journey/weak-topics
+ * Analyze user progress and identify weak topics using AI
+ */
+export async function getWeakTopics(req, res) {
+  try {
+    const { userId, subject, examContext } = req.query;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    console.log(`🤖 Analyzing weak topics for ${subject} (${examContext}) - User: ${userId}`);
+
+    // Get all topics for this subject
+    const { data: topics, error: topicsError } = await supabaseAdmin
+      .from('topics')
+      .select('id, topic_name, subject, exam_context')
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
+
+    if (topicsError) throw topicsError;
+
+    // Get user's topic progress from topic_resources
+    const { data: topicResources, error: resourcesError } = await supabaseAdmin
+      .from('topic_resources')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
+
+    if (resourcesError) throw resourcesError;
+
+    // Get user's practice performance per topic
+    const weakTopics = [];
+
+    for (const topic of topics) {
+      const topicResource = topicResources?.find(tr => tr.topic_id === topic.id);
+
+      // Get practice accuracy for this topic
+      const { data: questions } = await supabaseAdmin
+        .from('questions')
+        .select('id')
+        .eq('subject', subject)
+        .eq('exam_context', examContext)
+        .contains('topics', [topic.topic_name]);
+
+      const questionIds = questions?.map(q => q.id) || [];
+
+      let practiceAccuracy = 0;
+      let totalPractice = 0;
+      let correctPractice = 0;
+
+      if (questionIds.length > 0) {
+        const { data: practiceAnswers } = await supabaseAdmin
+          .from('practice_answers')
+          .select('is_correct')
+          .in('question_id', questionIds)
+          .eq('user_id', userId);
+
+        totalPractice = practiceAnswers?.length || 0;
+        correctPractice = practiceAnswers?.filter(pa => pa.is_correct).length || 0;
+        practiceAccuracy = totalPractice > 0 ? Math.round((correctPractice / totalPractice) * 100) : 0;
+      }
+
+      const masteryLevel = topicResource?.mastery_level || 0;
+
+      // Calculate weakness score (higher = weaker)
+      let weaknessScore = 0;
+      let reason = '';
+
+      if (masteryLevel < 40) {
+        weaknessScore += 5;
+        reason = `Low mastery level (${masteryLevel}%)`;
+      }
+      if (practiceAccuracy < 60 && totalPractice >= 3) {
+        weaknessScore += 5;
+        reason = `Low accuracy in practice (${practiceAccuracy}%)`;
+      }
+      if (totalPractice === 0) {
+        weaknessScore += 3;
+        reason = 'No practice attempts yet';
+      }
+      if (masteryLevel < 40 && practiceAccuracy < 60) {
+        reason = `Low mastery (${masteryLevel}%) and accuracy (${practiceAccuracy}%)`;
+      }
+
+      if (weaknessScore > 0) {
+        weakTopics.push({
+          topicId: topic.id,
+          topicName: topic.topic_name,
+          masteryLevel,
+          practiceAccuracy,
+          weaknessScore,
+          reason
+        });
+      }
+    }
+
+    // Sort by weakness score descending
+    weakTopics.sort((a, b) => b.weaknessScore - a.weaknessScore);
+
+    // Take top 10 weak topics
+    const topWeakTopics = weakTopics.slice(0, 10);
+
+    res.json({
+      success: true,
+      data: {
+        weakTopics: topWeakTopics,
+        recommendedFocus: topWeakTopics.slice(0, 5).map(wt => wt.topicName)
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error analyzing weak topics:', error);
+    res.status(500).json({
+      error: 'Failed to analyze weak topics',
+      message: error.message
+    });
+  }
+}
+
+/**
+ * POST /api/learning-journey/create-custom-test
+ * Generate a custom mock test with specified configuration
+ */
+export async function createCustomTest(req, res) {
+  try {
+    const {
+      userId,
+      testName,
+      subject,
+      examContext,
+      topicIds,
+      questionCount,
+      difficultyMix,
+      durationMinutes,
+      saveAsTemplate
+    } = req.body;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Validate difficulty mix
+    const total = difficultyMix.easy + difficultyMix.moderate + difficultyMix.hard;
+    if (total !== 100) {
+      return res.status(400).json({ error: 'Difficulty mix must total 100%' });
+    }
+
+    console.log(`🎯 Creating custom test "${testName}" - ${questionCount} questions`);
+
+    // Get topic names for these IDs
+    const { data: topics } = await supabaseAdmin
+      .from('topics')
+      .select('topic_name')
+      .in('id', topicIds);
+
+    const topicNames = topics?.map(t => t.topic_name) || [];
+
+    // Calculate questions needed per difficulty
+    const easyCount = Math.round((questionCount * difficultyMix.easy) / 100);
+    const moderateCount = Math.round((questionCount * difficultyMix.moderate) / 100);
+    const hardCount = questionCount - easyCount - moderateCount; // Ensure total is exact
+
+    // Get system scans for this subject
+    const { data: scans } = await supabaseAdmin
+      .from('scans')
+      .select('id')
+      .eq('is_system_scan', true)
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
+
+    const scanIds = scans?.map(s => s.id) || [];
+
+    if (scanIds.length === 0) {
+      return res.status(400).json({ error: 'No questions available for this subject' });
+    }
+
+    // Sample questions by difficulty
+    const selectedQuestions = [];
+
+    // Easy questions
+    if (easyCount > 0) {
+      const { data: easyQuestions } = await supabaseAdmin
+        .from('questions')
+        .select('*')
+        .in('scan_id', scanIds)
+        .eq('diff', 'Easy')
+        .overlaps('topics', topicNames)
+        .limit(easyCount * 2); // Get more than needed for random sampling
+
+      if (easyQuestions && easyQuestions.length > 0) {
+        const shuffled = easyQuestions.sort(() => 0.5 - Math.random());
+        selectedQuestions.push(...shuffled.slice(0, easyCount));
+      }
+    }
+
+    // Moderate questions
+    if (moderateCount > 0) {
+      const { data: moderateQuestions } = await supabaseAdmin
+        .from('questions')
+        .select('*')
+        .in('scan_id', scanIds)
+        .eq('diff', 'Moderate')
+        .overlaps('topics', topicNames)
+        .limit(moderateCount * 2);
+
+      if (moderateQuestions && moderateQuestions.length > 0) {
+        const shuffled = moderateQuestions.sort(() => 0.5 - Math.random());
+        selectedQuestions.push(...shuffled.slice(0, moderateCount));
+      }
+    }
+
+    // Hard questions
+    if (hardCount > 0) {
+      const { data: hardQuestions } = await supabaseAdmin
+        .from('questions')
+        .select('*')
+        .in('scan_id', scanIds)
+        .eq('diff', 'Hard')
+        .overlaps('topics', topicNames)
+        .limit(hardCount * 2);
+
+      if (hardQuestions && hardQuestions.length > 0) {
+        const shuffled = hardQuestions.sort(() => 0.5 - Math.random());
+        selectedQuestions.push(...shuffled.slice(0, hardCount));
+      }
+    }
+
+    if (selectedQuestions.length < questionCount) {
+      return res.status(400).json({
+        error: `Insufficient questions available. Found ${selectedQuestions.length}, needed ${questionCount}`
+      });
+    }
+
+    // Shuffle all questions together
+    const finalQuestions = selectedQuestions.sort(() => 0.5 - Math.random());
+
+    // Create test attempt
+    const { data: attempt, error: attemptError } = await supabaseAdmin
+      .from('test_attempts')
+      .insert({
+        user_id: userId,
+        test_type: 'custom_mock',
+        test_name: testName,
+        exam_context: examContext,
+        subject,
+        topic_id: null, // Multiple topics
+        total_questions: finalQuestions.length,
+        duration_minutes: durationMinutes,
+        start_time: new Date().toISOString(),
+        status: 'in_progress',
+        test_config: {
+          topicIds,
+          difficultyMix,
+          questionCount,
+          durationMinutes
+        }
+      })
+      .select()
+      .single();
+
+    if (attemptError) throw attemptError;
+
+    // Save as template if requested
+    let templateId = null;
+    if (saveAsTemplate) {
+      const { data: template, error: templateError } = await supabaseAdmin
+        .from('test_templates')
+        .insert({
+          user_id: userId,
+          template_name: testName,
+          subject,
+          exam_context: examContext,
+          topic_ids: topicIds,
+          difficulty_mix: difficultyMix,
+          question_count: questionCount,
+          duration_minutes: durationMinutes,
+          last_used_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (!templateError) {
+        templateId = template.id;
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        attempt,
+        questions: finalQuestions,
+        templateId
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error creating custom test:', error);
+    res.status(500).json({
+      error: 'Failed to create custom test',
+      message: error.message
+    });
+  }
+}
+
+/**
+ * GET /api/learning-journey/test-templates
+ * Get user's saved test templates
+ */
+export async function getTestTemplates(req, res) {
+  try {
+    const { userId, subject, examContext } = req.query;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { data: templates, error } = await supabaseAdmin
+      .from('test_templates')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('subject', subject)
+      .eq('exam_context', examContext)
+      .order('last_used_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: {
+        templates: templates || []
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching test templates:', error);
+    res.status(500).json({
+      error: 'Failed to fetch test templates',
+      message: error.message
+    });
+  }
+}
+
+/**
+ * POST /api/learning-journey/count-available-questions
+ * Count available questions matching specified criteria
+ */
+export async function countAvailableQuestions(req, res) {
+  try {
+    const {
+      subject,
+      examContext,
+      topicIds,
+      difficultyMix
+    } = req.body;
+
+    if (!subject || !examContext || !topicIds || topicIds.length === 0) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    console.log(`🔢 Counting available questions for ${subject} (${examContext})`);
+
+    // Get topic names for these IDs
+    const { data: topics } = await supabaseAdmin
+      .from('topics')
+      .select('topic_name')
+      .in('id', topicIds);
+
+    const topicNames = topics?.map(t => t.topic_name) || [];
+
+    // Get system scans for this subject
+    const { data: scans } = await supabaseAdmin
+      .from('scans')
+      .select('id')
+      .eq('is_system_scan', true)
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
+
+    const scanIds = scans?.map(s => s.id) || [];
+
+    if (scanIds.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          total: 0,
+          byDifficulty: { easy: 0, moderate: 0, hard: 0 }
+        }
+      });
+    }
+
+    // Count questions by difficulty
+    const counts = { easy: 0, moderate: 0, hard: 0 };
+
+    // Count Easy questions
+    const { count: easyCount } = await supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .in('scan_id', scanIds)
+      .eq('diff', 'Easy')
+      .overlaps('topics', topicNames);
+
+    counts.easy = easyCount || 0;
+
+    // Count Moderate questions
+    const { count: moderateCount } = await supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .in('scan_id', scanIds)
+      .eq('diff', 'Moderate')
+      .overlaps('topics', topicNames);
+
+    counts.moderate = moderateCount || 0;
+
+    // Count Hard questions
+    const { count: hardCount } = await supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .in('scan_id', scanIds)
+      .eq('diff', 'Hard')
+      .overlaps('topics', topicNames);
+
+    counts.hard = hardCount || 0;
+
+    const total = counts.easy + counts.moderate + counts.hard;
+
+    res.json({
+      success: true,
+      data: {
+        total,
+        byDifficulty: counts
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error counting available questions:', error);
+    res.status(500).json({
+      error: 'Failed to count questions',
+      message: error.message
+    });
+  }
+}
+
 // Export all handlers
 export const learningJourneyHandlers = {
   getTopics,
@@ -579,5 +1023,9 @@ export const learningJourneyHandlers = {
   getTestResults,
   getTestHistory,
   getSubjectProgress,
-  getTrajectoryProgress
+  getTrajectoryProgress,
+  getWeakTopics,
+  createCustomTest,
+  getTestTemplates,
+  countAvailableQuestions
 };

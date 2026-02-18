@@ -86,6 +86,135 @@ const safeJSONParse = (text: string): any => {
 };
 
 /**
+ * Auto-fix common LaTeX errors in extracted text
+ * This is a safety net in case Gemini fails to follow the double-backslash rules
+ * EXPORTED for use in solution generation (ExamAnalysis.tsx)
+ */
+export const fixLatexErrors = (text: string): string => {
+  if (!text) return text;
+
+  let fixed = text;
+
+  // Common missing backslash patterns (case-sensitive)
+  const fixes: [RegExp, string][] = [
+    // Missing backslash before common commands
+    [/([^\\])frac\{/g, '$1\\frac{'],           // "rac{" → "\frac{"
+    [/([^\\])int\s/g, '$1\\int '],             // "int " → "\int "
+    [/([^\\])sum\s/g, '$1\\sum '],             // "sum " → "\sum "
+    [/([^\\])prod\s/g, '$1\\prod '],           // "prod " → "\prod "
+    [/([^\\])lim\s/g, '$1\\lim '],             // "lim " → "\lim "
+    [/([^\\])sqrt\{/g, '$1\\sqrt{'],           // "sqrt{" → "\sqrt{"
+
+    // Trigonometric functions
+    [/([^\\])sin\s/g, '$1\\sin '],             // "sin " → "\sin "
+    [/([^\\])cos\s/g, '$1\\cos '],             // "cos " → "\cos "
+    [/([^\\])tan\s/g, '$1\\tan '],             // "tan " → "\tan "
+    [/([^\\])tan\^/g, '$1\\tan^'],             // "tan^" → "\tan^"
+    [/([^\\])cot\s/g, '$1\\cot '],             // "cot " → "\cot "
+    [/([^\\])sec\s/g, '$1\\sec '],             // "sec " → "\sec "
+    [/([^\\])csc\s/g, '$1\\csc '],             // "csc " → "\csc "
+
+    // Logarithms
+    [/([^\\])log\s/g, '$1\\log '],             // "log " → "\log "
+    [/([^\\])ln\s/g, '$1\\ln '],               // "ln " → "\ln "
+
+    // Left/Right delimiters
+    [/([^\\])left\(/g, '$1\\left('],           // "left(" → "\left("
+    [/([^\\])right\)/g, '$1\\right)'],         // "ight)" → "\right)"
+    [/([^\\])left\[/g, '$1\\left['],           // "left[" → "\left["
+    [/([^\\])right\]/g, '$1\\right]'],         // "ight]" → "\right]"
+
+    // Accents
+    [/([^\\])bar\{/g, '$1\\bar{'],             // "bar{" → "\bar{"
+    [/([^\\])vec\{/g, '$1\\vec{'],             // "vec{" → "\vec{"
+    [/([^\\])hat\{/g, '$1\\hat{'],             // "hat{" → "\hat{"
+    [/([^\\])tilde\{/g, '$1\\tilde{'],         // "tilde{" → "\tilde{"
+
+    // Greek letters
+    [/([^\\])alpha\b/g, '$1\\alpha'],          // "alpha" → "\alpha"
+    [/([^\\])beta\b/g, '$1\\beta'],            // "beta" → "\beta"
+    [/([^\\])gamma\b/g, '$1\\gamma'],          // "gamma" → "\gamma"
+    [/([^\\])theta\b/g, '$1\\theta'],          // "theta" → "\theta"
+    [/([^\\])pi\b/g, '$1\\pi'],                // "pi" → "\pi"
+
+    // Relations
+    [/([^\\])leq\b/g, '$1\\leq'],              // "leq" → "\leq"
+    [/([^\\])geq\b/g, '$1\\geq'],              // "geq" → "\geq"
+    [/([^\\])neq\b/g, '$1\\neq'],              // "neq" → "\neq"
+
+    // Remove trailing backslashes before closing delimiters
+    [/\\+(\s*[\)\]\}$])/g, '$1'],              // "...\" → "..."
+  ];
+
+  let fixCount = 0;
+  for (const [pattern, replacement] of fixes) {
+    const before = fixed;
+    fixed = fixed.replace(pattern, replacement);
+    if (fixed !== before) {
+      fixCount++;
+    }
+  }
+
+  if (fixCount > 0) {
+    console.log(`🔧 Auto-fixed ${fixCount} LaTeX pattern(s) in text`);
+  }
+
+  return fixed;
+};
+
+/**
+ * Clean unwrapped LaTeX commands and ensure proper spacing around $ delimiters
+ * This fixes rendering issues where LaTeX outside $...$ is displayed as raw text
+ */
+const cleanUnwrappedLatex = (text: string): string => {
+  if (!text) return text;
+
+  // First, ensure proper spacing around $ delimiters
+  let cleaned = text.replace(/([^\s])(\$)/g, '$1 $2');  // Add space before $ if missing
+  cleaned = cleaned.replace(/(\$)([^\s])/g, '$1 $2');    // Add space after $ if missing
+
+  // Split by $ to find LaTeX-wrapped and non-wrapped sections
+  const parts = cleaned.split('$');
+
+  // Process odd-indexed parts (outside $...$), keep even-indexed parts (inside $...$)
+  const result = parts.map((part, idx) => {
+    if (idx % 2 === 1) {
+      // Inside $...$ - preserve as is (for MathJax)
+      return part;
+    } else {
+      // Outside $...$ - clean up any raw LaTeX commands
+      return part
+        .replace(/\\{/g, '{')
+        .replace(/\\}/g, '}')
+        .replace(/\\dots/g, '...')
+        .replace(/\\([a-z])(?![a-zA-Z])/g, '$1');  // Remove stray backslashes
+    }
+  });
+
+  return result.join('$');
+};
+
+/**
+ * Recursively fix LaTeX in all string fields of an object
+ * EXPORTED for use in solution generation (ExamAnalysis.tsx)
+ */
+export const fixLatexInObject = (obj: any): any => {
+  if (typeof obj === 'string') {
+    // First fix missing backslashes, then clean unwrapped LaTeX and spacing
+    return cleanUnwrappedLatex(fixLatexErrors(obj));
+  } else if (Array.isArray(obj)) {
+    return obj.map(fixLatexInObject);
+  } else if (obj && typeof obj === 'object') {
+    const fixed: any = {};
+    for (const key in obj) {
+      fixed[key] = fixLatexInObject(obj[key]);
+    }
+    return fixed;
+  }
+  return obj;
+};
+
+/**
  * Simplified extraction using Gemini 3 Flash with schema-driven approach
  * Includes automatic retry with JSON repair on failures
  */
@@ -108,17 +237,74 @@ export const extractQuestionsSimplified = async (
     - If OCR fails to detect spaces, use context to insert proper word breaks.
     - NEVER output text without spaces between words!
 
-    CRITICAL INSTRUCTIONS FOR MATH RENDERING:
-    1. Extract all mathematical expressions into standard LaTeX format.
-    2. You MUST use double backslashes for all LaTeX commands. For example, use '\\\\frac' instead of '\\frac', '\\\\int' instead of '\\int', '\\\\vec' instead of '\\vec'.
-    3. Enclose display math in '$$...$$' and inline math in '$...$'.
-    4. Square brackets: Use \\\\left[ and \\\\right] for brackets, like $\\\\left[x\\\\right]$ (NEVER $[x]$ - causes KaTeX error!).
-    5. MATRICES & TABLES: Always wrap in proper environments:
-       - ⚠️ NEVER USE \\\\begin{tabular} - KaTeX DOES NOT SUPPORT IT!
-       - Matrices: $$\\\\begin{pmatrix} a & b \\\\\\\\ c & d \\\\end{pmatrix}$$
-       - Determinants: $$\\\\begin{vmatrix} a & b \\\\\\\\ c & d \\\\end{vmatrix}$$
-       - Tables: $$\\\\begin{array}{|c|c|} \\\\hline x & y \\\\\\\\ \\\\hline 1 & 2 \\\\\\\\ \\\\hline \\\\end{array}$$
-       - NEVER output standalone rows like "$a & b \\\\\\\\$" without array wrapper!
+    🚨🚨🚨 CRITICAL LATEX FORMATTING RULES (MUST FOLLOW EXACTLY) 🚨🚨🚨
+
+    ═══════════════════════════════════════════════════════════════════════
+    RULE #1: ALWAYS USE DOUBLE BACKSLASHES IN JSON STRINGS
+    ═══════════════════════════════════════════════════════════════════════
+    Because you are outputting JSON, you MUST escape backslashes by doubling them.
+
+    ❌ CATASTROPHIC ERRORS (NEVER DO THIS):
+    - "\\frac{a}{b}" → Will become "rac{a}{b}" after JSON parsing (BROKEN!)
+    - "\\int dx" → Will become "int dx" (BROKEN!)
+    - "\\tan^{-1}" → Will become "an^{-1}" (BROKEN!)
+    - "\\right)" → Will become "ight)" (BROKEN!)
+    - "\\sqrt{x}" → Will become "sqrt{x}" (BROKEN!)
+    - "\\bar{A}\\" → Trailing backslash (INVALID!)
+
+    ✅ CORRECT FORMAT (ALWAYS DO THIS):
+    - "\\\\frac{a}{b}" → Becomes "\\frac{a}{b}" after JSON parsing ✓
+    - "\\\\int dx" → Becomes "\\int dx" ✓
+    - "\\\\tan^{-1}" → Becomes "\\tan^{-1}" ✓
+    - "\\\\right)" → Becomes "\\right)" ✓
+    - "\\\\sqrt{x}" → Becomes "\\sqrt{x}" ✓
+    - "\\\\bar{A}" → NO trailing backslash ✓
+
+    ═══════════════════════════════════════════════════════════════════════
+    RULE #2: NEVER HAVE TRAILING BACKSLASHES
+    ═══════════════════════════════════════════════════════════════════════
+    ❌ WRONG: "\\\\bar{A}\\\\" or "P(A) = 1 - \\\\frac{1}{1024}\\\\"
+    ✅ RIGHT: "\\\\bar{A}" or "P(A) = 1 - \\\\frac{1}{1024}"
+
+    ═══════════════════════════════════════════════════════════════════════
+    RULE #3: CHECK EVERY LATEX COMMAND HAS DOUBLE BACKSLASH
+    ═══════════════════════════════════════════════════════════════════════
+    Common commands that MUST have \\\\ prefix:
+    - \\\\frac, \\\\int, \\\\sum, \\\\prod, \\\\lim
+    - \\\\sin, \\\\cos, \\\\tan, \\\\cot, \\\\sec, \\\\csc
+    - \\\\log, \\\\ln, \\\\exp
+    - \\\\sqrt, \\\\cdot, \\\\times, \\\\div
+    - \\\\left, \\\\right (MUST be paired!)
+    - \\\\vec, \\\\bar, \\\\hat, \\\\tilde
+    - \\\\alpha, \\\\beta, \\\\gamma, \\\\theta, \\\\pi
+    - \\\\infty, \\\\partial, \\\\nabla
+    - \\\\leq, \\\\geq, \\\\neq, \\\\approx
+    - \\\\in, \\\\subset, \\\\cup, \\\\cap
+    - \\\\Rightarrow, \\\\Leftrightarrow
+
+    ═══════════════════════════════════════════════════════════════════════
+    RULE #4: ENCLOSE MATH IN DELIMITERS
+    ═══════════════════════════════════════════════════════════════════════
+    - Inline math: $...$
+    - Display math: $$...$$
+
+    ═══════════════════════════════════════════════════════════════════════
+    RULE #5: BRACKETS AND PARENTHESES
+    ═══════════════════════════════════════════════════════════════════════
+    - Square brackets: Use \\\\left[ and \\\\right] like $\\\\left[x\\\\right]$
+    - NEVER use $[x]$ - causes KaTeX error!
+    - Parentheses: Use \\\\left( and \\\\right) for large expressions
+
+    ═══════════════════════════════════════════════════════════════════════
+    RULE #6: MATRICES & TABLES
+    ═══════════════════════════════════════════════════════════════════════
+    - ⚠️ NEVER USE \\\\begin{tabular} - KaTeX DOES NOT SUPPORT IT!
+    - Matrices: $$\\\\begin{pmatrix} a & b \\\\\\\\ c & d \\\\end{pmatrix}$$
+    - Determinants: $$\\\\begin{vmatrix} a & b \\\\\\\\ c & d \\\\end{vmatrix}$$
+    - Tables: $$\\\\begin{array}{|c|c|} \\\\hline x & y \\\\\\\\ \\\\hline 1 & 2 \\\\\\\\ \\\\hline \\\\end{array}$$
+    - NEVER output standalone rows like "$a & b \\\\\\\\$" without array wrapper!
+
+    ⚠️ BEFORE OUTPUTTING JSON: Double-check EVERY LaTeX command has \\\\ prefix!
 
     TOPIC CLASSIFICATION (Class 12 Mathematics):
     DOMAINS & CHAPTERS:
@@ -136,7 +322,21 @@ export const extractQuestionsSimplified = async (
 
     CRITICAL INSTRUCTIONS FOR STRUCTURE:
     1. Map the options to 'A', 'B', 'C', 'D'.
-    2. If the correct answer is marked or indicated in the document, set 'isCorrect' to true. Otherwise, set it to false for all options.
+    2. DETERMINING CORRECT ANSWER:
+       - First, check if the correct answer is explicitly marked or indicated in the document (answer key visible)
+       - If answer key is visible: Mark that option as isCorrect = true
+       - If NO answer key visible: You MUST solve the problem and determine the correct answer yourself
+
+    🚨 STRICT CORRECTNESS POLICY (WHEN DETERMINING ANSWER):
+       - The correct answer MUST be EXACTLY correct according to CBSE/NCERT Class 12 Mathematics syllabus
+       - DO NOT accept "technically close" or "approximately correct" answers
+       - DO NOT mark answers that are "correct in general" but wrong per NCERT standards
+       - Follow NCERT textbook formulas, notation, and conventions EXACTLY
+       - Only ONE option can be marked as isCorrect = true
+       - If multiple options seem close, choose the one using NCERT-standard notation
+       - The correct answer must give FULL MARKS in CBSE Class 12 examination
+       - When in doubt, solve the problem step-by-step using NCERT methods before marking
+
     3. Ensure the text is clean and readable.
     4. IMPORTANT: Generate complete, valid JSON. Do not truncate the response.
   `;
@@ -228,8 +428,11 @@ export const extractQuestionsSimplified = async (
           id: index + 1
         }));
 
-        console.log(`✅ Successfully extracted ${result.length} questions`);
-        return result;
+        // Auto-fix LaTeX errors in all questions
+        const fixedResult = fixLatexInObject(result);
+
+        console.log(`✅ Successfully extracted ${fixedResult.length} questions`);
+        return fixedResult;
       } else {
         throw new Error("No response text received from Gemini.");
       }

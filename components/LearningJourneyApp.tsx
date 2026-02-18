@@ -2,10 +2,14 @@ import React from 'react';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
 import TrajectorySelectionPage from './TrajectorySelectionPage';
 import SubjectSelectionPage from './SubjectSelectionPage';
+import SubjectMenuPage from './SubjectMenuPage';
+import PastYearExamsPage from './PastYearExamsPage';
+import MockTestBuilderPage from './MockTestBuilderPage';
 import TopicDashboardPage from './TopicDashboardPage';
 import TopicDetailPage from './TopicDetailPage';
 import TestInterface from './TestInterface';
 import PerformanceAnalysis from './PerformanceAnalysis';
+import VaultDetailPage from './VaultDetailPage';
 import { Loader2 } from 'lucide-react';
 
 interface LearningJourneyAppProps {
@@ -18,6 +22,8 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
     selectedTrajectory,
     selectedSubject,
     selectedTopicId,
+    selectedScan,
+    selectedScanId,
     topics,
     subjectProgress,
     currentTest,
@@ -25,11 +31,15 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
     currentTestResponses,
     isLoading,
     error,
+    userId,
     selectTrajectory,
     selectSubject,
+    selectSubjectOption,
     selectTopic,
+    openVault,
     goBack,
     startTest,
+    startCustomTest,
     submitTest,
     exitTest
   } = useLearningJourney();
@@ -167,6 +177,63 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
             }
           }}
           onBackToDashboard={goBack}
+        />
+      );
+
+    case 'subject_menu':
+      if (!selectedTrajectory || !selectedSubject) {
+        goBack();
+        return null;
+      }
+      return (
+        <SubjectMenuPage
+          subject={selectedSubject}
+          examContext={selectedTrajectory}
+          onSelectOption={selectSubjectOption}
+          onBack={goBack}
+        />
+      );
+
+    case 'past_year_exams':
+      if (!selectedTrajectory || !selectedSubject || !userId) {
+        goBack();
+        return null;
+      }
+      return (
+        <PastYearExamsPage
+          subject={selectedSubject}
+          examContext={selectedTrajectory}
+          onBack={goBack}
+          onOpenVault={openVault}
+          userId={userId}
+        />
+      );
+
+    case 'vault_detail':
+      if (!selectedTrajectory || !selectedSubject || !selectedScanId) {
+        goBack();
+        return null;
+      }
+      return (
+        <VaultDetailPage
+          scanId={selectedScanId}
+          onBack={goBack}
+        />
+      );
+
+    case 'mock_builder':
+      if (!selectedTrajectory || !selectedSubject || !userId) {
+        goBack();
+        return null;
+      }
+      return (
+        <MockTestBuilderPage
+          subject={selectedSubject}
+          examContext={selectedTrajectory}
+          topics={topics}
+          onBack={goBack}
+          onStartTest={startCustomTest}
+          userId={userId}
         />
       );
 

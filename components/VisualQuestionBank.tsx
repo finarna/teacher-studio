@@ -490,8 +490,19 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
 
       CRITICAL REQUIREMENTS:
       1. Each question MUST have exactly 4 options (A, B, C, D) - THIS IS MANDATORY
-      2. Mark correctOptionIndex (0-3) for the correct answer
+      2. Mark correctOptionIndex (0-3) for the EXACT correct answer per CBSE ${activeTab} syllabus
       3. All questions must be MCQs with 4 distinct options
+
+      🚨 STRICT CORRECTNESS POLICY FOR CORRECT ANSWER (ZERO TOLERANCE):
+      - The correctOptionIndex MUST point to the EXACT correct answer according to CBSE official syllabus
+      - DO NOT accept "technically close" or "approximately correct" answers
+      - DO NOT use answers that are "correct in general" but wrong per CBSE standards
+      - For CBSE: Follow NCERT textbooks and CBSE marking scheme exactly
+      - Only ONE option can be marked as correct - the one that matches CBSE examination standards EXACTLY
+      - If multiple options seem close, choose the one using CBSE-standard notation and conventions
+      - The correct answer must give FULL MARKS in CBSE examination
+      - Consider CBSE-specific marking patterns: exact terminology, standard units, NCERT formulas
+
       4. Use LaTeX for math: $...$ or $$...$$
       5. CRITICAL: Double backslash for LaTeX: "\\\\frac{1}{2}" not "\\frac{1}{2}"
 

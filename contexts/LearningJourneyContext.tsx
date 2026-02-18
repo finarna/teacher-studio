@@ -6,11 +6,12 @@ import type {
   TestAttempt,
   TestResponse,
   AnalyzedQuestion,
-  SubjectProgress
+  SubjectProgress,
+  Scan
 } from '../types';
 import { getApiUrl } from '../lib/api';
 
-type ViewType = 'trajectory' | 'subject' | 'topic_dashboard' | 'topic_detail' | 'test' | 'test_results';
+type ViewType = 'trajectory' | 'subject' | 'subject_menu' | 'topic_dashboard' | 'topic_detail' | 'test' | 'test_results' | 'past_year_exams' | 'vault_detail' | 'mock_builder';
 
 interface LearningJourneyState {
   // Navigation state
@@ -18,6 +19,8 @@ interface LearningJourneyState {
   selectedTrajectory: ExamContext | null;
   selectedSubject: Subject | null;
   selectedTopicId: string | null;
+  selectedScan: Scan | null;
+  selectedScanId: string | null;
 
   // Data state
   topics: TopicResource[];
@@ -38,12 +41,15 @@ interface LearningJourneyContextType extends LearningJourneyState {
   // Navigation actions
   selectTrajectory: (trajectory: ExamContext) => void;
   selectSubject: (subject: Subject) => void;
+  selectSubjectOption: (option: 'past_exams' | 'topicwise' | 'mock_builder') => void;
   selectTopic: (topicId: string) => void;
+  openVault: (scan: Scan) => void;
   goBack: () => void;
   resetToTrajectory: () => void;
 
   // Test actions
   startTest: (testType: 'topic_quiz' | 'subject_test' | 'full_mock', topicId?: string) => Promise<void>;
+  startCustomTest: (attempt: TestAttempt, questions: AnalyzedQuestion[]) => void;
   submitTest: (responses: TestResponse[]) => Promise<void>;
   exitTest: () => void;
 
@@ -77,6 +83,8 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     selectedTrajectory: null,
     selectedSubject: null,
     selectedTopicId: null,
+    selectedScan: null,
+    selectedScanId: null,
     topics: [],
     subjectProgress: {} as Record<Subject, SubjectProgress>,
     currentTest: null,
@@ -105,10 +113,10 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     setState(prev => ({
       ...prev,
       selectedSubject: subject,
-      currentView: 'topic_dashboard',
+      currentView: 'subject_menu',
       isLoading: true
     }));
-    setViewHistory(prev => [...prev, 'topic_dashboard']);
+    setViewHistory(prev => [...prev, 'subject_menu']);
 
     // Load topics for this subject via API (uses SERVICE_ROLE_KEY on server)
     try {
@@ -168,6 +176,33 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     setViewHistory(prev => [...prev, 'topic_detail']);
   };
 
+  // Select subject option from menu
+  const selectSubjectOption = (option: 'past_exams' | 'topicwise' | 'mock_builder') => {
+    const viewMap = {
+      past_exams: 'past_year_exams' as ViewType,
+      topicwise: 'topic_dashboard' as ViewType,
+      mock_builder: 'mock_builder' as ViewType
+    };
+
+    const targetView = viewMap[option];
+    setState(prev => ({
+      ...prev,
+      currentView: targetView
+    }));
+    setViewHistory(prev => [...prev, targetView]);
+  };
+
+  // Open vault for a specific scan
+  const openVault = (scan: Scan) => {
+    setState(prev => ({
+      ...prev,
+      selectedScan: scan,
+      selectedScanId: scan.id,
+      currentView: 'vault_detail'
+    }));
+    setViewHistory(prev => [...prev, 'vault_detail']);
+  };
+
   // Go back
   const goBack = () => {
     if (viewHistory.length > 1) {
@@ -183,15 +218,26 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
           selectedTrajectory: null,
           selectedSubject: null,
           selectedTopicId: null,
+          selectedScan: null,
           topics: []
         }),
         ...(previousView === 'subject' && {
           selectedSubject: null,
           selectedTopicId: null,
+          selectedScan: null,
           topics: []
+        }),
+        ...(previousView === 'subject_menu' && {
+          selectedTopicId: null,
+          selectedScan: null,
+          selectedScanId: null
         }),
         ...(previousView === 'topic_dashboard' && {
           selectedTopicId: null
+        }),
+        ...(previousView === 'past_year_exams' && {
+          selectedScan: null,
+          selectedScanId: null
         })
       }));
 
@@ -207,6 +253,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
       selectedTrajectory: null,
       selectedSubject: null,
       selectedTopicId: null,
+      selectedScan: null,
       topics: [],
       currentTest: null,
       currentTestQuestions: [],
@@ -329,6 +376,18 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     }));
   };
 
+  // Start custom test (from Mock Test Builder)
+  const startCustomTest = (attempt: TestAttempt, questions: AnalyzedQuestion[]) => {
+    setState(prev => ({
+      ...prev,
+      currentView: 'test',
+      currentTest: attempt,
+      currentTestQuestions: questions,
+      currentTestResponses: []
+    }));
+    setViewHistory(prev => [...prev, 'test']);
+  };
+
   // Load topics
   const loadTopics = async () => {
     if (!state.selectedTrajectory || !state.selectedSubject) return;
@@ -394,10 +453,13 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     ...state,
     selectTrajectory,
     selectSubject,
+    selectSubjectOption,
     selectTopic,
+    openVault,
     goBack,
     resetToTrajectory,
     startTest,
+    startCustomTest,
     submitTest,
     exitTest,
     loadTopics,

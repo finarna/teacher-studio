@@ -159,7 +159,7 @@ const QuizStudio: React.FC<QuizStudioProps> = ({ recentScans = [] }) => {
         generationConfig: { responseMimeType: "application/json" }
       });
 
-      const prompt = `You are an expert ${subjectConfig.name} teacher creating MCQ quiz questions for ${scan.grade} students.
+      const prompt = `You are an expert ${subjectConfig.name} teacher creating MCQ quiz questions for ${scan.grade} students preparing for ${scan.examContext || 'CBSE'} examination.
 
 TOPICS FROM EXAM: ${topicsList.join(', ')}
 
@@ -168,6 +168,15 @@ Generate ${questionCount} high-quality MCQ questions covering these topics:
 - Cover different topics proportionally
 - Include clear, concise explanations
 - Use proper ${subjectConfig.name} terminology
+
+🚨 STRICT CORRECTNESS POLICY FOR CORRECT ANSWER (ZERO TOLERANCE):
+- The correctIndex MUST point to the EXACT correct answer per ${scan.examContext || 'CBSE'} ${subjectConfig.name} official syllabus
+- DO NOT accept "technically close" or "approximately correct" answers
+- DO NOT use answers that are "correct in general" but wrong per ${scan.examContext || 'CBSE'} standards
+- Follow NCERT textbooks and ${scan.examContext || 'CBSE'} marking scheme exactly
+- Only ONE option can be marked as correct - the one that matches examination standards EXACTLY
+- If multiple options seem close, choose the one using ${scan.examContext || 'CBSE'}-standard notation and conventions
+- The correct answer must give FULL MARKS in ${scan.examContext || 'CBSE'} examination
 
 MATH FORMATTING: Use $ $ for ALL math (e.g., $\\\\frac{1}{2}$, $\\\\pi$).
 IMPORTANT: All backslashes in LaTeX must be properly escaped in JSON (use double backslashes: \\\\frac not \\frac).

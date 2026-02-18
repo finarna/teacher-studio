@@ -24,14 +24,38 @@ const genAI = new GoogleGenerativeAI(geminiApiKey);
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 async function determineCorrectAnswer(question: any): Promise<number | null> {
-  const prompt = `You are a math expert. Analyze this question and determine which option is correct.
+  const examContext = question.exam_context || 'CBSE';
+  const subject = question.subject || 'Math';
+
+  const prompt = `You are an expert ${subject} examiner with deep knowledge of ${examContext} examination patterns and syllabus requirements.
+
+CRITICAL INSTRUCTIONS - READ CAREFULLY:
+Your task is to identify the EXACT correct answer as per ${examContext} ${subject} syllabus and examination standards.
+
+🚨 STRICT CORRECTNESS POLICY:
+- DO NOT accept "technically close" or "approximately correct" answers
+- The answer must be EXACTLY correct according to ${examContext} syllabus and marking scheme
+- If an option is mathematically similar but uses different notation/convention than ${examContext} standard, it is WRONG
+- Only ONE option can be correct - choose the one that matches ${examContext} examination standards EXACTLY
+- Consider the specific exam context: ${examContext} may have different conventions than other exams
 
 Question: ${question.text}
 
 Options:
 ${question.options.map((opt: string, idx: number) => `${idx}: ${opt}`).join('\n')}
 
-${question.solution_steps?.length > 0 ? `Solution Steps: ${JSON.stringify(question.solution_steps)}` : ''}
+${question.solution_steps?.length > 0 ? `\nSolution Steps Available: ${JSON.stringify(question.solution_steps)}` : ''}
+
+Topic: ${question.topic || 'Not specified'}
+Exam Context: ${examContext}
+Subject: ${subject}
+
+ANALYZE CAREFULLY:
+1. Solve the problem step-by-step using ${examContext} ${subject} syllabus methods
+2. Calculate the exact answer
+3. Compare your calculated answer with ALL four options
+4. Select the option that matches EXACTLY (not approximately) your calculated answer
+5. Verify your choice follows ${examContext} notation and conventions
 
 IMPORTANT: Return ONLY a single number (0, 1, 2, or 3) indicating the correct option index. No explanation, just the number.`;
 
@@ -59,7 +83,7 @@ async function populateMathCorrectAnswers(dryRun: boolean = true) {
   // Get Math questions missing correct_option_index
   const { data: mathQuestions, error } = await supabase
     .from('questions')
-    .select('id, text, options, solution_steps, topic')
+    .select('id, text, options, solution_steps, topic, exam_context, subject')
     .is('correct_option_index', null)
     .not('options', 'is', null)
     .ilike('topic', '%math%')  // Math questions

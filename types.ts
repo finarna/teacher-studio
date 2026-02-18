@@ -284,6 +284,7 @@ export interface Scan {
   grade: string;
   subject: string;
   examContext?: ExamContext; // Optional for backward compatibility
+  year?: string; // Year of the exam paper (e.g., "2024", "2023")
   analysisData?: ExamAnalysisData;
 }
 
