@@ -1104,7 +1104,11 @@ const PracticeTab: React.FC<{
             { "step": "Perform the calculation step-by-step with intermediate results. Show the final answer with correct units and explain the physical meaning of the result.", "mark": "1" }
           ]
         }]
-      }`;
+      }
+
+      CRITICAL: For "diff" field, use ONLY these EXACT values: "Easy", "Moderate", or "Hard"
+      DO NOT use: "Medium", "Intermediate", "Advanced", "Simple", "Difficult" or any other variations.
+      `;
 
       const response = await ai.models.generateContent({
         model: selectedModel,
@@ -1127,42 +1131,59 @@ const PracticeTab: React.FC<{
 
       console.log('✅ Generated', data.questions.length, 'questions');
 
+      // Normalize difficulty value to match database constraint
+      const normalizeDifficulty = (diff: string): 'Easy' | 'Moderate' | 'Hard' => {
+        const normalized = (diff || 'Moderate').toLowerCase().trim();
+        if (normalized.includes('easy') || normalized.includes('simple') || normalized.includes('basic')) {
+          return 'Easy';
+        } else if (normalized.includes('hard') || normalized.includes('difficult') || normalized.includes('challenging') || normalized.includes('advanced')) {
+          return 'Hard';
+        } else {
+          // Medium, Moderate, Intermediate, etc. all map to Moderate
+          return 'Moderate';
+        }
+      };
+
       // Format questions with proper structure
-      const formatted: AnalyzedQuestion[] = data.questions.map((q: any) => ({
-        ...q,
-        id: crypto.randomUUID(), // Proper UUID
-        options: q.options || ['Option A', 'Option B', 'Option C', 'Option D'],
-        correctOptionIndex: q.correctOptionIndex ?? 0,
-        bloomsTaxonomy: q.bloomsTaxonomy || 'Understand',
-        pedagogy: q.pedagogy || 'Conceptual',
-        relevanceScore: q.relevanceScore || 70,
-        whyItMatters: q.whyItMatters || 'This question tests core concepts frequently appearing in exams.',
-        keyConcepts: q.keyConcepts || [{
-          name: q.topic || topicResource.topicName,
-          explanation: 'This concept is fundamental to understanding the subject.'
-        }],
-        commonMistakes: q.commonMistakes || [{
-          mistake: 'Calculation errors',
-          why: 'Students rush through calculations.',
-          howToAvoid: 'Always verify calculations step-by-step.'
-        }],
-        studyTip: q.studyTip || 'Break down the problem into smaller steps. Understand the theory first, then practice problems.',
-        thingsToRemember: q.thingsToRemember || ['Key formula or principle'],
-        aiReasoning: q.aiReasoning || `This ${q.topic || topicResource.topicName} question aligns with exam patterns.`,
-        historicalPattern: q.historicalPattern || `This concept appears consistently in ${examContext} exams.`,
-        predictiveInsight: q.predictiveInsight || 'High probability to appear in upcoming exams.',
-        marks: q.marks || '1',
-        difficulty: q.diff || 'Moderate',
-        diff: q.diff || 'Moderate',
-        blooms: q.bloomsTaxonomy || 'Understand',
-        topic: q.topic || topicResource.topicName,
-        domain: q.domain || topicResource.topicName,
-        year: q.year || '2025 Prediction',
-        solutionSteps: q.markingScheme?.map((s: any) => `${s.step}`) || [],
-        markingScheme: q.markingScheme || [],
-        extractedImages: q.extractedImages || [],
-        hasVisualElement: q.hasVisualElement || false
-      }));
+      const formatted: AnalyzedQuestion[] = data.questions.map((q: any) => {
+        const normalizedDifficulty = normalizeDifficulty(q.diff || q.difficulty || 'Moderate');
+
+        return {
+          ...q,
+          id: crypto.randomUUID(), // Proper UUID
+          options: q.options || ['Option A', 'Option B', 'Option C', 'Option D'],
+          correctOptionIndex: q.correctOptionIndex ?? 0,
+          bloomsTaxonomy: q.bloomsTaxonomy || 'Understand',
+          pedagogy: q.pedagogy || 'Conceptual',
+          relevanceScore: q.relevanceScore || 70,
+          whyItMatters: q.whyItMatters || 'This question tests core concepts frequently appearing in exams.',
+          keyConcepts: q.keyConcepts || [{
+            name: q.topic || topicResource.topicName,
+            explanation: 'This concept is fundamental to understanding the subject.'
+          }],
+          commonMistakes: q.commonMistakes || [{
+            mistake: 'Calculation errors',
+            why: 'Students rush through calculations.',
+            howToAvoid: 'Always verify calculations step-by-step.'
+          }],
+          studyTip: q.studyTip || 'Break down the problem into smaller steps. Understand the theory first, then practice problems.',
+          thingsToRemember: q.thingsToRemember || ['Key formula or principle'],
+          aiReasoning: q.aiReasoning || `This ${q.topic || topicResource.topicName} question aligns with exam patterns.`,
+          historicalPattern: q.historicalPattern || `This concept appears consistently in ${examContext} exams.`,
+          predictiveInsight: q.predictiveInsight || 'High probability to appear in upcoming exams.',
+          marks: q.marks || '1',
+          difficulty: normalizedDifficulty,
+          diff: normalizedDifficulty,
+          blooms: q.bloomsTaxonomy || 'Understand',
+          topic: q.topic || topicResource.topicName,
+          domain: q.domain || topicResource.topicName,
+          year: q.year || '2025 Prediction',
+          solutionSteps: q.markingScheme?.map((s: any) => `${s.step}`) || [],
+          markingScheme: q.markingScheme || [],
+          extractedImages: q.extractedImages || [],
+          hasVisualElement: q.hasVisualElement || false
+        };
+      });
 
       // ========== STEP 1: SAVE TO SUPABASE DATABASE ==========
       console.log('💾 Saving to Supabase...');
