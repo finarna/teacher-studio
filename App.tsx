@@ -201,7 +201,7 @@ const AppContent: React.FC = () => {
           headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const res = await fetch('http://localhost:9001/api/scans', { headers });
+        const res = await fetch(getApiUrl('/api/scans'), { headers });
         if (res.ok) {
           const data = await res.json();
           setRecentScans(data);
@@ -377,7 +377,7 @@ const AppContent: React.FC = () => {
       // Always POST - backend has upsert logic (checks if scan exists and updates/creates accordingly)
       console.log(`📝 Upserting scan ${scan.id}`);
 
-      const response = await fetch('http://localhost:9001/api/scans', {
+      const response = await fetch(getApiUrl('/api/scans'), {
         method: 'POST',
         headers,
         body: JSON.stringify(scan)

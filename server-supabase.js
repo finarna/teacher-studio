@@ -1599,7 +1599,8 @@ app.post('/api/learning-journey/create-custom-test', async (req, res) => {
       .from('scans')
       .select('id')
       .eq('is_system_scan', true)
-      .eq('subject', subject);
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
 
     const scanIds = scans?.map(s => s.id) || [];
 
@@ -1645,40 +1646,27 @@ app.post('/api/learning-journey/create-custom-test', async (req, res) => {
       .in('id', topicIds);
 
     const topicNames = topics?.map(t => t.name) || [];
+    console.log(`📚 Selected topics: ${topicNames.join(', ')}`);
 
-    // Get ALL questions from selected topics via topic_question_mapping
-    const { data: topicQuestionMapping } = await supabaseAdmin
-      .from('topic_question_mapping')
-      .select('question_id, topic_id')
-      .in('topic_id', topicIds);
-
-    const questionIdsFromTopics = topicQuestionMapping?.map(m => m.question_id) || [];
-
-    console.log(`🔍 Found ${questionIdsFromTopics.length} questions mapped to selected topics`);
-
-    // Fetch ALL questions from these IDs + from scans
+    // Fetch questions directly by topic name from system scans
     let allQuestions = [];
-
-    if (questionIdsFromTopics.length > 0) {
-      const { data } = await supabaseAdmin
-        .from('questions')
-        .select('*')
-        .in('id', questionIdsFromTopics)
-        .eq('exam_context', examContext);
-
-      if (data) allQuestions = data;
-    }
-
-    // If still no questions, fall back to domain-based selection
-    if (allQuestions.length === 0) {
-      console.log('⚠️ No questions from topic mapping, falling back to domain matching');
+    if (topicNames.length > 0) {
       const { data } = await supabaseAdmin
         .from('questions')
         .select('*')
         .in('scan_id', scanIds)
-        .eq('exam_context', examContext)
-        .limit(500);
+        .in('topic', topicNames);
+      if (data) allQuestions = data;
+    }
 
+    // Fallback: all system scan questions for this exam context
+    if (allQuestions.length === 0) {
+      console.log('⚠️ No topic-matched questions, using full system scan pool');
+      const { data } = await supabaseAdmin
+        .from('questions')
+        .select('*')
+        .in('scan_id', scanIds)
+        .limit(500);
       if (data) allQuestions = data;
     }
 
@@ -1690,52 +1678,131 @@ app.post('/api/learning-journey/create-custom-test', async (req, res) => {
       });
     }
 
-    // AI-powered selection: prioritize weak domains
-    const prioritizedQuestions = allQuestions.sort((a, b) => {
-      const aIsWeak = weakDomains.includes(a.domain) ? 1 : 0;
-      const bIsWeak = weakDomains.includes(b.domain) ? 1 : 0;
-      return bIsWeak - aIsWeak; // Weak domains first
-    });
+    // Get student mastery data for richer context
+    const { data: topicProgress } = await supabaseAdmin
+      .from('topic_resources')
+      .select('topic_name, mastery_level, study_stage')
+      .eq('user_id', userId)
+      .eq('subject', subject);
 
-    // Calculate questions per difficulty
-    const easyCount = Math.round((questionCount * difficultyMix.easy) / 100);
-    const moderateCount = Math.round((questionCount * difficultyMix.moderate) / 100);
-    const hardCount = questionCount - easyCount - moderateCount;
+    const masteryByTopic = {};
+    topicProgress?.forEach(t => { masteryByTopic[t.topic_name] = t.mastery_level || 0; });
 
-    // Sample questions by difficulty
-    const selectedQuestions = [];
+    // ── AI-POWERED SELECTION ──────────────────────────────────────────────
+    // Use Gemini to intelligently rank the question pool using full context
+    let selectedQuestions = [];
+    try {
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
 
-    // Easy
-    const easyPool = prioritizedQuestions.filter(q => q.diff === 'Easy' || q.diff === 1);
-    if (easyPool.length > 0) {
-      const shuffled = easyPool.sort(() => 0.5 - Math.random());
-      selectedQuestions.push(...shuffled.slice(0, Math.min(easyCount, easyPool.length)));
+      // Summarize question pool for Gemini (send IDs + metadata, not full text)
+      const questionSummaries = allQuestions.map(q => ({
+        id: q.id,
+        topic: q.topic,
+        difficulty: q.difficulty,
+        domain: q.domain,
+        blooms: q.blooms,
+        year: q.year,
+        hasVisual: q.has_visual_element
+      }));
+
+      const prompt = `You are an expert ${examContext} exam coach creating a personalized mock test.
+
+STUDENT CONTEXT:
+- Exam: ${examContext} | Subject: ${subject}
+- Weak domains (accuracy < 70%): ${weakDomains.length > 0 ? weakDomains.join(', ') : 'none identified yet'}
+- Topic mastery: ${JSON.stringify(masteryByTopic)}
+- Selected topics: ${topicNames.join(', ')}
+
+TEST REQUIREMENTS:
+- Total questions: ${questionCount}
+- Difficulty mix: ${difficultyMix.easy}% Easy, ${difficultyMix.moderate}% Moderate, ${difficultyMix.hard}% Hard
+- Easy count: ${Math.round(questionCount * difficultyMix.easy / 100)}
+- Moderate count: ${Math.round(questionCount * difficultyMix.moderate / 100)}
+- Hard count: ${questionCount - Math.round(questionCount * difficultyMix.easy / 100) - Math.round(questionCount * difficultyMix.moderate / 100)}
+
+AVAILABLE QUESTIONS (${questionSummaries.length} total):
+${JSON.stringify(questionSummaries)}
+
+SELECTION STRATEGY:
+1. Prioritize questions from WEAK domains (student needs practice there)
+2. Include questions from topics with LOW mastery (< 50%)
+3. Match the exact difficulty distribution requested
+4. Prefer recent year questions (higher exam relevance)
+5. Ensure topic diversity — don't cluster all questions on one topic
+6. Higher Bloom's taxonomy levels (Analyze, Evaluate, Apply) over pure recall
+
+Return ONLY a JSON array of question IDs in your recommended order (best first), matching exactly the required counts per difficulty. Format:
+{"selected": ["id1", "id2", ...]}`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: prompt,
+        config: { responseMimeType: 'application/json' }
+      });
+
+      const aiResult = JSON.parse(response.text);
+      const aiSelectedIds = new Set(aiResult.selected || []);
+
+      // Build final selection from AI's ranked IDs
+      const aiOrdered = (aiResult.selected || [])
+        .map(id => allQuestions.find(q => q.id === id))
+        .filter(Boolean);
+
+      // Fill any gaps AI missed with best remaining by difficulty
+      const easyTarget = Math.round(questionCount * difficultyMix.easy / 100);
+      const moderateTarget = Math.round(questionCount * difficultyMix.moderate / 100);
+      const hardTarget = questionCount - easyTarget - moderateTarget;
+
+      const pick = (pool, target) => pool.filter(q => !selectedQuestions.find(s => s.id === q.id)).slice(0, target);
+
+      // First fill from AI selection
+      selectedQuestions.push(...aiOrdered.filter(q => q.difficulty === 'Easy').slice(0, easyTarget));
+      selectedQuestions.push(...aiOrdered.filter(q => q.difficulty === 'Moderate').slice(0, moderateTarget));
+      selectedQuestions.push(...aiOrdered.filter(q => q.difficulty === 'Hard').slice(0, hardTarget));
+
+      // Fill remaining gaps from pool
+      const notPicked = allQuestions.filter(q => !selectedQuestions.find(s => s.id === q.id));
+      if (selectedQuestions.filter(q => q.difficulty === 'Easy').length < easyTarget)
+        selectedQuestions.push(...pick(notPicked.filter(q => q.difficulty === 'Easy'), easyTarget - selectedQuestions.filter(q => q.difficulty === 'Easy').length));
+      if (selectedQuestions.filter(q => q.difficulty === 'Moderate').length < moderateTarget)
+        selectedQuestions.push(...pick(notPicked.filter(q => q.difficulty === 'Moderate'), moderateTarget - selectedQuestions.filter(q => q.difficulty === 'Moderate').length));
+      if (selectedQuestions.filter(q => q.difficulty === 'Hard').length < hardTarget)
+        selectedQuestions.push(...pick(notPicked.filter(q => q.difficulty === 'Hard'), hardTarget - selectedQuestions.filter(q => q.difficulty === 'Hard').length));
+
+      console.log(`🤖 Gemini selected ${selectedQuestions.length} questions intelligently`);
+    } catch (aiErr) {
+      console.warn('⚠️ Gemini selection failed, using algorithmic fallback:', aiErr.message);
+
+      // Algorithmic fallback: score each question
+      const scored = allQuestions.map(q => {
+        let score = Math.random() * 10; // Base randomness
+        if (weakDomains.includes(q.domain)) score += 30;
+        const mastery = masteryByTopic[q.topic] || 50;
+        if (mastery < 40) score += 20;
+        else if (mastery < 60) score += 10;
+        if (q.year) score += 5; // Prefer year-tagged questions
+        if (['Analyze', 'Evaluate', 'Apply'].includes(q.blooms)) score += 8;
+        return { ...q, _score: score };
+      }).sort((a, b) => b._score - a._score);
+
+      const easyTarget = Math.round(questionCount * difficultyMix.easy / 100);
+      const moderateTarget = Math.round(questionCount * difficultyMix.moderate / 100);
+      const hardTarget = questionCount - easyTarget - moderateTarget;
+
+      selectedQuestions.push(...scored.filter(q => q.difficulty === 'Easy').slice(0, easyTarget));
+      selectedQuestions.push(...scored.filter(q => q.difficulty === 'Moderate').slice(0, moderateTarget));
+      selectedQuestions.push(...scored.filter(q => q.difficulty === 'Hard').slice(0, hardTarget));
+
+      // Fill remaining
+      if (selectedQuestions.length < questionCount) {
+        const remaining = scored.filter(q => !selectedQuestions.find(s => s.id === q.id))
+          .slice(0, questionCount - selectedQuestions.length);
+        selectedQuestions.push(...remaining);
+      }
     }
 
-    // Moderate
-    const moderatePool = prioritizedQuestions.filter(q => q.diff === 'Moderate' || q.diff === 2);
-    if (moderatePool.length > 0) {
-      const shuffled = moderatePool.sort(() => 0.5 - Math.random());
-      selectedQuestions.push(...shuffled.slice(0, Math.min(moderateCount, moderatePool.length)));
-    }
-
-    // Hard
-    const hardPool = prioritizedQuestions.filter(q => q.diff === 'Hard' || q.diff === 3);
-    if (hardPool.length > 0) {
-      const shuffled = hardPool.sort(() => 0.5 - Math.random());
-      selectedQuestions.push(...shuffled.slice(0, Math.min(hardCount, hardPool.length)));
-    }
-
-    // If we don't have enough, fill with any remaining questions
-    if (selectedQuestions.length < questionCount) {
-      const remaining = prioritizedQuestions
-        .filter(q => !selectedQuestions.includes(q))
-        .sort(() => 0.5 - Math.random())
-        .slice(0, questionCount - selectedQuestions.length);
-      selectedQuestions.push(...remaining);
-    }
-
-    console.log(`✅ Selected ${selectedQuestions.length} questions (Easy: ${selectedQuestions.filter(q => q.diff === 'Easy' || q.diff === 1).length}, Moderate: ${selectedQuestions.filter(q => q.diff === 'Moderate' || q.diff === 2).length}, Hard: ${selectedQuestions.filter(q => q.diff === 'Hard' || q.diff === 3).length})`);
+    console.log(`✅ Selected ${selectedQuestions.length} questions (Easy: ${selectedQuestions.filter(q => q.difficulty === 'Easy').length}, Moderate: ${selectedQuestions.filter(q => q.difficulty === 'Moderate').length}, Hard: ${selectedQuestions.filter(q => q.difficulty === 'Hard').length})`);
 
     if (selectedQuestions.length < questionCount) {
       return res.status(400).json({
@@ -1789,9 +1856,51 @@ app.post('/api/learning-journey/create-custom-test', async (req, res) => {
       templateId = template?.id;
     }
 
+    // Map DB snake_case to frontend camelCase
+    const mappedAttempt = {
+      id: attempt.id,
+      userId: attempt.user_id,
+      testType: attempt.test_type,
+      testName: attempt.test_name,
+      examContext: attempt.exam_context,
+      subject: attempt.subject,
+      topicId: attempt.topic_id,
+      totalQuestions: attempt.total_questions,
+      durationMinutes: attempt.duration_minutes,
+      startTime: attempt.start_time,
+      status: attempt.status,
+      questionsAttempted: attempt.questions_attempted || 0,
+      createdAt: attempt.created_at,
+    };
+
+    const mappedQuestions = finalQuestions.map(q => ({
+      id: q.id,
+      text: q.text,
+      options: q.options,
+      marks: q.marks,
+      difficulty: q.difficulty,
+      diff: q.difficulty,
+      topic: q.topic,
+      domain: q.domain,
+      year: q.year,
+      blooms: q.blooms,
+      bloomsTaxonomy: q.blooms,
+      solutionSteps: q.solution_steps || [],
+      examTip: q.exam_tip,
+      visualConcept: q.visual_concept,
+      keyFormulas: q.key_formulas || [],
+      pitfalls: q.pitfalls || [],
+      masteryMaterial: q.mastery_material,
+      hasVisualElement: q.has_visual_element,
+      visualElementType: q.visual_element_type,
+      diagramUrl: q.diagram_url,
+      correctOptionIndex: q.correct_option_index,
+      source: q.source,
+    }));
+
     res.json({
       success: true,
-      data: { attempt, questions: finalQuestions, templateId }
+      data: { attempt: mappedAttempt, questions: mappedQuestions, templateId }
     });
 
   } catch (error) {
@@ -1861,10 +1970,10 @@ app.post('/api/learning-journey/count-available-questions', async (req, res) => 
     // Get topic names for these IDs
     const { data: topics } = await supabaseAdmin
       .from('topics')
-      .select('topic_name')
+      .select('name')
       .in('id', topicIds);
 
-    const topicNames = topics?.map(t => t.topic_name) || [];
+    const topicNames = topics?.map(t => t.name) || [];
 
     // Get system scans for this subject
     const { data: scans } = await supabaseAdmin
@@ -1894,8 +2003,8 @@ app.post('/api/learning-journey/count-available-questions', async (req, res) => 
       .from('questions')
       .select('id', { count: 'exact', head: true })
       .in('scan_id', scanIds)
-      .eq('diff', 'Easy')
-      .overlaps('topics', topicNames);
+      .eq('difficulty', 'Easy')
+      .in('topic', topicNames);
 
     counts.easy = easyCount || 0;
 
@@ -1904,8 +2013,8 @@ app.post('/api/learning-journey/count-available-questions', async (req, res) => 
       .from('questions')
       .select('id', { count: 'exact', head: true })
       .in('scan_id', scanIds)
-      .eq('diff', 'Moderate')
-      .overlaps('topics', topicNames);
+      .eq('difficulty', 'Moderate')
+      .in('topic', topicNames);
 
     counts.moderate = moderateCount || 0;
 
@@ -1914,8 +2023,8 @@ app.post('/api/learning-journey/count-available-questions', async (req, res) => 
       .from('questions')
       .select('id', { count: 'exact', head: true })
       .in('scan_id', scanIds)
-      .eq('diff', 'Hard')
-      .overlaps('topics', topicNames);
+      .eq('difficulty', 'Hard')
+      .in('topic', topicNames);
 
     counts.hard = hardCount || 0;
 
@@ -1934,6 +2043,163 @@ app.post('/api/learning-journey/count-available-questions', async (req, res) => 
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error'
+    });
+  }
+});
+
+/**
+ * GET /api/learning-journey/mock-history
+ * Get user's past custom mock test attempts
+ */
+app.get('/api/learning-journey/mock-history', async (req, res) => {
+  try {
+    const { userId, subject, examContext, limit = 10 } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
+    }
+
+    let query = supabaseAdmin
+      .from('test_attempts')
+      .select('id, test_name, subject, exam_context, percentage, raw_score, marks_obtained, marks_total, total_questions, questions_attempted, status, created_at, completed_at, duration_minutes, total_duration, topic_analysis, time_analysis')
+      .eq('user_id', userId)
+      .eq('test_type', 'custom_mock')
+      .order('created_at', { ascending: false })
+      .limit(parseInt(limit));
+
+    if (subject) query = query.eq('subject', subject);
+    if (examContext) query = query.eq('exam_context', examContext);
+
+    const { data: attempts, error } = await query;
+    if (error) throw error;
+
+    const mappedAttempts = (attempts || []).map(a => ({
+      id: a.id,
+      testName: a.test_name,
+      subject: a.subject,
+      examContext: a.exam_context,
+      percentage: a.percentage,
+      rawScore: a.raw_score,
+      marksObtained: a.marks_obtained,
+      marksTotal: a.marks_total,
+      totalQuestions: a.total_questions,
+      questionsAttempted: a.questions_attempted || 0,
+      status: a.status,
+      createdAt: a.created_at,
+      completedAt: a.completed_at,
+      durationMinutes: a.duration_minutes,
+      totalDuration: a.total_duration,
+      topicAnalysis: a.topic_analysis,
+      timeAnalysis: a.time_analysis,
+    }));
+
+    res.json({ success: true, data: { attempts: mappedAttempts } });
+  } catch (error) {
+    console.error('Error in /api/learning-journey/mock-history:', error);
+    res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Internal server error' });
+  }
+});
+
+/**
+ * POST /api/learning-journey/ai-summary
+ * Generate Gemini-powered strength/weakness analysis for a completed test
+ */
+app.post('/api/learning-journey/ai-summary', async (req, res) => {
+  try {
+    const {
+      subject,
+      examContext,
+      testName,
+      percentage,
+      correctAnswers,
+      incorrectAnswers,
+      skippedAnswers,
+      totalQuestions,
+      topicStats,       // { topicName: { correct, total, accuracy } }
+      difficultyStats,  // { Easy: { correct, total }, Moderate: { ... }, Hard: { ... } }
+      avgTimePerQuestion,
+      totalTimeSeconds
+    } = req.body;
+
+    if (!subject || !examContext || percentage === undefined) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const topicLines = Object.entries(topicStats || {})
+      .map(([t, s]) => `  - ${t}: ${s.correct}/${s.total} correct (${s.accuracy}%)`)
+      .join('\n');
+
+    const diffLines = Object.entries(difficultyStats || {})
+      .map(([d, s]) => `  - ${d}: ${s.correct}/${s.total} correct (${s.total > 0 ? Math.round(s.correct/s.total*100) : 0}%)`)
+      .join('\n');
+
+    const prompt = `You are an expert ${examContext} exam coach. Analyze this mock test result and give a sharp, personalized report.
+
+TEST: "${testName}" | ${subject} | ${examContext}
+SCORE: ${percentage}% (${correctAnswers} correct, ${incorrectAnswers} incorrect, ${skippedAnswers} skipped out of ${totalQuestions})
+AVG TIME/QUESTION: ${avgTimePerQuestion}s
+TOTAL TIME: ${Math.round((totalTimeSeconds || 0) / 60)} min
+
+TOPIC BREAKDOWN:
+${topicLines || '  (not available)'}
+
+DIFFICULTY BREAKDOWN:
+${diffLines || '  (not available)'}
+
+Return ONLY valid JSON (no markdown, no explanation, no LaTeX, no backslashes) in exactly this structure:
+{
+  "verdict": "One sharp sentence: what this score means for their ${examContext} preparation and the single most important thing to fix",
+  "strengths": [
+    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers from their data"},
+    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers from their data"},
+    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers from their data"}
+  ],
+  "weaknesses": [
+    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers and why it matters for ${examContext}"},
+    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers and why it matters for ${examContext}"},
+    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers and why it matters for ${examContext}"}
+  ],
+  "studyPlan": "3-4 sentence concrete action plan for the next 7 days — specific topics, hours, and techniques. Reference actual weak topics from their data."
+}
+
+Be direct, specific, and use actual numbers from the data. No generic advice.`;
+
+    const { GoogleGenAI } = await import('@google/genai');
+    const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+      config: { responseMimeType: 'application/json' }
+    });
+
+    let rawText = response.text || '';
+    // Strip markdown code fences if present
+    rawText = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    // Extract first JSON object (handles trailing garbage)
+    const firstBrace = rawText.indexOf('{');
+    const lastBrace = rawText.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      rawText = rawText.slice(firstBrace, lastBrace + 1);
+    }
+    // Fix common Gemini JSON issues: unescaped backslashes outside of known escape sequences
+    rawText = rawText.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+
+    let summary;
+    try {
+      summary = JSON.parse(rawText);
+    } catch (parseErr) {
+      console.error('AI JSON parse failed, raw:', rawText.slice(0, 300));
+      throw parseErr;
+    }
+    res.json({ success: true, data: summary });
+
+  } catch (error) {
+    console.error('Error in /api/learning-journey/ai-summary:', error);
+    // Return a graceful fallback so the page still works
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'AI summary failed'
     });
   }
 });

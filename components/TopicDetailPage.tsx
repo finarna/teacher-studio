@@ -937,15 +937,14 @@ const PracticeTab: React.FC<{
           setQuestions(prev => {
             const existingIds = new Set(prev.map(q => q.id));
             const newQuestions = formattedAIQuestions.filter(q => !existingIds.has(q.id));
+            if (newQuestions.length === 0) return prev;
             const updated = [...prev, ...newQuestions];
 
-            // Update parent component's question count
-            if (onQuestionCountChange) {
-              onQuestionCountChange(updated.length);
-            }
-
-            // Update shared state so QuizTab can access these questions
-            setSharedQuestions(updated);
+            // Schedule side-effects after render (not inside state updater)
+            setTimeout(() => {
+              if (onQuestionCountChange) onQuestionCountChange(updated.length);
+              setSharedQuestions(updated);
+            }, 0);
 
             return updated;
           });

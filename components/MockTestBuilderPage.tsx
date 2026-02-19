@@ -14,7 +14,14 @@ import {
   FileQuestion,
   Sparkles,
   TrendingDown,
-  X
+  X,
+  History,
+  Trophy,
+  TrendingUp,
+  BarChart2,
+  CheckCircle,
+  XCircle,
+  MinusCircle
 } from 'lucide-react';
 import type { Subject, ExamContext, TopicResource, TestAttempt, AnalyzedQuestion } from '../types';
 import { SUBJECT_CONFIGS } from '../config/subjects';
@@ -48,6 +55,36 @@ interface TestTemplate {
   lastUsed: string;
 }
 
+interface TopicAnalysisEntry {
+  topicId: string;
+  topicName: string;
+  total: number;
+  correct: number;
+  incorrect: number;
+  skipped: number;
+  percentage: number;
+}
+
+interface PastTestAttempt {
+  id: string;
+  testName: string;
+  subject: string;
+  examContext: string;
+  percentage: number | null;
+  rawScore: number | null;
+  marksObtained: number | null;
+  marksTotal: number | null;
+  totalQuestions: number;
+  questionsAttempted: number;
+  status: string;
+  createdAt: string;
+  completedAt: string | null;
+  durationMinutes: number;
+  totalDuration: number | null;
+  topicAnalysis: TopicAnalysisEntry[] | null;
+  timeAnalysis: Record<string, number> | null;
+}
+
 const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   subject,
   examContext,
@@ -62,6 +99,9 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const [showRecommendations, setShowRecommendations] = useState(true);
   const [isCreatingTest, setIsCreatingTest] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [testHistory, setTestHistory] = useState<PastTestAttempt[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
 
   // Test configuration state
   const [testName, setTestName] = useState('');
@@ -77,6 +117,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   useEffect(() => {
     fetchWeakTopics();
     fetchTemplates();
+    fetchTestHistory();
   }, [subject, examContext, userId]);
 
   useEffect(() => {
@@ -120,6 +161,22 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
       }
     } catch (error) {
       console.error('Error fetching templates:', error);
+    }
+  };
+
+  const fetchTestHistory = async () => {
+    setIsLoadingHistory(true);
+    try {
+      const url = getApiUrl(`/api/learning-journey/mock-history?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(examContext)}&limit=5`);
+      const response = await fetch(url);
+      if (response.ok) {
+        const result = await response.json();
+        setTestHistory(result.data?.attempts || []);
+      }
+    } catch (error) {
+      console.error('Error fetching test history:', error);
+    } finally {
+      setIsLoadingHistory(false);
     }
   };
 
@@ -364,6 +421,296 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
             </div>
           )}
         </div>
+
+        {/* Test History & Analytics */}
+        {(isLoadingHistory || testHistory.length > 0) && (() => {
+          const completed = testHistory.filter(a => a.status === 'completed' && a.percentage != null);
+          const avgScore = completed.length > 0
+            ? Math.round(completed.reduce((s, a) => s + (a.percentage ?? 0), 0) / completed.length)
+            : null;
+          const bestScore = completed.length > 0
+            ? Math.max(...completed.map(a => a.percentage ?? 0))
+            : null;
+          const trend = completed.length >= 2
+            ? (completed[0].percentage ?? 0) - (completed[completed.length - 1].percentage ?? 0)
+            : null;
+
+          // Aggregate topic performance across all completed attempts
+          const topicMap: Record<string, { name: string; total: number; correct: number }> = {};
+          completed.forEach(a => {
+            const topics = Array.isArray(a.topicAnalysis) ? a.topicAnalysis : [];
+            topics.forEach(t => {
+              if (!topicMap[t.topicId]) topicMap[t.topicId] = { name: t.topicName, total: 0, correct: 0 };
+              topicMap[t.topicId].total += t.total;
+              topicMap[t.topicId].correct += t.correct;
+            });
+          });
+          const aggregatedTopics = Object.entries(topicMap)
+            .map(([id, v]) => ({ id, name: v.name, pct: v.total > 0 ? Math.round((v.correct / v.total) * 100) : 0 }))
+            .sort((a, b) => a.pct - b.pct);
+
+          // Bar chart data (last 8 tests, oldest→newest)
+          const chartData = [...completed].reverse().slice(-8);
+
+          return (
+            <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center">
+                    <BarChart2 size={20} className="text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-lg text-slate-900 font-outfit">Mock Test Analytics</h2>
+                    <p className="text-sm text-slate-500 font-instrument">
+                      {testHistory.length} test{testHistory.length !== 1 ? 's' : ''} • {completed.length} completed
+                    </p>
+                  </div>
+                </div>
+                {trend !== null && (
+                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-black ${
+                    trend > 0 ? 'bg-emerald-50 text-emerald-700' : trend < 0 ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {trend > 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                    {trend > 0 ? '+' : ''}{trend}% trend
+                  </div>
+                )}
+              </div>
+
+              {isLoadingHistory ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 size={28} className="text-blue-500 animate-spin" />
+                </div>
+              ) : (
+                <div className="p-6 space-y-6">
+                  {/* Summary Stats */}
+                  {completed.length > 0 && (
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <div className="text-2xl font-black text-blue-700">{avgScore}%</div>
+                        <div className="text-xs font-bold text-blue-600 mt-1">Avg Score</div>
+                      </div>
+                      <div className="text-center p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <div className="text-2xl font-black text-emerald-700">{bestScore}%</div>
+                        <div className="text-xs font-bold text-emerald-600 mt-1">Best Score</div>
+                      </div>
+                      <div className="text-center p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className="text-2xl font-black text-slate-700">{completed.length}</div>
+                        <div className="text-xs font-bold text-slate-500 mt-1">Completed</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Score Trend Chart */}
+                  {chartData.length >= 2 && (
+                    <div>
+                      <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Score Trend</div>
+                      <div className="flex items-end gap-2 h-24 px-1">
+                        {chartData.map((a, i) => {
+                          const pct = a.percentage ?? 0;
+                          const barH = Math.max(8, Math.round((pct / 100) * 88));
+                          const barColor = pct >= 75 ? 'bg-emerald-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500';
+                          return (
+                            <div key={a.id} className="flex-1 flex flex-col items-center gap-1">
+                              <div className="text-[10px] font-bold text-slate-600">{pct}%</div>
+                              <div
+                                className={`w-full rounded-t-md transition-all ${barColor}`}
+                                style={{ height: `${barH}px` }}
+                                title={`${a.testName}: ${pct}%`}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex justify-between text-[10px] text-slate-400 mt-1 px-1">
+                        <span>Oldest</span>
+                        <span>Latest</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Topic Heatmap */}
+                  {aggregatedTopics.length > 0 && (
+                    <div>
+                      <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Topic Performance (All Tests)</div>
+                      <div className="space-y-2">
+                        {aggregatedTopics.slice(0, 8).map(t => (
+                          <div key={t.id} className="flex items-center gap-3">
+                            <div className="w-28 text-xs font-medium text-slate-700 truncate shrink-0">{t.name}</div>
+                            <div className="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all ${
+                                  t.pct >= 75 ? 'bg-emerald-500' : t.pct >= 50 ? 'bg-amber-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${t.pct}%` }}
+                              />
+                            </div>
+                            <div className={`text-xs font-black w-9 text-right ${
+                              t.pct >= 75 ? 'text-emerald-600' : t.pct >= 50 ? 'text-amber-600' : 'text-red-600'
+                            }`}>{t.pct}%</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Individual Attempts */}
+                  <div>
+                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Recent Attempts</div>
+                    <div className="space-y-3">
+                      {testHistory.map((attempt) => {
+                        const pct = attempt.percentage;
+                        const isExpanded = expandedHistoryId === attempt.id;
+                        const taList = Array.isArray(attempt.topicAnalysis) ? attempt.topicAnalysis : [];
+                        const correct = taList.reduce((s, t) => s + t.correct, 0);
+                        const incorrect = taList.reduce((s, t) => s + t.incorrect, 0);
+                        const skipped = attempt.totalQuestions - (attempt.questionsAttempted);
+                        const timeTaken = attempt.totalDuration
+                          ? `${Math.floor(attempt.totalDuration / 60)}m ${attempt.totalDuration % 60}s`
+                          : null;
+                        const scoreColor = pct == null ? 'text-slate-500'
+                          : pct >= 75 ? 'text-emerald-600'
+                          : pct >= 50 ? 'text-amber-600'
+                          : 'text-red-600';
+                        const scoreBg = pct == null ? 'bg-slate-100'
+                          : pct >= 75 ? 'bg-emerald-50 border border-emerald-200'
+                          : pct >= 50 ? 'bg-amber-50 border border-amber-200'
+                          : 'bg-red-50 border border-red-200';
+
+                        return (
+                          <div key={attempt.id} className="border border-slate-200 rounded-xl overflow-hidden">
+                            <button
+                              className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors text-left"
+                              onClick={() => setExpandedHistoryId(isExpanded ? null : attempt.id)}
+                            >
+                              {/* Score badge */}
+                              <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${scoreBg}`}>
+                                {pct != null ? (
+                                  <div className="text-center">
+                                    <div className={`text-base font-black leading-none ${scoreColor}`}>{Math.round(pct)}%</div>
+                                    <Trophy size={10} className={`mx-auto mt-0.5 ${scoreColor}`} />
+                                  </div>
+                                ) : (
+                                  <span className="text-xs font-bold text-slate-400">N/A</span>
+                                )}
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="font-black text-sm text-slate-900 font-instrument truncate">{attempt.testName}</div>
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs text-slate-500">
+                                  {attempt.completedAt && (
+                                    <span>{new Date(attempt.completedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}</span>
+                                  )}
+                                  <span>{attempt.totalQuestions}Q • {attempt.durationMinutes}min</span>
+                                  {timeTaken && <span>Took {timeTaken}</span>}
+                                </div>
+                              </div>
+
+                              {/* Quick stats */}
+                              {attempt.status === 'completed' && (
+                                <div className="hidden sm:flex items-center gap-3 text-xs mr-3">
+                                  <div className="flex items-center gap-1 text-emerald-600">
+                                    <CheckCircle size={12} />
+                                    <span className="font-bold">{correct}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 text-red-500">
+                                    <XCircle size={12} />
+                                    <span className="font-bold">{incorrect}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 text-slate-400">
+                                    <MinusCircle size={12} />
+                                    <span className="font-bold">{skipped}</span>
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
+                                  attempt.status === 'completed'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-slate-100 text-slate-600'
+                                }`}>
+                                  {attempt.status === 'completed' ? 'Done' : 'Incomplete'}
+                                </span>
+                                {isExpanded ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+                              </div>
+                            </button>
+
+                            {/* Expanded detail panel */}
+                            {isExpanded && attempt.status === 'completed' && (
+                              <div className="border-t border-slate-100 px-5 py-4 bg-slate-50 space-y-4">
+                                {/* Score breakdown row */}
+                                <div className="grid grid-cols-4 gap-3 text-center">
+                                  <div className="bg-white rounded-lg p-3 border border-slate-200">
+                                    <div className="text-lg font-black text-slate-900">{pct != null ? Math.round(pct) : 'N/A'}%</div>
+                                    <div className="text-[10px] font-bold text-slate-500 uppercase">Score</div>
+                                  </div>
+                                  <div className="bg-emerald-50 rounded-lg p-3 border border-emerald-200">
+                                    <div className="text-lg font-black text-emerald-700">{correct}</div>
+                                    <div className="text-[10px] font-bold text-emerald-600 uppercase">Correct</div>
+                                  </div>
+                                  <div className="bg-red-50 rounded-lg p-3 border border-red-200">
+                                    <div className="text-lg font-black text-red-700">{incorrect}</div>
+                                    <div className="text-[10px] font-bold text-red-600 uppercase">Wrong</div>
+                                  </div>
+                                  <div className="bg-slate-100 rounded-lg p-3 border border-slate-200">
+                                    <div className="text-lg font-black text-slate-600">{skipped}</div>
+                                    <div className="text-[10px] font-bold text-slate-500 uppercase">Skipped</div>
+                                  </div>
+                                </div>
+
+                                {/* Topic breakdown */}
+                                {taList.length > 0 && (
+                                  <div>
+                                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Topic Breakdown</div>
+                                    <div className="space-y-2">
+                                      {[...taList]
+                                        .sort((a, b) => a.percentage - b.percentage)
+                                        .map(t => (
+                                          <div key={t.topicId} className="flex items-center gap-3">
+                                            <div className="w-28 text-xs font-medium text-slate-700 truncate shrink-0">{t.topicName}</div>
+                                            <div className="flex-1 h-2.5 bg-white rounded-full overflow-hidden border border-slate-200">
+                                              <div
+                                                className={`h-full rounded-full ${
+                                                  t.percentage >= 75 ? 'bg-emerald-500' : t.percentage >= 50 ? 'bg-amber-500' : 'bg-red-500'
+                                                }`}
+                                                style={{ width: `${t.percentage}%` }}
+                                              />
+                                            </div>
+                                            <div className={`text-xs font-black w-16 text-right ${
+                                              t.percentage >= 75 ? 'text-emerald-600' : t.percentage >= 50 ? 'text-amber-600' : 'text-red-600'
+                                            }`}>{t.correct}/{t.total} ({t.percentage}%)</div>
+                                          </div>
+                                        ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Marks */}
+                                {attempt.marksObtained != null && (
+                                  <div className="text-xs text-slate-500 font-medium">
+                                    Marks: <span className="font-black text-slate-700">{attempt.marksObtained}/{attempt.marksTotal}</span>
+                                    {timeTaken && <span className="ml-3">Time taken: <span className="font-black text-slate-700">{timeTaken}</span></span>}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {isExpanded && attempt.status !== 'completed' && (
+                              <div className="border-t border-slate-100 px-5 py-4 bg-slate-50 text-sm text-slate-500 italic">
+                                This test was not completed.
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Test Configuration */}
         <div className="bg-white rounded-2xl border-2 border-slate-200 p-6 space-y-6">

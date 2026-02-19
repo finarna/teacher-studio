@@ -239,9 +239,26 @@ export async function generateTest(req, res) {
 
     if (attemptError) throw attemptError;
 
+    // Map DB snake_case to frontend camelCase
+    const mappedAttempt = {
+      id: attempt.id,
+      userId: attempt.user_id,
+      testType: attempt.test_type,
+      testName: attempt.test_name,
+      examContext: attempt.exam_context,
+      subject: attempt.subject,
+      topicId: attempt.topic_id,
+      totalQuestions: attempt.total_questions,
+      durationMinutes: attempt.duration_minutes,
+      startTime: attempt.start_time,
+      status: attempt.status,
+      questionsAttempted: attempt.questions_attempted || 0,
+      createdAt: attempt.created_at,
+    };
+
     res.json({
       success: true,
-      attempt,
+      attempt: mappedAttempt,
       questions: questionSet.questions,
       metadata: questionSet.metadata
     });
@@ -352,9 +369,35 @@ export async function submitTest(req, res) {
 
     if (updateError) throw updateError;
 
+    // Map DB snake_case to frontend camelCase
+    const mappedAttempt = {
+      id: updatedAttempt.id,
+      userId: updatedAttempt.user_id,
+      testType: updatedAttempt.test_type,
+      testName: updatedAttempt.test_name,
+      examContext: updatedAttempt.exam_context,
+      subject: updatedAttempt.subject,
+      topicId: updatedAttempt.topic_id,
+      totalQuestions: updatedAttempt.total_questions,
+      durationMinutes: updatedAttempt.duration_minutes,
+      startTime: updatedAttempt.start_time,
+      endTime: updatedAttempt.end_time,
+      totalDuration: updatedAttempt.total_duration,
+      rawScore: updatedAttempt.raw_score,
+      percentage: updatedAttempt.percentage,
+      marksObtained: updatedAttempt.marks_obtained,
+      marksTotal: updatedAttempt.marks_total,
+      status: updatedAttempt.status,
+      questionsAttempted: updatedAttempt.questions_attempted || 0,
+      topicAnalysis: updatedAttempt.topic_analysis,
+      timeAnalysis: updatedAttempt.time_analysis,
+      createdAt: updatedAttempt.created_at,
+      completedAt: updatedAttempt.completed_at,
+    };
+
     res.json({
       success: true,
-      attempt: updatedAttempt,
+      attempt: mappedAttempt,
       score: {
         correct: correctCount,
         total: responses.length,

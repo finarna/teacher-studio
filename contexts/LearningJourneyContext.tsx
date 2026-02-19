@@ -10,6 +10,7 @@ import type {
   Scan
 } from '../types';
 import { getApiUrl } from '../lib/api';
+import { supabase } from '../lib/supabase';
 
 type ViewType = 'trajectory' | 'subject' | 'subject_menu' | 'topic_dashboard' | 'topic_detail' | 'test' | 'test_results' | 'past_year_exams' | 'vault_detail' | 'mock_builder';
 
@@ -329,10 +330,13 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     try {
       // Call API to save test responses
       const url = getApiUrl(`/api/tests/${state.currentTest.id}/submit`);
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         credentials: 'include',
         body: JSON.stringify({ responses })
