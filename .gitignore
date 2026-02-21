@@ -33,3 +33,5 @@ dist-ssr
 *.mp4
 
 .env
+*.backup
+server-supabase.js.backup
