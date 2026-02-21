@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: 'Which exam boards are supported?',
-    answer: 'EduJourney supports all major Indian exam boards including CBSE, ICSE, State Boards (Maharashtra, Karnataka, Tamil Nadu, etc.), and international curricula like IGCSE and IB. Our AI adapts to different question formats and marking schemes automatically.',
+    answer: 'plus2AI supports all major Indian exam boards including CBSE, ICSE, State Boards (Maharashtra, Karnataka, Tamil Nadu, etc.), and international curricula like IGCSE and IB. Our AI adapts to different question formats and marking schemes automatically.',
   },
   {
     question: 'Which exam packages do you offer?',
@@ -63,7 +63,7 @@ export default function FAQSection() {
             </span>
           </h2>
           <p className="text-xl text-gray-600">
-            Everything you need to know about EduJourney
+            Everything you need to know about plus2AI
           </p>
         </motion.div>
 

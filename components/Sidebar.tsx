@@ -98,8 +98,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
           </div>
           {!isCollapsed && (
             <div className="animate-in fade-in duration-500">
-              <h1 className="font-black text-slate-900 tracking-tight font-outfit text-xl leading-none uppercase italic">Edu<span className="text-accent-600">Journey</span></h1>
-              <span className="text-[9px] font-black text-slate-400 tracking-[0.25em] uppercase mt-1 block">Coach Assistant</span>
+              <h1 className="font-black text-slate-900 tracking-tight font-outfit text-xl leading-none uppercase italic">plus<span className="text-accent-600">2AI</span></h1>
+              <span className="text-[9px] font-black text-slate-400 tracking-[0.25em] uppercase mt-1 block">Learning Platform</span>
             </div>
           )}
         </div>

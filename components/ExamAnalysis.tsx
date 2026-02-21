@@ -31,7 +31,8 @@ import {
   AlertTriangle,
   HelpCircle,
   Share2,
-  Download
+  Download,
+  TrendingUp
 } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Scan, AnalyzedQuestion, Subject, ExamContext } from '../types';
@@ -43,6 +44,7 @@ import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
 import { useFilteredScans } from '../hooks/useFilteredScans';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
+import PredictiveTrendsTab from './PredictiveTrendsTab';
 
 interface MetricCardProps {
   title: string;
@@ -81,7 +83,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const { scans: filteredScans } = useFilteredScans(recentScans);
 
   const [isSynthesizingAll, setIsSynthesizingAll] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'vault'>(showOnlyVault ? 'vault' : 'overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'trends' | 'vault'>(showOnlyVault ? 'vault' : 'overview');
   const [expandedQuestionId, setExpandedQuestionId] = useState<string | null>(null);
   const [expandedDomainId, setExpandedDomainId] = useState<string | null>(null);
   const [isSynthesizingQuestion, setIsSynthesizingQuestion] = useState<string | null>(null);
@@ -1001,8 +1003,8 @@ Schema: {
             <div className="flex items-center justify-between">
               {/* Left: Tabs */}
               <div className="flex items-center gap-1">
-                {(['overview', 'intelligence', 'vault'] as const).map(tab => {
-                  const TabIcon = tab === 'overview' ? HelpCircle : tab === 'intelligence' ? Activity : FolderOpen;
+                {(['overview', 'intelligence', 'trends', 'vault'] as const).map(tab => {
+                  const TabIcon = tab === 'overview' ? HelpCircle : tab === 'intelligence' ? Activity : tab === 'trends' ? TrendingUp : FolderOpen;
                   return (
                     <button
                       key={tab}
@@ -1968,6 +1970,14 @@ Schema: {
             </div>
           </div>
           </div>
+        )}
+
+        {activeTab === 'trends' && scan && (
+          <PredictiveTrendsTab
+            examContext={scan.examContext || 'KCET'}
+            subject={scan.subject}
+            currentYear={scan.year}
+          />
         )}
         </div>
 

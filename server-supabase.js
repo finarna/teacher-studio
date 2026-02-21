@@ -1,5 +1,5 @@
 /**
- * EduJourney Vault - Express Server with Supabase + Redis
+ * plus2AI Vault - Express Server with Supabase + Redis
  *
  * This server replaces the Redis-only server with a hybrid approach:
  * - Supabase PostgreSQL: Persistent data storage (scans, questions, images)
@@ -41,8 +41,16 @@ import {
   getTestResults,
   getTestHistory,
   getSubjectProgress,
-  getTrajectoryProgress
+  getTrajectoryProgress,
+  createCustomTest,
+  getGenerationProgress
 } from './api/learningJourneyEndpoints.js';
+import {
+  getHistoricalTrends,
+  getTopicEvolution
+} from './api/trendsEndpoints.js';
+import { loadGenerationContext } from './lib/examDataLoader.ts';
+import { generateTestQuestions } from './lib/aiQuestionGenerator.ts';
 
 const app = express();
 const port = process.env.PORT || 9001;
@@ -547,6 +555,16 @@ app.post('/api/scans', async (req, res) => {
         const { autoMapScanQuestions } = await import('./lib/autoMapScanQuestions.ts');
         const result = await autoMapScanQuestions(supabaseAdmin, apiScan.id);
         console.log(`✅ Mapped ${result.mapped || 0}/${questionsWithMetadata.length} questions to topics`);
+
+        // Sync scan data to AI generator tables (for learning from past papers)
+        console.log(`🤖 Syncing scan data to AI generator tables...`);
+        const { syncScanToAITables } = await import('./lib/syncScanToAITables.ts');
+        const syncResult = await syncScanToAITables(supabaseAdmin, apiScan.id);
+        if (syncResult.success) {
+          console.log(`✅ AI tables updated: ${syncResult.message}`);
+        } else {
+          console.warn(`⚠️  AI table sync: ${syncResult.message}`);
+        }
       }
     } else {
       // Create new scan
@@ -633,6 +651,16 @@ app.post('/api/scans', async (req, res) => {
         const { autoMapScanQuestions } = await import('./lib/autoMapScanQuestions.ts');
         const result = await autoMapScanQuestions(supabaseAdmin, apiScan.id);
         console.log(`✅ Mapped ${result.mapped || 0}/${questionsWithMetadata.length} questions to topics`);
+
+        // Sync scan data to AI generator tables (for learning from past papers)
+        console.log(`🤖 Syncing scan data to AI generator tables...`);
+        const { syncScanToAITables } = await import('./lib/syncScanToAITables.ts');
+        const syncResult = await syncScanToAITables(supabaseAdmin, apiScan.id);
+        if (syncResult.success) {
+          console.log(`✅ AI tables updated: ${syncResult.message}`);
+        } else {
+          console.warn(`⚠️  AI table sync: ${syncResult.message}`);
+        }
       }
     }
 
@@ -1566,351 +1594,31 @@ app.get('/api/learning-journey/weak-topics', async (req, res) => {
 /**
  * POST /api/learning-journey/create-custom-test
  * Generate a custom mock test with specified configuration
+ * (Uses AI generation when GEMINI_API_KEY is set and test name contains 'mock')
  */
-app.post('/api/learning-journey/create-custom-test', async (req, res) => {
-  try {
-    const {
-      userId,
-      testName,
-      subject,
-      examContext,
-      topicIds,
-      questionCount,
-      difficultyMix,
-      durationMinutes,
-      saveAsTemplate
-    } = req.body;
+app.post('/api/learning-journey/create-custom-test', createCustomTest);
 
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
+/**
+ * GET /api/learning-journey/generation-progress/:progressId
+ * Poll progress of AI test generation
+ */
+app.get('/api/learning-journey/generation-progress/:progressId', getGenerationProgress);
 
-    // Validate difficulty mix
-    const total = difficultyMix.easy + difficultyMix.moderate + difficultyMix.hard;
-    if (total !== 100) {
-      return res.status(400).json({ error: 'Difficulty mix must total 100%' });
-    }
+// =====================================================
+// PREDICTIVE TRENDS ENDPOINTS
+// =====================================================
 
-    console.log(`🎯 AI-Powered Mock Test "${testName}" - ${questionCount} questions`);
-    console.log(`📊 Topics: ${topicIds.length}, Difficulty Mix:`, difficultyMix);
+/**
+ * GET /api/trends/historical/:examContext/:subject
+ * Get historical patterns and predictions for Exam Analysis UI
+ */
+app.get('/api/trends/historical/:examContext/:subject', getHistoricalTrends);
 
-    // Get ALL system scans for this subject and exam context
-    const { data: scans } = await supabaseAdmin
-      .from('scans')
-      .select('id')
-      .eq('is_system_scan', true)
-      .eq('subject', subject)
-      .eq('exam_context', examContext);
-
-    const scanIds = scans?.map(s => s.id) || [];
-
-    if (scanIds.length === 0) {
-      return res.status(400).json({ error: 'No questions available for this subject' });
-    }
-
-    console.log(`📚 Found ${scanIds.length} past year papers to pull questions from`);
-
-    // Get user's practice history to identify weak areas
-    const { data: practiceHistory } = await supabaseAdmin
-      .from('practice_answers')
-      .select('question_id, is_correct, domain')
-      .eq('user_id', userId)
-      .limit(1000);
-
-    // Calculate weak domains
-    const domainStats = {};
-    practiceHistory?.forEach(p => {
-      if (p.domain) {
-        if (!domainStats[p.domain]) {
-          domainStats[p.domain] = { correct: 0, total: 0 };
-        }
-        domainStats[p.domain].total++;
-        if (p.is_correct) domainStats[p.domain].correct++;
-      }
-    });
-
-    const weakDomains = Object.entries(domainStats)
-      .map(([domain, stats]) => ({
-        domain,
-        accuracy: stats.total > 0 ? (stats.correct / stats.total) * 100 : 0
-      }))
-      .filter(d => d.accuracy < 70)
-      .map(d => d.domain);
-
-    console.log(`🎯 Identified ${weakDomains.length} weak domains for focus`);
-
-    // Get topic names for filtering
-    const { data: topics } = await supabaseAdmin
-      .from('topics')
-      .select('name')
-      .in('id', topicIds);
-
-    const topicNames = topics?.map(t => t.name) || [];
-    console.log(`📚 Selected topics: ${topicNames.join(', ')}`);
-
-    // Fetch questions directly by topic name from system scans
-    let allQuestions = [];
-    if (topicNames.length > 0) {
-      const { data } = await supabaseAdmin
-        .from('questions')
-        .select('*')
-        .in('scan_id', scanIds)
-        .in('topic', topicNames);
-      if (data) allQuestions = data;
-    }
-
-    // Fallback: all system scan questions for this exam context
-    if (allQuestions.length === 0) {
-      console.log('⚠️ No topic-matched questions, using full system scan pool');
-      const { data } = await supabaseAdmin
-        .from('questions')
-        .select('*')
-        .in('scan_id', scanIds)
-        .limit(500);
-      if (data) allQuestions = data;
-    }
-
-    console.log(`📦 Total question pool: ${allQuestions.length}`);
-
-    if (allQuestions.length === 0) {
-      return res.status(400).json({
-        error: 'No questions available for selected topics. Try selecting more topics or check if past year papers are uploaded.'
-      });
-    }
-
-    // Get student mastery data for richer context
-    const { data: topicProgress } = await supabaseAdmin
-      .from('topic_resources')
-      .select('topic_name, mastery_level, study_stage')
-      .eq('user_id', userId)
-      .eq('subject', subject);
-
-    const masteryByTopic = {};
-    topicProgress?.forEach(t => { masteryByTopic[t.topic_name] = t.mastery_level || 0; });
-
-    // ── AI-POWERED SELECTION ──────────────────────────────────────────────
-    // Use Gemini to intelligently rank the question pool using full context
-    let selectedQuestions = [];
-    try {
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
-
-      // Summarize question pool for Gemini (send IDs + metadata, not full text)
-      const questionSummaries = allQuestions.map(q => ({
-        id: q.id,
-        topic: q.topic,
-        difficulty: q.difficulty,
-        domain: q.domain,
-        blooms: q.blooms,
-        year: q.year,
-        hasVisual: q.has_visual_element
-      }));
-
-      const prompt = `You are an expert ${examContext} exam coach creating a personalized mock test.
-
-STUDENT CONTEXT:
-- Exam: ${examContext} | Subject: ${subject}
-- Weak domains (accuracy < 70%): ${weakDomains.length > 0 ? weakDomains.join(', ') : 'none identified yet'}
-- Topic mastery: ${JSON.stringify(masteryByTopic)}
-- Selected topics: ${topicNames.join(', ')}
-
-TEST REQUIREMENTS:
-- Total questions: ${questionCount}
-- Difficulty mix: ${difficultyMix.easy}% Easy, ${difficultyMix.moderate}% Moderate, ${difficultyMix.hard}% Hard
-- Easy count: ${Math.round(questionCount * difficultyMix.easy / 100)}
-- Moderate count: ${Math.round(questionCount * difficultyMix.moderate / 100)}
-- Hard count: ${questionCount - Math.round(questionCount * difficultyMix.easy / 100) - Math.round(questionCount * difficultyMix.moderate / 100)}
-
-AVAILABLE QUESTIONS (${questionSummaries.length} total):
-${JSON.stringify(questionSummaries)}
-
-SELECTION STRATEGY:
-1. Prioritize questions from WEAK domains (student needs practice there)
-2. Include questions from topics with LOW mastery (< 50%)
-3. Match the exact difficulty distribution requested
-4. Prefer recent year questions (higher exam relevance)
-5. Ensure topic diversity — don't cluster all questions on one topic
-6. Higher Bloom's taxonomy levels (Analyze, Evaluate, Apply) over pure recall
-
-Return ONLY a JSON array of question IDs in your recommended order (best first), matching exactly the required counts per difficulty. Format:
-{"selected": ["id1", "id2", ...]}`;
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' }
-      });
-
-      const aiResult = JSON.parse(response.text);
-      const aiSelectedIds = new Set(aiResult.selected || []);
-
-      // Build final selection from AI's ranked IDs
-      const aiOrdered = (aiResult.selected || [])
-        .map(id => allQuestions.find(q => q.id === id))
-        .filter(Boolean);
-
-      // Fill any gaps AI missed with best remaining by difficulty
-      const easyTarget = Math.round(questionCount * difficultyMix.easy / 100);
-      const moderateTarget = Math.round(questionCount * difficultyMix.moderate / 100);
-      const hardTarget = questionCount - easyTarget - moderateTarget;
-
-      const pick = (pool, target) => pool.filter(q => !selectedQuestions.find(s => s.id === q.id)).slice(0, target);
-
-      // First fill from AI selection
-      selectedQuestions.push(...aiOrdered.filter(q => q.difficulty === 'Easy').slice(0, easyTarget));
-      selectedQuestions.push(...aiOrdered.filter(q => q.difficulty === 'Moderate').slice(0, moderateTarget));
-      selectedQuestions.push(...aiOrdered.filter(q => q.difficulty === 'Hard').slice(0, hardTarget));
-
-      // Fill remaining gaps from pool
-      const notPicked = allQuestions.filter(q => !selectedQuestions.find(s => s.id === q.id));
-      if (selectedQuestions.filter(q => q.difficulty === 'Easy').length < easyTarget)
-        selectedQuestions.push(...pick(notPicked.filter(q => q.difficulty === 'Easy'), easyTarget - selectedQuestions.filter(q => q.difficulty === 'Easy').length));
-      if (selectedQuestions.filter(q => q.difficulty === 'Moderate').length < moderateTarget)
-        selectedQuestions.push(...pick(notPicked.filter(q => q.difficulty === 'Moderate'), moderateTarget - selectedQuestions.filter(q => q.difficulty === 'Moderate').length));
-      if (selectedQuestions.filter(q => q.difficulty === 'Hard').length < hardTarget)
-        selectedQuestions.push(...pick(notPicked.filter(q => q.difficulty === 'Hard'), hardTarget - selectedQuestions.filter(q => q.difficulty === 'Hard').length));
-
-      console.log(`🤖 Gemini selected ${selectedQuestions.length} questions intelligently`);
-    } catch (aiErr) {
-      console.warn('⚠️ Gemini selection failed, using algorithmic fallback:', aiErr.message);
-
-      // Algorithmic fallback: score each question
-      const scored = allQuestions.map(q => {
-        let score = Math.random() * 10; // Base randomness
-        if (weakDomains.includes(q.domain)) score += 30;
-        const mastery = masteryByTopic[q.topic] || 50;
-        if (mastery < 40) score += 20;
-        else if (mastery < 60) score += 10;
-        if (q.year) score += 5; // Prefer year-tagged questions
-        if (['Analyze', 'Evaluate', 'Apply'].includes(q.blooms)) score += 8;
-        return { ...q, _score: score };
-      }).sort((a, b) => b._score - a._score);
-
-      const easyTarget = Math.round(questionCount * difficultyMix.easy / 100);
-      const moderateTarget = Math.round(questionCount * difficultyMix.moderate / 100);
-      const hardTarget = questionCount - easyTarget - moderateTarget;
-
-      selectedQuestions.push(...scored.filter(q => q.difficulty === 'Easy').slice(0, easyTarget));
-      selectedQuestions.push(...scored.filter(q => q.difficulty === 'Moderate').slice(0, moderateTarget));
-      selectedQuestions.push(...scored.filter(q => q.difficulty === 'Hard').slice(0, hardTarget));
-
-      // Fill remaining
-      if (selectedQuestions.length < questionCount) {
-        const remaining = scored.filter(q => !selectedQuestions.find(s => s.id === q.id))
-          .slice(0, questionCount - selectedQuestions.length);
-        selectedQuestions.push(...remaining);
-      }
-    }
-
-    console.log(`✅ Selected ${selectedQuestions.length} questions (Easy: ${selectedQuestions.filter(q => q.difficulty === 'Easy').length}, Moderate: ${selectedQuestions.filter(q => q.difficulty === 'Moderate').length}, Hard: ${selectedQuestions.filter(q => q.difficulty === 'Hard').length})`);
-
-    if (selectedQuestions.length < questionCount) {
-      return res.status(400).json({
-        error: `Insufficient questions. Found ${selectedQuestions.length}, needed ${questionCount}. Try selecting more topics or reducing question count.`
-      });
-    }
-
-    // Shuffle all questions
-    const finalQuestions = selectedQuestions.sort(() => 0.5 - Math.random());
-
-    // Create test attempt
-    const { data: attempt, error: attemptError } = await supabaseAdmin
-      .from('test_attempts')
-      .insert({
-        user_id: userId,
-        test_type: 'custom_mock',
-        test_name: testName,
-        exam_context: examContext,
-        subject,
-        topic_id: null,
-        total_questions: finalQuestions.length,
-        duration_minutes: durationMinutes,
-        start_time: new Date().toISOString(),
-        status: 'in_progress',
-        test_config: { topicIds, difficultyMix, questionCount, durationMinutes }
-      })
-      .select()
-      .single();
-
-    if (attemptError) throw attemptError;
-
-    // Save template if requested
-    let templateId = null;
-    if (saveAsTemplate) {
-      const { data: template } = await supabaseAdmin
-        .from('test_templates')
-        .insert({
-          user_id: userId,
-          template_name: testName,
-          subject,
-          exam_context: examContext,
-          topic_ids: topicIds,
-          difficulty_mix: difficultyMix,
-          question_count: questionCount,
-          duration_minutes: durationMinutes,
-          last_used_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      templateId = template?.id;
-    }
-
-    // Map DB snake_case to frontend camelCase
-    const mappedAttempt = {
-      id: attempt.id,
-      userId: attempt.user_id,
-      testType: attempt.test_type,
-      testName: attempt.test_name,
-      examContext: attempt.exam_context,
-      subject: attempt.subject,
-      topicId: attempt.topic_id,
-      totalQuestions: attempt.total_questions,
-      durationMinutes: attempt.duration_minutes,
-      startTime: attempt.start_time,
-      status: attempt.status,
-      questionsAttempted: attempt.questions_attempted || 0,
-      createdAt: attempt.created_at,
-    };
-
-    const mappedQuestions = finalQuestions.map(q => ({
-      id: q.id,
-      text: q.text,
-      options: q.options,
-      marks: q.marks,
-      difficulty: q.difficulty,
-      diff: q.difficulty,
-      topic: q.topic,
-      domain: q.domain,
-      year: q.year,
-      blooms: q.blooms,
-      bloomsTaxonomy: q.blooms,
-      solutionSteps: q.solution_steps || [],
-      examTip: q.exam_tip,
-      visualConcept: q.visual_concept,
-      keyFormulas: q.key_formulas || [],
-      pitfalls: q.pitfalls || [],
-      masteryMaterial: q.mastery_material,
-      hasVisualElement: q.has_visual_element,
-      visualElementType: q.visual_element_type,
-      diagramUrl: q.diagram_url,
-      correctOptionIndex: q.correct_option_index,
-      source: q.source,
-    }));
-
-    res.json({
-      success: true,
-      data: { attempt: mappedAttempt, questions: mappedQuestions, templateId }
-    });
-
-  } catch (error) {
-    console.error('Error in /api/learning-journey/create-custom-test:', error);
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Internal server error'
-    });
-  }
-});
+/**
+ * GET /api/trends/topic-evolution/:examContext/:subject/:topicId
+ * Get detailed evolution of a specific topic
+ */
+app.get('/api/trends/topic-evolution/:examContext/:subject/:topicId', getTopicEvolution);
 
 /**
  * GET /api/learning-journey/test-templates
@@ -2059,6 +1767,8 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
       return res.status(400).json({ error: 'userId is required' });
     }
 
+    console.log(`📚 Fetching mock test history for user ${userId}, subject: ${subject}, exam: ${examContext}`);
+
     let query = supabaseAdmin
       .from('test_attempts')
       .select('id, test_name, subject, exam_context, percentage, raw_score, marks_obtained, marks_total, total_questions, questions_attempted, status, created_at, completed_at, duration_minutes, total_duration, topic_analysis, time_analysis')
@@ -2072,6 +1782,8 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
 
     const { data: attempts, error } = await query;
     if (error) throw error;
+
+    console.log(`✅ Found ${attempts?.length || 0} mock test attempts`);
 
     const mappedAttempts = (attempts || []).map(a => ({
       id: a.id,
@@ -2107,6 +1819,7 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
 app.post('/api/learning-journey/ai-summary', async (req, res) => {
   try {
     const {
+      attemptId,        // For persistence
       subject,
       examContext,
       testName,
@@ -2192,6 +1905,27 @@ Be direct, specific, and use actual numbers from the data. No generic advice.`;
       console.error('AI JSON parse failed, raw:', rawText.slice(0, 300));
       throw parseErr;
     }
+
+    // Persist AI summary to database if attemptId provided
+    if (attemptId) {
+      try {
+        const { error: updateError } = await supabaseAdmin
+          .from('test_attempts')
+          .update({ ai_report: summary })
+          .eq('id', attemptId);
+
+        if (updateError) {
+          console.error('Failed to persist AI summary:', updateError);
+          // Don't fail the request, just log the error
+        } else {
+          console.log(`✅ AI summary persisted for attempt ${attemptId}`);
+        }
+      } catch (persistErr) {
+        console.error('Error persisting AI summary:', persistErr);
+        // Don't fail the request
+      }
+    }
+
     res.json({ success: true, data: summary });
 
   } catch (error) {
@@ -2253,7 +1987,7 @@ app.use((req, res) => {
 // =====================================================
 app.listen(port, '0.0.0.0', () => {
   console.log('\n' + '='.repeat(60));
-  console.log('🚀 EduJourney Vault Server (Supabase Edition)');
+  console.log('🚀 plus2AI Vault Server (Supabase Edition)');
   console.log('='.repeat(60));
   console.log(`✅ Server running at http://0.0.0.0:${port}`);
   console.log(`📊 Redis: ${redis ? redis.status : 'disabled (Supabase-only mode)'}`);

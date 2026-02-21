@@ -46,10 +46,10 @@ export default function LandingNav({ onGetStarted }: LandingNavProps) {
               className="flex items-center gap-2"
             >
               <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">E</span>
+                <span className="text-white font-bold text-xl">P</span>
               </div>
               <span className="text-xl font-bold text-gray-900">
-                EduJourney
+                plus2AI
               </span>
             </button>
           </div>

@@ -143,9 +143,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
 
         // Only log actual KaTeX errors (katex-error class means parsing failed)
         if (html.includes('katex-error')) {
-          console.error('❌ KaTeX parse error:', {
-            expression: cleanExpression.substring(0, 100)
-          });
+          console.error('❌ KaTeX parse error:', cleanExpression.substring(0, 100));
         }
 
         ref.current.innerHTML = html;
@@ -287,6 +285,33 @@ export const RenderWithMath: React.FC<{
     .replace(/\\\\r/g, '\r')  // Double backslash-r to carriage return (from JSON)
     .replace(/\\\\"/g, '"')   // Double backslash-quote to quote (from JSON)
     .replace(/\n{3,}/g, '\n\n'); // Collapse excessive newlines
+
+  // Fix text with missing spaces (common in PDF-sourced text or corrupted data)
+  // Dictionary of common words - ordered by length (longest first to avoid partial matches)
+  const dictionary = [
+    'perpendicular', 'straightline', 'straight', 'equation', 'through', 'passes',
+    'which', 'point', 'line', 'and', 'the', 'is', 'of', 'to', 'in', 'at', 'on',
+    'for', 'with', 'from', 'by', 'that', 'this', 'as', 'are', 'was', 'were',
+    'been', 'be', 'have', 'has', 'had', 'given', 'find', 'if', 'then', 'when',
+    'where', 'sec', 'csc', 'sin', 'cos', 'tan', 'cot'
+  ];
+
+  // Aggressively segment text that has no spaces (20+ consecutive lowercase letters)
+  cleanText = cleanText.replace(/[a-z]{20,}/gi, (match) => {
+    let result = match;
+
+    // First pass: add space before capital letters
+    result = result.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+    // Second pass: insert spaces before known dictionary words
+    // Sort by length descending to match longest words first
+    dictionary.forEach(word => {
+      const regex = new RegExp(`([a-z])(${word})`, 'gi');
+      result = result.replace(regex, '$1 $2');
+    });
+
+    return result;
+  });
 
   // 2. Convert LaTeX \(...\) to $...$ and \[...\] to $$...$$
   // Handle escaped backslashes first: \\( becomes \(

@@ -10,6 +10,7 @@ import TopicDetailPage from './TopicDetailPage';
 import TestInterface from './TestInterface';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import VaultDetailPage from './VaultDetailPage';
+import TestResultsPage from './TestResultsPage';
 import { Loader2 } from 'lucide-react';
 
 interface LearningJourneyAppProps {
@@ -41,7 +42,8 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
     startTest,
     startCustomTest,
     submitTest,
-    exitTest
+    exitTest,
+    viewPastTestResults
   } = useLearningJourney();
 
   // Error state
@@ -156,27 +158,23 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
 
     case 'test_results':
       if (!currentTest || !currentTestResponses || !currentTestQuestions) {
-        goBack();
-        return null;
+        // Return loading state while data is being fetched
+        return (
+          <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+            <div className="text-center">
+              <Loader2 size={48} className="text-primary-600 animate-spin mx-auto mb-4" />
+              <p className="text-sm font-medium text-slate-600">Loading test results...</p>
+            </div>
+          </div>
+        );
       }
       return (
-        <PerformanceAnalysis
+        <TestResultsPage
           attempt={currentTest}
-          responses={currentTestResponses}
           questions={currentTestQuestions}
-          onReviewQuestions={() => {
-            // TODO: Implement question review mode
-            console.log('Review questions clicked');
-          }}
-          onRetakeTest={() => {
-            // Restart the same test
-            if (selectedTopicId) {
-              startTest(currentTest.testType, selectedTopicId);
-            } else {
-              startTest(currentTest.testType);
-            }
-          }}
-          onBackToDashboard={goBack}
+          responses={currentTestResponses}
+          onBack={goBack}
+          onSubmitRetake={submitTest}
         />
       );
 
@@ -233,6 +231,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
           topics={topics}
           onBack={goBack}
           onStartTest={startCustomTest}
+          onViewTestResults={viewPastTestResults}
           userId={userId}
         />
       );

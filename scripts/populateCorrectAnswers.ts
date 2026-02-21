@@ -22,7 +22,7 @@ if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const genAI = new GoogleGenerativeAI(geminiApiKey);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
 async function determineCorrectAnswer(question: any): Promise<number | null> {
   const examContext = question.exam_context || 'CBSE';

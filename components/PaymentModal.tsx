@@ -84,7 +84,7 @@ export default function PaymentModal({ plan, onClose, onSuccess }: PaymentModalP
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || orderData.razorpay_key_id,
         amount: orderData.amount,
         currency: 'INR',
-        name: 'EduJourney',
+        name: 'plus2AI',
         description: `${plan.name} - ${plan.billing_period}`,
         order_id: orderData.order_id,
         image: 'https://cdn-icons-png.flaticon.com/512/3976/3976625.png', // Optional logo

@@ -5,8 +5,8 @@
  * Handles base64 → Blob conversion, batch uploads, and CDN URL generation.
  */
 
-import { supabaseAdmin } from './supabaseServer';
-import { createImage } from './supabaseServer';
+import { supabaseAdmin } from './supabaseServer.ts';
+import { createImage } from './supabaseServer.ts';
 
 const STORAGE_BUCKET = 'edujourney-images';
 

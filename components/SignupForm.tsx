@@ -73,7 +73,7 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
           {/* Header */}
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-            <p className="text-gray-600">Join EduJourney Vault to start analyzing exams</p>
+            <p className="text-gray-600">Join plus2AI Vault to start analyzing exams</p>
           </div>
 
           {/* Error Display */}

@@ -112,6 +112,13 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
   };
 
   const fetchAISummary = async () => {
+    // Check if AI report already exists in attempt
+    if (attempt.aiReport && typeof attempt.aiReport === 'object') {
+      setAiSummary(attempt.aiReport as AISummary);
+      setIsLoadingAI(false);
+      return;
+    }
+
     setIsLoadingAI(true);
     setAiError(false);
     setAiSummary(null);
@@ -134,6 +141,7 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          attemptId: attempt.id, // Add attemptId for persistence
           subject: attempt.subject,
           examContext: attempt.examContext,
           testName: attempt.testName,
@@ -175,36 +183,78 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
     <div className="bg-slate-50 font-instrument text-slate-900 pb-24">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div>
-            <h1 className="font-black text-2xl tracking-tight text-slate-900 font-outfit">
-              Test Results
-            </h1>
-            <p className="text-slate-500 text-sm font-medium mt-0.5">
-              {attempt.testName} · {attempt.subject} · {new Date(attempt.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onRetakeTest}
-              className="px-4 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-lg text-sm font-black hover:border-slate-300 transition-all"
-            >
-              <Zap size={14} className="inline mr-1.5" />
-              Retake
-            </button>
-            <button
-              onClick={onBackToDashboard}
-              className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-black hover:bg-slate-800 transition-all"
-            >
-              Dashboard
-            </button>
+        <div className="max-w-6xl mx-auto px-6 py-5">
+          {/* Top Row - Navigation and Actions */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onBackToDashboard}
+                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-md text-sm font-bold transition-all flex items-center gap-1.5"
+              >
+                <ArrowRight size={16} className="rotate-180" />
+                Back
+              </button>
+              <div>
+                <h1 className="font-black text-xl tracking-tight text-slate-900 font-outfit">
+                  {attempt.testName}
+                </h1>
+                <p className="text-slate-500 text-xs font-medium mt-0.5">
+                  {attempt.subject} · {attempt.examContext} · {attempt.totalQuestions} Questions · {new Date(attempt.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </p>
+              </div>
+            </div>
+
+            {/* Score Badge */}
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-xs font-medium text-slate-500">Your Score</div>
+                <div className={`text-2xl font-black ${
+                  percentage >= 75 ? 'text-emerald-600' :
+                  percentage >= 50 ? 'text-amber-600' :
+                  'text-red-600'
+                }`}>
+                  {percentage}%
+                </div>
+              </div>
+              <div className={`w-16 h-16 rounded-xl flex items-center justify-center text-xl font-black ${
+                percentage >= 75 ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-300' :
+                percentage >= 50 ? 'bg-amber-100 text-amber-700 border-2 border-amber-300' :
+                'bg-red-100 text-red-700 border-2 border-red-300'
+              }`}>
+                {correctAnswers}/{totalQuestions}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Analysis Content */}
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+        {/* ── Quick Actions ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <button
+            onClick={onReviewQuestions}
+            className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-base font-black hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          >
+            <BookOpen size={18} className="inline mr-2" />
+            Review Answers
+          </button>
+          <button
+            onClick={onRetakeTest}
+            className="w-full px-6 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl text-base font-black hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          >
+            <Zap size={18} className="inline mr-2" />
+            Retake Test
+          </button>
+          <button
+            onClick={onBackToDashboard}
+            className="w-full px-6 py-4 bg-slate-900 text-white rounded-xl text-base font-black hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          >
+            Back to Dashboard
+          </button>
+        </div>
 
-        {/* ── Score Hero ── */}
+          {/* ── Score Hero ── */}
         <div className={`bg-gradient-to-br ${performance.bg} rounded-2xl p-7 text-white relative overflow-hidden`}>
           <div className="absolute inset-0 opacity-10"
             style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
@@ -559,23 +609,6 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                 </div>
               </div>
             )}
-
-            {/* Actions */}
-            <div className="space-y-3">
-              <button
-                onClick={onRetakeTest}
-                className="w-full px-4 py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl text-sm font-black hover:from-amber-600 hover:to-amber-700 transition-all shadow-sm"
-              >
-                <Zap size={15} className="inline mr-2" />
-                Retake Test
-              </button>
-              <button
-                onClick={onBackToDashboard}
-                className="w-full px-4 py-3.5 bg-slate-900 text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all"
-              >
-                Back to Dashboard
-              </button>
-            </div>
           </div>
         </div>
       </div>

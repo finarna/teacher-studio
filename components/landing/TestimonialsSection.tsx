@@ -8,7 +8,7 @@ const testimonials = [
     role: 'Physics Teacher',
     school: 'Delhi Public School',
     image: '👩‍🏫',
-    quote: 'EduJourney has completely transformed how I prepare exam materials. What used to take me 5 hours now takes just 15 minutes. The AI accuracy is incredible!',
+    quote: 'plus2AI has completely transformed how I prepare exam materials. What used to take me 5 hours now takes just 15 minutes. The AI accuracy is incredible!',
     rating: 5,
   },
   {
@@ -40,7 +40,7 @@ const testimonials = [
     role: 'Principal',
     school: 'Modern School',
     image: '👩‍💼',
-    quote: 'We rolled out EduJourney across all our science departments. Teacher satisfaction is up, and we\'re saving over 200 hours of prep time monthly. ROI was immediate.',
+    quote: 'We rolled out plus2AI across all our science departments. Teacher satisfaction is up, and we\'re saving over 200 hours of prep time monthly. ROI was immediate.',
     rating: 5,
   },
   {
@@ -74,7 +74,7 @@ export default function TestimonialsSection() {
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            See why educators across India are switching to EduJourney
+            See why educators across India are switching to plus2AI
           </p>
         </motion.div>
 

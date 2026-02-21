@@ -1,7 +1,7 @@
 {
   "name": "edujourney---universal-teacher-studio",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.5.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,7 +16,9 @@
     "verify:db": "npx tsx scripts/verify-database.ts",
     "migrate:images": "npx tsx scripts/migrate-images-to-supabase.ts",
     "migrate:data": "npx tsx scripts/migrate-data-to-supabase.ts",
-    "migrate:exam-context": "npx tsx scripts/migrate-exam-context.ts"
+    "migrate:exam-context": "npx tsx scripts/migrate-exam-context.ts",
+    "delete-tests": "npx tsx scripts/deleteMockTests.ts",
+    "populate-answers": "npx tsx scripts/populateCorrectAnswers.ts"
   },
   "dependencies": {
     "@google/genai": "^1.34.0",

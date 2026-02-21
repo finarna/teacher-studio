@@ -3,7 +3,7 @@
  * Processes payment and subscription events from RazorPay
  */
 
-import { supabaseAdmin } from './supabaseServer';
+import { supabaseAdmin } from './supabaseServer.ts';
 
 interface WebhookEvent {
   event: string;

@@ -53,6 +53,7 @@ interface LearningJourneyContextType extends LearningJourneyState {
   startCustomTest: (attempt: TestAttempt, questions: AnalyzedQuestion[]) => void;
   submitTest: (responses: TestResponse[]) => Promise<void>;
   exitTest: () => void;
+  viewPastTestResults: (attemptId: string) => Promise<void>;
 
   // Data actions
   loadTopics: () => Promise<void>;
@@ -380,6 +381,53 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     }));
   };
 
+  // View past test results
+  const viewPastTestResults = async (attemptId: string) => {
+    setState(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      // Fetch test attempt details
+      const url = getApiUrl(`/api/tests/${attemptId}/results`);
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to load test results');
+      }
+
+      const result = await response.json();
+      const { attempt, questions, responses } = result;
+
+      console.log(`[Learning Journey] Loaded past test results - ${attempt.testName}`);
+
+      setState(prev => ({
+        ...prev,
+        currentView: 'test_results',
+        currentTest: attempt,
+        currentTestQuestions: questions,
+        currentTestResponses: responses,
+        isLoading: false
+      }));
+      setViewHistory(prev => [...prev, 'test_results']);
+    } catch (error) {
+      console.error('[Learning Journey] Error loading test results:', error);
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to load test results'
+      }));
+    }
+  };
+
   // Start custom test (from Mock Test Builder)
   const startCustomTest = (attempt: TestAttempt, questions: AnalyzedQuestion[]) => {
     setState(prev => ({
@@ -466,6 +514,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     startCustomTest,
     submitTest,
     exitTest,
+    viewPastTestResults,
     loadTopics,
     loadSubjectProgress,
     refreshData

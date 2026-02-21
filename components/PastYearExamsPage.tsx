@@ -17,6 +17,7 @@ import { SUBJECT_CONFIGS } from '../config/subjects';
 import { supabase } from '../lib/supabase';
 import confetti from 'canvas-confetti';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
+import PredictiveTrendsTab from './PredictiveTrendsTab';
 
 interface PastYearExamsPageProps {
   subject: Subject;
@@ -56,6 +57,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
   const [yearData, setYearData] = useState<YearData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterYear, setFilterYear] = useState<string>('all');
+  const [activeView, setActiveView] = useState<'papers' | 'trends'>('papers');
 
   const subjectConfig = SUBJECT_CONFIGS[subject];
 
@@ -239,106 +241,153 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
       <LearningJourneyHeader
         showBack
         onBack={onBack}
-        icon={<Calendar size={24} className="text-white" />}
-        title="Past Year Exams"
+        icon={activeView === 'papers' ? <Calendar size={24} className="text-white" /> : <TrendingUp size={24} className="text-white" />}
+        title={activeView === 'papers' ? "Past Year Exams" : "Predictive Trends"}
         subtitle={`${subject} • ${examContext}`}
-        description="Browse and solve previous exam papers with detailed explanations"
+        description={activeView === 'papers'
+          ? "Browse and solve previous exam papers with detailed explanations"
+          : "Historical patterns, topic evolution, and predictions for upcoming exams"
+        }
         subject={subject}
         trajectory={examContext}
         actions={
-          <div className="text-right">
-            <div className="text-xs text-slate-500 uppercase tracking-wide font-bold">
-              Overall Progress
+          <div className="flex items-center gap-4">
+            {/* View Toggle Buttons */}
+            <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-slate-200 shadow-sm">
+              <button
+                onClick={() => setActiveView('papers')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${
+                  activeView === 'papers'
+                    ? 'bg-slate-900 text-white'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <Calendar size={14} />
+                Papers
+              </button>
+              <button
+                onClick={() => setActiveView('trends')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${
+                  activeView === 'trends'
+                    ? 'bg-slate-900 text-white'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <TrendingUp size={14} />
+                Trends
+              </button>
             </div>
-            <div className="text-lg font-black text-slate-900 font-outfit">
-              {totalSolved}/{totalQuestions}
-            </div>
+
+            {/* Progress Stats (only show in papers view) */}
+            {activeView === 'papers' && (
+              <div className="text-right">
+                <div className="text-xs text-slate-500 uppercase tracking-wide font-bold">
+                  Overall Progress
+                </div>
+                <div className="text-lg font-black text-slate-900 font-outfit">
+                  {totalSolved}/{totalQuestions}
+                </div>
+              </div>
+            )}
           </div>
         }
       />
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Combined Filter & Stats Bar */}
-        {yearData.length > 0 && (
-          <div className="mb-6 bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-            <div className="flex items-center gap-6 flex-wrap">
-              {/* Left - Filter */}
-              <div className="flex items-center gap-3">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider font-outfit">Filter:</label>
-                <select
-                  value={filterYear}
-                  onChange={(e) => setFilterYear(e.target.value)}
-                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer font-instrument"
-                >
-                  <option value="all">All Years</option>
-                  {yearData.map(yd => (
-                    <option key={yd.year} value={yd.year}>
-                      {yd.year}
-                    </option>
-                  ))}
-                </select>
+        {/* Trends View */}
+        {activeView === 'trends' && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden" style={{ height: 'calc(100vh - 200px)' }}>
+            <PredictiveTrendsTab
+              examContext={examContext}
+              subject={subject}
+            />
+          </div>
+        )}
+
+        {/* Papers View */}
+        {activeView === 'papers' && (
+          <>
+            {/* Combined Filter & Stats Bar */}
+            {yearData.length > 0 && (
+              <div className="mb-6 bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
+                <div className="flex items-center gap-6 flex-wrap">
+                  {/* Left - Filter */}
+                  <div className="flex items-center gap-3">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider font-outfit">Filter:</label>
+                    <select
+                      value={filterYear}
+                      onChange={(e) => setFilterYear(e.target.value)}
+                      className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer font-instrument"
+                    >
+                      <option value="all">All Years</option>
+                      {yearData.map(yd => (
+                        <option key={yd.year} value={yd.year}>
+                          {yd.year}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="h-8 w-px bg-slate-200"></div>
+
+                  {/* Right - Stats */}
+                  <div className="flex items-center gap-6 ml-auto">
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-slate-900 font-outfit">
+                        {yearData.length}
+                      </div>
+                      <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                        Years
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-slate-900 font-outfit">
+                        {totalQuestions}
+                      </div>
+                      <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                        Questions
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-blue-600 font-outfit">
+                        {Math.round(overallProgress)}%
+                      </div>
+                      <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                        Progress
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+            )}
 
-              {/* Divider */}
-              <div className="h-8 w-px bg-slate-200"></div>
-
-              {/* Right - Stats */}
-              <div className="flex items-center gap-6 ml-auto">
-                <div className="text-center">
-                  <div className="text-2xl font-black text-slate-900 font-outfit">
-                    {yearData.length}
-                  </div>
-                  <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                    Years
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-black text-slate-900 font-outfit">
-                    {totalQuestions}
-                  </div>
-                  <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                    Questions
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-black text-blue-600 font-outfit">
-                    {Math.round(overallProgress)}%
-                  </div>
-                  <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                    Progress
-                  </div>
-                </div>
+            {/* Loading state */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 size={48} className="text-blue-600 animate-spin" />
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Loading state */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 size={48} className="text-blue-600 animate-spin" />
-          </div>
-        )}
+            {/* Empty state */}
+            {!isLoading && yearData.length === 0 && (
+              <div className="bg-white rounded-2xl border-2 border-slate-200 p-12 text-center">
+                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar size={36} className="text-slate-400" />
+                </div>
+                <h3 className="font-black text-xl text-slate-900 font-outfit mb-2">
+                  No Past Year Exams Available
+                </h3>
+                <p className="text-slate-600 font-instrument">
+                  Past year exam papers will appear here once they're added to the system.
+                </p>
+              </div>
+            )}
 
-        {/* Empty state */}
-        {!isLoading && yearData.length === 0 && (
-          <div className="bg-white rounded-2xl border-2 border-slate-200 p-12 text-center">
-            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Calendar size={36} className="text-slate-400" />
-            </div>
-            <h3 className="font-black text-xl text-slate-900 font-outfit mb-2">
-              No Past Year Exams Available
-            </h3>
-            <p className="text-slate-600 font-instrument">
-              Past year exam papers will appear here once they're added to the system.
-            </p>
-          </div>
-        )}
-
-        {/* Compact Paper Cards Grid */}
-        {!isLoading && filteredYearData.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Compact Paper Cards Grid */}
+            {!isLoading && filteredYearData.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredYearData.flatMap((yd) =>
               yd.scans.map((scan) => {
                 const progressPercent = scan.questionsCount > 0
@@ -419,9 +468,10 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                 );
               })
             )}
-          </div>
+              </div>
+            )}
+          </>
         )}
-
       </div>
     </div>
   );

@@ -9,9 +9,9 @@ export default function LandingFooter() {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">E</span>
+                <span className="text-white font-bold text-xl">P</span>
               </div>
-              <span className="text-xl font-bold text-white">EduJourney</span>
+              <span className="text-xl font-bold text-white">plus2AI</span>
             </div>
             <p className="text-gray-400 mb-4 max-w-md">
               Transform exam papers into interactive learning experiences with AI-powered pedagogy tools. Save time, improve outcomes.
@@ -112,7 +112,7 @@ export default function LandingFooter() {
         <div className="pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
-              © {currentYear} EduJourney. All rights reserved.
+              © {currentYear} plus2AI. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <a href="#" className="hover:text-white transition-colors duration-200">

@@ -208,7 +208,7 @@ export function LoginForm({ onSwitchToSignup, onSuccess }: LoginFormProps) {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
-          © 2024 EduJourney Vault. All rights reserved.
+          © 2024 plus2AI Vault. All rights reserved.
         </p>
       </div>
     </div>

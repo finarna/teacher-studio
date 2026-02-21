@@ -122,8 +122,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectLesson, customLessons, on
       <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50 h-14">
         <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-slate-950 rounded-lg flex items-center justify-center text-white font-black text-[10px] tracking-widest shadow-lg transform -rotate-3">EDU</div>
-            <span className="font-black text-lg tracking-tight text-slate-900 font-outfit uppercase italic">Edu<span className="text-primary-600">Journey</span></span>
+            <div className="w-8 h-8 bg-slate-950 rounded-lg flex items-center justify-center text-white font-black text-[10px] tracking-widest shadow-lg transform -rotate-3">P2A</div>
+            <span className="font-black text-lg tracking-tight text-slate-900 font-outfit uppercase italic">plus<span className="text-primary-600">2AI</span></span>
           </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1">
