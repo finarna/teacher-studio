@@ -18,6 +18,7 @@ import { supabase } from '../lib/supabase';
 import confetti from 'canvas-confetti';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import PredictiveTrendsTab from './PredictiveTrendsTab';
+import { useLearningJourney } from '../contexts/LearningJourneyContext';
 
 interface PastYearExamsPageProps {
   subject: Subject;
@@ -59,6 +60,8 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
   const [filterYear, setFilterYear] = useState<string>('all');
   const [activeView, setActiveView] = useState<'papers' | 'trends'>('papers');
 
+  const { subjectProgress } = useLearningJourney();
+  const subProg = subjectProgress?.[subject];
   const subjectConfig = SUBJECT_CONFIGS[subject];
 
   // Map string icon names to actual Lucide components
@@ -250,28 +253,28 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
         }
         subject={subject}
         trajectory={examContext}
+        mastery={subProg?.overallMastery}
+        accuracy={subProg?.overallAccuracy ?? 100}
         actions={
           <div className="flex items-center gap-4">
             {/* View Toggle Buttons */}
             <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-slate-200 shadow-sm">
               <button
                 onClick={() => setActiveView('papers')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${
-                  activeView === 'papers'
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                }`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${activeView === 'papers'
+                  ? 'bg-slate-900 text-white'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
               >
                 <Calendar size={14} />
                 Papers
               </button>
               <button
                 onClick={() => setActiveView('trends')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${
-                  activeView === 'trends'
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                }`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${activeView === 'trends'
+                  ? 'bg-slate-900 text-white'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
               >
                 <TrendingUp size={14} />
                 Trends
@@ -280,12 +283,18 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
 
             {/* Progress Stats (only show in papers view) */}
             {activeView === 'papers' && (
-              <div className="text-right">
-                <div className="text-xs text-slate-500 uppercase tracking-wide font-bold">
-                  Overall Progress
+              <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+                <div className="hidden lg:flex flex-col items-end mr-1">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Archive</span>
+                  <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight leading-none">Stats</span>
                 </div>
-                <div className="text-lg font-black text-slate-900 font-outfit">
-                  {totalSolved}/{totalQuestions}
+                <div className="text-right">
+                  <div className="text-[9px] text-slate-400 uppercase tracking-wide font-black leading-none mb-1">
+                    Solved
+                  </div>
+                  <div className="text-lg font-black text-slate-900 font-outfit leading-none">
+                    {totalSolved}/{totalQuestions}
+                  </div>
                 </div>
               </div>
             )}
@@ -388,86 +397,84 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
             {/* Compact Paper Cards Grid */}
             {!isLoading && filteredYearData.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredYearData.flatMap((yd) =>
-              yd.scans.map((scan) => {
-                const progressPercent = scan.questionsCount > 0
-                  ? (scan.solvedCount / scan.questionsCount) * 100
-                  : 0;
-                const isCompleted = progressPercent === 100;
+                {filteredYearData.flatMap((yd) =>
+                  yd.scans.map((scan) => {
+                    const progressPercent = scan.questionsCount > 0
+                      ? (scan.solvedCount / scan.questionsCount) * 100
+                      : 0;
+                    const isCompleted = progressPercent === 100;
 
-                return (
-                  <button
-                    key={scan.id}
-                    onClick={() => onOpenVault(scan)}
-                    className="group relative bg-white rounded-xl border border-slate-200/60 hover:border-slate-300 transition-all duration-200 text-left shadow-sm hover:shadow-lg overflow-hidden"
-                  >
-                    {/* Card Content - Compact Stat-Card Style */}
-                    <div className="p-4">
-                      {/* Year Badge - Top Left */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
-                          <Calendar size={14} className="text-blue-600" />
-                          <span className="text-sm font-black text-blue-900">{yd.year}</span>
-                        </div>
-                        {isCompleted && (
-                          <div className="text-green-600 text-lg">✓</div>
-                        )}
-                      </div>
+                    return (
+                      <button
+                        key={scan.id}
+                        onClick={() => onOpenVault(scan)}
+                        className="group relative bg-white rounded-xl border border-slate-200/60 hover:border-slate-300 transition-all duration-200 text-left shadow-sm hover:shadow-lg overflow-hidden"
+                      >
+                        {/* Card Content - Compact Stat-Card Style */}
+                        <div className="p-4">
+                          {/* Year Badge - Top Left */}
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
+                              <Calendar size={14} className="text-blue-600" />
+                              <span className="text-sm font-black text-blue-900">{yd.year}</span>
+                            </div>
+                            {isCompleted && (
+                              <div className="text-green-600 text-lg">✓</div>
+                            )}
+                          </div>
 
-                      {/* Stats - Large Numbers */}
-                      <div className="grid grid-cols-3 gap-3 mb-3">
-                        <div className="text-center">
-                          <div className="text-2xl font-black text-slate-900 font-outfit transition-colors duration-300 group-hover:text-blue-600">
-                            {scan.questionsCount}
+                          {/* Stats - Large Numbers */}
+                          <div className="grid grid-cols-3 gap-3 mb-3">
+                            <div className="text-center">
+                              <div className="text-2xl font-black text-slate-900 font-outfit transition-colors duration-300 group-hover:text-blue-600">
+                                {scan.questionsCount}
+                              </div>
+                              <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                                Questions
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className={`text-2xl font-black font-outfit transition-colors duration-300 ${isCompleted ? 'text-green-600' : 'text-slate-900 group-hover:text-blue-600'
+                                }`}>
+                                {scan.solvedCount}
+                              </div>
+                              <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                                Solved
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-black text-slate-900 font-outfit transition-colors duration-300 group-hover:text-blue-600">
+                                {scan.analysisInsights?.totalMarks || 0}M
+                              </div>
+                              <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                                Marks
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                            Questions
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className={`text-2xl font-black font-outfit transition-colors duration-300 ${
-                            isCompleted ? 'text-green-600' : 'text-slate-900 group-hover:text-blue-600'
-                          }`}>
-                            {scan.solvedCount}
-                          </div>
-                          <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                            Solved
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-black text-slate-900 font-outfit transition-colors duration-300 group-hover:text-blue-600">
-                            {scan.analysisInsights?.totalMarks || 0}M
-                          </div>
-                          <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                            Marks
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Progress Bar */}
-                      <div className="mb-3">
-                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              isCompleted
-                                ? 'bg-gradient-to-r from-green-500 to-green-600'
-                                : 'bg-gradient-to-r from-blue-500 to-blue-600'
-                            }`}
-                            style={{ width: `${progressPercent}%` }}
-                          />
-                        </div>
-                      </div>
+                          {/* Progress Bar */}
+                          <div className="mb-3">
+                            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-300 ${isCompleted
+                                  ? 'bg-gradient-to-r from-green-500 to-green-600'
+                                  : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                                  }`}
+                                style={{ width: `${progressPercent}%` }}
+                              />
+                            </div>
+                          </div>
 
-                      {/* View Button */}
-                      <div className="flex items-center justify-center gap-2 text-blue-600 font-bold text-sm transition-colors duration-200 group-hover:text-blue-700">
-                        <span>View Vault</span>
-                        <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-                      </div>
-                    </div>
-                  </button>
-                );
-              })
-            )}
+                          {/* View Button */}
+                          <div className="flex items-center justify-center gap-2 text-blue-600 font-bold text-sm transition-colors duration-200 group-hover:text-blue-700">
+                            <span>View Vault</span>
+                            <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
               </div>
             )}
           </>

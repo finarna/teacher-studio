@@ -176,7 +176,10 @@ router.get('/subjects/:trajectory', async (req: Request, res: Response) => {
           totalQuestions: topics.reduce((sum, t) => sum + t.totalQuestions, 0),
           overallMastery: topics.length > 0
             ? Math.round(topics.reduce((sum, t) => sum + t.masteryLevel, 0) / topics.length)
-            : 0
+            : 0,
+          overallAccuracy: topics.filter(t => t.questionsAttempted > 0).length > 0
+            ? Math.round(topics.reduce((sum, t) => sum + (t.questionsAttempted > 0 ? t.averageAccuracy : 0), 0) / topics.filter(t => t.questionsAttempted > 0).length)
+            : 100
         };
       })
     );

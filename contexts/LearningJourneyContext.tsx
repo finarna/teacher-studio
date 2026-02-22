@@ -110,6 +110,13 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     setViewHistory(prev => [...prev, 'subject']);
   };
 
+  // Auto-load subject progress when trajectory changes
+  useEffect(() => {
+    if (state.selectedTrajectory && state.currentView === 'subject') {
+      loadSubjectProgress(true); // Silent load
+    }
+  }, [state.selectedTrajectory, state.currentView]);
+
   // Select subject
   const selectSubject = async (subject: Subject) => {
     setState(prev => ({
@@ -497,9 +504,9 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
         progressMap[item.subject as Subject] = {
           overallMastery: item.overallMastery,
           topicsTotal: item.totalTopics,
-          topicsMastered: item.topicsWithQuestions, // Using topicsWithQuestions as a proxy if explicit mastered count not available
+          topicsMastered: item.topicsWithQuestions,
           totalQuestionsAttempted: item.totalQuestions,
-          overallAccuracy: 0 // Will be handled by actual stats later
+          overallAccuracy: item.overallAccuracy ?? 100
         } as any;
       });
 

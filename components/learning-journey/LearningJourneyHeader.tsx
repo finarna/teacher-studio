@@ -20,8 +20,13 @@ interface LearningJourneyHeaderProps {
   subject?: Subject;
   additionalContext?: string; // e.g., year, custom text
 
+  // Stats
+  mastery?: number;
+  accuracy?: number;
+
   // Actions (right side)
   actions?: React.ReactNode;
+  // ...
 
   // Children (for stats grid, etc.)
   children?: React.ReactNode;
@@ -41,6 +46,8 @@ const LearningJourneyHeader: React.FC<LearningJourneyHeaderProps> = ({
   trajectory,
   subject,
   additionalContext,
+  mastery,
+  accuracy,
   actions,
   children,
   sticky = true,
@@ -138,6 +145,32 @@ const LearningJourneyHeader: React.FC<LearningJourneyHeaderProps> = ({
 
             {/* Right Section: Badges & Actions */}
             <div className="flex items-center gap-3 shrink-0">
+              {/* Universal Stats HUD */}
+              {(mastery !== undefined) && (
+                <div className="flex items-center gap-3 mr-4">
+                  <div className="hidden lg:flex flex-col items-end mr-1">
+                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Subject</span>
+                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight leading-none">Intelligence</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* COMMAND pill */}
+                    <div className="hidden md:flex items-center gap-2.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl shadow-sm">
+                      <span className="text-lg font-bold text-slate-900 leading-none tracking-tight">
+                        {Math.round((mastery * (accuracy ?? 100)) / 100)}%
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Command</span>
+                    </div>
+
+                    {/* MASTERY pill */}
+                    <div className="flex items-center gap-2.5 px-3 py-1.5 bg-slate-900 rounded-xl shadow-lg border border-white/10">
+                      <span className="text-lg font-bold text-white leading-none tracking-tight">{Math.round(mastery)}%</span>
+                      <span className="text-[9px] font-bold text-primary-400 uppercase tracking-widest whitespace-nowrap">Mastery</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Dynamic Badges */}
               <div className="hidden lg:flex items-center gap-2 mr-2">
                 {additionalContext && (

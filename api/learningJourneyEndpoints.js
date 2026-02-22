@@ -655,6 +655,99 @@ export async function submitTest(req, res) {
         });
     }
 
+    // =========================================================================
+    // 🧠 UPSTREAM MASTERY & COMMAND INTEGRATION
+    // =========================================================================
+    // User requested that Mock Test scores feed upstream into the overall Subject Performance.
+    // The Mastery/Command engine relies on `practice_answers` (for absolute accuracy bounds)
+    // and `topic_activities` (for incremental effort stats and to trigger recalculations).
+    // This background async block connects the isolated mock test responses to the core engine.
+    // =========================================================================
+    if (['full_mock', 'subject_test', 'topic_quiz', 'custom_mock'].includes(updatedAttempt.test_type)) {
+      console.log('🔄 Syncing mock test/quiz responses to upstream Mastery tables...');
+
+      Promise.resolve().then(async () => {
+        try {
+          // 1. Fetch user's latest aggregated topic resources to map plain text topics to `topic_resource_id`
+          // `aggregateTopicsForUser` seamlessly fetches or creates the tracking entities needed.
+          const topics = await aggregateTopicsForUser(
+            supabaseAdmin,
+            userId,
+            updatedAttempt.subject,
+            updatedAttempt.exam_context
+          );
+
+          // Create a lookup dictionary: lowercase topic -> topic_resource_id UUID
+          const topicResourceMap = new Map();
+          topics.forEach(t => {
+            if (t.topicName) topicResourceMap.set(t.topicName.toLowerCase(), t.id);
+          });
+
+          // 2. Prepare batch payloads for the `practice_answers` persistent store
+          const practiceAnswersToInsert = [];
+          for (const r of responses) {
+            // Note: `r.topic` is the plain text topic attached to the question metadata
+            const topicNameLower = (r.topic || '').toLowerCase();
+            const topicResId = topicResourceMap.get(topicNameLower);
+
+            if (topicResId) {
+              practiceAnswersToInsert.push({
+                user_id: userId,
+                question_id: r.questionId,
+                topic_resource_id: topicResId,
+                selected_option: r.selectedOption,
+                is_correct: r.isCorrect,
+                time_spent_seconds: r.timeSpent,
+                first_attempt_correct: r.isCorrect, // We treat a mock test environment attempt as primary
+                metadata: { source: updatedAttempt.test_type, attempt_id: attemptId }
+              });
+            }
+          }
+
+          // 3. Upsert into `practice_answers`. 
+          // `calculateTopicMastery` mathematically relies on this table to derive the base 60% accuracy weight.
+          if (practiceAnswersToInsert.length > 0) {
+            const { error: paError } = await supabaseAdmin
+              .from('practice_answers')
+              .upsert(practiceAnswersToInsert, {
+                onConflict: 'user_id, question_id',
+                ignoreDuplicates: false // We overwrite with the latest test's outcome if they attempt it again
+              });
+
+            if (paError) {
+              console.error('⚠️ Error syncing to practice_answers:', paError);
+            } else {
+              console.log(`✅ Synced ${practiceAnswersToInsert.length} test responses into practice_answers for mastery calculation.`);
+
+              // 4. Trigger `recordTopicActivity` sequentially for each valid response.
+              // This function:
+              //   - A) Logs into `topic_activities` (updating volumetric practice counts & quiz bonuses).
+              //   - B) Pulls the fresh `practice_answers` we just upserted.
+              //   - C) Re-runs the strict weighted `calculateTopicMastery` logic.
+              //   - D) Overwrites `topic_resources.mastery_level`, trickling up to global Command via Postgres triggers.
+              for (const r of responses) {
+                const topicResId = topicResourceMap.get((r.topic || '').toLowerCase());
+                if (topicResId) {
+                  await recordTopicActivity(
+                    supabaseAdmin,
+                    userId,
+                    topicResId,
+                    'completed_quiz', // Classifiable as quiz tracking rather than passive practice
+                    r.questionId,
+                    r.isCorrect,
+                    r.timeSpent
+                  );
+                }
+              }
+              console.log('✅ Global upstream Mastery recalculation completed successfully for Mock Test.');
+            }
+          }
+        } catch (err) {
+          console.error('⚠️ Upstream Master/Command sync error during explicit submit:', err);
+        }
+      });
+    }
+
     res.json({
       success: true,
       attempt: mappedAttempt,
@@ -936,8 +1029,8 @@ export async function getTrajectoryProgress(req, res) {
     // Calculate overall metrics
     const overallMastery = subjectProgress.length > 0
       ? Math.round(
-          subjectProgress.reduce((sum, sp) => sum + sp.overall_mastery, 0) / subjectProgress.length
-        )
+        subjectProgress.reduce((sum, sp) => sum + sp.overall_mastery, 0) / subjectProgress.length
+      )
       : 0;
 
     const totalTopics = subjectProgress.reduce((sum, sp) => sum + sp.topics_total, 0);

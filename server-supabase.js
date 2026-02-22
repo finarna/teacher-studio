@@ -1050,14 +1050,14 @@ app.post('/api/payment/create-order', async (req, res) => {
     const periodEnd = plan.billing_period === 'yearly'
       ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
       : plan.billing_period === 'monthly'
-      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-      : new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000); // 100 years for free/custom
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        : new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000); // 100 years for free/custom
 
     // DON'T cancel existing subscriptions yet - wait for payment success
     // The verify endpoint will handle cancellation after payment
 
     // Create new subscription in 'pending' status
-    const { data: subscription, error: subError} = await supabaseAdmin
+    const { data: subscription, error: subError } = await supabaseAdmin
       .from('subscriptions')
       .insert({
         user_id: userId,
@@ -1453,7 +1453,10 @@ app.get('/api/learning-journey/subjects/:trajectory', async (req, res) => {
           totalQuestions: topics.reduce((sum, t) => sum + t.totalQuestions, 0),
           overallMastery: topics.length > 0
             ? Math.round(topics.reduce((sum, t) => sum + t.masteryLevel, 0) / topics.length)
-            : 0
+            : 0,
+          overallAccuracy: topics.filter(t => t.questionsAttempted > 0).length > 0
+            ? Math.round(topics.reduce((sum, t) => sum + (t.questionsAttempted > 0 ? t.averageAccuracy : 0), 0) / topics.filter(t => t.questionsAttempted > 0).length)
+            : 100
         };
       })
     );
@@ -1843,7 +1846,7 @@ app.post('/api/learning-journey/ai-summary', async (req, res) => {
       .join('\n');
 
     const diffLines = Object.entries(difficultyStats || {})
-      .map(([d, s]) => `  - ${d}: ${s.correct}/${s.total} correct (${s.total > 0 ? Math.round(s.correct/s.total*100) : 0}%)`)
+      .map(([d, s]) => `  - ${d}: ${s.correct}/${s.total} correct (${s.total > 0 ? Math.round(s.correct / s.total * 100) : 0}%)`)
       .join('\n');
 
     const prompt = `You are an expert ${examContext} exam coach. Analyze this mock test result and give a sharp, personalized report.

@@ -47,6 +47,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import { supabase } from '../lib/supabase';
 import { cache } from '../utils/cache';
+import { useLearningJourney } from '../contexts/LearningJourneyContext';
 
 interface TopicDetailPageProps {
   topicResource: TopicResource;
@@ -72,9 +73,25 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
   const subjectConfig = SUBJECT_CONFIGS[subject];
   const { user } = useAuth();
   const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
+  const { refreshData, subjectProgress } = useLearningJourney();
+  const subProg = subjectProgress?.[subject];
+  const [isRefreshing, setIsRefreshing] = useState(false); // Added state for refreshing
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshData();
+    } catch (error) {
+      // Handle error if necessary
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const refreshStats = (silent: boolean = true) => {
     setStatsRefreshTrigger(prev => prev + 1);
     onRefreshData?.(silent);
+    handleRefresh(); // Trigger refresh of subject progress as well
   };
 
   const [localStats, setLocalStats] = useState({
@@ -140,6 +157,8 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
         subtitle={`${subject} • Domain Intelligence`}
         subject={subject}
         additionalContext={localStats.studyStage.replace('_', ' ')}
+        mastery={subProg?.overallMastery}
+        accuracy={subProg?.overallAccuracy ?? 100}
         actions={null}
       >
         {/* UNIFIED SINGLE BAR: Tabs + Metrics (Swapped Order) */}
@@ -173,7 +192,11 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
           </div>
 
           {/* Right: Compact Metrics */}
-          <div className="flex items-center gap-3 md:gap-5 px-3 py-1">
+          <div className="flex items-center gap-3 md:gap-5 px-3 py-1 border-l border-slate-200 ml-2">
+            <div className="hidden lg:flex flex-col items-end mr-2">
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Topic</span>
+              <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight leading-none">Intelligence</span>
+            </div>
             {[
               {
                 label: 'Mastery',

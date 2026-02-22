@@ -4,16 +4,20 @@ import {
   BookOpen,
   FlaskConical,
   ArrowRight,
+  ChevronLeft,
   TrendingUp,
   Target,
   Zap,
+  Play,
   Calculator,
   Atom,
   Leaf
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Subject, ExamContext } from '../types';
 import { SUBJECT_CONFIGS } from '../config/subjects';
 import { supabase } from '../lib/supabase';
+import { useLearningJourney } from '../contexts/LearningJourneyContext';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 
 interface SubjectMenuPageProps {
@@ -48,7 +52,11 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
     customTestsTaken: 0,
     avgMockScore: 0
   });
+  const [globalStats, setGlobalStats] = useState({ averageMastery: 0, averageAccuracy: 0 });
+  const { refreshData, subjectProgress } = useLearningJourney();
+  const subProg = subjectProgress[subject];
   const [isLoading, setIsLoading] = useState(true);
+  const [lastActivity, setLastActivity] = useState<{ id: string, name: string, type: 'topic' | 'exam' } | null>(null);
 
   // Get subject config
   const subjectConfig = SUBJECT_CONFIGS[subject];
@@ -71,26 +79,67 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
   const fetchStats = async () => {
     setIsLoading(true);
     try {
-      // Fetch topic count
-      const { data: topicsData } = await supabase
-        .from('topics')
-        .select('id, name')
-        .eq('subject', subject);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-      const totalTopics = topicsData?.length || 0;
+      // Parallelize independent data fetches for the dashboard cards
+      const [
+        { count: totalTopicsCount },
+        { data: scansData },
+        { count: mCount },
+        { data: testsData },
+        { data: recentTopic }
+      ] = await Promise.all([
+        // 1. Topic Count
+        supabase
+          .from('topics')
+          .select('*', { count: 'exact', head: true })
+          .eq('subject', subject),
 
-      // Fetch past year questions from scans (only those with year field)
-      // Get all scans for this subject and exam context
-      const { data: scansData, error: scansError } = await supabase
-        .from('scans')
-        .select('id, year, analysis_data')
-        .eq('subject', subject)
-        .eq('exam_context', examContext)
-        .not('year', 'is', null);
+        // 2. Scans for Past Year Questions
+        supabase
+          .from('scans')
+          .select('id, year, analysis_data')
+          .eq('subject', subject)
+          .eq('exam_context', examContext)
+          .not('year', 'is', null),
 
-      console.log(`📅 [SUBJECT MENU] Found ${scansData?.length || 0} scans with year field`);
-      if (scansError) {
-        console.error('❌ [SUBJECT MENU] Scans query error:', scansError.message);
+        // 3. Mastered Topics Count
+        supabase
+          .from('topic_resources')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('subject', subject)
+          .eq('exam_context', examContext)
+          .gte('mastery_level', 85),
+
+        // 4. Mock Tests Data
+        supabase
+          .from('test_attempts')
+          .select('percentage')
+          .eq('user_id', user.id)
+          .eq('subject', subject)
+          .eq('exam_context', examContext)
+          .eq('test_type', 'full_mock')
+          .eq('status', 'completed'),
+
+        // 5. Last Active Topic
+        supabase
+          .from('topic_resources')
+          .select('id, topic_id, topics(name)')
+          .eq('user_id', user.id)
+          .eq('subject', subject)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+      ]);
+
+      // We no longer calculate global currentSubjectStats here manually to ensure total consistency
+      // Instead, we rely on the LearningJourneyContext which is the source of truth for all sub-pages
+
+      // Handle Last Activity
+      if (recentTopic && recentTopic.length > 0) {
+        const lastTr = recentTopic[0] as any;
+        setLastActivity({ id: lastTr.id, name: lastTr.topics?.name || 'Recent Topic', type: 'topic' });
       }
 
       let pastYearQuestionsCount = 0;
@@ -98,55 +147,24 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
       const totalPapers = scansData?.length || 0;
 
       if (scansData && scansData.length > 0) {
-        // Count questions from analysis_data and extract years
         scansData.forEach((scan: any) => {
           const questions = scan.analysis_data?.questions || [];
           pastYearQuestionsCount += questions.length;
-          if (scan.year) {
-            availableYears.push(scan.year);
-          }
+          if (scan.year) availableYears.push(scan.year);
         });
-
-        // Remove duplicates and sort years descending
         availableYears = [...new Set(availableYears)].sort((a, b) => parseInt(b) - parseInt(a));
       }
 
-      // Fetch mastered topics from user progress
-      const { data: { user } } = await supabase.auth.getUser();
-      let masteredTopics = 0;
-      let customTestsTaken = 0;
+      const customTestsTaken = testsData?.length || 0;
       let avgMockScore = 0;
-
-      if (user) {
-        const [{ count: mCount }, { data: testsData }] = await Promise.all([
-          supabase
-            .from('topic_resources')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .eq('subject', subject)
-            .eq('exam_context', examContext)
-            .gte('mastery_level', 85),
-          supabase
-            .from('test_attempts')
-            .select('percentage')
-            .eq('user_id', user.id)
-            .eq('subject', subject)
-            .eq('exam_context', examContext)
-            .eq('test_type', 'full_mock')
-            .eq('status', 'completed')
-        ]);
-
-        masteredTopics = mCount || 0;
-        customTestsTaken = testsData?.length || 0;
-        if (customTestsTaken > 0) {
-          const totalScore = testsData!.reduce((sum, t) => sum + (t.percentage || 0), 0);
-          avgMockScore = Math.round(totalScore / customTestsTaken);
-        }
+      if (customTestsTaken > 0) {
+        const totalScore = testsData!.reduce((sum, t) => sum + (t.percentage || 0), 0);
+        avgMockScore = Math.round(totalScore / customTestsTaken);
       }
 
       setStats({
-        totalTopics,
-        masteredTopics,
+        totalTopics: totalTopicsCount || 0,
+        masteredTopics: mCount || 0,
         pastYearQuestionsCount,
         availableYears,
         totalPapers,
@@ -232,10 +250,32 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
               style={{ objectPosition: 'center', objectFit: 'cover' }}
             />
 
-            {/* Subject Color Tint Overlay - More Prominent */}
-            <div className={`absolute inset-0 ${subjectTheme.bgClass} opacity-20 group-hover:opacity-25 transition-opacity mix-blend-multiply`} />
+            {/* ROLLING YEARS MARQUEE - Infinite Time Machine Effect */}
+            <div className="absolute inset-0 flex justify-around opacity-10 group-hover:opacity-20 transition-opacity">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  animate={{ y: [0, -600] }}
+                  transition={{
+                    duration: 15 + (i * 5),
+                    repeat: Infinity,
+                    ease: "linear",
+                    delay: i * -2
+                  }}
+                  className="flex flex-col gap-12 font-black text-6xl tracking-tighter"
+                >
+                  {[2019, 2020, 2021, 2022, 2023, 2024, 2025].map(year => (
+                    <span key={year}>{year}</span>
+                  ))}
+                  {[2019, 2020, 2021, 2022, 2023, 2024, 2025].map(year => (
+                    <span key={`dup-${year}`}>{year}</span>
+                  ))}
+                </motion.div>
+              ))}
+            </div>
 
-            {/* Light Overlay for Better Text Readability */}
+            {/* Subject Color Tint Overlay */}
+            <div className={`absolute inset-0 ${subjectTheme.bgClass} opacity-20 group-hover:opacity-25 transition-opacity mix-blend-multiply`} />
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10" />
           </div>
         );
@@ -246,7 +286,35 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
             {/* Desk surface with subject color */}
             <div className={`absolute inset-0 ${subjectTheme.bgClass} opacity-20 group-hover:opacity-30 transition-opacity`} />
             <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-purple-100 to-purple-200 opacity-20" />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_48%,rgba(147,51,234,0.05)_50%,transparent_52%)] bg-[length:30px_30px]" />
+
+            {/* FLOATING SUBJECT SYMBOLS - Mapping Logic */}
+            <div className="absolute inset-0">
+              {subjectTheme.symbols.map((symbol, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{
+                    x: Math.random() * 200,
+                    y: Math.random() * 200,
+                    rotate: 0,
+                    opacity: 0.1
+                  }}
+                  animate={{
+                    x: [Math.random() * 200, Math.random() * 200],
+                    y: [Math.random() * 200, Math.random() * 200],
+                    rotate: [0, 360],
+                    opacity: [0.1, 0.2, 0.1]
+                  }}
+                  transition={{
+                    duration: 10 + idx * 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="absolute text-5xl font-bold text-slate-900"
+                >
+                  {symbol}
+                </motion.div>
+              ))}
+            </div>
 
             {/* Open book - larger and more detailed */}
             <div className="absolute top-6 left-6 w-32 h-20 bg-white/60 rounded-sm transform -rotate-12 shadow-lg opacity-80 group-hover:opacity-90 transition-opacity">
@@ -302,6 +370,14 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
             {/* Tech grid background with subject color */}
             <div className={`absolute inset-0 ${subjectTheme.bgClass} opacity-25 group-hover:opacity-35 transition-opacity`} />
             <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 opacity-20" />
+
+            {/* DIANOSTIC SONAR SCAN - Moving Logic Bar */}
+            <motion.div
+              animate={{ y: [-50, 300] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" as any }}
+              className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400 to-transparent shadow-[0_0_15px_rgba(251,191,36,0.5)] z-0"
+            />
+
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(251,191,36,0.12),transparent_60%)]" />
 
             {/* Circuit pattern - more visible */}
@@ -402,49 +478,104 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
         }
       `}</style>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 relative">
-        {/* Subtle background pattern */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgb(51,65,85)_1px,transparent_0)] bg-[length:24px_24px]" />
+      <div className="min-h-screen bg-[#F8FAFC] relative font-outfit">
+        {/* 1. AMBIENT MESH BACKGROUND */}
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-[-5%] left-[-5%] w-[35%] h-[35%] bg-blue-50/30 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-indigo-50/20 rounded-full blur-[120px]" />
         </div>
 
-        {/* Unified Header */}
+        {/* 2. REFINED UNIVERSAL HEADER */}
         <LearningJourneyHeader
           showBack
           onBack={onBack}
-          icon={<IconComponent size={24} className="text-white" />}
-          title={`${subject} Learning Options`}
-          subtitle={`${examContext} Preparation`}
-          description="Choose how you want to study and track your progress"
+          title={`${subject} Mission Center`}
+          subtitle={`Systematic preparation for ${(examContext as any)?.name || examContext}`}
           subject={subject}
           trajectory={examContext}
-          actions={
-            <span className="text-3xl">{subjectConfig.iconEmoji}</span>
-          }
+          mastery={subProg?.overallMastery}
+          accuracy={subProg?.overallAccuracy}
         />
 
         {/* Content */}
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          {/* Welcome message with enhanced styling */}
-          <div className="mb-8 text-center relative">
-            <div className="inline-block mb-3">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-purple-400 to-amber-400 rounded-lg blur-lg opacity-20 group-hover:opacity-30 transition-opacity" />
-              <h2 className="relative font-black text-3xl text-slate-900 font-outfit">
-                Choose Your Learning Path
-              </h2>
-            </div>
-            <p className="text-slate-700 font-instrument text-lg font-medium">
-              Select how you want to study <span className="font-black text-slate-900">{subject}</span> for <span className="font-black text-slate-900">{examContext}</span>
-            </p>
-            <div className="mt-4 flex items-center justify-center gap-3 text-sm text-slate-600 font-semibold">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span>Real-time progress tracking</span>
+        <div className="max-w-7xl mx-auto px-6 py-6 overflow-y-auto custom-scrollbar">
+
+          {/* 3. HERO DASHBOARD SECTION */}
+          <div className="grid lg:grid-cols-3 gap-6 mb-8">
+            <div className="lg:col-span-2 relative bg-white rounded-[1.5rem] border border-slate-200/60 p-6 md:p-8 shadow-sm overflow-hidden flex flex-col justify-center">
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                <IconComponent size={140} />
               </div>
-              <span className="text-slate-400">•</span>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
-                <span>AI-powered insights</span>
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-[10px] font-bold uppercase tracking-wider mb-4 border border-primary-100">
+                  <Target size={12} />
+                  <span>Current Mission</span>
+                </div>
+                <h2 className="text-4xl font-bold text-slate-900 tracking-tighter leading-tight mb-4 max-w-md">
+                  Choose Your Next <span className="text-primary-600">Learning Milestone.</span>
+                </h2>
+                <p className="text-slate-500 font-instrument text-lg mb-6 max-w-md leading-relaxed">
+                  Systematic preparation for <span className="text-slate-900 font-bold">{examContext}</span>. Track every topic and paper in real-time.
+                </p>
+
+                {lastActivity && (
+                  <motion.button
+                    whileHover={{ x: 5 }}
+                    className="flex items-center gap-3 p-2 pr-4 bg-slate-900 text-white rounded-xl shadow-xl group transition-all"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                      <Play size={16} fill="white" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-[9px] font-bold text-primary-400 uppercase tracking-widest leading-none mb-1">Resume Session</div>
+                      <div className="text-sm font-bold leading-none">{lastActivity.name}</div>
+                    </div>
+                    <ArrowRight size={16} className="ml-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+                  </motion.button>
+                )}
+              </div>
+            </div>
+
+            {/* AI DIAGNOSTIC PANEL */}
+            <div className="bg-slate-900 rounded-[1.5rem] p-6 text-white relative overflow-hidden flex flex-col">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 via-transparent to-transparent pointer-events-none" />
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-primary-400 border border-white/10">
+                    <Zap size={20} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-primary-400 uppercase tracking-widest leading-none mb-1">AI Diagnostic</div>
+                    <div className="text-[10px] text-white/50 font-bold uppercase tracking-widest">Subject Level Advice</div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 mb-6 flex-1">
+                  <p className="text-sm text-slate-300 font-instrument font-medium leading-relaxed italic">
+                    "Your <span className="text-white font-bold">Concept Density</span> in high-yield topics is excellent. I recommend pivoting to <span className="text-white font-bold">Past Year Exams</span> to improve your session stamina for the upcoming {examContext} cycle."
+                  </p>
+                </div>
+
+                <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Subject Health</span>
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${(stats.masteredTopics / (stats.totalTopics || 1)) * 100 < 30 ? 'text-rose-400' :
+                      (stats.masteredTopics / (stats.totalTopics || 1)) * 100 > 75 ? 'text-blue-400' : 'text-emerald-400'
+                      }`}>
+                      {(stats.masteredTopics / (stats.totalTopics || 1)) * 100 < 30 ? 'Requires Boost' :
+                        (stats.masteredTopics / (stats.totalTopics || 1)) * 100 > 75 ? 'Optimal' : 'Stable'}
+                    </span>
+                  </div>
+                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(stats.masteredTopics / (stats.totalTopics || 1)) * 100}%` }}
+                      className={`h-full ${(stats.masteredTopics / (stats.totalTopics || 1)) * 100 < 30 ? 'bg-rose-500' :
+                        (stats.masteredTopics / (stats.totalTopics || 1)) * 100 > 75 ? 'bg-blue-500' : 'bg-emerald-500'
+                        }`}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -457,7 +588,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                 <button
                   key={card.id}
                   onClick={() => onSelectOption(card.id)}
-                  className="group relative bg-white rounded-2xl border-2 border-slate-200 p-6 text-left transition-all duration-300 hover:border-slate-300 hover:shadow-2xl hover:-translate-y-2 overflow-hidden active:scale-98 focus:outline-none focus:ring-4 focus:ring-slate-200/50 animate-fadeInUp"
+                  className="group relative bg-white rounded-[1.5rem] border border-slate-200/60 p-6 text-left transition-all duration-300 hover:border-primary-200 hover:shadow-xl hover:-translate-y-1 overflow-hidden animate-fadeInUp"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {/* Illustration Background */}
@@ -466,19 +597,19 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                   {/* Badge */}
                   {card.badge && (
                     <div className="absolute top-4 right-4 z-10">
-                      <span className="px-3 py-1.5 bg-green-100 text-green-700 text-xs font-black rounded-full shadow-sm border border-green-200">
+                      <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider rounded-md border border-emerald-100">
                         {card.badge}
                       </span>
                     </div>
                   )}
 
                   {/* Icon */}
-                  <div className={`relative z-10 w-14 h-14 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                    <CardIcon size={28} className="text-white" />
+                  <div className={`relative z-10 w-12 h-12 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    <CardIcon size={24} className="text-white" />
                   </div>
 
                   {/* Title */}
-                  <h3 className="relative z-10 font-black text-xl text-slate-900 font-outfit mb-3 leading-tight">
+                  <h3 className="relative z-10 font-bold text-xl text-slate-900 tracking-tight mb-2 leading-none">
                     {card.title}
                   </h3>
 
@@ -489,13 +620,12 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
 
                   {/* Stats */}
                   <div className="relative z-10 flex items-center justify-between mt-auto">
-                    <div className="px-3 py-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm border border-slate-200">
-                      <div className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    <div className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg border border-slate-100 shadow-sm">
+                      <div className="text-[10px] font-bold text-slate-900 uppercase tracking-widest leading-none">
                         {isLoading ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" />
-                            <div className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
-                            <div className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-1 h-1 rounded-full bg-slate-400 animate-pulse" />
+                            <span className="text-[9px] text-slate-400">Syncing...</span>
                           </div>
                         ) : (
                           card.stats
@@ -503,8 +633,8 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       </div>
                     </div>
                     <ArrowRight
-                      size={22}
-                      className="text-slate-500 group-hover:text-slate-900 group-hover:translate-x-1 transition-all duration-300"
+                      size={18}
+                      className="text-slate-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all duration-300"
                     />
                   </div>
 
@@ -522,39 +652,22 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
 
           {/* Quick stats summary */}
           {!isLoading && (
-            <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-              <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
-                <div className="text-3xl font-black text-slate-900 font-outfit mb-1">
-                  {stats.totalTopics}
+            <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+              {[
+                { label: 'Topics', value: stats.totalTopics, color: 'text-slate-900' },
+                { label: 'Papers', value: stats.totalPapers, color: 'text-primary-600' },
+                { label: 'Years', value: stats.availableYears.length, color: 'text-slate-900' },
+                { label: 'Questions', value: stats.pastYearQuestionsCount, color: 'text-slate-900' }
+              ].map((stat, i) => (
+                <div key={i} className="bg-white rounded-xl border border-slate-200/60 p-4 text-center hover:border-primary-200 hover:shadow-sm transition-all">
+                  <div className={`text-2xl font-bold ${stat.color} font-outfit mb-1`}>
+                    {stat.value}
+                  </div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                    {stat.label}
+                  </div>
                 </div>
-                <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
-                  Topics
-                </div>
-              </div>
-              <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
-                <div className="text-3xl font-black text-blue-600 font-outfit mb-1">
-                  {stats.totalPapers}
-                </div>
-                <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
-                  Papers
-                </div>
-              </div>
-              <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
-                <div className="text-3xl font-black text-slate-900 font-outfit mb-1">
-                  {stats.availableYears.length}
-                </div>
-                <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
-                  Years
-                </div>
-              </div>
-              <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
-                <div className="text-3xl font-black text-slate-900 font-outfit mb-1">
-                  {stats.pastYearQuestionsCount}
-                </div>
-                <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
-                  Questions
-                </div>
-              </div>
+              ))}
             </div>
           )}
         </div>

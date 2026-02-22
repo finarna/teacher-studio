@@ -61,12 +61,12 @@ const cardVariants = {
   visible: {
     y: 0,
     opacity: 1,
-    transition: { duration: 0.5, ease: "easeOut" }
+    transition: { duration: 0.5, ease: "easeOut" as any }
   },
   hover: {
     y: -8,
     scale: 1.01,
-    transition: { duration: 0.2, ease: "easeOut" }
+    transition: { duration: 0.2, ease: "easeOut" as any }
   }
 };
 
@@ -95,7 +95,8 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
   const [viewMode, setViewMode] = useState<ViewMode>('heatmap');
   const [selectedDomain, setSelectedDomain] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { refreshData } = useLearningJourney();
+  const { refreshData, subjectProgress } = useLearningJourney();
+  const subProg = subjectProgress[subject];
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -154,29 +155,49 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
         subtitle={`Domain-level mastery analysis for ${examContext}`}
         subject={subject}
         trajectory={examContext}
+        mastery={subProg?.overallMastery}
+        accuracy={subProg?.overallAccuracy}
         actions={
-          <div className="flex items-center gap-2">
-            <div className="hidden md:flex items-center gap-2 bg-white/50 backdrop-blur-sm rounded-xl p-1 border border-slate-200">
+          <div className="flex items-center gap-4">
+            {/* Local Stats: Engine Index */}
+            <div className="flex items-center gap-3 pr-4 border-r border-slate-200">
+              <div className="hidden lg:flex flex-col items-end mr-1">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Engine</span>
+                <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight leading-none">Index</span>
+              </div>
+              <div className="text-right">
+                <div className="text-[9px] text-slate-400 uppercase tracking-wide font-black leading-none mb-1">
+                  Mastered
+                </div>
+                <div className="text-lg font-black text-slate-900 font-outfit leading-none">
+                  {masteredTopics}/{totalTopics}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2 bg-white/50 backdrop-blur-sm rounded-xl p-1 border border-slate-200">
+                <button
+                  onClick={() => setViewMode('heatmap')}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'heatmap' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                >
+                  <LayoutGrid size={18} />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                >
+                  <List size={18} />
+                </button>
+              </div>
               <button
-                onClick={() => setViewMode('heatmap')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'heatmap' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm"
               >
-                <LayoutGrid size={18} />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
-              >
-                <List size={18} />
+                <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
               </button>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm"
-            >
-              <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
-            </button>
           </div>
         }
       />
