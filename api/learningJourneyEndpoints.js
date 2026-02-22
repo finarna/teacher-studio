@@ -1567,6 +1567,32 @@ export async function countAvailableQuestions(req, res) {
 
     const topicNames = topics?.map(t => t.topic_name) || [];
 
+    // Check if AI generation is enabled - if so we have essentially infinite questions
+    const useAIGeneration = !!(process.env.GEMINI_API_KEY && examContext && subject);
+
+    if (useAIGeneration) {
+      console.log(`🤖 AI generation is enabled -> Reporting virtually infinite question capacity`);
+
+      // Calculate realistic max based on number of topics selected
+      const topicsMultiplier = Math.max(1, topicNames.length);
+      const totalAvailable = topicsMultiplier * 300; // E.g., 300 questions per topic capacity
+
+      return res.json({
+        success: true,
+        data: {
+          total: totalAvailable,
+          byDifficulty: {
+            easy: Math.floor(totalAvailable * 0.3),
+            moderate: Math.floor(totalAvailable * 0.5),
+            hard: Math.floor(totalAvailable * 0.2)
+          },
+          isAIGenerated: true
+        }
+      });
+    }
+
+    // fallback to actual DB counts if AI generation is off
+
     // Get system scans for this subject
     const { data: scans } = await supabaseAdmin
       .from('scans')
@@ -1582,7 +1608,8 @@ export async function countAvailableQuestions(req, res) {
         success: true,
         data: {
           total: 0,
-          byDifficulty: { easy: 0, moderate: 0, hard: 0 }
+          byDifficulty: { easy: 0, moderate: 0, hard: 0 },
+          isAIGenerated: false
         }
       });
     }
@@ -1626,7 +1653,8 @@ export async function countAvailableQuestions(req, res) {
       success: true,
       data: {
         total,
-        byDifficulty: counts
+        byDifficulty: counts,
+        isAIGenerated: false
       }
     });
   } catch (error) {
