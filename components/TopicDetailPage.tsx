@@ -29,7 +29,8 @@ import {
   Award,
   Trophy,
   History,
-  X
+  X,
+  Info
 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -42,6 +43,8 @@ import { RenderWithMath } from './MathRenderer';
 import PracticeSolutionModal from './PracticeSolutionModal';
 import PracticeInsightsModal from './PracticeInsightsModal';
 import { usePracticeSession } from '../hooks/usePracticeSession';
+import { motion, AnimatePresence } from 'framer-motion';
+import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import { supabase } from '../lib/supabase';
 import { cache } from '../utils/cache';
 
@@ -51,6 +54,7 @@ interface TopicDetailPageProps {
   examContext: ExamContext;
   onBack: () => void;
   onStartQuiz: (topicId: string) => void;
+  onRefreshData?: (silent?: boolean) => void;
 }
 
 type TabType = 'learn' | 'practice' | 'quiz' | 'flashcards' | 'progress';
@@ -60,168 +64,206 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
   subject,
   examContext,
   onBack,
-  onStartQuiz
+  onStartQuiz,
+  onRefreshData
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('learn');
   const [totalQuestionsIncludingAI, setTotalQuestionsIncludingAI] = useState(topicResource.totalQuestions);
   const subjectConfig = SUBJECT_CONFIGS[subject];
-
-  // Shared questions state that persists across tab switches
-  const [sharedQuestions, setSharedQuestions] = useState<any[]>([]);
-
-  const tabs = [
-    { id: 'learn' as TabType, label: 'Learn', icon: BookOpen, description: 'Study notes & concepts' },
-    { id: 'practice' as TabType, label: 'Practice', icon: Zap, description: 'Solve questions' },
-    { id: 'quiz' as TabType, label: 'Quiz', icon: Brain, description: 'Test yourself' },
-    { id: 'flashcards' as TabType, label: 'Flashcards', icon: CreditCard, description: 'Quick revision' },
-    { id: 'progress' as TabType, label: 'Progress', icon: TrendingUp, description: 'Track analytics' }
-  ];
-
-  const getMasteryColor = (mastery: number): string => {
-    if (mastery >= 85) return 'emerald';
-    if (mastery >= 70) return 'lime';
-    if (mastery >= 50) return 'yellow';
-    if (mastery >= 30) return 'orange';
-    return 'red';
+  const { user } = useAuth();
+  const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
+  const refreshStats = (silent: boolean = true) => {
+    setStatsRefreshTrigger(prev => prev + 1);
+    onRefreshData?.(silent);
   };
 
-  const masteryColor = getMasteryColor(topicResource.masteryLevel);
+  const [localStats, setLocalStats] = useState({
+    masteryLevel: topicResource.masteryLevel || 0,
+    averageAccuracy: topicResource.averageAccuracy || 0,
+    quizzesTaken: topicResource.quizzesTaken || 0,
+    studyStage: topicResource.studyStage || 'not_started',
+    notesCompleted: topicResource.notesCompleted || false
+  });
+
+  // Sync questions count when prop updates (e.g. after refreshData)
+  useEffect(() => {
+    setTotalQuestionsIncludingAI(topicResource.totalQuestions);
+  }, [topicResource.totalQuestions]);
+
+  useEffect(() => {
+    const fetchLatestStats = async () => {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase
+          .from('topic_resources')
+          .select('mastery_level, average_accuracy, quizzes_taken, study_stage, notes_completed')
+          .eq('user_id', user.id)
+          .eq('topic_id', topicResource.topicId)
+          .eq('exam_context', examContext)
+          .maybeSingle();
+
+        if (data && !error) {
+          console.log('📡 [HeaderStats] Fetched latest:', data);
+          setLocalStats({
+            masteryLevel: data.mastery_level || 0,
+            averageAccuracy: data.average_accuracy || 0,
+            quizzesTaken: data.quizzes_taken || 0,
+            studyStage: data.study_stage || 'not_started',
+            notesCompleted: data.notes_completed || false
+          });
+        }
+      } catch (err) { }
+    };
+    fetchLatestStats();
+  }, [user, activeTab, topicResource.topicId, examContext, statsRefreshTrigger]);
+
+  // Shared questions state that persists across tab switches
+  const [sharedQuestions, setSharedQuestions] = useState<AnalyzedQuestion[]>([]);
+  const [focusedQuestionId, setFocusedQuestionId] = useState<string | null>(null);
+  const [isNavigatorOpen, setIsNavigatorOpen] = useState(false);
+
+  const tabs = [
+    { id: 'learn' as TabType, label: 'Learn', icon: BookOpen, accent: 'text-blue-500', bg: 'bg-blue-50' },
+    { id: 'practice' as TabType, label: 'Solve', icon: Zap, accent: 'text-amber-500', bg: 'bg-amber-50' },
+    { id: 'quiz' as TabType, label: 'Mastery', icon: Target, accent: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { id: 'flashcards' as TabType, label: 'Recall', icon: Brain, accent: 'text-purple-500', bg: 'bg-purple-50' },
+    { id: 'progress' as TabType, label: 'Stats', icon: BarChart3, accent: 'text-indigo-500', bg: 'bg-indigo-50' }
+  ];
 
   return (
-    <div className="bg-slate-50/50 font-instrument text-slate-900">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 mb-3">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              <ChevronLeft size={20} />
-              <span className="text-xs font-black uppercase tracking-wider">Topics</span>
-            </button>
-            <span className="text-slate-400">/</span>
-            <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              {topicResource.topicName}
-            </span>
-          </div>
+    <div className="min-h-full bg-slate-50/50">
+      <LearningJourneyHeader
+        showBack
+        onBack={onBack}
+        icon={subjectConfig.iconEmoji}
+        title={topicResource.topicName}
+        subtitle={`${subject} • Domain Intelligence`}
+        subject={subject}
+        additionalContext={localStats.studyStage.replace('_', ' ')}
+        actions={null}
+      >
+        {/* UNIFIED SINGLE BAR: Tabs + Metrics (Swapped Order) */}
+        <div className="flex flex-col lg:flex-row items-center justify-between w-full bg-white/70 backdrop-blur-md rounded-2xl p-1.5 px-2 border border-slate-200/50 shadow-sm gap-2 mt-2">
 
-          {/* Premium Topic Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-4 flex-1 group">
-              <div className="relative">
-                <div
-                  className="w-16 h-16 rounded-xl flex items-center justify-center text-white shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-6"
-                  style={{ background: `linear-gradient(135deg, ${subjectConfig.color} 0%, ${subjectConfig.colorDark} 100%)` }}
-                >
-                  <span className="text-3xl transition-all duration-500 group-hover:scale-110">{subjectConfig.iconEmoji}</span>
-                </div>
-                {/* Glow effect */}
-                <div
-                  className="absolute top-0 left-0 w-16 h-16 rounded-xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500"
-                  style={{ background: `linear-gradient(135deg, ${subjectConfig.color} 0%, ${subjectConfig.colorDark} 100%)` }}
-                />
-              </div>
-              <div>
-                <h1 className="font-black text-2xl tracking-tight text-slate-900">
-                  {topicResource.topicName}
-                </h1>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="text-xs font-medium text-slate-500">
-                    {subject} • {examContext}
-                  </span>
-                  <div className={`px-2.5 py-1 bg-${masteryColor}-100 text-${masteryColor}-700 rounded-lg text-xs font-black uppercase tracking-wider`}>
-                    <span>{topicResource.masteryLevel}</span><span className="text-[10px]">%</span> Mastery
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Premium Quick Stats */}
-            <div className="flex items-center gap-3">
-              <div className="text-center group cursor-pointer">
-                <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{totalQuestionsIncludingAI}</div>
-                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Questions</div>
-              </div>
-              <div className="h-10 w-px bg-slate-200" />
-              <div className="text-center group cursor-pointer">
-                <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{topicResource.sketchPages?.length || 0}</div>
-                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Visual Notes</div>
-              </div>
-              <div className="h-10 w-px bg-slate-200" />
-              <div className="text-center group cursor-pointer">
-                <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">
-                  <span>{topicResource.averageAccuracy.toFixed(0)}</span><span className="text-lg">%</span>
-                </div>
-                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Accuracy</div>
-              </div>
-              <div className="h-10 w-px bg-slate-200" />
-              <div className="text-center group cursor-pointer">
-                <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">{topicResource.quizzesTaken}</div>
-                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Quizzes</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Premium Tab Navigation */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            {tabs.map(tab => {
+          {/* Left: Tab Selector (Compact) */}
+          <div className="flex items-center gap-1 p-1 bg-slate-900/5 rounded-xl border border-slate-200/50">
+            {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`group flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ${
-                    isActive
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:shadow-xl'
-                      : 'bg-white text-slate-600 hover:bg-purple-50 hover:text-purple-600 border-2 border-slate-200 hover:border-purple-300'
-                  }`}
+                  className={`relative px-4 py-2 rounded-lg transition-all duration-300 ${isActive ? 'text-white' : 'text-slate-500 hover:text-slate-900 group'}`}
                 >
-                  <Icon size={16} className={`transition-all duration-300 ${isActive ? '' : 'group-hover:scale-110 group-hover:rotate-6'}`} />
-                  <div className="text-left">
-                    <div className="text-xs font-black uppercase tracking-wider">{tab.label}</div>
-                    {!isActive && (
-                      <div className="text-[10px] font-medium opacity-70">{tab.description}</div>
-                    )}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTabBg"
+                      className="absolute inset-0 bg-slate-900 rounded-lg shadow-sm"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <div className="relative z-10 flex items-center gap-2.5">
+                    <Icon size={18} className={isActive ? 'text-white' : 'group-hover:scale-110 transition-transform'} />
+                    <span className="text-xs font-bold uppercase tracking-wider hidden md:inline font-outfit">{tab.label}</span>
                   </div>
                 </button>
               );
             })}
           </div>
-        </div>
-      </div>
 
-      {/* Tab Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        {activeTab === 'learn' && <LearnTab topicResource={topicResource} subject={subject} examContext={examContext} />}
-        {activeTab === 'practice' && (
-          <PracticeTab
-            topicResource={topicResource}
-            subject={subject}
-            examContext={examContext}
-            onQuestionCountChange={setTotalQuestionsIncludingAI}
-            sharedQuestions={sharedQuestions}
-            setSharedQuestions={setSharedQuestions}
-          />
-        )}
-        {activeTab === 'quiz' && (
-          <QuizTab
-            topicResource={topicResource}
-            subject={subject}
-            examContext={examContext}
-            sharedQuestions={sharedQuestions}
-            setSharedQuestions={setSharedQuestions}
-          />
-        )}
-        {activeTab === 'flashcards' && (
-          <FlashcardsTab
-            topicResource={topicResource}
-            sharedQuestions={sharedQuestions}
-          />
-        )}
-        {activeTab === 'progress' && <ProgressTab topicResource={topicResource} />}
+          {/* Right: Compact Metrics */}
+          <div className="flex items-center gap-3 md:gap-5 px-3 py-1">
+            {[
+              {
+                label: 'Mastery',
+                val: `${localStats.masteryLevel}%`,
+                icon: Trophy,
+                color: 'text-emerald-600',
+                tooltip: `Mastery requires covering at least 50% of the topic's question pool (minimum 15 questions) for accuracy to have full weight. New AI generations will correctly dilute this score until practiced.`
+              },
+              { label: 'Accuracy', val: `${localStats.averageAccuracy.toFixed(0)}%`, icon: Target, color: 'text-primary-600' },
+              { label: 'Questions', val: totalQuestionsIncludingAI, icon: FileQuestion, color: 'text-violet-600' },
+              { label: 'Quizzes', val: localStats.quizzesTaken, icon: Brain, color: 'text-amber-600' }
+            ].map((s, i) => (
+              <div key={i} className="flex items-center gap-3 pl-4 md:pl-6 border-l first:border-l-0 border-slate-200">
+                <s.icon size={20} className={s.color} />
+                <div className="flex flex-col leading-none">
+                  <span className="text-base font-bold text-slate-900 font-outfit">{s.val}</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{s.label}</span>
+                    {s.tooltip && (
+                      <div className="group relative">
+                        <Info size={12} className="text-slate-300 hover:text-slate-500 transition-colors cursor-help" />
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-[10px] font-medium leading-relaxed rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-[100] shadow-2xl border border-white/10 backdrop-blur-xl">
+                          <div className="relative z-10">
+                            {s.tooltip}
+                          </div>
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-slate-900" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </LearningJourneyHeader>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {activeTab === 'learn' && (
+              <LearnTab
+                topicResource={topicResource}
+                subject={subject}
+                examContext={examContext}
+                onProgressUpdate={refreshStats}
+                poolCount={totalQuestionsIncludingAI}
+              />
+            )}
+            {activeTab === 'practice' && (
+              <PracticeTab
+                topicResource={topicResource}
+                subject={subject}
+                examContext={examContext}
+                onQuestionCountChange={setTotalQuestionsIncludingAI}
+                sharedQuestions={sharedQuestions}
+                setSharedQuestions={setSharedQuestions}
+                focusedQuestionId={focusedQuestionId}
+                setFocusedQuestionId={setFocusedQuestionId}
+                isNavigatorOpen={isNavigatorOpen}
+                setIsNavigatorOpen={setIsNavigatorOpen}
+                onProgressUpdate={refreshStats}
+              />
+            )}
+            {activeTab === 'quiz' && (
+              <QuizTab
+                topicResource={topicResource}
+                subject={subject}
+                examContext={examContext}
+                sharedQuestions={sharedQuestions}
+                setSharedQuestions={setSharedQuestions}
+                onProgressUpdate={refreshStats}
+                poolCount={totalQuestionsIncludingAI}
+              />
+            )}
+            {activeTab === 'flashcards' && (
+              <FlashcardsTab
+                topicResource={topicResource}
+                sharedQuestions={sharedQuestions}
+              />
+            )}
+            {activeTab === 'progress' && <ProgressTab topicResource={topicResource} />}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -232,7 +274,9 @@ const LearnTab: React.FC<{
   topicResource: TopicResource;
   subject: Subject;
   examContext: ExamContext;
-}> = ({ topicResource, subject, examContext }) => {
+  onProgressUpdate?: (silent?: boolean) => void;
+  poolCount: number;
+}> = ({ topicResource, subject, examContext, onProgressUpdate, poolCount }) => {
   const { user } = useAuth();
   const [visualSketches, setVisualSketches] = useState<Array<{ questionId: string; sketchSvg: string; questionText: string; }>>([]);
   const [loadingSketches, setLoadingSketches] = useState(true);
@@ -253,7 +297,6 @@ const LearnTab: React.FC<{
       }
 
       try {
-        // Fetch all user's scans for this subject and examContext
         const { data: scans, error } = await supabase
           .from('scans')
           .select('id, name, analysis_data')
@@ -273,50 +316,38 @@ const LearnTab: React.FC<{
           return;
         }
 
-        // Extract visual sketches from all scans matching this topic
         const sketches: Array<{ questionId: string; sketchSvg: string; questionText: string }> = [];
 
         for (const scan of scans) {
-          // 1. Check for topic-based sketches (from Sketch Gallery)
           if (scan.analysis_data?.topicBasedSketches) {
             const topicBasedSketches = scan.analysis_data.topicBasedSketches;
-
-            // Look for exact topic match or partial match
             for (const [topicKey, topicSketch] of Object.entries(topicBasedSketches)) {
-              const isExactMatch = topicKey === topicResource.topicName;
-              const isPartialMatch = topicKey.includes(topicResource.topicName) || topicResource.topicName.includes(topicKey);
+              const matches = topicKey === topicResource.topicName ||
+                topicKey.includes(topicResource.topicName) ||
+                topicResource.topicName.includes(topicKey);
 
-              if (isExactMatch || isPartialMatch) {
-
-                // Topic-based sketches have multiple pages
-                if (topicSketch && typeof topicSketch === 'object' && 'pages' in topicSketch) {
-                  const pages = topicSketch.pages || [];
-
-                  pages.forEach((page: any, idx: number) => {
-                    // Topic-based sketches use 'imageData' not 'imageUrl'
-                    const imageData = page.imageData || page.imageUrl;
-                    if (imageData) {
-                      sketches.push({
-                        questionId: `${scan.id}-topic-${topicKey}-page-${idx}`,
-                        sketchSvg: imageData,
-                        questionText: page.title || `${topicKey} - Page ${idx + 1}`
-                      });
-                    }
-                  });
-                }
+              if (matches && topicSketch && typeof topicSketch === 'object' && 'pages' in topicSketch) {
+                const pages = (topicSketch as any).pages || [];
+                pages.forEach((page: any, idx: number) => {
+                  const imageData = page.imageData || page.imageUrl;
+                  if (imageData) {
+                    sketches.push({
+                      questionId: `${scan.id}-topic-${topicKey}-page-${idx}`,
+                      sketchSvg: imageData,
+                      questionText: page.title || `${topicKey} - Page ${idx + 1}`
+                    });
+                  }
+                });
               }
             }
           }
 
-          // 2. Check for per-question sketches
           if (scan.analysis_data?.questions) {
             for (const question of scan.analysis_data.questions) {
-              // Match topic (exact or partial match for sub-topics)
               if (question.topic === topicResource.topicName ||
-                  question.topic?.includes(topicResource.topicName) ||
-                  topicResource.topicName?.includes(question.topic)) {
+                question.topic?.includes(topicResource.topicName) ||
+                topicResource.topicName?.includes(question.topic)) {
 
-                // Check if this question has a visual sketch (database uses sketch_svg_url)
                 const sketchData = question.sketch_svg_url || question.sketchSvg || question.diagram_url || question.diagramUrl;
                 if (sketchData) {
                   sketches.push({
@@ -344,12 +375,9 @@ const LearnTab: React.FC<{
   // Track time spent on current sketch
   useEffect(() => {
     let interval: NodeJS.Timeout;
-
     if (viewerOpen && sketchStartTime && visualSketches[currentSketchIndex]) {
       interval = setInterval(() => {
         const currentSketch = visualSketches[currentSketchIndex];
-        const elapsed = Math.floor((Date.now() - sketchStartTime) / 1000);
-
         setTotalDurations(prev => {
           const newMap = new Map(prev);
           const existingDuration = newMap.get(currentSketch.questionId) || 0;
@@ -358,18 +386,17 @@ const LearnTab: React.FC<{
         });
       }, 1000);
     }
-
     return () => clearInterval(interval);
   }, [viewerOpen, sketchStartTime, currentSketchIndex, visualSketches]);
 
-  // Load saved progress from database
+  // Load saved progress from database with LocalStorage fallback
   useEffect(() => {
     const loadSavedProgress = async () => {
       if (!user || visualSketches.length === 0) return;
 
+      let dbData: any[] = [];
       try {
         const sketchIds = visualSketches.map(s => s.questionId);
-
         const { data, error } = await supabase
           .from('sketch_progress')
           .select('*')
@@ -379,33 +406,38 @@ const LearnTab: React.FC<{
           .eq('exam_context', examContext)
           .in('sketch_id', sketchIds);
 
-        if (error) {
-          console.error('Failed to load sketch progress:', error);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          // Load completed sketches
-          const completed = new Set<string>();
-          const durations = new Map<string, number>();
-
-          data.forEach(record => {
-            if (record.completed) {
-              completed.add(record.sketch_id);
-            }
-            durations.set(record.sketch_id, record.duration_seconds || 0);
-          });
-
-          setCompletedSketches(completed);
-          setTotalDurations(durations);
-
-          console.log(`📊 [SKETCH PROGRESS] Loaded ${completed.size} completed, ${data.length} total records`);
+        if (!error && data) {
+          dbData = data;
         }
       } catch (err) {
-        console.error('Error loading sketch progress:', err);
+        console.warn('⚠️ [LearnTab] Could not load from Supabase, using LocalStorage fallback');
       }
-    };
 
+      // Merge with LocalStorage data
+      const localKey = `sketch_prog_${user.id}_${topicResource.topicId}`;
+      const localRaw = localStorage.getItem(localKey);
+      const localData = localRaw ? JSON.parse(localRaw) : {};
+
+      const completed = new Set<string>();
+      const durations = new Map<string, number>();
+
+      // Apply DB data
+      dbData.forEach(record => {
+        if (record.completed) completed.add(record.sketch_id);
+        durations.set(record.sketch_id, record.duration_seconds || 0);
+      });
+
+      // Layer Local Data (takes precedence for recent session stuff if DB failed)
+      Object.entries(localData).forEach(([sketchId, data]: [string, any]) => {
+        if (data.completed) completed.add(sketchId);
+        if (data.duration > (durations.get(sketchId) || 0)) {
+          durations.set(sketchId, data.duration);
+        }
+      });
+
+      setCompletedSketches(completed);
+      setTotalDurations(durations);
+    };
     loadSavedProgress();
   }, [user, visualSketches, topicResource.topicName, subject, examContext]);
 
@@ -416,7 +448,6 @@ const LearnTab: React.FC<{
   };
 
   const closeViewer = async () => {
-    // Save final duration before closing
     if (sketchStartTime && visualSketches[currentSketchIndex]) {
       await saveSketchProgress();
     }
@@ -426,9 +457,7 @@ const LearnTab: React.FC<{
 
   const goToNextSketch = async () => {
     if (currentSketchIndex < visualSketches.length - 1) {
-      // Save current sketch progress
       await saveSketchProgress();
-
       setCurrentSketchIndex(currentSketchIndex + 1);
       setSketchStartTime(Date.now());
     }
@@ -436,9 +465,7 @@ const LearnTab: React.FC<{
 
   const goToPrevSketch = async () => {
     if (currentSketchIndex > 0) {
-      // Save current sketch progress
       await saveSketchProgress();
-
       setCurrentSketchIndex(currentSketchIndex - 1);
       setSketchStartTime(Date.now());
     }
@@ -450,18 +477,36 @@ const LearnTab: React.FC<{
     newCompleted.add(currentSketch.questionId);
     setCompletedSketches(newCompleted);
 
-    // Save to database
-    await saveSketchProgress(true);
+    // Check if THIS was the last one
+    const isAllDone = newCompleted.size === visualSketches.length && visualSketches.length > 0;
+    await saveSketchProgress(true, isAllDone);
   };
 
-  const saveSketchProgress = async (markCompleted = false) => {
+  const saveSketchProgress = async (markCompleted = false, allNotesDone = false) => {
     if (!user || !visualSketches[currentSketchIndex]) return;
-
     const currentSketch = visualSketches[currentSketchIndex];
     const duration = totalDurations.get(currentSketch.questionId) || 0;
+    const isCompleted = markCompleted || completedSketches.has(currentSketch.questionId);
 
+    // If we're not explicitly told all are done, check our state
+    const isActuallyAllDone = allNotesDone || (completedSketches.size === visualSketches.length && visualSketches.length > 0);
+
+    // 1. Sync to LocalStorage (Fallback)
     try {
-      const { error } = await supabase
+      const localKey = `sketch_prog_${user.id}_${topicResource.topicId}`;
+      const localRaw = localStorage.getItem(localKey);
+      const localData = localRaw ? JSON.parse(localRaw) : {};
+      localData[currentSketch.questionId] = {
+        completed: isCompleted,
+        duration: duration,
+        ts: Date.now()
+      };
+      localStorage.setItem(localKey, JSON.stringify(localData));
+    } catch (e) { }
+
+    // 2. Sync to Supabase (Sketch Progress)
+    try {
+      await supabase
         .from('sketch_progress')
         .upsert({
           user_id: user.id,
@@ -470,352 +515,291 @@ const LearnTab: React.FC<{
           subject: subject,
           exam_context: examContext,
           duration_seconds: duration,
-          completed: markCompleted || completedSketches.has(currentSketch.questionId),
+          completed: isCompleted,
           last_viewed_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,sketch_id'
-        });
+        }, { onConflict: 'user_id,sketch_id' });
+    } catch (err) { }
 
-      if (error) {
-        console.error('Failed to save sketch progress:', error);
+    // 3. Update Global Topic Status & Mastery with Absolute Truth
+    try {
+      const { data: current } = await supabase
+        .from('topic_resources')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('topic_id', topicResource.topicId)
+        .eq('exam_context', examContext)
+        .maybeSingle();
+
+      const { data: allAnswers } = await supabase
+        .from('practice_answers')
+        .select('is_correct')
+        .eq('topic_resource_id', topicResource.id);
+
+      const currentStage = current?.study_stage || 'not_started';
+      const quizzesTaken = current?.quizzes_taken || 0;
+      const totalAttempted = allAnswers?.length || 0;
+      const totalCorrect = allAnswers?.filter((a: any) => a.is_correct).length || 0;
+      const accuracy = totalAttempted > 0 ? (totalCorrect / totalAttempted) * 100 : 0;
+
+      // Determine next stage
+      let nextStage = currentStage;
+      if (currentStage === 'not_started') nextStage = 'studying_notes';
+      if (isActuallyAllDone && (currentStage === 'studying_notes' || currentStage === 'not_started')) {
+        nextStage = 'practicing';
       }
-    } catch (err) {
-      console.error('Error saving sketch progress:', err);
+
+      // Standard Mastery Formula Recalculation
+      // NEW DYNAMIC COVERAGE: Saturation target is 50% of the currently known question pool (min 15).
+      const saturationTarget = Math.min(poolCount, Math.max(15, Math.floor(poolCount * 0.5)));
+      const coverageWeight = Math.min(1, totalAttempted / Math.max(1, saturationTarget));
+
+      const newMastery = Math.min(100, Math.round(
+        (accuracy * 0.60 * coverageWeight) +
+        Math.min(20, quizzesTaken * 10) +
+        Math.min(10, Math.floor(totalAttempted / 10) * 5) +
+        (isActuallyAllDone ? 10 : 0)
+      ));
+
+      // Check for Mastered state
+      if (newMastery >= 90 && quizzesTaken >= 2) {
+        nextStage = 'mastered';
+      }
+
+      await supabase
+        .from('topic_resources')
+        .upsert({
+          user_id: user.id,
+          topic_id: topicResource.topicId,
+          subject: subject,
+          exam_context: examContext,
+          study_stage: nextStage,
+          notes_completed: isActuallyAllDone,
+          mastery_level: newMastery,
+          questions_attempted: totalAttempted,
+          questions_correct: totalCorrect,
+          average_accuracy: Math.round(accuracy),
+          last_practiced: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,topic_id,exam_context' });
+
+      onProgressUpdate?.(true);
+    } catch (e) {
+      console.error('❌ [LearnTab] Failed to sync study stage:', e);
     }
   };
 
-  const [showInsights, setShowInsights] = useState(false);
-
   return (
-    <div className="space-y-4">
-      {/* Compact AI Study Guide Banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-4 text-white flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            <Sparkles size={20} />
-          </div>
-          <div>
-            <div className="text-xs font-bold text-white/80 uppercase tracking-wider">AI Study Guide</div>
-            <div className="text-sm font-black">Recommended: 45-60 min study time</div>
-          </div>
-        </div>
-        {topicResource.chapterInsights && topicResource.chapterInsights.length > 0 && (
-          <button
-            onClick={() => setShowInsights(!showInsights)}
-            className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-black flex items-center gap-2 transition-all backdrop-blur-sm"
-          >
-            {showInsights ? 'Hide' : 'View'} Key Concepts
-            {showInsights ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
-        )}
-      </div>
-
-      {/* Collapsible Chapter Insights */}
-      {showInsights && topicResource.chapterInsights && topicResource.chapterInsights.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm animate-in slide-in-from-top-2 duration-200">
-          <h2 className="font-black text-base text-slate-900 mb-4 flex items-center gap-2">
-            <Lightbulb size={18} className="text-amber-500" />
-            Key Concepts
-          </h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {topicResource.chapterInsights.map((insight, idx) => (
-              <div key={idx} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                <h3 className="font-black text-sm text-slate-800 mb-2">{insight.topic}</h3>
-                <p className="text-xs text-slate-600 font-medium mb-3 line-clamp-2">{insight.description}</p>
-
-                {/* Key Concepts */}
-                {insight.keyConcepts && insight.keyConcepts.length > 0 && (
-                  <div className="mb-3">
-                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1.5">
-                      Core Concepts
-                    </div>
-                    <ul className="space-y-1">
-                      {insight.keyConcepts.slice(0, 3).map((concept, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-xs">
-                          <CheckCircle2 size={12} className="text-emerald-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-slate-700 font-medium line-clamp-2">{concept}</span>
-                        </li>
-                      ))}
-                      {insight.keyConcepts.length > 3 && (
-                        <li className="text-[10px] text-slate-500 font-bold ml-5">
-                          +{insight.keyConcepts.length - 3} more
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Important Formulas */}
-                {insight.importantFormulas && insight.importantFormulas.length > 0 && (
-                  <div>
-                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1.5">
-                      Key Formulas
-                    </div>
-                    <div className="space-y-1">
-                      {insight.importantFormulas.slice(0, 2).map((formula, i) => (
-                        <div key={i} className="bg-white border border-slate-200 rounded p-2">
-                          <code className="text-[11px] font-mono text-slate-900">{formula}</code>
-                        </div>
-                      ))}
-                      {insight.importantFormulas.length > 2 && (
-                        <div className="text-[10px] text-slate-500 font-bold">
-                          +{insight.importantFormulas.length - 2} more formulas
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Visual Sketch Notes - Compact */}
-      {loadingSketches ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-8 text-center shadow-sm">
-          <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-xs text-slate-600 font-medium">Loading sketches...</p>
-        </div>
-      ) : visualSketches.length > 0 ? (
-        <div>
-          {/* Compact Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <Eye size={16} className="text-white" />
-              </div>
-              <div>
-                <h2 className="font-black text-base text-slate-900">Visual Sketches</h2>
-                <p className="text-[10px] text-slate-500 font-medium">
-                  {visualSketches.length} AI-generated notes • {completedSketches.size} completed
-                </p>
-              </div>
+    <div className="space-y-8 pb-20">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-slate-900 text-white rounded-[1.25rem] px-5 py-4 relative overflow-hidden shadow-lg border border-white/10"
+      >
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-[40px] -mr-16 -mt-16" />
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10">
+              <Sparkles size={20} className="text-primary-400" />
+            </div>
+            <div>
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-400/80 mb-0.5">Active Learning Layer</div>
+              <h2 className="text-lg font-black font-outfit tracking-tight leading-tight">Prime Concepts & Strategic Insights</h2>
             </div>
           </div>
-
-          {/* Compact Sketch Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {visualSketches.map((sketch, idx) => {
-              const isCompleted = completedSketches.has(sketch.questionId);
-              const duration = totalDurations.get(sketch.questionId) || 0;
-
-              return (
-              <div
-                key={sketch.questionId}
-                onClick={() => openViewer(idx)}
-                className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-xl hover:border-blue-300 hover:scale-[1.02] transition-all duration-200 cursor-pointer relative"
-              >
-                {/* Completion Badge */}
-                {isCompleted && (
-                  <div className="absolute top-2 right-2 z-10 bg-green-500 text-white rounded-full p-1.5 shadow-lg">
-                    <CheckCircle size={14} />
-                  </div>
-                )}
-
-                {/* Sketch Image */}
-                <div className="bg-slate-50 p-3 aspect-video flex items-center justify-center overflow-hidden">
-                  {sketch.sketchSvg.startsWith('data:image') ? (
-                    <img
-                      src={sketch.sketchSvg}
-                      alt={sketch.questionText}
-                      className="w-full h-full object-contain rounded-lg"
-                    />
-                  ) : (
-                    <div
-                      dangerouslySetInnerHTML={{ __html: sketch.sketchSvg }}
-                      className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
-                    />
-                  )}
-                </div>
-
-                {/* Compact Footer */}
-                <div className="p-3 bg-white border-t border-slate-100">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-wider">
-                      Sketch {idx + 1}
-                    </span>
-                    {duration > 0 && (
-                      <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1">
-                        <Clock size={10} />
-                        {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-600 leading-snug line-clamp-2 mb-2">
-                    {sketch.questionText}
-                  </p>
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-slate-400 font-bold">From scan</span>
-                    <span className="text-blue-600 font-black flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      View <Eye size={10} />
-                    </span>
-                  </div>
-                </div>
-              </div>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-
-      {/* Empty State - Compact */}
-      {!loadingSketches &&
-       (!topicResource.chapterInsights || topicResource.chapterInsights.length === 0) &&
-       (!topicResource.sketchPages || topicResource.sketchPages.length === 0) &&
-       visualSketches.length === 0 && (
-        <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-dashed border-slate-300 rounded-xl p-8 text-center">
-          <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
-            <BookOpen size={24} className="text-slate-400" />
-          </div>
-          <h3 className="font-black text-base text-slate-900 mb-1">No Study Materials</h3>
-          <p className="text-xs text-slate-600 font-medium max-w-md mx-auto">
-            Scan your first exam paper to generate personalized visual sketches and study notes.
+          <p className="hidden md:block text-slate-400 font-instrument text-xs max-w-[280px] leading-tight text-right italic">
+            AI-synthesized visual schemas and strategic conceptual breakdowns for deep mastery.
           </p>
         </div>
-      )}
+      </motion.div>
 
-      {/* Sketch Player Modal */}
-      {viewerOpen && visualSketches.length > 0 && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 font-instrument">
-          <div className="w-full max-w-7xl h-[96vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-            {/* Header Bar */}
-            <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex-shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <BookOpen size={18} className="text-blue-400" />
-                  <h2 className="text-sm font-black uppercase tracking-wider truncate max-w-md">
-                    {visualSketches[currentSketchIndex].questionText.split(' - ')[0] || 'Solved Examples'}
-                  </h2>
-                </div>
-                <span className="text-xs font-bold bg-white/10 px-3 py-1 rounded-full">
-                  {currentSketchIndex + 1} of {visualSketches.length}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                {/* Duration Display */}
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg">
-                  <Clock size={14} className="text-blue-400" />
-                  <span className="text-xs font-bold tabular-nums">
-                    {Math.floor((totalDurations.get(visualSketches[currentSketchIndex].questionId) || 0) / 60)}:
-                    {String((totalDurations.get(visualSketches[currentSketchIndex].questionId) || 0) % 60).padStart(2, '0')}
-                  </span>
-                </div>
-
-                {/* Mark Complete Button */}
-                {!completedSketches.has(visualSketches[currentSketchIndex].questionId) ? (
-                  <button
-                    onClick={markAsCompleted}
-                    className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-black flex items-center gap-2 transition-all shadow-lg hover:shadow-green-600/50"
-                  >
-                    <CheckCircle size={14} />
-                    Mark Complete
-                  </button>
-                ) : (
-                  <div className="px-4 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-xs font-black flex items-center gap-2">
-                    <CheckCircle size={14} />
-                    Completed
-                  </div>
-                )}
-
-                {/* Close Button */}
-                <button
-                  onClick={closeViewer}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                  title="Close (ESC)"
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          {topicResource.chapterInsights && topicResource.chapterInsights.length > 0 && (
+            <div className="grid grid-cols-1 gap-4">
+              {topicResource.chapterInsights.map((insight, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="group bg-white border border-slate-200 rounded-[2rem] p-6 hover:border-primary-200 hover:shadow-xl transition-all duration-300"
                 >
-                  <X size={20} />
-                </button>
-              </div>
-            </div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
+                      <Lightbulb size={24} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-black text-slate-900 font-outfit mb-2">{insight.topic}</h3>
+                      <p className="text-sm text-slate-500 leading-relaxed mb-4">{insight.description}</p>
 
-            {/* Main Image Area with Navigation - Fixed Height */}
-            <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 relative overflow-hidden min-h-0">
-              {/* Previous Button */}
-              <button
-                onClick={goToPrevSketch}
-                disabled={currentSketchIndex === 0}
-                className="absolute left-4 z-10 p-3 bg-slate-900 hover:bg-slate-800 text-white rounded-full disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl hover:scale-110"
-                title="Previous (←)"
-              >
-                <ChevronLeft size={24} />
-              </button>
-
-              {/* Image Container - Proper fit */}
-              <div className="w-full h-full flex items-center justify-center px-20 py-4">
-                {visualSketches[currentSketchIndex].sketchSvg.startsWith('data:image') ? (
-                  <img
-                    src={visualSketches[currentSketchIndex].sketchSvg}
-                    alt={visualSketches[currentSketchIndex].questionText}
-                    className="max-w-full max-h-full w-auto h-auto object-contain rounded-xl shadow-2xl bg-white"
-                  />
-                ) : (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: visualSketches[currentSketchIndex].sketchSvg }}
-                    className="max-w-full max-h-full w-auto h-auto [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto [&>svg]:object-contain [&>svg]:rounded-xl [&>svg]:shadow-2xl [&>svg]:bg-white"
-                  />
-                )}
-              </div>
-
-              {/* Next Button */}
-              <button
-                onClick={goToNextSketch}
-                disabled={currentSketchIndex === visualSketches.length - 1}
-                className="absolute right-4 z-10 p-3 bg-slate-900 hover:bg-slate-800 text-white rounded-full disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl hover:scale-110"
-                title="Next (→)"
-              >
-                <ChevronRight size={24} />
-              </button>
-            </div>
-
-            {/* Footer - Progress Bar */}
-            <div className="px-6 py-3 bg-white border-t border-slate-200 flex-shrink-0">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                  Progress
-                </div>
-                <div className="text-xs font-bold text-slate-500">
-                  {completedSketches.size} of {visualSketches.length} completed
-                </div>
-              </div>
-
-              {/* Progress Dots */}
-              <div className="flex items-center gap-2 justify-center">
-                {visualSketches.map((sketch, idx) => {
-                  const isCompleted = completedSketches.has(sketch.questionId);
-                  const isCurrent = idx === currentSketchIndex;
-
-                  return (
-                    <button
-                      key={sketch.questionId}
-                      onClick={() => {
-                        saveSketchProgress();
-                        setCurrentSketchIndex(idx);
-                        setSketchStartTime(Date.now());
-                      }}
-                      className={`relative transition-all ${
-                        isCurrent
-                          ? 'w-12 h-3 bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-600/50'
-                          : isCompleted
-                          ? 'w-3 h-3 bg-green-500 hover:bg-green-600'
-                          : 'w-3 h-3 bg-slate-300 hover:bg-slate-400'
-                      } rounded-full`}
-                      title={`${sketch.questionText.substring(0, 50)}...${isCompleted ? ' ✓' : ''}`}
-                    >
-                      {isCompleted && !isCurrent && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <CheckCircle size={10} className="text-white" />
+                      {insight.keyConcepts && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {insight.keyConcepts.map((c, i) => (
+                            <span key={i} className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-full text-[10px] font-black uppercase tracking-wider text-slate-600">
+                              {c}
+                            </span>
+                          ))}
                         </div>
                       )}
-                    </button>
-                  );
-                })}
-              </div>
+
+                      {insight.importantFormulas && (
+                        <div className="space-y-2">
+                          {insight.importantFormulas.map((f, i) => (
+                            <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100 font-mono text-xs text-primary-700">
+                              {f}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
+          )}
+
+          {(!topicResource.chapterInsights || topicResource.chapterInsights.length === 0) && visualSketches.length === 0 && (
+            <div className="bg-white border-2 border-dashed border-slate-200 rounded-[2rem] p-12 text-center">
+              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <BookOpen size={32} className="text-slate-400" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-2">Knowledge Base Building</h3>
+              <p className="text-slate-500 max-w-sm mx-auto text-sm">Scan papers or start practicing to activate AI knowledge generation for this topic.</p>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Visual DNA ({visualSketches.length})</h3>
+            <div className="h-px flex-1 bg-slate-200 mx-4" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {loadingSketches ? (
+              [1, 2, 3].map(i => (
+                <div key={i} className="aspect-video bg-slate-100 animate-pulse rounded-[1.5rem]" />
+              ))
+            ) : (
+              visualSketches.map((sketch, idx) => (
+                <motion.button
+                  key={sketch.questionId}
+                  whileHover={{ y: -4 }}
+                  onClick={() => openViewer(idx)}
+                  className="group relative bg-white border border-slate-200 rounded-[1.5rem] overflow-hidden hover:shadow-xl transition-all text-left"
+                >
+                  <div className="aspect-video bg-slate-50 p-4 flex items-center justify-center">
+                    <div className="w-full h-full grayscale group-hover:grayscale-0 transition-all duration-500">
+                      {sketch.sketchSvg.startsWith('data:image') ? (
+                        <img src={sketch.sketchSvg} alt="" className="w-full h-full object-contain" />
+                      ) : (
+                        <div dangerouslySetInnerHTML={{ __html: sketch.sketchSvg }} className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-4 bg-white border-t border-slate-100">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest">Visual Module {idx + 1}</span>
+                      {completedSketches.has(sketch.questionId) && <CheckCircle size={12} className="text-emerald-500" />}
+                    </div>
+                    <p className="text-xs font-bold text-slate-900 truncate">{sketch.questionText}</p>
+                  </div>
+                </motion.button>
+              ))
+            )}
           </div>
         </div>
-      )}
+      </div>
+
+      <AnimatePresence>
+        {viewerOpen && visualSketches.length > 0 && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeViewer}
+              className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-6xl aspect-[16/10] bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                    <Eye size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 font-outfit">{visualSketches[currentSketchIndex].questionText}</h3>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sketch {currentSketchIndex + 1} of {visualSketches.length}</span>
+                      <div className="w-1 h-1 rounded-full bg-slate-200" />
+                      <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-500">
+                        <Clock size={12} />
+                        {Math.floor((totalDurations.get(visualSketches[currentSketchIndex].questionId) || 0) / 60)}:
+                        {String((totalDurations.get(visualSketches[currentSketchIndex].questionId) || 0) % 60).padStart(2, '0')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={markAsCompleted}
+                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${completedSketches.has(visualSketches[currentSketchIndex].questionId) ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+                  >
+                    {completedSketches.has(visualSketches[currentSketchIndex].questionId) ? 'Mastered' : 'Mark as Mastered'}
+                  </button>
+                  <button onClick={closeViewer} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 bg-slate-50 relative flex items-center justify-center p-12 overflow-hidden">
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+
+                <motion.div
+                  key={currentSketchIndex}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="w-full h-full flex items-center justify-center relative z-10"
+                >
+                  {visualSketches[currentSketchIndex].sketchSvg.startsWith('data:image') ? (
+                    <img src={visualSketches[currentSketchIndex].sketchSvg} alt="" className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl bg-white" />
+                  ) : (
+                    <div dangerouslySetInnerHTML={{ __html: visualSketches[currentSketchIndex].sketchSvg }} className="max-w-full max-h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain bg-white rounded-2xl shadow-2xl" />
+                  )}
+                </motion.div>
+
+                <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+                  <button onClick={goToPrevSketch} disabled={currentSketchIndex === 0} className="w-12 h-12 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-slate-900 disabled:opacity-30 hover:scale-110 active:scale-95 transition-all">
+                    <ChevronLeft size={24} />
+                  </button>
+                </div>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-4">
+                  <button onClick={goToNextSketch} disabled={currentSketchIndex === visualSketches.length - 1} className="w-12 h-12 rounded-full bg-white/80 backdrop-blur-md shadow-lg flex items-center justify-center text-slate-900 disabled:opacity-30 hover:scale-110 active:scale-95 transition-all">
+                    <ChevronRight size={24} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center gap-1">
+                {visualSketches.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${i === currentSketchIndex ? 'bg-primary-500' : i < currentSketchIndex ? 'bg-slate-300' : 'bg-slate-100'}`}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -826,207 +810,227 @@ const PracticeTab: React.FC<{
   subject: Subject;
   examContext: ExamContext;
   onQuestionCountChange?: (count: number) => void;
-  sharedQuestions: any[];
-  setSharedQuestions: React.Dispatch<React.SetStateAction<any[]>>;
-}> = ({ topicResource, subject, examContext, onQuestionCountChange, sharedQuestions, setSharedQuestions }) => {
-  // Use shared questions state that persists across tab switches
-  const [questions, setQuestions] = useState<AnalyzedQuestion[]>(sharedQuestions.length > 0 ? sharedQuestions : (topicResource.questions || []));
+  sharedQuestions: AnalyzedQuestion[];
+  setSharedQuestions: React.Dispatch<React.SetStateAction<AnalyzedQuestion[]>>;
+  focusedQuestionId: string | null;
+  setFocusedQuestionId: (id: string | null) => void;
+  isNavigatorOpen: boolean;
+  setIsNavigatorOpen: (open: boolean) => void;
+  onProgressUpdate?: (silent?: boolean) => void;
+}> = ({
+  topicResource,
+  subject,
+  examContext,
+  onQuestionCountChange,
+  sharedQuestions,
+  setSharedQuestions,
+  focusedQuestionId,
+  setFocusedQuestionId,
+  isNavigatorOpen,
+  setIsNavigatorOpen,
+  onProgressUpdate
+}) => {
+    // Use shared questions state that persists across tab switches
+    const [questions, setQuestions] = useState<AnalyzedQuestion[]>(sharedQuestions.length > 0 ? sharedQuestions : (topicResource.questions || []));
 
-  // Persistent practice session hook
-  const {
-    savedAnswers,
-    validatedAnswers,
-    bookmarkedIds,
-    saveAnswer,
-    toggleBookmark,
-    startQuestionTimer,
-    stopQuestionTimer,
-    getSessionStats,
-    clearProgress,
-    reload: reloadPracticeSession,
-    isLoading: sessionLoading
-  } = usePracticeSession({
-    topicResourceId: topicResource.id,
-    topicName: topicResource.topicName,
-    subject,
-    examContext,
-    questions: questions  // Use local state instead of topicResource.questions
-  });
+    // Persistent practice session hook
+    const {
+      savedAnswers,
+      validatedAnswers,
+      bookmarkedIds,
+      saveAnswer,
+      toggleBookmark,
+      startQuestionTimer,
+      stopQuestionTimer,
+      getSessionStats,
+      clearProgress,
+      reload: reloadPracticeSession,
+      isLoading: sessionLoading
+    } = usePracticeSession({
+      topicResourceId: topicResource.id,
+      topicId: topicResource.topicId,
+      topicName: topicResource.topicName,
+      subject,
+      examContext,
+      questions: questions,  // Use local state instead of topicResource.questions
+      onProgressUpdate
+    });
 
-  // Local UI state (for immediate feedback before DB save)
-  const [userAnswers, setUserAnswers] = useState<Map<string, number>>(new Map());
-  const [trashedIds, setTrashedIds] = useState<Set<string>>(new Set());
-  const [showStats, setShowStats] = useState(false);
+    // Local UI state (for immediate feedback before DB save)
+    const [userAnswers, setUserAnswers] = useState<Map<string, number>>(new Map());
+    const [trashedIds, setTrashedIds] = useState<Set<string>>(new Set());
+    const [showStats, setShowStats] = useState(false);
 
-  // Modal state
-  const [solutionModalQuestion, setSolutionModalQuestion] = useState<AnalyzedQuestion | null>(null);
-  const [insightsModalQuestion, setInsightsModalQuestion] = useState<AnalyzedQuestion | null>(null);
-  const [showGenerateModal, setShowGenerateModal] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generateCount, setGenerateCount] = useState(5);
-  const [generateError, setGenerateError] = useState<string | null>(null);
-  const [generateSuccess, setGenerateSuccess] = useState<string | null>(null);
+    // Modal state
+    const [solutionModalQuestion, setSolutionModalQuestion] = useState<AnalyzedQuestion | null>(null);
+    const [insightsModalQuestion, setInsightsModalQuestion] = useState<AnalyzedQuestion | null>(null);
+    const [showGenerateModal, setShowGenerateModal] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [generateCount, setGenerateCount] = useState(5);
+    const [generateError, setGenerateError] = useState<string | null>(null);
+    const [generateSuccess, setGenerateSuccess] = useState<string | null>(null);
 
-  // Get authenticated user from AuthProvider
-  const { user } = useAuth();
+    // Get authenticated user from AuthProvider
+    const { user } = useAuth();
 
-  // Load AI-generated questions from database on mount
-  useEffect(() => {
-    const loadAIGeneratedQuestions = async () => {
-      if (!user) return;
+    // Load AI-generated questions from database on mount
+    useEffect(() => {
+      const loadAIGeneratedQuestions = async () => {
+        if (!user) return;
 
-      try {
-        // Fetch AI-generated questions for this topic from Supabase
-        const { data: aiQuestions, error } = await supabase
-          .from('questions')
-          .select('*')
-          .eq('subject', subject)
-          .eq('exam_context', examContext)
-          .eq('topic', topicResource.topicName)
-          .in('scan_id', (await supabase
-            .from('scans')
-            .select('id')
-            .eq('user_id', user.id)
-            .filter('metadata->>is_ai_practice_placeholder', 'eq', 'true')
-          ).data?.map(s => s.id) || []);
+        try {
+          // Fetch AI-generated questions for this topic from Supabase
+          const { data: aiQuestions, error } = await supabase
+            .from('questions')
+            .select('*')
+            .eq('subject', subject)
+            .eq('exam_context', examContext)
+            .eq('topic', topicResource.topicName)
+            .in('scan_id', (await supabase
+              .from('scans')
+              .select('id')
+              .eq('user_id', user.id)
+              .filter('metadata->>is_ai_practice_placeholder', 'eq', 'true')
+            ).data?.map(s => s.id) || []);
 
-        if (error) {
-          console.error('❌ Failed to load AI-generated questions:', error);
-          return;
+          if (error) {
+            console.error('❌ Failed to load AI-generated questions:', error);
+            return;
+          }
+
+          if (aiQuestions && aiQuestions.length > 0) {
+            console.log(`📥 Loaded ${aiQuestions.length} AI-generated questions from database`);
+
+            // Transform database questions to AnalyzedQuestion format
+            const formattedAIQuestions: AnalyzedQuestion[] = aiQuestions.map(q => ({
+              id: q.id,
+              text: q.text,
+              options: q.options || [],
+              correctOptionIndex: q.correct_option_index,
+              marks: q.marks?.toString() || '1',
+              difficulty: q.difficulty,
+              diff: q.difficulty,
+              topic: q.topic,
+              domain: q.domain || q.topic,
+              blooms: q.blooms || '',
+              bloomsTaxonomy: q.blooms || '',
+              pedagogy: q.pedagogy || '',
+              year: q.year || '',
+              solutionSteps: q.solution_steps || [],
+              examTip: q.exam_tip || '',
+              visualConcept: q.visual_concept || '',
+              keyFormulas: q.key_formulas || [],
+              pitfalls: q.pitfalls || [],
+              masteryMaterial: q.mastery_material || {},
+              hasVisualElement: q.has_visual_element || false,
+              visualElementDescription: q.visual_element_description || '',
+              extractedImages: [],
+              // Extract AI fields from mastery_material JSONB
+              keyConcepts: q.mastery_material?.keyConcepts || [],
+              aiReasoning: q.mastery_material?.aiReasoning || '',
+              historicalPattern: q.mastery_material?.historicalPattern || '',
+              predictiveInsight: q.mastery_material?.predictiveInsight || '',
+              whyItMatters: q.mastery_material?.whyItMatters || '',
+              relevanceScore: q.mastery_material?.relevanceScore || 0,
+              commonMistakes: q.pitfalls || [],
+              studyTip: q.exam_tip || '',
+              thingsToRemember: q.key_formulas || []
+            }));
+
+            // Merge with existing questions (avoid duplicates by ID)
+            setQuestions(prev => {
+              const existingIds = new Set(prev.map(q => q.id));
+              const newQuestions = formattedAIQuestions.filter(q => !existingIds.has(q.id));
+              if (newQuestions.length === 0) return prev;
+              const updated = [...prev, ...newQuestions];
+
+              // Schedule side-effects after render (not inside state updater)
+              setTimeout(() => {
+                if (onQuestionCountChange) onQuestionCountChange(updated.length);
+                setSharedQuestions(updated);
+              }, 0);
+
+              return updated;
+            });
+          }
+        } catch (err) {
+          console.error('❌ Error loading AI-generated questions:', err);
         }
+      };
 
-        if (aiQuestions && aiQuestions.length > 0) {
-          console.log(`📥 Loaded ${aiQuestions.length} AI-generated questions from database`);
+      loadAIGeneratedQuestions();
+    }, [user, subject, examContext, topicResource.topicName, onQuestionCountChange]);
 
-          // Transform database questions to AnalyzedQuestion format
-          const formattedAIQuestions: AnalyzedQuestion[] = aiQuestions.map(q => ({
-            id: q.id,
-            text: q.text,
-            options: q.options || [],
-            correctOptionIndex: q.correct_option_index,
-            marks: q.marks?.toString() || '1',
-            difficulty: q.difficulty,
-            diff: q.difficulty,
-            topic: q.topic,
-            domain: q.domain || q.topic,
-            bloomsTaxonomy: q.blooms || '',
-            pedagogy: q.pedagogy || '',
-            year: q.year || '',
-            solutionSteps: q.solution_steps || [],
-            examTip: q.exam_tip || '',
-            visualConcept: q.visual_concept || '',
-            keyFormulas: q.key_formulas || [],
-            pitfalls: q.pitfalls || [],
-            masteryMaterial: q.mastery_material || {},
-            hasVisualElement: q.has_visual_element || false,
-            visualElementDescription: q.visual_element_description || '',
-            extractedImages: [],
-            // Extract AI fields from mastery_material JSONB
-            keyConcepts: q.mastery_material?.keyConcepts || [],
-            aiReasoning: q.mastery_material?.aiReasoning || '',
-            historicalPattern: q.mastery_material?.historicalPattern || '',
-            predictiveInsight: q.mastery_material?.predictiveInsight || '',
-            whyItMatters: q.mastery_material?.whyItMatters || '',
-            relevanceScore: q.mastery_material?.relevanceScore || 0,
-            commonMistakes: q.pitfalls || [],
-            studyTip: q.exam_tip || '',
-            thingsToRemember: q.key_formulas || []
-          }));
+    const handleAnswerSelect = (questionId: string, optionIndex: number) => {
+      // Update local state for immediate UI feedback
+      setUserAnswers(prev => {
+        const next = new Map(prev);
+        next.set(questionId, optionIndex);
+        return next;
+      });
 
-          // Merge with existing questions (avoid duplicates by ID)
-          setQuestions(prev => {
-            const existingIds = new Set(prev.map(q => q.id));
-            const newQuestions = formattedAIQuestions.filter(q => !existingIds.has(q.id));
-            if (newQuestions.length === 0) return prev;
-            const updated = [...prev, ...newQuestions];
-
-            // Schedule side-effects after render (not inside state updater)
-            setTimeout(() => {
-              if (onQuestionCountChange) onQuestionCountChange(updated.length);
-              setSharedQuestions(updated);
-            }, 0);
-
-            return updated;
-          });
-        }
-      } catch (err) {
-        console.error('❌ Error loading AI-generated questions:', err);
+      // Start timer when user first interacts with question
+      if (!savedAnswers.has(questionId)) {
+        startQuestionTimer(questionId);
       }
     };
 
-    loadAIGeneratedQuestions();
-  }, [user, subject, examContext, topicResource.topicName, onQuestionCountChange]);
+    const handleValidateAnswer = async (questionId: string, correctOptionIndex: number) => {
+      const selectedAnswer = userAnswers.get(questionId);
+      if (selectedAnswer === undefined) return;
 
-  const handleAnswerSelect = (questionId: string, optionIndex: number) => {
-    // Update local state for immediate UI feedback
-    setUserAnswers(prev => {
-      const next = new Map(prev);
-      next.set(questionId, optionIndex);
-      return next;
-    });
+      const isCorrect = selectedAnswer === correctOptionIndex;
 
-    // Start timer when user first interacts with question
-    if (!savedAnswers.has(questionId)) {
-      startQuestionTimer(questionId);
-    }
-  };
+      // Save to database (persists across sessions)
+      await saveAnswer(questionId, selectedAnswer, isCorrect);
 
-  const handleValidateAnswer = async (questionId: string, correctOptionIndex: number) => {
-    const selectedAnswer = userAnswers.get(questionId);
-    if (selectedAnswer === undefined) return;
+      // Stop timer for this question
+      stopQuestionTimer(questionId);
+    };
 
-    const isCorrect = selectedAnswer === correctOptionIndex;
+    const handleSave = async (id: string) => {
+      await toggleBookmark(id);
+    };
 
-    // Save to database (persists across sessions)
-    await saveAnswer(questionId, selectedAnswer, isCorrect);
+    const handleTrash = (id: string) => {
+      setTrashedIds(prev => {
+        const next = new Set(prev);
+        next.add(id);
+        return next;
+      });
+    };
 
-    // Stop timer for this question
-    stopQuestionTimer(questionId);
-  };
-
-  const handleSave = async (id: string) => {
-    await toggleBookmark(id);
-  };
-
-  const handleTrash = (id: string) => {
-    setTrashedIds(prev => {
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
-  };
-
-  const handleGenerateQuestions = async () => {
-    if (!user) {
-      setGenerateError('Please sign in to generate questions');
-      return;
-    }
-
-    // Clear previous messages
-    setGenerateError(null);
-    setGenerateSuccess(null);
-    setIsGenerating(true);
-
-    try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (process as any).env?.GEMINI_API_KEY;
-      if (!apiKey) {
-        setGenerateError("API Key Missing. Please check your environment configuration.");
-        setIsGenerating(false);
+    const handleGenerateQuestions = async () => {
+      if (!user) {
+        setGenerateError('Please sign in to generate questions');
         return;
       }
 
-      // Use NEW @google/genai library
-      const ai = new GoogleGenAI({ apiKey });
+      // Clear previous messages
+      setGenerateError(null);
+      setGenerateSuccess(null);
+      setIsGenerating(true);
 
-      // Get model from Settings
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
-      const temperature = parseFloat(localStorage.getItem('ai_temperature') || '0.7');
+      try {
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (process as any).env?.GEMINI_API_KEY;
+        if (!apiKey) {
+          setGenerateError("API Key Missing. Please check your environment configuration.");
+          setIsGenerating(false);
+          return;
+        }
 
-      // Topic-specific context
-      const topicContext = `Focus EXCLUSIVELY on topic: "${topicResource.topicName}" for ${subject} ${examContext} exam.`;
+        // Use NEW @google/genai library
+        const ai = new GoogleGenAI({ apiKey });
 
-      // EXACT PROMPT from VisualQuestionBank (adapted for topic)
-      const prompt = `Generate ${generateCount} ${subject} MCQ questions with comprehensive metadata and detailed AI insights.
+        // Get model from Settings or force gemini-3-flash-preview
+        const selectedModel = 'gemini-3-flash-preview';
+        const temperature = 0.7; // Hardcoded fallback or use localStorage
+
+        // Topic-specific context
+        const topicContext = `Focus EXCLUSIVELY on topic: "${topicResource.topicName}" for ${subject} ${examContext} exam.`;
+
+        // EXACT PROMPT from VisualQuestionBank (adapted for topic)
+        const prompt = `Generate ${generateCount} ${subject} MCQ questions with comprehensive metadata and detailed AI insights.
 
       ${topicContext}
 
@@ -1068,7 +1072,7 @@ const PracticeTab: React.FC<{
          - predictiveInsight: Future likelihood
 
       9. SOLUTION STEPS (CRITICAL - Make these VERY DETAILED):
-         - markingScheme: Array of detailed step-by-step solutions
+         - solutionSteps: Array of detailed step-by-step solutions
          - Each step should be 2-4 sentences with complete explanations
          - Include WHY each step is performed, not just WHAT
          - Use LaTeX for all mathematical expressions
@@ -1097,7 +1101,7 @@ const PracticeTab: React.FC<{
           "aiReasoning": "Important because...",
           "historicalPattern": "Appeared X times...",
           "predictiveInsight": "Likely to appear...",
-          "markingScheme": [
+          "solutionSteps": [
             { "step": "Identify given data and explain what we need to find. State the relevant formula with LaTeX $$formula$$ and explain why this formula applies to this problem.", "mark": "1" },
             { "step": "Substitute the values into the formula, showing each substitution step clearly with LaTeX. Explain what each variable represents and why we use these specific values.", "mark": "1" },
             { "step": "Perform the calculation step-by-step with intermediate results. Show the final answer with correct units and explain the physical meaning of the result.", "mark": "1" }
@@ -1109,915 +1113,907 @@ const PracticeTab: React.FC<{
       DO NOT use: "Medium", "Intermediate", "Advanced", "Simple", "Difficult" or any other variations.
       `;
 
-      const response = await ai.models.generateContent({
-        model: selectedModel,
-        contents: prompt,
-        config: {
-          temperature,
-          maxOutputTokens: 16384,
-          responseMimeType: 'application/json'
-        }
-      });
+        const response = await ai.models.generateContent({
+          model: selectedModel,
+          contents: prompt,
+          config: {
+            temperature,
+            maxOutputTokens: 16384,
+            responseMimeType: 'application/json'
+          }
+        });
 
-      const text = response.text;
-      const data = safeAiParse<any>(text, { questions: [] }, true);
+        const text = response.text;
+        const data = safeAiParse<any>(text, { questions: [] }, true);
 
-      if (!data.questions || data.questions.length === 0) {
-        setGenerateError('Failed to generate questions. Please try again.');
-        setIsGenerating(false);
-        return;
-      }
-
-      console.log('✅ Generated', data.questions.length, 'questions');
-
-      // Normalize difficulty value to match database constraint
-      const normalizeDifficulty = (diff: string): 'Easy' | 'Moderate' | 'Hard' => {
-        const normalized = (diff || 'Moderate').toLowerCase().trim();
-        if (normalized.includes('easy') || normalized.includes('simple') || normalized.includes('basic')) {
-          return 'Easy';
-        } else if (normalized.includes('hard') || normalized.includes('difficult') || normalized.includes('challenging') || normalized.includes('advanced')) {
-          return 'Hard';
-        } else {
-          // Medium, Moderate, Intermediate, etc. all map to Moderate
-          return 'Moderate';
-        }
-      };
-
-      // Format questions with proper structure
-      const formatted: AnalyzedQuestion[] = data.questions.map((q: any) => {
-        const normalizedDifficulty = normalizeDifficulty(q.diff || q.difficulty || 'Moderate');
-
-        return {
-          ...q,
-          id: crypto.randomUUID(), // Proper UUID
-          options: q.options || ['Option A', 'Option B', 'Option C', 'Option D'],
-          correctOptionIndex: q.correctOptionIndex ?? 0,
-          bloomsTaxonomy: q.bloomsTaxonomy || 'Understand',
-          pedagogy: q.pedagogy || 'Conceptual',
-          relevanceScore: q.relevanceScore || 70,
-          whyItMatters: q.whyItMatters || 'This question tests core concepts frequently appearing in exams.',
-          keyConcepts: q.keyConcepts || [{
-            name: q.topic || topicResource.topicName,
-            explanation: 'This concept is fundamental to understanding the subject.'
-          }],
-          commonMistakes: q.commonMistakes || [{
-            mistake: 'Calculation errors',
-            why: 'Students rush through calculations.',
-            howToAvoid: 'Always verify calculations step-by-step.'
-          }],
-          studyTip: q.studyTip || 'Break down the problem into smaller steps. Understand the theory first, then practice problems.',
-          thingsToRemember: q.thingsToRemember || ['Key formula or principle'],
-          aiReasoning: q.aiReasoning || `This ${q.topic || topicResource.topicName} question aligns with exam patterns.`,
-          historicalPattern: q.historicalPattern || `This concept appears consistently in ${examContext} exams.`,
-          predictiveInsight: q.predictiveInsight || 'High probability to appear in upcoming exams.',
-          marks: q.marks || '1',
-          difficulty: normalizedDifficulty,
-          diff: normalizedDifficulty,
-          blooms: q.bloomsTaxonomy || 'Understand',
-          topic: q.topic || topicResource.topicName,
-          domain: q.domain || topicResource.topicName,
-          year: q.year || '2025 Prediction',
-          solutionSteps: q.markingScheme?.map((s: any) => `${s.step}`) || [],
-          markingScheme: q.markingScheme || [],
-          extractedImages: q.extractedImages || [],
-          hasVisualElement: q.hasVisualElement || false
-        };
-      });
-
-      // ========== STEP 1: SAVE TO SUPABASE DATABASE ==========
-      console.log('💾 Saving to Supabase...');
-
-      // Step 1a: Create or get placeholder scan for AI-generated questions
-      // Questions table requires scan_id (NOT NULL), so we create a system scan
-      const placeholderScanName = `AI Practice - ${topicResource.topicName}`;
-
-      let scanId: string;
-
-      // Check if placeholder scan exists (RLS ensures user_id isolation)
-      const { data: existingScans } = await supabase
-        .from('scans')
-        .select('id, metadata')
-        .eq('user_id', user.id)
-        .eq('name', placeholderScanName)
-        .eq('subject', subject)
-        .eq('status', 'Complete')
-        .filter('metadata->>is_ai_practice_placeholder', 'eq', 'true')
-        .limit(1);
-
-      if (existingScans && existingScans.length > 0) {
-        scanId = existingScans[0].id;
-        console.log('Using existing placeholder scan:', scanId);
-      } else {
-        // Create placeholder scan (hidden from main scans list)
-        // NOTE: This is a system scan used ONLY to satisfy questions.scan_id foreign key
-        // RLS ensures user_id isolation - each user only sees their own placeholder scans
-        const { data: newScan, error: scanError } = await supabase
-          .from('scans')
-          .insert({
-            user_id: user.id,
-            name: placeholderScanName,
-            grade: '12', // Default grade
-            subject: subject,
-            status: 'Complete',
-            summary: `AI-generated practice questions for ${topicResource.topicName}`,
-            exam_context: examContext,
-            metadata: {
-              is_ai_practice_placeholder: true, // FILTER THIS OUT in scans list queries
-              type: 'ai_generated',
-              topic_resource_id: topicResource.id,
-              topic_name: topicResource.topicName,
-              hidden_from_scans_list: true // Explicit flag for filtering
-            }
-          })
-          .select('id')
-          .single();
-
-        if (scanError || !newScan) {
-          console.error('❌ Failed to create placeholder scan:', scanError);
-          setGenerateError(`Failed to create placeholder scan: ${scanError?.message || 'Unknown error'}`);
+        if (!data.questions || data.questions.length === 0) {
+          setGenerateError('Failed to generate questions. Please try again.');
           setIsGenerating(false);
           return;
         }
 
-        scanId = newScan.id;
-        console.log('Created new placeholder scan:', scanId);
-      }
+        console.log('✅ Generated', data.questions.length, 'questions');
 
-      // Map to actual database columns (from migrations/001_initial_schema.sql and 009_add_question_metadata.sql)
-      const questionsToInsert = formatted.map(q => ({
-        id: q.id,
-        scan_id: scanId, // Reference to placeholder scan (required field)
-        // NOTE: questions table does NOT have user_id column - user ownership tracked via scan_id -> scans.user_id
-        text: q.text,  // Column is 'text', not 'question_text'
-        options: q.options,
-        correct_option_index: q.correctOptionIndex,
-        marks: parseInt(q.marks) || 1,
-        difficulty: q.difficulty,
-        topic: q.topic,
-        blooms: q.bloomsTaxonomy, // Column is 'blooms', not 'blooms_taxonomy'
-        domain: q.domain,
-        year: q.year,
-        subject: subject,
-        exam_context: examContext,
-        pedagogy: q.pedagogy,
-        // Map AI fields to existing columns
-        solution_steps: q.solutionSteps,
-        exam_tip: q.studyTip, // Map studyTip to exam_tip
-        visual_concept: q.visualConcept,
-        key_formulas: q.thingsToRemember, // Map thingsToRemember to key_formulas
-        pitfalls: q.commonMistakes, // Map commonMistakes to pitfalls
-        has_visual_element: q.hasVisualElement || false,
-        visual_element_description: q.visualElementDescription,
-        // Store remaining AI data in mastery_material JSONB column
-        mastery_material: {
-          keyConcepts: q.keyConcepts,
-          aiReasoning: q.aiReasoning,
-          historicalPattern: q.historicalPattern,
-          predictiveInsight: q.predictiveInsight,
-          whyItMatters: q.whyItMatters,
-          relevanceScore: q.relevanceScore
-        }
-      }));
+        // Normalize difficulty value to match database constraint
+        const normalizeDifficulty = (diff: string): 'Easy' | 'Moderate' | 'Hard' => {
+          const normalized = (diff || 'Moderate').toLowerCase().trim();
+          if (normalized.includes('easy') || normalized.includes('simple') || normalized.includes('basic')) {
+            return 'Easy';
+          } else if (normalized.includes('hard') || normalized.includes('difficult') || normalized.includes('challenging') || normalized.includes('advanced')) {
+            return 'Hard';
+          } else {
+            // Medium, Moderate, Intermediate, etc. all map to Moderate
+            return 'Moderate';
+          }
+        };
 
-      const { error: dbError } = await supabase
-        .from('questions')
-        .insert(questionsToInsert);
+        // Format questions with proper structure
+        const formatted: AnalyzedQuestion[] = data.questions.map((q: any) => {
+          const normalizedDifficulty = normalizeDifficulty(q.diff || q.difficulty || 'Moderate');
 
-      if (dbError) {
-        console.error('❌ Supabase error:', dbError);
-        // Set error in state instead of throwing
-        setGenerateError(`Failed to save to database: ${dbError.message}`);
-        setIsGenerating(false);
-        return; // Don't throw, just return
-      }
-
-      console.log('✅ Saved to Supabase');
-
-      // ========== STEP 2: SAVE TO REDIS/API ==========
-      const newQuestions = [...formatted, ...questions];
-      const cacheKey = `qbank_${topicResource.topicName}_${subject}_${examContext}`;
-
-      try {
-        const token = localStorage.getItem('sb-auth-token');
-        await fetch('/api/questionbank', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-          },
-          body: JSON.stringify({ key: cacheKey, questions: newQuestions })
+          return {
+            ...q,
+            id: crypto.randomUUID(), // Proper UUID
+            options: q.options || ['Option A', 'Option B', 'Option C', 'Option D'],
+            correctOptionIndex: q.correctOptionIndex ?? 0,
+            bloomsTaxonomy: q.bloomsTaxonomy || 'Understand',
+            pedagogy: q.pedagogy || 'Conceptual',
+            relevanceScore: q.relevanceScore || 70,
+            whyItMatters: q.whyItMatters || 'This question tests core concepts frequently appearing in exams.',
+            keyConcepts: q.keyConcepts || [{
+              name: q.topic || topicResource.topicName,
+              explanation: 'This concept is fundamental to understanding the subject.'
+            }],
+            commonMistakes: q.commonMistakes || [{
+              mistake: 'Calculation errors',
+              why: 'Students rush through calculations.',
+              howToAvoid: 'Always verify calculations step-by-step.'
+            }],
+            studyTip: q.studyTip || 'Break down the problem into smaller steps. Understand the theory first, then practice problems.',
+            thingsToRemember: q.thingsToRemember || ['Key formula or principle'],
+            aiReasoning: q.aiReasoning || `This ${q.topic || topicResource.topicName} question aligns with exam patterns.`,
+            historicalPattern: q.historicalPattern || `This concept appears consistently in ${examContext} exams.`,
+            predictiveInsight: q.predictiveInsight || 'High probability to appear in upcoming exams.',
+            marks: q.marks || '1',
+            difficulty: normalizedDifficulty,
+            diff: normalizedDifficulty,
+            blooms: q.bloomsTaxonomy || 'Understand',
+            topic: q.topic || topicResource.topicName,
+            domain: q.domain || topicResource.topicName,
+            year: q.year || '2025 Prediction',
+            solutionSteps: (q.solutionSteps || q.markingScheme)?.map((s: any) => `${s.step}`) || [],
+            markingSteps: q.solutionSteps || q.markingScheme || [],
+            extractedImages: q.extractedImages || [],
+            hasVisualElement: q.hasVisualElement || false
+          };
         });
-        console.log('✅ Saved to Redis/API');
-      } catch (err) {
-        console.warn('⚠️ Redis save failed (non-critical):', err);
-      }
 
-      // ========== STEP 3: UPDATE LOCAL STATE ==========
-      setQuestions(newQuestions);
-      console.log('✅ Updated local state');
+        // ========== STEP 1: SAVE TO SUPABASE DATABASE ==========
+        console.log('💾 Saving to Supabase...');
 
-      // Update parent component's question count
-      if (onQuestionCountChange) {
-        onQuestionCountChange(newQuestions.length);
-      }
+        // Step 1a: Create or get placeholder scan for AI-generated questions
+        // Questions table requires scan_id (NOT NULL), so we create a system scan
+        const placeholderScanName = `AI Practice - ${topicResource.topicName}`;
 
-      // ========== STEP 4: RELOAD PRACTICE SESSION ==========
-      // This will re-fetch saved answers for new questions
-      await reloadPracticeSession();
-      console.log('✅ Reloaded practice session');
+        let scanId: string;
 
-      // ========== STEP 5: SUCCESS NOTIFICATION ==========
-      setGenerateSuccess(`Successfully generated ${formatted.length} new practice questions! They're ready for you to solve.`);
-      setIsGenerating(false);
+        // Check if placeholder scan exists (RLS ensures user_id isolation)
+        const { data: existingScans } = await supabase
+          .from('scans')
+          .select('id, metadata')
+          .eq('user_id', user.id)
+          .eq('name', placeholderScanName)
+          .eq('subject', subject)
+          .eq('status', 'Complete')
+          .filter('metadata->>is_ai_practice_placeholder', 'eq', 'true')
+          .limit(1);
 
-      // Auto-close modal after 2 seconds
-      setTimeout(() => {
-        setShowGenerateModal(false);
-        setGenerateSuccess(null);
-      }, 2000);
+        if (existingScans && existingScans.length > 0) {
+          scanId = existingScans[0].id;
+          console.log('Using existing placeholder scan:', scanId);
+        } else {
+          // Create placeholder scan (hidden from main scans list)
+          // NOTE: This is a system scan used ONLY to satisfy questions.scan_id foreign key
+          // RLS ensures user_id isolation - each user only sees their own placeholder scans
+          const { data: newScan, error: scanError } = await supabase
+            .from('scans')
+            .insert({
+              user_id: user.id,
+              name: placeholderScanName,
+              grade: '12', // Default grade
+              subject: subject,
+              status: 'Complete',
+              summary: `AI-generated practice questions for ${topicResource.topicName}`,
+              exam_context: examContext,
+              metadata: {
+                is_ai_practice_placeholder: true, // FILTER THIS OUT in scans list queries
+                type: 'ai_generated',
+                topic_resource_id: topicResource.id,
+                topic_name: topicResource.topicName,
+                hidden_from_scans_list: true // Explicit flag for filtering
+              }
+            })
+            .select('id')
+            .single();
 
-    } catch (error: any) {
-      console.error('❌ Generation error:', error);
-      setGenerateError(`Failed to generate questions: ${error.message || 'Unknown error'}. Please try again.`);
-      setIsGenerating(false);
-    }
-  };
+          if (scanError || !newScan) {
+            console.error('❌ Failed to create placeholder scan:', scanError);
+            setGenerateError(`Failed to create placeholder scan: ${scanError?.message || 'Unknown error'}`);
+            setIsGenerating(false);
+            return;
+          }
 
-  const getPedagogyColor = (pedagogy?: string) => {
-    switch (pedagogy) {
-      case 'Conceptual': return 'bg-gradient-to-br from-blue-50 to-blue-100/80 text-blue-700 border-blue-200/50';
-      case 'Analytical': return 'bg-gradient-to-br from-purple-50 to-purple-100/80 text-purple-700 border-purple-200/50';
-      case 'Problem-Solving': return 'bg-gradient-to-br from-orange-50 to-orange-100/80 text-orange-700 border-orange-200/50';
-      case 'Application': return 'bg-gradient-to-br from-green-50 to-green-100/80 text-green-700 border-green-200/50';
-      case 'Critical-Thinking': return 'bg-gradient-to-br from-pink-50 to-pink-100/80 text-pink-700 border-pink-200/50';
-      default: return 'bg-gradient-to-br from-slate-50 to-slate-100/80 text-slate-700 border-slate-200/50';
-    }
-  };
-
-  const getBloomsColor = (level?: string) => {
-    switch (level) {
-      case 'Remember':
-      case 'Remembering': return 'bg-gradient-to-br from-slate-50 to-slate-100/80 text-slate-700 border border-slate-200/50';
-      case 'Understand':
-      case 'Understanding': return 'bg-gradient-to-br from-blue-50 to-blue-100/80 text-blue-700 border border-blue-200/50';
-      case 'Apply':
-      case 'Application': return 'bg-gradient-to-br from-green-50 to-green-100/80 text-green-700 border border-green-200/50';
-      case 'Analyze':
-      case 'Analyzing': return 'bg-gradient-to-br from-yellow-50 to-yellow-100/80 text-yellow-700 border border-yellow-200/50';
-      case 'Evaluate':
-      case 'Evaluating': return 'bg-gradient-to-br from-orange-50 to-orange-100/80 text-orange-700 border border-orange-200/50';
-      case 'Create':
-      case 'Creating': return 'bg-gradient-to-br from-purple-50 to-purple-100/80 text-purple-700 border border-purple-200/50';
-      default: return 'bg-gradient-to-br from-slate-50 to-slate-100/80 text-slate-700 border border-slate-200/50';
-    }
-  };
-
-  const filteredQuestions = questions?.filter(q => !trashedIds.has(q.id)) || [];
-
-  // Get real-time session statistics
-  const sessionStats = getSessionStats();
-
-  // Track analytics visibility
-  const [showAnalytics, setShowAnalytics] = useState(false);
-
-  // Load saved answers into local state ONCE when session is loaded
-  useEffect(() => {
-    if (!sessionLoading && savedAnswers.size > 0 && userAnswers.size === 0) {
-      setUserAnswers(new Map(savedAnswers));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionLoading]);
-
-  // Calculate comprehensive analytics
-  const calculateAnalytics = () => {
-    // Topic breakdown
-    const topicStats = new Map<string, { correct: number; total: number; timeSpent: number }>();
-    filteredQuestions.forEach(q => {
-      if (validatedAnswers.has(q.id)) {
-        const stats = topicStats.get(q.topic) || { correct: 0, total: 0, timeSpent: 0 };
-        stats.total++;
-        if (validatedAnswers.get(q.id)) stats.correct++;
-        topicStats.set(q.topic, stats);
-      }
-    });
-
-    // Difficulty breakdown
-    const difficultyStats = {
-      Easy: { correct: 0, total: 0 },
-      Moderate: { correct: 0, total: 0 },
-      Hard: { correct: 0, total: 0 }
-    };
-    filteredQuestions.forEach(q => {
-      if (validatedAnswers.has(q.id)) {
-        const diff = (q.difficulty || q.diff || 'Moderate') as 'Easy' | 'Moderate' | 'Hard';
-        if (difficultyStats[diff]) {
-          difficultyStats[diff].total++;
-          if (validatedAnswers.get(q.id)) difficultyStats[diff].correct++;
+          scanId = newScan.id;
+          console.log('Created new placeholder scan:', scanId);
         }
+
+        // Map to actual database columns (from migrations/001_initial_schema.sql and 009_add_question_metadata.sql)
+        const questionsToInsert = formatted.map(q => ({
+          id: q.id,
+          scan_id: scanId, // Reference to placeholder scan (required field)
+          // NOTE: questions table does NOT have user_id column - user ownership tracked via scan_id -> scans.user_id
+          text: q.text,  // Column is 'text', not 'question_text'
+          options: q.options,
+          correct_option_index: q.correctOptionIndex,
+          marks: typeof q.marks === 'number' ? q.marks : parseInt(q.marks as string) || 1,
+          difficulty: q.difficulty,
+          topic: q.topic,
+          blooms: q.bloomsTaxonomy, // Column is 'blooms', not 'blooms_taxonomy'
+          domain: q.domain,
+          year: q.year,
+          subject: subject,
+          exam_context: examContext,
+          pedagogy: q.pedagogy,
+          // Map AI fields to existing columns
+          solution_steps: q.solutionSteps,
+          exam_tip: q.studyTip,
+          visual_concept: q.visualConcept,
+          key_formulas: q.thingsToRemember,
+          pitfalls: q.commonMistakes,
+          has_visual_element: q.hasVisualElement || false,
+          visual_element_description: q.visualElementDescription,
+          // Store remaining AI data in mastery_material JSONB column
+          mastery_material: {
+            keyConcepts: q.keyConcepts,
+            aiReasoning: q.aiReasoning,
+            historicalPattern: q.historicalPattern,
+            predictiveInsight: q.predictiveInsight,
+            whyItMatters: q.whyItMatters,
+            relevanceScore: q.relevanceScore,
+            markingSteps: q.markingSteps // Keep original steps in JSONB just in case
+          }
+        }));
+
+        const { error: dbError } = await supabase
+          .from('questions')
+          .insert(questionsToInsert);
+
+        if (dbError) {
+          console.error('❌ Supabase error:', dbError);
+          // Set error in state instead of throwing
+          setGenerateError(`Failed to save to database: ${dbError.message}`);
+          setIsGenerating(false);
+          return; // Don't throw, just return
+        }
+
+        console.log('✅ Saved to Supabase');
+
+        // --- NEW: Add question-topic mappings so it shows up in dashboards ---
+        const mappingsToInsert = questionsToInsert.map(q => ({
+          question_id: q.id,
+          topic_id: topicResource.topicId,
+          confidence: 1.0,
+          mapped_by: 'ai'
+        }));
+
+        const { error: mappingError } = await supabase
+          .from('topic_question_mapping')
+          .insert(mappingsToInsert);
+
+        if (mappingError) {
+          console.warn('⚠️  Could not save topic mappings:', mappingError);
+          // Don't fail the whole process if mapping fails, just log it
+        } else {
+          console.log('✅ Topic mappings saved');
+          // Refresh global data to update dashboard Q counts immediately
+          onProgressUpdate?.(true);
+        }
+
+        // ========== STEP 2: SAVE TO REDIS/API ==========
+        const newQuestions = [...formatted, ...questions];
+        const cacheKey = `qbank_${topicResource.topicName}_${subject}_${examContext}`;
+
+        try {
+          const token = localStorage.getItem('sb-auth-token');
+          await fetch('/api/questionbank', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ key: cacheKey, questions: newQuestions })
+          });
+          console.log('✅ Saved to Redis/API');
+        } catch (err) {
+          console.warn('⚠️ Redis save failed (non-critical):', err);
+        }
+
+        // ========== STEP 3: UPDATE LOCAL STATE ==========
+        setQuestions(newQuestions);
+        console.log('✅ Updated local state');
+
+        // Update parent component's question count
+        if (onQuestionCountChange) {
+          onQuestionCountChange(newQuestions.length);
+        }
+
+        // ========== STEP 4: RELOAD PRACTICE SESSION ==========
+        // This will re-fetch saved answers for new questions
+        await reloadPracticeSession();
+        console.log('✅ Reloaded practice session');
+
+        // ========== STEP 5: SUCCESS NOTIFICATION ==========
+        setGenerateSuccess(`Successfully generated ${formatted.length} new practice questions! They're ready for you to solve.`);
+        setIsGenerating(false);
+
+        // Auto-close modal after 2 seconds
+        setTimeout(() => {
+          setShowGenerateModal(false);
+          setGenerateSuccess(null);
+        }, 2000);
+
+      } catch (error: any) {
+        console.error('❌ Generation error:', error);
+        setGenerateError(`Failed to generate questions: ${error.message || 'Unknown error'}. Please try again.`);
+        setIsGenerating(false);
       }
-    });
+    };
 
-    // Weak topics (accuracy < 60%)
-    const weakTopics = Array.from(topicStats.entries())
-      .map(([topic, stats]) => ({
-        topic,
-        accuracy: Math.round((stats.correct / stats.total) * 100),
-        correct: stats.correct,
-        total: stats.total
-      }))
-      .filter(t => t.accuracy < 60)
-      .sort((a, b) => a.accuracy - b.accuracy)
-      .slice(0, 3);
+    const getPedagogyColor = (pedagogy?: string) => {
+      switch (pedagogy) {
+        case 'Conceptual': return 'bg-gradient-to-br from-blue-50 to-blue-100/80 text-blue-700 border-blue-200/50';
+        case 'Analytical': return 'bg-gradient-to-br from-purple-50 to-purple-100/80 text-purple-700 border-purple-200/50';
+        case 'Problem-Solving': return 'bg-gradient-to-br from-orange-50 to-orange-100/80 text-orange-700 border-orange-200/50';
+        case 'Application': return 'bg-gradient-to-br from-green-50 to-green-100/80 text-green-700 border-green-200/50';
+        case 'Critical-Thinking': return 'bg-gradient-to-br from-pink-50 to-pink-100/80 text-pink-700 border-pink-200/50';
+        default: return 'bg-gradient-to-br from-slate-50 to-slate-100/80 text-slate-700 border-slate-200/50';
+      }
+    };
 
-    // Strong topics (accuracy >= 80%)
-    const strongTopics = Array.from(topicStats.entries())
-      .map(([topic, stats]) => ({
-        topic,
-        accuracy: Math.round((stats.correct / stats.total) * 100),
-        correct: stats.correct,
-        total: stats.total
-      }))
-      .filter(t => t.accuracy >= 80)
-      .sort((a, b) => b.accuracy - a.accuracy)
-      .slice(0, 3);
+    const getBloomsColor = (level?: string) => {
+      switch (level) {
+        case 'Remember':
+        case 'Remembering': return 'bg-gradient-to-br from-slate-50 to-slate-100/80 text-slate-700 border border-slate-200/50';
+        case 'Understand':
+        case 'Understanding': return 'bg-gradient-to-br from-blue-50 to-blue-100/80 text-blue-700 border border-blue-200/50';
+        case 'Apply':
+        case 'Application': return 'bg-gradient-to-br from-green-50 to-green-100/80 text-green-700 border border-green-200/50';
+        case 'Analyze':
+        case 'Analyzing': return 'bg-gradient-to-br from-yellow-50 to-yellow-100/80 text-yellow-700 border border-yellow-200/50';
+        case 'Evaluate':
+        case 'Evaluating': return 'bg-gradient-to-br from-orange-50 to-orange-100/80 text-orange-700 border border-orange-200/50';
+        case 'Create':
+        case 'Creating': return 'bg-gradient-to-br from-purple-50 to-purple-100/80 text-purple-700 border border-purple-200/50';
+        default: return 'bg-gradient-to-br from-slate-50 to-slate-100/80 text-slate-700 border border-slate-200/50';
+      }
+    };
 
-    return { topicStats, difficultyStats, weakTopics, strongTopics };
-  };
+    const filteredQuestions = questions?.filter(q => !trashedIds.has(q.id)) || [];
 
-  const analytics = calculateAnalytics();
+    // Get real-time session statistics
+    const sessionStats = getSessionStats();
 
-  // DEBUG: Log first question metadata to verify data flow (only once)
-  // Questions loaded - debug logs removed
+    // Track analytics visibility
+    const [showAnalytics, setShowAnalytics] = useState(false);
 
-  // Show loading state while fetching saved data
-  if (sessionLoading) {
+    // Load saved answers into local state ONCE when session is loaded
+    useEffect(() => {
+      if (!sessionLoading && savedAnswers.size > 0 && userAnswers.size === 0) {
+        setUserAnswers(new Map(savedAnswers));
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sessionLoading]);
+
+    // Calculate comprehensive analytics
+    const calculateAnalytics = () => {
+      // Topic breakdown
+      const topicStats = new Map<string, { correct: number; total: number; timeSpent: number }>();
+      filteredQuestions.forEach(q => {
+        if (validatedAnswers.has(q.id)) {
+          const stats = topicStats.get(q.topic) || { correct: 0, total: 0, timeSpent: 0 };
+          stats.total++;
+          if (validatedAnswers.get(q.id)) stats.correct++;
+          topicStats.set(q.topic, stats);
+        }
+      });
+
+      // Difficulty breakdown
+      const difficultyStats = {
+        Easy: { correct: 0, total: 0 },
+        Moderate: { correct: 0, total: 0 },
+        Hard: { correct: 0, total: 0 }
+      };
+      filteredQuestions.forEach(q => {
+        if (validatedAnswers.has(q.id)) {
+          const diff = (q.difficulty || q.diff || 'Moderate') as 'Easy' | 'Moderate' | 'Hard';
+          if (difficultyStats[diff]) {
+            difficultyStats[diff].total++;
+            if (validatedAnswers.get(q.id)) difficultyStats[diff].correct++;
+          }
+        }
+      });
+
+      // Weak topics (accuracy < 60%)
+      const weakTopics = Array.from(topicStats.entries())
+        .map(([topic, stats]) => ({
+          topic,
+          accuracy: Math.round((stats.correct / stats.total) * 100),
+          correct: stats.correct,
+          total: stats.total
+        }))
+        .filter(t => t.accuracy < 60)
+        .sort((a, b) => a.accuracy - b.accuracy)
+        .slice(0, 3);
+
+      // Strong topics (accuracy >= 80%)
+      const strongTopics = Array.from(topicStats.entries())
+        .map(([topic, stats]) => ({
+          topic,
+          accuracy: Math.round((stats.correct / stats.total) * 100),
+          correct: stats.correct,
+          total: stats.total
+        }))
+        .filter(t => t.accuracy >= 80)
+        .sort((a, b) => b.accuracy - a.accuracy)
+        .slice(0, 3);
+
+      return { topicStats, difficultyStats, weakTopics, strongTopics };
+    };
+
+    const analytics = calculateAnalytics();
+
+    // DEBUG: Log first question metadata to verify data flow (only once)
+    // Questions loaded - debug logs removed
+
+    // Show loading state while fetching saved data
+    if (sessionLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-sm text-slate-600 font-medium">Loading your practice session...</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sm text-slate-600 font-medium">Loading your practice session...</p>
-        </div>
-      </div>
-    );
-  }
+      <div className="space-y-6">
+        <div className="space-y-4">
+          {/* Dedicated Practice Actions Bar */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 ${sessionStats.accuracy >= 80 ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
+                <Zap size={14} />
+                <span className="text-[11px] font-bold uppercase tracking-wider font-outfit">
+                  {filteredQuestions.length} Problems
+                  <span className="opacity-50 mx-2">•</span>
+                  {filteredQuestions.filter(q => q.source?.toLowerCase().includes('ai')).length} AI / {filteredQuestions.filter(q => !q.source?.toLowerCase().includes('ai')).length} Scan
+                  <span className="opacity-50 mx-2">•</span>
+                  {sessionStats.accuracy}% Sync
+                </span>
+              </div>
+            </div>
 
-  return (
-    <div className="space-y-6">
-      {/* Compact Practice Header */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-4 flex items-center justify-between shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            <Zap size={20} className="text-white" />
-          </div>
-          <div>
-            <div className="text-xs font-bold text-white/80 uppercase tracking-wider">Practice</div>
-            <div className="text-sm font-black text-white">{filteredQuestions.length} questions • {sessionStats.attempted} attempted</div>
-          </div>
-        </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setFocusedQuestionId(focusedQuestionId ? null : (filteredQuestions[0]?.id || null))}
+                className={`px-4 py-2 rounded-xl text-[11px] font-bold flex items-center gap-2 transition-all border font-outfit ${focusedQuestionId ? 'bg-purple-600 text-white border-purple-700 shadow-md' : 'bg-white text-slate-900 border-slate-200 shadow-sm'
+                  }`}
+              >
+                <Target size={14} />
+                {focusedQuestionId ? 'EXIT FOCUS' : 'FOCUS MODE'}
+              </button>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowGenerateModal(true)}
-            className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-black text-white flex items-center gap-2 transition-all backdrop-blur-sm"
-          >
-            <Sparkles size={12} />
-            Generate
-          </button>
-          {sessionStats.attempted > 0 && (
-            <>
+              <button
+                onClick={() => setShowGenerateModal(true)}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 rounded-xl text-[11px] font-bold text-white flex items-center gap-2 transition-all shadow-md font-outfit"
+              >
+                <Sparkles size={14} />
+                AI GENERATE
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200">
               <button
                 onClick={() => setShowStats(!showStats)}
-                className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-xs font-black text-white flex items-center gap-2 transition-all backdrop-blur-sm"
+                className={`p-1.5 rounded-lg transition-all ${showStats ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-900'}`}
+                title="Toggle Full Stats"
               >
-                {showStats ? 'Hide' : 'View'} Stats
-                {showStats ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                <BarChart3 size={16} />
               </button>
               <button
                 onClick={async () => {
-                  if (confirm('⚠️ Reset all progress?')) {
+                  if (confirm('⚠️ Reset progress?')) {
                     await clearProgress();
                     setUserAnswers(new Map());
                     setTrashedIds(new Set());
                   }
                 }}
-                className="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-white transition-all backdrop-blur-sm"
-                title="Reset Progress"
+                className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg transition-all"
+                title="Reset"
               >
-                <RefreshCw size={14} />
+                <RefreshCw size={16} />
               </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Collapsible Stats */}
-      {showStats && sessionStats.attempted > 0 && (
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm animate-in slide-in-from-top-2 duration-200">
-          <div className="grid grid-cols-4 gap-3 mb-4">
-            <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-200 rounded-lg p-3">
-              <div className="text-[9px] font-black text-slate-500 uppercase mb-0.5">Accuracy</div>
-              <div className={`text-xl font-black ${
-                sessionStats.accuracy >= 80 ? 'text-emerald-600' :
-                sessionStats.accuracy >= 60 ? 'text-amber-600' : 'text-rose-600'
-              }`}>
-                {sessionStats.accuracy}%
-              </div>
-              <div className="text-[10px] text-slate-600">{sessionStats.correct}/{sessionStats.attempted}</div>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-lg p-3">
-              <div className="text-[9px] font-black text-slate-500 uppercase mb-0.5">Progress</div>
-              <div className="text-xl font-black text-slate-900">
-                {((sessionStats.attempted / filteredQuestions.length) * 100).toFixed(0)}%
-              </div>
-              <div className="text-[10px] text-slate-600">{sessionStats.attempted}/{filteredQuestions.length}</div>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-50 to-white border border-purple-200 rounded-lg p-3">
-              <div className="text-[9px] font-black text-slate-500 uppercase mb-0.5">Bookmarked</div>
-              <div className="text-xl font-black text-purple-600">{sessionStats.bookmarked}</div>
-              <div className="text-[10px] text-slate-600">For review</div>
-            </div>
-
-            <div className="bg-gradient-to-br from-amber-50 to-white border border-amber-200 rounded-lg p-3">
-              <div className="text-[9px] font-black text-slate-500 uppercase mb-0.5">Avg Time</div>
-              <div className="text-xl font-black text-amber-600">
-                {sessionStats.avgTime > 0 ? `${Math.floor(sessionStats.avgTime)}s` : '—'}
-              </div>
-              <div className="text-[10px] text-slate-600">Per question</div>
             </div>
           </div>
-
-          {analytics.weakTopics.length > 0 && (
-            <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertCircle size={14} className="text-rose-600" />
-                <div>
-                  <div className="text-xs font-black text-rose-900">Focus: {analytics.weakTopics[0].topic}</div>
-                  <div className="text-[10px] text-slate-600">{analytics.weakTopics[0].accuracy}% accuracy</div>
-                </div>
-              </div>
-              <div className="text-[9px] font-black text-rose-600">
-                Practice {Math.max(3, 10 - analytics.weakTopics[0].total)} more
-              </div>
-            </div>
-          )}
         </div>
-      )}
 
-
-      {/* Questions List - Same format as Question Bank */}
-      {filteredQuestions.length > 0 ? (
-        <div className="space-y-6">
-          {filteredQuestions.map((q) => {
-            // Check local state first (for immediate feedback), then fall back to saved answers
-            const selectedAnswer = userAnswers.get(q.id) ?? savedAnswers.get(q.id);
-            const hasValidated = validatedAnswers.has(q.id);
-            const isCorrect = validatedAnswers.get(q.id) ?? false;
-            const validatedAnswer = savedAnswers.get(q.id);
-
-            // Button logic (debug logs removed)
-
-            return (
-              <div key={q.id} className="bg-white border-2 border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 transition-all duration-300">
-                {/* Card Header - Sophisticated Premium Design */}
-                <div className="px-7 py-5 bg-gradient-to-r from-white via-slate-50/50 to-white border-b border-slate-200/60">
-                  <div className="flex items-center justify-between gap-6">
-                    {/* Left: Q Badge + Topic + Metadata */}
-                    <div className="flex items-center gap-5 flex-1 min-w-0">
-                      {/* Question Number Badge - Premium Style */}
-                      {(() => {
-                        const qNumMatch = q.id?.match(/Q(\d+)/i) || q.id?.match(/(\d+)/);
-                        const qNum = qNumMatch ? qNumMatch[1] : filteredQuestions.indexOf(q) + 1;
-                        return (
-                          <div className="relative flex-shrink-0">
-                            <div className="w-16 h-16 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-900/25 ring-1 ring-slate-900/10">
-                              <div className="text-center">
-                                <div className="text-[10px] font-extrabold text-slate-400 tracking-wider uppercase">Q</div>
-                                <div className="text-2xl font-black leading-none text-white">{qNum}</div>
-                              </div>
-                            </div>
-                            {/* Subtle glow effect */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl blur-sm -z-10"></div>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Topic + Tags Container */}
-                      <div className="flex-1 min-w-0">
-                        {/* Topic Name + Time Tracker */}
-                        <div className="flex items-center gap-3 mb-2.5">
-                          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
-                            {q.topic}
-                          </h3>
-                          {/* Time Spent Badge */}
-                          {hasValidated && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-lg">
-                              <Clock size={12} className="text-blue-600" />
-                              <span className="text-[11px] font-bold text-blue-700">
-                                {Math.floor((sessionStats.avgTime || 0))}s
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Metadata Tags Row - Refined */}
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          {/* Year */}
-                          {q.year && (
-                            <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-br from-blue-50 to-blue-100/80 text-blue-700 text-[11px] font-bold rounded-md border border-blue-200/50 shadow-sm">
-                              {q.year}
-                            </span>
-                          )}
-
-                          {/* Difficulty */}
-                          {q.diff && (
-                            <span className={`inline-flex items-center px-2.5 py-1 text-[11px] font-bold rounded-md border shadow-sm ${
-                              q.diff === 'Hard'
-                                ? 'bg-gradient-to-br from-rose-50 to-rose-100/80 text-rose-700 border-rose-200/50' :
-                              q.diff === 'Moderate'
-                                ? 'bg-gradient-to-br from-amber-50 to-amber-100/80 text-amber-700 border-amber-200/50' :
-                                'bg-gradient-to-br from-emerald-50 to-emerald-100/80 text-emerald-700 border-emerald-200/50'
-                            }`}>
-                              {q.diff}
-                            </span>
-                          )}
-
-                          {/* Marks */}
-                          {q.marks && (
-                            <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-br from-indigo-50 to-indigo-100/80 text-indigo-700 text-[11px] font-bold rounded-md border border-indigo-200/50 shadow-sm">
-                              {q.marks} Mark{parseInt(q.marks) > 1 ? 's' : ''}
-                            </span>
-                          )}
-
-                          {/* Pedagogy */}
-                          {q.pedagogy && (
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-md border shadow-sm ${getPedagogyColor(q.pedagogy)}`}>
-                              <Brain size={11} className="flex-shrink-0" />
-                              <span>{q.pedagogy}</span>
-                            </span>
-                          )}
-
-                          {/* Bloom's Taxonomy */}
-                          {q.bloomsTaxonomy && (
-                            <span className={`inline-flex items-center px-2.5 py-1 text-[11px] font-bold rounded-md shadow-sm ${getBloomsColor(q.bloomsTaxonomy)}`}>
-                              {q.bloomsTaxonomy}
-                            </span>
-                          )}
-
-                          {/* Domain */}
-                          {q.domain && (
-                            <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-br from-slate-900 to-slate-800 text-white text-[11px] font-bold rounded-md shadow-md border border-slate-700/50">
-                              {q.domain}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right: Action Buttons - Refined */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <button
-                        onClick={() => handleSave(q.id)}
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 ${
-                          bookmarkedIds.has(q.id)
-                            ? 'bg-gradient-to-br from-emerald-100 to-emerald-50 text-emerald-600 shadow-sm ring-1 ring-emerald-200/50'
-                            : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 hover:shadow-sm'
-                        }`}
-                        title={bookmarkedIds.has(q.id) ? "Remove bookmark" : "Bookmark question"}
-                      >
-                        <BookmarkPlus size={16} fill={bookmarkedIds.has(q.id) ? "currentColor" : "none"} strokeWidth={2.5} />
-                      </button>
-                      <button
-                        onClick={() => handleTrash(q.id)}
-                        className="w-9 h-9 bg-slate-50 text-slate-400 hover:bg-gradient-to-br hover:from-rose-100 hover:to-rose-50 hover:text-rose-600 rounded-xl flex items-center justify-center transition-all duration-200 hover:shadow-sm"
-                        title="Remove from list"
-                      >
-                        <Trash2 size={16} strokeWidth={2.5} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Question Body */}
-                <div className="px-5 py-6">
-                  {/* Question Text */}
-                  <div className="text-xl font-bold text-slate-900 leading-relaxed mb-6">
-                    <RenderWithMath text={q.text} showOptions={false} />
-                  </div>
-
-                  {/* Diagram (if present) */}
-                  {q.hasVisualElement && q.extractedImages && q.extractedImages.length > 0 && (
-                    <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                      <img
-                        src={q.extractedImages[0]}
-                        alt="Question diagram"
-                        className="max-w-full h-auto mx-auto"
-                      />
-                    </div>
-                  )}
-
-                  {/* MCQ Options - 2 Column Grid - EXACT Question Bank Format */}
-                  {q.options && q.options.length > 0 && (
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      {q.options.map((option, idx) => {
-                        // Only apply highlighting if correctOptionIndex is defined
-                        const hasCorrectAnswer = q.correctOptionIndex !== undefined && q.correctOptionIndex !== null;
-                        const isThisCorrect = hasCorrectAnswer && q.correctOptionIndex === idx;
-                        const isSelected = selectedAnswer === idx;
-                        const isUserSelection = validatedAnswer === idx; // User's validated choice
-                        const isValidatedCorrect = hasValidated && isUserSelection && isThisCorrect;
-                        const isValidatedWrong = hasValidated && isUserSelection && !isThisCorrect && hasCorrectAnswer;
-                        const optionLabel = String.fromCharCode(65 + idx); // A, B, C, D
-
-                        let bgColor = 'bg-white';
-                        let shadowClass = 'shadow-sm';
-                        let ringClass = '';
-
-                        // Before validation - show selection with blue ring
-                        if (isSelected && !hasValidated) {
-                          bgColor = 'bg-blue-50';
-                          shadowClass = 'shadow-md';
-                          ringClass = 'ring-2 ring-blue-500';
-                        }
-
-                        // After validation - show BOTH user's choice (red) AND correct answer (green)
-                        if (hasValidated && hasCorrectAnswer) {
-                          // First, highlight the correct answer in green
-                          if (isThisCorrect) {
-                            bgColor = 'bg-emerald-50';
-                            shadowClass = 'shadow-md';
-                            ringClass = 'ring-2 ring-emerald-400';
-                          }
-                          // ALSO highlight user's wrong choice in red (both visible simultaneously)
-                          if (isValidatedWrong) {
-                            bgColor = 'bg-rose-50';
-                            shadowClass = 'shadow-md';
-                            ringClass = 'ring-2 ring-rose-400';
-                          }
-                        }
-
-                        return (
-                          <button
-                            key={idx}
-                            onClick={() => !hasValidated && handleAnswerSelect(q.id, idx)}
-                            disabled={hasValidated}
-                            className={`group relative flex items-start gap-3.5 px-5 py-4 rounded-2xl border border-slate-200 transition-all text-left ${bgColor} ${shadowClass} ${ringClass} ${!hasValidated ? 'cursor-pointer hover:shadow-lg hover:ring-2 hover:ring-purple-300 hover:border-purple-200 hover:bg-purple-50 active:scale-[0.99]' : 'cursor-default'}`}
-                          >
-                            {/* Option Label */}
-                            <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center font-bold text-lg transition-all ${
-                              isValidatedCorrect
-                                ? 'bg-emerald-500 text-white shadow-md'
-                                : isValidatedWrong
-                                ? 'bg-rose-500 text-white shadow-md'
-                                : isSelected && !hasValidated
-                                ? 'bg-blue-500 text-white shadow-md'
-                                : 'bg-slate-100 text-slate-700 group-hover:bg-purple-100 group-hover:text-purple-700 group-hover:scale-110'
-                            }`}>
-                              {optionLabel}
-                            </div>
-
-                            {/* Option Text */}
-                            <div className="flex-1 text-base font-medium text-slate-800 pt-2">
-                              <RenderWithMath text={option} showOptions={false} />
-                            </div>
-
-                            {/* Floating Checkmark for Correct Answer */}
-                            {isValidatedCorrect && (
-                              <div className="absolute -top-3 -right-3 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-xl border-2 border-white">
-                                <CheckCircle size={18} className="text-white" strokeWidth={3} />
-                              </div>
-                            )}
-
-                            {/* X mark for Wrong Answer */}
-                            {isValidatedWrong && (
-                              <div className="absolute -top-3 -right-3 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center shadow-xl border-2 border-white">
-                                <XCircle size={18} className="text-white" strokeWidth={3} />
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Action Buttons - Matching QuestionBank Flow */}
-                  <div className="flex items-center justify-center gap-3 mt-6">
-                    {/* Empty State Message - When no answer selected */}
-                    {!hasValidated && selectedAnswer === undefined && (
-                      <p className="text-sm text-slate-400 italic font-medium">
-                        Select an option to get it evaluated
-                      </p>
-                    )}
-
-                    {/* Get Evaluated Button - When answer selected but not validated */}
-                    {!hasValidated && selectedAnswer !== undefined && q.correctOptionIndex !== undefined && (
-                      <button
-                        onClick={() => {
-                          handleValidateAnswer(q.id, q.correctOptionIndex!);
-                        }}
-                        className="group flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
-                        title="Get Answer Evaluated"
-                      >
-                        <Award size={20} className="transition-transform group-hover:scale-110 group-hover:rotate-6" />
-                        <span className="text-sm font-bold uppercase tracking-wide">Get Evaluated</span>
-                      </button>
-                    )}
-
-                    {/* Warning: Correct answer missing */}
-                    {!hasValidated && selectedAnswer !== undefined && q.correctOptionIndex === undefined && (
-                      <div className="px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-                        ⚠️ Correct answer not available for this question
-                      </div>
-                    )}
-
-                    {/* Action Buttons - After Validation */}
-                    {hasValidated && (
-                      <>
-                        <button
-                          onClick={() => setSolutionModalQuestion(q)}
-                          className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-lg hover:from-purple-700 hover:to-purple-800 transition-all"
-                          title="View Solution"
-                        >
-                          <Eye size={18} className="transition-transform group-hover:scale-110" />
-                          <span className="text-sm font-bold uppercase tracking-wide">Solution</span>
-                        </button>
-                        <button
-                          onClick={() => setInsightsModalQuestion(q)}
-                          className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-lg hover:from-purple-700 hover:to-purple-800 transition-all"
-                          title="AI Insights"
-                        >
-                          <Lightbulb size={18} className="transition-transform group-hover:scale-110 group-hover:rotate-12" />
-                          <span className="text-sm font-bold uppercase tracking-wide">Insights</span>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Validation Message (full width at bottom) - Animated */}
-                {hasValidated && (
-                  <div
-                    className={`px-6 py-4 ${isCorrect ? 'bg-emerald-50' : 'bg-rose-50'} animate-fadeIn`}
-                    style={{
-                      animation: 'fadeIn 0.3s ease-in-out'
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      {isCorrect ? (
-                        <>
-                          <div className="flex-shrink-0 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center animate-bounce">
-                            <CheckCircle size={18} className="text-white" strokeWidth={3} />
-                          </div>
-                          <div>
-                            <p className="font-black text-sm text-emerald-900">Excellent! That's correct! 🎉</p>
-                            <p className="text-xs text-emerald-700 mt-0.5">You're building strong mastery of this concept.</p>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex-shrink-0 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center">
-                            <XCircle size={18} className="text-white" strokeWidth={3} />
-                          </div>
-                          <div>
-                            <p className="font-black text-sm text-rose-900">Not quite right - but that's part of learning!</p>
-                            <p className="text-xs text-rose-700 mt-0.5">Review the correct answer above and check the solution for detailed steps.</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-dashed border-slate-300 rounded-2xl p-16 text-center">
-          <div className="max-w-md mx-auto">
-            {/* Animated Icon */}
-            <div className="relative mb-6">
-              <div className="w-24 h-24 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mx-auto">
-                <FileQuestion size={48} className="text-primary-600" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-purple-500/20 rounded-full blur-xl -z-10 animate-pulse"></div>
-            </div>
-
-            <h3 className="font-black text-2xl text-slate-900 mb-3">Ready to Start Practicing?</h3>
-            <p className="text-sm text-slate-600 font-medium mb-6 leading-relaxed">
-              No questions available yet for this topic. Generate AI-powered practice questions tailored to your exam pattern, or scan past papers to build your question bank.
-            </p>
-
-            {/* Action Button */}
-            <button
-              onClick={() => setShowGenerateModal(true)}
-              className="group inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
+        {/* Modern Expanded Stats */}
+        <AnimatePresence>
+          {showStats && sessionStats.attempted > 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
             >
-              <Sparkles size={20} className="transition-transform group-hover:rotate-12 group-hover:scale-110" />
-              <span className="uppercase tracking-wide">Generate Practice Questions</span>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-2">
+                {[
+                  { label: 'Precision', val: `${sessionStats.accuracy}%`, detail: `${sessionStats.correct}/${sessionStats.attempted}`, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                  { label: 'Progress', val: `${((sessionStats.attempted / filteredQuestions.length) * 100).toFixed(0)}%`, detail: `${sessionStats.attempted}/${filteredQuestions.length}`, color: 'text-blue-600', bg: 'bg-blue-50' },
+                  { label: 'Vault', val: sessionStats.bookmarked, detail: 'Reviews', color: 'text-purple-600', bg: 'bg-purple-50' },
+                  { label: 'Latency', val: sessionStats.avgTime > 0 ? `${Math.floor(sessionStats.avgTime)}s` : '—', detail: 'Per Problem', color: 'text-amber-600', bg: 'bg-amber-50' }
+                ].map((stat, i) => (
+                  <div key={i} className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
+                    <div className={`text-xl font-black ${stat.color}`}>{stat.val}</div>
+                    <div className="text-[10px] text-slate-500 font-medium">{stat.detail}</div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+
+        {/* Floating Progress Dock - Innovative Navigation */}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] md:right-28 md:left-auto md:translate-x-0">
+          <motion.div
+            initial={false}
+            animate={{
+              width: isNavigatorOpen ? (typeof window !== 'undefined' && window.innerWidth < 768 ? '90vw' : '400px') : '160px',
+              height: isNavigatorOpen ? 'auto' : '48px',
+              borderRadius: isNavigatorOpen ? '24px' : '999px'
+            }}
+            className="bg-slate-900 border border-white/10 shadow-2xl overflow-hidden flex flex-col"
+          >
+            {/* Dock Header / Toggle */}
+            <button
+              onClick={() => setIsNavigatorOpen(!isNavigatorOpen)}
+              className="h-12 flex items-center justify-between px-5 gap-3 hover:bg-white/5 transition-colors"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                <span className="text-white font-bold text-[11px] uppercase tracking-widest leading-none mt-0.5">
+                  {isNavigatorOpen ? 'Quest Progress' : (
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-outfit text-[13px] font-black tracking-tight">{validatedAnswers.size}/{filteredQuestions.length || 0}</span>
+                      <span className="opacity-80">SOLVED</span>
+                    </div>
+                  )}
+                </span>
+              </div>
+              {isNavigatorOpen ? <ChevronDown size={14} className="text-slate-400" /> : <ChevronUp size={14} className="text-slate-400" />}
             </button>
 
-            {/* Help Text */}
-            <p className="text-xs text-slate-500 mt-4">
-              ✨ AI will create exam-style questions with detailed solutions and insights
-            </p>
-          </div>
+            {/* Expanded Content */}
+            <AnimatePresence>
+              {isNavigatorOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="p-5 pt-0 border-t border-white/5"
+                >
+                  <div className="grid grid-cols-6 gap-2 mt-4">
+                    {filteredQuestions.map((q, idx) => {
+                      const hasValidated = validatedAnswers.has(q.id);
+                      const isCorrect = validatedAnswers.get(q.id) ?? false;
+                      const isSelected = userAnswers.has(q.id);
+                      const isFocused = focusedQuestionId === q.id;
+
+                      return (
+                        <button
+                          key={q.id}
+                          onClick={() => {
+                            setFocusedQuestionId(q.id);
+                            document.getElementById(`question-${q.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }}
+                          className={`group relative h-9 rounded-xl flex items-center justify-center text-[11px] font-black transition-all border-2 ${hasValidated
+                            ? (isCorrect ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.2)]' : 'bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_12px_rgba(244,63,94,0.2)]')
+                            : isFocused
+                              ? 'bg-white text-slate-900 border-white shadow-[0_0_15px_rgba(255,255,255,0.4)]'
+                              : isSelected
+                                ? 'bg-blue-500/20 text-blue-400 border-blue-500/50'
+                                : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/30'
+                            }`}
+                        >
+                          {idx + 1}
+                          {isFocused && (
+                            <motion.div
+                              layoutId="nav-focus-ring"
+                              className="absolute -inset-1 rounded-2xl border-2 border-white/20 animate-pulse"
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4">
+                    <div className="space-y-1">
+                      <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Accuracy</div>
+                      <div className="text-sm font-black text-white">
+                        {validatedAnswers.size > 0
+                          ? Math.round((Array.from(validatedAnswers.values()).filter(v => v).length / validatedAnswers.size) * 100)
+                          : 0}%
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-right">
+                      <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Remaining</div>
+                      <div className="text-sm font-black text-white">
+                        {filteredQuestions.length - validatedAnswers.size}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
-      )}
 
-      {/* Modals */}
-      {solutionModalQuestion && (
-        <PracticeSolutionModal
-          question={solutionModalQuestion}
-          onClose={() => setSolutionModalQuestion(null)}
-        />
-      )}
+        {/* Questions List */}
+        {
+          filteredQuestions.length > 0 ? (
+            <div className="space-y-4 md:space-y-6">
+              {filteredQuestions.map((q) => {
+                const selectedAnswer = userAnswers.get(q.id) ?? savedAnswers.get(q.id);
+                const hasValidated = validatedAnswers.has(q.id);
+                const isCorrect = validatedAnswers.get(q.id) ?? false;
+                const validatedAnswer = savedAnswers.get(q.id);
+                const isFocused = focusedQuestionId === q.id;
 
-      {insightsModalQuestion && (
-        <PracticeInsightsModal
-          question={insightsModalQuestion}
-          onClose={() => setInsightsModalQuestion(null)}
-        />
-      )}
+                return (
+                  <motion.div
+                    key={q.id}
+                    id={`question-${q.id}`}
+                    initial={false}
+                    animate={{
+                      scale: isFocused ? 1.01 : 1,
+                      opacity: focusedQuestionId && !isFocused ? 0.25 : 1,
+                      boxShadow: isFocused ? '0 30px 60px -15px rgba(0,0,0,0.15)' : '0 10px 15px -3px rgba(0,0,0,0.04)'
+                    }}
+                    onClick={() => setFocusedQuestionId(q.id)}
+                    className={`bg-white border transition-all duration-500 rounded-[1.75rem] overflow-hidden group/card relative ${isFocused ? 'border-purple-300' : 'border-slate-200'
+                      }`}
+                  >
+                    {/* Glassy Status Indicator */}
+                    {hasValidated && (
+                      <div className={`absolute top-0 left-0 w-full h-1 z-20 ${isCorrect ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                    )}
 
-      {/* Generate Questions Modal */}
-      {showGenerateModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <h3 className="text-xl font-black text-slate-900 mb-4">Generate Practice Questions</h3>
-            <p className="text-sm text-slate-600 mb-6">
-              AI will generate new MCQ questions for <span className="font-bold text-primary-600">{topicResource.topicName}</span>
-            </p>
+                    {/* Card Header - Ultra Premium */}
+                    <div className={`px-4 py-2 flex items-center justify-between gap-3 border-b ${isFocused ? 'bg-purple-50/25' : 'bg-slate-50/25'} border-slate-100`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-md ${hasValidated
+                          ? (isCorrect ? 'bg-emerald-500 rotate-0' : 'bg-rose-500 rotate-0')
+                          : 'bg-slate-900 -rotate-3 group-hover/card:rotate-0'
+                          }`}>
+                          <div className="text-center">
+                            <div className={`text-[9px] font-black uppercase leading-none ${hasValidated ? 'text-white/80' : 'text-slate-400'}`}>
+                              {q.source?.toLowerCase().includes('ai') ? 'AI Gen' : 'PBM'}
+                            </div>
+                            <div className="text-xl font-bold text-white leading-none font-outfit mt-0.5 flex items-center justify-center gap-0.5">
+                              {q.source?.toLowerCase().includes('ai') && <Sparkles size={8} className="text-purple-200" />}
+                              {(() => {
+                                const qNumMatch = q.id?.match(/Q(\d+)/i) || q.id?.match(/(\d+)/);
+                                if (q.source?.toLowerCase().includes('ai')) {
+                                  return filteredQuestions.indexOf(q) + 1;
+                                }
+                                return qNumMatch ? qNumMatch[1] : filteredQuestions.indexOf(q) + 1;
+                              })()}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
+                            <h3 className="text-base font-bold text-slate-900 tracking-tight font-outfit uppercase">
+                              {q.topic}
+                            </h3>
+                            {hasValidated && (
+                              <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-500 text-[11px] font-bold rounded-lg tracking-wider font-outfit shadow-sm">
+                                {Math.floor(sessionStats.avgTime || 0)}s <span className="text-slate-400 uppercase">Avg Latency</span>
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-2.5 items-center mt-1">
+                            {q.diff && (
+                              <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${q.diff === 'Hard' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                q.diff === 'Moderate' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                  'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                } font-outfit shadow-sm`}>{q.diff} RATING</span>
+                            )}
+                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider font-outfit px-1">Syllabus Sync</span>
+                            {q.blooms && (
+                              <>
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+                                <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">Blooms: {q.blooms}</span>
+                              </>
+                            )}
+                            {q.pedagogy && (
+                              <>
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+                                <span className="text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">{q.pedagogy}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={(e) => { e.stopPropagation(); handleSave(q.id); }} className={`p-2.5 rounded-xl transition-all ${bookmarkedIds.has(q.id) ? 'text-blue-600 bg-blue-50' : 'text-slate-300 hover:bg-slate-100'}`}>
+                          <BookmarkPlus size={18} fill={bookmarkedIds.has(q.id) ? "currentColor" : "none"} />
+                        </button>
+                      </div>
+                    </div>
 
-            <div className="mb-6">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Number of Questions</label>
-              <select
-                value={generateCount}
-                onChange={(e) => setGenerateCount(parseInt(e.target.value))}
-                disabled={isGenerating}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl font-medium focus:border-primary-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value={3}>3 Questions</option>
-                <option value={5}>5 Questions</option>
-                <option value={10}>10 Questions</option>
-                <option value={15}>15 Questions</option>
-              </select>
+                    {/* Question Content */}
+                    <div className="p-5 md:p-8">
+                      <div className="text-lg md:text-2xl font-bold text-slate-900 leading-snug mb-6 font-outfit">
+                        <RenderWithMath text={q.text} showOptions={false} />
+                      </div>
+
+                      {q.hasVisualElement && q.extractedImages && q.extractedImages.length > 0 && (
+                        <div className="mb-4 p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center">
+                          <img src={q.extractedImages[0]} alt="Conceptual aid" className="max-h-32 w-auto rounded-lg mix-blend-multiply" />
+                        </div>
+                      )}
+
+                      {/* Innovative MCQ Grid */}
+                      {q.options && q.options.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {q.options.map((option, idx) => {
+                            const isSelected = selectedAnswer === idx;
+                            const hasCorrectAnswer = q.correctOptionIndex !== undefined;
+                            const isCorrectChoice = hasCorrectAnswer && q.correctOptionIndex === idx;
+                            const isWrongChoice = hasValidated && isSelected && !isCorrectChoice;
+                            const isCorrectReveal = hasValidated && isCorrectChoice;
+
+                            return (
+                              <button
+                                key={idx}
+                                onClick={(e) => { e.stopPropagation(); !hasValidated && handleAnswerSelect(q.id, idx); }}
+                                disabled={hasValidated}
+                                className={`group relative flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 text-left ${isSelected && !hasValidated ? 'border-blue-500 bg-blue-50/50 ring-4 ring-blue-500/10' :
+                                  isCorrectReveal ? 'border-emerald-500 bg-emerald-50 shadow-[0_0_20px_rgba(16,185,129,0.1)]' :
+                                    isWrongChoice ? 'border-rose-500 bg-rose-50 shadow-[0_0_20px_rgba(244,63,94,0.1)]' :
+                                      'border-slate-100 bg-white hover:border-slate-300 hover:shadow-md hover:bg-slate-50/50'
+                                  }`}
+                              >
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold transition-all text-sm ${isSelected && !hasValidated ? 'bg-blue-500 text-white shadow-lg' :
+                                  isCorrectReveal ? 'bg-emerald-500 text-white shadow-lg' :
+                                    isWrongChoice ? 'bg-rose-500 text-white shadow-lg' :
+                                      'bg-slate-100 text-slate-500 group-hover:bg-slate-900 group-hover:text-white group-active:scale-95 font-outfit border border-slate-200'
+                                  }`}>
+                                  {String.fromCharCode(65 + idx)}
+                                </div>
+                                <div className="flex-1 text-base md:text-lg font-semibold text-slate-800 tracking-tight leading-relaxed">
+                                  <RenderWithMath text={option} showOptions={false} />
+                                </div>
+                                {isCorrectReveal && <CheckCircle size={20} className="text-emerald-500 shrink-0" />}
+                                {isWrongChoice && <XCircle size={20} className="text-rose-500 shrink-0" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-slate-100 pt-6">
+                        {!hasValidated ? (
+                          <div className="w-full md:w-auto">
+                            {selectedAnswer !== undefined ? (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleValidateAnswer(q.id, q.correctOptionIndex!); }}
+                                className="w-full md:w-auto px-10 py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl hover:shadow-2xl hover:bg-slate-800 transition-all active:scale-95 flex items-center justify-center gap-3 font-outfit"
+                              >
+                                <Award size={18} />
+                                Evaluate Accuracy
+                              </button>
+                            ) : (
+                              <div className="flex items-center gap-3 text-slate-400 text-[11px] font-bold uppercase tracking-widest font-outfit px-2">
+                                <div className="w-2 h-2 rounded-full bg-slate-200 animate-pulse" />
+                                Awaiting Selection...
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setSolutionModalQuestion(q); }}
+                              className="w-full sm:flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-[1.25rem] font-bold text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 font-outfit shadow-lg hover:shadow-xl"
+                            >
+                              <Eye size={18} /> View Detailed Solution
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setInsightsModalQuestion(q); }}
+                              className="w-full sm:flex-1 py-4 bg-white border border-slate-200 text-slate-900 rounded-[1.25rem] font-bold text-[11px] uppercase tracking-widest hover:border-slate-900 transition-all flex items-center justify-center gap-3 font-outfit shadow-sm hover:shadow-md"
+                            >
+                              <Sparkles size={18} className="text-amber-500" /> AI Deep Insights
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Tactile Feedback Banner */}
+                    <AnimatePresence>
+                      {hasValidated && (
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: 'auto' }}
+                          className={`px-6 py-4 flex items-center gap-3 ${isCorrect ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white'}`}
+                        >
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isCorrect ? 'bg-white/20' : 'bg-rose-500/20'}`}>
+                            {isCorrect ? <Trophy size={16} /> : <AlertCircle size={16} className="text-rose-400" />}
+                          </div>
+                          <div>
+                            <div className="text-[10px] font-black uppercase tracking-widest opacity-80">
+                              {isCorrect ? 'Elite Mastery' : 'Growth Opportunity'}
+                            </div>
+                            <div className="text-sm font-bold">
+                              {isCorrect ? 'Precision Achieved! Your conceptual sync is high.' : 'Not quite. Use solution to debug your logic.'}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
             </div>
-
-            {/* Error Message */}
-            {generateError && (
-              <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-start gap-3">
-                <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-red-900 mb-1">Generation Failed</p>
-                  <p className="text-xs text-red-700">{generateError}</p>
+          ) : (
+            <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-dashed border-slate-300 rounded-2xl p-16 text-center">
+              <div className="max-w-md mx-auto">
+                {/* Animated Icon */}
+                <div className="relative mb-6">
+                  <div className="w-24 h-24 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mx-auto">
+                    <FileQuestion size={48} className="text-primary-600" />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-purple-500/20 rounded-full blur-xl -z-10 animate-pulse"></div>
                 </div>
-              </div>
-            )}
 
-            {/* Success Message */}
-            {generateSuccess && (
-              <div className="mb-4 p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl flex items-start gap-3 animate-fadeIn">
-                <CheckCircle size={20} className="text-emerald-600 flex-shrink-0 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-emerald-900 mb-1">Success!</p>
-                  <p className="text-xs text-emerald-700">{generateSuccess}</p>
+                <h3 className="font-black text-2xl text-slate-900 mb-3">Ready to Start Practicing?</h3>
+                <p className="text-sm text-slate-600 font-medium mb-6 leading-relaxed">
+                  No questions available yet for this topic. Generate AI-powered practice questions tailored to your exam pattern, or scan past papers to build your question bank.
+                </p>
+
+                {/* Action Button */}
+                <button
+                  onClick={() => setShowGenerateModal(true)}
+                  className="group inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
+                >
+                  <Sparkles size={20} className="transition-transform group-hover:rotate-12 group-hover:scale-110" />
+                  <span className="uppercase tracking-wide">Generate Practice Questions</span>
+                </button>
+
+                {/* Help Text */}
+                <p className="text-xs text-slate-500 mt-4">
+                  ✨ AI will create exam-style questions with detailed solutions and insights
+                </p>
+              </div>
+            </div>
+          )
+        }
+
+        {/* Modals */}
+        {
+          solutionModalQuestion && (
+            <PracticeSolutionModal
+              question={solutionModalQuestion}
+              onClose={() => setSolutionModalQuestion(null)}
+            />
+          )
+        }
+
+        {
+          insightsModalQuestion && (
+            <PracticeInsightsModal
+              question={insightsModalQuestion}
+              onClose={() => setInsightsModalQuestion(null)}
+            />
+          )
+        }
+
+        {/* Generate Questions Modal */}
+        {
+          showGenerateModal && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                <h3 className="text-xl font-black text-slate-900 mb-4">Generate Practice Questions</h3>
+                <p className="text-sm text-slate-600 mb-6">
+                  AI will generate new MCQ questions for <span className="font-bold text-primary-600">{topicResource.topicName}</span>
+                </p>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Number of Questions</label>
+                  <select
+                    value={generateCount}
+                    onChange={(e) => setGenerateCount(parseInt(e.target.value))}
+                    disabled={isGenerating}
+                    className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl font-medium focus:border-primary-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value={3}>3 Questions</option>
+                    <option value={5}>5 Questions</option>
+                    <option value={10}>10 Questions</option>
+                    <option value={15}>15 Questions</option>
+                  </select>
                 </div>
-              </div>
-            )}
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleGenerateQuestions}
-                disabled={isGenerating}
-                className="group flex-1 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold disabled:opacity-50 hover:from-purple-700 hover:to-purple-800 transition-all flex items-center justify-center gap-2"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    <span className="uppercase tracking-wide">Generating...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={18} className="transition-transform group-hover:rotate-12 group-hover:scale-110" />
-                    <span className="uppercase tracking-wide">Generate</span>
-                  </>
+                {/* Error Message */}
+                {generateError && (
+                  <div className="mb-4 p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-start gap-3">
+                    <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-red-900 mb-1">Generation Failed</p>
+                      <p className="text-xs text-red-700">{generateError}</p>
+                    </div>
+                  </div>
                 )}
-              </button>
-              <button
-                onClick={() => setShowGenerateModal(false)}
-                disabled={isGenerating}
-                className="px-5 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all disabled:opacity-50"
-              >
-                Cancel
-              </button>
+
+                {/* Success Message */}
+                {generateSuccess && (
+                  <div className="mb-4 p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl flex items-start gap-3 animate-fadeIn">
+                    <CheckCircle size={20} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-emerald-900 mb-1">Success!</p>
+                      <p className="text-xs text-emerald-700">{generateSuccess}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleGenerateQuestions}
+                    disabled={isGenerating}
+                    className="group flex-1 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold disabled:opacity-50 hover:from-purple-700 hover:to-purple-800 transition-all flex items-center justify-center gap-2"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        <span className="uppercase tracking-wide">Generating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={18} className="transition-transform group-hover:rotate-12 group-hover:scale-110" />
+                        <span className="uppercase tracking-wide">Generate</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowGenerateModal(false)}
+                    disabled={isGenerating}
+                    className="px-5 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+          )
+        }
+      </div>
+    );
+  };
 
 // ========== TAB 3: QUIZ (AI-POWERED) ==========
 const QuizTab: React.FC<{
@@ -2026,226 +2022,190 @@ const QuizTab: React.FC<{
   examContext: ExamContext;
   sharedQuestions: any[];
   setSharedQuestions: React.Dispatch<React.SetStateAction<any[]>>;
+  onProgressUpdate?: (silent?: boolean) => void;
+  poolCount: number;
 }> = ({
   topicResource,
   subject,
   examContext,
   sharedQuestions,
-  setSharedQuestions
+  setSharedQuestions,
+  onProgressUpdate,
+  poolCount
 }) => {
-  const { user } = useAuth();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [quizQuestions, setQuizQuestions] = useState<any[]>([]); // Generated quiz questions
-  const [questionCount, setQuestionCount] = useState<number>(10);
+    const { user } = useAuth();
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
+    const [questionCount, setQuestionCount] = useState<number>(10);
 
-  // Quiz state
-  const [isQuizActive, setIsQuizActive] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [answeredQuestions, setAnsweredQuestions] = useState<Map<number, number>>(new Map());
-  const [showResults, setShowResults] = useState(false);
-  const [timeElapsed, setTimeElapsed] = useState(0);
-  const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
-  const [quizSaved, setQuizSaved] = useState(false);
+    // Quiz state
+    const [isQuizActive, setIsQuizActive] = useState(false);
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+    const [answeredQuestions, setAnsweredQuestions] = useState<Map<number, number>>(new Map());
+    const [showResults, setShowResults] = useState(false);
+    const [timeElapsed, setTimeElapsed] = useState(0);
+    const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
+    const [quizSaved, setQuizSaved] = useState(false);
 
-  // Past quizzes
-  const [pastQuizzes, setPastQuizzes] = useState<any[]>([]);
-  const [showPastQuizzes, setShowPastQuizzes] = useState(false);
-  const [loadingPastQuizzes, setLoadingPastQuizzes] = useState(false);
+    // Past quizzes
+    const [pastQuizzes, setPastQuizzes] = useState<any[]>([]);
+    const [showPastQuizzes, setShowPastQuizzes] = useState(false);
+    const [loadingPastQuizzes, setLoadingPastQuizzes] = useState(false);
 
-  // Timer for active quiz
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isQuizActive && quizStartTime && !showResults) {
-      interval = setInterval(() => {
-        setTimeElapsed(Math.floor((Date.now() - quizStartTime) / 1000));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isQuizActive, quizStartTime, showResults]);
-
-  // Parse JSON helper (from RapidRecall)
-  const parseGeminiJSON = (responseText: string) => {
-    try {
-      let jsonText = responseText.trim();
-      if (jsonText.startsWith('```json')) {
-        jsonText = jsonText.replace(/```json\s*/, '').replace(/```\s*$/, '');
-      } else if (jsonText.startsWith('```')) {
-        jsonText = jsonText.replace(/```\s*/, '').replace(/```\s*$/, '');
+    // Timer for active quiz
+    useEffect(() => {
+      let interval: NodeJS.Timeout;
+      if (isQuizActive && quizStartTime && !showResults) {
+        interval = setInterval(() => {
+          setTimeElapsed(Math.floor((Date.now() - quizStartTime) / 1000));
+        }, 1000);
       }
-      jsonText = jsonText.trim();
-      return JSON.parse(jsonText);
-    } catch (error) {
-      console.error('Failed to parse JSON:', error);
-      throw new Error('Invalid JSON response from AI');
-    }
-  };
+      return () => clearInterval(interval);
+    }, [isQuizActive, quizStartTime, showResults]);
 
-  const generateQuiz = async () => {
-    if (!user) {
-      alert('Please log in to generate quiz');
-      return;
-    }
+    // Parse JSON helper
+    const parseGeminiJSON = (responseText: string) => {
+      try {
+        let jsonText = responseText.trim();
+        if (jsonText.startsWith('```json')) {
+          jsonText = jsonText.replace(/```json\s*/, '').replace(/```\s*$/, '');
+        } else if (jsonText.startsWith('```')) {
+          jsonText = jsonText.replace(/```\s*/, '').replace(/```\s*$/, '');
+        }
+        return JSON.parse(jsonText.trim());
+      } catch (error) {
+        console.error('Failed to parse JSON:', error);
+        throw new Error('Invalid JSON response from AI');
+      }
+    };
 
-    setIsGenerating(true);
-
-    try {
-      // Get topic-specific questions from shared state
-      const topicQuestions = sharedQuestions || [];
-
-      if (topicQuestions.length === 0) {
-        alert('No questions available for this topic yet. Please generate practice questions first from the Practice tab.');
-        setIsGenerating(false);
+    const generateQuiz = async () => {
+      if (!user) {
+        alert('Please log in to generate quiz');
         return;
       }
+      setIsGenerating(true);
+      try {
+        const topicQuestions = sharedQuestions || [];
+        if (topicQuestions.length === 0) {
+          alert('No questions available yet. Please generate practice questions first.');
+          setIsGenerating(false);
+          return;
+        }
 
-      // Adaptive quiz logic based on student performance
-      const masteryLevel = topicResource.masteryLevel || 0;
-      const averageScore = topicResource.averageQuizScore || 0;
+        const masteryLevel = topicResource.masteryLevel || 0;
+        const averageScore = topicResource.averageQuizScore || 0;
 
-      // Determine difficulty distribution based on mastery
-      let difficultyDistribution = "";
-      if (masteryLevel < 30) {
-        difficultyDistribution = "70% Easy, 25% Medium, 5% Hard - Focus on fundamentals";
-      } else if (masteryLevel < 60) {
-        difficultyDistribution = "30% Easy, 50% Medium, 20% Hard - Balanced practice";
-      } else {
-        difficultyDistribution = "10% Easy, 40% Medium, 50% Hard - Challenge mode";
+        let difficultyDistribution = masteryLevel < 30 ? "70% Easy, 25% Medium, 5% Hard" :
+          masteryLevel < 60 ? "30% Easy, 50% Medium, 20% Hard" :
+            "10% Easy, 40% Medium, 50% Hard";
+
+        const weakConcepts = topicQuestions
+          .filter(q => q.userAttempted && q.userCorrect === false)
+          .slice(0, 3)
+          .map(q => q.concept || q.topic)
+          .filter(Boolean);
+
+        const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+        const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({
+          model: selectedModel,
+          generationConfig: { responseMimeType: "application/json" }
+        });
+
+        const prompt = `You are an expert ${subject} teacher creating an ADAPTIVE MCQ quiz for ${examContext} students on "${topicResource.topicName}".
+            Generate ${questionCount} high-quality MCQ questions with this difficulty distribution: ${difficultyDistribution}.
+            Return ONLY valid JSON array with id, question, options, correctIndex, explanation, concept, topic, domain, difficulty.`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const parsed = parseGeminiJSON(response.text() || "[]");
+        if (Array.isArray(parsed)) setQuizQuestions(parsed);
+      } catch (error) {
+        console.error('Quiz generation error:', error);
+        alert('Failed to generate quiz.');
+      } finally {
+        setIsGenerating(false);
       }
+    };
 
-      // Get weak areas from question bank performance
-      const weakConcepts = topicQuestions
-        .filter(q => q.userAttempted && q.userCorrect === false)
-        .slice(0, 3)
-        .map(q => q.concept || q.topic)
-        .filter(Boolean);
+    const startQuiz = () => {
+      if (quizQuestions.length === 0) return;
+      setIsQuizActive(true);
+      setCurrentQuestion(0);
+      setSelectedAnswer(null);
+      setAnsweredQuestions(new Map());
+      setShowResults(false);
+      setQuizStartTime(Date.now());
+      setTimeElapsed(0);
+    };
 
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
-      const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({
-        model: selectedModel,
-        generationConfig: { responseMimeType: "application/json" }
-      });
+    const handleAnswerSelect = (optionIndex: number) => {
+      if (!isQuizActive || showResults) return;
+      setSelectedAnswer(optionIndex);
+    };
 
-      const prompt = `You are an expert ${subject} teacher creating an ADAPTIVE MCQ quiz for ${examContext} students on "${topicResource.topicName}".
+    const submitAnswer = () => {
+      if (selectedAnswer === null) return;
 
-STUDENT PERFORMANCE DATA:
-- Mastery Level: ${masteryLevel}%
-- Average Quiz Score: ${averageScore}%
-- Weak Areas: ${weakConcepts.length > 0 ? weakConcepts.join(', ') : 'No data yet'}
+      const newAnswers = new Map(answeredQuestions);
+      newAnswers.set(currentQuestion, selectedAnswer);
+      setAnsweredQuestions(newAnswers);
+      // User must manually click "Next Question" button to continue
+    };
 
-Generate ${questionCount} high-quality MCQ questions with this difficulty distribution:
-${difficultyDistribution}
+    const exitQuiz = () => {
+      setIsQuizActive(false);
+      setShowResults(false);
+      setCurrentQuestion(0);
+      setSelectedAnswer(null);
+      setAnsweredQuestions(new Map());
+    };
 
-${weakConcepts.length > 0 ? `PRIORITY: Include questions on these weak concepts: ${weakConcepts.join(', ')}` : ''}
+    const retakeQuiz = () => {
+      startQuiz();
+      setQuizSaved(false);
+    };
 
-REQUIREMENTS:
-- Focus on key concepts from ${topicResource.topicName}
-- Include clear, concise explanations with learning tips
-- Use proper ${subject} terminology
-- Progressively increase difficulty within the quiz
-- Each explanation should teach the concept, not just state the answer
+    // Calculate results (moved up for scope)
+    const correctCount = Array.from(answeredQuestions.entries()).filter(
+      ([idx, answer]) => (quizQuestions[idx]?.correctIndex === answer || quizQuestions[idx]?.correctOptionIndex === answer)
+    ).length;
 
-MATH FORMATTING: Use $ $ for ALL math (e.g., $\\\\frac{1}{2}$, $\\\\pi$).
-IMPORTANT: All backslashes in LaTeX must be properly escaped in JSON (use double backslashes: \\\\frac not \\frac).
+    const accuracy = answeredQuestions.size > 0
+      ? Math.round((correctCount / answeredQuestions.size) * 100)
+      : 0;
 
-Return ONLY valid JSON array:
-[
-  {
-    "id": "q1",
-    "question": "Question text with $\\\\frac{1}{2}$",
-    "options": ["$\\\\frac{\\\\pi}{6}$", "$\\\\frac{\\\\pi}{3}$", "Option C", "Option D"],
-    "correctIndex": 0,
-    "explanation": "Brief explanation with learning tip",
-    "concept": "Key concept tested",
-    "topic": "${topicResource.topicName}",
-    "domain": "${subject}",
-    "difficulty": "Easy/Medium/Hard"
-  }
-]`;
+    const formatTime = (seconds: number) => {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const parsed = parseGeminiJSON(response.text() || "[]");
+    // Save quiz attempt to database
+    const saveQuizAttempt = async () => {
+      if (!user || quizSaved) return;
+      try {
+        const wrongCount = answeredQuestions.size - correctCount;
+        const questionsData = quizQuestions.map((q, idx) => ({
+          question: q.question || q.text,
+          options: q.options,
+          correctIndex: q.correctIndex ?? q.correctOptionIndex,
+          userAnswer: answeredQuestions.get(idx),
+          isCorrect: answeredQuestions.get(idx) === (q.correctIndex ?? q.correctOptionIndex),
+          difficulty: q.difficulty,
+          topic: q.topic,
+          explanation: q.explanation || ''
+        }));
 
-      if (!Array.isArray(parsed)) {
-        throw new Error('Invalid response format');
-      }
-
-      setQuizQuestions(parsed);
-    } catch (error) {
-      console.error('Quiz generation error:', error);
-      alert('Failed to generate quiz. Please try again.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const startQuiz = () => {
-    if (quizQuestions.length === 0) return;
-    setIsQuizActive(true);
-    setCurrentQuestion(0);
-    setSelectedAnswer(null);
-    setAnsweredQuestions(new Map());
-    setShowResults(false);
-    setQuizStartTime(Date.now());
-    setTimeElapsed(0);
-  };
-
-  const handleAnswerSelect = (optionIndex: number) => {
-    if (!isQuizActive || showResults) return;
-    setSelectedAnswer(optionIndex);
-  };
-
-  const submitAnswer = () => {
-    if (selectedAnswer === null) return;
-
-    const newAnswers = new Map(answeredQuestions);
-    newAnswers.set(currentQuestion, selectedAnswer);
-    setAnsweredQuestions(newAnswers);
-    // User must manually click "Next Question" button to continue
-  };
-
-  const exitQuiz = () => {
-    setIsQuizActive(false);
-    setShowResults(false);
-    setCurrentQuestion(0);
-    setSelectedAnswer(null);
-    setAnsweredQuestions(new Map());
-  };
-
-  const retakeQuiz = () => {
-    startQuiz();
-    setQuizSaved(false);
-  };
-
-  // Save quiz attempt to database
-  const saveQuizAttempt = async () => {
-    if (!user || quizSaved) return;
-
-    try {
-      const wrongCount = answeredQuestions.size - correctCount;
-
-      const questionsData = questions.map((q, idx) => ({
-        question: q.question,
-        options: q.options,
-        correctIndex: q.correctIndex,
-        userAnswer: answeredQuestions.get(idx),
-        isCorrect: answeredQuestions.get(idx) === q.correctIndex,
-        difficulty: q.difficulty,
-        concept: q.concept,
-        explanation: q.explanation
-      }));
-
-      const { error } = await supabase
-        .from('quiz_attempts')
-        .insert({
+        await supabase.from('quiz_attempts').insert({
           user_id: user.id,
           topic_resource_id: topicResource.id,
           subject,
           exam_context: examContext,
           topic_name: topicResource.topicName,
-          question_count: questions.length,
+          question_count: quizQuestions.length,
           questions_data: questionsData,
           correct_count: correctCount,
           wrong_count: wrongCount,
@@ -2253,455 +2213,499 @@ Return ONLY valid JSON array:
           time_spent_seconds: timeElapsed
         });
 
-      if (error) {
-        console.error('Failed to save quiz attempt:', error);
-      } else {
-        console.log('✅ Quiz attempt saved successfully');
+        // Update topic_resources stats overall
+        const { data: currentStats } = await supabase
+          .from('topic_resources')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('topic_id', topicResource.topicId)
+          .eq('exam_context', examContext)
+          .single();
+
+        // Fetch absolute truth for questions attempted/correct from practice_answers
+        const { data: allAnswers } = await supabase
+          .from('practice_answers')
+          .select('id, is_correct')
+          .eq('user_id', user.id)
+          .eq('topic_resource_id', topicResource.id);
+
+        // Include current quiz questions in the calculation if they aren't in practice_answers yet
+        // (Though usually they are saved during the quiz)
+        const totalAttempted = allAnswers?.length || 0;
+        const totalCorrect = allAnswers?.filter((a: any) => a.is_correct).length || 0;
+        const newAccuracy = totalAttempted > 0 ? Math.round((totalCorrect / totalAttempted) * 100) : accuracy; // Fallback to current quiz accuracy if no history
+
+        const newQuizzesTaken = (currentStats?.quizzes_taken || 0) + 1;
+        const oldAvgQuizScore = currentStats?.average_quiz_score || 0;
+        const newAvgQuizScore = Math.round(((oldAvgQuizScore * (newQuizzesTaken - 1)) + accuracy) / newQuizzesTaken);
+
+        const isNotesDone = currentStats?.notes_completed || false;
+        // NEW DYNAMIC COVERAGE: Saturation target is 50% of the currently known question pool (min 15).
+        const saturationTarget = Math.min(poolCount, Math.max(15, Math.floor(poolCount * 0.5)));
+        const coverageWeight = Math.min(1, totalAttempted / Math.max(1, saturationTarget));
+
+        const newMasteryLevel = Math.min(100, Math.round(
+          (newAccuracy * 0.60 * coverageWeight) +
+          Math.min(20, newQuizzesTaken * 10) +
+          Math.min(10, Math.floor(totalAttempted / 10) * 5) +
+          (isNotesDone ? 10 : 0)
+        ));
+
+        // Refined Shifting Logic: Mastered requires 90% Mastery AND 2+ Quizzes
+        let nextStage = currentStats?.study_stage || 'practicing';
+        if (newMasteryLevel >= 90 && newQuizzesTaken >= 2) {
+          nextStage = 'mastered';
+        } else if (nextStage !== 'mastered') {
+          nextStage = 'taking_quiz';
+        }
+
+        console.log(`📊 [QuizMasteryCalc] Topic: ${topicResource.topicId}, Accuracy: ${newAccuracy}%, Mastery: ${newMasteryLevel}%, Stage: ${nextStage}`);
+
+        const statsData = {
+          user_id: user.id,
+          topic_id: topicResource.topicId,
+          subject: subject,
+          exam_context: examContext,
+          questions_attempted: totalAttempted,
+          questions_correct: totalCorrect,
+          average_accuracy: newAccuracy,
+          quizzes_taken: newQuizzesTaken,
+          average_quiz_score: newAvgQuizScore,
+          mastery_level: newMasteryLevel,
+          study_stage: nextStage,
+          last_practiced: new Date().toISOString()
+        };
+
+        const { error: upsertErr } = await supabase
+          .from('topic_resources')
+          .upsert(statsData, {
+            onConflict: 'user_id,topic_id,exam_context'
+          });
+
+        if (upsertErr) console.error('Error upserting topic_resources:', upsertErr);
+        else onProgressUpdate?.(true);
+
         setQuizSaved(true);
+      } catch (err) {
+        console.error('Error saving quiz:', err);
       }
-    } catch (err) {
-      console.error('Error saving quiz:', err);
-    }
-  };
+    };
 
-  // Load past quiz attempts
-  const loadPastQuizzes = async () => {
-    if (!user) return;
+    const loadPastQuizzes = async () => {
+      if (!user) return;
+      setLoadingPastQuizzes(true);
+      try {
+        const { data, error } = await supabase
+          .from('quiz_attempts')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('topic_resource_id', topicResource.id)
+          .order('created_at', { ascending: false });
 
-    setLoadingPastQuizzes(true);
-    try {
-      const { data, error } = await supabase
-        .from('quiz_attempts')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('topic_resource_id', topicResource.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (error) {
-        console.error('Failed to load past quizzes:', error);
-      } else {
+        if (error) throw error;
         setPastQuizzes(data || []);
+      } catch (err) {
+        console.error('Error loading quizzes:', err);
+      } finally {
+        setLoadingPastQuizzes(false);
       }
-    } catch (err) {
-      console.error('Error loading past quizzes:', err);
-    } finally {
-      setLoadingPastQuizzes(false);
-    }
-  };
+    };
 
-  // Save quiz when results are shown
-  useEffect(() => {
-    if (showResults && isQuizActive && !quizSaved) {
-      saveQuizAttempt();
-    }
-  }, [showResults, isQuizActive, quizSaved]);
+    // Save quiz when results are shown
+    useEffect(() => {
+      if (showResults && isQuizActive && !quizSaved) {
+        saveQuizAttempt();
+      }
+    }, [showResults, isQuizActive, quizSaved]);
 
-  // Calculate results
-  const correctCount = Array.from(answeredQuestions.entries()).filter(
-    ([idx, answer]) => quizQuestions[idx]?.correctIndex === answer
-  ).length;
-
-  const accuracy = answeredQuestions.size > 0
-    ? Math.round((correctCount / answeredQuestions.size) * 100)
-    : 0;
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Results Screen - Expert Side-by-Side Design
-  if (showResults && isQuizActive) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-4">
-        <div className="max-w-[1400px] mx-auto px-4">
-          {/* Minimal Header Score Bar */}
-          <div className="flex items-center justify-between mb-4 bg-white rounded-xl px-6 py-4 shadow-sm border border-slate-200">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-                  accuracy >= 80 ? 'bg-emerald-100' : accuracy >= 60 ? 'bg-amber-100' : 'bg-red-100'
-                }`}>
-                  <Trophy size={28} className={
-                    accuracy >= 80 ? 'text-emerald-600' : accuracy >= 60 ? 'text-amber-600' : 'text-red-600'
-                  } />
+    // Results Screen - Expert Side-by-Side Design
+    if (showResults && isQuizActive) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-4">
+          <div className="max-w-[1400px] mx-auto px-4">
+            {/* Minimal Header Score Bar */}
+            <div className="flex items-center justify-between mb-4 bg-white rounded-xl px-6 py-4 shadow-sm border border-slate-200">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3">
+                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${accuracy >= 80 ? 'bg-emerald-100' : accuracy >= 60 ? 'bg-amber-100' : 'bg-red-100'
+                    }`}>
+                    <Trophy size={28} className={
+                      accuracy >= 80 ? 'text-emerald-600' : accuracy >= 60 ? 'text-amber-600' : 'text-red-600'
+                    } />
+                  </div>
+                  <div>
+                    <div className="text-3xl font-black text-slate-900">{accuracy}%</div>
+                    <div className="text-xs text-slate-500 font-medium">Score</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-3xl font-black text-slate-900">{accuracy}%</div>
-                  <div className="text-xs text-slate-500 font-medium">Score</div>
+
+                <div className="h-12 w-px bg-slate-200"></div>
+
+                <div className="flex items-center gap-6">
+                  <div>
+                    <div className="text-2xl font-black text-emerald-600">{correctCount}</div>
+                    <div className="text-[10px] text-slate-500 font-bold uppercase">Correct</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-black text-red-600">{answeredQuestions.size - correctCount}</div>
+                    <div className="text-[10px] text-slate-500 font-bold uppercase">Wrong</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-black font-mono text-blue-600">{formatTime(timeElapsed)}</div>
+                    <div className="text-[10px] text-slate-500 font-bold uppercase">Time</div>
+                  </div>
                 </div>
               </div>
 
-              <div className="h-12 w-px bg-slate-200"></div>
+              <div className="flex gap-2">
+                <button
+                  onClick={retakeQuiz}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all flex items-center gap-2 text-sm"
+                >
+                  <RefreshCw size={14} />
+                  Retake
+                </button>
+                <button
+                  onClick={exitQuiz}
+                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-900 rounded-lg font-bold transition-all text-sm"
+                >
+                  Exit
+                </button>
+              </div>
+            </div>
 
-              <div className="flex items-center gap-6">
-                <div>
-                  <div className="text-2xl font-black text-emerald-600">{correctCount}</div>
-                  <div className="text-[10px] text-slate-500 font-bold uppercase">Correct</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-black text-red-600">{answeredQuestions.size - correctCount}</div>
-                  <div className="text-[10px] text-slate-500 font-bold uppercase">Wrong</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-black font-mono text-blue-600">{formatTime(timeElapsed)}</div>
-                  <div className="text-[10px] text-slate-500 font-bold uppercase">Time</div>
+            {/* Questions - TRUE Side-by-Side Layout */}
+            <div className="space-y-4">
+              {quizQuestions.map((q, idx) => {
+                const userAnswer = answeredQuestions.get(idx);
+                const isCorrect = userAnswer === q.correctIndex;
+
+                return (
+                  <div key={idx} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    {/* Minimal Question Number Header */}
+                    <div className={`px-4 py-2 border-b flex items-center gap-3 ${isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'
+                      }`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm ${isCorrect ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+                        }`}>
+                        {idx + 1}
+                      </div>
+                      <div className={`text-xs font-bold ${isCorrect ? 'text-emerald-700' : 'text-red-700'}`}>
+                        {isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                      </div>
+                    </div>
+
+                    {/* TRUE 50/50 Split - No Stacking */}
+                    <div className="grid grid-cols-2 divide-x divide-slate-200">
+                      {/* LEFT PANEL: Question + Options */}
+                      <div className="p-6 bg-white">
+                        <div className="text-sm font-bold text-slate-900 mb-4 leading-relaxed">
+                          <RenderWithMath text={q.question} showOptions={false} serif={false} />
+                        </div>
+
+                        <div className="space-y-2">
+                          {q.options.map((option: string, optIdx: number) => {
+                            const isUserSelection = userAnswer === optIdx;
+                            const isCorrectOpt = q.correctIndex === optIdx;
+
+                            return (
+                              <div
+                                key={optIdx}
+                                className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-all ${isCorrectOpt
+                                  ? 'border-emerald-400 bg-emerald-50'
+                                  : isUserSelection && !isCorrect
+                                    ? 'border-red-400 bg-red-50'
+                                    : 'border-slate-200 bg-slate-50'
+                                  }`}
+                              >
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0 ${isCorrectOpt
+                                  ? 'bg-emerald-500 text-white shadow-sm'
+                                  : isUserSelection && !isCorrect
+                                    ? 'bg-red-500 text-white shadow-sm'
+                                    : 'bg-white text-slate-700 border-2 border-slate-300'
+                                  }`}>
+                                  {String.fromCharCode(65 + optIdx)}
+                                </div>
+                                <div className="flex-1 text-sm font-medium text-slate-800 pt-0.5">
+                                  <RenderWithMath text={option} showOptions={false} serif={false} />
+                                </div>
+                                {isCorrectOpt && (
+                                  <CheckCircle2 size={20} className="text-emerald-600 flex-shrink-0" strokeWidth={2.5} />
+                                )}
+                                {isUserSelection && !isCorrect && (
+                                  <XCircle size={20} className="text-red-600 flex-shrink-0" strokeWidth={2.5} />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* RIGHT PANEL: Solution + Explanation */}
+                      <div className="p-6 bg-gradient-to-br from-slate-50 to-white">
+                        {/* Correct Answer Section */}
+                        <div className="mb-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center">
+                              <CheckCircle2 size={14} className="text-white" strokeWidth={3} />
+                            </div>
+                            <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">Correct Answer</h4>
+                          </div>
+                          <div className="bg-emerald-50 border-2 border-emerald-300 rounded-lg px-4 py-3">
+                            <div className="text-base font-black text-emerald-700">
+                              {String.fromCharCode(65 + q.correctIndex)}
+                            </div>
+                            <div className="text-sm font-medium text-emerald-800 mt-1">
+                              <RenderWithMath text={q.options[q.correctIndex]} showOptions={false} serif={false} />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Explanation Section */}
+                        {q.explanation && (
+                          <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Lightbulb size={16} className="text-blue-600" />
+                              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">Explanation</h4>
+                            </div>
+                            <div className="bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-700 leading-relaxed">
+                              <RenderWithMath text={q.explanation} showOptions={false} serif={false} />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Your Wrong Answer */}
+                        {!isCorrect && (
+                          <div className="p-3 bg-amber-50 border-2 border-amber-300 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertCircle size={14} className="text-amber-600" />
+                              <span className="text-[10px] font-black text-amber-700 uppercase tracking-wider">Your Answer</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 bg-amber-500 rounded-lg flex items-center justify-center font-black text-xs text-white">
+                                {String.fromCharCode(65 + userAnswer!)}
+                              </div>
+                              <div className="text-xs font-medium text-amber-800">
+                                <RenderWithMath text={q.options[userAnswer!]} showOptions={false} serif={false} />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Active Quiz Screen
+    if (isQuizActive && !showResults && quizQuestions.length > 0) {
+      const currentQ = quizQuestions[currentQuestion];
+      const isAnswered = answeredQuestions.has(currentQuestion);
+      const userAnswer = answeredQuestions.get(currentQuestion);
+      const isCorrect = userAnswer === currentQ?.correctIndex;
+
+      // Difficulty badge color
+      const getDifficultyColor = (diff: string) => {
+        switch (diff?.toLowerCase()) {
+          case 'easy': return 'bg-green-100 text-green-700';
+          case 'medium': return 'bg-yellow-100 text-yellow-700';
+          case 'hard': return 'bg-red-100 text-red-700';
+          default: return 'bg-slate-100 text-slate-700';
+        }
+      };
+
+      return (
+        <div className="max-w-3xl mx-auto space-y-2">
+          {/* Ultra-Compact Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg px-3 py-1.5 shadow-sm flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-white/20 rounded flex items-center justify-center">
+                <div className="text-white font-black text-xs">{currentQuestion + 1}</div>
+              </div>
+              <span className="text-[11px] font-black text-white">
+                {currentQuestion + 1}/{quizQuestions.length}
+              </span>
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${getDifficultyColor(currentQ?.difficulty)}`}>
+                {currentQ?.difficulty || 'Med'}
+              </span>
+              <div className="flex-1 mx-2">
+                <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-white/90 transition-all duration-500 rounded-full"
+                    style={{ width: `${((currentQuestion + 1) / quizQuestions.length) * 100}%` }}
+                  />
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={retakeQuiz}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all flex items-center gap-2 text-sm"
-              >
-                <RefreshCw size={14} />
-                Retake
-              </button>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-[10px] font-bold text-white">
+                <Clock size={10} />
+                {formatTime(timeElapsed)}
+              </div>
+              <div className="flex items-center gap-1 text-[10px] font-bold text-white">
+                {correctCount}/{answeredQuestions.size}
+              </div>
               <button
                 onClick={exitQuiz}
-                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-900 rounded-lg font-bold transition-all text-sm"
+                className="ml-1 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-[10px] font-bold text-white transition-all"
               >
                 Exit
               </button>
             </div>
           </div>
 
-          {/* Questions - TRUE Side-by-Side Layout */}
-          <div className="space-y-4">
-            {quizQuestions.map((q, idx) => {
-              const userAnswer = answeredQuestions.get(idx);
-              const isCorrect = userAnswer === q.correctIndex;
-
-              return (
-                <div key={idx} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                  {/* Minimal Question Number Header */}
-                  <div className={`px-4 py-2 border-b flex items-center gap-3 ${
-                    isCorrect ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'
-                  }`}>
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm ${
-                      isCorrect ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
-                    }`}>
-                      {idx + 1}
-                    </div>
-                    <div className={`text-xs font-bold ${isCorrect ? 'text-emerald-700' : 'text-red-700'}`}>
-                      {isCorrect ? '✓ Correct' : '✗ Incorrect'}
-                    </div>
-                  </div>
-
-                  {/* TRUE 50/50 Split - No Stacking */}
-                  <div className="grid grid-cols-2 divide-x divide-slate-200">
-                    {/* LEFT PANEL: Question + Options */}
-                    <div className="p-6 bg-white">
-                      <div className="text-sm font-bold text-slate-900 mb-4 leading-relaxed">
-                        <RenderWithMath text={q.question} showOptions={false} serif={false} />
-                      </div>
-
-                      <div className="space-y-2">
-                        {q.options.map((option: string, optIdx: number) => {
-                          const isUserSelection = userAnswer === optIdx;
-                          const isCorrectOpt = q.correctIndex === optIdx;
-
-                          return (
-                            <div
-                              key={optIdx}
-                              className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-all ${
-                                isCorrectOpt
-                                  ? 'border-emerald-400 bg-emerald-50'
-                                  : isUserSelection && !isCorrect
-                                  ? 'border-red-400 bg-red-50'
-                                  : 'border-slate-200 bg-slate-50'
-                              }`}
-                            >
-                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0 ${
-                                isCorrectOpt
-                                  ? 'bg-emerald-500 text-white shadow-sm'
-                                  : isUserSelection && !isCorrect
-                                  ? 'bg-red-500 text-white shadow-sm'
-                                  : 'bg-white text-slate-700 border-2 border-slate-300'
-                              }`}>
-                                {String.fromCharCode(65 + optIdx)}
-                              </div>
-                              <div className="flex-1 text-sm font-medium text-slate-800 pt-0.5">
-                                <RenderWithMath text={option} showOptions={false} serif={false} />
-                              </div>
-                              {isCorrectOpt && (
-                                <CheckCircle2 size={20} className="text-emerald-600 flex-shrink-0" strokeWidth={2.5} />
-                              )}
-                              {isUserSelection && !isCorrect && (
-                                <XCircle size={20} className="text-red-600 flex-shrink-0" strokeWidth={2.5} />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* RIGHT PANEL: Solution + Explanation */}
-                    <div className="p-6 bg-gradient-to-br from-slate-50 to-white">
-                      {/* Correct Answer Section */}
-                      <div className="mb-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center">
-                            <CheckCircle2 size={14} className="text-white" strokeWidth={3} />
-                          </div>
-                          <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">Correct Answer</h4>
-                        </div>
-                        <div className="bg-emerald-50 border-2 border-emerald-300 rounded-lg px-4 py-3">
-                          <div className="text-base font-black text-emerald-700">
-                            {String.fromCharCode(65 + q.correctIndex)}
-                          </div>
-                          <div className="text-sm font-medium text-emerald-800 mt-1">
-                            <RenderWithMath text={q.options[q.correctIndex]} showOptions={false} serif={false} />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Explanation Section */}
-                      {q.explanation && (
-                        <div className="mb-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Lightbulb size={16} className="text-blue-600" />
-                            <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">Explanation</h4>
-                          </div>
-                          <div className="bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-700 leading-relaxed">
-                            <RenderWithMath text={q.explanation} showOptions={false} serif={false} />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Your Wrong Answer */}
-                      {!isCorrect && (
-                        <div className="p-3 bg-amber-50 border-2 border-amber-300 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <AlertCircle size={14} className="text-amber-600" />
-                            <span className="text-[10px] font-black text-amber-700 uppercase tracking-wider">Your Answer</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-amber-500 rounded-lg flex items-center justify-center font-black text-xs text-white">
-                              {String.fromCharCode(65 + userAnswer!)}
-                            </div>
-                            <div className="text-xs font-medium text-amber-800">
-                              <RenderWithMath text={q.options[userAnswer!]} showOptions={false} serif={false} />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Active Quiz Screen
-  if (isQuizActive && !showResults && quizQuestions.length > 0) {
-    const currentQ = quizQuestions[currentQuestion];
-    const isAnswered = answeredQuestions.has(currentQuestion);
-    const userAnswer = answeredQuestions.get(currentQuestion);
-    const isCorrect = userAnswer === currentQ?.correctIndex;
-
-    // Difficulty badge color
-    const getDifficultyColor = (diff: string) => {
-      switch (diff?.toLowerCase()) {
-        case 'easy': return 'bg-green-100 text-green-700';
-        case 'medium': return 'bg-yellow-100 text-yellow-700';
-        case 'hard': return 'bg-red-100 text-red-700';
-        default: return 'bg-slate-100 text-slate-700';
-      }
-    };
-
-    return (
-      <div className="max-w-3xl mx-auto space-y-2">
-        {/* Ultra-Compact Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg px-3 py-1.5 shadow-sm flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-white/20 rounded flex items-center justify-center">
-              <div className="text-white font-black text-xs">{currentQuestion + 1}</div>
+          {/* Compact Question Card */}
+          <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
+            <div className="text-sm font-bold text-slate-900 mb-3 leading-snug">
+              <RenderWithMath text={currentQ?.question || ''} showOptions={false} serif={false} />
             </div>
-            <span className="text-[11px] font-black text-white">
-              {currentQuestion + 1}/{quizQuestions.length}
-            </span>
-            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${getDifficultyColor(currentQ?.difficulty)}`}>
-              {currentQ?.difficulty || 'Med'}
-            </span>
-            <div className="flex-1 mx-2">
-              <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-white/90 transition-all duration-500 rounded-full"
-                  style={{ width: `${((currentQuestion + 1) / quizQuestions.length) * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-[10px] font-bold text-white">
-              <Clock size={10} />
-              {formatTime(timeElapsed)}
-            </div>
-            <div className="flex items-center gap-1 text-[10px] font-bold text-white">
-              {correctCount}/{answeredQuestions.size}
-            </div>
-            <button
-              onClick={exitQuiz}
-              className="ml-1 px-2 py-0.5 bg-white/20 hover:bg-white/30 rounded text-[10px] font-bold text-white transition-all"
-            >
-              Exit
-            </button>
-          </div>
-        </div>
+            {/* 2x2 Grid Layout for Options */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+              {currentQ?.options.map((option: string, idx: number) => {
+                let buttonClass = "text-left p-2 rounded-lg border transition-all duration-200 flex items-center gap-2 ";
 
-        {/* Compact Question Card */}
-        <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-sm">
-          <div className="text-sm font-bold text-slate-900 mb-3 leading-snug">
-            <RenderWithMath text={currentQ?.question || ''} showOptions={false} serif={false} />
-          </div>
-
-          {/* 2x2 Grid Layout for Options */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-            {currentQ?.options.map((option: string, idx: number) => {
-              let buttonClass = "text-left p-2 rounded-lg border transition-all duration-200 flex items-center gap-2 ";
-
-              if (isAnswered) {
-                if (idx === currentQ.correctIndex) {
-                  buttonClass += "border-green-400 bg-green-50 text-green-900";
-                } else if (idx === userAnswer) {
-                  buttonClass += "border-red-400 bg-red-50 text-red-900";
+                if (isAnswered) {
+                  if (idx === currentQ.correctIndex) {
+                    buttonClass += "border-green-400 bg-green-50 text-green-900";
+                  } else if (idx === userAnswer) {
+                    buttonClass += "border-red-400 bg-red-50 text-red-900";
+                  } else {
+                    buttonClass += "border-slate-200 bg-slate-50 text-slate-400";
+                  }
                 } else {
-                  buttonClass += "border-slate-200 bg-slate-50 text-slate-400";
+                  if (idx === selectedAnswer) {
+                    buttonClass += "border-purple-400 bg-purple-50 text-purple-900 shadow-sm";
+                  } else {
+                    buttonClass += "border-slate-200 hover:border-purple-300 hover:bg-purple-50 cursor-pointer";
+                  }
                 }
-              } else {
-                if (idx === selectedAnswer) {
-                  buttonClass += "border-purple-400 bg-purple-50 text-purple-900 shadow-sm";
-                } else {
-                  buttonClass += "border-slate-200 hover:border-purple-300 hover:bg-purple-50 cursor-pointer";
-                }
-              }
 
-              return (
-                <button
-                  key={idx}
-                  onClick={() => handleAnswerSelect(idx)}
-                  disabled={isAnswered}
-                  className={buttonClass}
-                >
-                  <div className={`w-5 h-5 rounded flex items-center justify-center font-black text-[10px] flex-shrink-0 ${
-                    isAnswered
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleAnswerSelect(idx)}
+                    disabled={isAnswered}
+                    className={buttonClass}
+                  >
+                    <div className={`w-5 h-5 rounded flex items-center justify-center font-black text-[10px] flex-shrink-0 ${isAnswered
                       ? idx === currentQ.correctIndex
                         ? 'bg-green-500 text-white'
                         : idx === userAnswer
-                        ? 'bg-red-500 text-white'
-                        : 'bg-slate-200 text-slate-500'
+                          ? 'bg-red-500 text-white'
+                          : 'bg-slate-200 text-slate-500'
                       : idx === selectedAnswer
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-slate-200 text-slate-600'
-                  }`}>
-                    {String.fromCharCode(65 + idx)}
-                  </div>
-                  <span className="text-xs font-medium flex-1">
-                    <RenderWithMath text={option} showOptions={false} serif={false} />
-                  </span>
-                  {isAnswered && idx === currentQ.correctIndex && (
-                    <CheckCircle2 size={14} className="text-green-600 flex-shrink-0" />
-                  )}
-                  {isAnswered && idx === userAnswer && idx !== currentQ.correctIndex && (
-                    <XCircle size={14} className="text-red-600 flex-shrink-0" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Compact Explanation */}
-          {isAnswered && currentQ?.explanation && (
-            <div className="p-2 bg-blue-50 border border-blue-200 rounded">
-              <h4 className="font-black text-[10px] text-blue-900 mb-1 flex items-center gap-1">
-                <Lightbulb size={10} />
-                Explanation
-              </h4>
-              <div className="text-[11px] text-blue-800 leading-snug">
-                <RenderWithMath text={currentQ.explanation} showOptions={false} serif={false} />
-              </div>
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-slate-200 text-slate-600'
+                      }`}>
+                      {String.fromCharCode(65 + idx)}
+                    </div>
+                    <span className="text-xs font-medium flex-1">
+                      <RenderWithMath text={option} showOptions={false} serif={false} />
+                    </span>
+                    {isAnswered && idx === currentQ.correctIndex && (
+                      <CheckCircle2 size={14} className="text-green-600 flex-shrink-0" />
+                    )}
+                    {isAnswered && idx === userAnswer && idx !== currentQ.correctIndex && (
+                      <XCircle size={14} className="text-red-600 flex-shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          )}
 
-          {/* Inline Action Button */}
-          {!isAnswered ? (
-            <button
-              onClick={submitAnswer}
-              disabled={selectedAnswer === null}
-              className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-bold hover:from-purple-700 hover:to-purple-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 shadow-sm text-xs"
-            >
-              <CheckCircle2 size={14} />
-              Submit Answer
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                if (currentQuestion < quizQuestions.length - 1) {
-                  setCurrentQuestion(currentQuestion + 1);
-                  setSelectedAnswer(null);
-                } else {
-                  setShowResults(true);
-                }
-              }}
-              className="w-full px-3 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-bold hover:from-green-700 hover:to-emerald-700 transition-all flex items-center justify-center gap-1 shadow-sm text-xs"
-            >
-              {currentQuestion < quizQuestions.length - 1 ? (
-                <>
-                  Next Question
-                  <ChevronRight size={14} />
-                </>
-              ) : (
-                <>
-                  <Trophy size={14} />
-                  View Results
-                </>
-              )}
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  }
+            {/* Compact Explanation */}
+            {isAnswered && currentQ?.explanation && (
+              <div className="p-2 bg-blue-50 border border-blue-200 rounded">
+                <h4 className="font-black text-[10px] text-blue-900 mb-1 flex items-center gap-1">
+                  <Lightbulb size={10} />
+                  Explanation
+                </h4>
+                <div className="text-[11px] text-blue-800 leading-snug">
+                  <RenderWithMath text={currentQ.explanation} showOptions={false} serif={false} />
+                </div>
+              </div>
+            )}
 
-  // Main Quiz Setup Screen
-  return (
-    <div className="max-w-3xl mx-auto space-y-3">
-      {/* Inline Quiz Stats - Single Line */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg px-3 py-2">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-blue-600 rounded-md flex items-center justify-center">
-            <Brain size={12} className="text-white" />
+            {/* Inline Action Button */}
+            {!isAnswered ? (
+              <button
+                onClick={submitAnswer}
+                disabled={selectedAnswer === null}
+                className="w-full px-3 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-bold hover:from-purple-700 hover:to-purple-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 shadow-sm text-xs"
+              >
+                <CheckCircle2 size={14} />
+                Submit Answer
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (currentQuestion < quizQuestions.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setSelectedAnswer(null);
+                  } else {
+                    setShowResults(true);
+                  }
+                }}
+                className="w-full px-3 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-bold hover:from-green-700 hover:to-emerald-700 transition-all flex items-center justify-center gap-1 shadow-sm text-xs"
+              >
+                {currentQuestion < quizQuestions.length - 1 ? (
+                  <>
+                    Next Question
+                    <ChevronRight size={14} />
+                  </>
+                ) : (
+                  <>
+                    <Trophy size={14} />
+                    View Results
+                  </>
+                )}
+              </button>
+            )}
           </div>
-          <span className="text-xs font-black text-blue-900">Adaptive Quiz</span>
-          <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md">
-            {topicResource.masteryLevel}% mastery
-          </span>
         </div>
-        <div className="flex items-center gap-2 text-[10px] font-bold text-blue-700">
-          <span className="bg-white/60 px-2 py-0.5 rounded">✓ {topicResource.masteryLevel < 30 ? '70% Easy' : topicResource.masteryLevel < 60 ? '50% Med' : '50% Hard'}</span>
-          <span className="bg-white/60 px-2 py-0.5 rounded">✓ Weak areas</span>
-          <span className="bg-white/60 px-2 py-0.5 rounded">✓ Tips</span>
-        </div>
-      </div>
+      );
+    }
 
-      {/* Compact Quiz Controls */}
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-3">
-        <div className="flex items-center gap-4">
-          {/* Question Count Slider */}
-          <div className="flex-1">
-            <label className="block text-[11px] font-bold text-slate-700 mb-1">
+    // Main Quiz Setup Screen
+    return (
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Inline Quiz Stats - Single Line */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl px-6 py-4 shadow-sm gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
+              <Brain size={20} className="text-white" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-base font-black text-blue-900 uppercase tracking-tight font-outfit">Adaptive Quiz</span>
+              <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider mt-0.5">Focus Mode</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-bold text-blue-700 bg-blue-100 border border-blue-200 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">
+              {topicResource.masteryLevel}% mastery
+            </span>
+            <span className="text-[11px] font-bold text-slate-700 bg-white border border-slate-200 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">✓ {topicResource.masteryLevel < 30 ? '70% Easy' : topicResource.masteryLevel < 60 ? '50% Med' : '50% Hard'}</span>
+            <span className="text-[11px] font-bold text-slate-700 bg-white border border-slate-200 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">✓ Weak areas</span>
+            <span className="text-[11px] font-bold text-slate-700 bg-white border border-slate-200 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm hidden md:inline-flex">✓ Tips</span>
+          </div>
+        </div>
+
+        {/* Compact Quiz Controls */}
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm p-2 md:p-2.5 md:pl-8 w-full">
+          <div className="flex flex-col md:flex-row md:items-center justify-between w-full gap-4 md:gap-6 xl:gap-8">
+            {/* Label */}
+            <div className="text-sm font-black text-[#0B1528] whitespace-nowrap font-outfit self-start md:self-auto px-2 md:px-0 pt-2 md:pt-0 shrink-0">
               Questions: <span className="text-blue-600">{questionCount}</span>
-            </label>
-            <div className="flex items-center gap-2">
+            </div>
+
+            {/* Slider Track */}
+            <div className="flex-1 flex items-center gap-4 md:gap-6 w-full md:w-auto pr-2 md:pr-0">
               <input
                 type="range"
                 min="5"
@@ -2709,149 +2713,147 @@ Return ONLY valid JSON array:
                 step="5"
                 value={questionCount}
                 onChange={(e) => setQuestionCount(Number(e.target.value))}
-                className="flex-1 accent-blue-600 h-1.5"
+                className="flex-1 accent-[#0B1528] h-[5px] bg-slate-200 rounded-lg cursor-pointer appearance-auto"
               />
-              <div className="flex gap-1 text-[9px] text-slate-400 font-medium">
+              <div className="flex gap-2 md:gap-3 text-[10px] text-slate-400 font-bold whitespace-nowrap tracking-wider hidden sm:flex shrink-0">
                 <span>5</span>
-                <span>•</span>
+                <span className="text-slate-200">•</span>
                 <span>10</span>
-                <span>•</span>
+                <span className="text-slate-200">•</span>
                 <span>15</span>
-                <span>•</span>
+                <span className="text-slate-200">•</span>
                 <span>20</span>
               </div>
             </div>
+
+            {/* Generate Button */}
+            <button
+              onClick={generateQuiz}
+              disabled={isGenerating}
+              className="px-6 py-2.5 bg-[#0B1528] text-white rounded-[2rem] font-black hover:bg-[#15233D] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md text-xs uppercase tracking-wider font-outfit shrink-0 w-full md:w-auto"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Zap size={16} className="fill-transparent" />
+                  <span>Generate</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Start Quiz Card - Compact */}
+        {quizQuestions.length > 0 && (
+          <div className="bg-[#0B1528] rounded-full p-2 md:p-2 md:pl-3 flex flex-col md:flex-row items-center justify-between shadow-lg gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shrink-0">
+                <Play size={16} className="text-white fill-white ml-0.5" />
+              </div>
+              <div className="flex flex-col justify-center">
+                <div className="text-base font-black text-white font-outfit uppercase tracking-widest leading-tight mb-0.5">
+                  {quizQuestions.length} Questions Ready
+                </div>
+                <div className="text-[10px] text-white/50 font-medium leading-none">
+                  {topicResource.topicName}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={startQuiz}
+              className="px-8 py-2.5 md:px-8 md:py-2.5 bg-white text-[#0B1528] rounded-full font-black hover:bg-slate-100 transition-all flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md text-xs uppercase tracking-wider font-outfit w-full md:w-auto shrink-0 md:mr-1"
+            >
+              <Play size={14} className="fill-[#0B1528] shrink-0" />
+              <span>Start</span>
+            </button>
+          </div>
+        )}
+
+        {/* Past Quizzes Section */}
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm p-4 md:p-5 md:px-8 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-black text-sm text-[#0B1528] flex items-center gap-2 font-outfit tracking-wide">
+              <History size={16} />
+              Past Quizzes
+            </h3>
+            <button
+              onClick={() => {
+                setShowPastQuizzes(!showPastQuizzes);
+                if (!showPastQuizzes && pastQuizzes.length === 0) {
+                  loadPastQuizzes();
+                }
+              }}
+              className="text-xs font-bold text-slate-500 hover:text-slate-900 bg-slate-100/80 hover:bg-slate-200 px-6 py-2.5 rounded-full transition-colors uppercase tracking-wider font-outfit"
+            >
+              {showPastQuizzes ? 'Hide' : 'View All'}
+            </button>
           </div>
 
-          {/* Generate Button */}
-          <button
-            onClick={generateQuiz}
-            disabled={isGenerating}
-            className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-bold hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm hover:shadow-md text-sm"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 size={14} className="animate-spin" />
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <Zap size={14} />
-                <span>Generate</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Start Quiz Card - Compact */}
-      {quizQuestions.length > 0 && (
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-3 flex items-center justify-between shadow-md">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-              <Play size={18} className="text-white" />
-            </div>
-            <div>
-              <div className="text-sm font-black text-white">
-                {quizQuestions.length} Questions Ready
-              </div>
-              <div className="text-[10px] text-white/80 font-medium">
-                {topicResource.topicName}
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={startQuiz}
-            className="px-4 py-2 bg-white text-blue-700 rounded-lg font-bold hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md text-sm"
-          >
-            <Play size={14} />
-            <span>Start</span>
-          </button>
-        </div>
-      )}
-
-      {/* Past Quizzes Section */}
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-3">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-black text-xs text-slate-900 flex items-center gap-1.5">
-            <History size={12} />
-            Past Quizzes
-          </h3>
-          <button
-            onClick={() => {
-              setShowPastQuizzes(!showPastQuizzes);
-              if (!showPastQuizzes && pastQuizzes.length === 0) {
-                loadPastQuizzes();
-              }
-            }}
-            className="text-[10px] font-bold text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            {showPastQuizzes ? 'Hide' : 'View All'}
-          </button>
-        </div>
-
-        {showPastQuizzes && (
-          <>
-            {loadingPastQuizzes ? (
-              <div className="text-center py-4">
-                <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-              </div>
-            ) : pastQuizzes.length > 0 ? (
-              <div className="space-y-1.5">
-                {pastQuizzes.map((quiz) => (
-                  <div
-                    key={quiz.id}
-                    className="p-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-8 h-8 rounded flex items-center justify-center font-black text-xs ${
-                          quiz.accuracy_percentage >= 80
+          {showPastQuizzes && (
+            <>
+              {loadingPastQuizzes ? (
+                <div className="text-center py-4">
+                  <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+                </div>
+              ) : pastQuizzes.length > 0 ? (
+                <div className="space-y-1.5">
+                  {pastQuizzes.map((quiz) => (
+                    <div
+                      key={quiz.id}
+                      className="p-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-8 h-8 rounded flex items-center justify-center font-black text-xs ${quiz.accuracy_percentage >= 80
                             ? 'bg-green-100 text-green-700'
                             : quiz.accuracy_percentage >= 60
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}>
-                          {quiz.accuracy_percentage}%
-                        </div>
-                        <div>
-                          <div className="text-[11px] font-bold text-slate-900">
-                            {quiz.correct_count}/{quiz.question_count} correct
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                            }`}>
+                            {quiz.accuracy_percentage}%
                           </div>
-                          <div className="text-[9px] text-slate-500">
-                            {new Date(quiz.created_at).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                          <div>
+                            <div className="text-[11px] font-bold text-slate-900">
+                              {quiz.correct_count}/{quiz.question_count} correct
+                            </div>
+                            <div className="text-[9px] text-slate-500">
+                              {new Date(quiz.created_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-500">
-                        <Clock size={10} />
-                        {Math.floor(quiz.time_spent_seconds / 60)}:{String(quiz.time_spent_seconds % 60).padStart(2, '0')}
+                        <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                          <Clock size={10} />
+                          {Math.floor(quiz.time_spent_seconds / 60)}:{String(quiz.time_spent_seconds % 60).padStart(2, '0')}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-4 text-[11px] text-slate-500">
-                No past quizzes yet. Complete a quiz to see your history here.
-              </div>
-            )}
-          </>
-        )}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 text-[11px] text-slate-500">
+                  No past quizzes yet. Complete a quiz to see your history here.
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 // ========== TAB 4: FLASHCARDS ==========
 const FlashcardsTab: React.FC<{
   topicResource: TopicResource;
-  sharedQuestions: any[];
+  sharedQuestions: AnalyzedQuestion[];
 }> = ({ topicResource, sharedQuestions }) => {
   const { user } = useAuth();
   const [currentCard, setCurrentCard] = useState(0);
@@ -2874,270 +2876,130 @@ const FlashcardsTab: React.FC<{
   };
 
   const generateFlashcards = async () => {
-    if (!user) {
-      alert('Please log in to generate flashcards.');
-      return;
-    }
-
+    if (!user) { alert('Please log in.'); return; }
     setIsGenerating(true);
-
     try {
       const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-      if (!apiKey) {
-        alert('Gemini API key not configured. Please contact administrator.');
-        setIsGenerating(false);
-        return;
-      }
-
-      // Prepare context from questions
-      const questionContext = sharedQuestions.length > 0
-        ? sharedQuestions.map((q, idx) => `Q${idx + 1}: ${q.text}\nCorrect Answer: ${q.options?.[q.correct_option_index || q.correctOptionIndex] || 'N/A'}\n${q.solution_steps?.length > 0 ? 'Solution: ' + q.solution_steps.join(' ') : ''}`).join('\n\n')
-        : 'No practice questions available yet.';
-
-      const prompt = `You are an expert educator creating comprehensive flashcards for ${topicResource.topicName} (${topicResource.subject} - ${topicResource.examContext}).
-
-CONTEXT:
-- Topic: ${topicResource.topicName}
-- Subject: ${topicResource.subject}
-- Exam: ${topicResource.examContext}
-- Total Questions Available: ${sharedQuestions.length}
-
-QUESTIONS ANALYZED:
-${questionContext.substring(0, 3000)}
-
-TASK: Create 12-15 comprehensive flashcards covering:
-1. **Key Concepts** from official ${topicResource.examContext} ${topicResource.subject} syllabus for ${topicResource.topicName}
-2. **Important Formulas** and their applications
-3. **Common Exam Patterns** seen in questions
-4. **Critical Definitions** students must memorize
-5. **Problem-Solving Techniques** for this topic
-6. **Common Mistakes** to avoid
-
-Each flashcard should:
-- Have a clear, concise question/term (front)
-- Have a complete, exam-focused answer (back)
-- Be directly useful for ${topicResource.examContext} exam preparation
-- Cover different difficulty levels (easy concepts to advanced applications)
-
-Return ONLY a JSON array with this EXACT format:
-[
-  {
-    "term": "What is the determinant of a 2x2 matrix?",
-    "definition": "For matrix [[a,b],[c,d]], determinant = ad - bc. This value determines if the matrix is invertible (non-zero determinant means invertible).",
-    "context": "Core Definition"
-  },
-  {
-    "term": "Properties of determinants",
-    "definition": "1) det(AB) = det(A)×det(B)\\n2) det(A^T) = det(A)\\n3) If any row/column is zero, det = 0\\n4) Swapping rows changes sign\\n5) det(kA) = k^n × det(A) for n×n matrix",
-    "context": "Key Properties"
-  }
-]
-
-Generate 12-15 flashcards covering all important aspects of ${topicResource.topicName} for ${topicResource.examContext}.`;
-
-      console.log('🎴 Generating AI-powered flashcards for', topicResource.topicName);
-
-      const genAI = new GoogleGenerativeAI(apiKey);
+      const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({ model: selectedModel });
-
+      const prompt = `Create 12-15 comprehensive flashcards for ${topicResource.topicName} (${topicResource.subject}). Return JSON array with term, definition, context. Use $ $ for math.`;
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      const text = response.text();
-
-      // Parse JSON response
-      let jsonText = text.trim();
-      if (jsonText.startsWith('```json')) {
-        jsonText = jsonText.replace(/```json\s*/, '').replace(/```\s*$/, '');
-      } else if (jsonText.startsWith('```')) {
-        jsonText = jsonText.replace(/```\s*/, '').replace(/```\s*$/, '');
+      let text = response.text().trim();
+      if (text.startsWith('```json')) text = text.replace(/```json\s*/, '').replace(/```\s*$/, '');
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) {
+        setCards(parsed);
+        setCurrentCard(0);
+        setIsFlipped(false);
       }
-      jsonText = jsonText.trim();
-
-      const generatedCards = JSON.parse(jsonText);
-
-      if (!Array.isArray(generatedCards) || generatedCards.length === 0) {
-        throw new Error('Invalid flashcard format received');
-      }
-
-      console.log(`✅ Generated ${generatedCards.length} AI-powered flashcards`);
-
-      setCards(generatedCards);
-      setCurrentCard(0);
-      setIsFlipped(false);
-    } catch (error) {
-      console.error('Failed to generate flashcards:', error);
-      alert('Failed to generate flashcards. Please try again.');
+    } catch (e) {
+      console.error(e);
+      alert('Failed to generate.');
     } finally {
       setIsGenerating(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      {/* Compact Flashcards Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-3 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-            <CreditCard size={16} className="text-white" />
+    <div className="space-y-6">
+      {/* Premium Neural Header */}
+      <div className="bg-slate-900 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-white/10 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-[40px] -mr-16 -mt-16" />
+
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center backdrop-blur-md border border-purple-500/20">
+            <Brain size={20} className="text-purple-400" />
           </div>
           <div>
-            <div className="text-[10px] font-bold text-white/80 uppercase tracking-wider">RapidRecall</div>
-            <div className="text-xs font-black text-white">{cards.length} flashcards • {topicResource.topicName}</div>
+            <div className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-0.5">Rapid Recall Sync</div>
+            <div className="text-base font-black text-white">{cards.length} AI Synthesized Nodes</div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="relative z-10 flex items-center gap-2">
           {hasCards && (
-            <>
-              <div className="text-[10px] font-black text-white/90 bg-white/20 px-2 py-1 rounded-lg backdrop-blur-sm">
-                Card {currentCard + 1} / {cards.length}
-              </div>
-              <button
-                onClick={generateFlashcards}
-                disabled={isGenerating}
-                className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 text-[10px] backdrop-blur-sm"
-                title="Regenerate flashcards with fresh AI insights"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 size={12} className="animate-spin" />
-                    Regenerating...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw size={12} />
-                    Regenerate
-                  </>
-                )}
-              </button>
-            </>
+            <div className="hidden lg:flex items-center gap-2 mr-4 px-3 py-1 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+              <div className="text-[10px] font-black text-slate-400 uppercase">Retention Mode</div>
+              <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
           )}
+          <button
+            onClick={generateFlashcards}
+            disabled={isGenerating}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-black text-white flex items-center gap-2 transition-all shadow-lg shadow-purple-900/40"
+          >
+            <Sparkles size={14} />
+            {isGenerating ? 'SYNTHESIZING...' : 'GENERATE AI NODES'}
+          </button>
         </div>
       </div>
 
-      {/* Flashcard Viewer */}
       {hasCards ? (
-        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="p-3">
-            <div className="w-full max-w-xl mx-auto perspective-1000 relative">
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsFlipped(!isFlipped);
-                }}
-                className={`select-none relative w-full h-64 transition-all duration-700 transform-style-3d cursor-pointer ${isFlipped ? 'rotate-y-180' : ''}`}
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                {/* Card Front */}
-                <div
-                  className="absolute inset-0 backface-hidden bg-gradient-to-br from-white to-purple-50 rounded-lg p-4 shadow-md flex flex-col items-center text-center justify-center border-2 border-purple-200 overflow-hidden"
-                  style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
-                >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-t-lg"></div>
-                  <div className="text-purple-600 font-black text-[9px] uppercase tracking-wider mb-3 bg-purple-100 px-2.5 py-0.5 rounded-full">{topicResource.topicName}</div>
-                  <div className="flex-1 flex items-center justify-center w-full overflow-y-auto px-3">
-                    <div className="text-base md:text-lg font-black text-slate-900 leading-tight">
-                      <RenderWithMath text={cards[currentCard].term} showOptions={false} compact={false} serif={false} />
-                    </div>
-                  </div>
-                  <div className="text-[8px] font-bold text-purple-500 uppercase tracking-wider flex items-center gap-1 mt-3 bg-purple-100/50 px-2.5 py-1 rounded-full">
-                    <div className="w-1 h-1 rounded-full bg-purple-500 animate-pulse"></div> Click to reveal
-                  </div>
+        <div className="max-w-5xl mx-auto">
+          {/* Immersive 3D Stage */}
+          <div className="perspective-2000 py-4">
+            <div
+              onClick={() => setIsFlipped(!isFlipped)}
+              className={`relative w-full h-[320px] transition-all duration-700 transform-style-3d cursor-pointer preserve-3d group ${isFlipped ? 'rotate-y-180' : ''}`}
+            >
+              {/* Card Front - Clean, Premium Typography */}
+              <div className="absolute inset-0 backface-hidden bg-white rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-center border-2 border-slate-100 overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-500 to-indigo-500" />
+                <div className="text-[11px] font-bold text-purple-600 uppercase tracking-wider mb-8 bg-purple-50 px-4 py-1.5 rounded-full border border-purple-100 shadow-sm font-outfit">CONCEPT NODE {currentCard + 1}</div>
+                <div className="text-2xl md:text-3xl font-black text-slate-900 leading-tight text-center">
+                  <RenderWithMath text={cards[currentCard].term} showOptions={false} />
                 </div>
-
-                {/* Card Back */}
-                <div
-                  className="absolute inset-0 backface-hidden bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg shadow-md flex flex-col border-2 border-slate-700 overflow-hidden"
-                  style={{
-                    backfaceVisibility: 'hidden',
-                    WebkitBackfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)'
-                  }}
-                >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-t-lg"></div>
-
-                  {/* Scrollable content area */}
-                  <div className="flex-1 w-full overflow-y-auto px-4 pt-4 pb-10 scroller-hide">
-                    <div className="flex flex-col items-center justify-center min-h-full space-y-3">
-                      <div className="text-emerald-400 font-black text-[9px] uppercase tracking-wider bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Answer</div>
-                      <div className="text-xs md:text-sm font-bold text-white leading-relaxed text-center px-3">
-                        <RenderWithMath text={cards[currentCard].definition} showOptions={false} autoSteps={true} dark={true} compact={false} serif={false} />
-                      </div>
-                      {cards[currentCard].context && (
-                        <div className="text-[10px] text-emerald-200 font-medium italic bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
-                          {cards[currentCard].context}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Bottom hint */}
-                  <div className="absolute bottom-3 left-0 right-0 text-center">
-                    <div className="text-[8px] font-bold text-emerald-300 uppercase tracking-wider flex items-center justify-center gap-1 bg-emerald-500/20 px-2.5 py-1 rounded-full mx-auto w-fit">
-                      <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></div> Click to flip
-                    </div>
-                  </div>
+                <div className="mt-auto text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Eye size={12} className="text-purple-400" /> Click to reveal truth
                 </div>
               </div>
 
-              {/* Navigation */}
-              <div className="mt-3 flex items-center justify-center gap-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrev();
-                  }}
-                  className="group w-9 h-9 bg-white border-2 border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-purple-700 hover:border-purple-500 hover:bg-purple-50 transition-all shadow-sm hover:shadow-md"
-                >
-                  <ChevronLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNext();
-                  }}
-                  className="group w-9 h-9 bg-white border-2 border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-purple-700 hover:border-purple-500 hover:bg-purple-50 transition-all shadow-sm hover:shadow-md"
-                >
-                  <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-                </button>
+              {/* Card Back - Dark, Tech-Focused Analysis */}
+              <div className="absolute inset-0 backface-hidden bg-slate-900 rounded-3xl p-8 shadow-2xl flex flex-col border-2 border-slate-700 overflow-hidden rotate-y-180">
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 to-cyan-400" />
+                <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto px-4 scroller-hide">
+                  <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-6 bg-emerald-500/10 px-4 py-1.5 rounded-full border border-emerald-500/20 shadow-sm font-outfit">INTELLIGENCE SYNOPSIS</div>
+                  <div className="text-sm md:text-base font-bold text-slate-100 leading-relaxed text-center">
+                    <RenderWithMath text={cards[currentCard].definition} showOptions={false} dark={true} />
+                  </div>
+                  {cards[currentCard].context && (
+                    <div className="mt-6 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                      Context: <span className="text-emerald-400">{cards[currentCard].context}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 text-center">
+                  <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">RapidRecall System v2.0</div>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Precision Controls */}
+          <div className="flex items-center justify-between mt-8 px-4">
+            <button onClick={handlePrev} className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-slate-200 text-slate-400 hover:text-purple-600 hover:border-purple-200 transition-all shadow-sm hover:shadow-md">
+              <ChevronLeft size={24} />
+            </button>
+
+            <div className="flex flex-col items-center">
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Index</div>
+              <div className="text-lg font-black text-slate-900">{currentCard + 1} <span className="text-slate-300">/ {cards.length}</span></div>
+            </div>
+
+            <button onClick={handleNext} className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20">
+              <ChevronRight size={24} />
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4">
-          <div className="text-center py-8 border-2 border-dashed border-slate-300 rounded-lg">
-            <CreditCard size={32} className="text-slate-300 mx-auto mb-3" />
-            <p className="text-xs text-slate-600 font-medium mb-2">
-              No flashcards available for this topic yet
-            </p>
-            <p className="text-[10px] text-slate-500 mb-4 max-w-md mx-auto">
-              AI will create comprehensive flashcards covering key concepts, formulas, exam patterns, and problem-solving techniques from the official {topicResource.examContext} syllabus
-            </p>
-            <button
-              onClick={generateFlashcards}
-              disabled={isGenerating}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center gap-2 mx-auto text-sm shadow-md hover:shadow-lg"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 size={14} className="animate-spin" />
-                  Generating AI Flashcards...
-                </>
-              ) : (
-                <>
-                  <Sparkles size={14} />
-                  Generate AI Flashcards
-                </>
-              )}
-            </button>
-            {sharedQuestions.length > 0 && (
-              <p className="text-[9px] text-slate-400 mt-3">
-                Using {sharedQuestions.length} questions + official syllabus
-              </p>
-            )}
+        <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center shadow-sm">
+          <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <Brain size={40} className="text-slate-300" />
           </div>
+          <h3 className="text-xl font-black text-slate-900 mb-2">Neural Nodes Latent</h3>
+          <p className="text-sm text-slate-500 max-w-md mx-auto mb-8 font-medium">Activate the AI Synapse to generate comprehensive memory nodes for {topicResource.topicName}.</p>
+          <button onClick={generateFlashcards} className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-purple-900/20">Initialize Synapse</button>
         </div>
       )}
     </div>
@@ -3147,106 +3009,98 @@ Generate 12-15 flashcards covering all important aspects of ${topicResource.topi
 // ========== TAB 5: PROGRESS ==========
 const ProgressTab: React.FC<{ topicResource: TopicResource }> = ({ topicResource }) => {
   return (
-    <div className="space-y-6">
-      {/* Mastery Overview */}
-      <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
-        <h2 className="font-black text-lg text-slate-900 mb-6">Mastery Overview</h2>
-        <div className="flex items-center justify-center mb-6">
-          <div className="group relative w-48 h-48">
-            <svg className="transform -rotate-90 w-48 h-48 transition-transform duration-500 group-hover:scale-110">
-              <circle cx="96" cy="96" r="88" stroke="#e2e8f0" strokeWidth="12" fill="none" />
-              <circle
-                cx="96"
-                cy="96"
-                r="88"
-                stroke="url(#purpleGradient)"
-                strokeWidth="12"
-                fill="none"
-                strokeDasharray={`${(topicResource.masteryLevel / 100) * 552.92} 552.92`}
-                strokeLinecap="round"
-                className="transition-all duration-500"
-              />
-              <defs>
-                <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#9333ea" />
-                  <stop offset="100%" stopColor="#7e22ce" />
-                </linearGradient>
-              </defs>
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* High-Intelligence Status Header */}
+      <div className="bg-slate-900 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-white/10 shadow-xl overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-[40px] -mr-16 -mt-16" />
+
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center backdrop-blur-md border border-indigo-500/20">
+            <BarChart3 size={20} className="text-indigo-400" />
+          </div>
+          <div>
+            <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-0.5">Performance Intelligence</div>
+            <div className="text-base font-black text-white">Advanced Learning Analytics</div>
+          </div>
+        </div>
+
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="px-4 py-1.5 bg-white/5 rounded-xl border border-white/10 text-center">
+            <div className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Current Standing</div>
+            <div className="text-sm font-black text-indigo-400">{topicResource.masteryLevel >= 80 ? 'Master' : topicResource.masteryLevel >= 50 ? 'Proficient' : 'Novice'} Stage</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Global Mastery Ring */}
+        <div className="lg:col-span-1 bg-white border border-slate-200 rounded-3xl p-8 flex flex-col items-center justify-center shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
+          <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-8">Mastery Quotient</h3>
+
+          <div className="relative w-48 h-48 flex items-center justify-center">
+            <svg className="w-full h-full transform -rotate-90">
+              <circle cx="96" cy="96" r="88" strokeWidth="12" stroke="currentColor" fill="transparent" className="text-slate-100" />
+              <circle cx="96" cy="96" r="88" strokeWidth="12" strokeDasharray={553} strokeDashoffset={553 - (553 * topicResource.masteryLevel) / 100} strokeLinecap="round" stroke="currentColor" fill="transparent" className="text-indigo-600 transition-all duration-1000 ease-out" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="text-5xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-700">{topicResource.masteryLevel}%</div>
-              <div className="text-sm font-medium text-slate-600 transition-colors duration-300 group-hover:text-purple-600">Mastery</div>
+              <span className="text-5xl font-black text-slate-900 tracking-tighter">{topicResource.masteryLevel}%</span>
+              <span className="text-[10px] font-black text-slate-400 uppercase mt-1">Syllabus Command</span>
+            </div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-2 gap-4 w-full">
+            <div className="bg-slate-50 rounded-2xl p-4 text-center border border-slate-100">
+              <div className="text-lg font-black text-slate-900">{topicResource.questionsAttempted}</div>
+              <div className="text-[9px] font-black text-slate-400 uppercase">Attempted</div>
+            </div>
+            <div className="bg-slate-50 rounded-2xl p-4 text-center border border-slate-100">
+              <div className="text-lg font-black text-emerald-600">{topicResource.questionsCorrect}</div>
+              <div className="text-[9px] font-black text-slate-400 uppercase">Correct</div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="group text-center p-4 bg-slate-50 rounded-lg hover:bg-purple-50 hover:border hover:border-purple-200 transition-all duration-300 cursor-pointer">
-            <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-700">{topicResource.questionsAttempted}</div>
-            <div className="text-xs font-medium text-slate-600 transition-colors duration-300 group-hover:text-purple-600">Questions Attempted</div>
-          </div>
-          <div className="group text-center p-4 bg-slate-50 rounded-lg hover:bg-purple-50 hover:border hover:border-purple-200 transition-all duration-300 cursor-pointer">
-            <div className="text-2xl font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-700">{topicResource.questionsCorrect}</div>
-            <div className="text-xs font-medium text-slate-600 transition-colors duration-300 group-hover:text-purple-600">Questions Correct</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Study Timeline */}
-      <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
-        <h2 className="font-black text-lg text-slate-900 mb-4">Study Timeline</h2>
-        {topicResource.lastPracticed ? (
-          <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
-            <Calendar size={20} className="text-slate-400" />
-            <div>
-              <div className="text-sm font-black text-slate-900">Last Practiced</div>
-              <div className="text-xs text-slate-600">
-                {new Date(topicResource.lastPracticed).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8 text-slate-500 text-sm font-medium">
-            No practice history yet
-          </div>
-        )}
-      </div>
-
-      {/* Performance Insights */}
-      <div className="bg-white border-2 border-slate-200 rounded-xl p-6">
-        <h2 className="font-black text-lg text-slate-900 mb-4">Performance Insights</h2>
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <TrendingUp size={20} className="text-emerald-600" />
-            </div>
-            <div>
-              <div className="font-black text-sm text-slate-900 mb-1">Strength</div>
-              <div className="text-sm text-slate-600 font-medium">
-                {topicResource.averageAccuracy >= 70
-                  ? 'You have a strong grasp of this topic. Focus on maintaining consistency.'
-                  : 'Continue practicing to improve your understanding.'}
-              </div>
+        {/* Middle/Right: Deep Insights & Recommendations */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Strategic Intelligence</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { label: 'Precision Rating', val: `${topicResource.averageAccuracy.toFixed(0)}%`, icon: Target, color: 'text-rose-500', bg: 'bg-rose-50', desc: 'Accuracy on first attempts across all papers' },
+                { label: 'Latency Score', val: 'Low', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'Average response time per intelligence node' },
+                { label: 'Consistency', val: 'High', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50', desc: 'Sustained performance over previous 5 sessions' },
+                { label: 'Last Sync', val: topicResource.lastPracticed ? new Date(topicResource.lastPracticed).toLocaleDateString() : 'Never', icon: Calendar, color: 'text-blue-500', bg: 'bg-blue-50', desc: 'Time elapsed since last syllabus interaction' }
+              ].map((insight, i) => (
+                <div key={i} className="flex gap-4 p-4 rounded-2xl border border-slate-100 hover:border-slate-200 transition-all">
+                  <div className={`w-12 h-12 ${insight.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                    <insight.icon size={20} className={insight.color} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{insight.label}</div>
+                    <div className="text-lg font-black text-slate-900 mb-1">{insight.val}</div>
+                    <div className="text-[9px] text-slate-500 font-medium leading-tight">{insight.desc}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Target size={20} className="text-blue-600" />
-            </div>
-            <div>
-              <div className="font-black text-sm text-slate-900 mb-1">Recommendation</div>
-              <div className="text-sm text-slate-600 font-medium">
-                {topicResource.masteryLevel < 50
-                  ? 'Review study notes and practice more questions to build foundation.'
-                  : topicResource.masteryLevel < 85
-                  ? 'Take adaptive quizzes to identify and strengthen weak areas.'
-                  : 'Excellent work! Focus on maintaining mastery with periodic revision.'}
-              </div>
+          <div className="bg-slate-900 rounded-3xl p-6 shadow-xl relative overflow-hidden border border-white/5">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-[40px] -mr-16 -mt-16" />
+            <h3 className="text-xs font-black text-emerald-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <Sparkles size={14} /> Agentic Recommendation
+            </h3>
+            <p className="text-white text-sm font-medium leading-relaxed mb-6">
+              {topicResource.masteryLevel < 50
+                ? `System detects fundamental gaps in ${topicResource.topicName}. PRIORITY: Review syllabus documentation and complete 5 foundational practice sets.`
+                : topicResource.masteryLevel < 85
+                  ? `Current mastery is stable but optimization is required. PRIORITY: Initiate "Adaptive Quiz" mode to target moderate-to-hard latent concepts.`
+                  : `Elite stage reached. PRIORITY: Maintenance sync every 72 hours and challenge peer-level rigor questions to sustain 90%+ percentile.`}
+            </p>
+            <div className="flex gap-2">
+              <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white uppercase group cursor-pointer hover:bg-white/10 transition-all">Deep Dive Analysis</div>
+              <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white uppercase group cursor-pointer hover:bg-white/10 transition-all">Curated Weak areas</div>
             </div>
           </div>
         </div>

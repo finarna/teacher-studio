@@ -185,17 +185,15 @@ export const DerivationStep: React.FC<{ index: number, title?: string, content: 
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Step Number Badge */}
-        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 text-white flex items-center justify-center text-sm font-black shadow-lg shrink-0 transition-all duration-300 ${
-          isExpanded ? 'scale-100' : 'scale-90 opacity-70'
-        } ${isHovered ? 'ring-4 ring-primary-500/20' : ''}`}>
+        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 text-white flex items-center justify-center text-sm font-black shadow-lg shrink-0 transition-all duration-300 ${isExpanded ? 'scale-100' : 'scale-90 opacity-70'
+          } ${isHovered ? 'ring-4 ring-primary-500/20' : ''}`}>
           {index}
         </div>
 
         {/* Title */}
         <div className="flex-1 flex items-center gap-3 min-w-0">
-          <div className={`text-[11px] font-bold text-slate-700 uppercase tracking-wider font-outfit transition-colors duration-300 truncate ${
-            isHovered ? 'text-slate-900' : ''
-          }`}>
+          <div className={`text-[11px] font-bold text-slate-700 uppercase tracking-wider font-outfit transition-colors duration-300 truncate ${isHovered ? 'text-slate-900' : ''
+            }`}>
             {title || `Step ${index}`}
           </div>
           {!isExpanded && (
@@ -214,9 +212,8 @@ export const DerivationStep: React.FC<{ index: number, title?: string, content: 
       </div>
 
       {/* Step Content - Collapsible */}
-      <div className={`transition-all duration-500 ease-out ${
-        isExpanded ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'
-      }`}>
+      <div className={`transition-all duration-500 ease-out ${isExpanded ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'
+        }`}>
         <div className="ml-13 relative group/step">
           {/* Connecting Line */}
           <div className="absolute left-[-26px] top-0 bottom-0 w-[2px] bg-gradient-to-b from-slate-200 via-slate-200 to-transparent" />
@@ -230,9 +227,8 @@ export const DerivationStep: React.FC<{ index: number, title?: string, content: 
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary-500/30 to-transparent" />
 
             {/* Action Buttons - Show on Hover */}
-            <div className={`absolute top-3 right-3 flex items-center gap-1.5 transition-opacity duration-300 ${
-              isHovered ? 'opacity-100' : 'opacity-0'
-            }`}>
+            <div className={`absolute top-3 right-3 flex items-center gap-1.5 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
+              }`}>
               <button
                 onClick={(e) => { e.stopPropagation(); handleCopy(); }}
                 className="p-1.5 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm group/btn"
@@ -397,7 +393,7 @@ export const RenderWithMath: React.FC<{
   // 5. Split by newlines to handle paragraphs
   const paragraphs = cleanText.split('\n').filter(p => p.trim().length > 0);
 
-  const hasCustomColor = className?.includes('text-');
+  const hasCustomFontSize = className?.includes('text-');
 
   return (
     <div className={`${compact ? '' : 'prose prose-slate max-w-none'} ${serif ? 'font-serif' : 'font-instrument'} ${className}`}>
@@ -408,7 +404,7 @@ export const RenderWithMath: React.FC<{
             if (compact) {
               return (
                 <div key={i} className="my-1.5 flex justify-center w-full">
-                  <MathRenderer expression={p.trim().slice(2, -2)} displayMode={false} className={`scale-110 drop-shadow-sm ${dark ? 'text-white' : (hasCustomColor ? '' : 'text-slate-900')}`} />
+                  <MathRenderer expression={p.trim().slice(2, -2)} displayMode={false} className={`scale-110 drop-shadow-sm ${dark ? 'text-white' : (hasCustomFontSize ? '' : 'text-slate-900')}`} />
                 </div>
               );
             }
@@ -433,7 +429,7 @@ export const RenderWithMath: React.FC<{
 
                   {/* Math Content */}
                   <div className="relative z-10 pt-2">
-                    <MathRenderer expression={p.trim().slice(2, -2)} displayMode={true} className={hasCustomColor ? '' : 'text-slate-900'} />
+                    <MathRenderer expression={p.trim().slice(2, -2)} displayMode={true} className={hasCustomFontSize ? '' : 'text-slate-900'} />
                   </div>
                 </div>
               </div>
@@ -444,7 +440,7 @@ export const RenderWithMath: React.FC<{
           const parts = p.split(/(\$\$[\s\S]+?\$\$|\$[^$]+?\$)/g);
 
           return (
-            <div key={i} className={`leading-[1.9] ${serif ? 'text-lg md:text-xl' : 'text-base font-medium'} ${dark ? 'text-white shrink-0' : (hasCustomColor ? '' : 'text-slate-800')}`}>
+            <div key={i} className={`leading-[1.9] ${hasCustomFontSize ? '' : (serif ? 'text-lg md:text-xl' : 'text-base font-medium')} ${dark ? 'text-white shrink-0' : (hasCustomFontSize ? '' : 'text-slate-800')}`}>
               {parts.map((part, pIdx) => {
                 if (part.startsWith('$$') && part.endsWith('$$') && !compact) {
                   return (
@@ -480,15 +476,19 @@ export const RenderWithMath: React.FC<{
                 }
 
                 // Fallback for raw LaTeX commands not wrapped in $
-                // Use shared LATEX_PATTERNS from mathLatexReference.ts
+                // High risk for false positives. We only KaTeX it if it looks like an isolated formula
+                // rather than a full paragraph of text.
                 const hasLatexCommand = LATEX_PATTERNS.some(t => part.includes(t));
                 const hasSubSuperscript = /[a-zA-Z0-9]+[_^][{a-zA-Z0-9]/.test(part);
 
-                if (hasLatexCommand || (hasSubSuperscript && (part.includes('{') || part.includes('_') || part.includes('^')))) {
+                const isLikelyPureMath = (hasLatexCommand || (hasSubSuperscript && (part.includes('{') || part.includes('_') || part.includes('^')))) &&
+                  (part.length < 40 || (part.match(/\s/g) || []).length <= 2);
+
+                if (isLikelyPureMath) {
                   return <MathRenderer key={pIdx} expression={part} inline={true} className={`font-bold px-2 py-0.5 rounded-md ${dark ? 'text-emerald-300 bg-emerald-950/30' : 'text-primary-900 bg-primary-50/80 border border-primary-100/50'}`} />;
                 }
 
-                return <span key={pIdx} className="whitespace-normal">{part}</span>;
+                return <span key={pIdx} className="whitespace-pre-wrap">{part}</span>;
               })}
             </div>
           );
@@ -504,11 +504,10 @@ export const RenderWithMath: React.FC<{
             const isCorrect = correctOptionIndex !== undefined && i === correctOptionIndex;
 
             return (
-              <div key={i} className={`flex gap-4 p-6 border rounded-[2rem] shadow-sm hover:shadow-xl transition-all group/opt relative ${
-                isCorrect
-                  ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-300 hover:border-emerald-400'
-                  : 'bg-white border-slate-100 hover:border-primary-200'
-              }`}>
+              <div key={i} className={`flex gap-4 p-6 border rounded-[2rem] shadow-sm hover:shadow-xl transition-all group/opt relative ${isCorrect
+                ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-300 hover:border-emerald-400'
+                : 'bg-white border-slate-100 hover:border-primary-200'
+                }`}>
                 {isCorrect && (
                   <div className="absolute -top-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -516,14 +515,12 @@ export const RenderWithMath: React.FC<{
                     </svg>
                   </div>
                 )}
-                <div className={`w-12 h-12 rounded-xl text-white flex items-center justify-center text-xs font-black shrink-0 transition-all shadow-2xl transform -rotate-2 group-hover/opt:rotate-0 ${
-                  isCorrect
-                    ? 'bg-emerald-600 group-hover/opt:bg-emerald-700 shadow-emerald-900/20'
-                    : 'bg-slate-950 group-hover/opt:bg-primary-600 shadow-slate-900/10'
-                }`}>{label}</div>
-                <div className={`text-sm font-bold pt-3 flex-1 leading-relaxed ${
-                  isCorrect ? 'text-emerald-900' : 'text-slate-800'
-                }`}>
+                <div className={`w-12 h-12 rounded-xl text-white flex items-center justify-center text-xs font-black shrink-0 transition-all shadow-2xl transform -rotate-2 group-hover/opt:rotate-0 ${isCorrect
+                  ? 'bg-emerald-600 group-hover/opt:bg-emerald-700 shadow-emerald-900/20'
+                  : 'bg-slate-950 group-hover/opt:bg-primary-600 shadow-slate-900/10'
+                  }`}>{label}</div>
+                <div className={`text-sm font-bold pt-3 flex-1 leading-relaxed ${isCorrect ? 'text-emerald-900' : 'text-slate-800'
+                  }`}>
                   <RenderWithMath text={content} showOptions={false} serif={false} />
                 </div>
               </div>

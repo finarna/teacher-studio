@@ -556,306 +556,306 @@ const AppContent: React.FC = () => {
         />
 
         <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50/50">
+          <LearningJourneyProvider userId={user?.id || ''}>
 
-          {/* Global Compact Header for Desktop (Hidden in Learning Journey) */}
-          {godModeView !== 'learning_journey' && (
-            <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 z-40 shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1">
-                  <Search size={12} className="text-slate-400" />
-                  <input type="text" placeholder="Global Search..." className="bg-transparent border-0 outline-none text-[10px] font-black text-slate-900 w-32 placeholder:text-slate-400 uppercase tracking-widest" />
+            {/* Global Compact Header for Desktop (Hidden in Learning Journey) */}
+            {godModeView !== 'learning_journey' && (
+              <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 z-40 shrink-0">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1">
+                    <Search size={12} className="text-slate-400" />
+                    <input type="text" placeholder="Global Search..." className="bg-transparent border-0 outline-none text-[10px] font-black text-slate-900 w-32 placeholder:text-slate-400 uppercase tracking-widest" />
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-3">
-                {/* GLOBAL Subject Switcher - Primary Control */}
-                <SubjectSwitcher />
-                <div className="h-6 w-px bg-slate-200" />
-                <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors relative">
-                  <Bell size={18} />
-                  <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary-500 rounded-full border border-white" />
-                </button>
-              </div>
-            </header>
-          )}
+                <div className="flex items-center gap-3">
+                  {/* GLOBAL Subject Switcher - Primary Control */}
+                  <SubjectSwitcher />
+                  <div className="h-6 w-px bg-slate-200" />
+                  <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors relative">
+                    <Bell size={18} />
+                    <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary-500 rounded-full border border-white" />
+                  </button>
+                </div>
+              </header>
+            )}
 
-          <main className="flex-1 overflow-y-auto relative">
-            {godModeView === 'mastermind' && (
-              <div className="h-full overflow-y-auto scroller-hide p-8 bg-slate-50/50">
-                <div className="max-w-7xl mx-auto space-y-6">
-                  {/* Dashboard Header */}
-                  <div>
-                    <h1 className="text-3xl font-black text-slate-900 font-outfit uppercase tracking-tight">Teacher Dashboard</h1>
-                    <p className="text-sm text-slate-500 font-bold mt-1">Central command for all teaching operations</p>
-                  </div>
-
-                  {/* Quick Stats */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                          <LayoutDashboard size={20} className="text-blue-600" />
-                        </div>
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Total Scans</span>
-                      </div>
-                      <div className="text-3xl font-black text-slate-900 font-outfit">{recentScans.length}</div>
+            <main className="flex-1 overflow-y-auto relative">
+              {godModeView === 'mastermind' && (
+                <div className="h-full overflow-y-auto scroller-hide p-8 bg-slate-50/50">
+                  <div className="max-w-7xl mx-auto space-y-6">
+                    {/* Dashboard Header */}
+                    <div>
+                      <h1 className="text-3xl font-black text-slate-900 font-outfit uppercase tracking-tight">Teacher Dashboard</h1>
+                      <p className="text-sm text-slate-500 font-bold mt-1">Central command for all teaching operations</p>
                     </div>
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                          <GraduationCap size={20} className="text-emerald-600" />
-                        </div>
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Students</span>
-                      </div>
-                      <div className="text-3xl font-black text-slate-900 font-outfit">24</div>
-                    </div>
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                          <Search size={20} className="text-amber-600" />
-                        </div>
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Questions</span>
-                      </div>
-                      <div className="text-3xl font-black text-slate-900 font-outfit">{recentScans.reduce((acc, scan) => acc + (scan.analysisData?.questions?.length || 0), 0)}</div>
-                    </div>
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
-                          <Bell size={20} className="text-rose-600" />
-                        </div>
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Alerts</span>
-                      </div>
-                      <div className="text-3xl font-black text-slate-900 font-outfit">3</div>
-                    </div>
-                  </div>
 
-                  {/* Quick Actions */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <button
-                      onClick={() => setGodModeView('scanning')}
-                      className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <Home size={24} className="text-primary-600" />
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                            <LayoutDashboard size={20} className="text-blue-600" />
+                          </div>
+                          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Total Scans</span>
+                        </div>
+                        <div className="text-3xl font-black text-slate-900 font-outfit">{recentScans.length}</div>
                       </div>
-                      <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Scan New Paper</h3>
-                      <p className="text-xs text-slate-500 font-bold">Upload and analyze exam papers with AI</p>
-                    </button>
-                    <button
-                      onClick={() => setGodModeView('approval')}
-                      className="bg-white border-2 border-emerald-200 rounded-2xl p-6 hover:border-emerald-400 hover:shadow-lg transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <CheckCircle2 size={24} className="text-emerald-600" />
+                      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                            <GraduationCap size={20} className="text-emerald-600" />
+                          </div>
+                          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Students</span>
+                        </div>
+                        <div className="text-3xl font-black text-slate-900 font-outfit">24</div>
                       </div>
-                      <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Review & Publish</h3>
-                      <p className="text-xs text-slate-500 font-bold">Approve scans to make them available system-wide</p>
-                    </button>
-                    <button
-                      onClick={() => setGodModeView('recall')}
-                      className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <User size={24} className="text-amber-600" />
+                      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                            <Search size={20} className="text-amber-600" />
+                          </div>
+                          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Questions</span>
+                        </div>
+                        <div className="text-3xl font-black text-slate-900 font-outfit">{recentScans.reduce((acc, scan) => acc + (scan.analysisData?.questions?.length || 0), 0)}</div>
                       </div>
-                      <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Rapid Recall</h3>
-                      <p className="text-xs text-slate-500 font-bold">Generate flashcards for quick revision</p>
-                    </button>
-                    <button
-                      onClick={() => setGodModeView('training_studio')}
-                      className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <ArrowLeft size={24} className="text-amber-600" />
+                      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
+                            <Bell size={20} className="text-rose-600" />
+                          </div>
+                          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Alerts</span>
+                        </div>
+                        <div className="text-3xl font-black text-slate-900 font-outfit">3</div>
                       </div>
-                      <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Pedagogy Studio</h3>
-                      <p className="text-xs text-slate-500 font-bold">Create custom training materials</p>
-                    </button>
-                  </div>
+                    </div>
 
-                  {/* Recent Scans */}
-                  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-black text-slate-900 font-outfit uppercase">Recent Scans</h2>
+                    {/* Quick Actions */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <button
                         onClick={() => setGodModeView('scanning')}
-                        className="text-xs font-black text-primary-600 uppercase tracking-widest hover:text-primary-700"
+                        className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
                       >
-                        View All →
+                        <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <Home size={24} className="text-primary-600" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Scan New Paper</h3>
+                        <p className="text-xs text-slate-500 font-bold">Upload and analyze exam papers with AI</p>
+                      </button>
+                      <button
+                        onClick={() => setGodModeView('approval')}
+                        className="bg-white border-2 border-emerald-200 rounded-2xl p-6 hover:border-emerald-400 hover:shadow-lg transition-all text-left group"
+                      >
+                        <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <CheckCircle2 size={24} className="text-emerald-600" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Review & Publish</h3>
+                        <p className="text-xs text-slate-500 font-bold">Approve scans to make them available system-wide</p>
+                      </button>
+                      <button
+                        onClick={() => setGodModeView('recall')}
+                        className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
+                      >
+                        <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <User size={24} className="text-amber-600" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Rapid Recall</h3>
+                        <p className="text-xs text-slate-500 font-bold">Generate flashcards for quick revision</p>
+                      </button>
+                      <button
+                        onClick={() => setGodModeView('training_studio')}
+                        className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
+                      >
+                        <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <ArrowLeft size={24} className="text-amber-600" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Pedagogy Studio</h3>
+                        <p className="text-xs text-slate-500 font-bold">Create custom training materials</p>
                       </button>
                     </div>
-                    <div className="space-y-3">
-                      {recentScans.slice(0, 5).map(scan => (
+
+                    {/* Recent Scans */}
+                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-black text-slate-900 font-outfit uppercase">Recent Scans</h2>
                         <button
-                          key={scan.id}
-                          onClick={() => {
-                            setSelectedScan(scan);
-                            setGodModeView('analysis');
-                          }}
-                          className="w-full flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all text-left"
+                          onClick={() => setGodModeView('scanning')}
+                          className="text-xs font-black text-primary-600 uppercase tracking-widest hover:text-primary-700"
                         >
-                          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                            <Home size={18} className="text-slate-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-black text-slate-900 truncate">{scan.name}</h4>
-                            <p className="text-xs text-slate-500 font-bold">{scan.subject} • {scan.grade}</p>
-                          </div>
-                          <ArrowLeft size={16} className="text-slate-300" />
+                          View All →
                         </button>
-                      ))}
-                      {recentScans.length === 0 && (
-                        <div className="text-center py-12">
-                          <p className="text-sm text-slate-400 font-bold">No scans yet. Start by scanning a paper!</p>
-                        </div>
-                      )}
+                      </div>
+                      <div className="space-y-3">
+                        {recentScans.slice(0, 5).map(scan => (
+                          <button
+                            key={scan.id}
+                            onClick={() => {
+                              setSelectedScan(scan);
+                              setGodModeView('analysis');
+                            }}
+                            className="w-full flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all text-left"
+                          >
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                              <Home size={18} className="text-slate-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-black text-slate-900 truncate">{scan.name}</h4>
+                              <p className="text-xs text-slate-500 font-bold">{scan.subject} • {scan.grade}</p>
+                            </div>
+                            <ArrowLeft size={16} className="text-slate-300" />
+                          </button>
+                        ))}
+                        {recentScans.length === 0 && (
+                          <div className="text-center py-12">
+                            <p className="text-sm text-slate-400 font-bold">No scans yet. Start by scanning a paper!</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-            {godModeView === 'analysis' && (
-              <div className="h-full overflow-y-auto scroller-hide">
-                <ExamAnalysis
-                  onBack={() => setGodModeView('mastermind')}
-                  scan={selectedScan}
-                  onGenerateTraining={() => setGodModeView('training_studio')}
-                  onUpdateScan={(updatedScan) => {
-                    setRecentScans(prev => prev.map(s => s.id === updatedScan.id ? updatedScan : s));
-                    setSelectedScan(updatedScan);
-                    syncScanToSupabase(updatedScan);
-                  }}
-                  recentScans={recentScans}
-                  onSelectScan={setSelectedScan}
-                />
-              </div>
-            )}
-            {godModeView === 'training_studio' && (
-              <div className="h-full overflow-y-auto scroller-hide">
-                <TrainingStudio
-                  onClose={() => setGodModeView('mastermind')}
-                  selectedScan={selectedScan}
-                  onTrainingCreated={(training) => {
-                    setCurrentTraining(training);
-                    setGodModeView('training_viewer');
-                  }}
-                />
-              </div>
-            )}
-            {godModeView === 'training_viewer' && currentTraining && (
-              <div className="h-full overflow-y-auto scroller-hide">
-                <TrainingViewer
-                  training={currentTraining}
-                  onBack={() => setGodModeView('training_studio')}
-                />
-              </div>
-            )}
-            {godModeView === 'gallery' && (
-              <div className="h-full">
-                <SketchGallery
-                  onBack={() => setGodModeView('mastermind')}
-                  scan={selectedScan}
-                  recentScans={recentScans}
-                  onUpdateScan={(updatedScan) => {
-                    setRecentScans(prev => prev.map(s => s.id === updatedScan.id ? updatedScan : s));
-                    setSelectedScan(updatedScan);
-                    syncScanToSupabase(updatedScan);
-                  }}
-                />
-              </div>
-            )}
-            {godModeView === 'recall' && <div className="h-full overflow-y-auto scroller-hide"><RapidRecall recentScans={recentScans} /></div>}
-            {godModeView === 'approval' && (
-              <div className="h-full overflow-y-auto scroller-hide">
-                <AdminScanApproval />
-              </div>
-            )}
-            {godModeView === 'learning_journey' && (
-              <div className="h-full overflow-y-auto scroller-hide">
-                <LearningJourneyProvider userId={user?.id || ''}>
+              )}
+              {godModeView === 'analysis' && (
+                <div className="h-full overflow-y-auto scroller-hide">
+                  <ExamAnalysis
+                    onBack={() => setGodModeView('mastermind')}
+                    scan={selectedScan}
+                    onGenerateTraining={() => setGodModeView('training_studio')}
+                    onUpdateScan={(updatedScan) => {
+                      setRecentScans(prev => prev.map(s => s.id === updatedScan.id ? updatedScan : s));
+                      setSelectedScan(updatedScan);
+                      syncScanToSupabase(updatedScan);
+                    }}
+                    recentScans={recentScans}
+                    onSelectScan={setSelectedScan}
+                  />
+                </div>
+              )}
+              {godModeView === 'training_studio' && (
+                <div className="h-full overflow-y-auto scroller-hide">
+                  <TrainingStudio
+                    onClose={() => setGodModeView('mastermind')}
+                    selectedScan={selectedScan}
+                    onTrainingCreated={(training) => {
+                      setCurrentTraining(training);
+                      setGodModeView('training_viewer');
+                    }}
+                  />
+                </div>
+              )}
+              {godModeView === 'training_viewer' && currentTraining && (
+                <div className="h-full overflow-y-auto scroller-hide">
+                  <TrainingViewer
+                    training={currentTraining}
+                    onBack={() => setGodModeView('training_studio')}
+                  />
+                </div>
+              )}
+              {godModeView === 'gallery' && (
+                <div className="h-full">
+                  <SketchGallery
+                    onBack={() => setGodModeView('mastermind')}
+                    scan={selectedScan}
+                    recentScans={recentScans}
+                    onUpdateScan={(updatedScan) => {
+                      setRecentScans(prev => prev.map(s => s.id === updatedScan.id ? updatedScan : s));
+                      setSelectedScan(updatedScan);
+                      syncScanToSupabase(updatedScan);
+                    }}
+                  />
+                </div>
+              )}
+              {godModeView === 'recall' && <div className="h-full overflow-y-auto scroller-hide"><RapidRecall recentScans={recentScans} /></div>}
+              {godModeView === 'approval' && (
+                <div className="h-full overflow-y-auto scroller-hide">
+                  <AdminScanApproval />
+                </div>
+              )}
+              {godModeView === 'learning_journey' && (
+                <div className="h-full overflow-y-auto scroller-hide">
                   <LearningJourneyApp onBack={() => setGodModeView('mastermind')} />
-                </LearningJourneyProvider>
-              </div>
-            )}
-            {godModeView === 'questions' && <div className="h-full overflow-y-auto scroller-hide"><VisualQuestionBank recentScans={recentScans} /></div>}
-            {godModeView === 'profile' && (
-              <div className="h-full overflow-hidden">
-                <UserProfile onBack={() => setGodModeView('mastermind')} />
-              </div>
-            )}
-            {godModeView === 'settings' && (
-              <div className="h-full">
-                <SettingsPanel onBack={() => setGodModeView('mastermind')} />
-              </div>
-            )}
-            {godModeView === 'scanning' && (
-              <div className="h-full overflow-y-auto scroller-hide">
-                <BoardMastermind
-                  onNavigate={setGodModeView}
-                  recentScans={recentScans}
-                  onAddScan={(scan) => {
-                    setRecentScans(prev => [...prev, scan]);
-                    syncScanToSupabase(scan);
-                  }}
-                  onSelectScan={(scan) => setSelectedScan(scan)}
-                />
-              </div>
-            )}
-          </main>
+                </div>
+              )}
+              {godModeView === 'questions' && <div className="h-full overflow-y-auto scroller-hide"><VisualQuestionBank recentScans={recentScans} /></div>}
+              {godModeView === 'profile' && (
+                <div className="h-full overflow-hidden">
+                  <UserProfile onBack={() => setGodModeView('mastermind')} />
+                </div>
+              )}
+              {godModeView === 'settings' && (
+                <div className="h-full">
+                  <SettingsPanel onBack={() => setGodModeView('mastermind')} />
+                </div>
+              )}
+              {godModeView === 'scanning' && (
+                <div className="h-full overflow-y-auto scroller-hide">
+                  <BoardMastermind
+                    onNavigate={setGodModeView}
+                    recentScans={recentScans}
+                    onAddScan={(scan) => {
+                      setRecentScans(prev => [...prev, scan]);
+                      syncScanToSupabase(scan);
+                    }}
+                    onSelectScan={(scan) => setSelectedScan(scan)}
+                  />
+                </div>
+              )}
+            </main>
 
-          {/* Vidya AI Assistant - Feature Flag: V2 or V3 */}
-          {isFeatureEnabled('useVidyaV3') ? (
-            <VidyaV3
-              appContext={{
-                scannedPapers: recentScans,
-                selectedScan: selectedScan,
-                currentView: godModeView,
-              }}
-            />
-          ) : (
-            <VidyaV2
-              userRole="teacher"
-              appContext={{
-                scannedPapers: recentScans,
-                selectedScan: selectedScan,
-                customLessons: customLessons,
-                currentView: godModeView,
-              }}
-              actions={{
-                navigateTo: (view) => setGodModeView(view),
-                goBack: () => setGodModeView('mastermind'),
-                scanPaper: () => setGodModeView('mastermind'),
-                createLesson: () => setIsCreatorOpen(true),
-                viewAnalysis: (scanId) => {
-                  const scan = recentScans.find((s) => s.id === scanId);
-                  if (scan) setSelectedScan(scan);
-                  setGodModeView('analysis');
-                },
-                generateSketches: (scanId) => {
-                  const scan = recentScans.find((s) => s.id === scanId);
-                  if (scan) setSelectedScan(scan);
-                  setGodModeView('sketches');
-                },
-                exportData: async (type, data) => {
-                  console.log(`Exporting as ${type}:`, data);
-                  // TODO: Implement actual export logic
-                },
-                showNotification: (message, type) => {
-                  showToast(message, type);
-                },
-                confirmAction: async (title, message, type = 'danger') => {
-                  return await confirm({ title, message, type });
-                },
-                openModal: (modalId, props) => {
-                  console.log('Open modal:', modalId, props);
-                  // TODO: Implement modal system
-                },
-                closeModal: () => {
-                  console.log('Close modal');
-                },
-              }}
-            />
-          )}
+            {/* Vidya AI Assistant - Feature Flag: V2 or V3 */}
+            {isFeatureEnabled('useVidyaV3') ? (
+              <VidyaV3
+                appContext={{
+                  scannedPapers: recentScans,
+                  selectedScan: selectedScan,
+                  currentView: godModeView,
+                }}
+              />
+            ) : (
+              <VidyaV2
+                userRole="teacher"
+                appContext={{
+                  scannedPapers: recentScans,
+                  selectedScan: selectedScan,
+                  customLessons: customLessons,
+                  currentView: godModeView,
+                }}
+                actions={{
+                  navigateTo: (view) => setGodModeView(view),
+                  goBack: () => setGodModeView('mastermind'),
+                  scanPaper: () => setGodModeView('mastermind'),
+                  createLesson: () => setIsCreatorOpen(true),
+                  viewAnalysis: (scanId) => {
+                    const scan = recentScans.find((s) => s.id === scanId);
+                    if (scan) setSelectedScan(scan);
+                    setGodModeView('analysis');
+                  },
+                  generateSketches: (scanId) => {
+                    const scan = recentScans.find((s) => s.id === scanId);
+                    if (scan) setSelectedScan(scan);
+                    setGodModeView('sketches');
+                  },
+                  exportData: async (type, data) => {
+                    console.log(`Exporting as ${type}:`, data);
+                    // TODO: Implement actual export logic
+                  },
+                  showNotification: (message, type) => {
+                    showToast(message, type);
+                  },
+                  confirmAction: async (title, message, type = 'danger') => {
+                    return await confirm({ title, message, type });
+                  },
+                  openModal: (modalId, props) => {
+                    console.log('Open modal:', modalId, props);
+                    // TODO: Implement modal system
+                  },
+                  closeModal: () => {
+                    console.log('Close modal');
+                  },
+                }}
+              />
+            )}
+          </LearningJourneyProvider>
         </div>
       </div>
     );
@@ -897,90 +897,92 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-screen overflow-hidden font-instrument text-slate-900 bg-[#f8fafc] flex flex-col">
-      <div className="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center z-50 shrink-0">
-        <div className="flex items-center gap-4">
-          <button onClick={handleBackToDashboard} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors">
-            <Home size={18} />
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-slate-950 rounded-lg flex items-center justify-center text-white font-black text-[10px] tracking-widest shadow-lg transform -rotate-3 hover:rotate-0 transition-transform">EDU</div>
-            <span className="font-extrabold text-slate-900 text-sm tracking-tight font-outfit uppercase">{currentLesson?.title || 'Lesson'}</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-end">
-          <span className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] font-outfit">Neural Mastery</span>
-          <div className="flex items-center gap-3">
-            <div className="w-40 h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden shadow-inner">
-              <div className="h-full bg-gradient-to-r from-primary-600 to-primary-400 transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(20,184,166,0.5)]" style={{ width: `${userState.masteryScore}%` }}></div>
+    <LearningJourneyProvider userId={user?.id || ''}>
+      <div className="w-full h-screen overflow-hidden font-instrument text-slate-900 bg-[#f8fafc] flex flex-col">
+        <div className="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center z-50 shrink-0">
+          <div className="flex items-center gap-4">
+            <button onClick={handleBackToDashboard} className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors">
+              <Home size={18} />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-slate-950 rounded-lg flex items-center justify-center text-white font-black text-[10px] tracking-widest shadow-lg transform -rotate-3 hover:rotate-0 transition-transform">EDU</div>
+              <span className="font-extrabold text-slate-900 text-sm tracking-tight font-outfit uppercase">{currentLesson?.title || 'Lesson'}</span>
             </div>
-            <span className="text-[10px] font-black text-slate-700 mt-1">{userState.masteryScore}%</span>
+          </div>
+
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] font-outfit">Neural Mastery</span>
+            <div className="flex items-center gap-3">
+              <div className="w-40 h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden shadow-inner">
+                <div className="h-full bg-gradient-to-r from-primary-600 to-primary-400 transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(20,184,166,0.5)]" style={{ width: `${userState.masteryScore}%` }}></div>
+              </div>
+              <span className="text-[10px] font-black text-slate-700 mt-1">{userState.masteryScore}%</span>
+            </div>
           </div>
         </div>
+
+        <main className="flex-1 overflow-hidden relative">
+          {renderModule()}
+        </main>
+
+        {/* Vidya AI Assistant - Feature Flag: V2 or V3 */}
+        {isFeatureEnabled('useVidyaV3') ? (
+          <VidyaV3
+            appContext={{
+              currentView: currentModule?.type,
+            }}
+          />
+        ) : (
+          <VidyaV2
+            userRole="student"
+            appContext={{
+              currentLesson: currentLesson,
+              userProgress: {
+                masteryScore: userState.masteryScore,
+                currentModule: currentModule?.title || '',
+                quizHistory: userState.quizHistory,
+                misconceptions: userState.misconceptions,
+              },
+              currentView: currentModule?.type,
+            }}
+            actions={{
+              navigateTo: (view) => {
+                console.log('Navigate to:', view);
+                // Student mode navigation (limited)
+              },
+              goBack: handleBackToDashboard,
+              scanPaper: () => {
+                console.log('Students cannot scan papers');
+              },
+              createLesson: () => {
+                console.log('Students cannot create lessons');
+              },
+              viewAnalysis: (scanId) => {
+                console.log('View analysis:', scanId);
+              },
+              generateSketches: (scanId) => {
+                console.log('Generate sketches:', scanId);
+              },
+              exportData: async (type, data) => {
+                console.log(`Export as ${type}:`, data);
+              },
+              showNotification: (message, type) => {
+                showToast(message, type);
+              },
+              confirmAction: async (title, message, type = 'danger') => {
+                return await confirm({ title, message, type });
+              },
+              openModal: (modalId, props) => {
+                console.log('Open modal:', modalId, props);
+              },
+              closeModal: () => {
+                console.log('Close modal');
+              },
+            }}
+          />
+        )}
       </div>
-
-      <main className="flex-1 overflow-hidden relative">
-        {renderModule()}
-      </main>
-
-      {/* Vidya AI Assistant - Feature Flag: V2 or V3 */}
-      {isFeatureEnabled('useVidyaV3') ? (
-        <VidyaV3
-          appContext={{
-            currentView: currentModule?.type,
-          }}
-        />
-      ) : (
-        <VidyaV2
-          userRole="student"
-          appContext={{
-            currentLesson: currentLesson,
-            userProgress: {
-              masteryScore: userState.masteryScore,
-              currentModule: currentModule?.title || '',
-              quizHistory: userState.quizHistory,
-              misconceptions: userState.misconceptions,
-            },
-            currentView: currentModule?.type,
-          }}
-          actions={{
-            navigateTo: (view) => {
-              console.log('Navigate to:', view);
-              // Student mode navigation (limited)
-            },
-            goBack: handleBackToDashboard,
-            scanPaper: () => {
-              console.log('Students cannot scan papers');
-            },
-            createLesson: () => {
-              console.log('Students cannot create lessons');
-            },
-            viewAnalysis: (scanId) => {
-              console.log('View analysis:', scanId);
-            },
-            generateSketches: (scanId) => {
-              console.log('Generate sketches:', scanId);
-            },
-            exportData: async (type, data) => {
-              console.log(`Export as ${type}:`, data);
-            },
-            showNotification: (message, type) => {
-              showToast(message, type);
-            },
-            confirmAction: async (title, message, type = 'danger') => {
-              return await confirm({ title, message, type });
-            },
-            openModal: (modalId, props) => {
-              console.log('Open modal:', modalId, props);
-            },
-            closeModal: () => {
-              console.log('Close modal');
-            },
-          }}
-        />
-      )}
-    </div>
+    </LearningJourneyProvider>
   );
 };
 

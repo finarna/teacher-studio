@@ -33,11 +33,11 @@ async function testMathJourney() {
     return;
   }
 
-  const userId = scan.user_id;
+  const userId = '00000000-0000-0000-0000-000000000000';
   console.log(`Testing for user: ${userId}\n`);
 
   // Test aggregation
-  const topics = await aggregateTopicsForUser(userId, 'Math', 'KCET');
+  const topics = await aggregateTopicsForUser(supabase, userId, 'Math', 'KCET');
 
   console.log(`✅ Learning Journey returned ${topics.length} Math topics\n`);
 

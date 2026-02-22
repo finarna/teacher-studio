@@ -68,6 +68,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setUser(null);
           }
         }
+
+        // Clean up URL if it contains auth tokens (stale or consumed)
+        if (typeof window !== 'undefined' && (window.location.hash.includes('access_token=') || window.location.hash.includes('type=recovery'))) {
+          console.log('🧹 [Auth] Cleaning up stagnant auth tokens from URL...');
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
       } catch (err: any) {
         console.error('Failed to initialize auth:', err);
         if (mounted) {

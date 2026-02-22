@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Instrument+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,14 +15,15 @@
             rgba(255, 255, 255, 0));
 
     /* Multi-Subject Theme Variables - Dynamically updated by useSubjectTheme hook */
-    --subject-primary: #10B981;  /* Default: Physics Green */
+    --subject-primary: #10B981;
+    /* Default: Physics Green */
     --subject-light: #D1FAE5;
     --subject-dark: #047857;
 }
 
 @layer base {
     html {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         font-size: 16px;
@@ -30,10 +31,9 @@
 
     body {
         @apply antialiased text-slate-900 bg-[#f8fafc];
-        font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
-        line-height: 1.625;
-        /* Optimized for long-form reading */
-        letter-spacing: -0.011em;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "ss02";
+        line-height: 1.6;
+        letter-spacing: -0.015em;
     }
 
     h1,
@@ -43,8 +43,8 @@
     h5,
     h6 {
         font-family: 'Outfit', sans-serif;
-        letter-spacing: -0.025em;
-        line-height: 1.25;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
         font-weight: 700;
         @apply text-slate-900;
     }
@@ -211,6 +211,7 @@
     0% {
         background-position: -200% 0;
     }
+
     100% {
         background-position: 200% 0;
     }
@@ -224,6 +225,7 @@
     0% {
         background-position: -200% 0;
     }
+
     100% {
         background-position: 200% 0;
     }
@@ -234,9 +236,12 @@
 }
 
 @keyframes float-slow {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px) translateX(0px);
     }
+
     50% {
         transform: translateY(-20px) translateX(10px);
     }
@@ -247,9 +252,12 @@
 }
 
 @keyframes float-medium {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px) translateX(0px);
     }
+
     50% {
         transform: translateY(-15px) translateX(-8px);
     }
@@ -260,9 +268,12 @@
 }
 
 @keyframes float-fast {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px) translateX(0px);
     }
+
     50% {
         transform: translateY(-12px) translateX(8px);
     }
@@ -273,9 +284,12 @@
 }
 
 @keyframes gradient-shift {
-    0%, 100% {
+
+    0%,
+    100% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
@@ -286,9 +300,12 @@
 }
 
 @keyframes pulse-slow {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.5;
     }
@@ -299,10 +316,13 @@
 }
 
 @keyframes pulse-gentle {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         opacity: 1;
     }
+
     50% {
         transform: scale(1.05);
         opacity: 0.9;
@@ -339,13 +359,15 @@
 
 /* Chemistry formulas - slightly smaller and distinct color */
 .katex .mhchem {
-    color: #0f766e !important; /* Teal for chemistry */
+    color: #0f766e !important;
+    /* Teal for chemistry */
     font-size: 0.95em;
 }
 
 /* Physics units - distinct styling */
 .katex .pu {
-    color: #1e40af !important; /* Blue for physics units */
+    color: #1e40af !important;
+    /* Blue for physics units */
     font-size: 0.9em;
 }
 
@@ -375,7 +397,7 @@
 }
 
 /* Smooth scrolling for long equations */
-.katex-display > .katex {
+.katex-display>.katex {
     text-align: center;
     white-space: nowrap;
 }
@@ -479,6 +501,7 @@
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -487,6 +510,7 @@
 .animate-spin-slow {
     animation: spin-slow 8s linear infinite;
 }
+
 /* ═══════════════════════════════════════════════════════════════════
    MULTI-SUBJECT SWITCHING ANIMATIONS (Phase 5)
    ═══════════════════════════════════════════════════════════════════ */
@@ -512,6 +536,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -538,6 +563,7 @@
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

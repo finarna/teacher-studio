@@ -15,6 +15,7 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '..', '.env.local') });
 
 import { aggregateTopicsForUser } from '../lib/topicAggregator.js';
+import { supabaseAdmin } from '../lib/supabaseServer.js';
 
 async function testTopicAggregation() {
   console.log('\n🧪 TESTING TOPIC AGGREGATION FIX\n');
@@ -27,7 +28,7 @@ async function testTopicAggregation() {
   console.log('-'.repeat(80));
 
   try {
-    const topics = await aggregateTopicsForUser(fakeUserId, 'Chemistry', 'KCET');
+    const topics = await aggregateTopicsForUser(supabaseAdmin, fakeUserId, 'Chemistry', 'KCET');
 
     console.log(`\n✅ SUCCESS: Found ${topics.length} topics`);
 
@@ -76,7 +77,7 @@ async function testTopicAggregation() {
   console.log('-'.repeat(80));
 
   try {
-    const topics = await aggregateTopicsForUser(fakeUserId, 'Chemistry', 'NEET');
+    const topics = await aggregateTopicsForUser(supabaseAdmin, fakeUserId, 'Chemistry', 'NEET');
 
     console.log(`\n✅ SUCCESS: Found ${topics.length} topics`);
 
@@ -109,7 +110,7 @@ async function testTopicAggregation() {
   console.log('-'.repeat(80));
 
   try {
-    const topics = await aggregateTopicsForUser(fakeUserId, 'Biology', 'KCET');
+    const topics = await aggregateTopicsForUser(supabaseAdmin, fakeUserId, 'Biology', 'KCET');
 
     console.log(`\n✅ SUCCESS: Found ${topics.length} topics`);
 

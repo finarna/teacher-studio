@@ -9,7 +9,7 @@
  * - Smart summarization (send relevant data, not everything)
  */
 
-import { Scan } from '../../types';
+import { Scan, VidyaAppContext } from '../../types';
 import { VidyaRole } from './systemInstructions';
 import {
   generateCacheKey,
@@ -85,6 +85,19 @@ export interface VidyaContextPayload {
 
   // Weak areas (if student mode and data available)
   weakTopics?: string[];
+
+  // Live Topic Workspace Context
+  activeTopic?: {
+    name: string;
+    subject: string;
+    examContext: string;
+    masteryLevel: number;
+    studyStage: string;
+    totalQuestions: number;
+    accuracy: number;
+    quizzesTaken: number;
+    keyConcepts: string[];
+  };
 }
 
 /**
@@ -168,10 +181,7 @@ function compressQuestions(
 /**
  * Internal context builder (uncached)
  */
-function buildContextPayloadInternal(appContext: {
-  currentView?: string;
-  scannedPapers?: Scan[];
-  selectedScan?: Scan;
+function buildContextPayloadInternal(appContext: VidyaAppContext & {
   activeSubject?: string;
   activeExamContext?: string;
 }, userRole: VidyaRole): VidyaContextPayload {
@@ -273,10 +283,10 @@ function buildContextPayloadInternal(appContext: {
         scanName: scan.name,
         scanDate: scan.date,
         examYear,
-        questionNumber: q.questionNumber,
+        questionNumber: (q as any).questionNumber || 0,
         topic: q.topic || 'General',
-        difficulty: q.difficulty || 'Unknown',
-        marks: q.marks || 0,
+        difficulty: (q.difficulty as any) || q.diff || 'Unknown',
+        marks: typeof q.marks === 'number' ? q.marks : Number(q.marks) || 0,
         text: q.text || '',
         options: q.options || [],
         correctAnswer: q.correctOptionIndex !== undefined
@@ -303,10 +313,10 @@ function buildContextPayloadInternal(appContext: {
             scanName: scan.name,
             scanDate: scan.date,
             examYear,
-            questionNumber: q.questionNumber,
+            questionNumber: (q as any).questionNumber || 0,
             topic: q.topic || 'General',
-            difficulty: q.difficulty || 'Unknown',
-            marks: q.marks || 0,
+            difficulty: (q.difficulty as any) || q.diff || 'Unknown',
+            marks: typeof q.marks === 'number' ? q.marks : Number(q.marks) || 0,
             text: q.text || '',
             options: q.options || [],
             correctAnswer: q.correctOptionIndex !== undefined
@@ -373,6 +383,42 @@ function buildContextPayloadInternal(appContext: {
     questions: compressedQuestions,
   };
 
+  // Build active topic details if available
+  if (appContext.activeTopicResource) {
+    const topic = appContext.activeTopicResource;
+    payload.activeTopic = {
+      name: topic.topicName,
+      subject: topic.subject,
+      examContext: topic.examContext,
+      masteryLevel: topic.masteryLevel,
+      studyStage: topic.studyStage,
+      totalQuestions: topic.totalQuestions,
+      accuracy: topic.averageAccuracy,
+      quizzesTaken: topic.quizzesTaken,
+      keyConcepts: topic.chapterInsights?.[0]?.keyConcepts || []
+    };
+
+    // If we're on a topic page, prioritize its questions in the context if not already there
+    if (topic.questions && topic.questions.length > 0 && payload.questions.length < 5) {
+      topic.questions.slice(0, 10).forEach((q: any) => {
+        // Only add if not already present from scan context
+        if (!payload.questions.some(pq => pq.text === q.text)) {
+          payload.questions.push({
+            scanName: 'Live Workspace',
+            scanDate: new Date().toLocaleDateString(),
+            questionNumber: 0,
+            topic: topic.topicName,
+            difficulty: q.difficulty || q.diff || 'Moderate',
+            marks: typeof q.marks === 'number' ? q.marks : 0,
+            text: q.text || '',
+            options: q.options || [],
+            correctAnswer: q.correctOptionIndex !== undefined ? String.fromCharCode(65 + q.correctOptionIndex) : undefined
+          });
+        }
+      });
+    }
+  }
+
   // Add ALL scans analysis (for cross-scan analysis queries)
   if (scans.length > 1) {
     payload.allScansAnalysis = allScansAnalysis;
@@ -395,7 +441,9 @@ export function formatContextForGemini(
 ): string {
   // Add clear context summary for better AI understanding
   let contextSummary = '';
-  if (payload.currentScan) {
+  if (payload.activeTopic) {
+    contextSummary = `\n🎯 ACTIVE TOPIC: User is studying "${payload.activeTopic.name}" (${payload.activeTopic.subject})\n📈 PROGRESS: ${payload.activeTopic.masteryLevel}% Mastery, ${payload.activeTopic.accuracy}% Accuracy\n📚 STAGE: ${payload.activeTopic.studyStage}\n`;
+  } else if (payload.currentScan) {
     contextSummary = `\n📄 ACTIVE CONTEXT: User is viewing scan "${payload.currentScan.name}" (${payload.currentScan.subject}, ${payload.currentScan.grade})\n`;
   } else if (payload.scannedPapers.total > 0) {
     contextSummary = `\n📊 ACTIVE CONTEXT: User is viewing all scans (${payload.scannedPapers.total} total)\n`;
@@ -419,10 +467,7 @@ User Query: ${userMessage}`;
  * This is the main export used by the chat hook.
  * Checks cache first before building to improve performance.
  */
-export function buildContextPayload(appContext: {
-  currentView?: string;
-  scannedPapers?: Scan[];
-  selectedScan?: Scan;
+export function buildContextPayload(appContext: VidyaAppContext & {
   activeSubject?: string;
   activeExamContext?: string;
 }, userRole: VidyaRole): VidyaContextPayload {

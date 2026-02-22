@@ -17,11 +17,17 @@ import {
   AlertCircle,
   Trophy,
   Flame,
-  RefreshCw
+  RefreshCw,
+  LayoutGrid,
+  Activity,
+  Award,
+  ArrowRight
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
 import type { Subject, ExamContext, TopicResource } from '../types';
 import { SUBJECT_CONFIGS } from '../config/subjects';
+import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 
 interface TopicDashboardPageProps {
   subject: Subject;
@@ -39,6 +45,43 @@ interface TopicDashboardPageProps {
 }
 
 type ViewMode = 'heatmap' | 'list';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.5, ease: "easeOut" }
+  },
+  hover: {
+    y: -8,
+    scale: 1.01,
+    transition: { duration: 0.2, ease: "easeOut" }
+  }
+};
+
+const STAGE_ORDER = ['not_started', 'studying_notes', 'practicing', 'taking_quiz', 'mastered'];
+
+const getStageConfig = (stage: string) => {
+  switch (stage) {
+    case 'not_started': return { label: 'Start', color: 'slate', icon: Circle, index: 0 };
+    case 'studying_notes': return { label: 'Learning', color: 'blue', icon: BookOpen, index: 1 };
+    case 'practicing': return { label: 'Practicing', color: 'amber', icon: Zap, index: 2 };
+    case 'taking_quiz': return { label: 'Testing', color: 'purple', icon: FileQuestion, index: 3 };
+    case 'mastered': return { label: 'Mastered', color: 'emerald', icon: Award, index: 4 };
+    default: return { label: stage, color: 'slate', icon: Circle, index: 0 };
+  }
+};
 
 const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
   subject,
@@ -58,7 +101,6 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
     setIsRefreshing(true);
     try {
       await refreshData();
-      console.log('✅ [TopicDashboard] Data refreshed successfully');
     } catch (error) {
       console.error('❌ [TopicDashboard] Failed to refresh:', error);
     } finally {
@@ -72,7 +114,7 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
   const topicsByDomain = useMemo(() => {
     const grouped: Record<string, TopicResource[]> = {};
     topics.forEach(topic => {
-      const domain = topic.topicName.split(' - ')[0] || 'Other'; // Simple domain extraction
+      const domain = topic.topicName.split(' - ')[0] || 'Other';
       if (!grouped[domain]) {
         grouped[domain] = [];
       }
@@ -86,68 +128,16 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
   // Calculate stats
   const totalTopics = topics.length;
   const masteredTopics = topics.filter(t => t.masteryLevel >= 85).length;
-  const inProgressTopics = topics.filter(t => t.masteryLevel > 0 && t.masteryLevel < 85).length;
-  const notStartedTopics = topics.filter(t => t.masteryLevel === 0).length;
   const averageMastery = Math.round(
     topics.reduce((sum, t) => sum + t.masteryLevel, 0) / (totalTopics || 1)
   );
 
-  // Get mastery color
-  const getMasteryColor = (mastery: number): string => {
-    if (mastery === 0) return 'bg-slate-100 text-slate-400 border-slate-200';
-    if (mastery < 30) return 'bg-red-100 text-red-700 border-red-300';
-    if (mastery < 50) return 'bg-orange-100 text-orange-700 border-orange-300';
-    if (mastery < 70) return 'bg-yellow-100 text-yellow-700 border-yellow-300';
-    if (mastery < 85) return 'bg-lime-100 text-lime-700 border-lime-300';
-    return 'bg-emerald-100 text-emerald-700 border-emerald-300';
-  };
-
-  const getMasteryBgColor = (mastery: number): string => {
-    if (mastery === 0) return 'bg-slate-100';
-    if (mastery < 30) return 'bg-red-100';
-    if (mastery < 50) return 'bg-orange-100';
-    if (mastery < 70) return 'bg-yellow-100';
-    if (mastery < 85) return 'bg-lime-100';
-    return 'bg-emerald-100';
-  };
-
-  const getMasteryLabel = (mastery: number): string => {
-    if (mastery === 0) return 'Not Started';
-    if (mastery < 30) return 'Beginner';
-    if (mastery < 50) return 'Learning';
-    if (mastery < 70) return 'Progressing';
-    if (mastery < 85) return 'Good';
-    return 'Mastered';
-  };
-
-  // Get status badge info based on mastery level and trend
-  const getStatusInfo = (topic: TopicResource): { label: string; icon: string; color: string } => {
-    const mastery = topic.masteryLevel;
-
-    if (mastery === 0) return { label: 'NOT STARTED', icon: '—', color: 'bg-slate-100 text-slate-600 border-slate-200' };
-    if (mastery < 30) return { label: 'CRITICAL', icon: '↓', color: 'bg-red-100 text-red-700 border-red-300' };
-    if (mastery < 50) return { label: 'DECLINING', icon: '↓', color: 'bg-orange-100 text-orange-700 border-orange-300' };
-    if (mastery < 70) return { label: 'IMPROVING', icon: '↗', color: 'bg-blue-100 text-blue-700 border-blue-300' };
-    if (mastery < 85) return { label: 'STABLE', icon: '—', color: 'bg-amber-100 text-amber-700 border-amber-300' };
-    return { label: 'MASTERED', icon: '✓', color: 'bg-emerald-100 text-emerald-700 border-emerald-300' };
-  };
-
-  // Calculate 4-step completion progress
-  const getStepProgress = (topic: TopicResource): number => {
-    const steps = {
-      'not_started': 0,
-      'studying_notes': 1,
-      'practicing': 2,
-      'taking_quiz': 3,
-      'mastered': 4
-    };
-    return steps[topic.studyStage] || 0;
-  };
-
-  // Get completion percentage (0-100)
-  const getCompletionPercentage = (topic: TopicResource): number => {
-    const steps = getStepProgress(topic);
-    return Math.round((steps / 4) * 100);
+  const getStatusInfo = (topic: TopicResource) => {
+    const m = topic.masteryLevel;
+    if (m === 0 && topic.studyStage === 'not_started') return { label: 'START', color: 'bg-slate-100 text-slate-600', icon: PlayCircle };
+    if (m < 40) return { label: 'CRITICAL', color: 'bg-red-50 text-red-600', icon: AlertCircle };
+    if (m < 85) return { label: 'ACTIVE', color: 'bg-blue-50 text-blue-600', icon: Activity };
+    return { label: 'MASTERED', color: 'bg-emerald-50 text-emerald-600', icon: Trophy };
   };
 
   const filteredTopics = selectedDomain === 'all'
@@ -155,439 +145,287 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
     : topicsByDomain[selectedDomain] || [];
 
   return (
-    <div className="bg-slate-50/50 font-instrument text-slate-900">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={onBack}
-                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                <ChevronLeft size={20} />
-                <span className="text-sm font-black uppercase tracking-wider">Back</span>
-              </button>
-
-              <div className="h-6 w-px bg-slate-200" />
-
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
-                  style={{ background: `linear-gradient(135deg, ${subjectConfig.color} 0%, ${subjectConfig.colorDark} 100%)` }}
-                >
-                  <span className="text-xl">{subjectConfig.iconEmoji}</span>
-                </div>
-                <div>
-                  <h1 className="font-black text-xl tracking-tight text-slate-900">
-                    {subjectConfig.displayName}
-                  </h1>
-                  <p className="text-xs font-medium text-slate-500">{examContext} • {totalTopics} topics</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Refresh Button */}
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              title="Refresh topics from latest scans"
-            >
-              <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh'}
-            </button>
-
-            {/* View Mode Toggle */}
-            <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
+    <div className="min-h-full bg-slate-50/50">
+      <LearningJourneyHeader
+        showBack
+        onBack={onBack}
+        icon={subjectConfig.iconEmoji}
+        title={`${subjectConfig.displayName} Engine`}
+        subtitle={`Domain-level mastery analysis for ${examContext}`}
+        subject={subject}
+        trajectory={examContext}
+        actions={
+          <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2 bg-white/50 backdrop-blur-sm rounded-xl p-1 border border-slate-200">
               <button
                 onClick={() => setViewMode('heatmap')}
-                className={`px-3 py-1.5 rounded-md text-xs font-black uppercase tracking-wider transition-all ${
-                  viewMode === 'heatmap'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'heatmap' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
               >
-                <Grid3x3 size={14} className="inline mr-1.5" />
-                Heatmap
+                <LayoutGrid size={18} />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-3 py-1.5 rounded-md text-xs font-black uppercase tracking-wider transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
               >
-                <List size={14} className="inline mr-1.5" />
-                List
+                <List size={18} />
               </button>
             </div>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm"
+            >
+              <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
+            </button>
           </div>
+        }
+      />
 
-          {/* Compact Premium Stats Grid */}
-          <div className="grid grid-cols-4 gap-2">
-            {/* Mastered */}
-            <div className="group relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 rounded-lg p-2.5 overflow-hidden hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer">
-              <div className="absolute -bottom-1 -right-1 opacity-10">
-                <Trophy size={40} className="text-white" />
-              </div>
-              <div className="relative">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="w-7 h-7 rounded-md bg-white/20 flex items-center justify-center">
-                    <Trophy size={14} className="text-white" />
-                  </div>
-                  <span className="text-[7px] font-black text-white uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20">Elite</span>
-                </div>
-                <div className="text-2xl font-black text-white leading-none">{masteredTopics}</div>
-                <div className="text-[9px] font-bold text-emerald-100 uppercase tracking-wide mt-0.5">Mastered</div>
-              </div>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
 
-            {/* In Progress */}
-            <div className="group relative bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 rounded-lg p-2.5 overflow-hidden hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer">
-              <div className="absolute -bottom-1 -right-1 opacity-10">
-                <TrendingUp size={40} className="text-white" />
-              </div>
-              <div className="relative">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="w-7 h-7 rounded-md bg-white/20 flex items-center justify-center">
-                    <TrendingUp size={14} className="text-white" />
-                  </div>
-                  <span className="text-[7px] font-black text-white uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20">Active</span>
-                </div>
-                <div className="text-2xl font-black text-white leading-none">{inProgressTopics}</div>
-                <div className="text-[9px] font-bold text-blue-100 uppercase tracking-wide mt-0.5">In Progress</div>
-              </div>
-            </div>
+        {/* Recommendation Engine Area */}
+        <AnimatePresence mode="wait">
+          {aiRecommendation && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="mb-10 text-white rounded-3xl overflow-hidden shadow-2xl relative group cursor-pointer"
+              style={{ background: `linear-gradient(135deg, ${subjectConfig.color}, ${subjectConfig.colorDark})` }}
+              onClick={() => onSelectTopic(aiRecommendation.topicId)}
+            >
+              {/* Animated background elements */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 animate-pulse" />
 
-            {/* Not Started */}
-            <div className="group relative bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 rounded-lg p-2.5 overflow-hidden hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer">
-              <div className="absolute -bottom-1 -right-1 opacity-10">
-                <Circle size={40} className="text-white" />
-              </div>
-              <div className="relative">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="w-7 h-7 rounded-md bg-white/20 flex items-center justify-center">
-                    <Circle size={14} className="text-white" />
-                  </div>
-                  <span className="text-[7px] font-black text-white uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/20">Queue</span>
+              <div className="p-8 relative z-10 flex flex-col md:flex-row items-center gap-8">
+                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 shadow-inner">
+                  <Sparkles size={40} className="animate-pulse" />
                 </div>
-                <div className="text-2xl font-black text-white leading-none">{notStartedTopics}</div>
-                <div className="text-[9px] font-bold text-slate-300 uppercase tracking-wide mt-0.5">Not Started</div>
-              </div>
-            </div>
 
-            {/* Average Mastery */}
-            <div className="group relative bg-white rounded-lg p-2.5 border-2 border-slate-200 overflow-hidden hover:shadow-lg hover:scale-[1.01] hover:border-purple-300 transition-all cursor-pointer">
-              <div className="absolute -bottom-1 -right-1 opacity-5">
-                <Target size={40} className="text-purple-600" />
-              </div>
-              <div className="relative">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="w-7 h-7 rounded-md bg-purple-100 flex items-center justify-center group-hover:bg-purple-200">
-                    <Target size={14} className="text-purple-600" />
+                <div className="flex-1 text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest mb-3 backdrop-blur-md">
+                    <Zap size={10} fill="currentColor" />
+                    AI Strategic Target
                   </div>
-                  <span className="text-[7px] font-black text-slate-600 uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 group-hover:text-purple-700 group-hover:bg-purple-100">Overall</span>
+                  <h3 className="text-3xl font-black font-outfit tracking-tight mb-2">Focus Point: {aiRecommendation.topicName}</h3>
+                  <p className="text-white/80 font-instrument text-base max-w-2xl">{aiRecommendation.reason}</p>
                 </div>
-                <div className="text-2xl font-black text-slate-900 leading-none group-hover:text-purple-700">
-                  <span>{averageMastery}</span><span className="text-lg">%</span>
+
+                <div className="shrink-0 flex flex-col items-center justify-center p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 min-w-[140px]">
+                  <div className="text-3xl font-black">Now</div>
+                  <div className="text-[10px] font-black uppercase tracking-widest opacity-60">Ideal Start</div>
+                  <ArrowRight size={24} className="mt-2 group-hover:translate-x-2 transition-transform" />
                 </div>
-                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wide mt-0.5 group-hover:text-purple-600">Avg Mastery</div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Global Progress Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          {[
+            { label: 'Total Topics', val: totalTopics, icon: BookOpen, color: 'text-slate-600', bg: 'bg-slate-100' },
+            { label: 'Mastered', val: masteredTopics, icon: Award, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: 'Avg Mastery', val: `${averageMastery}%`, icon: Target, color: 'text-primary-600', bg: 'bg-primary-50' },
+            { label: 'Study Streak', val: `${studyStreak}d`, icon: Flame, color: 'text-orange-600', bg: 'bg-orange-50' }
+          ].map((s, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex items-center gap-4"
+            >
+              <div className={`w-12 h-12 rounded-2xl ${s.bg} ${s.color} flex items-center justify-center shrink-0`}>
+                <s.icon size={24} />
+              </div>
+              <div>
+                <div className="text-base font-black text-slate-900 leading-none">{s.val}</div>
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{s.label}</div>
+              </div>
+            </motion.div>
+          ))}
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-3">
+        {/* Domain Filtering (Only in List View) */}
 
-        {/* AI Recommendations & Insights */}
-        {(aiRecommendation || topics.filter(t => t.masteryLevel > 0 && t.masteryLevel < 40).length > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-            {/* AI Recommendation */}
-            {aiRecommendation && (
-              <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 rounded-2xl p-6 text-white overflow-hidden shadow-lg group hover:shadow-xl transition-shadow">
-                <div className="absolute inset-0 opacity-10">
-                  <div className="absolute inset-0" style={{
-                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-                    backgroundSize: '24px 24px'
-                  }}></div>
-                </div>
-                <div className="relative">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles size={20} className="animate-pulse" />
-                    <span className="text-xs font-black uppercase tracking-wider">
-                      AI Recommendation
+        {/* Master Content Area */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className={viewMode === 'heatmap' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col gap-3'}
+        >
+          {filteredTopics.map((topic) => {
+            const m = topic.masteryLevel;
+            const status = getStatusInfo(topic);
+            const ProgressIcon = status.icon;
+            const stageConfig = getStageConfig(topic.studyStage);
+            const stageIndex = STAGE_ORDER.indexOf(topic.studyStage);
+
+            return (
+              <motion.button
+                key={topic.id}
+                variants={cardVariants}
+                whileHover="hover"
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onSelectTopic(topic.topicId)}
+                className={`group relative bg-white border rounded-[2rem] overflow-hidden transition-all duration-500 text-left ${viewMode === 'list' ? 'flex items-center p-5' : 'flex flex-col h-full'} ${m >= 85 ? 'border-emerald-200' : 'border-slate-200 hover:border-primary-200 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)]'}`}
+              >
+                {/* Visual Accent for Active Topics */}
+                {topic.studyStage !== 'not_started' && topic.studyStage !== 'mastered' && (
+                  <div className="absolute top-0 right-0 p-4">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
                     </span>
                   </div>
-                  <h3 className="font-black text-xl mb-2">{aiRecommendation.topicName}</h3>
-                  <p className="text-sm font-medium opacity-95 mb-4 leading-relaxed">
-                    {aiRecommendation.reason}
-                  </p>
-                  <button
-                    onClick={() => onSelectTopic(aiRecommendation.topicId)}
-                    className="w-full px-4 py-3 bg-white text-primary-600 rounded-xl text-sm font-black hover:bg-primary-50 transition-all shadow-sm hover:shadow-md transform hover:scale-[1.02]"
-                  >
-                    Start Learning Now →
-                  </button>
-                </div>
-              </div>
-            )}
+                )}
 
-            {/* Weak Areas Alert */}
-            {topics.filter(t => t.masteryLevel > 0 && t.masteryLevel < 40).length > 0 && (
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-300 rounded-2xl p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <AlertCircle size={20} className="text-orange-600" />
-                  <span className="text-sm font-black uppercase tracking-wider text-orange-800">
-                    Needs Your Attention
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {topics
-                    .filter(t => t.masteryLevel > 0 && t.masteryLevel < 40)
-                    .slice(0, 3)
-                    .map(topic => (
-                      <button
-                        key={topic.id}
-                        onClick={() => onSelectTopic(topic.topicId)}
-                        className="w-full text-left px-4 py-3 bg-white border-2 border-orange-200 rounded-xl hover:bg-orange-50 hover:border-orange-400 transition-all group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-black text-sm text-orange-900">{topic.topicName}</div>
-                            <div className="text-xs text-orange-700 font-medium mt-0.5">
-                              <span>{topic.masteryLevel}</span><span className="text-[10px]">%</span> mastery
-                            </div>
-                          </div>
-                          <div className="text-orange-400 group-hover:text-orange-600 transition-colors">
-                            <TrendingUp size={18} />
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Main Content */}
-        <div>
-          {/* Domain Filter (for list view) */}
-            {viewMode === 'list' && (
-              <div className="mb-3">
-                <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                  <button
-                    onClick={() => setSelectedDomain('all')}
-                    className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
-                      selectedDomain === 'all'
-                        ? 'bg-slate-900 text-white'
-                        : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    All Topics ({totalTopics})
-                  </button>
-                  {domains.map(domain => (
-                    <button
-                      key={domain}
-                      onClick={() => setSelectedDomain(domain)}
-                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
-                        selectedDomain === domain
-                          ? 'bg-slate-900 text-white'
-                          : 'bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300'
-                      }`}
-                    >
-                      {domain} ({topicsByDomain[domain].length})
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Premium Card Grid - World-Class UX */}
-            {viewMode === 'heatmap' && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                {topics.map(topic => {
-                  const statusInfo = getStatusInfo(topic);
-                  const mastery = topic.masteryLevel;
-
-                  // Premium gradient based on mastery
-                  const getGradient = (m: number) => {
-                    if (m === 0) return 'from-slate-50 to-slate-100/50';
-                    if (m < 30) return 'from-red-50 to-red-100/50';
-                    if (m < 50) return 'from-orange-50 to-orange-100/50';
-                    if (m < 70) return 'from-blue-50 to-blue-100/50';
-                    if (m < 85) return 'from-amber-50 to-amber-100/50';
-                    return 'from-emerald-50 to-emerald-100/50';
-                  };
-
-                  const getBorderColor = (m: number) => {
-                    if (m === 0) return 'border-slate-200/80';
-                    if (m < 30) return 'border-red-200/80';
-                    if (m < 50) return 'border-orange-200/80';
-                    if (m < 70) return 'border-blue-200/80';
-                    if (m < 85) return 'border-amber-200/80';
-                    return 'border-emerald-200/80';
-                  };
-
-                  const getAccentColor = (m: number) => {
-                    if (m === 0) return 'bg-slate-500';
-                    if (m < 30) return 'bg-gradient-to-r from-red-500 to-red-600';
-                    if (m < 50) return 'bg-gradient-to-r from-orange-500 to-orange-600';
-                    if (m < 70) return 'bg-gradient-to-r from-blue-500 to-indigo-600';
-                    if (m < 85) return 'bg-gradient-to-r from-amber-500 to-amber-600';
-                    return 'bg-gradient-to-r from-emerald-500 to-emerald-600';
-                  };
-
-                  return (
-                    <button
-                      key={topic.id}
-                      onClick={() => onSelectTopic(topic.topicId)}
-                      className={`group relative bg-gradient-to-br ${getGradient(mastery)} border-2 ${getBorderColor(mastery)} rounded-lg p-3 hover:shadow-lg hover:scale-[1.005] transition-all text-left overflow-hidden`}
-                    >
-                      {/* Decorative Elements */}
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full blur-2xl"></div>
-
-                      <div className="relative">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            <div className="w-10 h-10 rounded-lg bg-white/80 backdrop-blur-sm flex items-center justify-center text-xl shadow border border-white/50 flex-shrink-0">
-                              {subjectConfig.iconEmoji}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-black text-sm text-slate-900 leading-tight line-clamp-1">
-                                {topic.topicName}
-                              </h3>
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border backdrop-blur-sm mt-1 ${statusInfo.color}`}>
-                                <span className="text-[9px]">{statusInfo.icon}</span>
-                                {statusInfo.label}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Mastery Badge - Compact */}
-                          <div className="relative flex-shrink-0">
-                            <div className="w-14 h-14 rounded-lg bg-white/90 backdrop-blur-sm shadow border border-white/50 flex flex-col items-center justify-center">
-                              <div className={`text-xl font-black leading-none ${mastery === 0 ? 'text-slate-400' : mastery < 30 ? 'text-red-600' : mastery < 50 ? 'text-orange-600' : mastery < 70 ? 'text-blue-600' : mastery < 85 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                                {mastery}
-                              </div>
-                              <div className="text-[8px] font-bold text-slate-500 uppercase">%</div>
-                            </div>
-                            <div className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded bg-slate-900 text-white text-[7px] font-black uppercase tracking-wider">
-                              Mastery
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Compact Progress Bar */}
+                {/* Heatmap Layout */}
+                {viewMode === 'heatmap' && (
+                  <>
+                    <div className="p-7 flex flex-col h-full relative z-10">
+                      <div className="flex items-start justify-between mb-6">
                         <div className="relative">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Progress</span>
-                            <span className="text-[9px] font-black text-slate-900">{mastery}%</span>
-                          </div>
-                          <div className="h-1.5 bg-white/60 backdrop-blur-sm rounded-full overflow-hidden border border-white/50">
-                            <div
-                              className={`h-full ${getAccentColor(mastery)} rounded-full transition-all duration-500`}
-                              style={{ width: `${mastery}%` }}
+                          {/* Mastery Circle Background */}
+                          <svg className="w-14 h-14 transform -rotate-90">
+                            <circle
+                              cx="28" cy="28" r="24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              className="text-slate-50"
                             />
+                            <motion.circle
+                              cx="28" cy="28" r="24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              strokeDasharray="150"
+                              initial={{ strokeDashoffset: 150 }}
+                              animate={{ strokeDashoffset: 150 - (150 * m) / 100 }}
+                              className={m >= 85 ? 'text-emerald-500' : m >= 40 ? 'text-blue-500' : 'text-red-500'}
+                              transition={{ duration: 1.5, ease: "easeOut" }}
+                            />
+                          </svg>
+                          <div className={`absolute inset-0 flex items-center justify-center w-14 h-14 rounded-full ${status.color} transform group-hover:scale-90 transition-transform`}>
+                            <ProgressIcon size={22} />
                           </div>
                         </div>
+                        <div className="text-right">
+                          <div className={`text-2xl font-black font-outfit tracking-tighter ${m >= 85 ? 'text-emerald-600' : 'text-slate-900'}`}>{m}%</div>
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mastery</div>
+                        </div>
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
 
-            {/* Premium List View */}
-            {viewMode === 'list' && (
-              <div className="space-y-2">
-                {filteredTopics.map(topic => {
-                  const statusInfo = getStatusInfo(topic);
-                  const mastery = topic.masteryLevel;
+                      <h3 className="text-xl font-black text-slate-800 font-outfit tracking-tight mb-4 flex-1 group-hover:text-primary-600 transition-colors leading-tight">
+                        {topic.topicName}
+                      </h3>
 
-                  const getGradient = (m: number) => {
-                    if (m === 0) return 'from-slate-50 to-slate-100/50';
-                    if (m < 30) return 'from-red-50 to-red-100/50';
-                    if (m < 50) return 'from-orange-50 to-orange-100/50';
-                    if (m < 70) return 'from-blue-50 to-blue-100/50';
-                    if (m < 85) return 'from-amber-50 to-amber-100/50';
-                    return 'from-emerald-50 to-emerald-100/50';
-                  };
-
-                  const getBorderColor = (m: number) => {
-                    if (m === 0) return 'border-slate-200/80';
-                    if (m < 30) return 'border-red-200/80';
-                    if (m < 50) return 'border-orange-200/80';
-                    if (m < 70) return 'border-blue-200/80';
-                    if (m < 85) return 'border-amber-200/80';
-                    return 'border-emerald-200/80';
-                  };
-
-                  const getAccentColor = (m: number) => {
-                    if (m === 0) return 'bg-slate-500';
-                    if (m < 30) return 'bg-gradient-to-r from-red-500 to-red-600';
-                    if (m < 50) return 'bg-gradient-to-r from-orange-500 to-orange-600';
-                    if (m < 70) return 'bg-gradient-to-r from-blue-500 to-indigo-600';
-                    if (m < 85) return 'bg-gradient-to-r from-amber-500 to-amber-600';
-                    return 'bg-gradient-to-r from-emerald-500 to-emerald-600';
-                  };
-
-                  return (
-                    <button
-                      key={topic.id}
-                      onClick={() => onSelectTopic(topic.topicId)}
-                      className={`group relative w-full bg-gradient-to-br ${getGradient(mastery)} border-2 ${getBorderColor(mastery)} rounded-lg p-3 hover:shadow-lg hover:scale-[1.002] transition-all text-left overflow-hidden`}
-                    >
-                      {/* Decorative Elements */}
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full blur-2xl"></div>
-
-                      <div className="relative flex items-center gap-3">
-                        {/* Icon */}
-                        <div className="w-10 h-10 rounded-lg bg-white/80 backdrop-blur-sm flex items-center justify-center text-xl shadow border border-white/50 flex-shrink-0">
-                          {subjectConfig.iconEmoji}
+                      {/* Progress Journey Track */}
+                      <div className="space-y-4 mb-6">
+                        <div className="flex items-center justify-between">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Knowledge Depth</div>
+                          <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${stageConfig.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' : stageConfig.color === 'slate' ? 'bg-slate-50 text-slate-500' : 'bg-blue-50 text-blue-600'}`}>
+                            {stageConfig.label}
+                          </div>
                         </div>
 
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-black text-sm text-slate-900 leading-tight line-clamp-1 mb-1">
-                                {topic.topicName}
-                              </h3>
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border backdrop-blur-sm ${statusInfo.color}`}>
-                                <span className="text-[9px]">{statusInfo.icon}</span>
-                                {statusInfo.label}
-                              </span>
-                            </div>
+                        <div className="relative flex justify-between items-center px-1">
+                          {/* Background Track */}
+                          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 rounded-full" />
+                          {/* Progress Track */}
+                          <motion.div
+                            className={`absolute top-1/2 left-0 h-0.5 -translate-y-1/2 rounded-full ${m >= 85 ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(stageIndex / (STAGE_ORDER.length - 1)) * 100}%` }}
+                          />
 
-                            {/* Mastery Badge - Compact */}
-                            <div className="relative flex-shrink-0">
-                              <div className="w-14 h-14 rounded-lg bg-white/90 backdrop-blur-sm shadow border border-white/50 flex flex-col items-center justify-center">
-                                <div className={`text-xl font-black leading-none ${mastery === 0 ? 'text-slate-400' : mastery < 30 ? 'text-red-600' : mastery < 50 ? 'text-orange-600' : mastery < 70 ? 'text-blue-600' : mastery < 85 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                                  {mastery}
+                          {STAGE_ORDER.map((s, idx) => {
+                            const config = getStageConfig(s);
+                            const isActive = idx <= stageIndex;
+                            const isCurrent = idx === stageIndex;
+                            const Icon = config.icon;
+
+                            return (
+                              <div key={s} className="relative z-10 flex flex-col items-center">
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500 ${isCurrent ? 'scale-125 shadow-lg' : ''} ${isActive ? (m >= 85 ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white') : 'bg-white border-2 border-slate-100 text-slate-300'}`}>
+                                  <Icon size={10} strokeWidth={3} />
                                 </div>
-                                <div className="text-[8px] font-bold text-slate-500 uppercase">%</div>
                               </div>
-                              <div className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded bg-slate-900 text-white text-[7px] font-black uppercase tracking-wider">
-                                Mastery
-                              </div>
-                            </div>
-                          </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-        </div>
+
+                      <div className="mt-auto flex items-center justify-between pt-5 border-t border-slate-50">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
+                          <FileQuestion size={14} className="text-slate-400" />
+                          <span className="text-xs font-black text-slate-600">
+                            {topic.totalQuestions || 0} Qs
+                          </span>
+                        </div>
+                        <div className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm border border-black/5 ${status.color}`}>
+                          {status.label}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* List Layout */}
+                {viewMode === 'list' && (
+                  <div className="flex items-center w-full gap-6 p-1">
+                    <div className="relative shrink-0">
+                      <svg className="w-12 h-12 transform -rotate-90">
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-50" />
+                        <motion.circle
+                          cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="125"
+                          initial={{ strokeDashoffset: 125 }}
+                          animate={{ strokeDashoffset: 125 - (125 * m) / 100 }}
+                          className={m >= 85 ? 'text-emerald-500' : m >= 40 ? 'text-blue-500' : 'text-red-500'}
+                        />
+                      </svg>
+                      <div className={`absolute inset-0 flex items-center justify-center w-12 h-12 rounded-full ${status.color} bg-transparent`}>
+                        <ProgressIcon size={18} />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-black text-slate-800 font-outfit tracking-tight text-lg mb-1 truncate">{topic.topicName}</h3>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded-lg border border-slate-100">
+                          <stageConfig.icon size={10} className={stageConfig.color === 'emerald' ? 'text-emerald-500' : 'text-blue-500'} strokeWidth={3} />
+                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{stageConfig.label}</span>
+                        </div>
+                        <div className="w-1 h-1 rounded-full bg-slate-200" />
+                        <div className="flex items-center gap-1">
+                          <FileQuestion size={10} className="text-slate-400" />
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{topic.totalQuestions || 0} Questions</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end shrink-0 px-4 border-l border-slate-100">
+                      <div className="text-2xl font-black text-slate-900 leading-none tracking-tighter">{m}%</div>
+                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Mastery</div>
+                    </div>
+
+                    <div className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-sm border border-black/5 flex items-center gap-2 ${status.color}`}>
+                      <status.icon size={12} />
+                      {status.label}
+                    </div>
+                  </div>
+                )}
+              </motion.button>
+            );
+          })}
+        </motion.div>
       </div>
     </div>
   );
 };
 
 export default TopicDashboardPage;
+

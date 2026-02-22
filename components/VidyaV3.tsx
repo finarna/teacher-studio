@@ -15,6 +15,7 @@ import { getQuickActions, getDefaultQuickActions } from '../utils/vidya/quickAct
 import { buildContextPayload } from '../utils/vidya/contextBuilder';
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
+import { useLearningJourney } from '../contexts/LearningJourneyContext';
 
 interface VidyaV3Props {
   appContext?: VidyaAppContext;
@@ -22,7 +23,18 @@ interface VidyaV3Props {
 
 const VidyaV3: React.FC<VidyaV3Props> = ({ appContext }) => {
   const { activeSubject, subjectConfig, examConfig } = useAppContext();
+  const learningJourney = useLearningJourney();
   const theme = useSubjectTheme();
+
+  // Enrich context from LearningJourney state
+  const enrichedContext = React.useMemo(() => {
+    const activeTopicResource = learningJourney?.topics.find(t => t.id === learningJourney.selectedTopicId);
+    return {
+      ...appContext,
+      activeTopicResource,
+      currentView: appContext?.currentView || learningJourney?.currentView
+    };
+  }, [appContext, learningJourney.selectedTopicId, learningJourney.topics, learningJourney.currentView]);
 
   const {
     messages,
@@ -34,7 +46,7 @@ const VidyaV3: React.FC<VidyaV3Props> = ({ appContext }) => {
     toggleChat,
     sendMessage,
     clearChat,
-  } = useVidyaChatV3(appContext);
+  } = useVidyaChatV3(enrichedContext);
 
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -51,15 +63,13 @@ const VidyaV3: React.FC<VidyaV3Props> = ({ appContext }) => {
     }
 
     const contextPayload = buildContextPayload({
-      currentView: appContext.currentView,
-      scannedPapers: appContext.scannedPapers,
-      selectedScan: appContext.selectedScan,
+      ...enrichedContext,
       activeSubject,
       activeExamContext: examConfig.name,
     }, userRole);
 
     return getQuickActions(userRole, contextPayload);
-  }, [userRole, appContext]);
+  }, [userRole, enrichedContext, activeSubject, examConfig.name]);
 
   const handleSend = async (textOverride?: string) => {
     const textToSend = textOverride || input;
@@ -76,10 +86,10 @@ const VidyaV3: React.FC<VidyaV3Props> = ({ appContext }) => {
   };
 
   return createPortal(
-    <div className="fixed bottom-5 right-5 z-50">
+    <div className="fixed bottom-5 right-5 z-[2147483647]" style={{ transform: 'translateZ(9999px)' }}>
       {/* Chat Window */}
       {isOpen && (
-        <div className="w-[420px] h-[650px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
+        <div className="w-[420px] h-[650px] max-h-[calc(100vh-100px)] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
 
           {/* Header */}
           <div
@@ -151,11 +161,10 @@ const VidyaV3: React.FC<VidyaV3Props> = ({ appContext }) => {
 
                 {/* Message */}
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-white text-gray-800 shadow-sm border border-gray-200'
-                  }`}
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white text-gray-800 shadow-sm border border-gray-200'
+                    }`}
                 >
                   <RichMarkdownRenderer
                     text={msg.content}

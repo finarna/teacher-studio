@@ -46,6 +46,10 @@ export async function aggregateTopicsForUser(
 
     if (examTopics.length === 0) return [];
 
+    // Create a name -> ID lookup for fallback mapping
+    const topicNameToId = new Map<string, string>();
+    examTopics.forEach(t => topicNameToId.set(t.name, t.id));
+
     // 3. Get user's scans + system scans (shared question bank) WITHOUT analysis_data
     // We no longer need to fetch analysis_data here - questions are in the questions table
     const { data: scans, error: scansError } = await supabase
@@ -151,7 +155,13 @@ export async function aggregateTopicsForUser(
     // 6. Group questions by OFFICIAL topic ID (using mappings from BOTH sources)
     const questionsByTopicId = new Map<string, AnalyzedQuestion[]>();
     allQuestions.forEach(q => {
-      const topicId = questionTopicMap.get(q.id);
+      let topicId = questionTopicMap.get(q.id);
+
+      // Fallback: Try mapping by name if mapping table entry is missing (common for fresh AI questions)
+      if (!topicId && q.topic) {
+        topicId = topicNameToId.get(q.topic);
+      }
+
       if (topicId) {
         if (!questionsByTopicId.has(topicId)) {
           questionsByTopicId.set(topicId, []);
@@ -237,7 +247,7 @@ export async function aggregateTopicsForUser(
 
       // Get user data for this topic using MAPPED topic ID (may be empty)
       const topicQuestions = questionsByTopicId.get(topicId) || [];
-      const existing = existingMap.get(topicId);
+      const existing = existingMap.get(topicId) as any;
 
       // For insights, sketches, flashcards: still use topic NAME matching
       // (these resources don't have mappings yet, they rely on exact name match)
@@ -283,6 +293,7 @@ export async function aggregateTopicsForUser(
         // Progress tracking (from existing or defaults)
         masteryLevel,
         studyStage,
+        notesCompleted: existing?.notes_completed || false,
         questionsAttempted: existing?.questions_attempted || 0,
         questionsCorrect: existing?.questions_correct || 0,
         averageAccuracy: existing?.average_accuracy || 0,
@@ -407,6 +418,7 @@ export async function getTopicResourceLibrary(
 
       masteryLevel: topicResource.mastery_level || 0,
       studyStage: topicResource.study_stage || 'not_started',
+      notesCompleted: topicResource.notes_completed || false,
       questionsAttempted: topicResource.questions_attempted || 0,
       questionsCorrect: topicResource.questions_correct || 0,
       averageAccuracy: topicResource.average_accuracy || 0,
@@ -424,7 +436,7 @@ export async function getTopicResourceLibrary(
 }
 
 /**
- * Calculate topic mastery based on activities
+ * Recalculate mastery level for a topic resource using Absolute Truth
  */
 export async function calculateTopicMastery(
   supabase: any,
@@ -432,41 +444,67 @@ export async function calculateTopicMastery(
 ): Promise<number> {
 
   try {
-    const { data: activities, error } = await supabase
-      .from('topic_activities')
-      .select('*')
-      .eq('topic_resource_id', topicResourceId)
-      .not('is_correct', 'is', null);
+    // 1. Fetch the topic resource for base stats (quizzes, notes, total questions)
+    const { data: resource, error: resError } = await supabase
+      .from('topic_resources')
+      .select('notes_completed, quizzes_taken, total_questions, user_id')
+      .eq('id', topicResourceId)
+      .single();
 
-    if (error || !activities || activities.length === 0) return 0;
+    if (resError) throw resError;
 
-    // Calculate accuracy
-    const correctCount = activities.filter(a => a.is_correct).length;
-    const accuracy = (correctCount / activities.length) * 100;
+    // 2. Fetch all practice answers for this resource (Accuracy Truth)
+    const { data: allAnswers, error: ansError } = await supabase
+      .from('practice_answers')
+      .select('id, is_correct')
+      .eq('topic_resource_id', topicResourceId);
 
-    // Count activities by type
-    const quizCount = activities.filter(a => a.activity_type === 'completed_quiz').length;
-    const practiceCount = activities.filter(a => a.activity_type === 'practiced_question').length;
+    if (ansError) throw ansError;
 
-    // Mastery formula (from migration):
-    // Base: accuracy (65% weight)
-    // Bonus: +10 for each quiz (max 20)
-    // Bonus: +5 for every 10 practice questions (max 15)
-    const mastery = Math.min(100,
-      accuracy * 0.65 +
-      Math.min(20, quizCount * 10) +
-      Math.min(15, Math.floor(practiceCount / 10) * 5)
-    );
+    const isNotesDone = resource?.notes_completed || false;
+    const quizzesTaken = resource?.quizzes_taken || 0;
+    const answers = allAnswers || [];
 
-    return Math.round(mastery);
+    // Calculate Absolute Accuracy
+    const totalAttempted = answers.length;
+    if (totalAttempted === 0) {
+      return isNotesDone ? 10 : 0;
+    }
+
+    const correctCount = answers.filter((a: any) => a.is_correct).length;
+    const accuracy = (correctCount / totalAttempted) * 100;
+
+    /**
+     * Mastery formula (The Absolute Standard):
+     * 1. Base Accuracy: 60% weight (weighted by coverage)
+     * 2. Quizzes Taken: +10 per quiz (max 20 points / 2 quizzes)
+     * 3. Practice Volume: +5 per 10 unique questions (max 10 points / 20 questions)
+     * 4. Notes Completion: +10 points if all visual notes viewed
+     */
+    // Recalculate Mastery using the official standard
+
+    // NEW DYNAMIC COVERAGE: Mastery requires deeper engagement as the pool grows.
+    // Full accuracy weight is earned only after solving ~50% of the pool (min 15, max achievable).
+    const totalQuestions = resource?.total_questions || 10;
+    const saturationTarget = Math.min(totalQuestions, Math.max(15, Math.floor(totalQuestions * 0.5)));
+    const coverageWeight = Math.min(1, totalAttempted / Math.max(1, saturationTarget));
+
+    const mastery = Math.min(100, Math.round(
+      (accuracy * 0.60 * coverageWeight) +
+      Math.min(20, quizzesTaken * 10) +
+      Math.min(10, Math.floor(totalAttempted / 10) * 5) +
+      (isNotesDone ? 10 : 0)
+    ));
+
+    return mastery;
   } catch (error) {
-    console.error('Error calculating mastery:', error);
+    console.error('❌ [calculateTopicMastery] Error:', error);
     return 0;
   }
 }
 
 /**
- * Record a topic activity
+ * Record a topic activity and update aggregated stats
  */
 export async function recordTopicActivity(
   supabase: any,
@@ -478,7 +516,7 @@ export async function recordTopicActivity(
   timeSpent?: number
 ): Promise<void> {
   try {
-    // Insert activity
+    // 1. Insert activity log
     await supabase.from('topic_activities').insert({
       user_id: userId,
       topic_resource_id: topicResourceId,
@@ -489,40 +527,64 @@ export async function recordTopicActivity(
       activity_timestamp: new Date().toISOString()
     });
 
-    // Update topic resource stats
-    if (activityType === 'practiced_question' && isCorrect !== undefined) {
-      const { data: resource } = await supabase
-        .from('topic_resources')
-        .select('questions_attempted, questions_correct')
-        .eq('id', topicResourceId)
-        .single();
+    // 2. Fetch fresh stats to update topic_resources
+    // We update accuracy and volume from practice_answers to avoid drift
+    const { data: allAnswers } = await supabase
+      .from('practice_answers')
+      .select('is_correct')
+      .eq('topic_resource_id', topicResourceId);
 
-      if (resource) {
-        const newAttempted = (resource.questions_attempted || 0) + 1;
-        const newCorrect = (resource.questions_correct || 0) + (isCorrect ? 1 : 0);
-        const newAccuracy = (newCorrect / newAttempted) * 100;
+    const { data: currentRes } = await supabase
+      .from('topic_resources')
+      .select('quizzes_taken, notes_completed, study_stage, total_questions')
+      .eq('id', topicResourceId)
+      .single();
 
-        await supabase
-          .from('topic_resources')
-          .update({
-            questions_attempted: newAttempted,
-            questions_correct: newCorrect,
-            average_accuracy: newAccuracy,
-            last_practiced: new Date().toISOString()
-          })
-          .eq('id', topicResourceId);
+    if (allAnswers && currentRes) {
+      const totalAttempted = allAnswers.length;
+      const totalCorrect = allAnswers.filter((a: any) => a.is_correct).length;
+      const accuracy = totalAttempted > 0 ? (totalCorrect / totalAttempted) * 100 : 0;
+
+      // Recalculate Mastery using the official standard
+
+      // NEW DYNAMIC COVERAGE: Adjust mastery weight based on total pool size
+      const totalQuestions = currentRes?.total_questions || 10;
+      const saturationTarget = Math.min(totalQuestions, Math.max(15, Math.floor(totalQuestions * 0.5)));
+      const coverageWeight = Math.min(1, totalAttempted / Math.max(1, saturationTarget));
+
+      const newMastery = Math.min(100, Math.round(
+        (accuracy * 0.60 * coverageWeight) +
+        Math.min(20, (currentRes.quizzes_taken || 0) * 10) +
+        Math.min(10, Math.floor(totalAttempted / 10) * 5) +
+        (currentRes.notes_completed ? 10 : 0)
+      ));
+
+      // Determine Study Stage Shifting
+      let nextStage = currentRes.study_stage || 'not_started';
+      if (nextStage === 'not_started' || nextStage === 'studying_notes') {
+        if (activityType === 'practiced_question') nextStage = 'practicing';
       }
+
+      // Elite Mastery Threshold: Accuracy 90%+ and 2+ Quizzes
+      if (newMastery >= 90 && currentRes.quizzes_taken >= 2) {
+        nextStage = 'mastered';
+      }
+
+      await supabase
+        .from('topic_resources')
+        .update({
+          questions_attempted: totalAttempted,
+          questions_correct: totalCorrect,
+          average_accuracy: Math.round(accuracy),
+          mastery_level: newMastery,
+          study_stage: nextStage,
+          last_practiced: new Date().toISOString()
+        })
+        .eq('id', topicResourceId);
     }
 
-    // Recalculate mastery
-    const newMastery = await calculateTopicMastery(topicResourceId);
-    await supabase
-      .from('topic_resources')
-      .update({ mastery_level: newMastery })
-      .eq('id', topicResourceId);
-
   } catch (error) {
-    console.error('Error recording activity:', error);
+    console.error('❌ [recordTopicActivity] Error:', error);
     throw error;
   }
 }

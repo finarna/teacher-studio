@@ -58,7 +58,7 @@ interface LearningJourneyContextType extends LearningJourneyState {
   // Data actions
   loadTopics: () => Promise<void>;
   loadSubjectProgress: () => Promise<void>;
-  refreshData: () => Promise<void>;
+  refreshData: (silent?: boolean) => Promise<void>;
 }
 
 const LearningJourneyContext = createContext<LearningJourneyContextType | undefined>(undefined);
@@ -441,10 +441,10 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   };
 
   // Load topics
-  const loadTopics = async () => {
+  const loadTopics = async (silent = false) => {
     if (!state.selectedTrajectory || !state.selectedSubject) return;
 
-    setState(prev => ({ ...prev, isLoading: true }));
+    if (!silent) setState(prev => ({ ...prev, isLoading: true }));
 
     try {
       // Call API endpoint instead of direct function call
@@ -474,17 +474,38 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   };
 
   // Load subject progress
-  const loadSubjectProgress = async () => {
+  const loadSubjectProgress = async (silent = false) => {
     if (!state.selectedTrajectory) return;
 
-    setState(prev => ({ ...prev, isLoading: true }));
+    if (!silent) setState(prev => ({ ...prev, isLoading: true }));
 
     try {
-      // TODO: API call to fetch subject progress
-      // For now, return empty
+      if (!state.selectedTrajectory) return;
+
+      const url = getApiUrl(`/api/learning-journey/subjects/${state.selectedTrajectory}?userId=${encodeURIComponent(userId)}`);
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('Failed to load subject progress');
+      }
+
+      const { data } = await response.json();
+
+      // Transform array to Record<Subject, SubjectProgress>
+      const progressMap = {} as Record<Subject, SubjectProgress>;
+      data.forEach((item: any) => {
+        progressMap[item.subject as Subject] = {
+          overallMastery: item.overallMastery,
+          topicsTotal: item.totalTopics,
+          topicsMastered: item.topicsWithQuestions, // Using topicsWithQuestions as a proxy if explicit mastered count not available
+          totalQuestionsAttempted: item.totalQuestions,
+          overallAccuracy: 0 // Will be handled by actual stats later
+        } as any;
+      });
+
       setState(prev => ({
         ...prev,
-        subjectProgress: {} as Record<Subject, SubjectProgress>,
+        subjectProgress: progressMap,
         isLoading: false
       }));
     } catch (error) {
@@ -497,8 +518,8 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   };
 
   // Refresh all data
-  const refreshData = async () => {
-    await Promise.all([loadTopics(), loadSubjectProgress()]);
+  const refreshData = async (silent = false) => {
+    await Promise.all([loadTopics(silent), loadSubjectProgress(silent)]);
   };
 
   const contextValue: LearningJourneyContextType = {

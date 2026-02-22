@@ -23,10 +23,12 @@ interface PracticeAnswer {
 
 interface UsePracticeSessionProps {
   topicResourceId: string;
+  topicId: string;
   topicName: string;
   subject: Subject;
   examContext: ExamContext;
   questions: AnalyzedQuestion[];
+  onProgressUpdate?: (silent?: boolean) => void;
 }
 
 interface PracticeSessionState {
@@ -43,16 +45,19 @@ interface PracticeSessionState {
 
   // Session metadata
   sessionId: string | null;
+  authenticatedTopicResourceId: string | null;
   isLoading: boolean;
   isSaving: boolean;
 }
 
 export const usePracticeSession = ({
   topicResourceId,
+  topicId,
   topicName,
   subject,
   examContext,
-  questions
+  questions,
+  onProgressUpdate
 }: UsePracticeSessionProps) => {
   const { user } = useAuth();
 
@@ -63,6 +68,7 @@ export const usePracticeSession = ({
     questionStartTimes: new Map(),
     timeSpentPerQuestion: new Map(),
     sessionId: null,
+    authenticatedTopicResourceId: null,
     isLoading: true,
     isSaving: false
   });
@@ -113,7 +119,7 @@ export const usePracticeSession = ({
       // Create or get active session (match by topic_name, subject, exam_context since topic_resource_id is NULL)
       const { data: sessions, error: sessionsError } = await supabase
         .from('practice_sessions')
-        .select('id')
+        .select('id, topic_resource_id')
         .eq('topic_name', topicName)
         .eq('subject', subject)
         .eq('exam_context', examContext)
@@ -123,14 +129,37 @@ export const usePracticeSession = ({
       if (sessionsError) throw sessionsError;
 
       let sessionId = sessions?.[0]?.id;
+      let authenticatedTopicResourceId = sessions?.[0]?.topic_resource_id || topicResourceId;
 
       if (!sessionId) {
+        // --- NEW: Ensure topic_resource entry exists first ---
+        // This avoids FK errors if topicResourceId was a placeholder
+        const { data: resource, error: resourceError } = await supabase
+          .from('topic_resources')
+          .upsert({
+            user_id: user.id,
+            topic_id: topicId,
+            subject,
+            exam_context: examContext
+          }, {
+            onConflict: 'user_id,topic_id,exam_context'
+          })
+          .select('id')
+          .single();
+
+        if (resourceError) {
+          console.error('❌ Failed to ensure topic resource:', resourceError);
+          // Fallback to provided ID, but it might fail FK check
+        } else if (resource) {
+          authenticatedTopicResourceId = resource.id;
+        }
+
         // Create new session
         const { data: newSession, error: createError } = await supabase
           .from('practice_sessions')
           .insert({
             user_id: user.id,
-            topic_resource_id: null, // In-memory topics don't exist in topic_resources table
+            topic_resource_id: authenticatedTopicResourceId,
             subject,
             exam_context: examContext,
             topic_name: topicName
@@ -139,10 +168,30 @@ export const usePracticeSession = ({
           .single();
 
         if (createError) {
-          console.error('❌ Failed to create session:', createError);
-          throw createError;
+          // If 409 Conflict, another process created it - re-query
+          if ((createError as any).code === '23505' || createError.message?.includes('duplicate')) {
+            const { data: retry } = await supabase
+              .from('practice_sessions')
+              .select('id, topic_resource_id')
+              .eq('topic_name', topicName)
+              .eq('subject', subject)
+              .eq('exam_context', examContext)
+              .eq('is_active', true)
+              .single();
+
+            if (retry) {
+              sessionId = retry.id;
+              authenticatedTopicResourceId = retry.topic_resource_id;
+            } else {
+              throw createError;
+            }
+          } else {
+            console.error('❌ Failed to create session:', createError);
+            throw createError;
+          }
+        } else {
+          sessionId = newSession.id;
         }
-        sessionId = newSession.id;
       }
 
       // Build state maps
@@ -165,6 +214,7 @@ export const usePracticeSession = ({
         bookmarkedIds: bookmarksSet,
         timeSpentPerQuestion: timeMap,
         sessionId,
+        authenticatedTopicResourceId,
         isLoading: false
       }));
 
@@ -206,7 +256,7 @@ export const usePracticeSession = ({
         .upsert({
           user_id: user.id,
           question_id: questionId,
-          topic_resource_id: null, // In-memory topics don't exist in topic_resources table
+          topic_resource_id: state.authenticatedTopicResourceId || topicResourceId, // Link to topic resource for stats!
           selected_option: selectedOption,
           is_correct: isCorrect,
           time_spent_seconds: timeSpent,
@@ -242,9 +292,90 @@ export const usePracticeSession = ({
               last_active_at: new Date().toISOString()
             })
             .eq('id', state.sessionId)
-            .then(() => console.log('📊 [usePracticeSession] Updated session stats'))
-            .catch(err => console.error('❌ Failed to update session stats:', err));
+            .then(
+              () => console.log('📊 [usePracticeSession] Updated session stats'),
+              (err) => console.error('❌ Failed to update session stats:', err)
+            );
         }
+
+        // --- NEW: Update overall topic_resources stats with absolute truth from current state ---
+        (async () => {
+          try {
+            // Calculate absolute truth from our current maps (loaded from DB + new answers)
+            const totalAttempted = newValidatedAnswers.size;
+            const totalCorrect = Array.from(newValidatedAnswers.values()).filter(v => v).length;
+            const absoluteAccuracy = totalAttempted > 0 ? Math.round((totalCorrect / totalAttempted) * 100) : 0;
+
+            // Fetch latest quizzes/notes status from DB to ensure formula is correct
+            const { data: currentStats } = await supabase
+              .from('topic_resources')
+              .select('quizzes_taken, notes_completed, mastery_level, study_stage')
+              .eq('user_id', user.id)
+              .eq('topic_id', topicId)
+              .eq('exam_context', examContext)
+              .maybeSingle();
+
+            const quizzesTaken = currentStats?.quizzes_taken || 0;
+            const isNotesDone = currentStats?.notes_completed || false;
+
+            console.log(`📊 [usePracticeSession] Recalculating Stats:`, {
+              totalAttempted,
+              totalCorrect,
+              absoluteAccuracy,
+              quizzesTaken,
+              currentIsCorrect: isCorrect
+            });
+
+            // Re-calculate mastery using the standard formula
+            // NEW DYNAMIC COVERAGE: Mastery requires deeper engagement as the pool grows.
+            // Saturation target is 50% of the currently known question pool (min 15).
+            const poolSize = questions?.length || 10;
+            const saturationTarget = Math.min(poolSize, Math.max(15, Math.floor(poolSize * 0.5)));
+            const coverageWeight = Math.min(1, totalAttempted / Math.max(1, saturationTarget));
+
+            const calculatedMastery = Math.min(100, Math.round(
+              (absoluteAccuracy * 0.60 * coverageWeight) +
+              Math.min(20, quizzesTaken * 10) +
+              Math.min(10, Math.floor(totalAttempted / 10) * 5) +
+              (isNotesDone ? 10 : 0)
+            ));
+
+            // Determine if stage should move from 'studying_notes' to 'practicing' or 'mastered'
+            let nextStage = currentStats?.study_stage || 'not_started';
+            if (nextStage === 'not_started' || nextStage === 'studying_notes') {
+              nextStage = 'practicing';
+            }
+
+            // Standard Mastered Threshold: 90% + 2 Quizzes
+            if (calculatedMastery >= 90 && quizzesTaken >= 2) {
+              nextStage = 'mastered';
+            }
+
+            const statsData = {
+              user_id: user.id,
+              topic_id: topicId,
+              subject: subject,
+              exam_context: examContext,
+              questions_attempted: totalAttempted,
+              questions_correct: totalCorrect,
+              average_accuracy: absoluteAccuracy,
+              mastery_level: calculatedMastery,
+              study_stage: nextStage,
+              last_practiced: new Date().toISOString()
+            };
+
+            const { error: upsertErr } = await supabase
+              .from('topic_resources')
+              .upsert(statsData, {
+                onConflict: 'user_id,topic_id,exam_context'
+              });
+
+            if (upsertErr) console.error('Error upserting topic_resources:', upsertErr);
+            else onProgressUpdate?.(true);
+          } catch (e) {
+            console.error('Failed to update topic_resources inside saveAnswer', e);
+          }
+        })();
 
         return {
           ...prev,
@@ -260,7 +391,7 @@ export const usePracticeSession = ({
       console.error('❌ [usePracticeSession] Error saving answer:', error);
       setState(prev => ({ ...prev, isSaving: false }));
     }
-  }, [user?.id, state.savedAnswers, state.timeSpentPerQuestion, state.sessionId]);
+  }, [user?.id, state.savedAnswers, state.timeSpentPerQuestion, state.sessionId, topicResourceId, topicId, subject, examContext, topicName]);
 
   /**
    * Toggle bookmark

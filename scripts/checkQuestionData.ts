@@ -39,12 +39,16 @@ async function checkQuestionData() {
   console.log(`   ❌ Missing correct_option_index: ${withoutCorrect}\n`);
 
   // Show sample questions missing correct answers
-  const { data: samples } = await supabase
+  const { data: samples, error: samplesError } = await supabase
     .from('questions')
-    .select('id, text, options, marking_scheme, solution_steps')
+    .select('id, text, options, solution_steps')
     .is('correct_option_index', null)
     .not('options', 'is', null)
     .limit(5);
+
+  if (samplesError) {
+    console.error('❌ Error fetching samples:', samplesError);
+  }
 
   console.log('📋 Sample Questions Missing Correct Answer:\n');
 
@@ -52,10 +56,9 @@ async function checkQuestionData() {
     console.log(`${idx + 1}. ID: ${q.id.substring(0, 8)}`);
     console.log(`   Text: ${q.text.substring(0, 100)}...`);
     console.log(`   Options: ${q.options?.length} options`);
-    console.log(`   Has marking_scheme: ${q.marking_scheme ? 'Yes' : 'No'}`);
     console.log(`   Has solution_steps: ${q.solution_steps?.length > 0 ? 'Yes' : 'No'}`);
-    if (q.marking_scheme) {
-      console.log(`   Marking Scheme: ${JSON.stringify(q.marking_scheme).substring(0, 150)}...`);
+    if (q.solution_steps && Array.isArray(q.solution_steps)) {
+      console.log(`   Solution Steps: ${JSON.stringify(q.solution_steps).substring(0, 150)}...`);
     }
     console.log('');
   });
@@ -74,7 +77,6 @@ async function checkQuestionData() {
     console.log(`   Text: ${targetQ.text}`);
     console.log(`   Options: ${JSON.stringify(targetQ.options, null, 2)}`);
     console.log(`   correct_option_index: ${targetQ.correct_option_index}`);
-    console.log(`   marking_scheme: ${JSON.stringify(targetQ.marking_scheme, null, 2)}`);
     console.log(`   solution_steps: ${JSON.stringify(targetQ.solution_steps, null, 2)}`);
   }
 }

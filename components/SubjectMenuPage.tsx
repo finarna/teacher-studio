@@ -111,14 +111,47 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
         availableYears = [...new Set(availableYears)].sort((a, b) => parseInt(b) - parseInt(a));
       }
 
+      // Fetch mastered topics from user progress
+      const { data: { user } } = await supabase.auth.getUser();
+      let masteredTopics = 0;
+      let customTestsTaken = 0;
+      let avgMockScore = 0;
+
+      if (user) {
+        const [{ count: mCount }, { data: testsData }] = await Promise.all([
+          supabase
+            .from('topic_resources')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('subject', subject)
+            .eq('exam_context', examContext)
+            .gte('mastery_level', 85),
+          supabase
+            .from('test_attempts')
+            .select('percentage')
+            .eq('user_id', user.id)
+            .eq('subject', subject)
+            .eq('exam_context', examContext)
+            .eq('test_type', 'full_mock')
+            .eq('status', 'completed')
+        ]);
+
+        masteredTopics = mCount || 0;
+        customTestsTaken = testsData?.length || 0;
+        if (customTestsTaken > 0) {
+          const totalScore = testsData!.reduce((sum, t) => sum + (t.percentage || 0), 0);
+          avgMockScore = Math.round(totalScore / customTestsTaken);
+        }
+      }
+
       setStats({
         totalTopics,
-        masteredTopics: 0, // TODO: Calculate from user progress
+        masteredTopics,
         pastYearQuestionsCount,
         availableYears,
         totalPapers,
-        customTestsTaken: 0, // TODO: Query test_attempts with type='custom_mock'
-        avgMockScore: 0 // TODO: Calculate average score
+        customTestsTaken,
+        avgMockScore
       });
     } catch (error) {
       console.error('Error fetching subject menu stats:', error);
@@ -170,15 +203,15 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
     return {
       blackboardImage: `/assets/blackboards/${subjectLower}-blackboard-sketch.jpg`,
       bgClass: subject === 'Physics' ? 'bg-gradient-to-br from-blue-500 to-cyan-500'
-               : subject === 'Chemistry' ? 'bg-gradient-to-br from-green-500 to-emerald-500'
-               : subject === 'Math' ? 'bg-gradient-to-br from-purple-500 to-violet-500'
-               : subject === 'Biology' ? 'bg-gradient-to-br from-lime-500 to-green-500'
-               : 'bg-gradient-to-br from-slate-500 to-slate-600',
+        : subject === 'Chemistry' ? 'bg-gradient-to-br from-green-500 to-emerald-500'
+          : subject === 'Math' ? 'bg-gradient-to-br from-purple-500 to-violet-500'
+            : subject === 'Biology' ? 'bg-gradient-to-br from-lime-500 to-green-500'
+              : 'bg-gradient-to-br from-slate-500 to-slate-600',
       symbols: subject === 'Physics' ? ['⚡', '🔋', '🧲', '⚛️']
-             : subject === 'Chemistry' ? ['⚗️', '🧪', '⚛️', '🔬']
-             : subject === 'Math' ? ['∑', '∫', '√', '∞']
-             : subject === 'Biology' ? ['🧬', '🦠', '🌱', '🔬']
-             : ['∑', '⚛️', '🧪', '🧬']
+        : subject === 'Chemistry' ? ['⚗️', '🧪', '⚛️', '🔬']
+          : subject === 'Math' ? ['∑', '∫', '√', '∞']
+            : subject === 'Biology' ? ['🧬', '🦠', '🌱', '🔬']
+              : ['∑', '⚛️', '🧪', '🧬']
     };
   };
 
@@ -290,7 +323,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
               <svg viewBox="0 0 100 100" className="w-full h-full">
                 {/* Brain outline */}
                 <path d="M50,20 C30,20 20,35 20,50 C20,65 30,80 50,80 C70,80 80,65 80,50 C80,35 70,20 50,20"
-                      fill="url(#brainGradient)" stroke="rgba(245,158,11,0.4)" strokeWidth="1.5" />
+                  fill="url(#brainGradient)" stroke="rgba(245,158,11,0.4)" strokeWidth="1.5" />
                 <defs>
                   <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="rgba(251,191,36,0.3)" />
@@ -386,144 +419,144 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
           subject={subject}
           trajectory={examContext}
           actions={
-            <span className="text-3xl">{subjectConfig.emoji}</span>
+            <span className="text-3xl">{subjectConfig.iconEmoji}</span>
           }
         />
 
         {/* Content */}
         <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Welcome message with enhanced styling */}
-        <div className="mb-8 text-center relative">
-          <div className="inline-block mb-3">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-purple-400 to-amber-400 rounded-lg blur-lg opacity-20 group-hover:opacity-30 transition-opacity" />
-            <h2 className="relative font-black text-3xl text-slate-900 font-outfit">
-              Choose Your Learning Path
-            </h2>
-          </div>
-          <p className="text-slate-700 font-instrument text-lg font-medium">
-            Select how you want to study <span className="font-black text-slate-900">{subject}</span> for <span className="font-black text-slate-900">{examContext}</span>
-          </p>
-          <div className="mt-4 flex items-center justify-center gap-3 text-sm text-slate-600 font-semibold">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span>Real-time progress tracking</span>
+          {/* Welcome message with enhanced styling */}
+          <div className="mb-8 text-center relative">
+            <div className="inline-block mb-3">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-purple-400 to-amber-400 rounded-lg blur-lg opacity-20 group-hover:opacity-30 transition-opacity" />
+              <h2 className="relative font-black text-3xl text-slate-900 font-outfit">
+                Choose Your Learning Path
+              </h2>
             </div>
-            <span className="text-slate-400">•</span>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
-              <span>AI-powered insights</span>
+            <p className="text-slate-700 font-instrument text-lg font-medium">
+              Select how you want to study <span className="font-black text-slate-900">{subject}</span> for <span className="font-black text-slate-900">{examContext}</span>
+            </p>
+            <div className="mt-4 flex items-center justify-center gap-3 text-sm text-slate-600 font-semibold">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span>Real-time progress tracking</span>
+              </div>
+              <span className="text-slate-400">•</span>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                <span>AI-powered insights</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Option cards grid with staggered entrance */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {optionCards.map((card, index) => {
-            const CardIcon = card.icon;
-            return (
-              <button
-                key={card.id}
-                onClick={() => onSelectOption(card.id)}
-                className="group relative bg-white rounded-2xl border-2 border-slate-200 p-6 text-left transition-all duration-300 hover:border-slate-300 hover:shadow-2xl hover:-translate-y-2 overflow-hidden active:scale-98 focus:outline-none focus:ring-4 focus:ring-slate-200/50 animate-fadeInUp"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {/* Illustration Background */}
-                {renderIllustration(card.illustration)}
+          {/* Option cards grid with staggered entrance */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {optionCards.map((card, index) => {
+              const CardIcon = card.icon;
+              return (
+                <button
+                  key={card.id}
+                  onClick={() => onSelectOption(card.id)}
+                  className="group relative bg-white rounded-2xl border-2 border-slate-200 p-6 text-left transition-all duration-300 hover:border-slate-300 hover:shadow-2xl hover:-translate-y-2 overflow-hidden active:scale-98 focus:outline-none focus:ring-4 focus:ring-slate-200/50 animate-fadeInUp"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  {/* Illustration Background */}
+                  {renderIllustration(card.illustration)}
 
-                {/* Badge */}
-                {card.badge && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <span className="px-3 py-1.5 bg-green-100 text-green-700 text-xs font-black rounded-full shadow-sm border border-green-200">
-                      {card.badge}
-                    </span>
-                  </div>
-                )}
-
-                {/* Icon */}
-                <div className={`relative z-10 w-14 h-14 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                  <CardIcon size={28} className="text-white" />
-                </div>
-
-                {/* Title */}
-                <h3 className="relative z-10 font-black text-xl text-slate-900 font-outfit mb-3 leading-tight">
-                  {card.title}
-                </h3>
-
-                {/* Description */}
-                <p className="relative z-10 text-sm text-slate-700 font-instrument font-medium mb-4 leading-relaxed">
-                  {card.description}
-                </p>
-
-                {/* Stats */}
-                <div className="relative z-10 flex items-center justify-between mt-auto">
-                  <div className="px-3 py-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm border border-slate-200">
-                    <div className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                      {isLoading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" />
-                          <div className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
-                          <div className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
-                        </div>
-                      ) : (
-                        card.stats
-                      )}
+                  {/* Badge */}
+                  {card.badge && (
+                    <div className="absolute top-4 right-4 z-10">
+                      <span className="px-3 py-1.5 bg-green-100 text-green-700 text-xs font-black rounded-full shadow-sm border border-green-200">
+                        {card.badge}
+                      </span>
                     </div>
+                  )}
+
+                  {/* Icon */}
+                  <div className={`relative z-10 w-14 h-14 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    <CardIcon size={28} className="text-white" />
                   </div>
-                  <ArrowRight
-                    size={22}
-                    className="text-slate-500 group-hover:text-slate-900 group-hover:translate-x-1 transition-all duration-300"
-                  />
-                </div>
 
-                {/* Hover gradient overlay with shimmer effect */}
-                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 pointer-events-none z-0`} />
+                  {/* Title */}
+                  <h3 className="relative z-10 font-black text-xl text-slate-900 font-outfit mb-3 leading-tight">
+                    {card.title}
+                  </h3>
 
-                {/* Shimmer effect on hover */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-                  <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000`} />
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                  {/* Description */}
+                  <p className="relative z-10 text-sm text-slate-700 font-instrument font-medium mb-4 leading-relaxed">
+                    {card.description}
+                  </p>
 
-        {/* Quick stats summary */}
-        {!isLoading && (
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
-              <div className="text-3xl font-black text-slate-900 font-outfit mb-1">
-                {stats.totalTopics}
-              </div>
-              <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
-                Topics
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
-              <div className="text-3xl font-black text-blue-600 font-outfit mb-1">
-                {stats.totalPapers}
-              </div>
-              <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
-                Papers
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
-              <div className="text-3xl font-black text-slate-900 font-outfit mb-1">
-                {stats.availableYears.length}
-              </div>
-              <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
-                Years
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
-              <div className="text-3xl font-black text-slate-900 font-outfit mb-1">
-                {stats.pastYearQuestionsCount}
-              </div>
-              <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
-                Questions
-              </div>
-            </div>
+                  {/* Stats */}
+                  <div className="relative z-10 flex items-center justify-between mt-auto">
+                    <div className="px-3 py-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm border border-slate-200">
+                      <div className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        {isLoading ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" />
+                            <div className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.1s' }} />
+                            <div className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0.2s' }} />
+                          </div>
+                        ) : (
+                          card.stats
+                        )}
+                      </div>
+                    </div>
+                    <ArrowRight
+                      size={22}
+                      className="text-slate-500 group-hover:text-slate-900 group-hover:translate-x-1 transition-all duration-300"
+                    />
+                  </div>
+
+                  {/* Hover gradient overlay with shimmer effect */}
+                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 pointer-events-none z-0`} />
+
+                  {/* Shimmer effect on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+                    <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000`} />
+                  </div>
+                </button>
+              );
+            })}
           </div>
-        )}
+
+          {/* Quick stats summary */}
+          {!isLoading && (
+            <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+              <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
+                <div className="text-3xl font-black text-slate-900 font-outfit mb-1">
+                  {stats.totalTopics}
+                </div>
+                <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
+                  Topics
+                </div>
+              </div>
+              <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
+                <div className="text-3xl font-black text-blue-600 font-outfit mb-1">
+                  {stats.totalPapers}
+                </div>
+                <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
+                  Papers
+                </div>
+              </div>
+              <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
+                <div className="text-3xl font-black text-slate-900 font-outfit mb-1">
+                  {stats.availableYears.length}
+                </div>
+                <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
+                  Years
+                </div>
+              </div>
+              <div className="bg-white rounded-xl border-2 border-slate-200 p-4 text-center hover:border-slate-300 transition-colors">
+                <div className="text-3xl font-black text-slate-900 font-outfit mb-1">
+                  {stats.pastYearQuestionsCount}
+                </div>
+                <div className="text-xs text-slate-600 uppercase tracking-wider font-black">
+                  Questions
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>

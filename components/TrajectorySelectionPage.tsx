@@ -7,10 +7,13 @@ import {
   ArrowRight,
   Clock,
   Target,
-  TrendingUp,
-  CheckCircle2,
-  Sparkles
+  Sparkles,
+  Zap,
+  Medal,
+  Award,
+  BookMarked
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { ExamContext } from '../types';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 
@@ -31,12 +34,13 @@ interface TrajectoryCard {
   icon: React.ElementType;
   color: string;
   gradient: string;
+  lightColor: string;
   pattern: {
     totalQuestions: number;
     duration: number;
     subjects: string[];
   };
-  highlights: string[];
+  highlights: { icon: React.ElementType; text: string }[];
 }
 
 const TRAJECTORY_CARDS: TrajectoryCard[] = [
@@ -44,210 +48,238 @@ const TRAJECTORY_CARDS: TrajectoryCard[] = [
     id: 'NEET',
     name: 'NEET',
     fullName: 'National Eligibility cum Entrance Test',
-    description: 'MEDICAL PREP TRACK (BIOLOGY FOCUS)',
+    description: 'Premier Medical Track',
     icon: FlaskConical,
-    color: 'emerald',
-    gradient: 'from-emerald-500 to-emerald-600',
+    color: '#10B981',
+    gradient: 'from-emerald-500 to-emerald-700',
+    lightColor: 'bg-emerald-50',
     pattern: {
       totalQuestions: 180,
       duration: 200,
       subjects: ['Physics', 'Chemistry', 'Biology']
     },
     highlights: [
-      'Medical & Dental Colleges',
-      'AIIMS, JIPMER & State Quotas',
-      'Biology-focused preparation'
+      { icon: Medal, text: 'Medical & Dental Colleges' },
+      { icon: Zap, text: 'Biology-focused prep' },
+      { icon: Award, text: 'AIIMS & JIPMER track' }
     ]
   },
   {
     id: 'JEE',
     name: 'JEE MAIN',
     fullName: 'Joint Entrance Examination',
-    description: 'ENGINEERING PREP TRACK (MATH FOCUS)',
+    description: 'Engineering Mastery Track',
     icon: Atom,
-    color: 'blue',
-    gradient: 'from-blue-500 to-blue-600',
+    color: '#3B82F6',
+    gradient: 'from-blue-500 to-blue-700',
+    lightColor: 'bg-blue-50',
     pattern: {
       totalQuestions: 90,
       duration: 180,
       subjects: ['Physics', 'Chemistry', 'Math']
     },
     highlights: [
-      'IITs, NITs & IIITs',
-      'JEE Main & Advanced',
-      'Math & Physics mastery'
+      { icon: Medal, text: 'IITs, NITs & IIITs' },
+      { icon: Zap, text: 'Math & Physics focus' },
+      { icon: Award, text: 'Main & Advanced track' }
     ]
   },
   {
     id: 'KCET',
     name: 'KCET',
     fullName: 'Karnataka Common Entrance Test',
-    description: 'STATE COMMON PREP TRACK',
+    description: 'State Academic Focus',
     icon: GraduationCap,
-    color: 'orange',
-    gradient: 'from-orange-500 to-orange-600',
+    color: '#F59E0B',
+    gradient: 'from-orange-500 to-orange-700',
+    lightColor: 'bg-orange-50',
     pattern: {
       totalQuestions: 60,
       duration: 80,
-      subjects: ['Physics', 'Chemistry', 'Math/Biology']
+      subjects: ['P', 'C', 'M', 'B']
     },
     highlights: [
-      'Karnataka Engineering Colleges',
-      'Fast-paced test pattern',
-      'State quota advantage'
+      { icon: Medal, text: 'State Govt. Colleges' },
+      { icon: Zap, text: 'Fast-paced pattern' },
+      { icon: Award, text: 'Common Entrance focus' }
     ]
   },
   {
     id: 'CBSE',
-    name: 'BOARD EXAM',
-    fullName: 'Central Board of Secondary Education',
-    description: 'CLASS 12TH SENIOR SECONDARY',
-    icon: BookOpen,
-    color: 'pink',
-    gradient: 'from-pink-500 to-pink-600',
+    name: 'BOARDS',
+    fullName: 'Central Board Council',
+    description: 'Academic Foundation',
+    icon: BookMarked,
+    color: '#EC4899',
+    gradient: 'from-pink-500 to-pink-700',
+    lightColor: 'bg-pink-50',
     pattern: {
       totalQuestions: 40,
       duration: 180,
-      subjects: ['All Core Subjects']
+      subjects: ['Core Academic Path']
     },
     highlights: [
-      'Board Exam Excellence',
-      'Foundation for entrances',
-      'Comprehensive curriculum'
+      { icon: Medal, text: 'Board Excellence' },
+      { icon: Zap, text: 'Foundation building' },
+      { icon: Award, text: 'Concept mastery' }
     ]
   }
 ];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const cardVariants: { [key: string]: any } = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.5, ease: "easeOut" }
+  }
+};
 
 const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
   onSelectTrajectory,
   userProgress
 }) => {
   return (
-    <div className="bg-slate-50/50 font-instrument text-slate-900 selection:bg-primary-500 selection:text-white">
-      {/* Unified Header - No back button (start page) */}
+    <div className="min-h-full bg-slate-50/50">
       <LearningJourneyHeader
-        showBack={false}
-        icon={
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-slate-900 font-black text-[10px] tracking-widest shadow-sm transform -rotate-3">
-            EDU
-          </div>
-        }
-        title="Choose Your Learning Journey"
-        description="Select your exam trajectory to access personalized study paths, topic-wise mastery tracking, and full-length mock tests"
+        title="Path Selection"
+        subtitle="Embark on your personal excellence journey"
       />
 
-      {/* Trajectory Cards Grid - Compact & Clean Design */}
-      <div className="max-w-7xl mx-auto px-6 py-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <div className="mb-10 text-center max-w-2xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border border-primary-100 shadow-sm"
+          >
+            <Sparkles size={12} />
+            AI-Powered Personalization
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl md:text-4xl font-black text-slate-900 font-outfit mb-3 tracking-tight"
+          >
+            Select Your <span className="text-primary-600">Trajectory</span>
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-slate-500 font-instrument text-lg"
+          >
+            Choose your exam target to unlock tailored study materials, predictive analytics, and mastery tracking.
+          </motion.p>
+        </div>
+
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
           {TRAJECTORY_CARDS.map((trajectory) => {
             const progress = userProgress?.[trajectory.id];
             const hasProgress = progress && progress.overallMastery > 0;
             const Icon = trajectory.icon;
 
             return (
-              <button
+              <motion.button
                 key={trajectory.id}
+                variants={cardVariants}
+                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onSelectTrajectory(trajectory.id)}
-                className={`group relative bg-white rounded-xl border transition-all duration-300 text-left shadow-sm hover:shadow-lg overflow-hidden flex flex-col ${
-                  trajectory.id === 'KCET'
-                    ? 'border-orange-400 ring-2 ring-orange-200 hover:border-orange-500'
-                    : 'border-slate-200/60 hover:border-purple-300'
-                }`}
+                className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-2xl hover:border-primary-200 transition-all duration-300 text-left overflow-hidden flex flex-col h-full"
               >
-                {/* Active Badge for KCET */}
-                {trajectory.id === 'KCET' && (
-                  <div className="absolute top-2 left-2 z-10">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full text-[8px] font-black uppercase tracking-wider shadow-md">
-                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-                      Active Focus
-                    </span>
-                  </div>
-                )}
+                {/* Background Accent */}
+                <div className={`absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity bg-gradient-to-br ${trajectory.gradient}`} />
 
-                {/* Hover Arrow Indicator - Top Right */}
-                <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0.5">
-                  <ArrowRight size={14} className="text-purple-600" strokeWidth={2.5} />
-                </div>
-
-                {/* Card Content */}
-                <div className="p-3.5 flex flex-col flex-1">
-                  {/* Compact Icon Badge - Fixed Height */}
-                  <div className="mb-3 h-12 flex items-start">
-                    <div className={`w-12 h-12 bg-gradient-to-br ${trajectory.gradient} rounded-lg flex items-center justify-center shadow transition-all duration-300 group-hover:scale-105`}>
-                      <Icon size={24} className="text-white" strokeWidth={2.5} />
+                <div className="p-6 flex flex-col h-full relative z-10">
+                  {/* Icon & Progress */}
+                  <div className="flex items-start justify-between mb-6">
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${trajectory.gradient} flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform duration-300`}>
+                      <Icon size={28} className="text-white" strokeWidth={2.5} />
                     </div>
-                  </div>
-
-                  {/* Trajectory Name - Fixed Height */}
-                  <h3 className="text-lg font-black text-slate-900 mb-1 tracking-tight transition-colors duration-300 group-hover:text-purple-600 h-7 flex items-center">
-                    {trajectory.name}
-                  </h3>
-
-                  {/* Description - Fixed Height */}
-                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-3 leading-tight h-8 flex items-start">
-                    {trajectory.description}
-                  </p>
-
-                  {/* Exam Pattern - Compact - Fixed Height */}
-                  <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-slate-100 h-12">
-                    <div className="flex items-center gap-1">
-                      <div className={`w-6 h-6 bg-gradient-to-br ${trajectory.gradient} rounded-md flex items-center justify-center flex-shrink-0`}>
-                        <Target size={12} className="text-white" />
-                      </div>
-                      <div className="min-w-[60px]">
-                        <div className="text-sm font-black text-slate-900 leading-tight">{trajectory.pattern.totalQuestions}</div>
-                        <div className="text-[7px] font-bold text-slate-400 uppercase tracking-wide leading-tight">Questions</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className={`w-6 h-6 bg-gradient-to-br ${trajectory.gradient} rounded-md flex items-center justify-center flex-shrink-0`}>
-                        <Clock size={12} className="text-white" />
-                      </div>
-                      <div className="min-w-[60px]">
-                        <div className="text-sm font-black text-slate-900 leading-tight">{trajectory.pattern.duration}</div>
-                        <div className="text-[7px] font-bold text-slate-400 uppercase tracking-wide leading-tight">Minutes</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Subjects - Compact Pills */}
-                  <div className="mb-3">
-                    <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Core Subjects</div>
-                    <div className="flex items-center flex-wrap gap-1">
-                      {trajectory.pattern.subjects.map((subject, idx) => (
-                        <span key={idx} className="inline-flex items-center px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full text-[9px] font-medium border border-slate-200 transition-colors duration-200 group-hover:bg-purple-100 group-hover:text-purple-700 group-hover:border-purple-200">
-                          {subject}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Progress Indicator (if in progress) - Fixed Height */}
-                  <div className="min-h-[32px] mt-auto">
                     {hasProgress && (
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">
-                            Progress
-                          </span>
-                          <span className="text-xs font-black text-slate-900 transition-colors duration-300 group-hover:text-purple-600">
-                            {progress.overallMastery}%
-                          </span>
-                        </div>
-                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full bg-gradient-to-r ${trajectory.gradient} rounded-full transition-all duration-300`}
-                            style={{ width: `${progress.overallMastery}%` }}
-                          />
-                        </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mastery</span>
+                        <span className="text-lg font-black text-slate-900 leading-none">{progress.overallMastery}%</span>
                       </div>
                     )}
                   </div>
+
+                  {/* Title & Description */}
+                  <div className="mb-6">
+                    <h3 className="text-2xl font-black text-slate-900 font-outfit tracking-tight group-hover:text-primary-600 transition-colors">
+                      {trajectory.name}
+                    </h3>
+                    <p className="text-sm font-bold text-slate-500">
+                      {trajectory.fullName}
+                    </p>
+                    <div className="mt-2 text-[10px] font-black text-primary-500 uppercase tracking-widest flex items-center gap-1.5 leading-none">
+                      <Zap size={10} />
+                      {trajectory.description}
+                    </div>
+                  </div>
+
+                  {/* Highlights */}
+                  <div className="space-y-3 mb-8 flex-1">
+                    {trajectory.highlights.map((h, i) => (
+                      <div key={i} className="flex items-center gap-3 text-sm text-slate-600 font-medium">
+                        <div className={`p-1.5 rounded-lg ${trajectory.lightColor}`}>
+                          <h.icon size={14} style={{ color: trajectory.color }} />
+                        </div>
+                        {h.text}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Footer Stats */}
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <div className="flex items-center gap-4">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Questions</span>
+                        <span className="text-sm font-black text-slate-900">{trajectory.pattern.totalQuestions}</span>
+                      </div>
+                      <div className="w-px h-8 bg-slate-100" />
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Time</span>
+                        <span className="text-sm font-black text-slate-900">{trajectory.pattern.duration}m</span>
+                      </div>
+                    </div>
+
+                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all">
+                      <ArrowRight size={18} />
+                    </div>
+                  </div>
+
+                  {/* Active Progress Bar */}
+                  {hasProgress && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-100">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress.overallMastery}%` }}
+                        className={`h-full bg-gradient-to-r ${trajectory.gradient}`}
+                      />
+                    </div>
+                  )}
                 </div>
-              </button>
+              </motion.button>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

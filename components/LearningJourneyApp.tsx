@@ -43,7 +43,8 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
     startCustomTest,
     submitTest,
     exitTest,
-    viewPastTestResults
+    viewPastTestResults,
+    refreshData
   } = useLearningJourney();
 
   // Error state
@@ -139,6 +140,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
           examContext={selectedTrajectory}
           onBack={goBack}
           onStartQuiz={(topicId) => startTest('topic_quiz', topicId)}
+          onRefreshData={refreshData}
         />
       );
 

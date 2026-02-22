@@ -188,63 +188,75 @@ export interface Flashcard {
 export interface AnalyzedQuestion {
   id: string;
   text: string;
-  options?: string[];      // NEW: For MCQs
-  marks: number | string;  // Can be number or string for UI compatibility
+  options?: string[];
+  marks: number | string;
   difficulty: 'Easy' | 'Moderate' | 'Hard';
-  diff?: string;           // Alias for difficulty (UI compatibility)
+  diff?: string;
   topic: string;
-  domain?: string;         // Subject domain/chapter (e.g., "Mechanics", "Organic Chemistry")
-  year?: string;           // Year of exam paper (e.g., "2024", "2023")
+  domain?: string;
+  year?: string;
   pedagogy?: 'Conceptual' | 'Analytical' | 'Problem-Solving' | 'Application' | 'Critical-Thinking' | 'Numerical' | 'Memorization';
   blooms: string;
-  bloomsTaxonomy?: string; // Alias for blooms (UI compatibility)
+  bloomsTaxonomy?: string;
   masteryMaterial?: {
-    logic: string;
-    memoryTrigger: string;
-    visualPrompt: string;
-    commonTrap: string;
+    logic?: string;
+    memoryTrigger?: string;
+    visualPrompt?: string;
+    commonTrap?: string;
     coreConcept?: string;
+    keyConcepts?: Array<{ name: string; explanation: string }>;
+    aiReasoning?: string;
+    historicalPattern?: string;
+    predictiveInsight?: string;
+    whyItMatters?: string;
+    relevanceScore?: number;
   };
   solutionSteps: string[];
-  markingScheme?: { step: string; mark: string }[]; // Marking scheme with marks per step
+  markingScheme?: { step: string; mark: string }[];
+  markingSteps?: any;
   examTip?: string;
+  studyTip?: string;
   visualConcept?: string;
   diagramUrl?: string;
   keyFormulas?: string[];
+  thingsToRemember?: string[];
   pitfalls?: string[];
-  source?: string; // NEW: Identification of origin paper
+  commonMistakes?: Array<{ mistake: string; why: string; howToAvoid: string }>;
+  keyConcepts?: Array<{ name: string; explanation: string }>;
+  aiReasoning?: string;
+  historicalPattern?: string;
+  predictiveInsight?: string;
+  whyItMatters?: string;
+  relevanceScore?: number;
+  source?: string;
   correctOptionIndex?: number;
   sketchSvg?: string;
-  // Enhanced image support for scanned papers
-  hasVisualElement?: boolean; // Indicates if question has diagram/table/image
+  hasVisualElement?: boolean;
   visualElementType?:
-    // Generic types (all subjects)
-    | 'diagram'
-    | 'table'
-    | 'graph'
-    | 'illustration'
-    | 'chart'
-    | 'image'
-    // Math-specific types
-    | 'coordinate-plane'    // Cartesian plane with function graphs
-    | 'geometric-figure'    // Triangles, circles, polygons with measurements
-    | '3d-diagram'          // 3D geometry (cuboids, spheres, cones)
-    | 'matrix'              // Matrix/determinant representation
-    | 'number-line'         // Number line for inequalities
-    | 'venn-diagram'        // Set theory diagrams
-    | 'tree-diagram'        // Probability tree diagrams
-    | 'flowchart'           // Algorithm/logic flow diagrams
-    // Physics-specific types
-    | 'circuit-diagram'     // Electrical circuits with resistors, capacitors, batteries
-    | 'ray-diagram'         // Optics: ray paths through lenses, mirrors, prisms
-    | 'free-body-diagram'   // Mechanics: forces acting on objects
-    | 'wave-diagram'        // Wave patterns, interference, standing waves
-    | 'field-diagram'       // Electric/magnetic field lines and equipotentials
-    | 'energy-level-diagram'; // Atomic energy levels, transitions
-  visualElementDescription?: string; // AI description of the visual element
-  visualElementPosition?: 'above' | 'below' | 'inline' | 'side'; // Position relative to question text
-  visualBoundingBox?: { pageNumber: number; x: string; y: string; width: string; height: string }; // Gemini-provided percentage coordinates (e.g., x: "10%")
-  extractedImages?: string[]; // Base64 image data URLs extracted from PDF
+  | 'diagram'
+  | 'table'
+  | 'graph'
+  | 'illustration'
+  | 'chart'
+  | 'image'
+  | 'coordinate-plane'
+  | 'geometric-figure'
+  | '3d-diagram'
+  | 'matrix'
+  | 'number-line'
+  | 'venn-diagram'
+  | 'tree-diagram'
+  | 'flowchart'
+  | 'circuit-diagram'
+  | 'ray-diagram'
+  | 'free-body-diagram'
+  | 'wave-diagram'
+  | 'field-diagram'
+  | 'energy-level-diagram';
+  visualElementDescription?: string;
+  visualElementPosition?: 'above' | 'below' | 'inline' | 'side';
+  visualBoundingBox?: { pageNumber: number; x: string; y: string; width: string; height: string };
+  extractedImages?: string[];
 }
 
 export interface ChapterInsight {
@@ -318,6 +330,7 @@ export interface VidyaAppContext {
 
   // Student Mode Context
   currentLesson?: LessonContract | null;
+  activeTopicResource?: TopicResource | null;
   userProgress?: {
     masteryScore: number;
     currentModule: string;
@@ -375,6 +388,7 @@ export interface TopicResource {
   // Progress tracking
   masteryLevel: number; // 0-100
   studyStage: StudyStage;
+  notesCompleted: boolean;
   questionsAttempted: number;
   questionsCorrect: number;
   averageAccuracy: number;

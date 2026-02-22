@@ -135,7 +135,7 @@ const VidyaV2: React.FC<VidyaV2Props> = ({ userRole, appContext, actions }) => {
       {/* ═══════════════════════════════════════════════════════════════════ */}
       <button
         onClick={toggleChat}
-        className="fixed bottom-6 right-6 z-[998] w-14 h-14 rounded-2xl bg-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center group border border-slate-200/50"
+        className="fixed bottom-6 right-6 z-[1000] w-14 h-14 rounded-2xl bg-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center group border border-slate-200/50"
         aria-label="Open Vidya AI Assistant"
       >
         <img
@@ -159,7 +159,7 @@ const VidyaV2: React.FC<VidyaV2Props> = ({ userRole, appContext, actions }) => {
       {/* ═══════════════════════════════════════════════════════════════════ */}
       {state.isOpen &&
         createPortal(
-          <div className="fixed inset-0 z-[999] flex items-end justify-end p-6 pointer-events-none">
+          <div className="fixed inset-0 z-[1001] flex items-end justify-end p-6 pointer-events-none">
             <div
               className="pointer-events-auto w-full max-w-md h-[700px] max-h-[90vh] flex flex-col rounded-3xl overflow-hidden shadow-2xl border border-slate-200/50 bg-white"
             >
@@ -181,8 +181,8 @@ const VidyaV2: React.FC<VidyaV2Props> = ({ userRole, appContext, actions }) => {
                       {state.isProcessingTool
                         ? 'Executing action...'
                         : state.isThinking
-                        ? 'Thinking...'
-                        : 'AI Teaching Assistant'}
+                          ? 'Thinking...'
+                          : 'AI Teaching Assistant'}
                     </p>
                   </div>
                 </div>
