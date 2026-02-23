@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import TrajectorySelectionPage from './TrajectorySelectionPage';
 import SubjectSelectionPage from './SubjectSelectionPage';
 import SubjectMenuPage from './SubjectMenuPage';
@@ -82,180 +83,224 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
     );
   }
 
-  // Render based on current view
-  switch (currentView) {
-    case 'trajectory':
-      return (
-        <TrajectorySelectionPage
-          onSelectTrajectory={selectTrajectory}
-          userProgress={undefined} // Will be loaded from API in future
-        />
-      );
+  // Animation variants for page transitions
+  const pageVariants = {
+    initial: { opacity: 0, x: 20 },
+    in: { opacity: 1, x: 0 },
+    out: { opacity: 0, x: -20 }
+  };
 
-    case 'subject':
-      if (!selectedTrajectory) {
-        goBack();
-        return null;
-      }
-      return (
-        <SubjectSelectionPage
-          examContext={selectedTrajectory}
-          onSelectSubject={selectSubject}
-          onBack={goBack}
-          subjectProgress={subjectProgress}
-        />
-      );
+  const pageTransition = {
+    type: "tween" as const,
+    ease: "anticipate" as const,
+    duration: 0.3
+  };
 
-    case 'topic_dashboard':
-      if (!selectedTrajectory || !selectedSubject) {
-        goBack();
-        return null;
-      }
-      return (
-        <TopicDashboardPage
-          subject={selectedSubject}
-          examContext={selectedTrajectory}
-          topics={topics}
-          onSelectTopic={selectTopic}
-          onBack={goBack}
-          aiRecommendation={undefined} // TODO: AI service integration
-          studyStreak={0} // TODO: Load from user activity
-        />
-      );
+  const swipeConfidenceThreshold = 10000;
+  const swipePower = (offset: number, velocity: number) => {
+    return Math.abs(offset) * velocity;
+  };
 
-    case 'topic_detail':
-      if (!selectedTrajectory || !selectedSubject || !selectedTopicId) {
-        goBack();
-        return null;
-      }
-      const selectedTopic = topics.find(t => t.topicId === selectedTopicId);
-      if (!selectedTopic) {
-        goBack();
-        return null;
-      }
-      return (
-        <TopicDetailPage
-          topicResource={selectedTopic}
-          subject={selectedSubject}
-          examContext={selectedTrajectory}
-          onBack={goBack}
-          onStartQuiz={(topicId) => startTest('topic_quiz', topicId)}
-          onRefreshData={refreshData}
-        />
-      );
-
-    case 'test':
-      if (!currentTest || !currentTestQuestions || currentTestQuestions.length === 0) {
-        goBack();
-        return null;
-      }
-      return (
-        <TestInterface
-          attempt={currentTest}
-          questions={currentTestQuestions}
-          onSubmit={submitTest}
-          onExit={exitTest}
-        />
-      );
-
-    case 'test_results':
-      if (!currentTest || !currentTestResponses || !currentTestQuestions) {
-        // Return loading state while data is being fetched
+  const renderView = () => {
+    switch (currentView) {
+      case 'trajectory':
         return (
-          <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <TrajectorySelectionPage
+            onSelectTrajectory={selectTrajectory}
+            userProgress={undefined} // Will be loaded from API in future
+          />
+        );
+
+      case 'subject':
+        if (!selectedTrajectory) {
+          goBack();
+          return null;
+        }
+        return (
+          <SubjectSelectionPage
+            examContext={selectedTrajectory}
+            onSelectSubject={selectSubject}
+            onBack={goBack}
+            subjectProgress={subjectProgress}
+          />
+        );
+
+      case 'topic_dashboard':
+        if (!selectedTrajectory || !selectedSubject) {
+          goBack();
+          return null;
+        }
+        return (
+          <TopicDashboardPage
+            subject={selectedSubject}
+            examContext={selectedTrajectory}
+            topics={topics}
+            onSelectTopic={selectTopic}
+            onBack={goBack}
+            aiRecommendation={undefined} // TODO: AI service integration
+            studyStreak={0} // TODO: Load from user activity
+          />
+        );
+
+      case 'topic_detail':
+        if (!selectedTrajectory || !selectedSubject || !selectedTopicId) {
+          goBack();
+          return null;
+        }
+        const selectedTopic = topics.find(t => t.topicId === selectedTopicId);
+        if (!selectedTopic) {
+          goBack();
+          return null;
+        }
+        return (
+          <TopicDetailPage
+            topicResource={selectedTopic}
+            subject={selectedSubject}
+            examContext={selectedTrajectory}
+            onBack={goBack}
+            onStartQuiz={(topicId) => startTest('topic_quiz', topicId)}
+            onRefreshData={refreshData}
+          />
+        );
+
+      case 'test':
+        if (!currentTest || !currentTestQuestions || currentTestQuestions.length === 0) {
+          goBack();
+          return null;
+        }
+        return (
+          <TestInterface
+            attempt={currentTest}
+            questions={currentTestQuestions}
+            onSubmit={submitTest}
+            onExit={exitTest}
+          />
+        );
+
+      case 'test_results':
+        if (!currentTest || !currentTestResponses || !currentTestQuestions) {
+          // Return loading state while data is being fetched
+          return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+              <div className="text-center">
+                <Loader2 size={48} className="text-primary-600 animate-spin mx-auto mb-4" />
+                <p className="text-sm font-medium text-slate-600">Loading test results...</p>
+              </div>
+            </div>
+          );
+        }
+        return (
+          <TestResultsPage
+            attempt={currentTest}
+            questions={currentTestQuestions}
+            responses={currentTestResponses}
+            onBack={goBack}
+            onSubmitRetake={submitTest}
+          />
+        );
+
+      case 'subject_menu':
+        if (!selectedTrajectory || !selectedSubject) {
+          goBack();
+          return null;
+        }
+        return (
+          <SubjectMenuPage
+            subject={selectedSubject}
+            examContext={selectedTrajectory}
+            onSelectOption={selectSubjectOption}
+            onBack={goBack}
+          />
+        );
+
+      case 'past_year_exams':
+        if (!selectedTrajectory || !selectedSubject || !userId) {
+          goBack();
+          return null;
+        }
+        return (
+          <PastYearExamsPage
+            subject={selectedSubject}
+            examContext={selectedTrajectory}
+            onBack={goBack}
+            onOpenVault={openVault}
+            userId={userId}
+          />
+        );
+
+      case 'vault_detail':
+        if (!selectedTrajectory || !selectedSubject || !selectedScanId) {
+          goBack();
+          return null;
+        }
+        return (
+          <VaultDetailPage
+            scanId={selectedScanId}
+            onBack={goBack}
+          />
+        );
+
+      case 'mock_builder':
+        if (!selectedTrajectory || !selectedSubject || !userId) {
+          goBack();
+          return null;
+        }
+        return (
+          <MockTestBuilderPage
+            subject={selectedSubject}
+            examContext={selectedTrajectory}
+            topics={topics}
+            onBack={goBack}
+            onStartTest={startCustomTest}
+            onViewTestResults={viewPastTestResults}
+            userId={userId}
+          />
+        );
+
+      default:
+        return (
+          <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
             <div className="text-center">
-              <Loader2 size={48} className="text-primary-600 animate-spin mx-auto mb-4" />
-              <p className="text-sm font-medium text-slate-600">Loading test results...</p>
+              <h2 className="font-black text-xl text-slate-900 mb-2">Unknown View</h2>
+              <p className="text-sm text-slate-600 mb-6">
+                Current view: {currentView}
+              </p>
+              <button
+                onClick={goBack}
+                className="px-6 py-3 bg-slate-900 text-white rounded-lg text-sm font-black hover:bg-slate-800 transition-all"
+              >
+                Go Back
+              </button>
             </div>
           </div>
         );
-      }
-      return (
-        <TestResultsPage
-          attempt={currentTest}
-          questions={currentTestQuestions}
-          responses={currentTestResponses}
-          onBack={goBack}
-          onSubmitRetake={submitTest}
-        />
-      );
+    }
+  };
 
-    case 'subject_menu':
-      if (!selectedTrajectory || !selectedSubject) {
-        goBack();
-        return null;
-      }
-      return (
-        <SubjectMenuPage
-          subject={selectedSubject}
-          examContext={selectedTrajectory}
-          onSelectOption={selectSubjectOption}
-          onBack={goBack}
-        />
-      );
-
-    case 'past_year_exams':
-      if (!selectedTrajectory || !selectedSubject || !userId) {
-        goBack();
-        return null;
-      }
-      return (
-        <PastYearExamsPage
-          subject={selectedSubject}
-          examContext={selectedTrajectory}
-          onBack={goBack}
-          onOpenVault={openVault}
-          userId={userId}
-        />
-      );
-
-    case 'vault_detail':
-      if (!selectedTrajectory || !selectedSubject || !selectedScanId) {
-        goBack();
-        return null;
-      }
-      return (
-        <VaultDetailPage
-          scanId={selectedScanId}
-          onBack={goBack}
-        />
-      );
-
-    case 'mock_builder':
-      if (!selectedTrajectory || !selectedSubject || !userId) {
-        goBack();
-        return null;
-      }
-      return (
-        <MockTestBuilderPage
-          subject={selectedSubject}
-          examContext={selectedTrajectory}
-          topics={topics}
-          onBack={goBack}
-          onStartTest={startCustomTest}
-          onViewTestResults={viewPastTestResults}
-          userId={userId}
-        />
-      );
-
-    default:
-      return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-          <div className="text-center">
-            <h2 className="font-black text-xl text-slate-900 mb-2">Unknown View</h2>
-            <p className="text-sm text-slate-600 mb-6">
-              Current view: {currentView}
-            </p>
-            <button
-              onClick={goBack}
-              className="px-6 py-3 bg-slate-900 text-white rounded-lg text-sm font-black hover:bg-slate-800 transition-all"
-            >
-              Go Back
-            </button>
-          </div>
-        </div>
-      );
-  }
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={currentView}
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        drag={currentView !== 'trajectory' && currentView !== 'test' ? "x" : false}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={(e, { offset, velocity }) => {
+          const swipe = swipePower(offset.x, velocity.x);
+          if (swipe > swipeConfidenceThreshold && offset.x > 100) {
+            goBack();
+          }
+        }}
+        className="w-full min-h-screen bg-[#fcfdfe] touch-pan-y"
+      >
+        {renderView()}
+      </motion.div>
+    </AnimatePresence>
+  );
 };
 
 export default LearningJourneyApp;

@@ -16,6 +16,7 @@ import type { Subject, ExamContext, Scan } from '../types';
 import { SUBJECT_CONFIGS } from '../config/subjects';
 import { supabase } from '../lib/supabase';
 import confetti from 'canvas-confetti';
+import { motion, AnimatePresence } from 'framer-motion';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import PredictiveTrendsTab from './PredictiveTrendsTab';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
@@ -255,52 +256,75 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
         trajectory={examContext}
         mastery={subProg?.overallMastery}
         accuracy={subProg?.overallAccuracy ?? 100}
-        actions={
-          <div className="flex items-center gap-4">
-            {/* View Toggle Buttons */}
-            <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-slate-200 shadow-sm">
-              <button
-                onClick={() => setActiveView('papers')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${activeView === 'papers'
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-              >
-                <Calendar size={14} />
-                Papers
-              </button>
-              <button
-                onClick={() => setActiveView('trends')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-all ${activeView === 'trends'
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-              >
-                <TrendingUp size={14} />
-                Trends
-              </button>
-            </div>
+        actions={null}
+      >
+        <div className="flex flex-col items-start w-full bg-white backdrop-blur-md rounded-[1.5rem] p-3 md:p-4 border border-slate-200/60 shadow-sm gap-4 mt-2 mb-2 md:mt-4 md:mb-0">
+          <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/50 w-full overflow-x-auto scroller-hide">
+            <button
+              onClick={() => setActiveView('papers')}
+              className={`relative flex-1 snap-center px-4 py-2 md:py-2.5 rounded-xl transition-all duration-300 ${activeView === 'papers' ? 'text-white' : 'text-slate-500 hover:text-slate-900 group'}`}
+            >
+              {activeView === 'papers' && (
+                <motion.div
+                  layoutId="activeExamTabBg"
+                  className="absolute inset-0 bg-slate-900 rounded-xl shadow-sm"
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <div className="relative z-10 flex items-center justify-center gap-2.5">
+                <Calendar size={18} className={activeView === 'papers' ? 'text-white' : 'group-hover:scale-110 transition-transform'} />
+                <span className="text-xs font-bold uppercase tracking-wider font-outfit">Archive Papers</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveView('trends')}
+              className={`relative flex-1 snap-center px-4 py-2 md:py-2.5 rounded-xl transition-all duration-300 ${activeView === 'trends' ? 'text-white' : 'text-slate-500 hover:text-slate-900 group'}`}
+            >
+              {activeView === 'trends' && (
+                <motion.div
+                  layoutId="activeExamTabBg"
+                  className="absolute inset-0 bg-slate-900 rounded-xl shadow-sm"
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <div className="relative z-10 flex items-center justify-center gap-2.5">
+                <TrendingUp size={18} className={activeView === 'trends' ? 'text-white' : 'group-hover:scale-110 transition-transform'} />
+                <span className="text-xs font-bold uppercase tracking-wider font-outfit">Predictive Trends</span>
+              </div>
+            </button>
+          </div>
 
-            {/* Progress Stats (only show in papers view) */}
-            {activeView === 'papers' && (
-              <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-                <div className="hidden lg:flex flex-col items-end mr-1">
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Archive</span>
-                  <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight leading-none">Stats</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-[9px] text-slate-400 uppercase tracking-wide font-black leading-none mb-1">
-                    Solved
-                  </div>
-                  <div className="text-lg font-black text-slate-900 font-outfit leading-none">
-                    {totalSolved}/{totalQuestions}
-                  </div>
+          {activeView === 'papers' && (
+            <div className="flex items-center justify-between w-full overflow-x-auto scroller-hide gap-6 md:gap-8 px-4 py-1">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Archive Questions</span>
+                <span className="text-xl md:text-2xl font-black text-slate-900 leading-none tracking-tighter">
+                  {totalQuestions} <span className="text-[10px] text-slate-400 font-bold uppercase ml-1">Total</span>
+                </span>
+              </div>
+              <div className="h-8 w-px bg-slate-200 hidden sm:block" />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Solved & Mastered</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xl md:text-2xl font-black text-emerald-600 leading-none tracking-tighter">
+                    {totalSolved}
+                  </span>
+                  <span className="text-xs font-bold text-emerald-600/60 leading-none">
+                    / {totalQuestions}
+                  </span>
                 </div>
               </div>
-            )}
-          </div>
-        }
-      />
+              <div className="h-8 w-px bg-slate-200 hidden sm:block" />
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Completion</span>
+                <span className="text-xl md:text-2xl font-black text-indigo-600 leading-none tracking-tighter">
+                  {totalQuestions > 0 ? Math.round((totalSolved / totalQuestions) * 100) : 0}%
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </LearningJourneyHeader>
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-6 py-8">

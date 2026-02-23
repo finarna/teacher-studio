@@ -32,7 +32,7 @@ import { ProfessorTrainingContract } from './types';
 import { VidyaActions } from './types/vidya';
 import { useAdaptiveLogic } from './hooks/useAdaptiveLogic';
 import { isFeatureEnabled } from './utils/featureFlags';
-import { Home, LayoutDashboard, GraduationCap, ArrowLeft, Bell, Search, User, LogOut, CheckCircle2 } from 'lucide-react';
+import { Home, LayoutDashboard, GraduationCap, ArrowLeft, Bell, Search, User, LogOut, CheckCircle2, Menu, Map, ScanLine } from 'lucide-react';
 import { AppContextProvider } from './contexts/AppContext';
 import { SubjectSwitcher } from './components/SubjectSwitcher';
 import { checkAndClearOldCache } from './utils/cacheRefresh';
@@ -83,6 +83,7 @@ const AppContent: React.FC = () => {
   // Navigation State for God Mode
   const [godModeView, setGodModeView] = useState('mastermind');
   const [viewMode, setViewMode] = useState<'STUDENT' | 'GOD_MODE'>('GOD_MODE');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // God Mode Feature State
   const [recentScans, setRecentScans] = useState<Scan[]>([]);
@@ -180,6 +181,13 @@ const AppContent: React.FC = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
+  }, []);
+
+  // Mobile Menu Global Listener
+  useEffect(() => {
+    const handleOpenMenu = () => setIsMobileMenuOpen(true);
+    window.addEventListener('openMobileMenu', handleOpenMenu);
+    return () => window.removeEventListener('openMobileMenu', handleOpenMenu);
   }, []);
 
   // Supabase Backend Sync Logic (Port 9001)
@@ -542,6 +550,8 @@ const AppContent: React.FC = () => {
           onNavigate={setGodModeView}
           userName={user?.email?.split('@')[0] || 'User'}
           onStudentView={() => setViewMode('STUDENT')}
+          isMobileMenuOpen={isMobileMenuOpen}
+          onCloseMobile={() => setIsMobileMenuOpen(false)}
           onLogout={async () => {
             const confirmed = await confirm({
               title: 'Sign Out',
@@ -558,20 +568,31 @@ const AppContent: React.FC = () => {
         <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50/50">
           <LearningJourneyProvider userId={user?.id || ''}>
 
-            {/* Global Compact Header for Desktop (Hidden in Learning Journey) */}
+            {/* Global Compact Header for Desktop and Mobile Responsive Nav */}
             {godModeView !== 'learning_journey' && (
-              <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 z-40 shrink-0">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1">
+              <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-40 shrink-0 sticky top-0">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <button
+                    className="md:hidden p-1.5 -ml-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                    onClick={() => setIsMobileMenuOpen(true)}
+                  >
+                    <Menu size={20} />
+                  </button>
+                  {/* Breadcrumb Context */}
+                  <div className="hidden md:flex items-center gap-2">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{godModeView.replace('_', ' ')}</span>
+                  </div>
+
+                  <div className="hidden md:flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1">
                     <Search size={12} className="text-slate-400" />
                     <input type="text" placeholder="Global Search..." className="bg-transparent border-0 outline-none text-[10px] font-black text-slate-900 w-32 placeholder:text-slate-400 uppercase tracking-widest" />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3">
                   {/* GLOBAL Subject Switcher - Primary Control */}
                   <SubjectSwitcher />
-                  <div className="h-6 w-px bg-slate-200" />
+                  <div className="h-6 w-px bg-slate-200 hidden md:block" />
                   <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors relative">
                     <Bell size={18} />
                     <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary-500 rounded-full border border-white" />
@@ -580,7 +601,7 @@ const AppContent: React.FC = () => {
               </header>
             )}
 
-            <main className="flex-1 overflow-y-auto relative">
+            <main className="flex-1 overflow-y-auto relative pb-16 md:pb-0">
               {godModeView === 'mastermind' && (
                 <div className="h-full overflow-y-auto scroller-hide p-8 bg-slate-50/50">
                   <div className="max-w-7xl mx-auto space-y-6">
@@ -788,7 +809,7 @@ const AppContent: React.FC = () => {
                 </div>
               )}
               {godModeView === 'scanning' && (
-                <div className="h-full overflow-y-auto scroller-hide">
+                <div className="h-full overflow-y-auto scroller-hide pb-20 md:pb-0">
                   <BoardMastermind
                     onNavigate={setGodModeView}
                     recentScans={recentScans}
@@ -801,6 +822,26 @@ const AppContent: React.FC = () => {
                 </div>
               )}
             </main>
+
+            {/* Mobile Bottom Navigation Bar always visible */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex items-center justify-around px-2 z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+              <button onClick={() => setGodModeView('mastermind')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${godModeView === 'mastermind' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                <LayoutDashboard size={20} className={godModeView === 'mastermind' ? 'fill-primary-50' : ''} />
+                <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
+              </button>
+              <button onClick={() => setGodModeView('scanning')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${godModeView === 'scanning' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                <ScanLine size={20} className={godModeView === 'scanning' ? 'fill-primary-50' : ''} />
+                <span className="text-[9px] font-bold uppercase tracking-wider">Scan</span>
+              </button>
+              <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${godModeView === 'learning_journey' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                <Map size={20} className={godModeView === 'learning_journey' ? 'fill-primary-50' : ''} />
+                <span className="text-[9px] font-bold uppercase tracking-wider">Journey</span>
+              </button>
+              <button onClick={() => setGodModeView('profile')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${godModeView === 'profile' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+                <User size={20} className={godModeView === 'profile' ? 'fill-primary-50' : ''} />
+                <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
+              </button>
+            </div>
 
             {/* Vidya AI Assistant - Feature Flag: V2 or V3 */}
             {isFeatureEnabled('useVidyaV3') ? (

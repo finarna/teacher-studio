@@ -262,7 +262,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-2 gap-4"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-6"
             >
               {availableSubjects.map((subject) => {
                 const config = SUBJECT_CONFIGS[subject];

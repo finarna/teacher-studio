@@ -298,7 +298,7 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
   aiRecommendation,
   studyStreak = 0
 }) => {
-  const [viewMode, setViewMode] = useState<ViewMode>('heatmap');
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedDomain, setSelectedDomain] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { refreshData, subjectProgress } = useLearningJourney();
@@ -608,19 +608,17 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                                 key={s}
                                 className="relative z-10 flex flex-col items-center"
                               >
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                                  isActive
-                                    ? m >= 85
-                                      ? 'bg-emerald-500 text-white shadow-md'
-                                      : 'bg-blue-500 text-white shadow-md'
-                                    : 'bg-slate-100 border border-slate-200 text-slate-400'
-                                } ${isCurrent ? 'ring-3 ring-offset-2' : ''} ${
-                                  isCurrent && m >= 85
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${isActive
+                                  ? m >= 85
+                                    ? 'bg-emerald-500 text-white shadow-md'
+                                    : 'bg-blue-500 text-white shadow-md'
+                                  : 'bg-slate-100 border border-slate-200 text-slate-400'
+                                  } ${isCurrent ? 'ring-3 ring-offset-2' : ''} ${isCurrent && m >= 85
                                     ? 'ring-emerald-200'
                                     : isCurrent
                                       ? 'ring-blue-200'
                                       : ''
-                                }`}>
+                                  }`}>
                                   <Icon size={14} strokeWidth={2.5} />
                                 </div>
                               </div>
@@ -646,82 +644,102 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
 
                 {/* List Layout */}
                 {viewMode === 'list' && (
-                  <div className="flex items-center w-full gap-6 p-1">
-                    <div className="relative shrink-0">
-                      {/* Rectangular Progress Ring */}
-                      <svg className="w-20 h-14" viewBox="0 0 80 56">
-                        <rect
-                          x="4" y="4" width="72" height="48" rx="12"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          className="text-slate-100"
-                        />
-                        <motion.rect
-                          x="4" y="4" width="72" height="48" rx="12"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeDasharray="200"
-                          initial={{ strokeDashoffset: 200 }}
-                          animate={{ strokeDashoffset: 200 - (200 * m) / 100 }}
-                          className={m >= 85 ? 'text-emerald-500' : m >= 40 ? 'text-blue-500' : 'text-red-500'}
-                          transition={{ duration: 1.5, ease: "easeOut" }}
-                        />
-                      </svg>
+                  <div className="flex flex-col md:flex-row w-full p-2 md:p-1 gap-3 md:gap-6">
+                    {/* Top Section on Mobile / Left Section on Desktop */}
+                    <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto flex-1 min-w-0">
+                      <div className="relative shrink-0 w-16 md:w-20 h-11 md:h-14 flex items-center justify-center">
+                        {/* Rectangular Progress Ring */}
+                        <svg className="absolute inset-0 w-full h-full text-slate-100" viewBox="0 0 80 56" preserveAspectRatio="none">
+                          <rect
+                            x="4" y="4" width="72" height="48" rx="12"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                          />
+                        </svg>
+                        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 80 56" preserveAspectRatio="none">
+                          <motion.rect
+                            x="4" y="4" width="72" height="48" rx="12"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeDasharray="200"
+                            initial={{ strokeDashoffset: 200 }}
+                            animate={{ strokeDashoffset: 200 - (200 * m) / 100 }}
+                            className={m >= 85 ? 'text-emerald-500' : m >= 40 ? 'text-blue-500' : 'text-red-500'}
+                            transition={{ duration: 1.5, ease: "easeOut" }}
+                          />
+                        </svg>
 
-                      {/* Icon/Image Container - Rounded Rectangle */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className={`px-2.5 py-1.5 min-w-[64px] h-10 rounded-xl ${status.color} transform hover:scale-95 transition-all overflow-hidden shadow-sm border border-black/5 flex items-center justify-center`}>
-                          {topic.representativeImageUrl ? (
-                            <img
-                              src={topic.representativeImageUrl}
-                              alt={topic.topicName}
-                              className="w-full h-full object-cover rounded-lg"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                if (e.currentTarget.nextSibling) {
-                                  (e.currentTarget.nextSibling as HTMLElement).style.display = 'flex';
-                                }
+                        {/* Icon/Image Container - Rounded Rectangle */}
+                        <div className="absolute inset-0 m-1 md:m-1.5 rounded-xl overflow-hidden shadow-sm border border-black/5 flex items-center justify-center transform hover:scale-95 transition-all bg-white">
+                          <div className={`w-full h-full flex items-center justify-center ${status.color}`}>
+                            {topic.representativeImageUrl ? (
+                              <img
+                                src={topic.representativeImageUrl}
+                                alt={topic.topicName}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  if (e.currentTarget.nextSibling) {
+                                    (e.currentTarget.nextSibling as HTMLElement).style.display = 'flex';
+                                  }
+                                }}
+                              />
+                            ) : null}
+                            <span
+                              className="font-black text-[12px] md:text-[14px] tracking-tight text-center whitespace-nowrap px-1"
+                              style={{
+                                fontFamily: 'var(--font-outfit)',
+                                display: topic.representativeImageUrl ? 'none' : 'flex'
                               }}
-                            />
-                          ) : null}
-                          <span
-                            className="font-black text-[14px] tracking-tight text-center whitespace-nowrap px-1"
-                            style={{
-                              fontFamily: 'var(--font-outfit)',
-                              display: topic.representativeImageUrl ? 'none' : 'flex'
-                            }}
-                          >
-                            {topic.representativeSymbol || getTopicVisual(topic.topicName)}
-                          </span>
+                            >
+                              {topic.representativeSymbol || getTopicVisual(topic.topicName)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex-1 min-w-0 py-1">
+                        <h3 className="font-black text-slate-800 font-outfit tracking-tight text-base md:text-lg truncate leading-tight mb-1">{topic.topicName}</h3>
+                        <div className="hidden md:flex items-center gap-3">
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded-lg border border-slate-100">
+                            <stageConfig.icon size={10} className={stageConfig.color === 'emerald' ? 'text-emerald-500' : 'text-blue-500'} strokeWidth={3} />
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{stageConfig.label}</span>
+                          </div>
+                          <div className="w-1 h-1 rounded-full bg-slate-200" />
+                          <div className="flex items-center gap-1 text-slate-400">
+                            <FileQuestion size={10} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">{topic.totalQuestions || 0} Questions</span>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-black text-slate-800 font-outfit tracking-tight text-lg mb-1 truncate">{topic.topicName}</h3>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded-lg border border-slate-100">
-                          <stageConfig.icon size={10} className={stageConfig.color === 'emerald' ? 'text-emerald-500' : 'text-blue-500'} strokeWidth={3} />
-                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{stageConfig.label}</span>
-                        </div>
-                        <div className="w-1 h-1 rounded-full bg-slate-200" />
-                        <div className="flex items-center gap-1">
-                          <FileQuestion size={10} className="text-slate-400" />
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{topic.totalQuestions || 0} Questions</span>
+                    {/* Bottom Section on Mobile / Right Section on Desktop */}
+                    <div className="flex items-center justify-between w-full md:w-auto md:ml-auto pt-2 md:pt-0 border-t border-slate-100 md:border-t-0 md:pl-4">
+
+                      {/* Mobile Only: Stage under title */}
+                      <div className="flex md:hidden items-center gap-2">
+                        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-50 rounded bg-transparent">
+                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{stageConfig.label} • {topic.totalQuestions || 0} Qs</span>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex flex-col items-end shrink-0 px-4 border-l border-slate-100">
-                      <div className="text-2xl font-black text-slate-900 leading-none tracking-tighter">{m}%</div>
-                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Mastery</div>
-                    </div>
+                      {/* Desktop Only separator */}
+                      <div className="hidden md:block w-px h-8 bg-slate-100 shrink-0 mx-2" />
 
-                    <div className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-sm border border-black/5 flex items-center gap-2 ${status.color}`}>
-                      <status.icon size={12} />
-                      {status.label}
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex flex-col items-end justify-center">
+                          <div className="text-xl md:text-2xl font-black text-slate-900 leading-none tracking-tighter">{m}%</div>
+                          <div className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Mastery</div>
+                        </div>
+
+                        <div className={`px-2.5 md:px-4 py-1.5 md:py-2 rounded-xl md:rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-sm border border-black/5 flex items-center gap-1.5 ${status.color}`}>
+                          <status.icon size={10} className="md:w-3 md:h-3" />
+                          {status.label}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

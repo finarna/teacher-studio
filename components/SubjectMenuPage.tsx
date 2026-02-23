@@ -580,15 +580,15 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
             </div>
           </div>
 
-          {/* Option cards grid with staggered entrance */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Option cards flex container for mobile horizontal scroll, grid for desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-6">
             {optionCards.map((card, index) => {
               const CardIcon = card.icon;
               return (
                 <button
                   key={card.id}
                   onClick={() => onSelectOption(card.id)}
-                  className="group relative bg-white rounded-[1.5rem] border border-slate-200/60 p-6 text-left transition-all duration-300 hover:border-primary-200 hover:shadow-xl hover:-translate-y-1 overflow-hidden animate-fadeInUp"
+                  className="group relative bg-white rounded-[1.5rem] border border-slate-200/60 p-6 text-left transition-all duration-300 hover:border-primary-200 hover:shadow-xl hover:-translate-y-1 overflow-hidden animate-fadeInUp flex flex-col"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {/* Illustration Background */}

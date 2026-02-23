@@ -147,6 +147,22 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
     { id: 'progress' as TabType, label: 'Stats', icon: BarChart3, accent: 'text-indigo-500', bg: 'bg-indigo-50' }
   ];
 
+  const swipeConfidenceThreshold = 10000;
+  const swipePower = (offset: number, velocity: number) => {
+    return Math.abs(offset) * velocity;
+  };
+
+  const handleDragEnd = (e: any, { offset, velocity }: any) => {
+    const swipe = swipePower(offset.x, velocity.x);
+    const currentIndex = tabs.findIndex(t => t.id === activeTab);
+
+    if (swipe < -swipeConfidenceThreshold || offset.x < -100) {
+      if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1].id);
+    } else if (swipe > swipeConfidenceThreshold || offset.x > 100) {
+      if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1].id);
+    }
+  };
+
   return (
     <div className="min-h-full bg-slate-50/50">
       <LearningJourneyHeader
@@ -161,11 +177,11 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
         accuracy={subProg?.overallAccuracy ?? 100}
         actions={null}
       >
-        {/* UNIFIED SINGLE BAR: Tabs + Metrics (Swapped Order) */}
-        <div className="flex flex-col lg:flex-row items-center justify-between w-full bg-white/70 backdrop-blur-md rounded-2xl p-1.5 px-2 border border-slate-200/50 shadow-sm gap-2 mt-2">
+        {/* UNIFIED SINGLE BAR: Tabs + Metrics */}
+        <div className="flex flex-col items-start w-full bg-white backdrop-blur-md rounded-[1.5rem] p-4 border border-slate-200/60 shadow-sm gap-4 mt-4">
 
-          {/* Left: Tab Selector (Compact) */}
-          <div className="flex items-center gap-1 p-1 bg-slate-900/5 rounded-xl border border-slate-200/50">
+          {/* Top: Tab Selector */}
+          <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/50 w-full overflow-x-auto scroller-hide">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -173,7 +189,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative px-4 py-2 rounded-lg transition-all duration-300 ${isActive ? 'text-white' : 'text-slate-500 hover:text-slate-900 group'}`}
+                  className={`relative flex-1 md:flex-none flex items-center justify-center shrink-0 snap-center px-2 md:px-4 py-2 rounded-lg transition-all duration-300 ${isActive ? 'text-white' : 'text-slate-500 hover:text-slate-900 group'}`}
                 >
                   {isActive && (
                     <motion.div
@@ -191,12 +207,8 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
             })}
           </div>
 
-          {/* Right: Compact Metrics */}
-          <div className="flex items-center gap-3 md:gap-5 px-3 py-1 border-l border-slate-200 ml-2">
-            <div className="hidden lg:flex flex-col items-end mr-2">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Topic</span>
-              <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight leading-none">Intelligence</span>
-            </div>
+          {/* Bottom: Compact Metrics */}
+          <div className="flex items-center justify-between w-full overflow-x-auto scroller-hide gap-6 md:gap-8 px-2">
             {[
               {
                 label: 'Mastery',
@@ -206,15 +218,15 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
                 tooltip: `Mastery requires covering at least 50% of the topic's question pool (minimum 15 questions) for accuracy to have full weight. New AI generations will correctly dilute this score until practiced.`
               },
               { label: 'Accuracy', val: `${localStats.averageAccuracy.toFixed(0)}%`, icon: Target, color: 'text-primary-600' },
-              { label: 'Questions', val: totalQuestionsIncludingAI, icon: FileQuestion, color: 'text-violet-600' },
+              { label: 'Questions', val: totalQuestionsIncludingAI, icon: FileQuestion, color: 'text-purple-600' },
               { label: 'Quizzes', val: localStats.quizzesTaken, icon: Brain, color: 'text-amber-600' }
             ].map((s, i) => (
-              <div key={i} className="flex items-center gap-3 pl-4 md:pl-6 border-l first:border-l-0 border-slate-200">
-                <s.icon size={20} className={s.color} />
-                <div className="flex flex-col leading-none">
-                  <span className="text-base font-bold text-slate-900 font-outfit">{s.val}</span>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{s.label}</span>
+              <div key={i} className="flex items-center gap-3 shrink-0">
+                <div className="flex flex-col">
+                  <span className="text-xl font-black text-slate-900 font-outfit leading-none mb-1">{s.val}</span>
+                  <div className="flex items-center gap-1.5">
+                    <s.icon size={14} className={s.color} />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.label}</span>
                     {s.tooltip && (
                       <div className="group relative">
                         <Info size={12} className="text-slate-300 hover:text-slate-500 transition-colors cursor-help" />
@@ -228,20 +240,26 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
                     )}
                   </div>
                 </div>
+                {i < 3 && <div className="h-8 w-px bg-slate-200 ml-4 md:ml-6 hidden sm:block" />}
               </div>
             ))}
           </div>
         </div>
-      </LearningJourneyHeader>
+      </LearningJourneyHeader >
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ type: "tween", ease: "anticipate" as const, duration: 0.3 }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+            className="touch-pan-y"
           >
             {activeTab === 'learn' && (
               <LearnTab
@@ -288,7 +306,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
           </motion.div>
         </AnimatePresence>
       </div>
-    </div>
+    </div >
   );
 };
 
@@ -1514,60 +1532,64 @@ const PracticeTab: React.FC<{
       <div className="space-y-6">
         <div className="space-y-4">
           {/* Dedicated Practice Actions Bar */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <div className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 ${sessionStats.accuracy >= 80 ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
-                <Zap size={14} />
-                <span className="text-[11px] font-bold uppercase tracking-wider font-outfit">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white p-2 md:p-3 rounded-[1.25rem] md:rounded-[1.5rem] border border-slate-200 shadow-sm w-full">
+            <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
+              <div className={`w-full md:w-auto px-4 py-2.5 md:py-2 rounded-xl border flex items-center justify-center md:justify-start gap-2 shadow-inner ${sessionStats.accuracy >= 80 ? 'bg-emerald-50/50 border-emerald-100 text-emerald-700' : 'bg-amber-50/50 border-amber-100 text-amber-700'}`}>
+                <Zap size={14} className="shrink-0" />
+                <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest font-outfit truncate flex items-center gap-1.5">
                   {filteredQuestions.length} Problems
-                  <span className="opacity-50 mx-2">•</span>
-                  {filteredQuestions.filter(q => q.source?.toLowerCase().includes('ai')).length} AI / {filteredQuestions.filter(q => !q.source?.toLowerCase().includes('ai')).length} Scan
-                  <span className="opacity-50 mx-2">•</span>
+                  <span className="opacity-30">•</span>
+                  <span className="flex items-center gap-1 bg-white/60 px-2 py-0.5 rounded shadow-sm">{filteredQuestions.filter(q => q.source?.toLowerCase().includes('ai')).length} <Sparkles size={8} /></span>
+                  <span className="opacity-30">•</span>
                   {sessionStats.accuracy}% Sync
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setFocusedQuestionId(focusedQuestionId ? null : (filteredQuestions[0]?.id || null))}
-                className={`px-4 py-2 rounded-xl text-[11px] font-bold flex items-center gap-2 transition-all border font-outfit ${focusedQuestionId ? 'bg-purple-600 text-white border-purple-700 shadow-md' : 'bg-white text-slate-900 border-slate-200 shadow-sm'
-                  }`}
-              >
-                <Target size={14} />
-                {focusedQuestionId ? 'EXIT FOCUS' : 'FOCUS MODE'}
-              </button>
+            <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto overflow-x-auto scroller-hide">
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setFocusedQuestionId(focusedQuestionId ? null : (filteredQuestions[0]?.id || null))}
+                  className={`px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-black flex items-center gap-1.5 md:gap-2 transition-all border font-outfit uppercase tracking-wider ${focusedQuestionId ? 'bg-purple-600 text-white border-purple-700 shadow-md' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-sm'
+                    }`}
+                >
+                  <Target size={14} />
+                  {focusedQuestionId ? 'Exit Focus' : 'Focus Mode'}
+                </button>
 
-              <button
-                onClick={() => setShowGenerateModal(true)}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 rounded-xl text-[11px] font-bold text-white flex items-center gap-2 transition-all shadow-md font-outfit"
-              >
-                <Sparkles size={14} />
-                AI GENERATE
-              </button>
-            </div>
+                <button
+                  onClick={() => setShowGenerateModal(true)}
+                  className="px-3 md:px-4 py-2 bg-slate-900 hover:bg-slate-800 rounded-xl text-[10px] md:text-[11px] font-black text-white flex items-center gap-1.5 md:gap-2 transition-all shadow-md font-outfit uppercase tracking-wider"
+                >
+                  <Sparkles size={14} className="text-purple-300" />
+                  AI Generate
+                </button>
+              </div>
 
-            <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200">
-              <button
-                onClick={() => setShowStats(!showStats)}
-                className={`p-1.5 rounded-lg transition-all ${showStats ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-900'}`}
-                title="Toggle Full Stats"
-              >
-                <BarChart3 size={16} />
-              </button>
-              <button
-                onClick={async () => {
-                  if (confirm('⚠️ Reset progress?')) {
-                    await clearProgress();
-                    setUserAnswers(new Map());
-                    setTrashedIds(new Set());
-                  }
-                }}
-                className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg transition-all"
-                title="Reset"
-              >
-                <RefreshCw size={16} />
-              </button>
+              <div className="hidden md:block w-px h-6 bg-slate-200 mx-1 shrink-0" />
+
+              <div className="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200 shrink-0">
+                <button
+                  onClick={() => setShowStats(!showStats)}
+                  className={`p-1.5 md:p-2 rounded-lg transition-all ${showStats ? 'bg-white shadow-sm text-slate-900 font-bold' : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'}`}
+                  title="Toggle Full Stats"
+                >
+                  <BarChart3 size={14} className="md:w-4 md:h-4" />
+                </button>
+                <button
+                  onClick={async () => {
+                    if (confirm('⚠️ Reset progress?')) {
+                      await clearProgress();
+                      setUserAnswers(new Map());
+                      setTrashedIds(new Set());
+                    }
+                  }}
+                  className="p-1.5 md:p-2 text-slate-500 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                  title="Reset Progress"
+                >
+                  <RefreshCw size={14} className="md:w-4 md:h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1727,18 +1749,19 @@ const PracticeTab: React.FC<{
                     )}
 
                     {/* Card Header - Ultra Premium */}
-                    <div className={`px-4 py-2 flex items-center justify-between gap-3 border-b ${isFocused ? 'bg-purple-50/25' : 'bg-slate-50/25'} border-slate-100`}>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-md ${hasValidated
-                          ? (isCorrect ? 'bg-emerald-500 rotate-0' : 'bg-rose-500 rotate-0')
-                          : 'bg-slate-900 -rotate-3 group-hover/card:rotate-0'
+                    <div className={`px-3 md:px-5 py-3 flex items-start justify-between gap-3 border-b ${isFocused ? 'bg-purple-50/40' : 'bg-slate-50/40'} border-slate-100 relative`}>
+                      <div className="flex items-start md:items-center gap-3 md:gap-4 flex-1 min-w-0 pr-8">
+                        {/* Number Box */}
+                        <div className={`w-9 h-9 md:w-11 md:h-11 shrink-0 rounded-[10px] md:rounded-xl flex items-center justify-center transition-all shadow-sm ${hasValidated
+                          ? (isCorrect ? 'bg-emerald-500 rotate-0 ring-4 ring-emerald-50' : 'bg-rose-500 rotate-0 ring-4 ring-rose-50')
+                          : 'bg-slate-900 -rotate-2 group-hover/card:rotate-0'
                           }`}>
                           <div className="text-center">
-                            <div className={`text-[9px] font-black uppercase leading-none ${hasValidated ? 'text-white/80' : 'text-slate-400'}`}>
-                              {q.source?.toLowerCase().includes('ai') ? 'AI Gen' : 'PBM'}
+                            <div className={`text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] leading-none ${hasValidated ? 'text-white/90' : 'text-slate-400'}`}>
+                              {q.source?.toLowerCase().includes('ai') ? 'AI' : 'PBM'}
                             </div>
-                            <div className="text-xl font-bold text-white leading-none font-outfit mt-0.5 flex items-center justify-center gap-0.5">
-                              {q.source?.toLowerCase().includes('ai') && <Sparkles size={8} className="text-purple-200" />}
+                            <div className="text-lg md:text-xl font-bold text-white leading-none font-outfit mt-0.5 flex items-center justify-center gap-1">
+                              {q.source?.toLowerCase().includes('ai') && <Sparkles size={8} className="text-amber-300" />}
                               {(() => {
                                 const qNumMatch = q.id?.match(/Q(\d+)/i) || q.id?.match(/(\d+)/);
                                 if (q.source?.toLowerCase().includes('ai')) {
@@ -1749,43 +1772,60 @@ const PracticeTab: React.FC<{
                             </div>
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
-                            <h3 className="text-base font-bold text-slate-900 tracking-tight font-outfit uppercase">
-                              {q.topic}
+
+                        {/* Metadata & Tags */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1.5 md:mb-1">
+                            <h3 className="text-[13px] md:text-base font-black text-slate-900 tracking-tight font-outfit uppercase line-clamp-1 leading-snug">
+                              {q.topic || 'General Practice'}
                             </h3>
                             {hasValidated && (
-                              <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-500 text-[11px] font-bold rounded-lg tracking-wider font-outfit shadow-sm">
-                                {Math.floor(sessionStats.avgTime || 0)}s <span className="text-slate-400 uppercase">Avg Latency</span>
+                              <span className="inline-flex items-center justify-center px-1.5 md:px-2 py-0.5 bg-white border border-slate-200 text-slate-500 text-[9px] md:text-[10px] font-black rounded-md md:rounded-lg tracking-widest font-outfit shadow-[0_2px_4px_rgba(0,0,0,0.02)] whitespace-nowrap w-max mt-0.5 sm:mt-0">
+                                {Math.floor(sessionStats.avgTime || 0)}s <span className="text-slate-400 uppercase ml-1">Lat</span>
                               </span>
                             )}
                           </div>
-                          <div className="flex flex-wrap gap-2.5 items-center mt-1">
+
+                          <div className="flex flex-wrap gap-1.5 items-center">
                             {q.diff && (
-                              <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${q.diff === 'Hard' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                              <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-[0.15em] px-1.5 md:px-2 py-0.5 rounded-md border ${q.diff === 'Hard' ? 'bg-rose-50 text-rose-600 border-rose-100' :
                                 q.diff === 'Moderate' ? 'bg-amber-50 text-amber-600 border-amber-100' :
                                   'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                } font-outfit shadow-sm`}>{q.diff} RATING</span>
+                                } font-outfit shadow-sm whitespace-nowrap`}>{q.diff}</span>
                             )}
-                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider font-outfit px-1">Syllabus Sync</span>
-                            {q.blooms && (
-                              <>
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-                                <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">Blooms: {q.blooms}</span>
-                              </>
-                            )}
-                            {q.pedagogy && (
-                              <>
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-                                <span className="text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">{q.pedagogy}</span>
-                              </>
-                            )}
+                            <div className="hidden md:flex items-center gap-1.5">
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-outfit px-1 whitespace-nowrap">Sync</span>
+                              {q.blooms && (
+                                <>
+                                  <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                  <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50/80 border border-indigo-100 px-2 py-0.5 rounded-md uppercase tracking-widest font-outfit whitespace-nowrap">Blooms: {q.blooms}</span>
+                                </>
+                              )}
+                              {q.pedagogy && (
+                                <>
+                                  <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                  <span className="text-[9px] font-bold text-blue-600 bg-blue-50/80 border border-blue-100 px-2 py-0.5 rounded-md uppercase tracking-widest font-outfit whitespace-nowrap">{q.pedagogy}</span>
+                                </>
+                              )}
+                            </div>
+
+                            {/* Mobile Only compressed tags layout */}
+                            <div className="md:hidden flex items-center flex-wrap gap-1">
+                              {q.blooms && (
+                                <span className="text-[8px] font-black text-indigo-600 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded shrink-0 uppercase tracking-widest font-outfit">B: {q.blooms.slice(0, 3)}</span>
+                              )}
+                              {q.pedagogy && (
+                                <span className="text-[8px] font-black text-blue-600 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded shrink-0 uppercase tracking-widest font-outfit">{q.pedagogy.slice(0, 3)}</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-1">
-                        <button onClick={(e) => { e.stopPropagation(); handleSave(q.id); }} className={`p-2.5 rounded-xl transition-all ${bookmarkedIds.has(q.id) ? 'text-blue-600 bg-blue-50' : 'text-slate-300 hover:bg-slate-100'}`}>
-                          <BookmarkPlus size={18} fill={bookmarkedIds.has(q.id) ? "currentColor" : "none"} />
+
+                      {/* Bookmark absolutely positioned on mobile for cleaner top right */}
+                      <div className="absolute top-3 right-3 md:relative md:top-auto md:right-auto md:shrink-0 flex gap-1">
+                        <button onClick={(e) => { e.stopPropagation(); handleSave(q.id); }} className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all border shadow-sm bg-white hover:scale-105 active:scale-95 ${bookmarkedIds.has(q.id) ? 'text-blue-600 border-blue-200 bg-blue-50/50' : 'text-slate-400 border-slate-200 hover:bg-slate-50'}`}>
+                          <BookmarkPlus size={16} className="md:w-[18px] md:h-[18px]" fill={bookmarkedIds.has(q.id) ? "currentColor" : "none"} />
                         </button>
                       </div>
                     </div>

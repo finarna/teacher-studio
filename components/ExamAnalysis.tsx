@@ -18,6 +18,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Target,
   ChevronUp,
   FileText,
@@ -93,6 +94,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const selectedImageModel = 'gemini-2.0-flash-exp-image-01';
   const [enlargedVisualNote, setEnlargedVisualNote] = useState<{ imageUrl: string, questionId: string } | null>(null);
   const [isGroupedView, setIsGroupedView] = useState(false);
+  const [mobileVaultView, setMobileVaultView] = useState<'list' | 'detail'>('list');
 
   // CRITICAL FIX: Auto-select first scan if none selected or scan doesn't match active subject
   // Use ref to track last selected scan ID to prevent infinite loops
@@ -161,6 +163,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const toggleQuestion = (id: string) => {
     const isExpanding = expandedQuestionId !== id;
     setExpandedQuestionId(isExpanding ? id : null);
+    setMobileVaultView('detail');
     if (isExpanding) {
       const q = questions.find(q => q.id === id);
       if (q && (!q.solutionSteps || q.solutionSteps.length <= 1)) {
@@ -724,14 +727,14 @@ Schema: {
 
       // Skip if topic is empty or too generic
       const isGeneric = !topic || topic.length < 3 ||
-                       topic === 'general' ||
-                       topic === 'mathematics' ||
-                       topic === 'math' ||
-                       topic === 'physics' ||
-                       topic === 'chemistry' ||
-                       topic === 'biology' ||
-                       /^q\d+$/i.test(topic) ||
-                       /^question\s*\d+$/i.test(topic);
+        topic === 'general' ||
+        topic === 'mathematics' ||
+        topic === 'math' ||
+        topic === 'physics' ||
+        topic === 'chemistry' ||
+        topic === 'biology' ||
+        /^q\d+$/i.test(topic) ||
+        /^question\s*\d+$/i.test(topic);
 
       if (!isGeneric) {
         // Try to match against each domain's keywords
@@ -1009,11 +1012,10 @@ Schema: {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-[11px] font-bold uppercase tracking-wide transition-all border-b-2 ${
-                        activeTab === tab
-                          ? 'bg-slate-50 text-slate-900 border-accent-600'
-                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-transparent'
-                      }`}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-[11px] font-bold uppercase tracking-wide transition-all border-b-2 ${activeTab === tab
+                        ? 'bg-slate-50 text-slate-900 border-accent-600'
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-transparent'
+                        }`}
                     >
                       <TabIcon size={16} />
                       {tab}
@@ -1036,29 +1038,29 @@ Schema: {
                       onChange={(e) => {
                         const selected = filteredScans.find(s => s.id === e.target.value);
                         if (selected && onSelectScan) onSelectScan(selected);
-                    }}
-                    className="bg-white border-2 rounded-full px-5 py-2.5 text-base font-bold outline-none cursor-pointer hover:shadow-md transition-all appearance-none pr-10 bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpath d=%27m6 9 6 6 6-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[center_right_1rem]"
-                    style={{
-                      borderColor: theme.color + '80',
-                      color: theme.color
-                    }}
-                  >
-                    {filteredScans.map(s => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <div
-                    className="bg-white border-2 rounded-full px-5 py-2.5 text-base font-bold"
-                    style={{
-                      borderColor: theme.color + '80',
-                      color: theme.color
-                    }}
-                  >
-                    {scan.name}
-                  </div>
-                )}
-              </div>
+                      }}
+                      className="bg-white border-2 rounded-full px-5 py-2.5 text-base font-bold outline-none cursor-pointer hover:shadow-md transition-all appearance-none pr-10 bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2716%27 height=%2716%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpath d=%27m6 9 6 6 6-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[center_right_1rem]"
+                      style={{
+                        borderColor: theme.color + '80',
+                        color: theme.color
+                      }}
+                    >
+                      {filteredScans.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div
+                      className="bg-white border-2 rounded-full px-5 py-2.5 text-base font-bold"
+                      style={{
+                        borderColor: theme.color + '80',
+                        color: theme.color
+                      }}
+                    >
+                      {scan.name}
+                    </div>
+                  )}
+                </div>
 
                 <button onClick={onBack} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
                   <ArrowLeft size={16} className="text-slate-500" />
@@ -1074,911 +1076,905 @@ Schema: {
             <div className="h-full overflow-y-auto scroller-hide p-6 space-y-6">
               {/* Top Level Intelligence Matrix */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <MetricCard title="SYNTHESIZED FRAGMENTS" content={questions.length} label="Units" icon={<FileText size={16} />} />
-              <MetricCard title="PORTFOLIO SOURCE" content={Array.from(new Set(questions.map(q => q.source))).length || 1} label="Papers" icon={<FolderOpen size={16} />} />
-              <MetricCard title="COGNITIVE WEIGHT" content={questions.reduce((a, b) => a + (Number(b.marks) || 0), 0)} label="Marks" icon={<Sigma size={16} />} />
-              <MetricCard title="AI FIDELITY" content="99.2%" label="Synced" icon={<Sparkles size={16} />} />
-            </div>
+                <MetricCard title="SYNTHESIZED FRAGMENTS" content={questions.length} label="Units" icon={<FileText size={16} />} />
+                <MetricCard title="PORTFOLIO SOURCE" content={Array.from(new Set(questions.map(q => q.source))).length || 1} label="Papers" icon={<FolderOpen size={16} />} />
+                <MetricCard title="COGNITIVE WEIGHT" content={questions.reduce((a, b) => a + (Number(b.marks) || 0), 0)} label="Marks" icon={<Sigma size={16} />} />
+                <MetricCard title="AI FIDELITY" content="99.2%" label="Synced" icon={<Sparkles size={16} />} />
+              </div>
 
-            <div className="grid grid-cols-12 gap-6">
-              {/* Main Analytical Narrative */}
-              <div className="col-span-12 xl:col-span-8 space-y-6">
-                <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative group overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 opacity-[0.03] transform rotate-12 transition-transform group-hover:scale-110 pointer-events-none text-slate-900"><Zap size={160} /></div>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-2xl bg-accent-600 flex items-center justify-center text-white shadow-lg shadow-accent-500/20">
-                      <Activity size={20} />
-                    </div>
-                    <div>
-                      <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-[0.2em] font-outfit italic">
-                        Instructional Strategist Output
-                      </h3>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cumulative Pedagogical Audit</p>
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <p className="text-[18px] font-bold text-slate-700 italic leading-relaxed mb-8 border-l-4 border-accent-500 pl-8 py-2 bg-slate-50/50 rounded-r-2xl pr-6">
-                      "{analysis.summary || 'Paper analyzed successfully across multiple pedagogical layers.'}"
-                    </p>
-                  </div>
-
-                  {professorInsights.length > 0 && (
-                    <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {professorInsights.map((insight, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl group/finding">
-                          <div className={`w-7 h-7 rounded-lg bg-white shadow-sm flex items-center justify-center ${insight.color}`}>{insight.icon}</div>
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{insight.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(analysis.strategy || []).map((s, i) => (
-                      <div key={i} className="flex items-start gap-4 p-5 bg-white border border-slate-100 rounded-2xl group/strat hover:border-accent-200 hover:shadow-xl hover:shadow-accent-500/5 transition-all duration-300">
-                        <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-[11px] font-black shrink-0 group-hover/strat:bg-accent-600 transition-colors shadow-lg">{i + 1}</div>
-                        <span className="text-[13px] font-bold text-slate-600 leading-snug py-1">{s}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Intelligence Traits - Data Analyst & Physics Prof View */}
-                <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+              <div className="grid grid-cols-12 gap-6">
+                {/* Main Analytical Narrative */}
+                <div className="col-span-12 xl:col-span-8 space-y-6">
+                  <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative group overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] transform rotate-12 transition-transform group-hover:scale-110 pointer-events-none text-slate-900"><Zap size={160} /></div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-2xl bg-accent-600 flex items-center justify-center text-white shadow-lg shadow-accent-500/20">
                         <Activity size={20} />
                       </div>
                       <div>
-                        <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-[0.2em] font-outfit italic">Intelligence Traits</h3>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Macro-Evolutionary Portfolio Audit</p>
+                        <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-[0.2em] font-outfit italic">
+                          Instructional Strategist Output
+                        </h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cumulative Pedagogical Audit</p>
                       </div>
+                    </div>
+
+                    <div className="relative">
+                      <p className="text-[18px] font-bold text-slate-700 italic leading-relaxed mb-8 border-l-4 border-accent-500 pl-8 py-2 bg-slate-50/50 rounded-r-2xl pr-6">
+                        "{analysis.summary || 'Paper analyzed successfully across multiple pedagogical layers.'}"
+                      </p>
+                    </div>
+
+                    {professorInsights.length > 0 && (
+                      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {professorInsights.map((insight, idx) => (
+                          <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl group/finding">
+                            <div className={`w-7 h-7 rounded-lg bg-white shadow-sm flex items-center justify-center ${insight.color}`}>{insight.icon}</div>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{insight.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(analysis.strategy || []).map((s, i) => (
+                        <div key={i} className="flex items-start gap-4 p-5 bg-white border border-slate-100 rounded-2xl group/strat hover:border-accent-200 hover:shadow-xl hover:shadow-accent-500/5 transition-all duration-300">
+                          <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-[11px] font-black shrink-0 group-hover/strat:bg-accent-600 transition-colors shadow-lg">{i + 1}</div>
+                          <span className="text-[13px] font-bold text-slate-600 leading-snug py-1">{s}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  {portfolioStats ? (
-                    <div className="space-y-10">
-                      {/* Executive Trend Summary */}
-                      <div className="bg-slate-900 rounded-[2rem] p-8 relative overflow-hidden group/exec">
-                        <div className="absolute top-0 right-0 p-10 opacity-10 -rotate-12 group-hover/exec:scale-110 transition-transform"><Sparkles size={120} className="text-accent-400" /></div>
-                        <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
-                          <div className="flex-1 space-y-4">
-                            <h4 className="text-[11px] font-black text-accent-400 uppercase tracking-[0.3em]">Longitudinal Cognitive Drift</h4>
-                            <div className="h-40 w-full">
+                  {/* Intelligence Traits - Data Analyst & Physics Prof View */}
+                  <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+                    <div className="flex items-center justify-between mb-8">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                          <Activity size={20} />
+                        </div>
+                        <div>
+                          <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-[0.2em] font-outfit italic">Intelligence Traits</h3>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Macro-Evolutionary Portfolio Audit</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {portfolioStats ? (
+                      <div className="space-y-10">
+                        {/* Executive Trend Summary */}
+                        <div className="bg-slate-900 rounded-[2rem] p-8 relative overflow-hidden group/exec">
+                          <div className="absolute top-0 right-0 p-10 opacity-10 -rotate-12 group-hover/exec:scale-110 transition-transform"><Sparkles size={120} className="text-accent-400" /></div>
+                          <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                            <div className="flex-1 space-y-4">
+                              <h4 className="text-[11px] font-black text-accent-400 uppercase tracking-[0.3em]">Longitudinal Cognitive Drift</h4>
+                              <div className="h-40 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <AreaChart data={portfolioStats}>
+                                    <defs>
+                                      <linearGradient id="colorMathExec" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
+                                      </linearGradient>
+                                    </defs>
+                                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', color: '#fff', borderRadius: '8px' }} />
+                                    <Area type="monotone" dataKey="depthFactor" stroke="#60a5fa" fillOpacity={1} fill="url(#colorMathExec)" strokeWidth={4} />
+                                    <Area type="monotone" dataKey="mathIntensity" stroke="#818cf8" fillOpacity={0} strokeWidth={2} strokeDasharray="5 5" />
+                                  </AreaChart>
+                                </ResponsiveContainer>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 shrink-0">
+                              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+                                <p className="text-[8px] font-black text-slate-500 uppercase mb-1">Max Rigorousness</p>
+                                <p className="text-xl font-black text-white">{Math.max(...portfolioStats.map(s => s.avgDifficulty)).toFixed(1)}</p>
+                              </div>
+                              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+                                <p className="text-[8px] font-black text-slate-500 uppercase mb-1">Math Ceiling</p>
+                                <p className="text-xl font-black text-white">{Math.round(Math.max(...portfolioStats.map(s => s.mathIntensity)))}%</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Cognitive Balance Index</h4>
+                              <div className="flex gap-4">
+                                <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-accent-500" /> <span className="text-[9px] font-bold text-slate-500 uppercase">Math</span></div>
+                                <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-indigo-500" /> <span className="text-[9px] font-bold text-slate-500 uppercase">Bloom</span></div>
+                              </div>
+                            </div>
+                            <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30">
                               <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={portfolioStats}>
-                                  <defs>
-                                    <linearGradient id="colorMathExec" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.3} />
-                                      <stop offset="95%" stopColor="#60a5fa" stopOpacity={0} />
-                                    </linearGradient>
-                                  </defs>
-                                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', color: '#fff', borderRadius: '8px' }} />
-                                  <Area type="monotone" dataKey="depthFactor" stroke="#60a5fa" fillOpacity={1} fill="url(#colorMathExec)" strokeWidth={4} />
-                                  <Area type="monotone" dataKey="mathIntensity" stroke="#818cf8" fillOpacity={0} strokeWidth={2} strokeDasharray="5 5" />
-                                </AreaChart>
+                                <LineChart data={portfolioStats}>
+                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                  <XAxis dataKey="source" hide />
+                                  <YAxis hide domain={[0, 100]} />
+                                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                                  <Line type="stepAfter" dataKey="mathIntensity" stroke="#3b82f6" strokeWidth={3} dot={false} />
+                                  <Line type="stepAfter" dataKey="depthFactor" stroke="#6366f1" strokeWidth={3} dot={false} />
+                                </LineChart>
                               </ResponsiveContainer>
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-4 shrink-0">
-                            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
-                              <p className="text-[8px] font-black text-slate-500 uppercase mb-1">Max Rigorousness</p>
-                              <p className="text-xl font-black text-white">{Math.max(...portfolioStats.map(s => s.avgDifficulty)).toFixed(1)}</p>
-                            </div>
-                            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
-                              <p className="text-[8px] font-black text-slate-500 uppercase mb-1">Math Ceiling</p>
-                              <p className="text-xl font-black text-white">{Math.round(Math.max(...portfolioStats.map(s => s.mathIntensity)))}%</p>
+
+                          <div className="space-y-4">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Rigor Segmentation (Y-o-Y)</h4>
+                            <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30">
+                              {portfolioStats && (portfolioStats as any[]).length > 0 && (
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <BarChart data={portfolioStats} layout="vertical" margin={{ left: 10, right: 30, top: 0, bottom: 0 }}>
+                                    <XAxis type="number" hide domain={[0, 100]} />
+                                    <YAxis dataKey="source" type="category" hide />
+                                    <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                                    <Bar name="Easy" dataKey="diffEasy" stackId="a" fill="#10b981" barSize={12} radius={[4, 0, 0, 4]} />
+                                    <Bar name="Moderate" dataKey="diffModerate" stackId="a" fill="#f59e0b" />
+                                    <Bar name="Critical" dataKey="diffCritical" stackId="a" fill="#ef4444" radius={[0, 4, 4, 0]} />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              )}
                             </div>
                           </div>
+                        </div>
+
+                        {/* Professional Insights Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {portfolioStats.map((stat, i) => (
+                            <div key={i} className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 group hover:bg-white hover:border-accent-200 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 overflow-hidden relative">
+                              <div className="absolute top-0 right-0 p-4 opacity-[0.05] pointer-events-none -rotate-12"><Activity size={60} /></div>
+                              <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 truncate">{stat.source}</h4>
+
+                              <div className="space-y-4">
+                                <div>
+                                  <div className="flex justify-between items-end mb-1">
+                                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Complexity Index</span>
+                                    <span className="text-[12px] font-black text-slate-900">{stat.complexityIndex.toFixed(1)}</span>
+                                  </div>
+                                  <div className="h-1 bg-slate-200 max-w-[40px] rounded-full" />
+                                </div>
+
+                                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                                  <div className="flex flex-col">
+                                    <span className="text-[8px] font-black text-slate-400 uppercase">Physics Depth</span>
+                                    <span className="text-[11px] font-black text-indigo-600">{Math.round(stat.depthFactor)}%</span>
+                                  </div>
+                                  <div className="flex flex-col items-end">
+                                    <span className="text-[8px] font-black text-slate-400 uppercase">Math Density</span>
+                                    <span className="text-[11px] font-black text-accent-600">{Math.round(stat.mathIntensity)}%</span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 pt-2">
+                                  <div className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter ${stat.avgDifficulty >= 2.5 ? 'bg-rose-100 text-rose-600' : 'bg-accent-100 text-accent-600'}`}>
+                                    {stat.avgDifficulty >= 2.5 ? 'Rigorous' : 'Balanced'}
+                                  </div>
+                                  <div className="px-2.5 py-1 bg-slate-800 text-white rounded-lg text-[8px] font-black uppercase tracking-tighter">
+                                    {stat.focus}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Cognitive Balance Index</h4>
-                            <div className="flex gap-4">
-                              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-accent-500" /> <span className="text-[9px] font-bold text-slate-500 uppercase">Math</span></div>
-                              <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-indigo-500" /> <span className="text-[9px] font-bold text-slate-500 uppercase">Bloom</span></div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {(analysis.trends && analysis.trends.length > 0 ? analysis.trends : [
+                          { title: "Conceptual Depth", description: "Increase in multi-step derivation logic observed in recent scans.", type: "positive" },
+                          { title: "Application Shift", description: "30% more questions focused on real-world constraints over pure theory.", type: "neutral" },
+                          { title: "Calculation Friction", description: "Reduction in repetitive arithmetic; focus on high-level variable modeling.", type: "positive" }
+                        ]).map((trend, i) => (
+                          <div key={i} className="p-6 rounded-[2rem] border border-slate-100 bg-slate-50/30 hover:bg-white hover:border-indigo-100 hover:shadow-xl transition-all group">
+                            <div className={`w-8 h-8 rounded-full mb-4 flex items-center justify-center ${trend.type === 'positive' ? 'bg-emerald-100 text-emerald-600' : trend.type === 'negative' ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                              {trend.type === 'positive' ? <Zap size={14} /> : <Activity size={14} />}
                             </div>
+                            <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-2 font-outfit">{trend.title}</h4>
+                            <p className="text-[11px] font-bold text-slate-500 leading-relaxed uppercase tracking-tight">{trend.description}</p>
                           </div>
-                          <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <LineChart data={portfolioStats}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <XAxis dataKey="source" hide />
-                                <YAxis hide domain={[0, 100]} />
-                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                                <Line type="stepAfter" dataKey="mathIntensity" stroke="#3b82f6" strokeWidth={3} dot={false} />
-                                <Line type="stepAfter" dataKey="depthFactor" stroke="#6366f1" strokeWidth={3} dot={false} />
-                              </LineChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Rigor Segmentation (Y-o-Y)</h4>
-                          <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30">
-                            {portfolioStats && (portfolioStats as any[]).length > 0 && (
-                              <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={portfolioStats} layout="vertical" margin={{ left: 10, right: 30, top: 0, bottom: 0 }}>
-                                  <XAxis type="number" hide domain={[0, 100]} />
-                                  <YAxis dataKey="source" type="category" hide />
-                                  <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                                  <Bar name="Easy" dataKey="diffEasy" stackId="a" fill="#10b981" barSize={12} radius={[4, 0, 0, 4]} />
-                                  <Bar name="Moderate" dataKey="diffModerate" stackId="a" fill="#f59e0b" />
-                                  <Bar name="Critical" dataKey="diffCritical" stackId="a" fill="#ef4444" radius={[0, 4, 4, 0]} />
-                                </BarChart>
-                              </ResponsiveContainer>
-                            )}
-                          </div>
-                        </div>
+                        ))}
                       </div>
+                    )}
+                  </div>
+                </div>
 
-                      {/* Professional Insights Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {portfolioStats.map((stat, i) => (
-                          <div key={i} className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 group hover:bg-white hover:border-accent-200 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 overflow-hidden relative">
-                            <div className="absolute top-0 right-0 p-4 opacity-[0.05] pointer-events-none -rotate-12"><Activity size={60} /></div>
-                            <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 truncate">{stat.source}</h4>
-
-                            <div className="space-y-4">
-                              <div>
-                                <div className="flex justify-between items-end mb-1">
-                                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Complexity Index</span>
-                                  <span className="text-[12px] font-black text-slate-900">{stat.complexityIndex.toFixed(1)}</span>
-                                </div>
-                                <div className="h-1 bg-slate-200 max-w-[40px] rounded-full" />
-                              </div>
-
-                              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                                <div className="flex flex-col">
-                                  <span className="text-[8px] font-black text-slate-400 uppercase">Physics Depth</span>
-                                  <span className="text-[11px] font-black text-indigo-600">{Math.round(stat.depthFactor)}%</span>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                  <span className="text-[8px] font-black text-slate-400 uppercase">Math Density</span>
-                                  <span className="text-[11px] font-black text-accent-600">{Math.round(stat.mathIntensity)}%</span>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-2 pt-2">
-                                <div className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter ${stat.avgDifficulty >= 2.5 ? 'bg-rose-100 text-rose-600' : 'bg-accent-100 text-accent-600'}`}>
-                                  {stat.avgDifficulty >= 2.5 ? 'Rigorous' : 'Balanced'}
-                                </div>
-                                <div className="px-2.5 py-1 bg-slate-800 text-white rounded-lg text-[8px] font-black uppercase tracking-tighter">
-                                  {stat.focus}
-                                </div>
-                              </div>
+                {/* Sidebar Intelligence */}
+                <div className="col-span-12 xl:col-span-4 space-y-6">
+                  {/* Portfolio Content List */}
+                  <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-accent-600/5 rotate-45 translate-x-1/2 blur-2xl" />
+                    <div className="relative z-10">
+                      <h3 className="text-[12px] font-black text-white uppercase tracking-[0.2em] mb-6 flex items-center gap-3 font-outfit italic">
+                        <FolderOpen size={18} className="text-accent-400" /> Portfolio Snapshot
+                      </h3>
+                      <div className="space-y-3">
+                        {Array.from(new Set(questions.map(q => q.source))).filter(Boolean).map((paper, i) => (
+                          <div key={i} className="flex items-center gap-3 p-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-default">
+                            <div className="w-8 h-8 rounded-xl bg-accent-500/20 text-accent-400 flex items-center justify-center text-[10px] font-black shrink-0">{i + 1}</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] font-black text-white truncate uppercase tracking-widest leading-none mb-1">{paper}</p>
+                              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">{questions.filter(q => q.source === paper).length} Fragments Indexed</p>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {(analysis.trends && analysis.trends.length > 0 ? analysis.trends : [
-                        { title: "Conceptual Depth", description: "Increase in multi-step derivation logic observed in recent scans.", type: "positive" },
-                        { title: "Application Shift", description: "30% more questions focused on real-world constraints over pure theory.", type: "neutral" },
-                        { title: "Calculation Friction", description: "Reduction in repetitive arithmetic; focus on high-level variable modeling.", type: "positive" }
-                      ]).map((trend, i) => (
-                        <div key={i} className="p-6 rounded-[2rem] border border-slate-100 bg-slate-50/30 hover:bg-white hover:border-indigo-100 hover:shadow-xl transition-all group">
-                          <div className={`w-8 h-8 rounded-full mb-4 flex items-center justify-center ${trend.type === 'positive' ? 'bg-emerald-100 text-emerald-600' : trend.type === 'negative' ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
-                            {trend.type === 'positive' ? <Zap size={14} /> : <Activity size={14} />}
+                  </div>
+
+                  {/* Cognitive Volatility (Only show if multiple papers) */}
+                  {portfolioStats && (
+                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden group">
+                      <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] mb-6 flex items-center gap-3 font-outfit italic">
+                        <Zap size={18} className="text-accent-600" /> Performance Volatility
+                      </h3>
+                      <div className="space-y-5">
+                        {portfolioStats.map((stat, i) => (
+                          <div key={i} className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-black text-slate-900 uppercase truncate pr-4">{stat.source}</span>
+                              <span className="text-[10px] font-black text-accent-600 uppercase tracking-tighter">
+                                {stat.totalMarks} Marks
+                              </span>
+                            </div>
+                            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div className="h-full bg-slate-900 transition-all duration-1000" style={{ width: `${(stat.totalMarks / 70) * 100}%` }} />
+                            </div>
                           </div>
-                          <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-2 font-outfit">{trend.title}</h4>
-                          <p className="text-[11px] font-bold text-slate-500 leading-relaxed uppercase tracking-tight">{trend.description}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden group">
+                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] mb-8 flex items-center gap-3 font-outfit italic relative z-10">
+                      <Compass size={18} className="text-accent-600" /> Predictive Mapping
+                    </h3>
+                    <div className="space-y-8 relative z-10">
+                      {(analysis.predictiveTopics || []).slice(0, 5).map((p, i) => {
+                        // Normalize probability (AI occasionally gives 0-1 instead of 0-100)
+                        const prob = p.probability <= 1 ? p.probability * 100 : p.probability;
+
+                        return (
+                          <div key={i} className="group/item relative">
+                            <div className="flex justify-between items-start mb-2.5">
+                              <div className="flex-1 pr-4">
+                                <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest block mb-1">{p.topic}</span>
+                                <span className="text-[10px] font-bold text-slate-400 leading-tight block line-clamp-2 italic uppercase tracking-tighter group-hover/item:text-slate-600 transition-colors">{p.reason}</span>
+                              </div>
+                              <span className="text-[10px] font-black text-white bg-accent-600 px-2.5 py-1 rounded-lg tracking-tighter shadow-lg shadow-accent-500/20">{Math.round(prob)}%</span>
+                            </div>
+                            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner group-hover/item:h-2 transition-all">
+                              <div className="h-full bg-accent-500 shadow-[0_0_8px_rgba(20,184,166,0.5)] transition-all duration-1000 origin-left" style={{ width: `${prob}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
+                <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                  <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest font-outfit italic">Strategic Analysis Matrix</h3>
+                  <div className="px-4 py-1.5 bg-slate-900 text-white text-[9px] font-black uppercase rounded-lg tracking-[0.2em] shadow-lg">Fidelity Matrix v2.0</div>
+                </div>
+                <div className="overflow-x-auto scroller-hide">
+                  <table className="w-full text-left border-separate border-spacing-0">
+                    <thead className="bg-white sticky top-0 z-10">
+                      <tr className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 font-outfit">
+                        <th className="px-8 py-5">Category Cluster</th>
+                        <th className="px-8 py-5">High-Yield Tracks</th>
+                        <th className="px-8 py-5 text-center">Marks</th>
+                        <th className="px-8 py-5">Cognitive DNA</th>
+                        <th className="px-8 py-5">Control Point</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {aggregatedDomains.map((cat, i) => (
+                        <tr key={i} className="hover:bg-slate-50 transition-colors group">
+                          <td className="px-8 py-6">
+                            <span className="text-[13px] font-black text-slate-900 uppercase tracking-tight font-outfit">{cat.name}</span>
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="flex flex-wrap gap-1.5">
+                              {cat.chapters.map((ch, ci) => (
+                                <span key={ci} className="text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-sm hover:border-accent-400 transition-all">{ch}</span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-8 py-6 text-center">
+                            <span className="text-[15px] font-black text-slate-900 italic font-outfit">{cat.totalMarks}</span>
+                          </td>
+                          <td className="px-8 py-6">
+                            <span className="px-3 py-1 bg-slate-900 shadow-md text-white rounded-lg text-[9px] font-black uppercase tracking-[0.15em]">{cat.dominantBlooms}</span>
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="flex flex-col gap-2 min-w-[140px]">
+                              <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                                <span>{cat.difficultyDNA}</span>
+                                <span className="text-slate-900">{Math.round((cat.avgDifficulty / 3) * 100)}%</span>
+                              </div>
+                              <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                                <div className={`h-full ${cat.difficultyDNA === 'Hard' ? 'bg-rose-500' : 'bg-accent-500'} transition-all shadow-[0_0_8px_rgba(20,184,166,0.4)]`} style={{ width: `${(cat.avgDifficulty / 3) * 100}%` }} />
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'intelligence' && (
+            <div className="h-full overflow-y-auto scroller-hide p-6 grid grid-cols-12 gap-4">
+              <div className="col-span-12 xl:col-span-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-sm min-h-[500px] min-w-0 flex flex-col">
+                <div className="flex items-center justify-between mb-10">
+                  <div>
+                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] font-outfit italic">
+                      {topicTrendData ? 'Domain Weightage Drift' : 'Syllabus Segment Weightage'}
+                    </h3>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                      {topicTrendData ? 'Multi-Paper Longitudinal Analysis' : 'Single Paper Conceptual Audit'}
+                    </p>
+                  </div>
+                  {topicTrendData && (
+                    <div className="flex flex-wrap gap-3 justify-end max-w-[400px]">
+                      {domainNames.map((name, i) => (
+                        <div key={i} className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                          <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter">{name}</span>
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
+                <div className="flex-1 w-full min-h-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    {topicTrendData ? (
+                      <LineChart data={topicTrendData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 9, fontWeight: 800 }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 9, fontWeight: 800 }} />
+                        <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }} />
+                        {domainNames.map((name, i) => (
+                          <Line
+                            key={name}
+                            type="monotone"
+                            dataKey={name}
+                            stroke={COLORS[i % COLORS.length]}
+                            strokeWidth={3}
+                            dot={{ r: 4, strokeWidth: 2, fill: '#white' }}
+                            activeDot={{ r: 6, strokeWidth: 0 }}
+                            animationDuration={1500}
+                          />
+                        ))}
+                      </LineChart>
+                    ) : (
+                      <BarChart data={aggregatedDomains.map(d => ({ name: d.name, marks: d.totalMarks }))}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 9, fontWeight: 800 }} />
+                        <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase' }} />
+                        <Bar dataKey="marks" fill={theme.color} radius={[8, 8, 0, 0]} barSize={48} />
+                      </BarChart>
+                    )}
+                  </ResponsiveContainer>
+                </div>
               </div>
 
-              {/* Sidebar Intelligence */}
               <div className="col-span-12 xl:col-span-4 space-y-6">
-                {/* Portfolio Content List */}
-                <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-accent-600/5 rotate-45 translate-x-1/2 blur-2xl" />
-                  <div className="relative z-10">
-                    <h3 className="text-[12px] font-black text-white uppercase tracking-[0.2em] mb-6 flex items-center gap-3 font-outfit italic">
-                      <FolderOpen size={18} className="text-accent-400" /> Portfolio Snapshot
-                    </h3>
-                    <div className="space-y-3">
-                      {Array.from(new Set(questions.map(q => q.source))).filter(Boolean).map((paper, i) => (
-                        <div key={i} className="flex items-center gap-3 p-3.5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-default">
-                          <div className="w-8 h-8 rounded-xl bg-accent-500/20 text-accent-400 flex items-center justify-center text-[10px] font-black shrink-0">{i + 1}</div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-black text-white truncate uppercase tracking-widest leading-none mb-1">{paper}</p>
-                            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">{questions.filter(q => q.source === paper).length} Fragments Indexed</p>
-                          </div>
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                  <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] mb-6 font-outfit italic">Cognitive Distribution</h3>
+                  <div className="space-y-4">
+                    {(analysis.bloomsTaxonomy || []).map((bloom, i) => (
+                      <div key={i} className="flex flex-col gap-2.5">
+                        <div className="flex justify-between items-center text-[11px] font-black uppercase text-slate-700 tracking-wider">
+                          <span>{bloom.name}</span>
+                          <span className="text-slate-900">{bloom.percentage}%</span>
                         </div>
-                      ))}
-                    </div>
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                          <div className="h-full transition-all shadow-[0_0_8px_rgba(0,0,0,0.1)]" style={{ width: `${bloom.percentage}%`, backgroundColor: bloom.color || '#3b82f6' }} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Cognitive Volatility (Only show if multiple papers) */}
-                {portfolioStats && (
-                  <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden group">
-                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] mb-6 flex items-center gap-3 font-outfit italic">
-                      <Zap size={18} className="text-accent-600" /> Performance Volatility
-                    </h3>
-                    <div className="space-y-5">
-                      {portfolioStats.map((stat, i) => (
-                        <div key={i} className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-black text-slate-900 uppercase truncate pr-4">{stat.source}</span>
-                            <span className="text-[10px] font-black text-accent-600 uppercase tracking-tighter">
-                              {stat.totalMarks} Marks
-                            </span>
+                {analysis.chapterInsights && analysis.chapterInsights.length > 0 && (
+                  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] mb-6 font-outfit italic">Chapter High-Yields</h3>
+                    <div className="space-y-3">
+                      {analysis.chapterInsights.slice(0, 3).map((insight, i) => (
+                        <div key={i} className="p-4 bg-slate-50 border border-slate-100 rounded-xl hover:bg-white hover:border-accent-100 transition-all shadow-sm group">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-[10px] font-black text-slate-900 uppercase tracking-wider">{insight.topic}</span>
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${insight.difficulty === 'Hard' ? 'bg-rose-100 text-rose-600' : 'bg-accent-100 text-accent-600'}`}>{insight.difficulty}</span>
                           </div>
-                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-slate-900 transition-all duration-1000" style={{ width: `${(stat.totalMarks / 70) * 100}%` }} />
-                          </div>
+                          <p className="text-[11px] font-bold text-slate-500 line-clamp-2 uppercase tracking-tight leading-relaxed group-hover:text-slate-700">{insight.description}</p>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden group">
-                  <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] mb-8 flex items-center gap-3 font-outfit italic relative z-10">
-                    <Compass size={18} className="text-accent-600" /> Predictive Mapping
-                  </h3>
-                  <div className="space-y-8 relative z-10">
-                    {(analysis.predictiveTopics || []).slice(0, 5).map((p, i) => {
-                      // Normalize probability (AI occasionally gives 0-1 instead of 0-100)
-                      const prob = p.probability <= 1 ? p.probability * 100 : p.probability;
+                <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-xl overflow-hidden relative group">
+                  <div className="absolute -bottom-4 -right-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Sigma size={100} /></div>
+                  <h3 className="text-[11px] font-black text-accent-400 uppercase tracking-[0.2em] mb-3 relative z-10">Fidelity Assurance</h3>
+                  <p className="text-[10px] font-bold text-slate-400 leading-relaxed uppercase relative z-10">All derivations and logic fragments have been cross-verified against official board rubrics.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'vault' && (
+            <div className="h-full flex flex-col md:flex-row overflow-hidden">
+              {/* Left Column - Questions List */}
+              <div className={`w-full md:w-80 bg-gradient-to-b from-slate-50 to-white border-b-2 md:border-b-0 md:border-r-2 border-slate-200 flex-col shrink-0 shadow-sm ${mobileVaultView === 'detail' ? 'hidden md:flex' : 'flex'}`}>
+                {/* Search & View Toggle */}
+                <div className="p-4 border-b-2 border-slate-200 space-y-3 bg-white/50">
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      placeholder="Search questions..."
+                      className="w-full px-3 py-2.5 text-xs font-medium border-2 border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-100 transition-all pl-9 bg-white hover:border-slate-300 placeholder:text-slate-400"
+                    />
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-purple-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  {/* View Toggle */}
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-slate-100 to-slate-50 rounded-xl p-1 shadow-inner">
+                    <button
+                      onClick={() => setIsGroupedView(false)}
+                      className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${!isGroupedView
+                        ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50 scale-[1.02]'
+                        : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                      List
+                    </button>
+                    <button
+                      onClick={() => setIsGroupedView(true)}
+                      className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${isGroupedView
+                        ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50 scale-[1.02]'
+                        : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                      Group
+                    </button>
+                  </div>
+                </div>
+
+                {/* Question List - Plain View */}
+                {!isGroupedView && (
+                  <div className="flex-1 overflow-y-auto scroller-hide p-3 space-y-2">
+                    {questions.map((q, i) => {
+                      const qId = q.id || `frag-${i}`;
+                      const isActive = (expandedQuestionId || questions[0]?.id) === qId;
+                      const qNumMatch = q.id?.match(/Q(\d+)/i);
+                      const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
+                      const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
 
                       return (
-                        <div key={i} className="group/item relative">
-                          <div className="flex justify-between items-start mb-2.5">
-                            <div className="flex-1 pr-4">
-                              <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest block mb-1">{p.topic}</span>
-                              <span className="text-[10px] font-bold text-slate-400 leading-tight block line-clamp-2 italic uppercase tracking-tighter group-hover/item:text-slate-600 transition-colors">{p.reason}</span>
+                        <button
+                          key={qId}
+                          onClick={() => toggleQuestion(qId)}
+                          className={`group w-full text-left p-3 rounded-xl transition-all duration-200 border-2 ${isActive
+                            ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-300 shadow-lg shadow-purple-200/50 scale-[1.02]'
+                            : 'bg-white hover:bg-gradient-to-br hover:from-slate-50 hover:to-white border-slate-200 hover:border-slate-300 hover:shadow-md'
+                            }`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`flex items-center justify-center w-8 h-8 rounded-lg text-xs font-black transition-all duration-200 ${isActive
+                              ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-md shadow-purple-500/30'
+                              : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 group-hover:from-slate-200 group-hover:to-slate-300'
+                              }`}>
+                              {qNum}
+                            </span>
+                            <span className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-colors ${isActive
+                              ? 'bg-purple-200 text-purple-700'
+                              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+                              }`}>
+                              {q.marks}M
+                            </span>
+                            {hasVisual && (
+                              <span className="w-2 h-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-sm" title="Has diagram/image" />
+                            )}
+                          </div>
+                          <div className="text-[11px] text-slate-700 line-clamp-2 leading-relaxed font-medium">
+                            <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Question List - Grouped View */}
+                {isGroupedView && (
+                  <div className="flex-1 overflow-y-auto scroller-hide p-3 space-y-3">
+                    {aggregatedDomains.map((domain) => {
+                      const isDomainExpanded = expandedDomainId === domain.name;
+                      const domainQuestions = domain.catQuestions || [];
+
+                      if (domainQuestions.length === 0) return null;
+
+                      return (
+                        <div key={domain.name} className="border-2 border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all">
+                          <button
+                            onClick={() => setExpandedDomainId(isDomainExpanded ? null : domain.name)}
+                            className="w-full flex flex-col gap-2 p-3 bg-gradient-to-r from-slate-50 via-white to-slate-50 hover:from-slate-100 hover:via-slate-50 hover:to-slate-100 transition-all duration-200"
+                          >
+                            <div className="flex items-start justify-between w-full gap-2">
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                {isDomainExpanded ? (
+                                  <ChevronDown size={16} className="text-purple-600 flex-shrink-0 mt-0.5" />
+                                ) : (
+                                  <ChevronRight size={16} className="text-slate-400 flex-shrink-0 mt-0.5" />
+                                )}
+                                <span className="text-[11px] font-black text-slate-900 uppercase tracking-wide leading-tight">
+                                  {domain.name}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <span className="px-2 py-1 bg-white border border-slate-200 text-slate-700 text-[9px] font-black rounded-lg shadow-sm">
+                                  {domainQuestions.length}Q
+                                </span>
+                                <span className="px-2 py-1 bg-white border border-slate-200 text-slate-700 text-[9px] font-black rounded-lg shadow-sm">
+                                  {domain.totalMarks}M
+                                </span>
+                                <span className={`px-2 py-1 text-[9px] font-bold rounded-lg shadow-sm ${domain.difficultyDNA === 'Hard' ? 'bg-gradient-to-br from-red-100 to-red-200 text-red-700 border border-red-300' :
+                                  domain.difficultyDNA === 'Moderate' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-700 border border-yellow-300' :
+                                    'bg-gradient-to-br from-green-100 to-green-200 text-green-700 border border-green-300'
+                                  }`}>
+                                  {domain.difficultyDNA}
+                                </span>
+                              </div>
                             </div>
-                            <span className="text-[10px] font-black text-white bg-accent-600 px-2.5 py-1 rounded-lg tracking-tighter shadow-lg shadow-accent-500/20">{Math.round(prob)}%</span>
-                          </div>
-                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner group-hover/item:h-2 transition-all">
-                            <div className="h-full bg-accent-500 shadow-[0_0_8px_rgba(20,184,166,0.5)] transition-all duration-1000 origin-left" style={{ width: `${prob}%` }} />
-                          </div>
+                          </button>
+                          {isDomainExpanded && (
+                            <div className="p-2.5 space-y-2 bg-gradient-to-b from-slate-50 to-white">
+                              {domainQuestions.map((q, i) => {
+                                const qId = q.id || `frag-${i}`;
+                                const isActive = (expandedQuestionId || questions[0]?.id) === qId;
+                                const qNumMatch = q.id?.match(/Q(\d+)/i);
+                                const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
+                                const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
+
+                                return (
+                                  <button
+                                    key={qId}
+                                    onClick={() => toggleQuestion(qId)}
+                                    className={`group w-full text-left p-2.5 rounded-xl transition-all duration-200 border-2 ${isActive
+                                      ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-300 shadow-lg shadow-purple-200/50'
+                                      : 'bg-white hover:bg-gradient-to-br hover:from-slate-50 hover:to-white border-slate-200 hover:border-slate-300 hover:shadow-md'
+                                      }`}
+                                  >
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                      <span className={`flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-black transition-all duration-200 ${isActive
+                                        ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-md shadow-purple-500/30'
+                                        : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 group-hover:from-slate-200 group-hover:to-slate-300'
+                                        }`}>
+                                        {qNum}
+                                      </span>
+                                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-lg transition-colors ${isActive
+                                        ? 'bg-purple-200 text-purple-700'
+                                        : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+                                        }`}>
+                                        {q.marks}M
+                                      </span>
+                                      {hasVisual && (
+                                        <span className="w-1.5 h-1.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-sm" title="Has diagram/image" />
+                                      )}
+                                    </div>
+                                    <div className="text-[11px] text-slate-700 line-clamp-2 leading-relaxed font-medium">
+                                      <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
-                </div>
-              </div>
-            </div>
+                )}
 
-            <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
-              <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest font-outfit italic">Strategic Analysis Matrix</h3>
-                <div className="px-4 py-1.5 bg-slate-900 text-white text-[9px] font-black uppercase rounded-lg tracking-[0.2em] shadow-lg">Fidelity Matrix v2.0</div>
-              </div>
-              <div className="overflow-x-auto scroller-hide">
-                <table className="w-full text-left border-separate border-spacing-0">
-                  <thead className="bg-white sticky top-0 z-10">
-                    <tr className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 font-outfit">
-                      <th className="px-8 py-5">Category Cluster</th>
-                      <th className="px-8 py-5">High-Yield Tracks</th>
-                      <th className="px-8 py-5 text-center">Marks</th>
-                      <th className="px-8 py-5">Cognitive DNA</th>
-                      <th className="px-8 py-5">Control Point</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {aggregatedDomains.map((cat, i) => (
-                      <tr key={i} className="hover:bg-slate-50 transition-colors group">
-                        <td className="px-8 py-6">
-                          <span className="text-[13px] font-black text-slate-900 uppercase tracking-tight font-outfit">{cat.name}</span>
-                        </td>
-                        <td className="px-8 py-6">
-                          <div className="flex flex-wrap gap-1.5">
-                            {cat.chapters.map((ch, ci) => (
-                              <span key={ci} className="text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-sm hover:border-accent-400 transition-all">{ch}</span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-8 py-6 text-center">
-                          <span className="text-[15px] font-black text-slate-900 italic font-outfit">{cat.totalMarks}</span>
-                        </td>
-                        <td className="px-8 py-6">
-                          <span className="px-3 py-1 bg-slate-900 shadow-md text-white rounded-lg text-[9px] font-black uppercase tracking-[0.15em]">{cat.dominantBlooms}</span>
-                        </td>
-                        <td className="px-8 py-6">
-                          <div className="flex flex-col gap-2 min-w-[140px]">
-                            <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                              <span>{cat.difficultyDNA}</span>
-                              <span className="text-slate-900">{Math.round((cat.avgDifficulty / 3) * 100)}%</span>
-                            </div>
-                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                              <div className={`h-full ${cat.difficultyDNA === 'Hard' ? 'bg-rose-500' : 'bg-accent-500'} transition-all shadow-[0_0_8px_rgba(20,184,166,0.4)]`} style={{ width: `${(cat.avgDifficulty / 3) * 100}%` }} />
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-          {activeTab === 'intelligence' && (
-            <div className="h-full overflow-y-auto scroller-hide p-6 grid grid-cols-12 gap-4">
-            <div className="col-span-12 xl:col-span-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-sm min-h-[500px] min-w-0 flex flex-col">
-              <div className="flex items-center justify-between mb-10">
-                <div>
-                  <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] font-outfit italic">
-                    {topicTrendData ? 'Domain Weightage Drift' : 'Syllabus Segment Weightage'}
-                  </h3>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                    {topicTrendData ? 'Multi-Paper Longitudinal Analysis' : 'Single Paper Conceptual Audit'}
-                  </p>
-                </div>
-                {topicTrendData && (
-                  <div className="flex flex-wrap gap-3 justify-end max-w-[400px]">
-                    {domainNames.map((name, i) => (
-                      <div key={i} className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter">{name}</span>
-                      </div>
-                    ))}
+                {/* Footer (hidden in Learning Journey vault) */}
+                {!showOnlyVault && (
+                  <div className="p-3 border-t border-slate-100">
+                    <button
+                      onClick={synthesizeAllSolutions}
+                      disabled={isSynthesizingAll}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-accent-600 text-white rounded-lg text-[10px] font-bold hover:bg-accent-700 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                      {isSynthesizingAll ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                      Sync All Solutions
+                    </button>
                   </div>
                 )}
               </div>
-              <div className="flex-1 w-full min-h-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  {topicTrendData ? (
-                    <LineChart data={topicTrendData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 9, fontWeight: 800 }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 9, fontWeight: 800 }} />
-                      <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }} />
-                      {domainNames.map((name, i) => (
-                        <Line
-                          key={name}
-                          type="monotone"
-                          dataKey={name}
-                          stroke={COLORS[i % COLORS.length]}
-                          strokeWidth={3}
-                          dot={{ r: 4, strokeWidth: 2, fill: '#white' }}
-                          activeDot={{ r: 6, strokeWidth: 0 }}
-                          animationDuration={1500}
-                        />
-                      ))}
-                    </LineChart>
-                  ) : (
-                    <BarChart data={aggregatedDomains.map(d => ({ name: d.name, marks: d.totalMarks }))}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 9, fontWeight: 800 }} />
-                      <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase' }} />
-                      <Bar dataKey="marks" fill={theme.color} radius={[8, 8, 0, 0]} barSize={48} />
-                    </BarChart>
-                  )}
-                </ResponsiveContainer>
-              </div>
-            </div>
 
-            <div className="col-span-12 xl:col-span-4 space-y-6">
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] mb-6 font-outfit italic">Cognitive Distribution</h3>
-                <div className="space-y-4">
-                  {(analysis.bloomsTaxonomy || []).map((bloom, i) => (
-                    <div key={i} className="flex flex-col gap-2.5">
-                      <div className="flex justify-between items-center text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                        <span>{bloom.name}</span>
-                        <span className="text-slate-900">{bloom.percentage}%</span>
-                      </div>
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                        <div className="h-full transition-all shadow-[0_0_8px_rgba(0,0,0,0.1)]" style={{ width: `${bloom.percentage}%`, backgroundColor: bloom.color || '#3b82f6' }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {analysis.chapterInsights && analysis.chapterInsights.length > 0 && (
-                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                  <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.2em] mb-6 font-outfit italic">Chapter High-Yields</h3>
-                  <div className="space-y-3">
-                    {analysis.chapterInsights.slice(0, 3).map((insight, i) => (
-                      <div key={i} className="p-4 bg-slate-50 border border-slate-100 rounded-xl hover:bg-white hover:border-accent-100 transition-all shadow-sm group">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[10px] font-black text-slate-900 uppercase tracking-wider">{insight.topic}</span>
-                          <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${insight.difficulty === 'Hard' ? 'bg-rose-100 text-rose-600' : 'bg-accent-100 text-accent-600'}`}>{insight.difficulty}</span>
-                        </div>
-                        <p className="text-[11px] font-bold text-slate-500 line-clamp-2 uppercase tracking-tight leading-relaxed group-hover:text-slate-700">{insight.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-xl overflow-hidden relative group">
-                <div className="absolute -bottom-4 -right-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Sigma size={100} /></div>
-                <h3 className="text-[11px] font-black text-accent-400 uppercase tracking-[0.2em] mb-3 relative z-10">Fidelity Assurance</h3>
-                <p className="text-[10px] font-bold text-slate-400 leading-relaxed uppercase relative z-10">All derivations and logic fragments have been cross-verified against official board rubrics.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'vault' && (
-          <div className="h-full flex overflow-hidden">
-            {/* Left Column - Questions List */}
-            <div className="w-80 bg-gradient-to-b from-slate-50 to-white border-r-2 border-slate-200 flex flex-col shrink-0 shadow-sm">
-              {/* Search & View Toggle */}
-              <div className="p-4 border-b-2 border-slate-200 space-y-3 bg-white/50">
-                <div className="relative group">
-                  <input
-                    type="text"
-                    placeholder="Search questions..."
-                    className="w-full px-3 py-2.5 text-xs font-medium border-2 border-slate-200 rounded-xl outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-100 transition-all pl-9 bg-white hover:border-slate-300 placeholder:text-slate-400"
-                  />
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-purple-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                {/* View Toggle */}
-                <div className="flex items-center gap-2 bg-gradient-to-r from-slate-100 to-slate-50 rounded-xl p-1 shadow-inner">
+              {/* Right Column - Question Details */}
+              <div className={`flex-1 overflow-y-auto scroller-hide p-4 md:p-6 ${mobileVaultView === 'list' ? 'hidden md:block' : 'block'}`}>
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 md:p-8">
+                  {/* Mobile Back Button */}
                   <button
-                    onClick={() => setIsGroupedView(false)}
-                    className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
-                      !isGroupedView
-                        ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50 scale-[1.02]'
-                        : 'text-slate-500 hover:text-slate-700'
-                    }`}
+                    onClick={() => setMobileVaultView('list')}
+                    className="md:hidden flex items-center gap-1.5 mb-6 text-slate-500 hover:text-slate-900 font-bold text-xs uppercase tracking-wider transition-colors"
                   >
-                    List
+                    <ChevronLeft size={16} /> Back to Questions
                   </button>
-                  <button
-                    onClick={() => setIsGroupedView(true)}
-                    className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
-                      isGroupedView
-                        ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50 scale-[1.02]'
-                        : 'text-slate-500 hover:text-slate-700'
-                    }`}
-                  >
-                    Group
-                  </button>
-                </div>
-              </div>
 
-              {/* Question List - Plain View */}
-              {!isGroupedView && (
-                <div className="flex-1 overflow-y-auto scroller-hide p-3 space-y-2">
-                  {questions.map((q, i) => {
-                    const qId = q.id || `frag-${i}`;
-                    const isActive = (expandedQuestionId || questions[0]?.id) === qId;
-                    const qNumMatch = q.id?.match(/Q(\d+)/i);
-                    const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
-                    const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
+                  {questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`)) ? (
+                    (() => {
+                      const selectedQ = questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`))!;
+                      const qId = selectedQ.id || 'frag-0';
 
-                    return (
-                      <button
-                        key={qId}
-                        onClick={() => toggleQuestion(qId)}
-                        className={`group w-full text-left p-3 rounded-xl transition-all duration-200 border-2 ${
-                          isActive
-                            ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-300 shadow-lg shadow-purple-200/50 scale-[1.02]'
-                            : 'bg-white hover:bg-gradient-to-br hover:from-slate-50 hover:to-white border-slate-200 hover:border-slate-300 hover:shadow-md'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className={`flex items-center justify-center w-8 h-8 rounded-lg text-xs font-black transition-all duration-200 ${
-                            isActive
-                              ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-md shadow-purple-500/30'
-                              : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 group-hover:from-slate-200 group-hover:to-slate-300'
-                          }`}>
-                            {qNum}
-                          </span>
-                          <span className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-colors ${
-                            isActive
-                              ? 'bg-purple-200 text-purple-700'
-                              : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-                          }`}>
-                            {q.marks}M
-                          </span>
-                          {hasVisual && (
-                            <span className="w-2 h-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-sm" title="Has diagram/image" />
-                          )}
-                        </div>
-                        <div className="text-[11px] text-slate-700 line-clamp-2 leading-relaxed font-medium">
-                          <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                      // Debug: Check if extractedImages is present on selectedQ
+                      console.debug('🔍 [VAULT DISPLAY DEBUG] Selected question:', {
+                        id: selectedQ.id,
+                        hasExtractedImages: !!selectedQ.extractedImages,
+                        extractedImagesCount: selectedQ.extractedImages?.length || 0,
+                        extractedImagesType: typeof selectedQ.extractedImages,
+                        hasVisualElement: selectedQ.hasVisualElement,
+                        questionKeys: Object.keys(selectedQ)
+                      });
 
-              {/* Question List - Grouped View */}
-              {isGroupedView && (
-                <div className="flex-1 overflow-y-auto scroller-hide p-3 space-y-3">
-                  {aggregatedDomains.map((domain) => {
-                    const isDomainExpanded = expandedDomainId === domain.name;
-                    const domainQuestions = domain.catQuestions || [];
-
-                    if (domainQuestions.length === 0) return null;
-
-                    return (
-                      <div key={domain.name} className="border-2 border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all">
-                        <button
-                          onClick={() => setExpandedDomainId(isDomainExpanded ? null : domain.name)}
-                          className="w-full flex flex-col gap-2 p-3 bg-gradient-to-r from-slate-50 via-white to-slate-50 hover:from-slate-100 hover:via-slate-50 hover:to-slate-100 transition-all duration-200"
-                        >
-                          <div className="flex items-start justify-between w-full gap-2">
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              {isDomainExpanded ? (
-                                <ChevronDown size={16} className="text-purple-600 flex-shrink-0 mt-0.5" />
-                              ) : (
-                                <ChevronRight size={16} className="text-slate-400 flex-shrink-0 mt-0.5" />
+                      return (
+                        <>
+                          {/* Single Row Question Header */}
+                          <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+                            {/* Left - Question Info */}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-bold text-slate-900">{selectedQ.id}</span>
+                              <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-semibold rounded">
+                                {selectedQ.marks}M
+                              </span>
+                              {selectedQ.difficulty && (
+                                <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${selectedQ.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                                  selectedQ.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                    'bg-green-100 text-green-700'
+                                  }`}>
+                                  {selectedQ.difficulty}
+                                </span>
                               )}
-                              <span className="text-[11px] font-black text-slate-900 uppercase tracking-wide leading-tight">
-                                {domain.name}
-                              </span>
+                              {selectedQ.blooms && (
+                                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-semibold rounded">
+                                  {selectedQ.blooms}
+                                </span>
+                              )}
+                              {selectedQ.topic && (
+                                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-medium rounded max-w-[200px] truncate">
+                                  {selectedQ.topic}
+                                </span>
+                              )}
+                              {(selectedQ.hasVisualElement || (selectedQ.extractedImages && selectedQ.extractedImages.length > 0)) && (
+                                <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-semibold rounded flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                                  Diagram
+                                </span>
+                              )}
                             </div>
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              <span className="px-2 py-1 bg-white border border-slate-200 text-slate-700 text-[9px] font-black rounded-lg shadow-sm">
-                                {domainQuestions.length}Q
-                              </span>
-                              <span className="px-2 py-1 bg-white border border-slate-200 text-slate-700 text-[9px] font-black rounded-lg shadow-sm">
-                                {domain.totalMarks}M
-                              </span>
-                              <span className={`px-2 py-1 text-[9px] font-bold rounded-lg shadow-sm ${
-                                domain.difficultyDNA === 'Hard' ? 'bg-gradient-to-br from-red-100 to-red-200 text-red-700 border border-red-300' :
-                                domain.difficultyDNA === 'Moderate' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-700 border border-yellow-300' :
-                                'bg-gradient-to-br from-green-100 to-green-200 text-green-700 border border-green-300'
-                              }`}>
-                                {domain.difficultyDNA}
-                              </span>
-                            </div>
-                          </div>
-                        </button>
-                        {isDomainExpanded && (
-                          <div className="p-2.5 space-y-2 bg-gradient-to-b from-slate-50 to-white">
-                            {domainQuestions.map((q, i) => {
-                              const qId = q.id || `frag-${i}`;
-                              const isActive = (expandedQuestionId || questions[0]?.id) === qId;
-                              const qNumMatch = q.id?.match(/Q(\d+)/i);
-                              const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
-                              const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
 
-                              return (
+                            {/* Right - Actions (hidden in Learning Journey vault) */}
+                            {!showOnlyVault && (
+                              <div className="flex items-center gap-1">
                                 <button
-                                  key={qId}
-                                  onClick={() => toggleQuestion(qId)}
-                                  className={`group w-full text-left p-2.5 rounded-xl transition-all duration-200 border-2 ${
-                                    isActive
-                                      ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-300 shadow-lg shadow-purple-200/50'
-                                      : 'bg-white hover:bg-gradient-to-br hover:from-slate-50 hover:to-white border-slate-200 hover:border-slate-300 hover:shadow-md'
-                                  }`}
+                                  onClick={() => synthesizeQuestionDetails(qId)}
+                                  disabled={isSynthesizingQuestion === qId}
+                                  className="p-2 text-slate-600 hover:bg-slate-100 hover:text-primary-600 rounded-lg transition-all disabled:opacity-50"
+                                  title="Generate/update solution"
                                 >
-                                  <div className="flex items-center gap-2 mb-1.5">
-                                    <span className={`flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-black transition-all duration-200 ${
-                                      isActive
-                                        ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-md shadow-purple-500/30'
-                                        : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 group-hover:from-slate-200 group-hover:to-slate-300'
-                                    }`}>
-                                      {qNum}
-                                    </span>
-                                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-lg transition-colors ${
-                                      isActive
-                                        ? 'bg-purple-200 text-purple-700'
-                                        : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-                                    }`}>
-                                      {q.marks}M
-                                    </span>
-                                    {hasVisual && (
-                                      <span className="w-1.5 h-1.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-sm" title="Has diagram/image" />
-                                    )}
-                                  </div>
-                                  <div className="text-[11px] text-slate-700 line-clamp-2 leading-relaxed font-medium">
-                                    <RenderWithMath text={q.text || ''} showOptions={false} serif={false} />
-                                  </div>
+                                  {isSynthesizingQuestion === qId ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
                                 </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Footer (hidden in Learning Journey vault) */}
-              {!showOnlyVault && (
-                <div className="p-3 border-t border-slate-100">
-                  <button
-                    onClick={synthesizeAllSolutions}
-                    disabled={isSynthesizingAll}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-accent-600 text-white rounded-lg text-[10px] font-bold hover:bg-accent-700 transition-all active:scale-95 disabled:opacity-50"
-                  >
-                    {isSynthesizingAll ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                    Sync All Solutions
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Right Column - Question Details */}
-            <div className="flex-1 overflow-y-auto scroller-hide p-6">
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8">
-              {questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`)) ? (
-                  (() => {
-                    const selectedQ = questions.find(q => (q.id || `frag-0`) === (expandedQuestionId || questions[0]?.id || `frag-0`))!;
-                    const qId = selectedQ.id || 'frag-0';
-
-                    // Debug: Check if extractedImages is present on selectedQ
-                    console.debug('🔍 [VAULT DISPLAY DEBUG] Selected question:', {
-                      id: selectedQ.id,
-                      hasExtractedImages: !!selectedQ.extractedImages,
-                      extractedImagesCount: selectedQ.extractedImages?.length || 0,
-                      extractedImagesType: typeof selectedQ.extractedImages,
-                      hasVisualElement: selectedQ.hasVisualElement,
-                      questionKeys: Object.keys(selectedQ)
-                    });
-
-                    return (
-                      <>
-                        {/* Single Row Question Header */}
-                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
-                          {/* Left - Question Info */}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-bold text-slate-900">{selectedQ.id}</span>
-                            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-semibold rounded">
-                              {selectedQ.marks}M
-                            </span>
-                            {selectedQ.difficulty && (
-                              <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${
-                                selectedQ.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
-                                selectedQ.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-green-100 text-green-700'
-                              }`}>
-                                {selectedQ.difficulty}
-                              </span>
-                            )}
-                            {selectedQ.blooms && (
-                              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-semibold rounded">
-                                {selectedQ.blooms}
-                              </span>
-                            )}
-                            {selectedQ.topic && (
-                              <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-medium rounded max-w-[200px] truncate">
-                                {selectedQ.topic}
-                              </span>
-                            )}
-                            {(selectedQ.hasVisualElement || (selectedQ.extractedImages && selectedQ.extractedImages.length > 0)) && (
-                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-semibold rounded flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-                                Diagram
-                              </span>
+                                <button
+                                  onClick={() => handleGenerateVisual(selectedQ.id)}
+                                  disabled={isGeneratingVisual !== null}
+                                  className="p-2 text-slate-600 hover:bg-slate-100 hover:text-purple-600 rounded-lg transition-all disabled:opacity-50"
+                                  title="Generate visual diagram"
+                                >
+                                  {isGeneratingVisual === selectedQ.id ? (
+                                    <Loader2 size={16} className="animate-spin text-purple-600" />
+                                  ) : (
+                                    <Sparkles size={16} />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={handleGenerateAllVisuals}
+                                  disabled={isGeneratingVisual !== null}
+                                  className="p-2 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-all disabled:opacity-50"
+                                  title="Generate all visuals"
+                                >
+                                  {(isGeneratingVisual !== null && isGeneratingVisual !== selectedQ.id) ? (
+                                    <Loader2 size={16} className="animate-spin text-yellow-500" />
+                                  ) : (
+                                    <Zap size={16} />
+                                  )}
+                                </button>
+                              </div>
                             )}
                           </div>
 
-                          {/* Right - Actions (hidden in Learning Journey vault) */}
-                          {!showOnlyVault && (
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => synthesizeQuestionDetails(qId)}
-                                disabled={isSynthesizingQuestion === qId}
-                                className="p-2 text-slate-600 hover:bg-slate-100 hover:text-primary-600 rounded-lg transition-all disabled:opacity-50"
-                                title="Generate/update solution"
-                              >
-                                {isSynthesizingQuestion === qId ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-                              </button>
-                              <button
-                                onClick={() => handleGenerateVisual(selectedQ.id)}
-                                disabled={isGeneratingVisual !== null}
-                                className="p-2 text-slate-600 hover:bg-slate-100 hover:text-purple-600 rounded-lg transition-all disabled:opacity-50"
-                                title="Generate visual diagram"
-                              >
-                                {isGeneratingVisual === selectedQ.id ? (
-                                  <Loader2 size={16} className="animate-spin text-purple-600" />
-                                ) : (
-                                  <Sparkles size={16} />
-                                )}
-                              </button>
-                              <button
-                                onClick={handleGenerateAllVisuals}
-                                disabled={isGeneratingVisual !== null}
-                                className="p-2 text-yellow-500 hover:bg-yellow-50 rounded-lg transition-all disabled:opacity-50"
-                                title="Generate all visuals"
-                              >
-                                {(isGeneratingVisual !== null && isGeneratingVisual !== selectedQ.id) ? (
-                                  <Loader2 size={16} className="animate-spin text-yellow-500" />
-                                ) : (
-                                  <Zap size={16} />
-                                )}
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Question Text */}
-                        <div className="text-base text-slate-900 leading-relaxed mb-6">
+                          {/* Question Text */}
+                          <div className="text-base text-slate-900 leading-relaxed mb-6">
                             <RenderWithMath text={selectedQ.text || ''} showOptions={false} serif={false} />
                           </div>
 
-                        {/* Options - Minimal */}
-                        {selectedQ.options && selectedQ.options.length > 0 && (
-                          <div className="grid grid-cols-2 gap-2 mb-6">
-                            {selectedQ.options.map((option: string, idx: number) => {
-                              const isCorrect = selectedQ.correctOptionIndex !== undefined && idx === selectedQ.correctOptionIndex;
-                              return (
-                                <div
-                                  key={idx}
-                                  className={`flex items-center gap-2 p-3 rounded-lg transition-colors relative ${
-                                    isCorrect
+                          {/* Options - Minimal */}
+                          {selectedQ.options && selectedQ.options.length > 0 && (
+                            <div className="grid grid-cols-2 gap-2 mb-6">
+                              {selectedQ.options.map((option: string, idx: number) => {
+                                const isCorrect = selectedQ.correctOptionIndex !== undefined && idx === selectedQ.correctOptionIndex;
+                                return (
+                                  <div
+                                    key={idx}
+                                    className={`flex items-center gap-2 p-3 rounded-lg transition-colors relative ${isCorrect
                                       ? 'bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-300'
                                       : 'bg-slate-50 hover:bg-slate-100'
-                                  }`}
-                                >
-                                  {isCorrect && (
-                                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-md">
-                                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                      </svg>
-                                    </div>
-                                  )}
-                                  <span className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold ${
-                                    isCorrect
+                                      }`}
+                                  >
+                                    {isCorrect && (
+                                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-md">
+                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                      </div>
+                                    )}
+                                    <span className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold ${isCorrect
                                       ? 'bg-emerald-600 text-white'
                                       : 'bg-slate-200 text-slate-700'
-                                  }`}>
-                                    {['A', 'B', 'C', 'D'][idx]}
-                                  </span>
-                                  <div className={`flex-1 text-sm ${isCorrect ? 'text-emerald-900 font-semibold' : 'text-slate-700'}`}>
-                                    <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-
-                        {/* Content Container with Tab Switcher */}
-                        <div className="relative border-t border-slate-200 pt-6">
-                          {/* Tab Switcher - Top Right of Content */}
-                          <div className="absolute top-0 right-0 flex items-center gap-1 bg-white px-2 py-1 -translate-y-1/2 rounded-lg border border-slate-200 shadow-sm">
-                            <button
-                              onClick={() => setIntelligenceBreakdownTab('logic')}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-                                intelligenceBreakdownTab === 'logic'
-                                  ? 'bg-slate-900 text-white shadow-sm'
-                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                              }`}
-                            >
-                              <span className="text-sm">📝</span>
-                              <span>Logic</span>
-                            </button>
-                            <button
-                              onClick={() => setIntelligenceBreakdownTab('visual')}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-                                intelligenceBreakdownTab === 'visual'
-                                  ? 'bg-slate-900 text-white shadow-sm'
-                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                              }`}
-                            >
-                              <span className="text-sm">👁</span>
-                              <span>Visual</span>
-                            </button>
-                          </div>
-
-                          {/* Content Tabs */}
-                          {intelligenceBreakdownTab === 'logic' ? (
-                            <div className="space-y-4">
-                            {/* Extracted Images - Minimal */}
-                            {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (
-                              <div className="mb-4">
-                                {selectedQ.extractedImages.map((imgData, idx) => (
-                                  <img
-                                    key={idx}
-                                    src={imgData}
-                                    alt={`Diagram ${idx + 1}`}
-                                    className="w-full rounded-lg border border-slate-200"
-                                  />
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Solution Steps - Minimal */}
-                            {isSynthesizingQuestion === qId ? (
-                              <div className="flex items-center justify-center py-8">
-                                <Loader2 className="animate-spin text-accent-500" size={20} />
-                              </div>
-                            ) : selectedQ.solutionSteps ? (
-                              <div className="space-y-3">
-                                {selectedQ.solutionSteps.map((step: string, sIdx: number) => {
-                                  const [title, content] = step.includes(':::') ? step.split(':::') : [`${sIdx + 1}`, step];
-                                  return (
-                                    <div key={sIdx} className="flex gap-3 pb-3 border-b border-slate-100 last:border-0">
-                                      <span className="flex-shrink-0 w-5 h-5 rounded bg-slate-100 text-slate-600 flex items-center justify-center text-[10px] font-semibold">
-                                        {sIdx + 1}
-                                      </span>
-                                      <div className="flex-1 text-sm text-slate-700 leading-relaxed">
-                                        <RenderWithMath text={content} showOptions={false} serif={false} />
-                                      </div>
+                                      }`}>
+                                      {['A', 'B', 'C', 'D'][idx]}
+                                    </span>
+                                    <div className={`flex-1 text-sm ${isCorrect ? 'text-emerald-900 font-semibold' : 'text-slate-700'}`}>
+                                      <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
                                     </div>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <div className="flex flex-col items-center justify-center py-8">
-                                <p className="text-xs text-slate-400 mb-3">No solution available</p>
-                                <button
-                                  onClick={() => synthesizeQuestionDetails(qId)}
-                                  className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-medium hover:bg-slate-800 transition-colors"
-                                >
-                                  Generate
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                          ) : (
-                            /* Visual Tab Content */
-                            <div className="space-y-4">
-                              {selectedQ.sketchSvg ? (
-                                <div
-                                  className="rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:border-accent-400 transition-colors"
-                                  onClick={() => setEnlargedVisualNote({ imageUrl: selectedQ.sketchSvg!, questionId: selectedQ.id })}
-                                >
-                                  <img
-                                    src={selectedQ.sketchSvg}
-                                    alt="Visual note"
-                                    className="w-full h-auto"
-                                  />
-                                </div>
-                              ) : (
-                                <div className="flex flex-col items-center justify-center py-8">
-                                  {isGeneratingVisual === selectedQ.id ? (
-                                    <>
-                                      <Loader2 size={20} className="text-accent-500 mb-2 animate-spin" />
-                                      <p className="text-xs text-slate-500">Generating...</p>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <p className="text-xs text-slate-400 mb-3">No visual note</p>
-                                      <button
-                                        onClick={() => handleGenerateVisual(selectedQ.id)}
-                                        disabled={isGeneratingVisual !== null}
-                                        className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
-                                      >
-                                        Generate
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              )}
+                                  </div>
+                                );
+                              })}
                             </div>
                           )}
-                        </div>
-                      </>
-                    );
-                  })()
-                ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-slate-300 italic">
-                  Select a fragment to synchronize intelligence...
-                </div>
-              )}
-            </div>
-          </div>
-          </div>
-        )}
 
-        {activeTab === 'trends' && scan && (
-          <PredictiveTrendsTab
-            examContext={scan.examContext || 'KCET'}
-            subject={scan.subject}
-            currentYear={scan.year}
-          />
-        )}
+                          {/* Content Container with Tab Switcher */}
+                          <div className="relative border-t border-slate-200 pt-6">
+                            {/* Tab Switcher - Top Right of Content */}
+                            <div className="absolute top-0 right-0 flex items-center gap-1 bg-white px-2 py-1 -translate-y-1/2 rounded-lg border border-slate-200 shadow-sm">
+                              <button
+                                onClick={() => setIntelligenceBreakdownTab('logic')}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${intelligenceBreakdownTab === 'logic'
+                                  ? 'bg-slate-900 text-white shadow-sm'
+                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                                  }`}
+                              >
+                                <span className="text-sm">📝</span>
+                                <span>Logic</span>
+                              </button>
+                              <button
+                                onClick={() => setIntelligenceBreakdownTab('visual')}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${intelligenceBreakdownTab === 'visual'
+                                  ? 'bg-slate-900 text-white shadow-sm'
+                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                                  }`}
+                              >
+                                <span className="text-sm">👁</span>
+                                <span>Visual</span>
+                              </button>
+                            </div>
+
+                            {/* Content Tabs */}
+                            {intelligenceBreakdownTab === 'logic' ? (
+                              <div className="space-y-4">
+                                {/* Extracted Images - Minimal */}
+                                {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (
+                                  <div className="mb-4">
+                                    {selectedQ.extractedImages.map((imgData, idx) => (
+                                      <img
+                                        key={idx}
+                                        src={imgData}
+                                        alt={`Diagram ${idx + 1}`}
+                                        className="w-full rounded-lg border border-slate-200"
+                                      />
+                                    ))}
+                                  </div>
+                                )}
+
+                                {/* Solution Steps - Minimal */}
+                                {isSynthesizingQuestion === qId ? (
+                                  <div className="flex items-center justify-center py-8">
+                                    <Loader2 className="animate-spin text-accent-500" size={20} />
+                                  </div>
+                                ) : selectedQ.solutionSteps ? (
+                                  <div className="space-y-3">
+                                    {selectedQ.solutionSteps.map((step: string, sIdx: number) => {
+                                      const [title, content] = step.includes(':::') ? step.split(':::') : [`${sIdx + 1}`, step];
+                                      return (
+                                        <div key={sIdx} className="flex gap-3 pb-3 border-b border-slate-100 last:border-0">
+                                          <span className="flex-shrink-0 w-5 h-5 rounded bg-slate-100 text-slate-600 flex items-center justify-center text-[10px] font-semibold">
+                                            {sIdx + 1}
+                                          </span>
+                                          <div className="flex-1 text-sm text-slate-700 leading-relaxed">
+                                            <RenderWithMath text={content} showOptions={false} serif={false} />
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center justify-center py-8">
+                                    <p className="text-xs text-slate-400 mb-3">No solution available</p>
+                                    <button
+                                      onClick={() => synthesizeQuestionDetails(qId)}
+                                      className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-medium hover:bg-slate-800 transition-colors"
+                                    >
+                                      Generate
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              /* Visual Tab Content */
+                              <div className="space-y-4">
+                                {selectedQ.sketchSvg ? (
+                                  <div
+                                    className="rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:border-accent-400 transition-colors"
+                                    onClick={() => setEnlargedVisualNote({ imageUrl: selectedQ.sketchSvg!, questionId: selectedQ.id })}
+                                  >
+                                    <img
+                                      src={selectedQ.sketchSvg}
+                                      alt="Visual note"
+                                      className="w-full h-auto"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center justify-center py-8">
+                                    {isGeneratingVisual === selectedQ.id ? (
+                                      <>
+                                        <Loader2 size={20} className="text-accent-500 mb-2 animate-spin" />
+                                        <p className="text-xs text-slate-500">Generating...</p>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <p className="text-xs text-slate-400 mb-3">No visual note</p>
+                                        <button
+                                          onClick={() => handleGenerateVisual(selectedQ.id)}
+                                          disabled={isGeneratingVisual !== null}
+                                          className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-medium hover:bg-slate-800 transition-colors disabled:opacity-50"
+                                        >
+                                          Generate
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16 text-slate-300 italic">
+                      Select a fragment to synchronize intelligence...
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'trends' && scan && (
+            <PredictiveTrendsTab
+              examContext={scan.examContext || 'KCET'}
+              subject={scan.subject}
+              currentYear={scan.year}
+            />
+          )}
         </div>
 
         {/* Enlarged Visual Note Modal */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, Sparkles, Map } from 'lucide-react';
+import { ChevronLeft, Sparkles, Map, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Subject, ExamContext } from '../../types';
 import { SUBJECT_CONFIGS } from '../../config/subjects';
@@ -82,8 +82,18 @@ const LearningJourneyHeader: React.FC<LearningJourneyHeaderProps> = ({
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
 
-            {/* Left Section: Back Button + Breadcrumbs/Identity */}
-            <div className="flex items-center gap-4 flex-1">
+            {/* Left Section: Mobile Menu + Back Button + Breadcrumbs/Identity */}
+            <div className="flex items-center gap-4 flex-1 w-full md:w-auto">
+
+              {/* Mobile Menu Trigger */}
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('openMobileMenu'))}
+                className="md:hidden shrink-0 w-10 h-10 flex items-center justify-center bg-white border border-slate-200 shadow-sm rounded-xl hover:bg-slate-50 transition-colors group"
+                aria-label="Open menu"
+              >
+                <Menu size={20} className="text-slate-600 group-hover:text-primary-600 transition-colors" />
+              </button>
+
               <AnimatePresence mode="wait">
                 {showBack && onBack && (
                   <motion.button
@@ -144,7 +154,7 @@ const LearningJourneyHeader: React.FC<LearningJourneyHeaderProps> = ({
             </div>
 
             {/* Right Section: Badges & Actions */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-3 shrink-0 ml-auto md:ml-0">
               {/* Universal Stats HUD */}
               {(mastery !== undefined) && (
                 <div className="flex items-center gap-3 mr-4">
@@ -155,7 +165,7 @@ const LearningJourneyHeader: React.FC<LearningJourneyHeaderProps> = ({
 
                   <div className="flex items-center gap-2">
                     {/* COMMAND pill */}
-                    <div className="hidden md:flex items-center gap-2.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <div className="flex items-center gap-2.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl shadow-sm">
                       <span className="text-lg font-bold text-slate-900 leading-none tracking-tight">
                         {Math.round((mastery * (accuracy ?? 100)) / 100)}%
                       </span>

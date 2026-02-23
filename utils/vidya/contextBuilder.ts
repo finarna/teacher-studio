@@ -490,10 +490,10 @@ export function buildContextPayload(appContext: VidyaAppContext & {
   // Try to get from cache
   const cached = getCachedContext(cacheKey);
   if (cached) {
-    const duration = performance.now() - startTime;
-    console.debug('[Performance] Context retrieved from cache', {
-      duration: `${duration.toFixed(2)}ms`,
-    });
+    // const duration = performance.now() - startTime;
+    // console.debug('[Performance] Context retrieved from cache', {
+    //   duration: `${duration.toFixed(2)}ms`,
+    // });
     return cached;
   }
 
