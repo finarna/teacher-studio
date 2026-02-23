@@ -3,8 +3,8 @@
  * Centralized API URL management for frontend API calls
  */
 
-// Use environment variable or fallback to localhost for development
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:9001';
+// Use environment variable or empty string (relative URLs work via vite proxy)
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 /**
  * Helper function to make authenticated API calls

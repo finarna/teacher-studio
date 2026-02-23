@@ -1601,11 +1601,6 @@ app.get('/api/learning-journey/weak-topics', async (req, res) => {
  */
 app.post('/api/learning-journey/create-custom-test', createCustomTest);
 
-/**
- * POST /api/learning-journey/count-available-questions
- * Count available database questions matching criteria
- */
-app.post('/api/learning-journey/count-available-questions', countAvailableQuestions);
 
 /**
  * GET /api/learning-journey/generation-progress/:progressId
