@@ -367,7 +367,13 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
         currentTestResponses: responses,
         isLoading: false
       }));
-      setViewHistory(prev => [...prev, 'test_results']);
+      // Replace 'test' in history with 'test_results' so back goes to the
+      // originating page (mock_builder / topic_detail), not back into the test
+      setViewHistory(prev => {
+        const newHistory = [...prev];
+        newHistory[newHistory.length - 1] = 'test_results';
+        return newHistory;
+      });
     } catch (error) {
       setState(prev => ({
         ...prev,

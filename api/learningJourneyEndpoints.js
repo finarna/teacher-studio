@@ -75,23 +75,20 @@ async function getOrCreateAIScan(supabase, subject, examContext, userId) {
   return newScan.id;
 }
 
-function updateProgress(attemptId, step, message, percentage) {
-  generationProgress.set(attemptId, {
-    step,
-    message,
-    percentage,
-    timestamp: Date.now()
-  });
+function updateProgress(progressId, step, message, percentage, result = null) {
+  const entry = { step, message, percentage, timestamp: Date.now() };
+  if (result) entry.result = result;
+  generationProgress.set(progressId, entry);
 
   // Auto-cleanup after 5 minutes
   setTimeout(() => {
-    generationProgress.delete(attemptId);
+    generationProgress.delete(progressId);
   }, 5 * 60 * 1000);
 }
 
 export async function getGenerationProgress(req, res) {
-  const { attemptId } = req.params;
-  const progress = generationProgress.get(attemptId) || {
+  const { progressId } = req.params;
+  const progress = generationProgress.get(progressId) || {
     step: 'unknown',
     message: 'Progress not found',
     percentage: 0
@@ -1180,44 +1177,16 @@ export async function getWeakTopics(req, res) {
 }
 
 /**
- * POST /api/learning-journey/create-custom-test
- * Generate a custom mock test with specified configuration
+ * Background worker: runs AI generation + DB writes after the HTTP response is sent.
+ * Stores the final result (or error) in generationProgress so the client can poll.
  */
-export async function createCustomTest(req, res) {
+async function generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId }) {
+  // Check if AI generation is enabled (requires GEMINI_API_KEY)
+  let useAIGeneration = !!(process.env.GEMINI_API_KEY && examContext && subject);
+
+  let finalQuestions = [];
+
   try {
-    const {
-      userId,
-      testName,
-      subject,
-      examContext,
-      topicIds,
-      questionCount,
-      difficultyMix,
-      durationMinutes,
-      saveAsTemplate
-    } = req.body;
-
-    if (!userId || userId === 'anonymous') {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-
-    // Validate difficulty mix
-    const total = difficultyMix.easy + difficultyMix.moderate + difficultyMix.hard;
-    if (total !== 100) {
-      return res.status(400).json({ error: 'Difficulty mix must total 100%' });
-    }
-
-    console.log(`🎯 Creating custom test "${testName}" - ${questionCount} questions`);
-
-    // Generate temporary attempt ID for progress tracking
-    const { randomUUID } = await import('crypto');
-    const progressId = randomUUID();
-
-    // Check if AI generation is enabled (requires GEMINI_API_KEY)
-    let useAIGeneration = !!(process.env.GEMINI_API_KEY && examContext && subject);
-
-    let finalQuestions = [];
-
     if (useAIGeneration) {
       // ✨ AI-powered question generation (always use AI if available)
       console.log('🤖 Using AI Question Generator for custom test...');
@@ -1361,7 +1330,7 @@ export async function createCustomTest(req, res) {
       const scanIds = scans?.map(s => s.id) || [];
 
       if (scanIds.length === 0) {
-        return res.status(400).json({ error: 'No questions available for this subject' });
+        throw new Error('No questions available for this subject');
       }
 
       // Sample questions by difficulty
@@ -1416,9 +1385,7 @@ export async function createCustomTest(req, res) {
       }
 
       if (selectedQuestions.length < questionCount) {
-        return res.status(400).json({
-          error: `Insufficient questions available. Found ${selectedQuestions.length}, needed ${questionCount}`
-        });
+        throw new Error(`Insufficient questions available. Found ${selectedQuestions.length}, needed ${questionCount}`);
       }
 
       // Shuffle all questions together
@@ -1475,9 +1442,6 @@ export async function createCustomTest(req, res) {
       }
     }
 
-    // Mark progress as complete
-    updateProgress(progressId, 'complete', '✅ Test ready! Redirecting...', 100);
-
     // Map database fields to camelCase for frontend
     const mappedAttempt = {
       id: attempt.id,
@@ -1496,21 +1460,69 @@ export async function createCustomTest(req, res) {
       testConfig: attempt.test_config
     };
 
-    res.json({
-      success: true,
-      data: {
-        attempt: mappedAttempt,
-        questions: finalQuestions,
-        templateId,
-        progressId  // Return progressId so client can poll for updates
-      }
+    // Store result in progress map so the polling client can retrieve it
+    updateProgress(progressId, 'complete', '✅ Test ready! Redirecting...', 100, {
+      attempt: mappedAttempt,
+      questions: finalQuestions,
+      templateId
     });
+
+    console.log(`✅ Background generation complete for progressId=${progressId}`);
+  } catch (error) {
+    console.error('❌ Error in background test generation:', error);
+    updateProgress(progressId, 'error', error.message || 'Failed to create test', 0);
+  }
+}
+
+/**
+ * POST /api/learning-journey/create-custom-test
+ * Validates the request, responds immediately with a progressId, then
+ * runs AI generation + DB writes asynchronously to avoid gateway timeouts.
+ */
+export async function createCustomTest(req, res) {
+  try {
+    const {
+      userId,
+      testName,
+      subject,
+      examContext,
+      topicIds,
+      questionCount,
+      difficultyMix,
+      durationMinutes,
+      saveAsTemplate
+    } = req.body;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const total = (difficultyMix?.easy || 0) + (difficultyMix?.moderate || 0) + (difficultyMix?.hard || 0);
+    if (total !== 100) {
+      return res.status(400).json({ error: 'Difficulty mix must total 100%' });
+    }
+
+    console.log(`🎯 Creating custom test "${testName}" - ${questionCount} questions`);
+
+    const { randomUUID } = await import('crypto');
+    const progressId = randomUUID();
+
+    // Respond immediately — prevents 504 gateway timeout during AI generation
+    updateProgress(progressId, 'analyzing', '🎯 Analyzing your performance and past exam patterns...', 5);
+    res.json({ success: true, data: { progressId } });
+
+    // Fire-and-forget background generation
+    generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId })
+      .catch(err => {
+        console.error('❌ Unhandled background generation error:', err);
+        updateProgress(progressId, 'error', err.message || 'Failed to create test', 0);
+      });
+
   } catch (error) {
     console.error('❌ Error creating custom test:', error);
-    res.status(500).json({
-      error: 'Failed to create custom test',
-      message: error.message
-    });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to create custom test', message: error.message });
+    }
   }
 }
 

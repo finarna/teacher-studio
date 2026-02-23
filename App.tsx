@@ -267,7 +267,7 @@ const AppContent: React.FC = () => {
 
         // Add timeout to prevent hanging
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
         try {
           const response = await fetch(getApiUrl('/api/subscription/status'), {

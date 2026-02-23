@@ -283,8 +283,8 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     try {
       const url = getApiUrl('/api/learning-journey/create-custom-test');
 
-      // Start the test creation (this will take time)
-      const createPromise = fetch(url, {
+      // POST responds immediately with a progressId — no 504 timeout
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -301,47 +301,62 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
         })
       });
 
-      // Poll for progress updates
-      const pollProgress = async (progressId: string) => {
-        try {
-          const progressUrl = getApiUrl(`/api/learning-journey/generation-progress/${progressId}`);
-          const progressRes = await fetch(progressUrl, { credentials: 'include' });
-
-          if (progressRes.ok) {
-            const progressData = await progressRes.json();
-            setProgressMessage(progressData.message || 'Generating questions...');
-            setProgressPercentage(progressData.percentage || 0);
-          }
-        } catch (err) {
-          // Silently fail - progress is nice-to-have
-          console.warn('Progress poll failed:', err);
-        }
-      };
-
-      // Wait for the creation response
-      const response = await createPromise;
-
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ error: 'Failed to create test' }));
         throw new Error(errorData.error || 'Failed to create test');
       }
 
       const result = await response.json();
-      const { attempt, questions, progressId } = result.data;
+      const { progressId } = result.data;
 
-      // If we got a progressId, start polling (for any future slow operations)
-      if (progressId) {
-        pollInterval = setInterval(() => pollProgress(progressId), 1000);
+      if (!progressId) {
+        throw new Error('No progress ID returned from server');
       }
 
-      // Test is ready!
-      setProgressMessage('✅ Test ready! Redirecting...');
-      setProgressPercentage(100);
+      // Poll the progress endpoint until generation is complete
+      await new Promise<void>((resolve, reject) => {
+        // Safety timeout: 5 minutes
+        const safetyTimer = setTimeout(() => {
+          if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+          }
+          reject(new Error('Test generation timed out. Please try again.'));
+        }, 5 * 60 * 1000);
 
-      // Small delay so user sees completion
-      setTimeout(() => {
-        onStartTest(attempt, questions);
-      }, 500);
+        pollInterval = setInterval(async () => {
+          try {
+            const progressUrl = getApiUrl(`/api/learning-journey/generation-progress/${progressId}`);
+            const progressRes = await fetch(progressUrl, { credentials: 'include' });
+
+            if (!progressRes.ok) return; // transient error, keep polling
+
+            const progressData = await progressRes.json();
+            setProgressMessage(progressData.message || 'Generating questions...');
+            setProgressPercentage(progressData.percentage || 0);
+
+            if (progressData.step === 'complete' && progressData.result) {
+              clearTimeout(safetyTimer);
+              clearInterval(pollInterval!);
+              pollInterval = null;
+              setProgressMessage('✅ Test ready! Redirecting...');
+              setProgressPercentage(100);
+              setTimeout(() => {
+                onStartTest(progressData.result.attempt, progressData.result.questions);
+              }, 500);
+              resolve();
+            } else if (progressData.step === 'error') {
+              clearTimeout(safetyTimer);
+              clearInterval(pollInterval!);
+              pollInterval = null;
+              reject(new Error(progressData.message || 'Test generation failed'));
+            }
+          } catch (err) {
+            // Transient poll failure — keep going
+            console.warn('Progress poll failed:', err);
+          }
+        }, 1500);
+      });
 
     } catch (error) {
       console.error('Error creating test:', error);

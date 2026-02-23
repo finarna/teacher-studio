@@ -101,7 +101,8 @@
 
 /* Premium Shadows */
 .shadow-premium {
-    @apply shadow-[0_8px_30px_rgb(0, 0, 0, 0.04)] border-slate-200/50;
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.04);
+    @apply border-slate-200/50;
 }
 
 /* Animations */
