@@ -10,10 +10,9 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       allowedHosts: ['learn.dataziv.com'],
       hmr: {
-        overlay: false, // Disable error overlay
+        overlay: false,
       },
       watch: {
-        // Reduce file watching to prevent auto-refresh
         ignored: ['**/node_modules/**', '**/dist/**', '**/.git/**', '**/scripts/**', '**/migrations/**']
       },
       proxy: {
@@ -22,6 +21,20 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
       },
+    },
+    preview: {
+      port: 9000,
+      host: '0.0.0.0',
+      allowedHosts: ['learn.dataziv.com'],
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:9001',
+          changeOrigin: true,
+        },
+      },
+    },
+    build: {
+      sourcemap: false,
     },
     plugins: [react()],
     define: {
