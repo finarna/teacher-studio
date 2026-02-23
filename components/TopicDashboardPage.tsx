@@ -83,6 +83,60 @@ const getStageConfig = (stage: string) => {
   }
 };
 
+const getTopicVisual = (topicName: string) => {
+  const name = topicName.toLowerCase();
+
+  // Math
+  if (name.includes('differential equation')) return 'dy/dx';
+  if (name.includes('integrals') || name.includes('integration') || name.includes('area under')) return '∫';
+  if (name.includes('continuity') || name.includes('limit')) return 'lim';
+  if (name.includes('relation') || name.includes('function') || name.includes('inverse trig')) return 'f(x)';
+  if (name.includes('determinant')) return '|A|';
+  if (name.includes('matrix') || name.includes('matrices')) return '[M]';
+  if (name.includes('linear programming') || name.includes('lpp')) return 'Max Z';
+  if (name.includes('vector')) return 'v⃗';
+  if (name.includes('3d') || name.includes('three dimensional')) return 'x,y,z';
+  if (name.includes('probability')) return 'P(E)';
+  if (name.includes('trigonometr')) return 'sin θ';
+  if (name.includes('derivative') || name.includes('differentiation')) return "f'(x)";
+  if (name.includes('application of derivative')) return 'df/dt';
+
+  // Physics
+  if (name.includes('electrostatic') || name.includes('charge')) return 'q';
+  if (name.includes('current') || name.includes('electricity')) return 'V=IR';
+  if (name.includes('magnet')) return 'B';
+  if (name.includes('optics') || name.includes('wave')) return 'λ';
+  if (name.includes('thermodynamics')) return 'ΔT';
+  if (name.includes('kinematics') || name.includes('motion')) return 'v, a';
+  if (name.includes('nuclei') || name.includes('atom')) return '⚛';
+  if (name.includes('semiconductor')) return 'p-n';
+  if (name.includes('alternating current') || name.includes('ac ')) return 'I_rms';
+
+  // Chem
+  if (name.includes('organic') || name.includes('carbon') || name.includes('haloalkane') || name.includes('alcohol') || name.includes('aldehyde') || name.includes('amine')) return 'C-C';
+  if (name.includes('kinetics')) return 'k[A]';
+  if (name.includes('electrochemistry')) return 'E°';
+  if (name.includes('solution')) return 'M';
+  if (name.includes('solid state')) return 'BCC';
+  if (name.includes('equilibrium')) return '⇌';
+  if (name.includes('coordination')) return '[ML]';
+  if (name.includes('p-block') || name.includes('d-block') || name.includes('f-block')) return 'p,d,f';
+
+  // Bio
+  if (name.includes('genetics') || name.includes('dna') || name.includes('inheritance') || name.includes('molecular')) return 'DNA';
+  if (name.includes('cell')) return '⬡';
+  if (name.includes('plant') || name.includes('photosynthesis')) return '🌿';
+  if (name.includes('human physiology') || name.includes('reproduction')) return '♥';
+  if (name.includes('ecology') || name.includes('environment')) return '🌱';
+  if (name.includes('evolution')) return '🐒';
+  if (name.includes('biotech')) return '✂️';
+
+  // Generic fallback
+  const firstWord = topicName.split(' ')[0] || '';
+  if (firstWord.length > 3) return firstWord.substring(0, 3).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+};
+
 const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
   subject,
   examContext,
@@ -331,7 +385,9 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                             />
                           </svg>
                           <div className={`absolute inset-0 flex items-center justify-center w-14 h-14 rounded-full ${status.color} transform group-hover:scale-90 transition-transform`}>
-                            <ProgressIcon size={22} />
+                            <span className="font-black text-[15px] tracking-tight text-center mt-0.5" style={{ fontFamily: 'var(--font-outfit)' }}>
+                              {getTopicVisual(topic.topicName)}
+                            </span>
                           </div>
                         </div>
                         <div className="text-right">
@@ -409,7 +465,9 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                         />
                       </svg>
                       <div className={`absolute inset-0 flex items-center justify-center w-12 h-12 rounded-full ${status.color} bg-transparent`}>
-                        <ProgressIcon size={18} />
+                        <span className="font-black text-[13px] tracking-tight text-center mt-0.5" style={{ fontFamily: 'var(--font-outfit)' }}>
+                          {getTopicVisual(topic.topicName)}
+                        </span>
                       </div>
                     </div>
 
