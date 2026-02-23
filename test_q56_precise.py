@@ -10,7 +10,7 @@ from io import BytesIO
 from google import generativeai as genai
 
 PDF_PATH = "/Users/apple/Downloads/CETPAPERS/03-KCET-Board-Exam-Maths-16-06-2022-M1.pdf"
-API_KEY = "AIzaSyCuFj4MCIL_AoQDf0HAoqtQGPdbL5WoCw8"
+API_KEY = os.environ["GEMINI_API_KEY"]
 
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-2.0-flash-exp',

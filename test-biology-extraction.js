@@ -6,7 +6,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
 
-const GEMINI_API_KEY = 'AIzaSyAKqwcOh0O5C3mi172QhCkPeaqn-8zAzdY';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const PDF_PATH = '/Users/apple/Downloads/KCET_2024_Biology_Question_Paper_da1769df106b3ea9e4d48557d5e777d3.pdf';
 
 // Read PDF and convert to base64 (mimics browser FileReader)
