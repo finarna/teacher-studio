@@ -421,7 +421,7 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                             />
                           </svg>
                           <div className={`absolute inset-0 flex items-center justify-center w-14 h-14 rounded-full ${status.color} transform group-hover:scale-90 transition-transform`}>
-                            <span className="font-black text-[15px] tracking-tight text-center mt-0.5" style={{ fontFamily: 'var(--font-outfit)' }}>
+                            <span className="font-black text-[24px] tracking-tight text-center mt-0.5" style={{ fontFamily: 'var(--font-outfit)' }}>
                               {getTopicVisual(topic.topicName)}
                             </span>
                           </div>
@@ -501,7 +501,7 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                         />
                       </svg>
                       <div className={`absolute inset-0 flex items-center justify-center w-12 h-12 rounded-full ${status.color} bg-transparent`}>
-                        <span className="font-black text-[13px] tracking-tight text-center mt-0.5" style={{ fontFamily: 'var(--font-outfit)' }}>
+                        <span className="font-black text-[20px] tracking-tight text-center mt-0.5" style={{ fontFamily: 'var(--font-outfit)' }}>
                           {getTopicVisual(topic.topicName)}
                         </span>
                       </div>
