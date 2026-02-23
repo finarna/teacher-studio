@@ -100,17 +100,37 @@ const getTopicVisual = (topicName: string) => {
   if (name.includes('trigonometr')) return 'sin θ';
   if (name.includes('derivative') || name.includes('differentiation')) return "f'(x)";
   if (name.includes('application of derivative')) return 'df/dt';
+  if (name.includes('complex number')) return 'a+ib';
+  if (name.includes('quadratic equation')) return 'x²';
+  if (name.includes('sequence') || name.includes('series') || name.includes('progression')) return '∑n';
+  if (name.includes('binomial')) return '(x+y)ⁿ';
+  if (name.includes('permutation') || name.includes('combination')) return 'nPr';
+  if (name.includes('straight line')) return 'y=mx';
+  if (name.includes('conic') || name.includes('parabola') || name.includes('ellipse')) return 'e<1';
+  if (name.includes('statistics')) return 'σ²';
+  if (name.includes('reasoning') || name.includes('logic')) return 'p⇒q';
+  if (name.includes('set')) return 'A∪B';
+  if (name.includes('circle')) return 'x²+y²';
 
   // Physics
-  if (name.includes('electrostatic') || name.includes('charge')) return 'q';
+  if (name.includes('electrostatic') || name.includes('charge') || name.includes('capacit')) return 'q';
   if (name.includes('current') || name.includes('electricity')) return 'V=IR';
   if (name.includes('magnet')) return 'B';
   if (name.includes('optics') || name.includes('wave')) return 'λ';
   if (name.includes('thermodynamics')) return 'ΔT';
-  if (name.includes('kinematics') || name.includes('motion')) return 'v, a';
+  if (name.includes('kinematics') || name.includes('motion in a plane') || name.includes('motion in a straight')) return 'v, a';
+  if (name.includes('law of motion') || name.includes('newton')) return 'F=ma';
+  if (name.includes('work') || name.includes('energy') || name.includes('power')) return 'W=Fd';
+  if (name.includes('rotational') || name.includes('particle')) return 'τ=Iα';
+  if (name.includes('gravitation')) return 'GM/r²';
+  if (name.includes('mechanical property') || name.includes('solid') || name.includes('fluid')) return 'F/A';
+  if (name.includes('oscillation')) return 'ωt';
   if (name.includes('nuclei') || name.includes('atom')) return '⚛';
   if (name.includes('semiconductor')) return 'p-n';
   if (name.includes('alternating current') || name.includes('ac ')) return 'I_rms';
+  if (name.includes('electromagnetic induction') || name.includes('emi')) return 'dΦ/dt';
+  if (name.includes('dual nature') || name.includes('radiation')) return 'E=hν';
+  if (name.includes('measurement') || name.includes('unit')) return '[MLT]';
 
   // Chem
   if (name.includes('organic') || name.includes('carbon') || name.includes('haloalkane') || name.includes('alcohol') || name.includes('aldehyde') || name.includes('amine')) return 'C-C';
@@ -121,6 +141,20 @@ const getTopicVisual = (topicName: string) => {
   if (name.includes('equilibrium')) return '⇌';
   if (name.includes('coordination')) return '[ML]';
   if (name.includes('p-block') || name.includes('d-block') || name.includes('f-block')) return 'p,d,f';
+  if (name.includes('structure of atom') || name.includes('atomic')) return '1s²';
+  if (name.includes('classification of element') || name.includes('periodic')) return 'Na→Ar';
+  if (name.includes('chemical bonding')) return 'σ,π';
+  if (name.includes('states of matter')) return 'PV=nRT';
+  if (name.includes('thermodynamics')) return 'ΔG';
+  if (name.includes('redox')) return 'e⁻';
+  if (name.includes('hydrogen')) return 'H₂';
+  if (name.includes('s-block')) return 's²';
+  if (name.includes('hydrocarbon')) return 'C-H';
+  if (name.includes('environmental')) return 'O₃';
+  if (name.includes('surface chemistry')) return 'x/m';
+  if (name.includes('isolation') || name.includes('metallurgy')) return 'ΔG°';
+  if (name.includes('biomolecule')) return 'CHO';
+  if (name.includes('polymer')) return '[-M-]n';
 
   // Bio
   if (name.includes('genetics') || name.includes('dna') || name.includes('inheritance') || name.includes('molecular')) return 'DNA';
@@ -130,6 +164,8 @@ const getTopicVisual = (topicName: string) => {
   if (name.includes('ecology') || name.includes('environment')) return '🌱';
   if (name.includes('evolution')) return '🐒';
   if (name.includes('biotech')) return '✂️';
+  if (name.includes('diversity') || name.includes('living world')) return '🦁';
+  if (name.includes('structural organization') || name.includes('animal') || name.includes('tissue')) return '🦴';
 
   // Generic fallback
   const firstWord = topicName.split(' ')[0] || '';
