@@ -1241,7 +1241,18 @@ export async function createCustomTest(req, res) {
           console.log(`🎯 Selected topic names:`, selectedTopicNames);
         }
 
-        // Load context from database (exam config, historical patterns, student profile)
+        // ==========================================================================================
+        // 🧠 AI CONTEXT PIPELINE: 5 LAYERS OF ANALYTICAL DATA INGESTION
+        // ==========================================================================================
+        // This function dynamically queries the database to build a complete intelligence profile
+        // for the AI generation prompt, so the model isn't "guessing", but mathematically building
+        // a tailored test. It fetches:
+        // 1. loadExamConfiguration: Official duration, rules, and marking schemes (CBSE/NEET etc.)
+        // 2. loadTopicMetadata: Syllabus structure, prerequisites, and Bloom's difficulty logic.
+        // 3. loadHistoricalPatterns: Past 5 years of exam questions, topic weights, & difficulty distributions.
+        // 4. loadStudentProfile: The user's specific accuracy bounds, mastery scores, and time spent.
+        // 5. loadGenerationRules: Algorithm weighting (e.g., 40% History matching, 30% User Weakness matching).
+        // ==========================================================================================
         const context = await loadGenerationContext(
           supabaseAdmin,
           userId,
