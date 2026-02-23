@@ -43,6 +43,7 @@ import {
   getSubjectProgress,
   getTrajectoryProgress,
   createCustomTest,
+  countAvailableQuestions,
   getGenerationProgress
 } from './api/learningJourneyEndpoints.js';
 import {

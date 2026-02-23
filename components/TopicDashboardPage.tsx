@@ -86,91 +86,207 @@ const getStageConfig = (stage: string) => {
 const getTopicVisual = (topicName: string) => {
   const name = topicName.toLowerCase();
 
-  // Math
+  // ========== MATHEMATICS ==========
+
+  // Calculus
   if (name.includes('differential equation')) return 'dy/dx';
-  if (name.includes('integrals') || name.includes('integration') || name.includes('area under')) return '∫';
-  if (name.includes('continuity') || name.includes('limit')) return 'lim';
-  if (name.includes('relation') || name.includes('function') || name.includes('inverse trig')) return 'f(x)';
-  if (name.includes('determinant')) return '|A|';
-  if (name.includes('matrix') || name.includes('matrices')) return '[M]';
-  if (name.includes('linear programming') || name.includes('lpp')) return 'Max Z';
-  if (name.includes('vector')) return 'v⃗';
-  if (name.includes('3d') || name.includes('three dimensional')) return 'x,y,z';
-  if (name.includes('probability')) return 'P(E)';
-  if (name.includes('trigonometr')) return 'sin θ';
+  if (name.includes('integrals') || name.includes('integration')) return '∫';
+  if (name.includes('application of integral')) return '∫ₐᵇ';
+  if (name.includes('area under')) return '∫A';
+  if (name.includes('continuity')) return 'ε-δ';
+  if (name.includes('limit')) return 'lim';
   if (name.includes('derivative') || name.includes('differentiation')) return "f'(x)";
-  if (name.includes('application of derivative')) return 'df/dt';
-  if (name.includes('complex number')) return 'a+ib';
-  if (name.includes('quadratic equation')) return 'x²';
-  if (name.includes('sequence') || name.includes('series') || name.includes('progression')) return '∑n';
-  if (name.includes('binomial')) return '(x+y)ⁿ';
-  if (name.includes('permutation') || name.includes('combination')) return 'nPr';
-  if (name.includes('straight line')) return 'y=mx';
-  if (name.includes('conic') || name.includes('parabola') || name.includes('ellipse')) return 'e<1';
-  if (name.includes('statistics')) return 'σ²';
+  if (name.includes('application of derivative')) return 'dy/dx';
+  if (name.includes('mean value')) return "f'(c)";
+
+  // Algebra
+  if (name.includes('determinant')) return '|A|';
+  if (name.includes('matrix') || name.includes('matrices')) return '[A]';
+  if (name.includes('linear programming') || name.includes('lpp')) return 'max Z';
+  if (name.includes('complex number')) return 'z=a+ib';
+  if (name.includes('quadratic')) return 'ax²+b';
+  if (name.includes('sequence') || name.includes('progression') || name.includes('series')) return 'Σaₙ';
+  if (name.includes('binomial')) return 'ⁿCᵣ';
+  if (name.includes('permutation')) return 'ⁿPᵣ';
+  if (name.includes('combination')) return 'ⁿCᵣ';
+  if (name.includes('logarithm')) return 'log x';
+  if (name.includes('inequalit')) return '≤,≥';
+
+  // Geometry & Trigonometry
+  if (name.includes('vector')) return 'v⃗';
+  if (name.includes('3d') || name.includes('three dimensional')) return '(x,y,z)';
+  if (name.includes('straight line')) return 'y=mx+c';
+  if (name.includes('conic')) return 'x²/a²';
+  if (name.includes('parabola')) return 'y²=4ax';
+  if (name.includes('ellipse')) return 'x²+y²';
+  if (name.includes('hyperbola')) return 'xy=c²';
+  if (name.includes('circle')) return 'x²+y²=r²';
+  if (name.includes('trigonometr')) return 'sin θ';
+  if (name.includes('inverse trig')) return 'sin⁻¹';
+
+  // Probability & Statistics
+  if (name.includes('probability')) return 'P(A∩B)';
+  if (name.includes('statistics')) return 'μ,σ';
+  if (name.includes('mean') || name.includes('median')) return 'x̄';
+  if (name.includes('variance')) return 'σ²';
+
+  // Logic & Sets
+  if (name.includes('relation') || name.includes('function')) return 'f(x)';
   if (name.includes('reasoning') || name.includes('logic')) return 'p⇒q';
   if (name.includes('set')) return 'A∪B';
-  if (name.includes('circle')) return 'x²+y²';
 
-  // Physics
-  if (name.includes('electrostatic') || name.includes('charge') || name.includes('capacit')) return 'q';
-  if (name.includes('current') || name.includes('electricity')) return 'V=IR';
-  if (name.includes('magnet')) return 'B';
-  if (name.includes('optics') || name.includes('wave')) return 'λ';
-  if (name.includes('thermodynamics')) return 'ΔT';
-  if (name.includes('kinematics') || name.includes('motion in a plane') || name.includes('motion in a straight')) return 'v, a';
+  // ========== PHYSICS ==========
+
+  // Mechanics
   if (name.includes('law of motion') || name.includes('newton')) return 'F=ma';
-  if (name.includes('work') || name.includes('energy') || name.includes('power')) return 'W=Fd';
-  if (name.includes('rotational') || name.includes('particle')) return 'τ=Iα';
-  if (name.includes('gravitation')) return 'GM/r²';
-  if (name.includes('mechanical property') || name.includes('solid') || name.includes('fluid')) return 'F/A';
-  if (name.includes('oscillation')) return 'ωt';
-  if (name.includes('nuclei') || name.includes('atom')) return '⚛';
+  if (name.includes('kinematics') || name.includes('motion in a plane')) return 'v=u+at';
+  if (name.includes('motion in a straight')) return 's=ut';
+  if (name.includes('work') || name.includes('energy')) return 'E=½mv²';
+  if (name.includes('power')) return 'P=W/t';
+  if (name.includes('rotational')) return 'τ=Iα';
+  if (name.includes('particle system')) return 'Σmᵢrᵢ';
+  if (name.includes('gravitation')) return 'F=Gm/r²';
+  if (name.includes('oscillation') || name.includes('shm')) return 'x=Asinωt';
+
+  // Properties of Matter
+  if (name.includes('mechanical property') || name.includes('elastic')) return 'σ=E⋅ε';
+  if (name.includes('solid')) return 'Y,G,K';
+  if (name.includes('fluid')) return 'P+ρgh';
+  if (name.includes('surface tension')) return 'γ';
+  if (name.includes('viscosity')) return 'η';
+
+  // Thermodynamics
+  if (name.includes('thermodynamics')) return 'PV=nRT';
+  if (name.includes('heat')) return 'Q=mcΔT';
+  if (name.includes('thermal')) return 'ΔQ';
+
+  // Electromagnetism
+  if (name.includes('electrostatic') || name.includes('electric potential')) return 'V=kq/r';
+  if (name.includes('electric field')) return 'E⃗=F⃗/q';
+  if (name.includes('charge')) return 'q,Q';
+  if (name.includes('capacit')) return 'C=Q/V';
+  if (name.includes('current electricity')) return 'V=IR';
+  if (name.includes('magnet') && !name.includes('electromagnetic')) return 'B⃗';
+  if (name.includes('electromagnetic induction') || name.includes('emi')) return 'ε=-dΦ/dt';
+  if (name.includes('alternating current') || name.includes(' ac ')) return 'Iᵣₘₛ';
+
+  // Optics & Waves
+  if (name.includes('optics')) return '1/f';
+  if (name.includes('wave')) return 'λ=v/f';
+  if (name.includes('ray optics')) return 'n₁sinθ₁';
+  if (name.includes('wave optics')) return 'λ';
+
+  // Modern Physics
+  if (name.includes('dual nature') || name.includes('photon')) return 'E=hν';
+  if (name.includes('radiation')) return 'hν';
+  if (name.includes('nuclei') || name.includes('nuclear')) return '⚛️';
+  if (name.includes('atom') && !name.includes('atomic')) return 'E=-13.6/n²';
   if (name.includes('semiconductor')) return 'p-n';
-  if (name.includes('alternating current') || name.includes('ac ')) return 'I_rms';
-  if (name.includes('electromagnetic induction') || name.includes('emi')) return 'dΦ/dt';
-  if (name.includes('dual nature') || name.includes('radiation')) return 'E=hν';
-  if (name.includes('measurement') || name.includes('unit')) return '[MLT]';
+  if (name.includes('quantum')) return 'ℏ';
 
-  // Chem
-  if (name.includes('organic') || name.includes('carbon') || name.includes('haloalkane') || name.includes('alcohol') || name.includes('aldehyde') || name.includes('amine')) return 'C-C';
-  if (name.includes('kinetics')) return 'k[A]';
-  if (name.includes('electrochemistry')) return 'E°';
-  if (name.includes('solution')) return 'M';
-  if (name.includes('solid state')) return 'BCC';
+  // General
+  if (name.includes('measurement') || name.includes('unit')) return '[M L T]';
+
+  // ========== CHEMISTRY ==========
+
+  // Physical Chemistry
+  if (name.includes('mole concept')) return 'n=m/M';
+  if (name.includes('states of matter') || name.includes('gas')) return 'PV=nRT';
+  if (name.includes('thermodynamics') || name.includes('thermochemistry')) return 'ΔH';
   if (name.includes('equilibrium')) return '⇌';
-  if (name.includes('coordination')) return '[ML]';
-  if (name.includes('p-block') || name.includes('d-block') || name.includes('f-block')) return 'p,d,f';
-  if (name.includes('structure of atom') || name.includes('atomic')) return '1s²';
-  if (name.includes('classification of element') || name.includes('periodic')) return 'Na→Ar';
-  if (name.includes('chemical bonding')) return 'σ,π';
-  if (name.includes('states of matter')) return 'PV=nRT';
-  if (name.includes('thermodynamics')) return 'ΔG';
+  if (name.includes('ionic equilibrium')) return 'Kₐ,Kᵦ';
   if (name.includes('redox')) return 'e⁻';
+  if (name.includes('electrochemistry')) return 'E°cell';
+  if (name.includes('kinetics') || name.includes('rate')) return 'rate=k[A]';
+  if (name.includes('solution')) return 'M,m';
+  if (name.includes('colligative')) return 'ΔTᵦ';
+
+  // Inorganic Chemistry
+  if (name.includes('structure of atom') || name.includes('atomic structure')) return '1s²2s²';
+  if (name.includes('classification') || name.includes('periodic')) return '⚛️';
+  if (name.includes('chemical bonding')) return 'σ,π';
   if (name.includes('hydrogen')) return 'H₂';
-  if (name.includes('s-block')) return 's²';
-  if (name.includes('hydrocarbon')) return 'C-H';
+  if (name.includes('s-block')) return 'ns¹⁻²';
+  if (name.includes('p-block')) return 'ns²npˣ';
+  if (name.includes('d-block') || name.includes('transition')) return 'd¹⁻¹⁰';
+  if (name.includes('f-block')) return 'f¹⁻¹⁴';
+  if (name.includes('coordination')) return '[ML₆]';
+  if (name.includes('metallurgy') || name.includes('extraction')) return 'MO→M';
+
+  // Organic Chemistry
+  if (name.includes('organic') || name.includes('hydrocarbon')) return 'CₙH₂ₙ';
+  if (name.includes('haloalkane') || name.includes('haloarene')) return 'R-X';
+  if (name.includes('alcohol') || name.includes('phenol')) return 'R-OH';
+  if (name.includes('ether')) return 'R-O-R';
+  if (name.includes('aldehyde')) return 'R-CHO';
+  if (name.includes('ketone')) return 'R-CO-R';
+  if (name.includes('carboxylic')) return 'R-COOH';
+  if (name.includes('amine')) return 'R-NH₂';
+  if (name.includes('biomolecule')) return 'CHO-N';
+  if (name.includes('polymer')) return '[-M-]ₙ';
+  if (name.includes('chemistry in everyday')) return '🧪';
+
+  // Other Chemistry
+  if (name.includes('solid state')) return 'FCC,BCC';
+  if (name.includes('surface chemistry')) return 'Δx/m';
   if (name.includes('environmental')) return 'O₃';
-  if (name.includes('surface chemistry')) return 'x/m';
-  if (name.includes('isolation') || name.includes('metallurgy')) return 'ΔG°';
-  if (name.includes('biomolecule')) return 'CHO';
-  if (name.includes('polymer')) return '[-M-]n';
 
-  // Bio
-  if (name.includes('genetics') || name.includes('dna') || name.includes('inheritance') || name.includes('molecular')) return 'DNA';
-  if (name.includes('cell')) return '⬡';
-  if (name.includes('plant') || name.includes('photosynthesis')) return '🌿';
-  if (name.includes('human physiology') || name.includes('reproduction')) return '♥';
-  if (name.includes('ecology') || name.includes('environment')) return '🌱';
-  if (name.includes('evolution')) return '🐒';
-  if (name.includes('biotech')) return '✂️';
-  if (name.includes('diversity') || name.includes('living world')) return '🦁';
-  if (name.includes('structural organization') || name.includes('animal') || name.includes('tissue')) return '🦴';
+  // ========== BIOLOGY ==========
 
-  // Generic fallback
-  const firstWord = topicName.split(' ')[0] || '';
-  if (firstWord.length > 3) return firstWord.substring(0, 3).toUpperCase();
-  return name.substring(0, 2).toUpperCase();
+  // Cell & Molecular Biology
+  if (name.includes('cell') && !name.includes('cellular')) return '🔬';
+  if (name.includes('biomolecule')) return 'C₆H₁₂O₆';
+  if (name.includes('cell cycle')) return '2n→4n';
+  if (name.includes('cellular respiration')) return 'ATP';
+
+  // Genetics
+  if (name.includes('genetics') || name.includes('inheritance')) return 'Aa×Aa';
+  if (name.includes('dna') || name.includes('rna')) return '🧬';
+  if (name.includes('molecular basis') || name.includes('gene')) return 'DNA→RNA';
+  if (name.includes('chromosome')) return 'XX,XY';
+
+  // Plant Biology
+  if (name.includes('plant') || name.includes('morphology')) return '🌿';
+  if (name.includes('photosynthesis')) return '6CO₂→C₆H₁₂O₆';
+  if (name.includes('plant growth')) return 'IAA';
+  if (name.includes('transport in plant')) return 'xylem,phloem';
+
+  // Animal Biology
+  if (name.includes('animal') || name.includes('tissue')) return '🦴';
+  if (name.includes('structural organization')) return '🔬';
+  if (name.includes('digestion')) return '🍎→ATP';
+  if (name.includes('breathing') || name.includes('respiration')) return 'O₂⇌CO₂';
+  if (name.includes('circulation') || name.includes('blood')) return '♥️';
+  if (name.includes('excretion')) return 'urea';
+  if (name.includes('locomotion')) return '💪';
+  if (name.includes('neural') || name.includes('nervous')) return '🧠';
+  if (name.includes('endocrine')) return '⚡';
+
+  // Reproduction & Development
+  if (name.includes('reproduction')) return '♂+♀';
+  if (name.includes('sexual reproduction')) return '🌸';
+  if (name.includes('human reproduction')) return '👶';
+  if (name.includes('reproductive health')) return '♥️';
+
+  // Evolution & Ecology
+  if (name.includes('evolution')) return '🦎→🦅';
+  if (name.includes('origin of life')) return '🌍';
+  if (name.includes('ecology') || name.includes('ecosystem')) return '🌱';
+  if (name.includes('environment')) return '♻️';
+  if (name.includes('biodiversity')) return '🦁';
+
+  // Biotechnology
+  if (name.includes('biotech') || name.includes('genetic engineering')) return '✂️DNA';
+  if (name.includes('microb')) return '🦠';
+
+  // Diversity
+  if (name.includes('diversity') || name.includes('living world')) return '🌿';
+  if (name.includes('kingdom')) return '🦠→🦁';
+
+  // Generic fallback - extract first meaningful characters
+  const firstWord = topicName.split(/[\s-]/)[0] || '';
+  if (firstWord.length >= 4) return firstWord.substring(0, 3).toUpperCase();
+  return topicName.substring(0, 3).toUpperCase();
 };
 
 const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
@@ -399,31 +515,55 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                     <div className="p-7 flex flex-col h-full relative z-10">
                       <div className="flex items-start justify-between mb-6">
                         <div className="relative">
-                          {/* Mastery Circle Background */}
-                          <svg className="w-14 h-14 transform -rotate-90">
-                            <circle
-                              cx="28" cy="28" r="24"
+                          {/* Circular Progress Ring */}
+                          <svg className="w-24 h-16" viewBox="0 0 96 64">
+                            <rect
+                              x="6" y="6" width="84" height="52" rx="16"
                               fill="none"
                               stroke="currentColor"
-                              strokeWidth="4"
-                              className="text-slate-50"
+                              strokeWidth="3"
+                              className="text-slate-100"
                             />
-                            <motion.circle
-                              cx="28" cy="28" r="24"
+                            <motion.rect
+                              x="6" y="6" width="84" height="52" rx="16"
                               fill="none"
                               stroke="currentColor"
-                              strokeWidth="4"
-                              strokeDasharray="150"
-                              initial={{ strokeDashoffset: 150 }}
-                              animate={{ strokeDashoffset: 150 - (150 * m) / 100 }}
+                              strokeWidth="3"
+                              strokeDasharray="220"
+                              initial={{ strokeDashoffset: 220 }}
+                              animate={{ strokeDashoffset: 220 - (220 * m) / 100 }}
                               className={m >= 85 ? 'text-emerald-500' : m >= 40 ? 'text-blue-500' : 'text-red-500'}
                               transition={{ duration: 1.5, ease: "easeOut" }}
                             />
                           </svg>
-                          <div className={`absolute inset-0 flex items-center justify-center w-14 h-14 rounded-full ${status.color} transform group-hover:scale-90 transition-transform`}>
-                            <span className="font-black text-[24px] tracking-tight text-center mt-0.5" style={{ fontFamily: 'var(--font-outfit)' }}>
-                              {getTopicVisual(topic.topicName)}
-                            </span>
+
+                          {/* Icon/Image Container - Rounded Rectangle */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className={`px-3 py-2 min-w-[72px] h-11 rounded-2xl ${status.color} transform group-hover:scale-95 transition-all overflow-hidden shadow-sm border border-black/5 flex items-center justify-center`}>
+                              {topic.representativeImageUrl ? (
+                                <img
+                                  src={topic.representativeImageUrl}
+                                  alt={topic.topicName}
+                                  className="w-full h-full object-cover rounded-xl"
+                                  onError={(e) => {
+                                    // Fallback to symbol if image fails to load
+                                    e.currentTarget.style.display = 'none';
+                                    if (e.currentTarget.nextSibling) {
+                                      (e.currentTarget.nextSibling as HTMLElement).style.display = 'flex';
+                                    }
+                                  }}
+                                />
+                              ) : null}
+                              <span
+                                className="font-black text-[16px] tracking-tight text-center whitespace-nowrap px-1"
+                                style={{
+                                  fontFamily: 'var(--font-outfit)',
+                                  display: topic.representativeImageUrl ? 'none' : 'flex'
+                                }}
+                              >
+                                {topic.representativeSymbol || getTopicVisual(topic.topicName)}
+                              </span>
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
@@ -437,22 +577,24 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                       </h3>
 
                       {/* Progress Journey Track */}
-                      <div className="space-y-4 mb-6">
+                      <div className="space-y-3 mb-6">
                         <div className="flex items-center justify-between">
-                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Knowledge Depth</div>
-                          <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${stageConfig.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' : stageConfig.color === 'slate' ? 'bg-slate-50 text-slate-500' : 'bg-blue-50 text-blue-600'}`}>
+                          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Knowledge Journey</div>
+                          <div className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${stageConfig.color === 'emerald' ? 'bg-emerald-500 text-white' : stageConfig.color === 'slate' ? 'bg-slate-100 text-slate-600' : 'bg-blue-500 text-white'}`}>
                             {stageConfig.label}
                           </div>
                         </div>
 
                         <div className="relative flex justify-between items-center px-1">
-                          {/* Background Track */}
+                          {/* Clean Background Track */}
                           <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 rounded-full" />
-                          {/* Progress Track */}
+
+                          {/* Simple Progress Track */}
                           <motion.div
                             className={`absolute top-1/2 left-0 h-0.5 -translate-y-1/2 rounded-full ${m >= 85 ? 'bg-emerald-500' : 'bg-blue-500'}`}
                             initial={{ width: 0 }}
                             animate={{ width: `${(stageIndex / (STAGE_ORDER.length - 1)) * 100}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
                           />
 
                           {STAGE_ORDER.map((s, idx) => {
@@ -462,9 +604,24 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                             const Icon = config.icon;
 
                             return (
-                              <div key={s} className="relative z-10 flex flex-col items-center">
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500 ${isCurrent ? 'scale-125 shadow-lg' : ''} ${isActive ? (m >= 85 ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white') : 'bg-white border-2 border-slate-100 text-slate-300'}`}>
-                                  <Icon size={10} strokeWidth={3} />
+                              <div
+                                key={s}
+                                className="relative z-10 flex flex-col items-center"
+                              >
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                  isActive
+                                    ? m >= 85
+                                      ? 'bg-emerald-500 text-white shadow-md'
+                                      : 'bg-blue-500 text-white shadow-md'
+                                    : 'bg-slate-100 border border-slate-200 text-slate-400'
+                                } ${isCurrent ? 'ring-3 ring-offset-2' : ''} ${
+                                  isCurrent && m >= 85
+                                    ? 'ring-emerald-200'
+                                    : isCurrent
+                                      ? 'ring-blue-200'
+                                      : ''
+                                }`}>
+                                  <Icon size={14} strokeWidth={2.5} />
                                 </div>
                               </div>
                             );
@@ -491,19 +648,54 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
                 {viewMode === 'list' && (
                   <div className="flex items-center w-full gap-6 p-1">
                     <div className="relative shrink-0">
-                      <svg className="w-12 h-12 transform -rotate-90">
-                        <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-50" />
-                        <motion.circle
-                          cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="125"
-                          initial={{ strokeDashoffset: 125 }}
-                          animate={{ strokeDashoffset: 125 - (125 * m) / 100 }}
+                      {/* Rectangular Progress Ring */}
+                      <svg className="w-20 h-14" viewBox="0 0 80 56">
+                        <rect
+                          x="4" y="4" width="72" height="48" rx="12"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          className="text-slate-100"
+                        />
+                        <motion.rect
+                          x="4" y="4" width="72" height="48" rx="12"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeDasharray="200"
+                          initial={{ strokeDashoffset: 200 }}
+                          animate={{ strokeDashoffset: 200 - (200 * m) / 100 }}
                           className={m >= 85 ? 'text-emerald-500' : m >= 40 ? 'text-blue-500' : 'text-red-500'}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
                         />
                       </svg>
-                      <div className={`absolute inset-0 flex items-center justify-center w-12 h-12 rounded-full ${status.color} bg-transparent`}>
-                        <span className="font-black text-[20px] tracking-tight text-center mt-0.5" style={{ fontFamily: 'var(--font-outfit)' }}>
-                          {getTopicVisual(topic.topicName)}
-                        </span>
+
+                      {/* Icon/Image Container - Rounded Rectangle */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className={`px-2.5 py-1.5 min-w-[64px] h-10 rounded-xl ${status.color} transform hover:scale-95 transition-all overflow-hidden shadow-sm border border-black/5 flex items-center justify-center`}>
+                          {topic.representativeImageUrl ? (
+                            <img
+                              src={topic.representativeImageUrl}
+                              alt={topic.topicName}
+                              className="w-full h-full object-cover rounded-lg"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                if (e.currentTarget.nextSibling) {
+                                  (e.currentTarget.nextSibling as HTMLElement).style.display = 'flex';
+                                }
+                              }}
+                            />
+                          ) : null}
+                          <span
+                            className="font-black text-[14px] tracking-tight text-center whitespace-nowrap px-1"
+                            style={{
+                              fontFamily: 'var(--font-outfit)',
+                              display: topic.representativeImageUrl ? 'none' : 'flex'
+                            }}
+                          >
+                            {topic.representativeSymbol || getTopicVisual(topic.topicName)}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
