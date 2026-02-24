@@ -91,38 +91,15 @@ export const usePracticeSession = ({
       console.log('📥 [usePracticeSession] Loading practice data for topic:', topicName);
       setState(prev => ({ ...prev, isLoading: true }));
 
-      // Get question IDs from current topic
-      const questionIds = questions.map(q => q.id);
-
-      if (questionIds.length === 0) {
-        console.log('📥 [usePracticeSession] No questions in topic, skipping load');
-        setState(prev => ({ ...prev, isLoading: false }));
-        return;
-      }
-
-      // Load saved answers for questions in this topic
-      const { data: answers, error: answersError } = await supabase
-        .from('practice_answers')
-        .select('question_id, selected_option, is_correct, time_spent_seconds')
-        .in('question_id', questionIds);
-
-      if (answersError) throw answersError;
-
-      // Load bookmarks for questions in this topic
-      const { data: bookmarks, error: bookmarksError } = await supabase
-        .from('bookmarked_questions')
-        .select('question_id')
-        .in('question_id', questionIds);
-
-      if (bookmarksError) throw bookmarksError;
-
-      // 3. CRITICAL: Ensure topic_resource entry exists in database first
+      // 1. CRITICAL: Ensure topic_resource entry exists in database first
       // This provides the source-of-truth UUID that practice_answers and sessions MUST link to.
+      // We do this BEFORE loading answers because it's the anchor for everything.
       const { data: resource, error: resourceError } = await supabase
         .from('topic_resources')
         .upsert({
           user_id: user.id,
           topic_id: topicId,
+          topic_name: topicName, // Important for metadata
           subject,
           exam_context: examContext
         }, {
@@ -133,11 +110,37 @@ export const usePracticeSession = ({
 
       if (resourceError) {
         console.error('❌ [usePracticeSession] Failed to ensure topic resource:', resourceError);
-        // If this fails, we cannot proceed safely as FKs will fail
         throw resourceError;
       }
 
       const authenticatedTopicResourceId = resource.id;
+
+      // 2. Get question IDs from current topic
+      const questionIds = questions.map(q => q.id);
+
+      // Load saved answers and bookmarks if we have questions
+      let answers: any[] = [];
+      let bookmarks: any[] = [];
+
+      if (questionIds.length > 0) {
+        // Load saved answers for questions in this topic
+        const { data: answersData, error: answersError } = await supabase
+          .from('practice_answers')
+          .select('question_id, selected_option, is_correct, time_spent_seconds')
+          .in('question_id', questionIds);
+
+        if (answersError) throw answersError;
+        answers = answersData || [];
+
+        // Load bookmarks for questions in this topic
+        const { data: bookmarksData, error: bookmarksError } = await supabase
+          .from('bookmarked_questions')
+          .select('question_id')
+          .in('question_id', questionIds);
+
+        if (bookmarksError) throw bookmarksError;
+        bookmarks = bookmarksData || [];
+      }
 
       // 4. Create or get active session linked to THIS validated resource ID
       const { data: sessions, error: sessionsError } = await supabase
@@ -214,7 +217,8 @@ export const usePracticeSession = ({
       console.log('📥 [usePracticeSession] Loaded practice data:', {
         answers: answersMap.size,
         bookmarks: bookmarksSet.size,
-        sessionId
+        sessionId,
+        authenticatedTopicResourceId
       });
 
     } catch (error) {
@@ -357,7 +361,7 @@ export const usePracticeSession = ({
       console.error('❌ [usePracticeSession] Error saving answer:', error);
       setState(prev => ({ ...prev, isSaving: false }));
     }
-  }, [user?.id, state.savedAnswers, state.timeSpentPerQuestion, state.sessionId, topicResourceId, topicId, subject, examContext, topicName]);
+  }, [user?.id, state.savedAnswers, state.timeSpentPerQuestion, state.sessionId, state.authenticatedTopicResourceId, topicResourceId, topicId, subject, examContext, topicName]);
 
   /**
    * Toggle bookmark
