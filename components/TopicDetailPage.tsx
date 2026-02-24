@@ -911,81 +911,82 @@ const PracticeTab: React.FC<{
     const [generateError, setGenerateError] = useState<string | null>(null);
     const [generateSuccess, setGenerateSuccess] = useState<string | null>(null);
 
+    // DEBUG PERSISTENCE
+    useEffect(() => {
+      if (questions.length > 0) {
+        console.log(`🧪 [PracticeTab] Topic: ${topicResource.topicName}, Questions: ${questions.length}, SavedAnswers: ${savedAnswers.size}, Validated: ${validatedAnswers.size}`);
+      }
+    }, [questions.length, savedAnswers.size, validatedAnswers.size, topicResource.topicName]);
+
     // Get authenticated user from AuthProvider
     const { user } = useAuth();
 
-    // Load AI-generated questions from database on mount
+    // 2. Fetch AI-generated questions for this topic from Supabase
     useEffect(() => {
       const loadAIGeneratedQuestions = async () => {
-        if (!user) return;
+        if (!user?.id || !topicResource.topicName) return;
 
         try {
-          // Fetch AI-generated questions for this topic from Supabase
+          console.log(`🔍 [PracticeTab] Loading AI questions for topic: ${topicResource.topicName}`);
+
+          // Step 1: Find placeholder scans for AI practice
+          const { data: scans, error: scansError } = await supabase
+            .from('scans')
+            .select('id')
+            .eq('user_id', user.id)
+            .filter('metadata->>is_ai_practice_placeholder', 'eq', 'true')
+            .eq('subject', subject);
+
+          if (scansError) throw scansError;
+
+          const scanIds = scans?.map(s => s.id) || [];
+          if (scanIds.length === 0) {
+            console.log('ℹ️ [PracticeTab] No placeholder scans found for this user.');
+            return;
+          }
+
+          // Step 2: Fetch questions belonging to these scans and this topic
           const { data: aiQuestions, error } = await supabase
             .from('questions')
             .select('*')
             .eq('subject', subject)
             .eq('exam_context', examContext)
             .eq('topic', topicResource.topicName)
-            .in('scan_id', (await supabase
-              .from('scans')
-              .select('id')
-              .eq('user_id', user.id)
-              .filter('metadata->>is_ai_practice_placeholder', 'eq', 'true')
-            ).data?.map(s => s.id) || []);
+            .in('scan_id', scanIds);
 
-          if (error) {
-            console.error('❌ Failed to load AI-generated questions:', error);
-            return;
-          }
+          if (error) throw error;
 
           if (aiQuestions && aiQuestions.length > 0) {
-            console.log(`📥 Loaded ${aiQuestions.length} AI-generated questions from database`);
+            console.log(`✅ [PracticeTab] Found ${aiQuestions.length} existing AI questions`);
 
-            // Transform database questions to AnalyzedQuestion format
             const formattedAIQuestions: AnalyzedQuestion[] = aiQuestions.map(q => ({
+              ...q,
               id: q.id,
               text: q.text,
-              options: q.options || [],
+              difficulty: q.difficulty as 'Easy' | 'Moderate' | 'Hard',
               correctOptionIndex: q.correct_option_index,
-              marks: q.marks?.toString() || '1',
-              difficulty: q.difficulty,
-              diff: q.difficulty,
-              topic: q.topic,
-              domain: q.domain || q.topic,
-              blooms: q.blooms || '',
-              bloomsTaxonomy: q.blooms || '',
-              pedagogy: q.pedagogy || '',
-              year: q.year || '',
-              solutionSteps: q.solution_steps || [],
-              examTip: q.exam_tip || '',
-              visualConcept: q.visual_concept || '',
-              keyFormulas: q.key_formulas || [],
-              pitfalls: q.pitfalls || [],
-              masteryMaterial: q.mastery_material || {},
-              hasVisualElement: q.has_visual_element || false,
-              visualElementDescription: q.visual_element_description || '',
-              extractedImages: [],
-              // Extract AI fields from mastery_material JSONB
+              bloomsTaxonomy: q.blooms,
+              studyTip: q.exam_tip,
               keyConcepts: q.mastery_material?.keyConcepts || [],
+              commonMistakes: q.pitfalls || [],
+              keyFormulas: q.key_formulas || [],
+              thingsToRemember: q.key_formulas || [],
               aiReasoning: q.mastery_material?.aiReasoning || '',
               historicalPattern: q.mastery_material?.historicalPattern || '',
               predictiveInsight: q.mastery_material?.predictiveInsight || '',
               whyItMatters: q.mastery_material?.whyItMatters || '',
-              relevanceScore: q.mastery_material?.relevanceScore || 0,
-              commonMistakes: q.pitfalls || [],
-              studyTip: q.exam_tip || '',
-              thingsToRemember: q.key_formulas || []
+              relevanceScore: q.mastery_material?.relevanceScore || 70,
+              markingSteps: q.mastery_material?.markingSteps || []
             }));
 
-            // Merge with existing questions (avoid duplicates by ID)
+            // Update local state and parent shared questions if needed
             setQuestions(prev => {
               const existingIds = new Set(prev.map(q => q.id));
               const newQuestions = formattedAIQuestions.filter(q => !existingIds.has(q.id));
               if (newQuestions.length === 0) return prev;
               const updated = [...prev, ...newQuestions];
 
-              // Schedule side-effects after render (not inside state updater)
+              // Async update of shared parent state
               setTimeout(() => {
                 if (onQuestionCountChange) onQuestionCountChange(updated.length);
                 setSharedQuestions(updated);
@@ -994,13 +995,26 @@ const PracticeTab: React.FC<{
               return updated;
             });
           }
-        } catch (err) {
-          console.error('❌ Error loading AI-generated questions:', err);
+        } catch (err: any) {
+          console.error('❌ [PracticeTab] Failed to load AI questions:', err);
         }
       };
 
       loadAIGeneratedQuestions();
-    }, [user, subject, examContext, topicResource.topicName, onQuestionCountChange]);
+    }, [user?.id, subject, examContext, topicResource.topicName]);
+
+    // Load saved answers into local state whenever they update or session finishes loading
+    useEffect(() => {
+      if (!sessionLoading && savedAnswers.size > 0) {
+        // Merge with local answers but give priority to local ones if they were just clicked
+        setUserAnswers(prev => {
+          const merged = new Map(savedAnswers);
+          // If the user already interacted in this session, keep their selections
+          prev.forEach((val, key) => merged.set(key, val));
+          return merged;
+        });
+      }
+    }, [sessionLoading, savedAnswers]);
 
     const handleAnswerSelect = (questionId: string, optionIndex: number) => {
       // Update local state for immediate UI feedback

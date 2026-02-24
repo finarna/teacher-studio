@@ -76,6 +76,12 @@ export const usePracticeSession = ({
   // Track active question for time tracking
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
   const timeTrackingInterval = useRef<NodeJS.Timeout | null>(null);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
 
   /**
    * Load existing practice data from database
@@ -99,7 +105,6 @@ export const usePracticeSession = ({
         .upsert({
           user_id: user.id,
           topic_id: topicId,
-          topic_name: topicName, // Important for metadata
           subject,
           exam_context: examContext
         }, {
@@ -117,6 +122,8 @@ export const usePracticeSession = ({
 
       // 2. Get question IDs from current topic
       const questionIds = questions.map(q => q.id);
+
+      console.log(`🔍 [usePracticeSession] SYNCING: ${questionIds.length} questions for topic: ${topicName}`);
 
       // Load saved answers and bookmarks if we have questions
       let answers: any[] = [];
@@ -203,29 +210,34 @@ export const usePracticeSession = ({
 
       const bookmarksSet = new Set(bookmarks?.map(b => b.question_id) || []);
 
-      setState(prev => ({
-        ...prev,
-        savedAnswers: answersMap,
-        validatedAnswers: validatedMap,
-        bookmarkedIds: bookmarksSet,
-        timeSpentPerQuestion: timeMap,
-        sessionId,
-        authenticatedTopicResourceId,
-        isLoading: false
-      }));
+      if (isMounted.current) {
+        setState(prev => ({
+          ...prev,
+          savedAnswers: answersMap,
+          validatedAnswers: validatedMap,
+          bookmarkedIds: bookmarksSet,
+          timeSpentPerQuestion: timeMap,
+          sessionId,
+          authenticatedTopicResourceId,
+          isLoading: false
+        }));
+      }
 
-      console.log('📥 [usePracticeSession] Loaded practice data:', {
+      console.log(`📥 [usePracticeSession] Loaded practice data for topic ${topicName}:`, {
         answers: answersMap.size,
         bookmarks: bookmarksSet.size,
         sessionId,
-        authenticatedTopicResourceId
+        authenticatedTopicResourceId,
+        questionCount: questionIds.length
       });
 
     } catch (error) {
       console.error('❌ [usePracticeSession] Error loading practice data:', error);
-      setState(prev => ({ ...prev, isLoading: false }));
+      if (isMounted.current) {
+        setState(prev => ({ ...prev, isLoading: false }));
+      }
     }
-  }, [user?.id, topicName, subject, examContext, questions]); // Use user.id to prevent unnecessary reloads
+  }, [user?.id, topicId, topicResourceId, topicName, subject, examContext, questions]); // Full dependency set
 
   /**
    * Save answer to database
@@ -361,7 +373,7 @@ export const usePracticeSession = ({
       console.error('❌ [usePracticeSession] Error saving answer:', error);
       setState(prev => ({ ...prev, isSaving: false }));
     }
-  }, [user?.id, state.savedAnswers, state.timeSpentPerQuestion, state.sessionId, state.authenticatedTopicResourceId, topicResourceId, topicId, subject, examContext, topicName]);
+  }, [user?.id, state.savedAnswers, state.timeSpentPerQuestion, state.sessionId, state.authenticatedTopicResourceId, topicResourceId, topicId, subject, examContext, topicName, questions]);
 
   /**
    * Toggle bookmark
@@ -569,7 +581,7 @@ export const usePracticeSession = ({
       console.error('❌ [usePracticeSession] Error clearing progress:', error);
       throw error;
     }
-  }, [user?.id, topicName, questions, state.sessionId, loadPracticeData]);
+  }, [user?.id, topicName, questions, state.sessionId, loadPracticeData, topicId, examContext, subject]);
 
   // Load practice data on mount
   useEffect(() => {
