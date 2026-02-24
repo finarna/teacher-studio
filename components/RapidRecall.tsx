@@ -58,6 +58,7 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isCached, setIsCached] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string>('All');
+  const [genCategory, setGenCategory] = useState<string>('All');
 
   const groupedCards = useMemo(() => {
     const groups: Record<string, Flashcard[]> = { 'All': cards };
@@ -69,6 +70,19 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
     });
     return groups;
   }, [cards]);
+
+  const paperCategories = useMemo(() => {
+    if (!selectedScan) return ['All'];
+    const scan = filteredScans.find(s => s.id === selectedScan);
+    if (!scan || !scan.analysisData?.questions) return ['All'];
+
+    const categories = new Set<string>(['All']);
+    scan.analysisData.questions.forEach((q: any) => {
+      if (q.topic) categories.add(q.topic);
+      else if (q.domain) categories.add(q.domain);
+    });
+    return Array.from(categories);
+  }, [selectedScan, filteredScans]);
 
   const displayedCards = groupedCards[selectedDomain] || [];
 
@@ -225,15 +239,31 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
         generationConfig: { responseMimeType: "application/json" }
       });
 
-      // Extract key concepts from questions with derivations
-      const questionsWithDerivations = scan.analysisData.questions.filter(
-        q => q.solutionSteps || q.masteryMaterial
+      // Extract key concepts from questions
+      let sourceQuestions = scan.analysisData.questions;
+
+      // Filter by category if selected
+      if (genCategory !== 'All') {
+        sourceQuestions = sourceQuestions.filter((q: any) =>
+          (q.topic === genCategory || q.domain === genCategory)
+        );
+      }
+
+      const questionsWithDerivations = sourceQuestions.filter(
+        (q: any) => q.solutionSteps || q.masteryMaterial
       );
 
-      const conceptsPrompt = `You are an elite academic specialist. Extract ${cardCount} high-yield flashcard concepts from these ${scan.subject} ${scan.grade} questions and their solutions.
+      // Fallback to regular questions if no derivations found for the category
+      const targetQuestions = questionsWithDerivations.length > 0
+        ? questionsWithDerivations
+        : sourceQuestions;
+
+      const selectedCategoryText = genCategory !== 'All' ? `specifically for the category "${genCategory}"` : "";
+
+      const conceptsPrompt = `You are an elite academic specialist. Extract ${cardCount} high-yield flashcard concepts ${selectedCategoryText} from these ${scan.subject} ${scan.grade} questions and their solutions.
 
       Questions Data:
-      ${JSON.stringify(questionsWithDerivations.slice(0, 20).map(q => ({
+      ${JSON.stringify(targetQuestions.slice(0, 30).map((q: any) => ({
         text: q.text,
         topic: q.topic,
         steps: q.solutionSteps,
@@ -356,6 +386,18 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
               <option value={20}>20 Cards</option>
               <option value={50}>50 Cards</option>
             </select>
+
+            {paperCategories.length > 1 && (
+              <select
+                value={genCategory}
+                onChange={(e) => setGenCategory(e.target.value)}
+                className="bg-white border border-slate-200 text-[11px] font-bold text-slate-700 rounded-lg px-3 py-1.5 outline-none focus:ring-4 focus:ring-primary-500/10 shadow-sm transition-all cursor-pointer min-w-[120px]"
+              >
+                {paperCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
 

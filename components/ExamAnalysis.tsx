@@ -36,7 +36,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Scan, AnalyzedQuestion, Subject, ExamContext } from '../types';
+import { Scan, AnalyzedQuestion, Subject, ExamContext, ExamAnalysisData } from '../types';
 import { RenderWithMath, DerivationStep } from './MathRenderer';
 import { safeAiParse } from '../utils/aiParser';
 import { generateSketch } from '../utils/sketchGenerators';
@@ -77,7 +77,7 @@ interface ExamAnalysisProps {
   year?: string;
 }
 
-const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan, recentScans = [], onSelectScan, showOnlyVault = false, year }) => {
+const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan, onGenerateTraining, recentScans = [], onSelectScan, showOnlyVault = false, year }) => {
   // Use AppContext for subject/exam awareness
   const { subjectConfig, examConfig, activeSubject } = useAppContext();
   const theme = useSubjectTheme();
@@ -135,7 +135,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   }, [activeSubject, scan?.id, filteredScans.length]);
 
   // Extract analysis data with safe defaults (MUST be before any conditional returns)
-  const analysis = scan?.analysisData || { questions: [] };
+  const analysis = (scan?.analysisData || { questions: [] }) as ExamAnalysisData;
   const questions = analysis.questions || [];
   // Safe subject value for useMemo dependencies
   const safeSubject = scan?.subject || activeSubject;
@@ -788,50 +788,60 @@ Schema: {
     // 2. Aggregate metrics by domain
     const domainsFound: Record<string, any> = {};
 
-    // Ensure all standard domains appear if they have questions
-    Object.entries(currentMap).forEach(([key, info]) => {
-      const catQuestions = mappedQuestions.filter(q => q.mappedKey === key);
-      if (catQuestions.length > 0) {
-        const totalMarks = catQuestions.reduce((acc, q) => acc + (Number(q.marks) || 0), 0);
-        const avgDifficulty = catQuestions.reduce((acc, q) => {
-          const d = (q.difficulty as string || '').toLowerCase();
-          return acc + (d === 'hard' ? 3 : (d === 'moderate' || d === 'medium') ? 2 : 1);
-        }, 0) / catQuestions.length;
+    mappedQuestions.forEach(q => {
+      const matchedKey = q.mappedKey;
+      let dName = 'Core Foundations';
+      let friction = 'Fundamental conceptual integration across branches.';
 
-        const bloomsDist: Record<string, number> = {};
-        catQuestions.forEach(q => bloomsDist[q.blooms] = (bloomsDist[q.blooms] || 0) + 1);
-        const dominantBlooms = Object.entries(bloomsDist).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Apply';
+      if (matchedKey !== 'General') {
+        const info = currentMap[matchedKey];
+        dName = info.domain;
+        friction = info.friction;
+      }
 
-        domainsFound[key] = {
-          name: info.domain,
-          chapters: Array.from(new Set(catQuestions.map(q => q.topic))),
-          catQuestions,
-          totalMarks,
-          avgDifficulty,
-          difficultyDNA: avgDifficulty >= 2.4 ? 'Hard' : avgDifficulty >= 1.7 ? 'Moderate' : 'Easy',
-          dominantBlooms,
-          friction: info.friction
+      if (!domainsFound[dName]) {
+        domainsFound[dName] = {
+          name: dName,
+          chapters: new Set<string>(),
+          catQuestions: [],
+          totalMarks: 0,
+          avgDifficultySum: 0,
+          bloomsDist: {} as Record<string, number>,
+          friction
         };
+      }
+
+      const domain = domainsFound[dName];
+      domain.catQuestions.push(q);
+      domain.totalMarks += (Number(q.marks) || 0);
+      domain.chapters.add(q.topic || 'General');
+
+      const d = (q.difficulty as string || '').toLowerCase();
+      domain.avgDifficultySum += (d === 'hard' ? 3 : (d === 'moderate' || d === 'medium') ? 2 : 1);
+
+      if (q.blooms) {
+        domain.bloomsDist[q.blooms] = (domain.bloomsDist[q.blooms] || 0) + 1;
       }
     });
 
-    // Handle 'General' catch-all
-    const generalQuestions = mappedQuestions.filter(q => q.mappedKey === 'General');
-    if (generalQuestions.length > 0) {
-      const gMarks = generalQuestions.reduce((acc, q) => acc + (Number(q.marks) || 0), 0);
-      domainsFound['General'] = {
-        name: 'Core Foundations',
-        chapters: Array.from(new Set(generalQuestions.map(q => q.topic))),
-        catQuestions: generalQuestions,
-        totalMarks: gMarks,
-        avgDifficulty: 1.5,
-        difficultyDNA: 'Moderate',
-        dominantBlooms: 'Understand',
-        friction: 'Fundamental conceptual integration across branches.'
-      };
-    }
+    // 3. Finalize domain stats
+    const finalizedDomains = Object.values(domainsFound).map((domain: any) => {
+      const avgDifficulty = domain.avgDifficultySum / domain.catQuestions.length;
+      const dominantBlooms = Object.entries(domain.bloomsDist).sort((a: any, b: any) => b[1] - a[1])[0]?.[0] || 'Apply';
 
-    return Object.values(domainsFound).sort((a, b) => b.totalMarks - a.totalMarks);
+      return {
+        name: domain.name,
+        chapters: Array.from(domain.chapters),
+        catQuestions: domain.catQuestions,
+        totalMarks: domain.totalMarks,
+        avgDifficulty,
+        difficultyDNA: avgDifficulty >= 2.4 ? 'Hard' : avgDifficulty >= 1.7 ? 'Moderate' : 'Easy',
+        dominantBlooms,
+        friction: domain.friction
+      };
+    });
+
+    return finalizedDomains.sort((a, b) => b.totalMarks - a.totalMarks);
   }, [safeSubject, questions]);
 
   const portfolioStats = React.useMemo(() => {
@@ -862,7 +872,7 @@ Schema: {
         };
       }
 
-      const sourceQuestions = questions.filter(q => q.source?.trim() === source);
+      const sourceQuestions = questions.filter(q => (q.source || '').trim() === source.trim());
       if (sourceQuestions.length === 0) return null;
 
       const totalMarks = sourceQuestions.reduce((acc, q) => acc + (Number(q.marks) || 0), 0);
@@ -871,8 +881,13 @@ Schema: {
         return acc + (d === 'hard' ? 3 : (d === 'moderate' || d === 'medium') ? 2 : 1);
       }, 0) / sourceQuestions.length;
 
-      // FIXED: Complexity = Average marks per question (not total/length)
-      const complexityIndex = sourceQuestions.reduce((acc, q) => acc + (Number(q.marks) || 1), 0) / sourceQuestions.length;
+      // ENHANCED Complexity Index: Differentiate by incorporating difficulty distribution
+      const higherOrderCount = sourceQuestions.filter(q => {
+        const b = (q.blooms || '').toLowerCase();
+        return ['evaluate', 'analyze', 'create', 'apply'].some(lvl => b.includes(lvl));
+      }).length;
+
+      const complexityIndex = (avgDiff * 1.2) + (higherOrderCount / sourceQuestions.length * 2.0);
 
       const mathQuestions = sourceQuestions.filter(q => {
         const text = q.text || '';
@@ -896,9 +911,12 @@ Schema: {
         const domainMarks = sourceQuestions
           .filter(q => {
             const topic = (q.topic || '').toLowerCase();
-            const matchedKey = Object.keys(currentMap).find(key =>
-              currentMap[key].chapters.some(ch => topic.includes(ch.toLowerCase()) || ch.toLowerCase().includes(topic))
-            ) || 'General';
+            const matchedKey = Object.keys(currentMap).find(key => {
+              const info = currentMap[key];
+              // First match by domain name if available, otherwise chapters
+              return info.domain.toLowerCase() === dName.toLowerCase() ||
+                info.chapters.some(ch => topic.includes(ch.toLowerCase()) || ch.toLowerCase().includes(topic));
+            }) || 'General';
             const domainMapped = matchedKey === 'General' ? 'Core Foundations' : currentMap[matchedKey].domain;
             return domainMapped === dName;
           })
@@ -994,10 +1012,10 @@ Schema: {
             onBack={onBack}
             icon={<FolderOpen size={24} className="text-white" />}
             title="Previous Year Question Vault"
-            subtitle={`${scan?.subject || activeSubject} • ${scan?.examContext || examConfig.code}`}
+            subtitle={`${scan?.subject || activeSubject} • ${scan?.examContext || examConfig.id}`}
             description="Browse and practice exam questions"
             subject={(scan?.subject || activeSubject) as Subject}
-            trajectory={(scan?.examContext || examConfig.code) as ExamContext}
+            trajectory={(scan?.examContext || examConfig.id) as ExamContext}
             additionalContext={year || undefined}
             sticky={false}
           />
@@ -1738,7 +1756,7 @@ Schema: {
                               </span>
                               {selectedQ.difficulty && (
                                 <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${selectedQ.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
-                                  selectedQ.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                  selectedQ.difficulty === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
                                     'bg-green-100 text-green-700'
                                   }`}>
                                   {selectedQ.difficulty}

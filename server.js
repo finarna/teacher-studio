@@ -425,6 +425,20 @@ app.get('/api/subscription/status', async (req, res) => {
             throw error;
         }
 
+        // Get profile to check for role-based bypass
+        const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single();
+
+        if (profile?.role === 'admin' || profile?.role === 'teacher') {
+            return res.json({
+                hasActiveSubscription: true,
+                subscription: { plan: { name: 'Staff Bypass' } },
+            });
+        }
+
         // Return standardized response
         const hasActiveSubscription = !!subscription;
         res.json({

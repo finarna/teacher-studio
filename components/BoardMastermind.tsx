@@ -115,8 +115,9 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         setLoadingStage(`Scanning File ${i + 1}/${files.length}: ${file.name}`);
 
         const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve) => {
+        const base64Promise = new Promise<string>((resolve, reject) => {
           reader.onload = () => resolve((reader.result as string).split(',')[1]);
+          reader.onerror = () => reject(new Error(`Failed to read file ${file.name}`));
           reader.readAsDataURL(file);
         });
         const base64Data = await base64Promise;
@@ -193,10 +194,10 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           const extractionPrompt = selectedSubject === 'Math'
             ? generateCleanMathPrompt(selectedGrade)
             : selectedSubject === 'Physics'
-            ? generateCleanPhysicsPrompt(selectedGrade)
-            : selectedSubject === 'Biology'
-            ? generateCleanBiologyPrompt(activeExamContext)
-            : `Extract ALL questions verbatim from this ${selectedSubject} paper.
+              ? generateCleanPhysicsPrompt(selectedGrade)
+              : selectedSubject === 'Biology'
+                ? generateCleanBiologyPrompt(activeExamContext)
+                : `Extract ALL questions verbatim from this ${selectedSubject} paper.
         RULES:
         0. ⚠️ CRITICAL TEXT EXTRACTION: PRESERVE ALL SPACES BETWEEN WORDS!
            - WRONG: "Asmalltelescopehas tan objectiveoffocallength"
@@ -342,10 +343,10 @@ ${generatePhysicsExtractionInstructions()}
               if (!bb) return false;
               // Check all required fields are present and valid
               const isValid = bb.pageNumber &&
-                            bb.x && typeof bb.x === 'string' &&
-                            bb.y && typeof bb.y === 'string' &&
-                            bb.width && typeof bb.width === 'string' &&
-                            bb.height && typeof bb.height === 'string';
+                bb.x && typeof bb.x === 'string' &&
+                bb.y && typeof bb.y === 'string' &&
+                bb.width && typeof bb.width === 'string' &&
+                bb.height && typeof bb.height === 'string';
               if (!isValid) {
                 console.warn(`⚠️ [BULK VISION-GUIDED] Q${item.questionNumber} has incomplete bounding box, skipping:`, bb);
               }
@@ -429,10 +430,10 @@ ${generatePhysicsExtractionInstructions()}
         questions: allExtractedQuestions
       });
 
-      // Extract year from filename (e.g., "KCET_2024_Biology..." → "2024")
-      const yearMatch = file.name.match(/20\d{2}|19\d{2}/);
+      // Extract year from representative filename (e.g., "KCET_2024_Biology..." → "2024")
+      const yearMatch = files[0].name.match(/20\d{2}|19\d{2}/);
       const extractedYear = yearMatch ? yearMatch[0] : null;
-      console.log(`📅 [YEAR EXTRACTION] Filename: ${file.name} → Year: ${extractedYear}`);
+      console.log(`📅 [YEAR EXTRACTION] Filename: ${files[0].name} → Year: ${extractedYear}`);
 
       const newScan: Scan = {
         id: crypto.randomUUID(), // Generate proper UUID for database compatibility
@@ -647,10 +648,10 @@ ${generatePhysicsExtractionInstructions()}
         const extractionPrompt = selectedSubject === 'Math'
           ? generateCleanMathPrompt(selectedGrade)
           : selectedSubject === 'Physics'
-          ? generateCleanPhysicsPrompt(selectedGrade)
-          : selectedSubject === 'Biology'
-          ? generateCleanBiologyPrompt(activeExamContext)
-          : `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
+            ? generateCleanPhysicsPrompt(selectedGrade)
+            : selectedSubject === 'Biology'
+              ? generateCleanBiologyPrompt(activeExamContext)
+              : `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
       RULES:
       1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise.
       2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
@@ -865,18 +866,18 @@ Already extracted: Q1-Q${lastQNum}
 NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
 DO NOT repeat Q1-Q${lastQNum}`
             : selectedSubject === 'Physics'
-            ? generateCleanPhysicsPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
+              ? generateCleanPhysicsPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
 
 Already extracted: Q1-Q${lastQNum}
 NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
 DO NOT repeat Q1-Q${lastQNum}`
-            : selectedSubject === 'Biology'
-            ? generateCleanBiologyPrompt(activeExamContext) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
+              : selectedSubject === 'Biology'
+                ? generateCleanBiologyPrompt(activeExamContext) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
 
 Already extracted: Q1-Q${lastQNum}
 NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
 DO NOT repeat Q1-Q${lastQNum}`
-            : `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${selectedSubject} paper.
+                : `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${selectedSubject} paper.
 
 CRITICAL RULES:
 1. Use high fidelity LaTeX for ALL math (wrap in $ delimiters)
@@ -961,7 +962,7 @@ CRITICAL RULES:
 
       // --- IMAGE EXTRACTION (vision-guided if enabled, otherwise basic) ---
       if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) &&
-          extractedData.questions && extractedData.questions.length > 0) {
+        extractedData.questions && extractedData.questions.length > 0) {
         try {
           if (enableVisionExtraction) {
             // VISION-GUIDED MODE: Use AI-provided bounding boxes for precise extraction
@@ -983,10 +984,10 @@ CRITICAL RULES:
                 if (!bb) return false;
                 // Check all required fields are present and valid
                 const isValid = bb.pageNumber &&
-                              bb.x && typeof bb.x === 'string' &&
-                              bb.y && typeof bb.y === 'string' &&
-                              bb.width && typeof bb.width === 'string' &&
-                              bb.height && typeof bb.height === 'string';
+                  bb.x && typeof bb.x === 'string' &&
+                  bb.y && typeof bb.y === 'string' &&
+                  bb.width && typeof bb.width === 'string' &&
+                  bb.height && typeof bb.height === 'string';
                 if (!isValid) {
                   console.warn(`⚠️ [VISION-GUIDED] Q${item.questionNumber} has incomplete bounding box, skipping:`, bb);
                 }
@@ -1161,22 +1162,20 @@ CRITICAL RULES:
           <div className="h-6 w-px bg-slate-200" />
           <button
             onClick={() => setUseSimplifiedExtraction(!useSimplifiedExtraction)}
-            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${
-              useSimplifiedExtraction
-                ? 'bg-emerald-500 text-white border-2 border-emerald-600'
-                : 'bg-white text-slate-400 border-2 border-slate-200 hover:border-slate-300'
-            }`}
+            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${useSimplifiedExtraction
+              ? 'bg-emerald-500 text-white border-2 border-emerald-600'
+              : 'bg-white text-slate-400 border-2 border-slate-200 hover:border-slate-300'
+              }`}
           >
             {useSimplifiedExtraction ? '✓ SIMPLIFIED MODE' : 'LEGACY MODE'}
           </button>
           <div className="h-6 w-px bg-slate-200" />
           <button
             onClick={() => setEnableVisionExtraction(!enableVisionExtraction)}
-            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${
-              enableVisionExtraction
-                ? 'bg-purple-500 text-white border-2 border-purple-600'
-                : 'bg-white text-slate-400 border-2 border-slate-200 hover:border-slate-300'
-            }`}
+            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${enableVisionExtraction
+              ? 'bg-purple-500 text-white border-2 border-purple-600'
+              : 'bg-white text-slate-400 border-2 border-slate-200 hover:border-slate-300'
+              }`}
             title="Extract diagrams from PDFs using vision AI (adds 1-2 min processing time)"
           >
             {enableVisionExtraction ? '✓ DIAGRAM EXTRACTION' : 'DIAGRAM EXTRACTION'}
@@ -1194,7 +1193,7 @@ CRITICAL RULES:
             {isProcessing && (
               <>
                 {/* Animated top gradient bar */}
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent-500 via-purple-500 to-accent-500 animate-shimmer-fast" style={{backgroundSize: '200% 100%'}} />
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent-500 via-purple-500 to-accent-500 animate-shimmer-fast" style={{ backgroundSize: '200% 100%' }} />
 
                 {/* Floating particles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -1210,7 +1209,7 @@ CRITICAL RULES:
                 {/* Compact Header with Glassmorphism */}
                 <div className="relative p-5 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                   {/* Animated gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-accent-600/20 via-purple-600/20 to-accent-600/20 animate-gradient-shift" style={{backgroundSize: '200% 200%'}} />
+                  <div className="absolute inset-0 bg-gradient-to-r from-accent-600/20 via-purple-600/20 to-accent-600/20 animate-gradient-shift" style={{ backgroundSize: '200% 200%' }} />
 
                   <div className="relative flex items-center gap-4">
                     {/* Compact animated icon */}
@@ -1256,7 +1255,7 @@ CRITICAL RULES:
                                 : (pipelineLogs.filter(p => p.status === 'complete').length / pipelineLogs.length) * 100}%`
                             }}
                           />
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer-slow" style={{backgroundSize: '200% 100%'}} />
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer-slow" style={{ backgroundSize: '200% 100%' }} />
                         </div>
                       </div>
                     </div>
@@ -1269,13 +1268,12 @@ CRITICAL RULES:
                     <React.Fragment key={i}>
                       <div className={`group relative flex flex-col items-center gap-1.5 transition-all duration-500 ${log.status === 'active' ? 'scale-110' : ''}`}>
                         {/* Icon circle */}
-                        <div className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-500 shadow-lg ${
-                          log.status === 'complete'
-                            ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-emerald-500/30'
-                            : log.status === 'active'
-                              ? 'bg-gradient-to-br from-accent-500 to-purple-600 text-white shadow-accent-500/40 animate-pulse-gentle'
-                              : 'bg-slate-100 text-slate-300 border-2 border-slate-200'
-                        }`}>
+                        <div className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-500 shadow-lg ${log.status === 'complete'
+                          ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-emerald-500/30'
+                          : log.status === 'active'
+                            ? 'bg-gradient-to-br from-accent-500 to-purple-600 text-white shadow-accent-500/40 animate-pulse-gentle'
+                            : 'bg-slate-100 text-slate-300 border-2 border-slate-200'
+                          }`}>
                           {log.status === 'complete' ? (
                             <CheckCircle2 size={18} className="animate-in zoom-in duration-300" />
                           ) : log.status === 'active' ? (
@@ -1292,9 +1290,8 @@ CRITICAL RULES:
 
                         {/* Label */}
                         <div className="text-center max-w-[70px]">
-                          <p className={`text-[8px] font-black uppercase tracking-wider leading-tight transition-colors duration-300 ${
-                            log.status === 'active' ? 'text-accent-600' : log.status === 'complete' ? 'text-emerald-600' : 'text-slate-400'
-                          }`}>
+                          <p className={`text-[8px] font-black uppercase tracking-wider leading-tight transition-colors duration-300 ${log.status === 'active' ? 'text-accent-600' : log.status === 'complete' ? 'text-emerald-600' : 'text-slate-400'
+                            }`}>
                             {log.label.split(' ')[0]}
                           </p>
 
@@ -1311,11 +1308,10 @@ CRITICAL RULES:
 
                       {/* Connector line */}
                       {i < pipelineLogs.length - 1 && (
-                        <div className={`h-0.5 w-6 transition-all duration-500 rounded-full ${
-                          pipelineLogs[i + 1].status === 'complete' || pipelineLogs[i + 1].status === 'active'
-                            ? 'bg-gradient-to-r from-emerald-400 to-accent-400'
-                            : 'bg-slate-200'
-                        }`} />
+                        <div className={`h-0.5 w-6 transition-all duration-500 rounded-full ${pipelineLogs[i + 1].status === 'complete' || pipelineLogs[i + 1].status === 'active'
+                          ? 'bg-gradient-to-r from-emerald-400 to-accent-400'
+                          : 'bg-slate-200'
+                          }`} />
                       )}
                     </React.Fragment>
                   ))}

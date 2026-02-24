@@ -60,21 +60,19 @@ function CompactPricingCatalog({ onSelectPlan }: CompactPricingCatalogProps) {
         <div className="inline-flex rounded-lg border-2 border-slate-200 p-0.5 bg-slate-50">
           <button
             onClick={() => setBillingPeriod('monthly')}
-            className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${
-              billingPeriod === 'monthly'
-                ? 'bg-slate-900 text-white shadow-md'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${billingPeriod === 'monthly'
+              ? 'bg-slate-900 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             Monthly
           </button>
           <button
             onClick={() => setBillingPeriod('yearly')}
-            className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${
-              billingPeriod === 'yearly'
-                ? 'bg-slate-900 text-white shadow-md'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${billingPeriod === 'yearly'
+              ? 'bg-slate-900 text-white shadow-md'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             Yearly
             <span className="ml-2 text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full">Save 17%</span>
@@ -87,11 +85,10 @@ function CompactPricingCatalog({ onSelectPlan }: CompactPricingCatalogProps) {
         {filteredPlans.map((plan) => (
           <div
             key={plan.id}
-            className={`relative rounded-xl border-2 transition-all hover:shadow-xl flex flex-col ${
-              isPopular(plan.slug)
-                ? 'border-blue-500 shadow-lg scale-[1.02]'
-                : 'border-slate-200 hover:border-slate-300'
-            }`}
+            className={`relative rounded-xl border-2 transition-all hover:shadow-xl flex flex-col ${isPopular(plan.slug)
+              ? 'border-blue-500 shadow-lg scale-[1.02]'
+              : 'border-slate-200 hover:border-slate-300'
+              }`}
           >
             {/* Badge */}
             {isPopular(plan.slug) && (
@@ -146,16 +143,15 @@ function CompactPricingCatalog({ onSelectPlan }: CompactPricingCatalogProps) {
             <div className="p-5 pt-0 flex-shrink-0">
               <button
                 onClick={() => onSelectPlan(plan)}
-                className={`w-full py-3 px-4 rounded-lg font-bold text-sm transition-all ${
-                  isPopular(plan.slug) || isUltimate(plan.slug)
-                    ? `bg-gradient-to-r ${getPlanColor(plan.slug)} text-white hover:shadow-lg hover:scale-[1.02]`
-                    : 'bg-slate-900 text-white hover:bg-slate-800 hover:shadow-md'
-                }`}
+                className={`w-full py-3 px-4 rounded-lg font-bold text-sm transition-all ${isPopular(plan.slug) || isUltimate(plan.slug)
+                  ? `bg-gradient-to-r ${getPlanColor(plan.slug)} text-white hover:shadow-lg hover:scale-[1.02]`
+                  : 'bg-slate-900 text-white hover:bg-slate-800 hover:shadow-md'
+                  }`}
               >
                 {plan.slug.includes('kcet') ? 'Start KCET Prep' :
-                 plan.slug.includes('neet') ? 'Ace NEET' :
-                 plan.slug.includes('jee') ? 'Crack JEE' :
-                 plan.slug.includes('ultimate') ? 'Get Ultimate' : 'Select Plan'}
+                  plan.slug.includes('neet') ? 'Ace NEET' :
+                    plan.slug.includes('jee') ? 'Crack JEE' :
+                      plan.slug.includes('ultimate') ? 'Get Ultimate' : 'Select Plan'}
               </button>
             </div>
           </div>
@@ -177,7 +173,7 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ onBack }: UserProfileProps) {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showPricingView, setShowPricingView] = useState(false);
@@ -255,79 +251,91 @@ export default function UserProfile({ onBack }: UserProfileProps) {
           <div className={`grid gap-4 ${showPricingView ? 'grid-cols-1 h-full' : 'grid-cols-1 lg:grid-cols-3'}`}>
             {/* Left Column - Compact Profile (Hidden in Pricing View) */}
             {!showPricingView && (
-            <div className="space-y-4 flex flex-col">
-              {/* Profile Card */}
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                {/* Compact Header - Aligned with right column */}
-                <div className={`h-20 bg-gradient-to-br ${subscription ? getPlanColor(subscription.plan?.name || '') : 'from-slate-600 to-slate-700'} relative`}>
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/20 to-transparent"></div>
-                </div>
-
-                <div className="px-4 pb-4 -mt-10 relative">
-                  {/* Compact Avatar */}
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center border-4 border-white shadow-lg mb-3">
-                    <User size={28} className="text-white" />
+              <div className="space-y-4 flex flex-col">
+                {/* Profile Card */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  {/* Compact Header - Aligned with right column */}
+                  <div className={`h-20 bg-gradient-to-br ${subscription ? getPlanColor(subscription.plan?.name || '') : 'from-slate-600 to-slate-700'} relative`}>
+                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/20 to-transparent"></div>
                   </div>
 
-                  {/* User Info */}
-                  <h1 className="text-lg font-black text-slate-900 font-outfit mb-1 truncate">
-                    {user?.email?.split('@')[0] || 'User'}
-                  </h1>
-                  <p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1 truncate">
-                    <Mail size={12} />
-                    {user?.email}
-                  </p>
+                  <div className="px-4 pb-4 -mt-10 relative">
+                    {/* Compact Avatar */}
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center border-4 border-white shadow-lg mb-3">
+                      <User size={28} className="text-white" />
+                    </div>
 
-                  {/* Plan Badge */}
-                  {subscription && (
-                    <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r ${getPlanColor(subscription.plan?.name || '')} text-white rounded-lg font-bold text-xs shadow-md mb-4`}>
-                      <Crown size={12} />
-                      {getPlanBadge(subscription.plan?.name || '')} Plan
-                    </div>
-                  )}
+                    {/* User Info */}
+                    <h1 className="text-lg font-black text-slate-900 font-outfit mb-1 truncate">
+                      {user?.email?.split('@')[0] || 'User'}
+                    </h1>
+                    <p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1 truncate">
+                      <Mail size={12} />
+                      {user?.email}
+                    </p>
 
-                  {/* Compact Stats */}
-                  <div className="pt-3 border-t border-slate-100 space-y-2.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500 font-semibold">Member Since</span>
-                      <span className="text-slate-900 font-bold">
-                        {user?.created_at ? formatDate(user.created_at) : 'N/A'}
-                      </span>
+                    {/* Info Badges */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {/* Role Badge */}
+                      <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-black text-[10px] uppercase shadow-sm ${userProfile?.role === 'admin' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                        userProfile?.role === 'teacher' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                          'bg-slate-100 text-slate-700 border border-slate-200'
+                        }`}>
+                        <Shield size={10} />
+                        {userProfile?.role || 'User'}
+                      </div>
+
+                      {/* Plan Badge */}
+                      {subscription && (
+                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r ${getPlanColor(subscription.plan?.name || '')} text-white rounded-lg font-bold text-[10px] shadow-md`}>
+                          <Crown size={10} />
+                          {getPlanBadge(subscription.plan?.name || '')} Plan
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-500 font-semibold">Status</span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 rounded text-xs font-bold">
-                        <CheckCircle2 size={10} />
-                        Active
-                      </span>
-                    </div>
-                    {subscription && (
+
+                    {/* Compact Stats */}
+                    <div className="pt-3 border-t border-slate-100 space-y-2.5">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-500 font-semibold">Scans Used</span>
+                        <span className="text-slate-500 font-semibold">Member Since</span>
                         <span className="text-slate-900 font-bold">
-                          {subscription.scans_used || 0} / ∞
+                          {user?.created_at ? formatDate(user.created_at) : 'N/A'}
                         </span>
                       </div>
-                    )}
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-500 font-semibold">Status</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 rounded text-xs font-bold">
+                          <CheckCircle2 size={10} />
+                          Active
+                        </span>
+                      </div>
+                      {subscription && (
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-500 font-semibold">Scans Used</span>
+                          <span className="text-slate-900 font-bold">
+                            {subscription.scans_used || 0} / ∞
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex-shrink-0">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Quick Actions</h3>
+                  <div className="space-y-2">
+                    <button className="w-full text-left px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors text-xs font-semibold text-slate-700 flex items-center gap-2">
+                      <CreditCard size={14} className="text-slate-400" />
+                      Payment History
+                    </button>
+                    <button className="w-full text-left px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors text-xs font-semibold text-slate-700 flex items-center gap-2">
+                      <Mail size={14} className="text-slate-400" />
+                      Email Preferences
+                    </button>
                   </div>
                 </div>
               </div>
-
-              {/* Quick Actions */}
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex-shrink-0">
-                <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3">Quick Actions</h3>
-                <div className="space-y-2">
-                  <button className="w-full text-left px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors text-xs font-semibold text-slate-700 flex items-center gap-2">
-                    <CreditCard size={14} className="text-slate-400" />
-                    Payment History
-                  </button>
-                  <button className="w-full text-left px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors text-xs font-semibold text-slate-700 flex items-center gap-2">
-                    <Mail size={14} className="text-slate-400" />
-                    Email Preferences
-                  </button>
-                </div>
-              </div>
-            </div>
             )}
 
             {/* Right Column - Subscription or Pricing View (Full Width in Pricing) */}

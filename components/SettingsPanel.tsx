@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Sparkles, Zap, Brain, Box } from 'lucide-react';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
+import { useAuth } from './AuthProvider';
+import { AdminUsersPanel } from './AdminUsersPanel';
 
 interface SettingsPanelProps {
   onBack: () => void;
@@ -8,6 +10,7 @@ interface SettingsPanelProps {
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
   const theme = useSubjectTheme();
+  const { userProfile } = useAuth();
 
   // AI Model Settings
   const [geminiModel, setGeminiModel] = useState(() => {
@@ -105,11 +108,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                     <button
                       key={model.id}
                       onClick={() => handleModelChange(model.id)}
-                      className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
-                        isSelected
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${isSelected
                           ? 'border-slate-900 bg-slate-50 shadow-md'
                           : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                      }`}
+                        }`}
                     >
                       <div
                         className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
@@ -179,31 +181,28 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                 <div className="grid grid-cols-3 gap-3 mt-4">
                   <button
                     onClick={() => handleTemperatureChange(0.3)}
-                    className={`px-3 py-2 rounded-lg border-2 text-xs font-bold transition-all ${
-                      temperature <= 0.3
+                    className={`px-3 py-2 rounded-lg border-2 text-xs font-bold transition-all ${temperature <= 0.3
                         ? 'border-slate-900 bg-slate-50'
                         : 'border-slate-200 hover:border-slate-300'
-                    }`}
+                      }`}
                   >
                     Focused (0.3)
                   </button>
                   <button
                     onClick={() => handleTemperatureChange(0.7)}
-                    className={`px-3 py-2 rounded-lg border-2 text-xs font-bold transition-all ${
-                      temperature > 0.3 && temperature <= 0.8
+                    className={`px-3 py-2 rounded-lg border-2 text-xs font-bold transition-all ${temperature > 0.3 && temperature <= 0.8
                         ? 'border-slate-900 bg-slate-50'
                         : 'border-slate-200 hover:border-slate-300'
-                    }`}
+                      }`}
                   >
                     Balanced (0.7)
                   </button>
                   <button
                     onClick={() => handleTemperatureChange(1.0)}
-                    className={`px-3 py-2 rounded-lg border-2 text-xs font-bold transition-all ${
-                      temperature > 0.8
+                    className={`px-3 py-2 rounded-lg border-2 text-xs font-bold transition-all ${temperature > 0.8
                         ? 'border-slate-900 bg-slate-50'
                         : 'border-slate-200 hover:border-slate-300'
-                    }`}
+                      }`}
                   >
                     Creative (1.0)
                   </button>
@@ -285,6 +284,11 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                 </div>
               </div>
             </div>
+
+            {/* Admin Users Panel */}
+            {userProfile?.role === 'admin' && (
+              <AdminUsersPanel />
+            )}
 
           </div>
         </div>

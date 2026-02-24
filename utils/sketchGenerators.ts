@@ -1,18 +1,10 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
-export type GenerationMethod = 'gemini-3-flash-preview' | 'gemini-2.0-flash-lite' | 'gemini-2.5-flash-latest' | 'gemini-1.5-pro' | 'gemini-2.0-pro-exp' | 'gemini-3-pro';
+export type GenerationMethod = 'gemini-3-flash-preview' | 'gemini-2.0-flash-lite' | 'gemini-2.5-flash-latest' | 'gemini-1.5-pro' | 'gemini-2.0-pro-exp' | 'gemini-3-pro' | 'gemini-2.0-flash-exp-image-01' | 'gemini-3-pro-image-preview';
 
 export interface GenerationResult {
   imageData: string; // Base64 encoded PNG image
-  blueprint: {
-    visualConcept: string;
-    detailedNotes: string;
-    mentalAnchor: string;
-    proceduralLogic: string[];
-    keyFormulas: string[];
-    examTip: string;
-    pitfalls: string[];
-  };
+  blueprint: any;
 }
 
 /**
@@ -117,12 +109,12 @@ async function retryWithBackoff<T>(
 
       // Check if it's a retryable error (429 rate limit or 503 overloaded)
       const isRateLimit = error.message?.includes('429') ||
-                         error.message?.includes('quota') ||
-                         error.message?.includes('Too Many Requests');
+        error.message?.includes('quota') ||
+        error.message?.includes('Too Many Requests');
 
       const is503 = error.message?.includes('503') ||
-                    error.message?.includes('overloaded') ||
-                    error.message?.includes('The model is overloaded');
+        error.message?.includes('overloaded') ||
+        error.message?.includes('The model is overloaded');
 
       const isRetryable = isRateLimit || is503;
 
@@ -135,7 +127,7 @@ async function retryWithBackoff<T>(
         const delay = suggestedDelay || initialDelay * Math.pow(2, i);
 
         const errorType = isRateLimit ? 'Rate limit' : '503 Server overloaded';
-        console.log(`⚠️ ${errorType}. Retrying in ${delay/1000}s... (attempt ${i + 1}/${maxRetries})`);
+        console.log(`⚠️ ${errorType}. Retrying in ${delay / 1000}s... (attempt ${i + 1}/${maxRetries})`);
         await sleep(delay);
       } else if (!isRetryable) {
         // If not a retryable error, throw immediately
@@ -169,16 +161,16 @@ export const generateGemini3ProImage = async (
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: "object",
+        type: SchemaType.OBJECT,
         properties: {
-          visualConcept: { type: "string" },
-          detailedNotes: { type: "string" },
-          mentalAnchor: { type: "string" },
-          proceduralLogic: { type: "array", items: { type: "string" } },
-          keyFormulas: { type: "array", items: { type: "string" } },
-          examTip: { type: "string" },
-          pitfalls: { type: "array", items: { type: "string" } },
-          imageDescription: { type: "string" }
+          visualConcept: { type: SchemaType.STRING },
+          detailedNotes: { type: SchemaType.STRING },
+          mentalAnchor: { type: SchemaType.STRING },
+          proceduralLogic: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          keyFormulas: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          examTip: { type: SchemaType.STRING },
+          pitfalls: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          imageDescription: { type: SchemaType.STRING }
         },
         required: ["visualConcept", "detailedNotes", "mentalAnchor", "proceduralLogic", "keyFormulas", "examTip", "pitfalls", "imageDescription"]
       }
@@ -270,7 +262,7 @@ MATH DIAGRAM REQUIREMENTS:
 - Tree diagrams: Clean branching structure with probability values
 - Venn diagrams: Overlapping circles with labeled regions
 - Use blue for primary elements, red for solutions/critical points, gray for construction lines` :
-`- Mathematical formulas clearly displayed`}
+      `- Mathematical formulas clearly displayed`}
 - Numbered steps or process flows
 - Small illustrative sketches to support understanding
 - Callout boxes for key insights
@@ -316,20 +308,20 @@ export const generateGemini25FlashImage = async (
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: "object",
+        type: SchemaType.OBJECT,
         properties: {
-          visualConcept: { type: "string" },
-          coreTheory: { type: "string" },
-          keyFormulas: { type: "array", items: { type: "string" } },
-          solvedExample: { type: "string" },
-          stepByStep: { type: "array", items: { type: "string" } },
-          commonVariations: { type: "array", items: { type: "string" } },
-          patternRecognition: { type: "string" },
-          relatedConcepts: { type: "array", items: { type: "string" } },
-          memoryTricks: { type: "array", items: { type: "string" } },
-          commonMistakes: { type: "array", items: { type: "string" } },
-          examStrategy: { type: "string" },
-          quickReference: { type: "array", items: { type: "string" } }
+          visualConcept: { type: SchemaType.STRING },
+          coreTheory: { type: SchemaType.STRING },
+          keyFormulas: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          solvedExample: { type: SchemaType.STRING },
+          stepByStep: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          commonVariations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          patternRecognition: { type: SchemaType.STRING },
+          relatedConcepts: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          memoryTricks: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          commonMistakes: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          examStrategy: { type: SchemaType.STRING },
+          quickReference: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
         },
         required: ["visualConcept", "coreTheory", "keyFormulas", "solvedExample", "stepByStep", "commonVariations", "patternRecognition", "relatedConcepts", "memoryTricks", "commonMistakes", "examStrategy", "quickReference"]
       }
@@ -505,20 +497,20 @@ export const generateImagen3Sketch = async (
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: "object",
+        type: SchemaType.OBJECT,
         properties: {
-          visualConcept: { type: "string" },
-          coreTheory: { type: "string" },
-          keyFormulas: { type: "array", items: { type: "string" } },
-          solvedExample: { type: "string" },
-          stepByStep: { type: "array", items: { type: "string" } },
-          commonVariations: { type: "array", items: { type: "string" } },
-          patternRecognition: { type: "string" },
-          relatedConcepts: { type: "array", items: { type: "string" } },
-          memoryTricks: { type: "array", items: { type: "string" } },
-          commonMistakes: { type: "array", items: { type: "string" } },
-          examStrategy: { type: "string" },
-          quickReference: { type: "array", items: { type: "string" } }
+          visualConcept: { type: SchemaType.STRING },
+          coreTheory: { type: SchemaType.STRING },
+          keyFormulas: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          solvedExample: { type: SchemaType.STRING },
+          stepByStep: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          commonVariations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          patternRecognition: { type: SchemaType.STRING },
+          relatedConcepts: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          memoryTricks: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          commonMistakes: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          examStrategy: { type: SchemaType.STRING },
+          quickReference: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
         },
         required: ["visualConcept", "coreTheory", "keyFormulas", "solvedExample", "stepByStep", "commonVariations", "patternRecognition", "relatedConcepts", "memoryTricks", "commonMistakes", "examStrategy", "quickReference"]
       }
@@ -856,7 +848,7 @@ export interface TopicBasedSketchResult {
  */
 export const generateTopicBasedSketch = async (
   topic: string,
-  questions: Array<{id: string, text: string, difficulty?: string, marks?: number}>,
+  questions: Array<{ id: string, text: string, difficulty?: string, marks?: number }>,
   subject: string,
   apiKey: string,
   onStatusUpdate?: (status: string) => void
@@ -871,26 +863,26 @@ export const generateTopicBasedSketch = async (
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: "object",
+        type: SchemaType.OBJECT,
         properties: {
-          coreTheory: { type: "string" },
-          keyFormulas: { type: "array", items: { type: "string" } },
-          patterns: { type: "array", items: { type: "string" } },
+          coreTheory: { type: SchemaType.STRING },
+          keyFormulas: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          patterns: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
           solvedExamples: {
-            type: "array",
+            type: SchemaType.ARRAY,
             items: {
-              type: "object",
+              type: SchemaType.OBJECT,
               properties: {
-                difficulty: { type: "string" },
-                question: { type: "string" },
-                solution: { type: "string" }
+                difficulty: { type: SchemaType.STRING },
+                question: { type: SchemaType.STRING },
+                solution: { type: SchemaType.STRING }
               }
             }
           },
-          variations: { type: "array", items: { type: "string" } },
-          commonMistakes: { type: "array", items: { type: "string" } },
-          examStrategies: { type: "array", items: { type: "string" } },
-          quickReference: { type: "array", items: { type: "string" } }
+          variations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          commonMistakes: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          examStrategies: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
+          quickReference: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } }
         },
         required: ["coreTheory", "keyFormulas", "patterns", "solvedExamples", "variations", "commonMistakes", "examStrategies", "quickReference"]
       }
@@ -1100,7 +1092,7 @@ VISUAL LAYOUT:
 
 ┌─────────────────────────────────────────┐
 │ 🔄 QUESTION VARIATIONS (Yellow gradient boxes):
-${blueprint.variations.slice(0, 5).map((v: string, i: number) => `│ Variation ${i+1}: ${latexToImageNotation(v)}
+${blueprint.variations.slice(0, 5).map((v: string, i: number) => `│ Variation ${i + 1}: ${latexToImageNotation(v)}
 │ [Add small icon showing how this differs from standard]`).join('\n')}
 │
 │ 💡 TIP: Examiners LOVE these twists! Know them all!
@@ -1109,7 +1101,7 @@ ${blueprint.variations.slice(0, 5).map((v: string, i: number) => `│ Variation 
 ┌─────────────────────────────────────────┐
 │ ❌ COMMON MISTAKES (RED WARNING BOXES with X icons):
 ${blueprint.commonMistakes.slice(0, 4).map((m: string, i: number) => `│
-│ MISTAKE #${i+1}: ${latexToImageNotation(m)}
+│ MISTAKE #${i + 1}: ${latexToImageNotation(m)}
 │ [Show incorrect work with red X]
 │ ✅ CORRECT WAY: [Show right method with green checkmark]`).join('\n')}
 │
@@ -1118,7 +1110,7 @@ ${blueprint.commonMistakes.slice(0, 4).map((m: string, i: number) => `│
 
 ┌─────────────────────────────────────────┐
 │ 🎯 EXAM WINNING STRATEGIES (Green boxes with star icons):
-${blueprint.examStrategies.map((s: string, i: number) => `│ ${i+1}. ${s} ✨`).join('\n')}
+${blueprint.examStrategies.map((s: string, i: number) => `│ ${i + 1}. ${s} ✨`).join('\n')}
 │
 │ 🏆 PRO TIP: Follow these to score 95%+
 └─────────────────────────────────────────┘
@@ -1307,20 +1299,20 @@ const generateUnifiedSketch = async (
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
-        type: "object",
+        type: SchemaType.OBJECT,
         properties: {
-          visualConcept: { type: "string" },
-          detailedNotes: { type: "string" },
-          mentalAnchor: { type: "string" },
+          visualConcept: { type: SchemaType.STRING },
+          detailedNotes: { type: SchemaType.STRING },
+          mentalAnchor: { type: SchemaType.STRING },
           keyPoints: {
-            type: "array",
-            items: { type: "string" }
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING }
           },
           examStrategies: {
-            type: "array",
-            items: { type: "string" }
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING }
           },
-          quickReference: { type: "string" }
+          quickReference: { type: SchemaType.STRING }
         },
         required: ["visualConcept", "detailedNotes", "mentalAnchor", "keyPoints", "examStrategies", "quickReference"]
       }

@@ -20,22 +20,25 @@ import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
 import { supabase } from '../lib/supabase';
 import { getApiUrl } from '../lib/api';
+import { useAuth } from './AuthProvider';
 
 interface SidebarProps {
   activeView: string;
   onNavigate: (view: string) => void;
   userName?: string;
-  onStudentView?: () => void;
   onLogout?: () => void;
   isMobileMenuOpen?: boolean;
   onCloseMobile?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onStudentView, onLogout, isMobileMenuOpen = false, onCloseMobile }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onLogout, isMobileMenuOpen = false, onCloseMobile }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [planBadge, setPlanBadge] = useState<string>('');
   const { subjectConfig, examConfig } = useAppContext();
   const theme = useSubjectTheme();
+  const { userProfile } = useAuth();
+
+  const role = userProfile?.role || 'admin'; // fallback to admin if not loaded yet so no lockout
 
   useEffect(() => {
     fetchUserPlan();
@@ -78,10 +81,26 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
     { id: 'questions', label: 'Question Bank', icon: FileQuestion },
     { id: 'recall', label: 'Rapid Recall', icon: BrainCircuit },
     { id: 'gallery', label: 'Sketch Notes', icon: Palette },
-    { id: 'training_studio', label: 'Pedagogy Studio', icon: GraduationCap },
     { id: 'profile', label: 'My Profile', icon: User },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
+
+  // Apply RBAC filters
+  const filteredMenuItems = menuItems.filter(item => {
+    if (role === 'admin') return true; // Admin sees all
+
+    if (role === 'teacher') {
+      // Teacher sees everything EXCEPT Settings
+      return item.id !== 'settings';
+    }
+
+    if (role === 'student') {
+      // Student ONLY sees Learning Journey and Profile
+      return ['learning_journey', 'profile'].includes(item.id);
+    }
+
+    return false;
+  });
 
   return (
     <>
@@ -128,8 +147,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
             )}
           </div>
 
-          {/* Subject Badge */}
-          {!isCollapsed && (
+          {/* Subject Badge - Only for Staff */}
+          {!isCollapsed && role !== 'student' && (
             <div
               className="mt-3 px-2 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-center animate-in fade-in duration-500"
               style={{
@@ -144,7 +163,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
 
         {/* Navigation */}
         <div className="flex-1 px-3 space-y-1.5 overflow-y-auto scroller-hide">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => {
@@ -208,13 +227,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
                 </div>
               </div>
 
-              {/* Student View Button */}
-              {onStudentView && (
+              {onLogout && (
                 <button
-                  onClick={onStudentView}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-xl text-[10px] font-black transition-all shadow-sm uppercase tracking-wider"
+                  onClick={onLogout}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-[10px] font-black transition-all shadow-sm uppercase tracking-wider"
                 >
-                  <GraduationCap size={14} /> Student View
+                  <LogOut size={14} /> Logout
                 </button>
               )}
             </>
@@ -233,15 +251,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onS
                   </div>
                 )}
               </button>
-              {onStudentView && (
-                <button
-                  onClick={onStudentView}
-                  title="Student View"
-                  className="w-full flex items-center justify-center p-2.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg transition-all"
-                >
-                  <GraduationCap size={18} />
-                </button>
-              )}
               {onLogout && (
                 <button
                   onClick={onLogout}

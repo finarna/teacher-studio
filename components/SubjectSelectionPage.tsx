@@ -88,15 +88,102 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
     description: string;
     focusArea: string;
     trend: 'improving' | 'stable' | 'attention';
+    tags: string[];
   } | null>(null);
 
   // Loading state
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
+  // LOGIC ENGINE: Dynamic Strategy Generation
+  const generateIntelligentStrategy = useCallback((
+    stats: typeof comprehensiveStats,
+    progress: Record<Subject, SubjectProgress> | undefined,
+    exam: ExamContext
+  ) => {
+    const subjects = Object.keys(SUBJECT_CONFIGS) as Subject[];
+    const activeSubjects = subjects.filter(s => SUBJECT_CONFIGS[s].supportedExams.includes(exam));
+
+    // 1. Calculate Core Metrics
+    const subjectMetrics = activeSubjects.map(s => ({
+      name: s,
+      mastery: progress?.[s]?.overallMastery || 0,
+      accuracy: progress?.[s]?.overallAccuracy ?? 0,
+      volume: progress?.[s]?.totalQuestionsAttempted || 0,
+      topics: stats.subjectStats[s]?.topics || 0
+    }));
+
+    const avgMastery = subjectMetrics.reduce((sum, s) => sum + s.mastery, 0) / activeSubjects.length;
+    const avgAccuracy = subjectMetrics.reduce((sum, s) => sum + s.accuracy, 0) / activeSubjects.length;
+    const totalVolume = subjectMetrics.reduce((sum, s) => sum + s.volume, 0);
+
+    // 2. Identify Imbalances (System Awareness)
+    const sortedByMastery = [...subjectMetrics].sort((a, b) => a.mastery - b.mastery);
+    const weakest = sortedByMastery[0];
+    const strongest = sortedByMastery[subjectMetrics.length - 1];
+    const masteryGap = strongest.mastery - weakest.mastery;
+
+    // 3. Determine Global Strategy State
+    let title = "Syncing Neural Map";
+    let description = "Begin your practice sessions to allow the AI Analyst to map your cognitive strengths and weaknesses.";
+    let focusArea = "General";
+    let trend: 'improving' | 'stable' | 'attention' = 'stable';
+    let tags = ["Calibration"];
+
+    if (totalVolume === 0) {
+      title = "Initialization Phase";
+      description = `Your ${exam} roadmap reached standby. The AI is waiting for your first 10 questions to map your cognitive footprint. Start with any subject to activate analysis.`;
+      tags = ["Ready to Launch", "Baseline"];
+    }
+    else if (totalVolume < 50 || avgMastery < 3) {
+      title = "Syncing Neural Map";
+      const masteryValue = Math.round(avgMastery);
+      description = `Data acquisition in progress. Mastery is currently at ${masteryValue}%. ${masteryValue === 0 && avgAccuracy > 0 ? "Initial accuracy is promising, but we need more volume to confirm your cognitive stability." : `Complete 25 more questions across your active arenas to unlock the "Strategy Pivot" mode.`}`;
+      tags = ["Calibration", "Data Sync"];
+    }
+    else if (masteryGap > 40 && avgMastery > 20) {
+      // SUBJECT NEGLECT PATTERN
+      title = "Structural Imbalance Detected";
+      description = `Your performance in ${strongest.name} is excellent, but ${weakest.name} (${weakest.mastery}%) is currently a bottleneck for your global ${exam} rank. A "Subject Pivot" strategy is recommended for the next 48 hours.`;
+      focusArea = weakest.name;
+      trend = 'attention';
+      tags = ["Subject Pivot", "Rank Protection"];
+    }
+    else if (avgAccuracy < 50 && totalVolume > 50) {
+      // RIGOR/ACCURACY PATTERN
+      title = "Accuracy Recovery Required";
+      description = `Your practice volume is high (${totalVolume} Qs), but your accuracy is hovering at ${Math.round(avgAccuracy)}%. You are likely rushing. We recommend "Slow-Mode Study" for ${weakest.name} to stabilize fundamentals.`;
+      focusArea = weakest.name;
+      trend = 'attention';
+      tags = ["Rigor Check", "Conceptual Gaps"];
+    }
+    else if (avgMastery > 70) {
+      // PEAK PERFORMANCE PATTERN
+      title = "Elite Refinement Strategy";
+      description = `You have achieved critical mass in the core syllabus. Your trajectory indicates a top-tier percentile potential. Shifting focus to "Edge Cases" and "Timed Mock Simulation" to optimize performance.`;
+      trend = 'improving';
+      tags = ["Elite Track", "Speed Optimization"];
+    }
+    else if (avgMastery > 20 && totalVolume > 80) {
+      // STEADY PROGRESS
+      title = "Cognitive Momentum Active";
+      description = `Your overall ${exam} command is growing steadily. ${weakest.name} is currently your high-yield focus area. Mastering just a few more topics here will push your matrix into the next proficiency tier.`;
+      focusArea = weakest.name;
+      trend = 'improving';
+      tags = ["Growth Hub", "High Yield"];
+    }
+    else {
+      // DEFAULT FALLBACK FOR ACTIVE BUT MODERATE PROGRESS
+      title = "Baseline Established";
+      description = `Your initial profile is mapped. Current average accuracy is ${Math.round(avgAccuracy)}%. To see a "Momentum" shift, increase your daily practice volume and clear ${activeSubjects.length * 2} more high-weightage topics.`;
+      tags = ["Active Learning", "Phase 1"];
+    }
+
+    return { title, description, focusArea, trend, tags };
+  }, []);
+
   const fetchComprehensiveStats = useCallback(async (isInitial = false) => {
     if (isInitial) setIsLoadingStats(true);
     try {
-      // 1. Fetch available scans once
       const { data: publishedScans } = await supabase
         .from('scans')
         .select('id, subject, analysis_data')
@@ -108,88 +195,52 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
       }
 
       const scanIds = publishedScans.map(s => s.id);
-
-      // 2. Fetch all flashcards count once
-      const { data: flashcardRecords } = await supabase
-        .from('flashcards')
-        .select('scan_id, data')
-        .in('scan_id', scanIds);
-
-      // 3. Fetch all topics count once
-      const { data: allTopics } = await supabase
-        .from('topics')
-        .select('id, subject, domain');
-
-      // 4. Fetch question counts per scan_id
-      // Since Supabase doesn't easily do grouped counts on related tables in one go without a RPC,
-      // we'll fetch them in parallel for each subject.
+      const { data: flashcardRecords } = await supabase.from('flashcards').select('scan_id, data').in('scan_id', scanIds);
+      const { data: allTopics } = await supabase.from('topics').select('id, subject, domain');
 
       const subjectPromises = availableSubjects.map(async (subject) => {
         const subjectScanIds = publishedScans.filter(s => s.subject === subject).map(s => s.id);
-
         let qCount = 0;
         if (subjectScanIds.length > 0) {
-          const { count } = await supabase
-            .from('questions')
-            .select('*', { count: 'exact', head: true })
-            .in('scan_id', subjectScanIds);
+          const { count } = await supabase.from('questions').select('*', { count: 'exact', head: true }).in('scan_id', subjectScanIds);
           qCount = count || 0;
         }
 
-        const subjectFlashcards = flashcardRecords
-          ?.filter(f => subjectScanIds.includes(f.scan_id))
-          .reduce((sum, f) => sum + (Array.isArray(f.data) ? f.data.length : 0), 0) || 0;
-
-        const subjectSketches = publishedScans
-          .filter(s => s.subject === subject && s.analysis_data?.topicBasedSketches)
-          .reduce((sum, s) => sum + Object.keys(s.analysis_data.topicBasedSketches).length, 0);
-
+        const subjectFlashcards = flashcardRecords?.filter(f => subjectScanIds.includes(f.scan_id)).reduce((sum, f) => sum + (Array.isArray(f.data) ? f.data.length : 0), 0) || 0;
+        const subjectSketches = publishedScans.filter(s => s.subject === subject && s.analysis_data?.topicBasedSketches).reduce((sum, s) => sum + Object.keys(s.analysis_data.topicBasedSketches).length, 0);
         const subjectTopics = allTopics?.filter(t => t.subject === subject).length || 0;
 
-        return [subject, {
-          questions: qCount,
-          sketches: subjectSketches,
-          flashcards: subjectFlashcards,
-          topics: subjectTopics
-        }] as [Subject, any];
+        return [subject, { questions: qCount, sketches: subjectSketches, flashcards: subjectFlashcards, topics: subjectTopics }] as [Subject, any];
       });
 
       const subjectStatsResults = await Promise.all(subjectPromises);
-      const subjectStats = Object.fromEntries(subjectStatsResults) as Record<Subject, any>;
+      const subjectStatsDict = Object.fromEntries(subjectStatsResults) as Record<Subject, any>;
 
-      const totalQuestions = Object.values(subjectStats).reduce((sum, s: any) => sum + s.questions, 0);
-      const totalSketches = Object.values(subjectStats).reduce((sum, s: any) => sum + s.sketches, 0);
-      const totalFlashcards = Object.values(subjectStats).reduce((sum, s: any) => sum + s.flashcards, 0);
-      const totalTopics = Object.values(subjectStats).reduce((sum, s: any) => sum + s.topics, 0);
+      const totalQuestions = Object.values(subjectStatsDict).reduce((sum, s: any) => sum + s.questions, 0);
+      const totalSketches = Object.values(subjectStatsDict).reduce((sum, s: any) => sum + s.sketches, 0);
+      const totalFlashcards = Object.values(subjectStatsDict).reduce((sum, s: any) => sum + s.flashcards, 0);
+      const totalTopics = Object.values(subjectStatsDict).reduce((sum, s: any) => sum + s.topics, 0);
 
-      setComprehensiveStats({
+      const newStats = {
         totalQuestions,
         totalSketches,
         totalFlashcards,
         totalTopics,
-        subjectStats
-      });
+        subjectStats: subjectStatsDict
+      };
 
-      // Generate AI Insights
-      const masteredSubjects = availableSubjects.filter(s => (subjectProgress?.[s]?.overallMastery || 0) > 80);
-      const attentionSubjects = availableSubjects.filter(s => (subjectProgress?.[s]?.overallMastery || 0) < 40);
+      setComprehensiveStats(newStats);
 
-      setAiInsights({
-        title: attentionSubjects.length > 0 ? "Strategic Focus Required" : masteredSubjects.length > 0 ? "Mastery Acceleration" : "Learning Engine Active",
-        description: attentionSubjects.length > 0
-          ? `You've demonstrated strong potential, but ${attentionSubjects[0]} requires immediate attention to balance your overall score. Focusing on high-yield topics here could boost your accuracy by ~15%.`
-          : masteredSubjects.length > 0
-            ? `Excellent progress in ${masteredSubjects[0]}! Your conceptual depth is significantly above average. You should now pivot to "Speed Drills" to optimize your time-per-question.`
-            : `All subjects are currently in the calibration phase. Based on your current trajectory, completing 20 more questions in any subject will unlock detailed predictive insights.`,
-        focusArea: attentionSubjects.length > 0 ? attentionSubjects[0] : masteredSubjects.length > 0 ? masteredSubjects[0] : "General",
-        trend: attentionSubjects.length > 0 ? 'attention' : masteredSubjects.length > 0 ? 'improving' : 'stable'
-      });
+      // 🧠 Generate Strategic AI Insights based on WHOLE profile
+      const strategy = generateIntelligentStrategy(newStats, subjectProgress, examContext);
+      setAiInsights(strategy);
+
     } catch (error) {
       console.error('Error fetching comprehensive stats:', error);
     } finally {
       if (isInitial) setIsLoadingStats(false);
     }
-  }, [availableSubjects, subjectProgress, examContext]);
+  }, [availableSubjects, subjectProgress, examContext, generateIntelligentStrategy]);
 
   useEffect(() => {
     // Only show skeleton loaders (true) if we don't have stats yet
@@ -248,62 +299,138 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
         }
       />
 
-      <main className="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto space-y-4">
+      <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-10">
+        <div className="max-w-7xl mx-auto space-y-8">
 
-          {/* THE SUBJECT GRID (Levelled Up & Clean) */}
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 px-1">
-              <div className="w-0.5 h-4 bg-slate-900 rounded-full" />
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Your Subjects</h2>
+          {/* 3. HERO AI COACH MESSAGE */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative bg-slate-900 rounded-[2rem] p-6 md:p-8 overflow-hidden shadow-2xl border border-white/5"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-[80px] -mr-32 -mt-32" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+              <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-primary-400 to-indigo-500 flex items-center justify-center text-slate-900 shadow-2xl shrink-0 animate-pulse">
+                <Brain size={40} strokeWidth={2.5} />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                  <span className="px-2 py-0.5 bg-primary-500/20 text-primary-400 rounded text-[10px] font-black uppercase tracking-widest border border-primary-500/30">Active Coach</span>
+                  <div className="flex gap-1.5 overflow-hidden">
+                    {aiInsights?.tags.map(tag => (
+                      <span key={tag} className="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/5 whitespace-nowrap">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black text-white italic uppercase tracking-tight mb-2">
+                  {aiInsights ? aiInsights.title : "Calibrating Performance Matrix"}
+                </h2>
+                <p className="text-slate-400 font-instrument text-lg leading-snug max-w-2xl">
+                  {aiInsights ? aiInsights.description : "Reviewing your latest test responses to generate strategic blueprints."}
+                </p>
+              </div>
+              <div className="shrink-0 flex gap-4">
+                <div className="text-center px-6 py-3 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+                  <div className="text-3xl font-black text-white leading-none mb-1">{Math.round(averageMastery)}%</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Avg Mastery</div>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* 4. THE SUBJECT GRID (Levelled Up & Clean) */}
+          <section className="space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-slate-900 rounded-full" />
+                <h2 className="text-sm font-black text-slate-900 uppercase tracking-[0.3em]">Arena Selection</h2>
+              </div>
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                {availableSubjects.length} Subjects Active
+              </div>
             </div>
 
             <motion.div
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-6"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pb-12"
             >
               {availableSubjects.map((subject) => {
                 const config = SUBJECT_CONFIGS[subject];
-                const mastery = subjectProgress?.[subject]?.overallMastery || 0;
+                const progress = subjectProgress?.[subject];
+                const mastery = progress?.overallMastery || 0;
+                const accuracy = progress?.overallAccuracy ?? 0;
+                const volume = progress?.totalQuestionsAttempted || 0;
                 const stats = comprehensiveStats.subjectStats[subject] || { questions: 0, sketches: 0, flashcards: 0, topics: 0 };
                 const Icon = SUBJECT_ICONS[subject];
+
+                // Dynamic Coach Tip per card - Multidimensional
+                const getCoachTip = (s: Subject, m: number, a: number, v: number) => {
+                  if (m === 0 || v === 0) return `Baseline missing. Complete 5 questions in ${s} to activate AI coaching.`;
+                  if (v < 15) return `Data syncing. Complete more questions in ${s} to generate a specialized strategy.`;
+                  if (a < 40) return `Critical accuracy gap detected. Move from practice to "Theory Review" immediately.`;
+                  if (m < 20 && a > 75) return `Strong fundamentals but low volume. Acceleration towards mock tests required.`;
+                  if (m > 60 && a < 60) return `High coverage but low retention. Re-practice "Weakest Topics" for stability.`;
+                  if (m > 80 && a > 80) return `Elite level achievement. Switch to "Peer Benchmarking" & "Advanced PYQs".`;
+                  return `Steady progress. Target +10% mastery to reach the next proficiency tier in ${s}.`;
+                };
 
                 return (
                   <motion.button
                     key={subject}
                     variants={cardVariants}
-                    whileHover={{ y: -4, scale: 1.005 }}
+                    whileHover={{ y: -8, scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
                     onClick={() => onSelectSubject(subject)}
-                    className="group relative bg-white rounded-[1.5rem] p-5 md:p-6 border border-slate-200/60 hover:border-primary-200 transition-all duration-300 shadow-sm hover:shadow-xl text-left flex flex-col gap-6 overflow-hidden"
+                    className="group relative bg-white rounded-[2.5rem] p-6 md:p-8 border border-slate-200 shadow-sm hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] hover:border-primary-200 transition-all duration-500 text-left flex flex-col gap-8 overflow-hidden"
                   >
-                    {/* Subtle Internal Glow Hover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-slate-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none" />
+                    {/* Visual Highlights */}
+                    <div className="absolute top-0 left-0 w-full h-2 bg-slate-100" />
+                    <div
+                      className="absolute top-0 left-0 h-2 transition-all duration-700 ease-out"
+                      style={{ width: `${mastery}%`, backgroundColor: config.color }}
+                    />
 
                     <div className="relative z-10 flex flex-col gap-8 w-full">
                       <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-5">
+                        <div className="flex items-center gap-6">
                           <div
-                            className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-xl transition-transform group-hover:rotate-6 duration-500"
+                            className="w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl transition-all group-hover:rotate-6 group-hover:scale-110 duration-500"
                             style={{ background: `linear-gradient(135deg, ${config.color}, ${config.colorDark})` }}
                           >
-                            <Icon size={28} strokeWidth={2} />
+                            <Icon size={32} strokeWidth={2.5} />
                           </div>
                           <div>
-                            <h4 className="text-2xl font-bold text-slate-900 uppercase italic font-outfit leading-none">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subject</span>
+                              <div className="w-1 h-3 bg-slate-200 rounded-full" />
+                            </div>
+                            <h4 className="text-3xl font-black text-slate-900 uppercase italic font-outfit leading-none tracking-tight">
                               {config.displayName}
                             </h4>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-3xl font-bold text-slate-900 font-outfit leading-none">{Math.round(mastery)}%</div>
-                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Mastery</div>
+                        <div className="text-right flex flex-col items-end">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-4xl font-black text-slate-900 font-outfit leading-none tracking-tighter">{Math.round(mastery)}%</span>
+                          </div>
+                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Global Mastery</div>
                         </div>
                       </div>
 
-                      {/* INTEGRATED STATS - CLEAN PROFESSIONAL LOOK */}
+                      {/* AI COACH MICRO-TIP */}
+                      <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-100 group-hover:bg-white group-hover:border-slate-200 transition-all">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <Sparkles size={12} className="text-primary-500" />
+                          <span className="text-[9px] font-black text-primary-600 uppercase tracking-[0.15em]">AI Coach Recommendation</span>
+                        </div>
+                        <p className="text-xs font-bold text-slate-600 italic leading-relaxed">
+                          "{getCoachTip(subject, mastery, accuracy, stats.questions || volume)}"
+                        </p>
+                      </div>
+
+                      {/* INTEGRATED STATS (Pills) */}
                       <div className="grid grid-cols-4 gap-3">
                         {[
                           { l: 'Topics', v: stats.topics, c: config.color, i: BookOpen },
@@ -313,33 +440,40 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         ].map((s, idx) => {
                           const StatIcon = s.i;
                           return (
-                            <div key={idx} className="relative bg-slate-50/40 backdrop-blur-sm border border-slate-100 rounded-xl p-3 flex flex-col items-center group-hover:bg-white group-hover:border-slate-200 transition-all duration-300">
-                              <div className="mb-2 opacity-80 group-hover:opacity-100" style={{ color: s.c }}>
-                                <StatIcon size={18} strokeWidth={1.5} />
+                            <div key={idx} className="bg-white border border-slate-100 rounded-2xl p-3 flex flex-col items-center shadow-sm group-hover:border-slate-200 transition-all">
+                              <div className="mb-2" style={{ color: s.c }}>
+                                <StatIcon size={18} strokeWidth={2} />
                               </div>
-                              <div className="text-xl font-bold text-slate-900 leading-none mb-1">{s.v || 0}</div>
-                              <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{s.l}</div>
+                              <div className="text-xl font-black text-slate-900 leading-none mb-1">{s.v || 0}</div>
+                              <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">{s.l}</div>
                             </div>
                           );
                         })}
                       </div>
 
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-100/60">
-                        <div className="flex items-center gap-2 text-primary-500 font-bold text-[10px] tracking-widest uppercase">
-                          <span className="group-hover:translate-x-1 transition-transform">Launch Hub</span>
-                          <ArrowRight size={14} />
+                      {/* PERFORMANCE PERFORMANCE PERFORMANCE */}
+                      <div className="space-y-4 pt-4 border-t border-slate-100">
+                        <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          <span>Accuracy Benchmarking</span>
+                          <span className="text-slate-900">{Math.round(accuracy)}%</span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${mastery}%` }}
-                              transition={{ duration: 1, ease: 'easeOut' }}
-                              className="h-full bg-slate-900 rounded-full"
-                              style={{ backgroundColor: config.color }}
-                            />
+                        <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${accuracy}%` }}
+                            className="h-full bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.5)]"
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between mt-6">
+                          <div className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform">
+                            Launch Subject
+                            <ArrowRight size={14} />
                           </div>
-                          <span className="text-[10px] font-bold text-slate-900">{Math.round(mastery)}%</span>
+                          <div className="flex items-center gap-2 italic">
+                            <TrendingUp size={12} className="text-emerald-500" />
+                            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Potential +12%</span>
+                          </div>
                         </div>
                       </div>
                     </div>

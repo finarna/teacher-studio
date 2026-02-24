@@ -552,26 +552,68 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
 
                 <div className="space-y-4 mb-6 flex-1">
                   <p className="text-sm text-slate-300 font-instrument font-medium leading-relaxed italic">
-                    "Your <span className="text-white font-bold">Concept Density</span> in high-yield topics is excellent. I recommend pivoting to <span className="text-white font-bold">Past Year Exams</span> to improve your session stamina for the upcoming {examContext} cycle."
+                    {(() => {
+                      const mastery = subProg?.overallMastery || 0;
+                      const accuracy = subProg?.overallAccuracy || 0;
+                      const volume = stats.pastYearQuestionsCount + (stats.masteredTopics * 5); // Rough estimate of activity
+
+                      if (mastery === 0) {
+                        return (
+                          <>
+                            "The <span className="text-white font-bold">{subject} Mission Center</span> is initialized. Since you haven't started yet, I recommend beginning with <span className="text-white font-bold">Topicwise Preparation</span> to establish your baseline concepts."
+                          </>
+                        );
+                      }
+
+                      if (mastery < 30) {
+                        return (
+                          <>
+                            "You are in the <span className="text-white font-bold">Foundation Building</span> phase. Focus on high-weightage topics in <span className="text-white font-bold">Topicwise Preparation</span> to quickly boost your Command metric before moving to papers."
+                          </>
+                        );
+                      }
+
+                      if (accuracy < 60 && mastery > 20) {
+                        return (
+                          <>
+                            "Your coverage is growing, but your <span className="text-white font-bold">Accuracy</span> is under 60%. I recommend <span className="text-white font-bold">Custom Mock Tests</span> focused on your recently practiced topics to stabilize your fundamentals."
+                          </>
+                        );
+                      }
+
+                      if (mastery > 70) {
+                        return (
+                          <>
+                            "Your <span className="text-white font-bold">Concept Density</span> in high-yield topics is excellent. I recommend pivoting to <span className="text-white font-bold">Past Year Exams</span> to improve your session stamina for the upcoming {examContext} cycle."
+                          </>
+                        );
+                      }
+
+                      return (
+                        <>
+                          "Your progress is steady. To accelerate towards mastery, try mixing <span className="text-white font-bold">Topicwise Quiz</span> with a few <span className="text-white font-bold">Past Year Questions</span> to see how theory applies in real exams."
+                        </>
+                      );
+                    })()}
                   </p>
                 </div>
 
                 <div className="bg-white/5 rounded-xl border border-white/10 p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Subject Health</span>
-                    <span className={`text-[10px] font-bold uppercase tracking-widest ${(stats.masteredTopics / (stats.totalTopics || 1)) * 100 < 30 ? 'text-rose-400' :
-                      (stats.masteredTopics / (stats.totalTopics || 1)) * 100 > 75 ? 'text-blue-400' : 'text-emerald-400'
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${(subProg?.overallMastery || 0) < 30 ? 'text-rose-400' :
+                      (subProg?.overallMastery || 0) > 75 ? 'text-blue-400' : 'text-emerald-400'
                       }`}>
-                      {(stats.masteredTopics / (stats.totalTopics || 1)) * 100 < 30 ? 'Requires Boost' :
-                        (stats.masteredTopics / (stats.totalTopics || 1)) * 100 > 75 ? 'Optimal' : 'Stable'}
+                      {(subProg?.overallMastery || 0) < 30 ? 'Requires Boost' :
+                        (subProg?.overallMastery || 0) > 75 ? 'Optimal' : 'Stable'}
                     </span>
                   </div>
                   <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${(stats.masteredTopics / (stats.totalTopics || 1)) * 100}%` }}
-                      className={`h-full ${(stats.masteredTopics / (stats.totalTopics || 1)) * 100 < 30 ? 'bg-rose-500' :
-                        (stats.masteredTopics / (stats.totalTopics || 1)) * 100 > 75 ? 'bg-blue-500' : 'bg-emerald-500'
+                      animate={{ width: `${subProg?.overallMastery || 0}%` }}
+                      className={`h-full ${(subProg?.overallMastery || 0) < 30 ? 'bg-rose-500' :
+                        (subProg?.overallMastery || 0) > 75 ? 'bg-blue-500' : 'bg-emerald-500'
                         }`}
                     />
                   </div>

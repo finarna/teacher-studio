@@ -11,7 +11,8 @@ import {
   Zap,
   Medal,
   Award,
-  BookMarked
+  BookMarked,
+  FileQuestion
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { ExamContext } from '../types';
@@ -150,36 +151,46 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
   userProgress
 }) => {
   return (
-    <div className="min-h-full bg-slate-50/50">
+    <div className="relative min-h-screen bg-[#fcfdfe] overflow-hidden">
+      {/* 1. PREMIUM AMBIENT BACKGROUND */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-500/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/5 rounded-full blur-[140px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+      </div>
+
       <LearningJourneyHeader
-        title="Path Selection"
-        subtitle="Embark on your personal excellence journey"
+        title="Mission Selection"
+        subtitle="Your personalized roadmap to academic excellence"
       />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-        <div className="mb-10 text-center max-w-2xl mx-auto">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
+        <div className="mb-16 text-center max-w-3xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-2 px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 border border-primary-100 shadow-sm"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-900 text-primary-400 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 border border-white/10 shadow-2xl"
           >
-            <Sparkles size={12} />
-            AI-Powered Personalization
+            <Sparkles size={14} className="animate-pulse" />
+            AI-Powered Personalization Engine
           </motion.div>
+
           <motion.h2
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-4xl font-black text-slate-900 font-outfit mb-3 tracking-tight"
+            className="text-4xl md:text-6xl font-black text-slate-900 font-outfit mb-6 tracking-tight italic uppercase"
           >
-            Select Your <span className="text-primary-600">Trajectory</span>
+            Choose Your <span className="text-primary-600 non-italic">Trajectory</span>
           </motion.h2>
+
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-slate-500 font-instrument text-lg"
+            className="text-slate-500 font-instrument text-xl md:text-2xl leading-relaxed"
           >
-            Choose your exam target to unlock tailored study materials, predictive analytics, and mastery tracking.
+            We've analyzed current exam trends to tailor your learning path.
+            Pick the arena where you'll prove your excellence today.
           </motion.p>
         </div>
 
@@ -187,7 +198,7 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 pb-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 pb-12"
         >
           {TRAJECTORY_CARDS.map((trajectory) => {
             const progress = userProgress?.[trajectory.id];
@@ -198,76 +209,103 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
               <motion.button
                 key={trajectory.id}
                 variants={cardVariants}
-                whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ y: -12, transition: { type: "spring", stiffness: 300 } }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => onSelectTrajectory(trajectory.id)}
-                className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-2xl hover:border-primary-200 transition-all duration-300 text-left overflow-hidden flex flex-col h-full"
+                className="group relative bg-white rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] hover:border-primary-300/50 transition-all duration-500 text-left overflow-hidden flex flex-col h-full"
               >
-                {/* Background Accent */}
-                <div className={`absolute top-0 right-0 w-32 h-32 -mr-8 -mt-8 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity bg-gradient-to-br ${trajectory.gradient}`} />
+                {/* Visual Accent Layer */}
+                <div className={`absolute top-0 right-0 w-48 h-48 -mr-12 -mt-12 rounded-full blur-[80px] opacity-0 group-hover:opacity-30 transition-opacity bg-gradient-to-br ${trajectory.gradient}`} />
 
-                <div className="p-6 flex flex-col h-full relative z-10">
-                  {/* Icon & Progress */}
-                  <div className="flex items-start justify-between mb-6">
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${trajectory.gradient} flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform duration-300`}>
-                      <Icon size={28} className="text-white" strokeWidth={2.5} />
+                {/* Progress Ring Background (Subtle) */}
+                <div className="absolute top-6 right-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Target size={120} style={{ color: trajectory.color }} />
+                </div>
+
+                <div className="p-8 flex flex-col h-full relative z-10">
+                  {/* Top Badge & Progress */}
+                  <div className="flex items-start justify-between mb-8">
+                    <div className={`w-16 h-16 rounded-[1.5rem] bg-gradient-to-br ${trajectory.gradient} flex items-center justify-center shadow-xl transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500`}>
+                      <Icon size={32} className="text-white" strokeWidth={2.5} />
                     </div>
-                    {hasProgress && (
+                    {hasProgress ? (
                       <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mastery</span>
-                        <span className="text-lg font-black text-slate-900 leading-none">{progress.overallMastery}%</span>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-2xl font-black text-slate-900 leading-none">{progress.overallMastery}%</span>
+                          <span className="text-[10px] font-bold text-slate-400">Mastery</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="px-3 py-1 bg-slate-50 rounded-full border border-slate-100 italic font-bold text-[10px] text-slate-400 uppercase tracking-widest">
+                        Not Started
                       </div>
                     )}
                   </div>
 
-                  {/* Title & Description */}
-                  <div className="mb-6">
-                    <h3 className="text-2xl font-black text-slate-900 font-outfit tracking-tight group-hover:text-primary-600 transition-colors">
+                  {/* Identity Section */}
+                  <div className="mb-8">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-black text-primary-500 uppercase tracking-[0.2em] leading-none">
+                        {trajectory.description}
+                      </span>
+                      <div className="w-1 h-3 bg-primary-200 rounded-full" />
+                    </div>
+                    <h3 className="text-3xl font-black text-slate-900 font-outfit tracking-tighter group-hover:text-primary-600 transition-colors uppercase italic">
                       {trajectory.name}
                     </h3>
-                    <p className="text-sm font-bold text-slate-500">
+                    <p className="text-sm font-bold text-slate-500 mt-1 line-clamp-1">
                       {trajectory.fullName}
                     </p>
-                    <div className="mt-2 text-[10px] font-black text-primary-500 uppercase tracking-widest flex items-center gap-1.5 leading-none">
-                      <Zap size={10} />
-                      {trajectory.description}
-                    </div>
                   </div>
 
-                  {/* Highlights */}
-                  <div className="space-y-3 mb-8 flex-1">
+                  {/* Highlights List */}
+                  <div className="space-y-4 mb-10 flex-1">
                     {trajectory.highlights.map((h, i) => (
-                      <div key={i} className="flex items-center gap-3 text-sm text-slate-600 font-medium">
-                        <div className={`p-1.5 rounded-lg ${trajectory.lightColor}`}>
-                          <h.icon size={14} style={{ color: trajectory.color }} />
+                      <div key={i} className="flex items-center gap-3 text-sm text-slate-600 font-semibold group/item">
+                        <div className={`p-2 rounded-xl ${trajectory.lightColor} group-hover/item:scale-110 transition-transform`}>
+                          <h.icon size={16} style={{ color: trajectory.color }} strokeWidth={2.5} />
                         </div>
-                        {h.text}
+                        <span className="group-hover:text-slate-900 transition-colors">{h.text}</span>
                       </div>
                     ))}
                   </div>
 
-                  {/* Footer Stats */}
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                    <div className="flex items-center gap-4">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Questions</span>
-                        <span className="text-sm font-black text-slate-900">{trajectory.pattern.totalQuestions}</span>
+                  {/* Predictive/Pattern Stats */}
+                  <div className="grid grid-cols-2 gap-4 pt-6 mt-auto border-t border-slate-100">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <FileQuestion size={10} className="text-slate-400" />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Patterns</span>
                       </div>
-                      <div className="w-px h-8 bg-slate-100" />
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Time</span>
-                        <span className="text-sm font-black text-slate-900">{trajectory.pattern.duration}m</span>
-                      </div>
+                      <span className="text-sm font-black text-slate-900 uppercase italic">
+                        {trajectory.pattern.totalQuestions} Questions
+                      </span>
                     </div>
-
-                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-all">
-                      <ArrowRight size={18} />
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Clock size={10} className="text-slate-400" />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Window</span>
+                      </div>
+                      <span className="text-sm font-black text-slate-900 uppercase italic">
+                        {trajectory.pattern.duration} Minutes
+                      </span>
                     </div>
                   </div>
 
-                  {/* Active Progress Bar */}
+                  {/* Action Link */}
+                  <div className="mt-8 flex items-center justify-between">
+                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.25em] group-hover:translate-x-2 transition-transform duration-300">
+                      Engage Mission
+                    </span>
+                    <div className={`w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-xl transition-all duration-300`}>
+                      <ArrowRight size={20} className="transform group-hover:scale-125 transition-transform" />
+                    </div>
+                  </div>
+
+                  {/* Master Progress Bar */}
                   {hasProgress && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-100">
+                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-50">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${progress.overallMastery}%` }}
@@ -279,6 +317,26 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
               </motion.button>
             );
           })}
+        </motion.div>
+
+        {/* AI INSIGHT PILL */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-12 flex justify-center"
+        >
+          <div className="px-6 py-4 bg-white border border-slate-200 rounded-3xl shadow-2xl flex items-center gap-4 max-w-xl mx-auto">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
+              <Zap size={24} className="fill-emerald-600/20" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Live AI Tip</p>
+              <p className="text-sm font-bold text-slate-700 italic leading-snug">
+                "Based on latest exam pattern updates, <span className="text-primary-600">JEE Math</span> weightage has shifted slightly towards vectors. Your roadmap is already updated."
+              </p>
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>

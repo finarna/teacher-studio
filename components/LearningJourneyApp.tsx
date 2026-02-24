@@ -130,6 +130,36 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
           goBack();
           return null;
         }
+
+        // Simple Recommendation Engine
+        const getAiRecommendation = () => {
+          if (!topics || topics.length === 0) return undefined;
+
+          // 1. Find a topic that is active but not mastered
+          const activeTopic = topics.find(t => t.masteryLevel > 0 && t.masteryLevel < 85);
+          if (activeTopic) {
+            return {
+              topicId: activeTopic.topicId,
+              topicName: activeTopic.topicName,
+              reason: `You've already started this topic. Finishing it will boost your global ${selectedSubject} command significantly.`,
+              urgency: 'high' as const
+            };
+          }
+
+          // 2. Find a high-yield unstarted topic (just pick first unstarted for now)
+          const unstartedTopic = topics.find(t => t.masteryLevel === 0);
+          if (unstartedTopic) {
+            return {
+              topicId: unstartedTopic.topicId,
+              topicName: unstartedTopic.topicName,
+              reason: `Identifying this as a core foundation for ${selectedSubject}. Mastering this early will simplify advanced concepts later.`,
+              urgency: 'medium' as const
+            };
+          }
+
+          return undefined;
+        };
+
         return (
           <TopicDashboardPage
             subject={selectedSubject}
@@ -137,7 +167,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
             topics={topics}
             onSelectTopic={selectTopic}
             onBack={goBack}
-            aiRecommendation={undefined} // TODO: AI service integration
+            aiRecommendation={getAiRecommendation()}
             studyStreak={0} // TODO: Load from user activity
           />
         );

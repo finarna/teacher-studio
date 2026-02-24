@@ -77,21 +77,21 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
   const subProg = subjectProgress?.[subject];
   const [isRefreshing, setIsRefreshing] = useState(false); // Added state for refreshing
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
+  const handleRefresh = async (silent = false) => {
+    if (!silent) setIsRefreshing(true);
     try {
-      await refreshData();
+      await refreshData(silent);
     } catch (error) {
       // Handle error if necessary
     } finally {
-      setIsRefreshing(false);
+      if (!silent) setIsRefreshing(false);
     }
   };
 
   const refreshStats = (silent: boolean = true) => {
     setStatsRefreshTrigger(prev => prev + 1);
     onRefreshData?.(silent);
-    handleRefresh(); // Trigger refresh of subject progress as well
+    handleRefresh(silent); // Trigger refresh of subject progress as well
   };
 
   const [localStats, setLocalStats] = useState({

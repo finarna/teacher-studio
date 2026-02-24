@@ -17,15 +17,26 @@ import type { User, Session } from '@supabase/supabase-js';
 // =====================================================
 // TYPES
 // =====================================================
+export interface UserProfile {
+  id: string;
+  email: string;
+  role: 'admin' | 'teacher' | 'student';
+  subscription_status: 'active' | 'inactive' | 'trial';
+  subscription_end_date?: string;
+  full_name?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  userProfile: UserProfile | null;
   loading: boolean;
   error: string | null;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   clearError: () => void;
+  refreshProfile: () => Promise<void>;
 }
 
 // =====================================================
@@ -43,8 +54,43 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Helper to fetch profile from DB
+  const fetchProfile = async (userId: string) => {
+    try {
+      // First try to fetch the profile
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (!error && data) {
+        // If DB has the columns, use them, otherwise default
+        setUserProfile({
+          id: data.id,
+          email: data.email || '',
+          role: data.role || 'admin', // DEFAULT to admin while developing the RBAC so you don't get locked out
+          subscription_status: data.subscription_status || 'active',
+          subscription_end_date: data.subscription_end_date,
+          full_name: data.full_name
+        });
+      } else {
+        setUserProfile(null);
+      }
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (user?.id) {
+      await fetchProfile(user.id);
+    }
+  }
 
   // Initialize auth state on mount
   useEffect(() => {
@@ -63,9 +109,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           if (currentSession) {
             setSession(currentSession);
             setUser(currentSession.user);
+            await fetchProfile(currentSession.user.id);
           } else {
             setSession(null);
             setUser(null);
+            setUserProfile(null);
           }
         }
 
@@ -111,9 +159,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
         setSession(session);
         setError(null);
+        fetchProfile(session.user.id);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setSession(null);
+        setUserProfile(null);
       } else if (event === 'TOKEN_REFRESHED' && session) {
         // Silently update session without triggering dependent effects
         // Don't update user object to prevent re-renders
@@ -144,6 +194,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       setUser(user);
       setSession(session);
+      if (user) await fetchProfile(user.id);
       return { error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to sign in';
@@ -169,6 +220,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       setUser(user);
       setSession(session);
+      if (user) await fetchProfile(user.id);
       return { error: null };
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to sign up';
@@ -203,12 +255,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value: AuthContextType = {
     user,
     session,
+    userProfile,
     loading,
     error,
     signIn: handleSignIn,
     signUp: handleSignUp,
     signOut: handleSignOut,
     clearError,
+    refreshProfile
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
