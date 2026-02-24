@@ -168,6 +168,42 @@ const AppContent: React.FC = () => {
     return () => window.removeEventListener('openMobileMenu', handleOpenMenu);
   }, []);
 
+  // Handle Browser Back Button (Android/Mobile)
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      // 1. If mobile menu is open, close it first
+      if (isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+        // Push state back so next 'back' works as expected
+        window.history.pushState({ view: godModeView }, '');
+        return;
+      }
+
+      // 2. Handle view navigation from browser history
+      if (event.state && event.state.view) {
+        if (event.state.view !== godModeView) {
+          setGodModeView(event.state.view);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    // Ensure initial state is in history
+    if (!window.history.state) {
+      window.history.replaceState({ view: godModeView }, '');
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [godModeView, isMobileMenuOpen]);
+
+  // Sync state to history on view change
+  useEffect(() => {
+    if (window.history.state?.view !== godModeView) {
+      window.history.pushState({ view: godModeView }, '');
+    }
+  }, [godModeView]);
+
   // Supabase Backend Sync Logic (Port 9001)
   useEffect(() => {
     if (!user) return; // Only fetch when user is authenticated
@@ -396,17 +432,19 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // Navigation Helpers
-  const handleBackToDashboard = () => {
-    setGodModeView('mastermind');
-  };
+  // Determine if user is student for conditional rendering logic
+  const isStudent = userProfile?.role === 'student';
 
+  // Force student view if they are a student (immediate RBAC check for rendering)
+  const activeView = isStudent && !['learning_journey', 'profile'].includes(godModeView)
+    ? 'learning_journey'
+    : godModeView;
 
   // --- PRIMARY APP ROUTER ---
   return (
     <div className="flex h-screen bg-white text-slate-900 font-instrument">
       <Sidebar
-        activeView={godModeView}
+        activeView={activeView}
         onNavigate={setGodModeView}
         userName={user?.email?.split('@')[0] || 'User'}
         isMobileMenuOpen={isMobileMenuOpen}
@@ -428,7 +466,7 @@ const AppContent: React.FC = () => {
         <LearningJourneyProvider userId={user?.id || ''}>
 
           {/* Global Compact Header for Desktop and Mobile Responsive Nav */}
-          {godModeView !== 'learning_journey' && (
+          {activeView !== 'learning_journey' && (
             <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-40 shrink-0 sticky top-0">
               <div className="flex items-center gap-3 md:gap-4">
                 <button
@@ -439,7 +477,7 @@ const AppContent: React.FC = () => {
                 </button>
                 {/* Breadcrumb Context */}
                 <div className="hidden md:flex items-center gap-2">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{godModeView.replace('_', ' ')}</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{activeView.replace('_', ' ')}</span>
                 </div>
 
                 <div className="hidden md:flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1">
@@ -465,7 +503,7 @@ const AppContent: React.FC = () => {
           )}
 
           <main className="flex-1 overflow-y-auto relative pb-16 md:pb-0">
-            {godModeView === 'mastermind' && (
+            {activeView === 'mastermind' && (
               <div className="h-full overflow-y-auto scroller-hide p-8 bg-slate-50/50">
                 <div className="max-w-7xl mx-auto space-y-6">
                   {/* Dashboard Header */}
@@ -600,11 +638,11 @@ const AppContent: React.FC = () => {
               </div>
             )}
 
-            {godModeView === 'learning_journey' && (
+            {activeView === 'learning_journey' && (
               <LearningJourneyApp onBack={() => setGodModeView('mastermind')} />
             )}
 
-            {godModeView === 'scanning' && (
+            {activeView === 'scanning' && (
               <div className="h-full overflow-y-auto scroller-hide pb-20 md:pb-0">
                 <BoardMastermind
                   onNavigate={setGodModeView}
@@ -618,13 +656,13 @@ const AppContent: React.FC = () => {
               </div>
             )}
 
-            {godModeView === 'approval' && (
+            {activeView === 'approval' && (
               <div className="h-full overflow-y-auto scroller-hide">
                 <AdminScanApproval />
               </div>
             )}
 
-            {godModeView === 'analysis' && (
+            {activeView === 'analysis' && (
               <div className="h-full overflow-y-auto scroller-hide">
                 <ExamAnalysis
                   onBack={() => setGodModeView('mastermind')}
@@ -641,7 +679,7 @@ const AppContent: React.FC = () => {
               </div>
             )}
 
-            {godModeView === 'training_studio' && (
+            {activeView === 'training_studio' && (
               <div className="h-full overflow-y-auto scroller-hide">
                 <TrainingStudio
                   onClose={() => setGodModeView('mastermind')}
@@ -654,7 +692,7 @@ const AppContent: React.FC = () => {
               </div>
             )}
 
-            {godModeView === 'training_viewer' && currentTraining && (
+            {activeView === 'training_viewer' && currentTraining && (
               <div className="h-full overflow-y-auto scroller-hide">
                 <TrainingViewer
                   training={currentTraining}
@@ -663,11 +701,11 @@ const AppContent: React.FC = () => {
               </div>
             )}
 
-            {godModeView === 'questions' && <div className="h-full overflow-y-auto scroller-hide"><VisualQuestionBank recentScans={recentScans} /></div>}
+            {activeView === 'questions' && <div className="h-full overflow-y-auto scroller-hide"><VisualQuestionBank recentScans={recentScans} /></div>}
 
-            {godModeView === 'recall' && <div className="h-full overflow-y-auto scroller-hide"><RapidRecall recentScans={recentScans} /></div>}
+            {activeView === 'recall' && <div className="h-full overflow-y-auto scroller-hide"><RapidRecall recentScans={recentScans} /></div>}
 
-            {godModeView === 'gallery' && (
+            {activeView === 'gallery' && (
               <div className="h-full">
                 <SketchGallery
                   onBack={() => setGodModeView('mastermind')}
@@ -682,7 +720,7 @@ const AppContent: React.FC = () => {
               </div>
             )}
 
-            {godModeView === 'profile' && (
+            {activeView === 'profile' && (
               <div className="h-full overflow-hidden">
                 <UserProfile onBack={() => {
                   if (userProfile?.role === 'student') {
@@ -694,7 +732,7 @@ const AppContent: React.FC = () => {
               </div>
             )}
 
-            {godModeView === 'settings' && (
+            {activeView === 'settings' && (
               <div className="h-full">
                 <SettingsPanel onBack={() => setGodModeView('mastermind')} />
               </div>
@@ -704,31 +742,31 @@ const AppContent: React.FC = () => {
 
           {/* Mobile Bottom Navigation Bar */}
           <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex items-center justify-around px-2 z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-            <button onClick={() => setGodModeView('mastermind')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${godModeView === 'mastermind' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-              <LayoutDashboard size={20} className={godModeView === 'mastermind' ? 'fill-primary-50' : ''} />
+            <button onClick={() => setGodModeView('mastermind')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${activeView === 'mastermind' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+              <LayoutDashboard size={20} className={activeView === 'mastermind' ? 'fill-primary-50' : ''} />
               <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
             </button>
-            <button onClick={() => setGodModeView('scanning')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${godModeView === 'scanning' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-              <ScanLine size={20} className={godModeView === 'scanning' ? 'fill-primary-50' : ''} />
+            <button onClick={() => setGodModeView('scanning')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${activeView === 'scanning' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+              <ScanLine size={20} className={activeView === 'scanning' ? 'fill-primary-50' : ''} />
               <span className="text-[9px] font-bold uppercase tracking-wider">Scan</span>
             </button>
-            <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${godModeView === 'learning_journey' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-              <Map size={20} className={godModeView === 'learning_journey' ? 'fill-primary-50' : ''} />
+            <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${activeView === 'learning_journey' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+              <Map size={20} className={activeView === 'learning_journey' ? 'fill-primary-50' : ''} />
               <span className="text-[9px] font-bold uppercase tracking-wider">Journey</span>
             </button>
-            <button onClick={() => setGodModeView('profile')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${godModeView === 'profile' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-              <User size={20} className={godModeView === 'profile' ? 'fill-primary-50' : ''} />
+            <button onClick={() => setGodModeView('profile')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${activeView === 'profile' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
+              <User size={20} className={activeView === 'profile' ? 'fill-primary-50' : ''} />
               <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
             </button>
           </div>
 
           {/* Global Assistant overlay - Vidya V3 */}
-          {godModeView !== 'learning_journey' && godModeView !== 'profile' && (
+          {activeView !== 'learning_journey' && activeView !== 'profile' && (
             <VidyaV3
               appContext={{
                 scannedPapers: recentScans,
                 selectedScan: selectedScan,
-                currentView: godModeView,
+                currentView: activeView,
               }}
             />
           )}

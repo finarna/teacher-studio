@@ -73,7 +73,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUserProfile({
           id: data.id,
           email: data.email || '',
-          role: data.role || 'admin', // DEFAULT to admin while developing the RBAC so you don't get locked out
+          role: data.role || 'student', // DEFAULT to student for safety
           subscription_status: data.subscription_status || 'active',
           subscription_end_date: data.subscription_end_date,
           full_name: data.full_name

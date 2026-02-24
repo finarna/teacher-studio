@@ -38,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onL
   const theme = useSubjectTheme();
   const { userProfile } = useAuth();
 
-  const role = userProfile?.role || 'admin'; // fallback to admin if not loaded yet so no lockout
+  const role = userProfile?.role || 'student'; // fallback to student for safety
 
   useEffect(() => {
     fetchUserPlan();
