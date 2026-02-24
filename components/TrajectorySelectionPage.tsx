@@ -46,6 +46,26 @@ interface TrajectoryCard {
 
 const TRAJECTORY_CARDS: TrajectoryCard[] = [
   {
+    id: 'KCET',
+    name: 'KCET',
+    fullName: 'Karnataka Common Entrance Test',
+    description: 'State Academic Focus',
+    icon: GraduationCap,
+    color: '#F59E0B',
+    gradient: 'from-orange-500 to-orange-700',
+    lightColor: 'bg-orange-50',
+    pattern: {
+      totalQuestions: 60,
+      duration: 80,
+      subjects: ['P', 'C', 'M', 'B']
+    },
+    highlights: [
+      { icon: Medal, text: 'State Govt. Colleges' },
+      { icon: Zap, text: 'Fast-paced pattern' },
+      { icon: Award, text: 'Common Entrance focus' }
+    ]
+  },
+  {
     id: 'NEET',
     name: 'NEET',
     fullName: 'National Eligibility cum Entrance Test',
@@ -83,26 +103,6 @@ const TRAJECTORY_CARDS: TrajectoryCard[] = [
       { icon: Medal, text: 'IITs, NITs & IIITs' },
       { icon: Zap, text: 'Math & Physics focus' },
       { icon: Award, text: 'Main & Advanced track' }
-    ]
-  },
-  {
-    id: 'KCET',
-    name: 'KCET',
-    fullName: 'Karnataka Common Entrance Test',
-    description: 'State Academic Focus',
-    icon: GraduationCap,
-    color: '#F59E0B',
-    gradient: 'from-orange-500 to-orange-700',
-    lightColor: 'bg-orange-50',
-    pattern: {
-      totalQuestions: 60,
-      duration: 80,
-      subjects: ['P', 'C', 'M', 'B']
-    },
-    highlights: [
-      { icon: Medal, text: 'State Govt. Colleges' },
-      { icon: Zap, text: 'Fast-paced pattern' },
-      { icon: Award, text: 'Common Entrance focus' }
     ]
   },
   {
