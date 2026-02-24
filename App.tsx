@@ -17,7 +17,8 @@ import { LoginForm } from './components/LoginForm';
 import { SignupForm } from './components/SignupForm';
 import { supabase } from './lib/supabase';
 import { ProfessorTrainingContract } from './types';
-import { Home, LayoutDashboard, GraduationCap, Bell, Search, User, CheckCircle2, Menu, Map, ScanLine, Sparkles, FileText, ChevronRight } from 'lucide-react';
+import { Home, LayoutDashboard, GraduationCap, Bell, Search, User, CheckCircle2, Menu, Map, ScanLine, Sparkles, FileText, ChevronRight, Library, ChevronLeft } from 'lucide-react';
+import { useLearningJourney } from './contexts/LearningJourneyContext';
 import { AppContextProvider } from './contexts/AppContext';
 import { SubjectSwitcher } from './components/SubjectSwitcher';
 import { checkAndClearOldCache } from './utils/cacheRefresh';
@@ -167,42 +168,6 @@ const AppContent: React.FC = () => {
     window.addEventListener('openMobileMenu', handleOpenMenu);
     return () => window.removeEventListener('openMobileMenu', handleOpenMenu);
   }, []);
-
-  // Handle Browser Back Button (Android/Mobile)
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      // 1. If mobile menu is open, close it first
-      if (isMobileMenuOpen) {
-        setIsMobileMenuOpen(false);
-        // Push state back so next 'back' works as expected
-        window.history.pushState({ view: godModeView }, '');
-        return;
-      }
-
-      // 2. Handle view navigation from browser history
-      if (event.state && event.state.view) {
-        if (event.state.view !== godModeView) {
-          setGodModeView(event.state.view);
-        }
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-
-    // Ensure initial state is in history
-    if (!window.history.state) {
-      window.history.replaceState({ view: godModeView }, '');
-    }
-
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [godModeView, isMobileMenuOpen]);
-
-  // Sync state to history on view change
-  useEffect(() => {
-    if (window.history.state?.view !== godModeView) {
-      window.history.pushState({ view: godModeView }, '');
-    }
-  }, [godModeView]);
 
   // Supabase Backend Sync Logic (Port 9001)
   useEffect(() => {
@@ -440,60 +405,210 @@ const AppContent: React.FC = () => {
     ? 'learning_journey'
     : godModeView;
 
-  // --- PRIMARY APP ROUTER ---
   return (
-    <div className="flex h-screen bg-white text-slate-900 font-instrument">
-      <Sidebar
+    <LearningJourneyProvider userId={user?.id || ''}>
+      <AppShell
         activeView={activeView}
-        onNavigate={setGodModeView}
-        userName={user?.email?.split('@')[0] || 'User'}
+        setGodModeView={setGodModeView}
+        isStudent={isStudent}
+        user={user}
+        userProfile={userProfile}
+        recentScans={recentScans}
+        setRecentScans={setRecentScans}
+        selectedScan={selectedScan}
+        setSelectedScan={setSelectedScan}
         isMobileMenuOpen={isMobileMenuOpen}
-        onCloseMobile={() => setIsMobileMenuOpen(false)}
-        onLogout={async () => {
-          const confirmed = await confirm({
-            title: 'Sign Out',
-            message: 'Are you sure you want to sign out?',
-            type: 'warning',
-          });
-          if (confirmed) {
-            await signOut();
-            showToast('Signed out successfully', 'success');
-          }
-        }}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+        syncScanToSupabase={syncScanToSupabase}
+        currentTraining={currentTraining}
+        setCurrentTraining={setCurrentTraining}
+        signOut={signOut}
+        confirm={confirm}
+        showToast={showToast}
       />
+    </LearningJourneyProvider>
+  );
+};
 
-      <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50/50">
-        <LearningJourneyProvider userId={user?.id || ''}>
+// New AppShell component that consumes LearningJourneyContext
+const AppShell: React.FC<{
+  activeView: string;
+  setGodModeView: (view: string) => void;
+  isStudent: boolean;
+  user: any;
+  userProfile: any;
+  recentScans: Scan[];
+  setRecentScans: React.Dispatch<React.SetStateAction<Scan[]>>;
+  selectedScan: Scan | null;
+  setSelectedScan: (scan: Scan | null) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
+  syncScanToSupabase: (scan: Scan) => Promise<void>;
+  currentTraining: ProfessorTrainingContract | null;
+  setCurrentTraining: (training: ProfessorTrainingContract | null) => void;
+  signOut: () => Promise<void>;
+  confirm: (options: any) => Promise<boolean>;
+  showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+}> = ({
+  activeView,
+  setGodModeView,
+  isStudent,
+  user,
+  userProfile,
+  recentScans,
+  setRecentScans,
+  selectedScan,
+  setSelectedScan,
+  isMobileMenuOpen,
+  setIsMobileMenuOpen,
+  syncScanToSupabase,
+  currentTraining,
+  setCurrentTraining,
+  signOut,
+  confirm,
+  showToast
+}) => {
+    const { isFocusMode, isDrilledDown, currentView, navigateToView, goBack: ljGoBack } = useLearningJourney();
 
-          {/* Global Compact Header for Desktop and Mobile Responsive Nav */}
-          {activeView !== 'learning_journey' && (
-            <header className="h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-40 shrink-0 sticky top-0">
-              <div className="flex items-center gap-3 md:gap-4">
+    // Unified History Management (Nested Sub-Views)
+    useEffect(() => {
+      const handlePopState = (event: PopStateEvent) => {
+        // 1. If mobile menu is open, close it first and stay on page
+        if (isMobileMenuOpen) {
+          setIsMobileMenuOpen(false);
+          window.history.pushState({ view: activeView, subView: currentView }, '');
+          return;
+        }
+
+        // 2. Handle history state
+        if (event.state) {
+          const { view: targetView, subView: targetSubView } = event.state;
+
+          // Handle Top-Level view change
+          if (targetView && targetView !== activeView) {
+            setGodModeView(targetView);
+          }
+
+          // Handle Internal Learning Journey view change
+          if (targetView === 'learning_journey' && targetSubView && targetSubView !== currentView) {
+            navigateToView(targetSubView);
+          }
+        } else {
+          // No state (reached entry point). Prevent leaving app if at root.
+          // If we are at root, we might want to stay here.
+          if (activeView === (isStudent ? 'learning_journey' : 'mastermind') && (!isDrilledDown)) {
+            window.history.pushState({ view: activeView, subView: currentView }, '');
+          }
+        }
+      };
+
+      window.addEventListener('popstate', handlePopState);
+
+      // Replace initial state to trap the 'Back to Login' journey
+      if (!window.history.state || !window.history.state.view) {
+        window.history.replaceState({ view: activeView, subView: currentView }, '');
+      }
+
+      return () => window.removeEventListener('popstate', handlePopState);
+    }, [activeView, currentView, isMobileMenuOpen, isDrilledDown]);
+
+    // Sync state to history on ANY relevant change
+    useEffect(() => {
+      const currentState = window.history.state;
+      if (currentState?.view !== activeView || currentState?.subView !== currentView) {
+        window.history.pushState({ view: activeView, subView: currentView }, '');
+      }
+    }, [activeView, currentView]);
+
+    // Navigation Intents
+    const handleHomeClick = () => {
+      if (isStudent) {
+        setGodModeView('learning_journey');
+      } else {
+        setGodModeView('mastermind');
+      }
+    };
+
+    // Sidebar controls
+    const handleNavigate = (view: string) => {
+      setGodModeView(view);
+      setIsMobileMenuOpen(false);
+    };
+
+    // --- PRIMARY APP ROUTER ---
+    return (
+      <div className="flex h-screen bg-white text-slate-900 font-instrument overflow-hidden">
+        {/* Sidebar - Hidden during focus mode or tests */}
+        {!isFocusMode && (
+          <Sidebar
+            activeView={activeView}
+            onNavigate={handleNavigate}
+            userName={user?.email?.split('@')[0] || 'User'}
+            isMobileMenuOpen={isMobileMenuOpen}
+            onCloseMobile={() => setIsMobileMenuOpen(false)}
+            onLogout={async () => {
+              const confirmed = await confirm({
+                title: 'Sign Out',
+                message: 'Are you sure you want to sign out?',
+                type: 'warning',
+              });
+              if (confirmed) {
+                await signOut();
+                showToast('Signed out successfully', 'success');
+              }
+            }}
+          />
+        )}
+
+        <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50/50">
+          {/* Global Compact Header - Hidden during test focus */}
+          {!isFocusMode && (
+            <header className={`h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-40 shrink-0 sticky top-0 transition-all duration-300 ${isDrilledDown && isStudent && activeView === 'learning_journey' ? 'bg-primary-50/30' : ''}`}>
+              <div className="flex items-center gap-3">
+                {/* Contextual Action: Back vs Hamburger */}
                 <button
-                  className="md:hidden p-1.5 -ml-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="p-2 -ml-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                  onClick={() => {
+                    if (activeView === 'learning_journey' && isDrilledDown) {
+                      ljGoBack();
+                    } else {
+                      setIsMobileMenuOpen(true);
+                    }
+                  }}
                 >
-                  <Menu size={20} />
+                  {activeView === 'learning_journey' && isDrilledDown ? (
+                    <ChevronLeft size={22} className="text-primary-600" />
+                  ) : (
+                    <Menu size={20} className="md:block" />
+                  )}
                 </button>
-                {/* Breadcrumb Context */}
-                <div className="hidden md:flex items-center gap-2">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{activeView.replace('_', ' ')}</span>
-                </div>
 
-                <div className="hidden md:flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1">
-                  <Search size={12} className="text-slate-400" />
-                  <input type="text" placeholder="Global Search..." className="bg-transparent border-0 outline-none text-[10px] font-black text-slate-900 w-32 placeholder:text-slate-400 uppercase tracking-widest" />
+                {/* Logo / Context Label */}
+                <div className="flex items-center gap-2 overflow-hidden">
+                  {!isDrilledDown || activeView !== 'learning_journey' ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 bg-slate-900 rounded-lg flex items-center justify-center shrink-0">
+                        <GraduationCap className="text-white" size={16} />
+                      </div>
+                      <h1 className="text-sm font-black text-slate-900 font-outfit uppercase tracking-tight hidden sm:block">plus<span className="text-primary-600">2AI</span></h1>
+                    </div>
+                  ) : null}
+
+                  <span className={`text-xs font-black text-slate-900 font-outfit uppercase tracking-tight truncate ${isDrilledDown && activeView === 'learning_journey' ? 'text-primary-700 bg-primary-100/50 px-2.5 py-1 rounded-full' : 'text-slate-400'}`}>
+                    {activeView === 'learning_journey' && isDrilledDown ? 'Back to Journey' : activeView.replace('_', ' ')}
+                  </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 md:gap-3">
                 {/* GLOBAL Subject Switcher - Staff Only */}
-                {userProfile?.role !== 'student' && (
-                  <>
+                {!isStudent && activeView !== 'learning_journey' && (
+                  <div className="hidden sm:flex items-center gap-2">
                     <SubjectSwitcher />
-                    <div className="h-6 w-px bg-slate-200 hidden md:block" />
-                  </>
+                    <div className="h-6 w-px bg-slate-200" />
+                  </div>
                 )}
+
                 <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors relative">
                   <Bell size={18} />
                   <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-primary-500 rounded-full border border-white" />
@@ -502,170 +617,168 @@ const AppContent: React.FC = () => {
             </header>
           )}
 
-          <main className="flex-1 overflow-y-auto relative pb-16 md:pb-0">
-            {activeView === 'mastermind' && (
-              <div className="h-full overflow-y-auto scroller-hide p-8 bg-slate-50/50">
-                <div className="max-w-7xl mx-auto space-y-6">
-                  {/* Dashboard Header */}
-                  <div>
-                    <h1 className="text-3xl font-black text-slate-900 font-outfit uppercase tracking-tight">Teacher Dashboard</h1>
-                    <p className="text-sm text-slate-500 font-bold mt-1">Central command for all teaching operations</p>
-                  </div>
+          <main className={`flex-1 overflow-hidden relative ${!isFocusMode ? 'pb-16 md:pb-0' : ''}`}>
+            <div className="h-full overflow-y-auto scroller-hide">
+              {activeView === 'mastermind' && (
+                <div className="p-8 bg-slate-50/50">
+                  <div className="max-w-7xl mx-auto space-y-6">
+                    {/* Dashboard Header */}
+                    <div>
+                      <h1 className="text-3xl font-black text-slate-900 font-outfit uppercase tracking-tight">Teacher Dashboard</h1>
+                      <p className="text-sm text-slate-500 font-bold mt-1">Central command for all teaching operations</p>
+                    </div>
 
-                  {/* Quick Stats */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                          <LayoutDashboard size={20} className="text-blue-600" />
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                      <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 shadow-sm">
+                        <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-50 rounded-lg md:rounded-xl flex items-center justify-center">
+                            <LayoutDashboard size={18} className="text-blue-600" />
+                          </div>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scans</span>
                         </div>
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Total Scans</span>
+                        <div className="text-2xl md:text-3xl font-black text-slate-900 font-outfit">{recentScans.length}</div>
                       </div>
-                      <div className="text-3xl font-black text-slate-900 font-outfit">{recentScans.length}</div>
-                    </div>
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                          <GraduationCap size={20} className="text-emerald-600" />
+                      <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 shadow-sm">
+                        <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-50 rounded-lg md:rounded-xl flex items-center justify-center">
+                            <GraduationCap size={18} className="text-emerald-600" />
+                          </div>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active</span>
                         </div>
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Students</span>
+                        <div className="text-2xl md:text-3xl font-black text-slate-900 font-outfit">24</div>
                       </div>
-                      <div className="text-3xl font-black text-slate-900 font-outfit">24</div>
-                    </div>
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                          <Search size={20} className="text-amber-600" />
+                      <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 shadow-sm">
+                        <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-amber-50 rounded-lg md:rounded-xl flex items-center justify-center">
+                            <Search size={18} className="text-amber-600" />
+                          </div>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Items</span>
                         </div>
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Questions</span>
-                      </div>
-                      <div className="text-3xl font-black text-slate-900 font-outfit">{recentScans.reduce((acc, scan) => acc + (scan.analysisData?.questions?.length || 0), 0)}</div>
-                    </div>
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
-                          <Bell size={20} className="text-rose-600" />
+                        <div className="text-2xl md:text-3xl font-black text-slate-900 font-outfit">
+                          {recentScans.reduce((acc, scan) => acc + (scan.analysisData?.questions?.length || 0), 0)}
                         </div>
-                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Alerts</span>
                       </div>
-                      <div className="text-3xl font-black text-slate-900 font-outfit">3</div>
+                      <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 shadow-sm">
+                        <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+                          <div className="w-8 h-8 md:w-10 md:h-10 bg-rose-50 rounded-lg md:rounded-xl flex items-center justify-center">
+                            <Bell size={18} className="text-rose-600" />
+                          </div>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Alerts</span>
+                        </div>
+                        <div className="text-2xl md:text-3xl font-black text-slate-900 font-outfit">3</div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Quick Actions */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <button
-                      onClick={() => setGodModeView('scanning')}
-                      className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <Home size={24} className="text-primary-600" />
-                      </div>
-                      <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Scan New Paper</h3>
-                      <p className="text-xs text-slate-500 font-bold">Upload and analyze exam papers with AI</p>
-                    </button>
-                    <button
-                      onClick={() => setGodModeView('approval')}
-                      className="bg-white border-2 border-emerald-200 rounded-2xl p-6 hover:border-emerald-400 hover:shadow-lg transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <CheckCircle2 size={24} className="text-emerald-600" />
-                      </div>
-                      <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Review & Publish</h3>
-                      <p className="text-xs text-slate-500 font-bold">Approve scans to make them available system-wide</p>
-                    </button>
-                    <button
-                      onClick={() => setGodModeView('recall')}
-                      className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <User size={24} className="text-amber-600" />
-                      </div>
-                      <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Rapid Recall</h3>
-                      <p className="text-xs text-slate-500 font-bold">Generate flashcards for quick revision</p>
-                    </button>
-                    <button
-                      onClick={() => setGodModeView('training_studio')}
-                      className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
-                    >
-                      <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <Sparkles size={24} className="text-indigo-600" />
-                      </div>
-                      <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Pedagogy Studio</h3>
-                      <p className="text-xs text-slate-500 font-bold">Create custom training materials</p>
-                    </button>
-                  </div>
-
-                  {/* Recent Scans */}
-                  <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-black text-slate-900 font-outfit uppercase">Recent Scans</h2>
+                    {/* Quick Actions */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                       <button
                         onClick={() => setGodModeView('scanning')}
-                        className="text-xs font-black text-primary-600 uppercase tracking-widest hover:text-primary-700"
+                        className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
                       >
-                        View All →
+                        <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <Home size={24} className="text-primary-600" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Scan New Paper</h3>
+                        <p className="text-xs text-slate-500 font-bold">Upload and analyze exam papers with AI</p>
+                      </button>
+                      <button
+                        onClick={() => setGodModeView('approval')}
+                        className="bg-white border-2 border-emerald-200 rounded-2xl p-6 hover:border-emerald-400 hover:shadow-lg transition-all text-left group"
+                      >
+                        <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <CheckCircle2 size={24} className="text-emerald-600" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Review & Publish</h3>
+                        <p className="text-xs text-slate-500 font-bold">Approve scans to make them available system-wide</p>
+                      </button>
+                      <button
+                        onClick={() => setGodModeView('recall')}
+                        className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
+                      >
+                        <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <Sparkles size={24} className="text-amber-600" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Rapid Recall</h3>
+                        <p className="text-xs text-slate-500 font-bold">Generate flashcards for quick revision</p>
+                      </button>
+                      <button
+                        onClick={() => setGodModeView('training_studio')}
+                        className="bg-white border-2 border-slate-200 rounded-2xl p-6 hover:border-primary-400 hover:shadow-lg transition-all text-left group"
+                      >
+                        <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <FileText size={24} className="text-indigo-600" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900 font-outfit uppercase mb-1">Pedagogy Studio</h3>
+                        <p className="text-xs text-slate-500 font-bold">Create custom training materials</p>
                       </button>
                     </div>
-                    <div className="space-y-3">
-                      {recentScans.slice(0, 5).map(scan => (
+
+                    {/* Recent Scans */}
+                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-black text-slate-900 font-outfit uppercase">Recent Scans</h2>
                         <button
-                          key={scan.id}
-                          onClick={() => {
-                            setSelectedScan(scan);
-                            setGodModeView('analysis');
-                          }}
-                          className="w-full flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all text-left"
+                          onClick={() => setGodModeView('scanning')}
+                          className="text-xs font-black text-primary-600 uppercase tracking-widest hover:text-primary-700"
                         >
-                          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                            <FileText size={18} className="text-slate-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-black text-slate-900 truncate">{scan.name}</h4>
-                            <p className="text-xs text-slate-500 font-bold">{scan.subject} • {scan.grade}</p>
-                          </div>
-                          <ChevronRight size={16} className="text-slate-300" />
+                          View All →
                         </button>
-                      ))}
-                      {recentScans.length === 0 && (
-                        <div className="text-center py-12">
-                          <p className="text-sm text-slate-400 font-bold">No scans yet. Start by scanning a paper!</p>
-                        </div>
-                      )}
+                      </div>
+                      <div className="space-y-3">
+                        {recentScans.slice(0, 5).map(scan => (
+                          <button
+                            key={scan.id}
+                            onClick={() => {
+                              setSelectedScan(scan);
+                              setGodModeView('analysis');
+                            }}
+                            className="w-full flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all text-left"
+                          >
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                              <FileText size={18} className="text-slate-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-black text-slate-900 truncate">{scan.name}</h4>
+                              <p className="text-xs text-slate-500 font-bold">{scan.subject} • {scan.grade}</p>
+                            </div>
+                            <ChevronRight size={16} className="text-slate-300" />
+                          </button>
+                        ))}
+                        {recentScans.length === 0 && (
+                          <div className="text-center py-12">
+                            <p className="text-sm text-slate-400 font-bold">No scans yet. Start by scanning a paper!</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {activeView === 'learning_journey' && (
-              <LearningJourneyApp onBack={() => setGodModeView('mastermind')} />
-            )}
+              {activeView === 'learning_journey' && (
+                <LearningJourneyApp onBack={handleHomeClick} />
+              )}
 
-            {activeView === 'scanning' && (
-              <div className="h-full overflow-y-auto scroller-hide pb-20 md:pb-0">
-                <BoardMastermind
-                  onNavigate={setGodModeView}
-                  recentScans={recentScans}
-                  onAddScan={(scan) => {
-                    setRecentScans(prev => [...prev, scan]);
-                    syncScanToSupabase(scan);
-                  }}
-                  onSelectScan={(scan) => setSelectedScan(scan)}
-                />
-              </div>
-            )}
+              {activeView === 'scanning' && (
+                <div className="h-full scroller-hide pb-20 md:pb-0">
+                  <BoardMastermind
+                    onNavigate={setGodModeView}
+                    recentScans={recentScans}
+                    onAddScan={(scan) => {
+                      setRecentScans(prev => [...prev, scan]);
+                      syncScanToSupabase(scan);
+                    }}
+                    onSelectScan={(scan) => setSelectedScan(scan)}
+                  />
+                </div>
+              )}
 
-            {activeView === 'approval' && (
-              <div className="h-full overflow-y-auto scroller-hide">
-                <AdminScanApproval />
-              </div>
-            )}
+              {activeView === 'approval' && <AdminScanApproval />}
 
-            {activeView === 'analysis' && (
-              <div className="h-full overflow-y-auto scroller-hide">
+              {activeView === 'analysis' && (
                 <ExamAnalysis
-                  onBack={() => setGodModeView('mastermind')}
+                  onBack={handleHomeClick}
                   scan={selectedScan}
                   onGenerateTraining={() => setGodModeView('training_studio')}
                   onUpdateScan={(updatedScan) => {
@@ -676,39 +789,31 @@ const AppContent: React.FC = () => {
                   recentScans={recentScans}
                   onSelectScan={setSelectedScan}
                 />
-              </div>
-            )}
+              )}
 
-            {activeView === 'training_studio' && (
-              <div className="h-full overflow-y-auto scroller-hide">
+              {activeView === 'training_studio' && (
                 <TrainingStudio
-                  onClose={() => setGodModeView('mastermind')}
+                  onClose={handleHomeClick}
                   selectedScan={selectedScan}
                   onTrainingCreated={(training) => {
                     setCurrentTraining(training);
                     setGodModeView('training_viewer');
                   }}
                 />
-              </div>
-            )}
+              )}
 
-            {activeView === 'training_viewer' && currentTraining && (
-              <div className="h-full overflow-y-auto scroller-hide">
+              {activeView === 'training_viewer' && currentTraining && (
                 <TrainingViewer
                   training={currentTraining}
                   onBack={() => setGodModeView('training_studio')}
                 />
-              </div>
-            )}
+              )}
 
-            {activeView === 'questions' && <div className="h-full overflow-y-auto scroller-hide"><VisualQuestionBank recentScans={recentScans} /></div>}
-
-            {activeView === 'recall' && <div className="h-full overflow-y-auto scroller-hide"><RapidRecall recentScans={recentScans} /></div>}
-
-            {activeView === 'gallery' && (
-              <div className="h-full">
+              {activeView === 'questions' && <VisualQuestionBank recentScans={recentScans} />}
+              {activeView === 'recall' && <RapidRecall recentScans={recentScans} />}
+              {activeView === 'gallery' && (
                 <SketchGallery
-                  onBack={() => setGodModeView('mastermind')}
+                  onBack={handleHomeClick}
                   scan={selectedScan}
                   recentScans={recentScans}
                   onUpdateScan={(updatedScan) => {
@@ -717,51 +822,67 @@ const AppContent: React.FC = () => {
                     syncScanToSupabase(updatedScan);
                   }}
                 />
-              </div>
-            )}
+              )}
 
-            {activeView === 'profile' && (
-              <div className="h-full overflow-hidden">
+              {activeView === 'profile' && (
                 <UserProfile onBack={() => {
-                  if (userProfile?.role === 'student') {
-                    setGodModeView('learning_journey');
-                  } else {
-                    setGodModeView('mastermind');
-                  }
+                  if (isStudent) setGodModeView('learning_journey');
+                  else setGodModeView('mastermind');
                 }} />
-              </div>
-            )}
+              )}
 
-            {activeView === 'settings' && (
-              <div className="h-full">
-                <SettingsPanel onBack={() => setGodModeView('mastermind')} />
-              </div>
-            )}
-
+              {activeView === 'settings' && <SettingsPanel onBack={handleHomeClick} />}
+            </div>
           </main>
 
-          {/* Mobile Bottom Navigation Bar */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex items-center justify-around px-2 z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-            <button onClick={() => setGodModeView('mastermind')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${activeView === 'mastermind' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-              <LayoutDashboard size={20} className={activeView === 'mastermind' ? 'fill-primary-50' : ''} />
-              <span className="text-[9px] font-bold uppercase tracking-wider">Home</span>
-            </button>
-            <button onClick={() => setGodModeView('scanning')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${activeView === 'scanning' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-              <ScanLine size={20} className={activeView === 'scanning' ? 'fill-primary-50' : ''} />
-              <span className="text-[9px] font-bold uppercase tracking-wider">Scan</span>
-            </button>
-            <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${activeView === 'learning_journey' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-              <Map size={20} className={activeView === 'learning_journey' ? 'fill-primary-50' : ''} />
-              <span className="text-[9px] font-bold uppercase tracking-wider">Journey</span>
-            </button>
-            <button onClick={() => setGodModeView('profile')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors ${activeView === 'profile' ? 'text-primary-600' : 'text-slate-400 hover:text-slate-600'}`}>
-              <User size={20} className={activeView === 'profile' ? 'fill-primary-50' : ''} />
-              <span className="text-[9px] font-bold uppercase tracking-wider">Profile</span>
-            </button>
-          </div>
+          {/* Mobile Bottom Navigation Bar - Hidden during focus mode (Tests) */}
+          {!isFocusMode && (
+            <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex items-center justify-around px-2 z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+              {isStudent ? (
+                <>
+                  {/* Student Navigation: Journey, Vault (Stats/Archives), Profile */}
+                  <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${activeView === 'learning_journey' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                    <Map size={20} className={activeView === 'learning_journey' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Journey</span>
+                  </button>
+                  <button onClick={() => {
+                    setGodModeView('learning_journey');
+                    // This is a bit of a hack to go to a specific sub-view, but for now Journey is the hub
+                  }} className="flex flex-col items-center justify-center w-20 h-full gap-1 text-slate-300">
+                    <Library size={20} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Vault</span>
+                  </button>
+                  <button onClick={() => setGodModeView('profile')} className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${activeView === 'profile' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                    <User size={20} className={activeView === 'profile' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Account</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Staff Navigation: Dashboard, Scan, Journey (Preview), Profile */}
+                  <button onClick={() => setGodModeView('mastermind')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'mastermind' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                    <LayoutDashboard size={20} className={activeView === 'mastermind' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Admin</span>
+                  </button>
+                  <button onClick={() => setGodModeView('scanning')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'scanning' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                    <ScanLine size={20} className={activeView === 'scanning' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Scan</span>
+                  </button>
+                  <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'learning_journey' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                    <Map size={20} className={activeView === 'learning_journey' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Journey</span>
+                  </button>
+                  <button onClick={() => setGodModeView('profile')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'profile' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                    <User size={20} className={activeView === 'profile' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Account</span>
+                  </button>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Global Assistant overlay - Vidya V3 */}
-          {activeView !== 'learning_journey' && activeView !== 'profile' && (
+          {!isFocusMode && activeView !== 'profile' && (
             <VidyaV3
               appContext={{
                 scannedPapers: recentScans,
@@ -770,13 +891,10 @@ const AppContent: React.FC = () => {
               }}
             />
           )}
-        </LearningJourneyProvider>
+        </div>
       </div>
-
-
-    </div>
-  );
-};
+    );
+  };
 
 const App: React.FC = () => {
   return (

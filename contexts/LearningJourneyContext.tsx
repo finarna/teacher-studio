@@ -47,6 +47,7 @@ interface LearningJourneyContextType extends LearningJourneyState {
   openVault: (scan: Scan) => void;
   goBack: () => void;
   resetToTrajectory: () => void;
+  navigateToView: (view: ViewType) => void;
 
   // Test actions
   startTest: (testType: 'topic_quiz' | 'subject_test' | 'full_mock', topicId?: string) => Promise<void>;
@@ -59,6 +60,10 @@ interface LearningJourneyContextType extends LearningJourneyState {
   loadTopics: () => Promise<void>;
   loadSubjectProgress: () => Promise<void>;
   refreshData: (silent?: boolean) => Promise<void>;
+
+  // Derived state for Global UI
+  isFocusMode: boolean;
+  isDrilledDown: boolean;
 }
 
 const LearningJourneyContext = createContext<LearningJourneyContextType | undefined>(undefined);
@@ -100,6 +105,17 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   // Navigation history for back button
   const [viewHistory, setViewHistory] = useState<ViewType[]>(['trajectory']);
 
+  // Navigate to specific view (External sync)
+  const navigateToView = (view: ViewType) => {
+    if (state.currentView === view) return;
+
+    setState(prev => ({
+      ...prev,
+      currentView: view
+    }));
+    // We don't push to viewHistory here because popstate handles history
+  };
+
   // Select trajectory
   const selectTrajectory = (trajectory: ExamContext) => {
     setState(prev => ({
@@ -113,7 +129,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   // Auto-load subject progress when trajectory changes
   useEffect(() => {
     if (state.selectedTrajectory && state.currentView === 'subject') {
-      loadSubjectProgress(true); // Silent load
+      loadSubjectProgress(true);
     }
   }, [state.selectedTrajectory, state.currentView]);
 
@@ -127,46 +143,20 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     }));
     setViewHistory(prev => [...prev, 'subject_menu']);
 
-    // Load topics for this subject via API (uses SERVICE_ROLE_KEY on server)
     try {
       if (state.selectedTrajectory) {
         const url = getApiUrl(`/api/learning-journey/topics?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(state.selectedTrajectory)}`);
         const response = await fetch(url);
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to load topics');
-        }
-
+        if (!response.ok) throw new Error('Failed to load topics');
         const result = await response.json();
-        const topics = result.data;
-
-        console.log(`[Learning Journey] Loaded ${topics.length} topics for ${subject} (${result.meta.totalQuestions} questions)`);
-
-        // DEBUG: Log first question metadata from API response
-        if (topics.length > 0 && topics[0].questions && topics[0].questions.length > 0) {
-          const firstQ = topics[0].questions[0];
-          console.log('📡 [Context] First Question from API:', {
-            topicName: topics[0].topicName,
-            questionId: firstQ.id?.substring(0, 8),
-            marks: firstQ.marks,
-            diff: firstQ.diff,
-            bloomsTaxonomy: firstQ.bloomsTaxonomy,
-            year: firstQ.year,
-            domain: firstQ.domain,
-            pedagogy: firstQ.pedagogy
-          });
-        }
-
         setState(prev => ({
           ...prev,
-          topics,
+          topics: result.data,
           isLoading: false,
           error: null
         }));
       }
     } catch (error) {
-      console.error('[Learning Journey] Error loading topics:', error);
       setState(prev => ({
         ...prev,
         isLoading: false,
@@ -185,23 +175,19 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     setViewHistory(prev => [...prev, 'topic_detail']);
   };
 
-  // Select subject option from menu
+  // Select sub-option
   const selectSubjectOption = (option: 'past_exams' | 'topicwise' | 'mock_builder') => {
     const viewMap = {
       past_exams: 'past_year_exams' as ViewType,
       topicwise: 'topic_dashboard' as ViewType,
       mock_builder: 'mock_builder' as ViewType
     };
-
     const targetView = viewMap[option];
-    setState(prev => ({
-      ...prev,
-      currentView: targetView
-    }));
+    setState(prev => ({ ...prev, currentView: targetView }));
     setViewHistory(prev => [...prev, targetView]);
   };
 
-  // Open vault for a specific scan
+  // Open Vault
   const openVault = (scan: Scan) => {
     setState(prev => ({
       ...prev,
@@ -216,13 +202,12 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   const goBack = () => {
     if (viewHistory.length > 1) {
       const newHistory = [...viewHistory];
-      newHistory.pop(); // Remove current view
+      newHistory.pop();
       const previousView = newHistory[newHistory.length - 1];
 
       setState(prev => ({
         ...prev,
         currentView: previousView,
-        // Clear relevant state based on view
         ...(previousView === 'trajectory' && {
           selectedTrajectory: null,
           selectedSubject: null,
@@ -240,21 +225,13 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
           selectedTopicId: null,
           selectedScan: null,
           selectedScanId: null
-        }),
-        ...(previousView === 'topic_dashboard' && {
-          selectedTopicId: null
-        }),
-        ...(previousView === 'past_year_exams' && {
-          selectedScan: null,
-          selectedScanId: null
         })
       }));
-
       setViewHistory(newHistory);
     }
   };
 
-  // Reset to trajectory selection
+  // Reset
   const resetToTrajectory = () => {
     setState(prev => ({
       ...prev,
@@ -271,26 +248,16 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     setViewHistory(['trajectory']);
   };
 
-  // Start test
-  const startTest = async (
-    testType: 'topic_quiz' | 'subject_test' | 'full_mock',
-    topicId?: string
-  ) => {
-    if (!state.selectedTrajectory || !state.selectedSubject) {
-      throw new Error('Trajectory and subject must be selected');
-    }
-
+  // Test Actions
+  const startTest = async (testType: 'topic_quiz' | 'subject_test' | 'full_mock', topicId?: string) => {
+    if (!state.selectedTrajectory || !state.selectedSubject) return;
     setState(prev => ({ ...prev, isLoading: true }));
-
     try {
-      // Call API to generate test and select questions
       const url = getApiUrl('/api/tests/generate');
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include', // Include auth cookies
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           userId,
           testType,
@@ -299,44 +266,26 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
           topics: topicId ? [topicId] : undefined
         })
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate test');
-      }
-
+      if (!response.ok) throw new Error('Failed to generate test');
       const result = await response.json();
-      const { attempt, questions, metadata } = result;
-
-      console.log(`[Learning Journey] Generated ${testType} with ${questions.length} questions`, metadata);
-
       setState(prev => ({
         ...prev,
         currentView: 'test',
-        currentTest: attempt,
-        currentTestQuestions: questions,
+        currentTest: result.attempt,
+        currentTestQuestions: result.questions,
         currentTestResponses: [],
         isLoading: false
       }));
       setViewHistory(prev => [...prev, 'test']);
     } catch (error) {
-      console.error('[Learning Journey] Error starting test:', error);
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to start test'
-      }));
+      setState(prev => ({ ...prev, isLoading: false, error: (error as Error).message }));
     }
   };
 
-  // Submit test
   const submitTest = async (responses: TestResponse[]) => {
     if (!state.currentTest) return;
-
     setState(prev => ({ ...prev, isLoading: true }));
-
     try {
-      // Call API to save test responses
       const url = getApiUrl(`/api/tests/${state.currentTest.id}/submit`);
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
@@ -349,41 +298,25 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
         credentials: 'include',
         body: JSON.stringify({ responses })
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit test');
-      }
-
+      if (!response.ok) throw new Error('Failed to submit test');
       const result = await response.json();
-      const { attempt: updatedAttempt, results } = result;
-
-      console.log(`[Learning Journey] Test submitted - Score: ${updatedAttempt.percentage}%`, results);
-
       setState(prev => ({
         ...prev,
         currentView: 'test_results',
-        currentTest: updatedAttempt,
+        currentTest: result.attempt,
         currentTestResponses: responses,
         isLoading: false
       }));
-      // Replace 'test' in history with 'test_results' so back goes to the
-      // originating page (mock_builder / topic_detail), not back into the test
       setViewHistory(prev => {
-        const newHistory = [...prev];
-        newHistory[newHistory.length - 1] = 'test_results';
-        return newHistory;
+        const h = [...prev];
+        h[h.length - 1] = 'test_results';
+        return h;
       });
     } catch (error) {
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to submit test'
-      }));
+      setState(prev => ({ ...prev, isLoading: false, error: (error as Error).message }));
     }
   };
 
-  // Exit test
   const exitTest = () => {
     setState(prev => ({
       ...prev,
@@ -394,16 +327,12 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     }));
   };
 
-  // View past test results
   const viewPastTestResults = async (attemptId: string) => {
     setState(prev => ({ ...prev, isLoading: true }));
-
     try {
-      // Fetch test attempt details
       const url = getApiUrl(`/api/tests/${attemptId}/results`);
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -411,37 +340,22 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
         },
         credentials: 'include'
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to load test results');
-      }
-
+      if (!response.ok) throw new Error('Failed to load results');
       const result = await response.json();
-      const { attempt, questions, responses } = result;
-
-      console.log(`[Learning Journey] Loaded past test results - ${attempt.testName}`);
-
       setState(prev => ({
         ...prev,
         currentView: 'test_results',
-        currentTest: attempt,
-        currentTestQuestions: questions,
-        currentTestResponses: responses,
+        currentTest: result.attempt,
+        currentTestQuestions: result.questions,
+        currentTestResponses: result.responses,
         isLoading: false
       }));
       setViewHistory(prev => [...prev, 'test_results']);
     } catch (error) {
-      console.error('[Learning Journey] Error loading test results:', error);
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to load test results'
-      }));
+      setState(prev => ({ ...prev, isLoading: false, error: (error as Error).message }));
     }
   };
 
-  // Start custom test (from Mock Test Builder)
   const startCustomTest = (attempt: TestAttempt, questions: AnalyzedQuestion[]) => {
     setState(prev => ({
       ...prev,
@@ -453,58 +367,29 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     setViewHistory(prev => [...prev, 'test']);
   };
 
-  // Load topics
+  // Data Loading
   const loadTopics = async (silent = false) => {
     if (!state.selectedTrajectory || !state.selectedSubject) return;
-
     if (!silent) setState(prev => ({ ...prev, isLoading: true }));
-
     try {
-      // Call API endpoint instead of direct function call
       const url = getApiUrl(`/api/learning-journey/topics?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(state.selectedSubject)}&examContext=${encodeURIComponent(state.selectedTrajectory)}`);
       const response = await fetch(url);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to load topics');
-      }
-
-      const { data: topics } = await response.json();
-
-      setState(prev => ({
-        ...prev,
-        topics,
-        isLoading: false,
-        error: null
-      }));
+      if (!response.ok) throw new Error('Failed to load topics');
+      const result = await response.json();
+      setState(prev => ({ ...prev, topics: result.data, isLoading: false, error: null }));
     } catch (error) {
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to load topics'
-      }));
+      setState(prev => ({ ...prev, isLoading: false, error: (error as Error).message }));
     }
   };
 
-  // Load subject progress
   const loadSubjectProgress = async (silent = false) => {
     if (!state.selectedTrajectory) return;
-
     if (!silent) setState(prev => ({ ...prev, isLoading: true }));
-
     try {
-      if (!state.selectedTrajectory) return;
-
       const url = getApiUrl(`/api/learning-journey/subjects/${state.selectedTrajectory}?userId=${encodeURIComponent(userId)}`);
       const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error('Failed to load subject progress');
-      }
-
+      if (!response.ok) throw new Error('Failed to load progress');
       const { data } = await response.json();
-
-      // Transform array to Record<Subject, SubjectProgress>
       const progressMap = {} as Record<Subject, SubjectProgress>;
       data.forEach((item: any) => {
         progressMap[item.subject as Subject] = {
@@ -515,22 +400,12 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
           overallAccuracy: item.overallAccuracy ?? 100
         } as any;
       });
-
-      setState(prev => ({
-        ...prev,
-        subjectProgress: progressMap,
-        isLoading: false
-      }));
+      setState(prev => ({ ...prev, subjectProgress: progressMap, isLoading: false }));
     } catch (error) {
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to load progress'
-      }));
+      setState(prev => ({ ...prev, isLoading: false, error: (error as Error).message }));
     }
   };
 
-  // Refresh all data
   const refreshData = async (silent = false) => {
     await Promise.all([loadTopics(silent), loadSubjectProgress(silent)]);
   };
@@ -544,6 +419,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     openVault,
     goBack,
     resetToTrajectory,
+    navigateToView,
     startTest,
     startCustomTest,
     submitTest,
@@ -551,7 +427,9 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     viewPastTestResults,
     loadTopics,
     loadSubjectProgress,
-    refreshData
+    refreshData,
+    isFocusMode: state.currentView === 'test',
+    isDrilledDown: state.currentView !== 'trajectory'
   };
 
   return (
