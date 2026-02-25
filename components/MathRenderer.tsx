@@ -87,7 +87,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
         // 4. Fix dimensional analysis brackets: [ ] → ( )
         // KaTeX has issues with square brackets, use parentheses instead for dimensional analysis
         // This is mathematically equivalent and renders cleanly
-        cleanExpression = cleanExpression.replace(/\[/g, '(').replace(/\]/g, ')');
+
 
         // 5. Fix Greek letter names to LaTeX symbols (for physics/dimensional analysis)
         // Use simple string replacement with space boundaries
@@ -125,28 +125,30 @@ const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline
         // If expression contains & and ends with \\, wrap it in array
         if (cleanExpression.includes('&') && cleanExpression.trim().endsWith('\\\\')) {
           // Don't auto-wrap if already in array/matrix/aligned environment
-          if (!cleanExpression.includes('\\begin{') && !cleanExpression.includes('\\end{')) {
+          if (!cleanExpression.includes('\\begin{')) {
             // Skip wrapping - these are likely fragments that shouldn't be rendered alone
             // Just render as-is and KaTeX will show error (better than corrupting valid math)
             console.warn('⚠️ Detected table fragment without array wrapper:', cleanExpression.substring(0, 50));
           }
         }
 
-        const html = window.katex.renderToString(cleanExpression, {
+        // Heal truncated LaTeX expressions (close dangling braces/brackets)
+        let healedExpression = cleanExpression;
+        const openBraces = (healedExpression.match(/{/g) || []).length;
+        const closeBraces = (healedExpression.match(/}/g) || []).length;
+        if (openBraces > closeBraces) healedExpression += '}'.repeat(openBraces - closeBraces);
+
+        const openBrack = (healedExpression.match(/\[/g) || []).length;
+        const closeBrack = (healedExpression.match(/\]/g) || []).length;
+        if (openBrack > closeBrack) healedExpression += ']'.repeat(openBrack - closeBrack);
+
+        window.katex.render(healedExpression, ref.current, {
           throwOnError: false,
           displayMode: isDisplayMode,
-          output: 'html',
-          strict: false,
           trust: true,
+          strict: false,
           macros: LATEX_MACROS
         });
-
-        // Only log actual KaTeX errors (katex-error class means parsing failed)
-        if (html.includes('katex-error')) {
-          console.error('❌ KaTeX parse error:', cleanExpression.substring(0, 100));
-        }
-
-        ref.current.innerHTML = html;
       } catch (error) {
         console.error('❌ KaTeX rendering error:', error, 'Expression:', rawExpression);
         ref.current.innerText = rawExpression.replace(/\$/g, '');
@@ -300,7 +302,6 @@ export const RenderWithMath: React.FC<{
     result = result.replace(/([a-z])([A-Z])/g, '$1 $2');
 
     // Second pass: insert spaces before known dictionary words
-    // Sort by length descending to match longest words first
     dictionary.forEach(word => {
       const regex = new RegExp(`([a-z])(${word})`, 'gi');
       result = result.replace(regex, '$1 $2');
@@ -309,63 +310,103 @@ export const RenderWithMath: React.FC<{
     return result;
   });
 
+  // 1.5. Clean input and handle objects
+  if (typeof text !== 'string' && text !== null && text !== undefined) {
+    const obj = text as any;
+    if (obj.step) cleanText = String(obj.step);
+    else if (obj.question) cleanText = String(obj.question);
+    else if (obj.text) cleanText = String(obj.text);
+    else cleanText = JSON.stringify(text);
+  }
+
+  // 1.6. Fix common AI notation glitches BEFORE delimiters are analyzed
+  // Normalize excess backslashes EXCEPT for double backslashes which might be newlines
+  cleanText = cleanText.replace(/\\\\\\+/g, '\\');
+  // Restore basic single backslash for core commands if doubled
+  cleanText = cleanText.replace(/\\\\(begin|end|frac|sqrt|sin|cos|tan|det|vmatrix|int|sum|lim|theta|alpha|beta|gamma)/g, '\\$1');
+
+  // Fix missing backslashes for trig/math functions (e.g. "cos x" -> "\cos x")
+  const functions = ['sin', 'cos', 'tan', 'cot', 'sec', 'csc', 'log', 'ln', 'det', 'lim', 'sqrt', 'alpha', 'beta', 'gamma', 'theta', 'phi', 'pi'];
+  functions.forEach(fn => {
+    // Only add backslash if not already there and not part of another word
+    const fnRegex = new RegExp(`([^\\\\a-zA-Z]|^)(${fn})\\b`, 'g');
+    cleanText = cleanText.replace(fnRegex, '$1\\$2');
+  });
+
   // 2. Convert LaTeX \(...\) to $...$ and \[...\] to $$...$$
-  // Handle escaped backslashes first: \\( becomes \(
   cleanText = cleanText.replace(/\\\\\(/g, '<<<ESCAPED_PAREN>>>');
   cleanText = cleanText.replace(/\\\\\)/g, '<<<ESCAPED_PAREN_CLOSE>>>');
   cleanText = cleanText.replace(/\\\\\[/g, '<<<ESCAPED_BRACKET>>>');
   cleanText = cleanText.replace(/\\\\\]/g, '<<<ESCAPED_BRACKET_CLOSE>>>');
 
-  // Now convert LaTeX delimiters to $ delimiters
   cleanText = cleanText.replace(/\\\(/g, '$');
   cleanText = cleanText.replace(/\\\)/g, '$');
   cleanText = cleanText.replace(/\\\[/g, '$$');
   cleanText = cleanText.replace(/\\\]/g, '$$');
 
-  // Restore escaped versions
   cleanText = cleanText.replace(/<<<ESCAPED_PAREN>>>/g, '\\(');
   cleanText = cleanText.replace(/<<<ESCAPED_PAREN_CLOSE>>>/g, '\\)');
   cleanText = cleanText.replace(/<<<ESCAPED_BRACKET>>>/g, '\\[');
   cleanText = cleanText.replace(/<<<ESCAPED_BRACKET_CLOSE>>>/g, '\\]');
 
-  // 2.5. Fix Greek letters in dimensional analysis - convert name to LaTeX symbol
-  // Must happen BEFORE $ delimiter wrapping
-  cleanText = cleanText.replace(/\(alpha\s/g, '(\\alpha ');
-  cleanText = cleanText.replace(/\(beta\s/g, '(\\beta ');
-  cleanText = cleanText.replace(/\(eta\s/g, '(\\eta ');
-  cleanText = cleanText.replace(/\(theta\s/g, '(\\theta ');
-  cleanText = cleanText.replace(/\(alpha\)/g, '(\\alpha)');
-  cleanText = cleanText.replace(/\(beta\)/g, '(\\beta)');
-  cleanText = cleanText.replace(/\(eta\)/g, '(\\eta)');
-  cleanText = cleanText.replace(/\(theta\)/g, '(\\theta)');
-
-  // 2.6. Auto-wrap dimensional analysis that lacks $ delimiters
-  // More lenient pattern - match any dimensional equation
-  // Examples: (\eta t) = (MLT^{-2}) or (\eta) (T) = (MLT^{-2}) or (\eta) = (MLT^{-3})
-  cleanText = cleanText.replace(/\([^)]+\)\s*=\s*\([^)]+\)/g, (match) => {
-    // Only wrap if it contains LaTeX backslash and uppercase letters (dimensional notation)
-    if (match.includes('\\') && /[A-Z]/.test(match)) {
-      return `$${match}$`;
-    }
-    return match;
+  // 2.6. Auto-wrap common LaTeX environments that lack delimiters
+  const environments = ['vmatrix', 'bmatrix', 'matrix', 'aligned', 'array', 'cases', 'equation', 'align', 'gather', 'split'];
+  environments.forEach(env => {
+    const envRegex = new RegExp(`\\\\begin\\{${env}\\}([\\s\\S]*?)\\\\end\\{${env}\\}`, 'g');
+    cleanText = cleanText.replace(envRegex, (match, content, offset) => {
+      const before = cleanText.substring(Math.max(0, offset - 2), offset);
+      const after = cleanText.substring(offset + match.length, offset + match.length + 2);
+      if (before.includes('$') || after.includes('$')) return match;
+      return ` $$ ${match} $$ `;
+    });
   });
 
-  // 3. Handle literal code-like patterns that might come from AI
-  cleanText = cleanText.replace(/```latex([\s\S]*?)```/g, '$$$1$$');
-  cleanText = cleanText.replace(/```math([\s\S]*?)```/g, '$$$1$$');
+  // 3. IDENTIFY ALL MATH BLOCKS and PROTECT with placeholders BEFORE naked command wrapping
+  const mathPlaceholders: string[] = [];
+  // Catch $$ blocks, $ blocks, and environments
+  const blockRegex = /(\$\$[\s\S]+?\$\$|\$[^$]+?\$|\\begin\{[a-z*]+\}[\s\S]+?\\end\{[a-z*]+\})/g;
 
-  // 4. MINIMAL cleanup - Don't corrupt the formulas!
-  // The aggressive regex was BREAKING formulas, not fixing them
+  let textWithPlaceholders = cleanText.replace(blockRegex, (match) => {
+    const placeholder = `<<<MATH_BLOCK_${mathPlaceholders.length}>>>`;
+    mathPlaceholders.push(match);
+    return placeholder;
+  });
 
-  // In compact mode (flashcards), AI might use $$ wrongly or too often.
-  // Force everything to be inline by temporarily swapping $$ for $ if it's on a single line or if we want single paragraph flow.
-  if (compact) {
-    cleanText = cleanText.replace(/\$\$/g, '$');
+  // 4. AUTO-WRAP STANDALONE COMMANDS on the text with placeholders
+  // This prevents wrapping commands INSIDE existing math blocks (which corrupts them)
+  const mathCommands = [
+    '\\\\cos', '\\\\sin', '\\\\tan', '\\\\sec', '\\\\csc', '\\\\cot',
+    '\\\\theta', '\\\\alpha', '\\\\beta', '\\\\gamma', '\\\\delta', '\\\\pi', '\\\\phi', '\\\\lambda', '\\\\omega',
+    '\\\\frac', '\\\\sqrt', '\\\\sum', '\\\\int', '\\\\lim', '\\\\vec', '\\\\infty',
+    '\\\\rightarrow', '\\\\partial', '\\\\nabla'
+  ];
+
+  // Nesting-aware argument matching (handles up to 1 level of nested braces)
+  const braceArg = '\\{(?:[^{}]|\\{[^{}]*\\})*\\}';
+  const brackArg = '\\[(?:[^\\[\\]]|\\[[^\\[\\]]*\\])*\\]';
+  const subArg = '_[a-zA-Z0-9]|_{[^{}]*}';
+  const supArg = '\\^[a-zA-Z0-9]|\\^{[^{}]*}';
+  const charArg = ' (?!is)[a-zA-Z0-9]'; // Avoid matching 'is' as math char
+
+  const commandsRegex = new RegExp(`(${mathCommands.join('|')})(?:${braceArg}|${brackArg}|${subArg}|${supArg}|${charArg}|(?![a-zA-Z]))+`, 'g');
+
+  textWithPlaceholders = textWithPlaceholders.replace(commandsRegex, (match) => {
+    return `$${match.trim()}$`;
+  });
+
+  // 5. EXTRACT OPTIONS & STEPS
+  // options and steps logic remains same but now using textWithPlaceholders to be safe
+  const optionMatches = textWithPlaceholders.match(/\(([1-4A-D])\).*?(?=\([1-4A-D]\)|$)/gs);
+
+  if (showOptions && optionMatches) {
+    optionMatches.forEach(opt => {
+      textWithPlaceholders = textWithPlaceholders.replace(opt, '');
+    });
   }
 
-  // 3. Auto-detect steps if text is long and has numbering markers
-  if (autoSteps && cleanText.length > 200) {
-    const stepMarkers = cleanText.match(/(?:^|\n)(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*(.*?)(?=\n(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*|$)/gs);
+  // Auto-detect steps logic
+  if (autoSteps && textWithPlaceholders.length > 200) {
+    const stepMarkers = textWithPlaceholders.match(/(?:^|\n)(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*(.*?)(?=\n(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*|$)/gs);
     if (stepMarkers && stepMarkers.length > 1) {
       return (
         <div className="space-y-4">
@@ -373,119 +414,92 @@ export const RenderWithMath: React.FC<{
             const titleMatch = step.match(/(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*(.*?)\n/i);
             const title = titleMatch ? titleMatch[1].trim() : `Step ${idx + 1}`;
             const content = step.replace(/(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*(.*?)\n/i, '').trim();
-            return <DerivationStep key={idx} index={idx + 1} title={title} content={content} />;
+            // Restore math for the content and title
+            const restoredContent = restoreMath(content);
+            const restoredTitle = restoreMath(title);
+            return <DerivationStep key={idx} index={idx + 1} title={restoredTitle} content={restoredContent} />;
           })}
         </div>
       );
     }
   }
 
-  // 4. Extract options if they are embedded in the text
-  const optionMatches = cleanText.match(/\(([1-4A-D])\).*?(?=\([1-4A-D]\)|$)/gs);
+  // 6. SPLIT PARAGRAPHS
+  const paragraphs = textWithPlaceholders.split(/\n\s*\n/).filter(p => p.trim().length > 0);
 
-  // Remove extracted options from main text if showOptions is true (to avoid double rendering)
-  if (showOptions && optionMatches) {
-    optionMatches.forEach(opt => {
-      cleanText = cleanText.replace(opt, '');
+  const restoreMath = (text: string) => {
+    return text.replace(/<<<MATH_BLOCK_(\d+)>>>/g, (_, index) => {
+      return mathPlaceholders[parseInt(index)];
     });
-  }
-
-  // 5. Split by newlines to handle paragraphs
-  const paragraphs = cleanText.split('\n').filter(p => p.trim().length > 0);
+  };
 
   const hasCustomFontSize = className?.includes('text-');
 
   return (
     <div className={`${compact ? '' : 'prose prose-slate max-w-none'} ${serif ? 'font-serif' : 'font-instrument'} ${className}`}>
       <div className={compact ? 'space-y-2' : 'space-y-4'}>
-        {paragraphs.map((p, i) => {
-          // Detect if paragraph is entirely a math block
-          if (p.trim().startsWith('$$') && p.trim().endsWith('$$')) {
+        {paragraphs.map((pWithPlaceholders, i) => {
+          const p = restoreMath(pWithPlaceholders);
+
+          // Detect if paragraph is entirely a display math block
+          const trimmedP = p.trim();
+          if ((trimmedP.startsWith('$$') && trimmedP.endsWith('$$')) ||
+            (trimmedP.startsWith('\\begin{') && trimmedP.endsWith('}'))) {
+
+            const expr = trimmedP.startsWith('$$') ? trimmedP.slice(2, -2) : trimmedP;
+
             if (compact) {
               return (
                 <div key={i} className="my-1.5 flex justify-center w-full">
-                  <MathRenderer expression={p.trim().slice(2, -2)} displayMode={false} className={`scale-110 drop-shadow-sm ${dark ? 'text-white' : (hasCustomFontSize ? '' : 'text-slate-900')}`} />
+                  <MathRenderer expression={expr} displayMode={false} className={`scale-110 drop-shadow-sm ${dark ? 'text-white' : (hasCustomFontSize ? '' : 'text-slate-900')}`} />
                 </div>
               );
             }
             return (
               <div key={i} className="my-6 relative group/math">
                 <div className="bg-gradient-to-br from-white via-slate-50/40 to-white border border-slate-200/70 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
-                  {/* Subtle Grid Background */}
                   <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.015] pointer-events-none" />
-
-                  {/* Top Accent Line */}
                   <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary-500/20 via-primary-500/40 to-primary-500/20" />
-
-                  {/* Formula Insight Badge */}
-                  <div className="absolute top-3 right-3 px-2.5 py-1 bg-primary-500/10 backdrop-blur-sm border border-primary-500/20 rounded-lg">
-                    <div className="text-[9px] font-bold text-primary-700 uppercase tracking-wide font-outfit flex items-center gap-1.5">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      Formula
-                    </div>
-                  </div>
-
-                  {/* Math Content */}
                   <div className="relative z-10 pt-2">
-                    <MathRenderer expression={p.trim().slice(2, -2)} displayMode={true} className={hasCustomFontSize ? '' : 'text-slate-900'} />
+                    <MathRenderer expression={expr} displayMode={true} className={hasCustomFontSize ? '' : 'text-slate-900'} />
                   </div>
                 </div>
               </div>
             );
           }
 
-          // Mixed text and math parsing
-          const parts = p.split(/(\$\$[\s\S]+?\$\$|\$[^$]+?\$)/g);
+          // Mixed text and math parsing logic
+          // Use a regex that preserves our protected math blocks
+          const parts = p.split(/(\$\$[\s\S]+?\$\$|\$[^$]+?\$|\\begin\{[a-z*]+\}[\s\S]+?\\end\{[a-z*]+\})/g);
 
           return (
             <div key={i} className={`leading-[1.9] ${hasCustomFontSize ? '' : (serif ? 'text-lg md:text-xl' : 'text-base font-medium')} ${dark ? 'text-white shrink-0' : (hasCustomFontSize ? '' : 'text-slate-800')}`}>
               {parts.map((part, pIdx) => {
-                if (part.startsWith('$$') && part.endsWith('$$') && !compact) {
+                const trimmedPart = part.trim();
+
+                // 1. Display Math
+                if (trimmedPart.startsWith('$$') && trimmedPart.endsWith('$$') && !compact) {
                   return (
                     <div key={pIdx} className="my-6 relative group/math">
                       <div className="bg-gradient-to-br from-white via-slate-50/40 to-white border border-slate-200/70 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
-                        {/* Subtle Grid Background */}
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.015] pointer-events-none" />
-
-                        {/* Top Accent Line */}
-                        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary-500/20 via-primary-500/40 to-primary-500/20" />
-
-                        {/* Formula Insight Badge */}
-                        <div className="absolute top-3 right-3 px-2.5 py-1 bg-primary-500/10 backdrop-blur-sm border border-primary-500/20 rounded-lg">
-                          <div className="text-[9px] font-bold text-primary-700 uppercase tracking-wide font-outfit flex items-center gap-1.5">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
-                            Formula
-                          </div>
-                        </div>
-
-                        {/* Math Content */}
                         <div className="relative z-10 pt-2">
-                          <MathRenderer expression={part.slice(2, -2)} displayMode={true} className={dark ? 'text-white' : ''} />
+                          <MathRenderer expression={trimmedPart.slice(2, -2)} displayMode={true} className={dark ? 'text-white' : ''} />
                         </div>
                       </div>
                     </div>
                   );
                 }
-                if ((part.startsWith('$') && part.endsWith('$')) || (compact && part.startsWith('$$') && part.endsWith('$$'))) {
-                  const expr = part.startsWith('$$') ? part.slice(2, -2) : part.slice(1, -1);
-                  return <MathRenderer key={pIdx} expression={expr} inline={true} className={`font-bold px-2 py-0.5 rounded-md ${dark ? 'text-emerald-300 bg-emerald-950/30' : 'text-primary-900 bg-primary-50/80 border border-primary-100/50'}`} />;
-                }
 
-                // Fallback for raw LaTeX commands not wrapped in $
-                // High risk for false positives. We only KaTeX it if it looks like an isolated formula
-                // rather than a full paragraph of text.
-                const hasLatexCommand = LATEX_PATTERNS.some(t => part.includes(t));
-                const hasSubSuperscript = /[a-zA-Z0-9]+[_^][{a-zA-Z0-9]/.test(part);
+                // 2. Inline Math or Environments
+                if ((trimmedPart.startsWith('$') && trimmedPart.endsWith('$')) ||
+                  (trimmedPart.startsWith('\\begin{') && trimmedPart.endsWith('}')) ||
+                  (compact && trimmedPart.startsWith('$$') && trimmedPart.endsWith('$$'))) {
 
-                const isLikelyPureMath = (hasLatexCommand || (hasSubSuperscript && (part.includes('{') || part.includes('_') || part.includes('^')))) &&
-                  (part.length < 40 || (part.match(/\s/g) || []).length <= 2);
+                  let expr = trimmedPart;
+                  if (trimmedPart.startsWith('$$')) expr = trimmedPart.slice(2, -2);
+                  else if (trimmedPart.startsWith('$')) expr = trimmedPart.slice(1, -1);
 
-                if (isLikelyPureMath) {
-                  return <MathRenderer key={pIdx} expression={part} inline={true} className={`font-bold px-2 py-0.5 rounded-md ${dark ? 'text-emerald-300 bg-emerald-950/30' : 'text-primary-900 bg-primary-50/80 border border-primary-100/50'}`} />;
+                  return <MathRenderer key={pIdx} expression={expr} inline={true} className={`font-bold ${compact ? '' : 'px-2 py-0.5 rounded-md'} ${dark ? 'text-emerald-300' : 'text-primary-900'} ${compact ? '' : (dark ? 'bg-emerald-950/30' : 'bg-primary-50/80 border border-primary-100/50')}`} />;
                 }
 
                 return <span key={pIdx} className="whitespace-pre-wrap">{part}</span>;

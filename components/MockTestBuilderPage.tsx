@@ -144,8 +144,14 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const fetchWeakTopics = async () => {
     setIsLoadingRecommendations(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const url = getApiUrl(`/api/learning-journey/weak-topics?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(examContext)}`);
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
 
       if (response.ok) {
         const result = await response.json();
@@ -164,8 +170,14 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
   const fetchTemplates = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const url = getApiUrl(`/api/learning-journey/test-templates?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(examContext)}`);
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
 
       if (response.ok) {
         const result = await response.json();
@@ -179,9 +191,15 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const fetchTestHistory = async () => {
     setIsLoadingHistory(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const url = getApiUrl(`/api/learning-journey/mock-history?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(examContext)}&limit=50`);
       console.log('📋 Fetching test history:', { subject, examContext, url });
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
       if (response.ok) {
         const result = await response.json();
         console.log('✅ Received test history:', result.data?.attempts?.length || 0, 'tests');
@@ -198,10 +216,15 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
   const calculateAvailableQuestions = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const url = getApiUrl('/api/learning-journey/count-available-questions');
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         credentials: 'include',
         body: JSON.stringify({
           subject,
@@ -281,12 +304,17 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     let pollInterval: NodeJS.Timeout | null = null;
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const url = getApiUrl('/api/learning-journey/create-custom-test');
 
       // POST responds immediately with a progressId — no 504 timeout
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         credentials: 'include',
         body: JSON.stringify({
           userId,
@@ -326,8 +354,15 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
         pollInterval = setInterval(async () => {
           try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
             const progressUrl = getApiUrl(`/api/learning-journey/generation-progress/${progressId}`);
-            const progressRes = await fetch(progressUrl, { credentials: 'include' });
+            const progressRes = await fetch(progressUrl, {
+              headers: {
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+              },
+              credentials: 'include'
+            });
 
             if (!progressRes.ok) return; // transient error, keep polling
 
@@ -389,12 +424,12 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
         showBack
         onBack={onBack}
         icon={<Zap size={24} className="text-white" />}
-        title="Mock Test Builder"
+        title="Mock Missions"
         subtitle={`${subject} • Custom Evaluation`}
         subject={subject}
         trajectory={examContext}
         mastery={subjectProgress?.[subject]?.overallMastery}
-        accuracy={subjectProgress?.[subject]?.overallAccuracy ?? 100}
+        accuracy={subjectProgress?.[subject]?.overallAccuracy ?? 0}
         actions={
           avgScore !== null && (
             <div className="flex items-center gap-6 pr-4 border-l border-slate-200 pl-4">

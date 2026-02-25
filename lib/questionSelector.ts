@@ -91,21 +91,37 @@ export async function selectQuestionsForTest(
     // 2. Build base query
     let query = supabase
       .from('questions')
-      .select('*');
-
-    // Filter by subject (via scan)
-    const { data: userScans } = await supabase
-      .from('scans')
-      .select('id')
-      .eq('user_id', criteria.userId)
+      .select('*')
       .eq('subject', criteria.subject);
 
-    if (!userScans || userScans.length === 0) {
-      throw new Error('No scans found for user');
+    if (criteria.examContext) {
+      query = query.eq('exam_context', criteria.examContext);
     }
 
-    const scanIds = userScans.map(s => s.id);
-    query = query.in('scan_id', scanIds);
+    // Try to get user scans to filter by ownership (user isolation)
+    let scanIds: string[] = [];
+    try {
+      const { data: userScans, error: scanError } = await supabase
+        .from('scans')
+        .select('id')
+        .eq('user_id', criteria.userId)
+        .eq('subject', criteria.subject);
+
+      if (scanError) {
+        console.warn('⚠️ Error fetching user scans:', scanError.message);
+      } else if (userScans && userScans.length > 0) {
+        scanIds = userScans.map(s => s.id);
+        console.log(`🔍 Found ${scanIds.length} scans for user ${criteria.userId} in ${criteria.subject}`);
+      } else {
+        console.warn(`⚠️ No scans found for user ${criteria.userId} in subject ${criteria.subject}. Proceeding with general questions...`);
+      }
+    } catch (e) {
+      console.warn('⚠️ Scan lookup failed:', e);
+    }
+
+    if (scanIds.length > 0) {
+      query = query.in('scan_id', scanIds);
+    }
 
     // 3. Filter by topics if specified
     if (criteria.topics && criteria.topics.length > 0) {
@@ -125,17 +141,27 @@ export async function selectQuestionsForTest(
     }
 
     // 4. Exclude previously attempted questions
+    // Supabase requires the `not.in` list to be formatted as a parenthesised
+    // string: "(uuid1,uuid2,...)" — passing a raw array causes a parse error.
     if (criteria.excludeQuestionIds && criteria.excludeQuestionIds.length > 0) {
-      query = query.not('id', 'in', criteria.excludeQuestionIds);
+      const idList = `(${criteria.excludeQuestionIds.join(',')})`;
+      query = query.not('id', 'in', idList);
     }
 
     // 5. Execute query
     const { data: allQuestions, error } = await query;
 
-    if (error) throw error;
-    if (!allQuestions || allQuestions.length === 0) {
-      throw new Error('No questions found matching criteria');
+    if (error) {
+      console.error('❌ Database error during question selection:', error);
+      throw error;
     }
+
+    if (!allQuestions || allQuestions.length === 0) {
+      console.error(`❌ No questions found for ${criteria.subject} (${criteria.examContext}) with topics:`, criteria.topics);
+      throw new Error(`Insufficient question pool for ${criteria.subject}. Please generate more questions first.`);
+    }
+
+    console.log(`📦 Selection pool: ${allQuestions.length} questions available`);
 
     // 6. Group questions by difficulty
     const questionsByDifficulty = {
@@ -395,7 +421,7 @@ export async function getPreviouslyAttemptedQuestions(
 
     if (error) throw error;
 
-    const questionIds = Array.from(new Set((data || []).map(r => r.question_id)));
+    const questionIds = Array.from(new Set((data || []).map((r: any) => r.question_id as string))) as string[];
     return questionIds;
 
   } catch (error) {

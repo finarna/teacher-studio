@@ -12,7 +12,16 @@ import TestInterface from './TestInterface';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import VaultDetailPage from './VaultDetailPage';
 import TestResultsPage from './TestResultsPage';
-import { Loader2 } from 'lucide-react';
+import PerformanceDashboardPage from './PerformanceDashboardPage';
+import { Loader2, AlertTriangle, Send, RefreshCcw, ChevronLeft } from 'lucide-react';
+import { useIsMobile } from '../hooks/useIsMobile';
+
+// Mobile Versions
+import MobileTrajectorySelectionPage from './MobileTrajectorySelectionPage';
+import MobileSubjectSelectionPage from './MobileSubjectSelectionPage';
+import MobileSubjectMenuPage from './MobileSubjectMenuPage';
+import MobileTopicDashboardPage from './MobileTopicDashboardPage';
+import MobileTopicDetailPage from './MobileTopicDetailPage';
 
 interface LearningJourneyAppProps {
   onBack: () => void;
@@ -34,6 +43,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
     isLoading,
     error,
     userId,
+    studyStreak,
     selectTrajectory,
     selectSubject,
     selectSubjectOption,
@@ -45,34 +55,77 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
     submitTest,
     exitTest,
     viewPastTestResults,
-    refreshData
+    refreshData,
+    navigateToView,
+    clearError,
+    reportError
   } = useLearningJourney();
+
+  const isMobile = useIsMobile();
 
   // Error state
   if (error) {
+    const handleGoBack = () => {
+      clearError();
+      goBack();
+    };
+
+    const handleReport = async () => {
+      await reportError(error);
+      alert('Error reported to our engineering team. Thank you!');
+    };
+
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="bg-white border-2 border-red-200 rounded-xl p-8 max-w-md w-full">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">⚠️</span>
-            </div>
-            <h2 className="font-black text-xl text-slate-900 mb-2">Something went wrong</h2>
-            <p className="text-sm text-slate-600 mb-6">{error}</p>
-            <button
-              onClick={goBack}
-              className="px-6 py-3 bg-slate-900 text-white rounded-lg text-sm font-black hover:bg-slate-800 transition-all"
-            >
-              Go Back
-            </button>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
+        <div className="mb-8 relative">
+          <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center animate-pulse">
+            <AlertTriangle size={48} className="text-red-500" />
           </div>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -bottom-2 -right-2 w-10 h-10 bg-white border-4 border-red-50 rounded-full flex items-center justify-center shadow-sm"
+          >
+            <RefreshCcw size={16} className="text-red-400" />
+          </motion.div>
+        </div>
+
+        <h2 className="text-2xl font-black text-slate-900 mb-2 leading-tight">Something went wrong</h2>
+        <p className="text-slate-600 mb-10 max-w-xs text-sm font-medium leading-relaxed">
+          {error || 'An unexpected error occurred while processing your request.'}
+        </p>
+
+        <div className="flex flex-col w-full max-w-xs gap-3">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center justify-center gap-2 w-full py-4 bg-slate-900 text-white rounded-2xl text-base font-black shadow-lg shadow-slate-200 active:scale-95 transition-all"
+          >
+            <ChevronLeft size={20} />
+            Go Back
+          </button>
+
+          <button
+            onClick={handleReport}
+            className="flex items-center justify-center gap-2 w-full py-4 bg-slate-50 text-slate-600 rounded-2xl text-sm font-bold active:scale-95 transition-all border border-slate-100"
+          >
+            <Send size={16} />
+            Report to Ops Team
+          </button>
+
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 active:scale-95 transition-all"
+          >
+            Full Page Refresh
+          </button>
         </div>
       </div>
     );
   }
 
-  // Loading state
-  if (isLoading && currentView !== 'test') {
+  // Full-screen loading only for major view transitions (NOT when generating a test
+  // from within topic_detail — those use inline button loading state instead)
+  if (isLoading && currentView !== 'test' && currentView !== 'topic_detail') {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
@@ -104,17 +157,32 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
   const renderView = () => {
     switch (currentView) {
       case 'trajectory':
+        if (isMobile) {
+          return <MobileTrajectorySelectionPage onSelectTrajectory={selectTrajectory} />;
+        }
         return (
           <TrajectorySelectionPage
             onSelectTrajectory={selectTrajectory}
-            userProgress={undefined} // Will be loaded from API in future
+            userProgress={undefined}
           />
         );
 
       case 'subject':
-        if (!selectedTrajectory) {
-          goBack();
-          return null;
+        if (!selectedTrajectory) return null;
+        if (isMobile) {
+          return (
+            <MobileSubjectSelectionPage
+              examContext={selectedTrajectory}
+              onSelectSubject={selectSubject}
+              onBack={goBack}
+              subjectProgress={subjectProgress}
+              onViewGlobalPerformance={() => navigateToView('overall_performance')}
+              onSelectOption={async (s, opt) => {
+                await selectSubject(s);
+                selectSubjectOption(opt);
+              }}
+            />
+          );
         }
         return (
           <SubjectSelectionPage
@@ -122,14 +190,16 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
             onSelectSubject={selectSubject}
             onBack={goBack}
             subjectProgress={subjectProgress}
+            onViewGlobalPerformance={() => navigateToView('overall_performance')}
+            onSelectOption={async (s, opt) => {
+              await selectSubject(s);
+              selectSubjectOption(opt);
+            }}
           />
         );
 
       case 'topic_dashboard':
-        if (!selectedTrajectory || !selectedSubject) {
-          goBack();
-          return null;
-        }
+        if (!selectedTrajectory || !selectedSubject) return null;
 
         // Simple Recommendation Engine
         const getAiRecommendation = () => {
@@ -160,6 +230,22 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
           return undefined;
         };
 
+        const recommendation = getAiRecommendation();
+
+        if (isMobile) {
+          return (
+            <MobileTopicDashboardPage
+              subject={selectedSubject}
+              examContext={selectedTrajectory}
+              topics={topics}
+              onSelectTopic={selectTopic}
+              onBack={goBack}
+              aiRecommendation={recommendation}
+              studyStreak={studyStreak}
+            />
+          );
+        }
+
         return (
           <TopicDashboardPage
             subject={selectedSubject}
@@ -167,36 +253,51 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
             topics={topics}
             onSelectTopic={selectTopic}
             onBack={goBack}
-            aiRecommendation={getAiRecommendation()}
-            studyStreak={0} // TODO: Load from user activity
+            aiRecommendation={recommendation}
+            studyStreak={studyStreak}
           />
         );
 
       case 'topic_detail':
-        if (!selectedTrajectory || !selectedSubject || !selectedTopicId) {
-          goBack();
-          return null;
-        }
+        if (!selectedTrajectory || !selectedSubject || !selectedTopicId) return null;
         const selectedTopic = topics.find(t => t.topicId === selectedTopicId);
-        if (!selectedTopic) {
-          goBack();
-          return null;
+        if (!selectedTopic) return null;
+
+        if (isMobile) {
+          return (
+            <MobileTopicDetailPage
+              topicResource={selectedTopic}
+              subject={selectedSubject}
+              examContext={selectedTrajectory}
+              onBack={goBack}
+              onStartQuiz={(topicId, totalQuestions) => { void startTest('topic_quiz', topicId, totalQuestions); }}
+              onRefreshData={refreshData}
+            />
+          );
         }
+
         return (
           <TopicDetailPage
             topicResource={selectedTopic}
             subject={selectedSubject}
             examContext={selectedTrajectory}
             onBack={goBack}
-            onStartQuiz={(topicId) => startTest('topic_quiz', topicId)}
+            onStartQuiz={(topicId, totalQuestions) => { void startTest('topic_quiz', topicId, totalQuestions); }}
             onRefreshData={refreshData}
           />
         );
 
       case 'test':
+        // Show loading while questions populate (async setState after API call)
         if (!currentTest || !currentTestQuestions || currentTestQuestions.length === 0) {
-          goBack();
-          return null;
+          return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+              <div className="text-center">
+                <Loader2 size={48} className="text-primary-600 animate-spin mx-auto mb-4" />
+                <p className="text-sm font-medium text-slate-600">Preparing your quiz…</p>
+              </div>
+            </div>
+          );
         }
         return (
           <TestInterface
@@ -209,7 +310,6 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
 
       case 'test_results':
         if (!currentTest || !currentTestResponses || !currentTestQuestions) {
-          // Return loading state while data is being fetched
           return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
               <div className="text-center">
@@ -230,10 +330,19 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
         );
 
       case 'subject_menu':
-        if (!selectedTrajectory || !selectedSubject) {
-          goBack();
-          return null;
+        if (!selectedTrajectory || !selectedSubject) return null;
+
+        if (isMobile) {
+          return (
+            <MobileSubjectMenuPage
+              subject={selectedSubject}
+              examContext={selectedTrajectory}
+              onBack={goBack}
+              onSelectOption={selectSubjectOption}
+            />
+          );
         }
+
         return (
           <SubjectMenuPage
             subject={selectedSubject}
@@ -244,10 +353,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
         );
 
       case 'past_year_exams':
-        if (!selectedTrajectory || !selectedSubject || !userId) {
-          goBack();
-          return null;
-        }
+        if (!selectedTrajectory || !selectedSubject || !userId) return null;
         return (
           <PastYearExamsPage
             subject={selectedSubject}
@@ -259,10 +365,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
         );
 
       case 'vault_detail':
-        if (!selectedTrajectory || !selectedSubject || !selectedScanId) {
-          goBack();
-          return null;
-        }
+        if (!selectedTrajectory || !selectedSubject || !selectedScanId) return null;
         return (
           <VaultDetailPage
             scanId={selectedScanId}
@@ -271,10 +374,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
         );
 
       case 'mock_builder':
-        if (!selectedTrajectory || !selectedSubject || !userId) {
-          goBack();
-          return null;
-        }
+        if (!selectedTrajectory || !selectedSubject || !userId) return null;
         return (
           <MockTestBuilderPage
             subject={selectedSubject}
@@ -284,6 +384,17 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
             onStartTest={startCustomTest}
             onViewTestResults={viewPastTestResults}
             userId={userId}
+          />
+        );
+
+      case 'overall_performance':
+        if (!selectedTrajectory) return null;
+        return (
+          <PerformanceDashboardPage
+            examContext={selectedTrajectory}
+            subjectProgress={subjectProgress}
+            onBack={goBack}
+            onSelectSubject={selectSubject}
           />
         );
 

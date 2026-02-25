@@ -12,6 +12,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import { supabase } from '../lib/supabase';
 import type { AnalyzedQuestion, Subject, ExamContext } from '../types';
+import { getApiUrl } from '../lib/api';
 
 interface PracticeAnswer {
   questionId: string;
@@ -360,6 +361,25 @@ export const usePracticeSession = ({
             }, {
               onConflict: 'user_id,topic_id,exam_context'
             });
+
+          // 3. Record Activity for Streak & Dashboard
+          const activityUrl = getApiUrl(`/api/topics/${topicResourceId}/activity`);
+          const { data: { session } } = await supabase.auth.getSession();
+          const token = session?.access_token;
+
+          await fetch(activityUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              activityType: 'practiced_question',
+              questionId,
+              isCorrect,
+              timeSpent: state.timeSpentPerQuestion.get(questionId) || 0
+            })
+          });
 
           onProgressUpdate?.(true);
         } catch (e) {

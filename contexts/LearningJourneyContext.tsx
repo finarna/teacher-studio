@@ -12,7 +12,7 @@ import type {
 import { getApiUrl } from '../lib/api';
 import { supabase } from '../lib/supabase';
 
-type ViewType = 'trajectory' | 'subject' | 'subject_menu' | 'topic_dashboard' | 'topic_detail' | 'test' | 'test_results' | 'past_year_exams' | 'vault_detail' | 'mock_builder';
+type ViewType = 'trajectory' | 'subject' | 'subject_menu' | 'topic_dashboard' | 'topic_detail' | 'test' | 'test_results' | 'past_year_exams' | 'vault_detail' | 'mock_builder' | 'overall_performance';
 
 interface LearningJourneyState {
   // Navigation state
@@ -36,6 +36,7 @@ interface LearningJourneyState {
 
   // User info
   userId: string | null;
+  studyStreak: number;
 }
 
 interface LearningJourneyContextType extends LearningJourneyState {
@@ -50,7 +51,7 @@ interface LearningJourneyContextType extends LearningJourneyState {
   navigateToView: (view: ViewType) => void;
 
   // Test actions
-  startTest: (testType: 'topic_quiz' | 'subject_test' | 'full_mock', topicId?: string) => Promise<void>;
+  startTest: (testType: 'topic_quiz' | 'subject_test' | 'full_mock', topicId?: string, totalQuestions?: number) => Promise<void>;
   startCustomTest: (attempt: TestAttempt, questions: AnalyzedQuestion[]) => void;
   submitTest: (responses: TestResponse[]) => Promise<void>;
   exitTest: () => void;
@@ -59,7 +60,10 @@ interface LearningJourneyContextType extends LearningJourneyState {
   // Data actions
   loadTopics: () => Promise<void>;
   loadSubjectProgress: () => Promise<void>;
+  loadStudyStreak: () => Promise<void>;
   refreshData: (silent?: boolean) => Promise<void>;
+  clearError: () => void;
+  reportError: (errorMessage: string) => Promise<void>;
 
   // Derived state for Global UI
   isFocusMode: boolean;
@@ -99,7 +103,8 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     currentTestResponses: [],
     isLoading: false,
     error: null,
-    userId
+    userId,
+    studyStreak: 0
   });
 
   // Navigation history for back button
@@ -130,6 +135,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   useEffect(() => {
     if (state.selectedTrajectory && state.currentView === 'subject') {
       loadSubjectProgress(true);
+      loadStudyStreak();
     }
   }, [state.selectedTrajectory, state.currentView]);
 
@@ -145,8 +151,14 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
 
     try {
       if (state.selectedTrajectory) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
         const url = getApiUrl(`/api/learning-journey/topics?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(state.selectedTrajectory)}`);
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          headers: {
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          }
+        });
         if (!response.ok) throw new Error('Failed to load topics');
         const result = await response.json();
         setState(prev => ({
@@ -249,24 +261,33 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   };
 
   // Test Actions
-  const startTest = async (testType: 'topic_quiz' | 'subject_test' | 'full_mock', topicId?: string) => {
+  const startTest = async (testType: 'topic_quiz' | 'subject_test' | 'full_mock', topicId?: string, totalQuestions: number = 10) => {
     if (!state.selectedTrajectory || !state.selectedSubject) return;
     setState(prev => ({ ...prev, isLoading: true }));
     try {
       const url = getApiUrl('/api/tests/generate');
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         credentials: 'include',
         body: JSON.stringify({
           userId,
           testType,
           subject: state.selectedSubject,
           examContext: state.selectedTrajectory,
-          topics: topicId ? [topicId] : undefined
+          topics: topicId ? [topicId] : undefined,
+          totalQuestions
         })
       });
-      if (!response.ok) throw new Error('Failed to generate test');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || 'Failed to generate test');
+      }
       const result = await response.json();
       setState(prev => ({
         ...prev,
@@ -298,7 +319,10 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
         credentials: 'include',
         body: JSON.stringify({ responses })
       });
-      if (!response.ok) throw new Error('Failed to submit test');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || 'Failed to submit test');
+      }
       const result = await response.json();
       setState(prev => ({
         ...prev,
@@ -372,11 +396,17 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     if (!state.selectedTrajectory || !state.selectedSubject) return;
     if (!silent) setState(prev => ({ ...prev, isLoading: true }));
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const url = getApiUrl(`/api/learning-journey/topics?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(state.selectedSubject)}&examContext=${encodeURIComponent(state.selectedTrajectory)}`);
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
       if (!response.ok) throw new Error('Failed to load topics');
       const result = await response.json();
-      setState(prev => ({ ...prev, topics: result.data, isLoading: false, error: null }));
+      setState(prev => ({ ...prev, topics: result.data || [], isLoading: false, error: null }));
     } catch (error) {
       setState(prev => ({ ...prev, isLoading: false, error: (error as Error).message }));
     }
@@ -386,18 +416,27 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     if (!state.selectedTrajectory) return;
     if (!silent) setState(prev => ({ ...prev, isLoading: true }));
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
       const url = getApiUrl(`/api/learning-journey/subjects/${state.selectedTrajectory}?userId=${encodeURIComponent(userId)}`);
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to load progress');
+      const response = await fetch(url, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || 'Failed to load progress');
+      }
       const { data } = await response.json();
       const progressMap = {} as Record<Subject, SubjectProgress>;
-      data.forEach((item: any) => {
+      (data || []).forEach((item: any) => {
         progressMap[item.subject as Subject] = {
           overallMastery: item.overallMastery,
           topicsTotal: item.totalTopics,
           topicsMastered: item.topicsWithQuestions,
           totalQuestionsAttempted: item.totalQuestions,
-          overallAccuracy: item.overallAccuracy ?? 100
+          overallAccuracy: item.overallAccuracy ?? 0
         } as any;
       });
       setState(prev => ({ ...prev, subjectProgress: progressMap, isLoading: false }));
@@ -406,8 +445,59 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     }
   };
 
+  const loadStudyStreak = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const url = getApiUrl(`/api/progress/streak?userId=${encodeURIComponent(userId)}`);
+      const response = await fetch(url, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      if (!response.ok) throw new Error('Failed to load streak');
+      const { streak } = await response.json();
+      setState(prev => ({ ...prev, studyStreak: streak || 0 }));
+    } catch (error) {
+      console.error('Failed to load streak:', error);
+    }
+  };
+
   const refreshData = async (silent = false) => {
-    await Promise.all([loadTopics(silent), loadSubjectProgress(silent)]);
+    await Promise.all([loadTopics(silent), loadSubjectProgress(silent), loadStudyStreak()]);
+  };
+
+  const clearError = () => {
+    setState(prev => ({ ...prev, error: null }));
+  };
+
+  const reportError = async (errorMessage: string) => {
+    try {
+      const url = getApiUrl('/api/ops/report-error');
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          userId,
+          error: errorMessage,
+          context: {
+            currentView: state.currentView,
+            trajectory: state.selectedTrajectory,
+            subject: state.selectedSubject,
+            timestamp: new Date().toISOString()
+          }
+        })
+      });
+      console.log('Error reported to ops team');
+    } catch (e) {
+      console.error('Failed to report error:', e);
+    }
   };
 
   const contextValue: LearningJourneyContextType = {
@@ -427,7 +517,10 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     viewPastTestResults,
     loadTopics,
     loadSubjectProgress,
+    loadStudyStreak,
     refreshData,
+    clearError,
+    reportError,
     isFocusMode: state.currentView === 'test',
     isDrilledDown: state.currentView !== 'trajectory'
   };

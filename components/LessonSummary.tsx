@@ -68,7 +68,7 @@ const LessonSummary: React.FC<LessonSummaryProps> = ({ title, content, onNext })
             {content.mnemonic && (
               <div className="mt-4 p-4 bg-primary-50 rounded-lg text-primary-900 text-[11px] font-bold border border-primary-100 flex flex-col md:flex-row items-center gap-3 text-center md:text-left">
                 <span className="font-bold bg-white px-2.5 py-1 rounded shadow-sm shrink-0 uppercase tracking-widest border border-primary-200 text-[9px]">Mnemonic</span>
-                <span className="leading-relaxed"><RenderWithMath text={content.mnemonic} showOptions={false} /></span>
+                <div className="leading-relaxed"><RenderWithMath text={content.mnemonic} showOptions={false} /></div>
               </div>
             )}
           </div>
@@ -108,9 +108,9 @@ const LessonSummary: React.FC<LessonSummaryProps> = ({ title, content, onNext })
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-[10px]">
                     {idx + 1}
                   </span>
-                  <p className="text-slate-700 text-[13px] font-medium leading-relaxed">
+                  <div className="text-slate-700 text-[13px] font-medium leading-relaxed">
                     <RenderWithMath text={tip} />
-                  </p>
+                  </div>
                 </div>
               ))}
             </div>

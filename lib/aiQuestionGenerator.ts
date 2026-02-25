@@ -105,12 +105,22 @@ export interface GenerationRules {
 
 export async function generateTestQuestions(
   context: GenerationContext,
-  geminiApiKey: string
+  geminiApiKey: string,
+  totalQuestionsOverride?: number
 ): Promise<AnalyzedQuestion[]> {
+
+  // Apply override so user-selected count is respected
+  if (totalQuestionsOverride && totalQuestionsOverride > 0) {
+    context = {
+      ...context,
+      examConfig: { ...context.examConfig, totalQuestions: totalQuestionsOverride }
+    };
+  }
 
   console.log('🚀 Starting AI Question Generation...');
   console.log(`📋 Exam: ${context.examConfig.examContext} ${context.examConfig.subject}`);
   console.log(`👤 Student: ${context.studentProfile.userId} (${context.studentProfile.overallAccuracy}% accuracy)`);
+  console.log(`📦 Question count: ${context.examConfig.totalQuestions}`);
 
   // Step 1: Analyze past patterns and predict next year
   const prediction = await predictNextYearPattern(context, geminiApiKey);
@@ -248,22 +258,22 @@ Return ONLY valid JSON:
 }`;
 
   try {
-    // Use @google/genai library with gemini-3-flash-preview
-    const { GoogleGenAI } = await import('@google/genai');
-    const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
       generationConfig: {
         temperature: 0.2,
         topK: 1,
         topP: 0.8,
         maxOutputTokens: 4096,
+        responseMimeType: 'application/json'
       }
     });
 
-    const text = response.text || '{}';
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text() || '{}';
 
     // Extract JSON from response
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/```\s*([\s\S]*?)\s*```/) || text.match(/\{[\s\S]*\}/);
@@ -582,22 +592,22 @@ Return ONLY valid JSON array:
 CRITICAL: Output MUST be valid JSON with NO markdown, NO extra text, JUST the array.`;
 
   try {
-    // Use @google/genai library with gemini-3-flash-preview
-    const { GoogleGenAI } = await import('@google/genai');
-    const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
       generationConfig: {
         temperature: 0.8,
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 8192,
+        responseMimeType: 'application/json'
       }
     });
 
-    const text = response.text || '[]';
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text() || '[]';
 
     // Extract JSON from response
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/```\s*([\s\S]*?)\s*```/) || text.match(/\[[\s\S]*\]/);

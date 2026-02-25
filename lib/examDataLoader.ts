@@ -32,7 +32,17 @@ export async function loadExamConfiguration(
     .single();
 
   if (error || !data) {
-    throw new Error(`Exam configuration not found for ${examContext} ${subject}`);
+    // Return sensible defaults so generation can still proceed without DB config
+    console.warn(`⚠️  No exam_configurations row for ${examContext} ${subject} — using defaults`);
+    return {
+      examContext,
+      subject,
+      totalQuestions: 30,
+      durationMinutes: 60,
+      marksPerQuestion: 1,
+      passingPercentage: 40,
+      negativeMarking: undefined
+    };
   }
 
   return {
@@ -294,24 +304,43 @@ export async function loadGenerationContext(
     loadGenerationRules(supabase, examContext, subject)
   ]);
 
-  // Filter topics if user selected specific ones (by topic name)
+  // Filter topics if user selected specific ones (by topic ID or name)
   const topics = selectedTopicNames && selectedTopicNames.length > 0
     ? allTopics.filter(t => {
-        // Match by topic name (case-insensitive)
-        const match = selectedTopicNames.some(name =>
-          t.topicName.toLowerCase().includes(name.toLowerCase()) ||
-          name.toLowerCase().includes(t.topicName.toLowerCase())
-        );
-        if (!match) {
-          console.log(`📊 [DEBUG] Topic "${t.topicName}" NOT in selected names`);
-        }
-        return match;
-      })
+      // Match by topic ID OR topic name (case-insensitive)
+      const match = selectedTopicNames.some(identifier =>
+        (t.topicId && t.topicId === identifier) ||
+        t.topicName.toLowerCase().includes(identifier.toLowerCase()) ||
+        identifier.toLowerCase().includes(t.topicName.toLowerCase())
+      );
+      if (!match) {
+        console.log(`📊 [DEBUG] Topic "${t.topicName}" (${t.topicId}) NOT in selected identifiers`);
+      }
+      return match;
+    })
     : allTopics;
 
   if (selectedTopicNames && selectedTopicNames.length > 0 && topics.length === 0) {
-    console.warn(`⚠️  [DEBUG] No topics matched! Selected names:`, selectedTopicNames);
+    console.warn(`⚠️  [DEBUG] No topics matched! Selected identifiers:`, selectedTopicNames);
     console.warn(`⚠️  [DEBUG] Available topic names:`, allTopics.map(t => t.topicName));
+    // When DB has no topic metadata, synthesise a minimal stub so AI can still generate
+    // questions using the topic name (which is passed as identifier)
+    const syntheticTopics = selectedTopicNames.map(name => ({
+      topicId: name,
+      topicName: name,
+      syllabus: `${examContext} ${subject} - ${name}`,
+      bloomsLevels: ['Understand', 'Apply', 'Analyse'],
+      estimatedDifficulty: 5,
+      prerequisites: []
+    }));
+    console.log(`ℹ️  Using synthetic topic stubs for generation:`, syntheticTopics.map(t => t.topicName));
+    return {
+      examConfig,
+      historicalData,
+      studentProfile,
+      topics: syntheticTopics,
+      generationRules
+    };
   }
 
   console.log(`✅ Loaded: ${topics.length} topics, ${historicalData.length} years of patterns`);

@@ -34,6 +34,7 @@ import {
   Clock,
   BarChart3
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { RenderWithMath, DerivationStep } from './MathRenderer';
 import { Scan, AnalyzedQuestion } from '../types';
 import { cache } from '../utils/cache';
@@ -354,21 +355,9 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
       // Load from Question Bank API/cache (AI-generated practice questions)
       const key = selectedAnalysisId ? `qbank_${selectedAnalysisId}` : `qbank_${activeTab}_${selectedGrade}`;
 
-      // Get auth token
-      const token = localStorage.getItem('sb-auth-token');
-
-      // Clear stale frontend cache before loading
-      const cachedData = cache.get(key);
-      if (cachedData && cachedData.length > 0) {
-        const firstQ = cachedData[0];
-        // If cached questions look like scan questions, clear them
-        if (firstQ.id && firstQ.id.includes('-Q') && firstQ.source) {
-          console.log(`🗑️ [CACHE CLEAR] Removing stale scan questions from frontend cache`);
-          cache.remove(key);
-        }
-      }
-
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
         const response = await fetch(`/api/questionbank/${key}`, {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         });
@@ -447,11 +436,11 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
   const generateNewQuestion = async () => {
     setIsGenerating(true);
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (process as any).env?.GEMINI_API_KEY;
+      const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (process as any).env?.GEMINI_API_KEY;
       if (!apiKey) throw new Error("API Key Missing");
 
       // Get model and temperature from Settings
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
       const temperature = parseFloat(localStorage.getItem('ai_temperature') || '0.7');
 
       const genAI = new GoogleGenerativeAI(apiKey);
@@ -623,7 +612,8 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
         const key = selectedAnalysisId ? `qbank_${selectedAnalysisId}` : `qbank_${activeTab}_${selectedGrade}`;
 
         // Get auth token
-        const token = localStorage.getItem('sb-auth-token');
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
 
         try {
           await fetch('/api/questionbank', {
@@ -711,21 +701,19 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                   <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
                     <button
                       onClick={() => setViewTab('summary')}
-                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
-                        viewTab === 'summary'
-                          ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md'
-                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
-                      }`}
+                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${viewTab === 'summary'
+                        ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md'
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
+                        }`}
                     >
                       Summary
                     </button>
                     <button
                       onClick={() => setViewTab('questions')}
-                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
-                        viewTab === 'questions'
-                          ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md'
-                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
-                      }`}
+                      className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${viewTab === 'questions'
+                        ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md'
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
+                        }`}
                     >
                       Questions
                     </button>
@@ -852,621 +840,618 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
             <div className="max-w-7xl mx-auto space-y-4 pb-16">
               {viewTab === 'summary' && (
                 (paperStats && filteredVault.length > 0) ? (
-              <div className="space-y-4">
-                {/* Row 1: Headline Stats */}
-                <div className="grid grid-cols-12 gap-4">
-                  {/* Scan Correlation - HERO CARD */}
-                  <div className="col-span-5 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24"></div>
-                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                          <Link2 size={20} className="text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-bold text-white/90 uppercase tracking-wide">AI Relevance Score</h3>
-                          {selectedAnalysis && (
-                            <p className="text-xs text-white/70">{selectedAnalysis.name}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-baseline gap-3 mb-3">
-                        <span className="text-6xl font-black text-white">{paperStats.correlationPercentage}%</span>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-white/90">Avg Match</span>
-                          <span className="text-xs text-white/70">based on AI analysis</span>
-                        </div>
-                      </div>
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between text-xs text-white/80 mb-1">
-                          <span>Relevance Distribution</span>
-                          <span>{questions.length} questions</span>
-                        </div>
-                        <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden backdrop-blur-sm">
-                          <div
-                            className="bg-emerald-400 h-full float-left"
-                            style={{ width: `${(paperStats.highRelevanceCount / questions.length) * 100}%` }}
-                            title={`${paperStats.highRelevanceCount} high-relevance (≥80%)`}
-                          ></div>
-                          <div
-                            className="bg-blue-400 h-full float-left"
-                            style={{ width: `${(paperStats.mediumRelevanceCount / questions.length) * 100}%` }}
-                            title={`${paperStats.mediumRelevanceCount} medium-relevance (60-79%)`}
-                          ></div>
-                          <div
-                            className="bg-amber-400 h-full float-left"
-                            style={{ width: `${((questions.length - paperStats.highRelevanceCount - paperStats.mediumRelevanceCount) / questions.length) * 100}%` }}
-                            title={`${questions.length - paperStats.highRelevanceCount - paperStats.mediumRelevanceCount} lower-relevance (<60%)`}
-                          ></div>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                            <span className="text-xs text-white/80">High ≥80%</span>
-                          </div>
-                          <span className="text-lg font-black text-white">{paperStats.highRelevanceCount}</span>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                            <span className="text-xs text-white/80">Med 60-79%</span>
-                          </div>
-                          <span className="text-lg font-black text-white">{paperStats.mediumRelevanceCount}</span>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                            <span className="text-xs text-white/80">Low &lt;60%</span>
-                          </div>
-                          <span className="text-lg font-black text-white">{questions.length - paperStats.highRelevanceCount - paperStats.mediumRelevanceCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Question Bank Overview */}
-                  <div className="col-span-4 bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                        <FileQuestion size={20} className="text-slate-700" />
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Question Bank</h3>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-sm font-medium text-slate-600">Total Questions</span>
-                        <span className="text-3xl font-black text-slate-900">{questions.length}</span>
-                      </div>
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-sm font-medium text-slate-600">Total Marks</span>
-                        <span className="text-2xl font-black text-indigo-600">{paperStats.totalMarks}</span>
-                      </div>
-                      <div className="flex items-baseline justify-between pt-2 border-t border-slate-100">
-                        <span className="text-sm font-medium text-slate-600">Topic Coverage</span>
-                        <span className="text-xl font-black text-purple-600">{paperStats.domainCounts} Domains</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Difficulty Breakdown */}
-                  <div className="col-span-3 bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                        <Target size={20} className="text-slate-700" />
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Difficulty</h3>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                          <span className="text-sm font-medium text-slate-600">Easy</span>
-                        </div>
-                        <span className="text-lg font-black text-emerald-600">{paperStats.diffCounts.Easy}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                          <span className="text-sm font-medium text-slate-600">Moderate</span>
-                        </div>
-                        <span className="text-lg font-black text-amber-600">{paperStats.diffCounts.Moderate}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-rose-500 rounded-full"></div>
-                          <span className="text-sm font-medium text-slate-600">Hard</span>
-                        </div>
-                        <span className="text-lg font-black text-rose-600">{paperStats.diffCounts.Hard}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 2: Detailed Analytics */}
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Pedagogy Distribution */}
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                        <Brain size={20} className="text-slate-700" />
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Pedagogy Distribution</h3>
-                    </div>
-                    <div className="space-y-2.5">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-                          <div className="bg-blue-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts.Conceptual / questions.length) * 100}%` }}></div>
-                        </div>
-                        <div className="flex items-center gap-2 w-48">
-                          <span className="text-sm font-medium text-slate-600">Conceptual</span>
-                          <span className="text-lg font-black text-blue-600 ml-auto">{paperStats.pedagogyCounts.Conceptual}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-                          <div className="bg-purple-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts.Analytical / questions.length) * 100}%` }}></div>
-                        </div>
-                        <div className="flex items-center gap-2 w-48">
-                          <span className="text-sm font-medium text-slate-600">Analytical</span>
-                          <span className="text-lg font-black text-purple-600 ml-auto">{paperStats.pedagogyCounts.Analytical}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-                          <div className="bg-orange-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts['Problem-Solving'] / questions.length) * 100}%` }}></div>
-                        </div>
-                        <div className="flex items-center gap-2 w-48">
-                          <span className="text-sm font-medium text-slate-600">Problem-Solving</span>
-                          <span className="text-lg font-black text-orange-600 ml-auto">{paperStats.pedagogyCounts['Problem-Solving']}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-                          <div className="bg-green-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts.Application / questions.length) * 100}%` }}></div>
-                        </div>
-                        <div className="flex items-center gap-2 w-48">
-                          <span className="text-sm font-medium text-slate-600">Application</span>
-                          <span className="text-lg font-black text-green-600 ml-auto">{paperStats.pedagogyCounts.Application}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-                          <div className="bg-pink-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts['Critical-Thinking'] / questions.length) * 100}%` }}></div>
-                        </div>
-                        <div className="flex items-center gap-2 w-48">
-                          <span className="text-sm font-medium text-slate-600">Critical-Thinking</span>
-                          <span className="text-lg font-black text-pink-600 ml-auto">{paperStats.pedagogyCounts['Critical-Thinking']}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bloom's Taxonomy */}
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                        <Sparkles size={20} className="text-slate-700" />
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Bloom's Taxonomy</h3>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="bg-slate-50 rounded-xl p-3 text-center">
-                        <div className="text-2xl font-black text-gray-600 mb-1">{paperStats.bloomsCounts.Remember}</div>
-                        <div className="text-xs font-bold text-slate-500 uppercase">Remember</div>
-                      </div>
-                      <div className="bg-blue-50 rounded-xl p-3 text-center">
-                        <div className="text-2xl font-black text-blue-600 mb-1">{paperStats.bloomsCounts.Understand}</div>
-                        <div className="text-xs font-bold text-blue-700 uppercase">Understand</div>
-                      </div>
-                      <div className="bg-green-50 rounded-xl p-3 text-center">
-                        <div className="text-2xl font-black text-green-600 mb-1">{paperStats.bloomsCounts.Apply}</div>
-                        <div className="text-xs font-bold text-green-700 uppercase">Apply</div>
-                      </div>
-                      <div className="bg-yellow-50 rounded-xl p-3 text-center">
-                        <div className="text-2xl font-black text-yellow-600 mb-1">{paperStats.bloomsCounts.Analyze}</div>
-                        <div className="text-xs font-bold text-yellow-700 uppercase">Analyze</div>
-                      </div>
-                      <div className="bg-orange-50 rounded-xl p-3 text-center">
-                        <div className="text-2xl font-black text-orange-600 mb-1">{paperStats.bloomsCounts.Evaluate}</div>
-                        <div className="text-xs font-bold text-orange-700 uppercase">Evaluate</div>
-                      </div>
-                      <div className="bg-red-50 rounded-xl p-3 text-center">
-                        <div className="text-2xl font-black text-red-600 mb-1">{paperStats.bloomsCounts.Create}</div>
-                        <div className="text-xs font-bold text-red-700 uppercase">Create</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 3: Topic Distribution */}
-                <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
-                  <div className="flex items-center gap-2 mb-5">
-                    <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                      <BarChart3 size={20} className="text-slate-700" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Topic Distribution</h3>
-                      <p className="text-xs text-slate-500">Top {paperStats.topTopics.length} most covered topics</p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-black text-indigo-600">{paperStats.topTopics.length}</div>
-                      <div className="text-xs text-slate-500 font-medium">Top Topics</div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-4">
-                    {paperStats.topTopics.map(([topic, count], idx) => {
-                      const percentage = Math.round((count / questions.length) * 100);
-                      const colors = [
-                        'from-blue-500 to-blue-600',
-                        'from-purple-500 to-purple-600',
-                        'from-indigo-500 to-indigo-600',
-                        'from-violet-500 to-violet-600',
-                        'from-pink-500 to-pink-600',
-                        'from-rose-500 to-rose-600',
-                        'from-orange-500 to-orange-600',
-                        'from-amber-500 to-amber-600',
-                      ];
-                      const gradientClass = colors[idx % colors.length];
-
-                      return (
-                        <div key={topic} className="bg-slate-50 rounded-xl p-4 hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center shadow-md`}>
-                              <span className="text-white font-black text-lg">{count}</span>
+                  <div className="space-y-4">
+                    {/* Row 1: Headline Stats */}
+                    <div className="grid grid-cols-12 gap-4">
+                      {/* Scan Correlation - HERO CARD */}
+                      <div className="col-span-5 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24"></div>
+                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
+                        <div className="relative z-10">
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                              <Link2 size={20} className="text-white" />
                             </div>
-                            <div className="text-right">
-                              <div className="text-xs font-bold text-slate-400 uppercase">Coverage</div>
-                              <div className="text-lg font-black text-slate-700">{percentage}%</div>
+                            <div>
+                              <h3 className="text-sm font-bold text-white/90 uppercase tracking-wide">AI Relevance Score</h3>
+                              {selectedAnalysis && (
+                                <p className="text-xs text-white/70">{selectedAnalysis.name}</p>
+                              )}
                             </div>
                           </div>
-                          <div className="mb-2">
-                            <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div className="flex items-baseline gap-3 mb-3">
+                            <span className="text-6xl font-black text-white">{paperStats.correlationPercentage}%</span>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold text-white/90">Avg Match</span>
+                              <span className="text-xs text-white/70">based on AI analysis</span>
+                            </div>
+                          </div>
+                          <div className="mb-3">
+                            <div className="flex items-center justify-between text-xs text-white/80 mb-1">
+                              <span>Relevance Distribution</span>
+                              <span>{questions.length} questions</span>
+                            </div>
+                            <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden backdrop-blur-sm">
                               <div
-                                className={`bg-gradient-to-r ${gradientClass} h-full rounded-full transition-all`}
-                                style={{ width: `${percentage}%` }}
+                                className="bg-emerald-400 h-full float-left"
+                                style={{ width: `${(paperStats.highRelevanceCount / questions.length) * 100}%` }}
+                                title={`${paperStats.highRelevanceCount} high-relevance (≥80%)`}
+                              ></div>
+                              <div
+                                className="bg-blue-400 h-full float-left"
+                                style={{ width: `${(paperStats.mediumRelevanceCount / questions.length) * 100}%` }}
+                                title={`${paperStats.mediumRelevanceCount} medium-relevance (60-79%)`}
+                              ></div>
+                              <div
+                                className="bg-amber-400 h-full float-left"
+                                style={{ width: `${((questions.length - paperStats.highRelevanceCount - paperStats.mediumRelevanceCount) / questions.length) * 100}%` }}
+                                title={`${questions.length - paperStats.highRelevanceCount - paperStats.mediumRelevanceCount} lower-relevance (<60%)`}
                               ></div>
                             </div>
                           </div>
-                          <h4 className="text-sm font-bold text-slate-800 truncate" title={topic}>
-                            {topic}
-                          </h4>
-                          <p className="text-xs text-slate-500 font-medium">{count} question{count !== 1 ? 's' : ''}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {paperStats.topTopics.length === 0 && (
-                    <div className="text-center py-12 text-slate-400">
-                      <p className="text-sm">No topics available yet. Generate questions to see topic distribution.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-32 text-center rounded-3xl border-4 border-dashed border-slate-200 bg-white">
-                  <div className="w-24 h-24 bg-slate-50 border-2 border-slate-100 rounded-3xl flex items-center justify-center mb-6 text-slate-200">
-                    <BarChart3 size={48} />
-                  </div>
-                  <h2 className="text-3xl font-black text-slate-900 mb-4 font-outfit uppercase tracking-tighter">No Summary Available</h2>
-                  <p className="text-sm text-slate-500 font-bold max-w-md leading-relaxed">
-                    Generate questions to see detailed statistics and analytics.
-                  </p>
-                </div>
-              )
-            )}
-
-            {viewTab === 'questions' && (
-              (filteredQuestions.length > 0 && filteredVault.length > 0) ? (
-                filteredQuestions.map((q) => {
-                const selectedAnswer = userAnswers.get(q.id);
-                const validatedAnswer = validatedAnswers.get(q.id);
-                const hasValidated = validatedAnswer !== undefined;
-                const isCorrect = hasValidated && validatedAnswer === q.correctOptionIndex;
-                const hasSelected = selectedAnswer !== undefined;
-
-                return (
-                  <div key={q.id}
-                    className="group bg-white border-2 border-slate-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:border-purple-300 hover:scale-[1.01] transition-all duration-300"
-                  >
-                    {/* Card Header - Clean & Organized */}
-                    <div className="px-6 py-5 bg-gradient-to-br from-slate-50 to-white border-b-2 border-slate-100">
-                      {/* Top Row - Question ID & Actions */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          {/* Question Number */}
-                          {(() => {
-                            const qNumMatch = q.id?.match(/Q(\d+)/i);
-                            const qNum = qNumMatch ? qNumMatch[1] : null;
-                            return qNum ? (
-                              <div className="flex items-center gap-3">
-                                <div className="relative">
-                                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-2xl flex items-center justify-center shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-2xl">
-                                    <div className="text-center">
-                                      <div className="text-xs font-bold text-purple-200">Q</div>
-                                      <div className="text-2xl font-black leading-none">{qNum}</div>
-                                    </div>
-                                  </div>
-                                  {/* Glow effect on hover */}
-                                  <div className="absolute top-0 left-0 w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500" />
-                                </div>
-                                <div className="h-10 w-px bg-slate-300"></div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                                <span className="text-xs text-white/80">High ≥80%</span>
                               </div>
-                            ) : null;
-                          })()}
+                              <span className="text-lg font-black text-white">{paperStats.highRelevanceCount}</span>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                <span className="text-xs text-white/80">Med 60-79%</span>
+                              </div>
+                              <span className="text-lg font-black text-white">{paperStats.mediumRelevanceCount}</span>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                                <span className="text-xs text-white/80">Low &lt;60%</span>
+                              </div>
+                              <span className="text-lg font-black text-white">{questions.length - paperStats.highRelevanceCount - paperStats.mediumRelevanceCount}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                          {/* Domain & Topic */}
-                          {q.domain && (
-                            <div>
-                              <span className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-black uppercase tracking-wider shadow-md transition-all group-hover:scale-105">
-                                {q.domain}
+                      {/* Question Bank Overview */}
+                      <div className="col-span-4 bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                            <FileQuestion size={20} className="text-slate-700" />
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Question Bank</h3>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex items-baseline justify-between">
+                            <span className="text-sm font-medium text-slate-600">Total Questions</span>
+                            <span className="text-3xl font-black text-slate-900">{questions.length}</span>
+                          </div>
+                          <div className="flex items-baseline justify-between">
+                            <span className="text-sm font-medium text-slate-600">Total Marks</span>
+                            <span className="text-2xl font-black text-indigo-600">{paperStats.totalMarks}</span>
+                          </div>
+                          <div className="flex items-baseline justify-between pt-2 border-t border-slate-100">
+                            <span className="text-sm font-medium text-slate-600">Topic Coverage</span>
+                            <span className="text-xl font-black text-purple-600">{paperStats.domainCounts} Domains</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Difficulty Breakdown */}
+                      <div className="col-span-3 bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                            <Target size={20} className="text-slate-700" />
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Difficulty</h3>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                              <span className="text-sm font-medium text-slate-600">Easy</span>
+                            </div>
+                            <span className="text-lg font-black text-emerald-600">{paperStats.diffCounts.Easy}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                              <span className="text-sm font-medium text-slate-600">Moderate</span>
+                            </div>
+                            <span className="text-lg font-black text-amber-600">{paperStats.diffCounts.Moderate}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-rose-500 rounded-full"></div>
+                              <span className="text-sm font-medium text-slate-600">Hard</span>
+                            </div>
+                            <span className="text-lg font-black text-rose-600">{paperStats.diffCounts.Hard}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 2: Detailed Analytics */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Pedagogy Distribution */}
+                      <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                            <Brain size={20} className="text-slate-700" />
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Pedagogy Distribution</h3>
+                        </div>
+                        <div className="space-y-2.5">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
+                              <div className="bg-blue-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts.Conceptual / questions.length) * 100}%` }}></div>
+                            </div>
+                            <div className="flex items-center gap-2 w-48">
+                              <span className="text-sm font-medium text-slate-600">Conceptual</span>
+                              <span className="text-lg font-black text-blue-600 ml-auto">{paperStats.pedagogyCounts.Conceptual}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
+                              <div className="bg-purple-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts.Analytical / questions.length) * 100}%` }}></div>
+                            </div>
+                            <div className="flex items-center gap-2 w-48">
+                              <span className="text-sm font-medium text-slate-600">Analytical</span>
+                              <span className="text-lg font-black text-purple-600 ml-auto">{paperStats.pedagogyCounts.Analytical}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
+                              <div className="bg-orange-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts['Problem-Solving'] / questions.length) * 100}%` }}></div>
+                            </div>
+                            <div className="flex items-center gap-2 w-48">
+                              <span className="text-sm font-medium text-slate-600">Problem-Solving</span>
+                              <span className="text-lg font-black text-orange-600 ml-auto">{paperStats.pedagogyCounts['Problem-Solving']}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
+                              <div className="bg-green-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts.Application / questions.length) * 100}%` }}></div>
+                            </div>
+                            <div className="flex items-center gap-2 w-48">
+                              <span className="text-sm font-medium text-slate-600">Application</span>
+                              <span className="text-lg font-black text-green-600 ml-auto">{paperStats.pedagogyCounts.Application}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
+                              <div className="bg-pink-500 h-full rounded-full transition-all" style={{ width: `${(paperStats.pedagogyCounts['Critical-Thinking'] / questions.length) * 100}%` }}></div>
+                            </div>
+                            <div className="flex items-center gap-2 w-48">
+                              <span className="text-sm font-medium text-slate-600">Critical-Thinking</span>
+                              <span className="text-lg font-black text-pink-600 ml-auto">{paperStats.pedagogyCounts['Critical-Thinking']}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bloom's Taxonomy */}
+                      <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                            <Sparkles size={20} className="text-slate-700" />
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Bloom's Taxonomy</h3>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="bg-slate-50 rounded-xl p-3 text-center">
+                            <div className="text-2xl font-black text-gray-600 mb-1">{paperStats.bloomsCounts.Remember}</div>
+                            <div className="text-xs font-bold text-slate-500 uppercase">Remember</div>
+                          </div>
+                          <div className="bg-blue-50 rounded-xl p-3 text-center">
+                            <div className="text-2xl font-black text-blue-600 mb-1">{paperStats.bloomsCounts.Understand}</div>
+                            <div className="text-xs font-bold text-blue-700 uppercase">Understand</div>
+                          </div>
+                          <div className="bg-green-50 rounded-xl p-3 text-center">
+                            <div className="text-2xl font-black text-green-600 mb-1">{paperStats.bloomsCounts.Apply}</div>
+                            <div className="text-xs font-bold text-green-700 uppercase">Apply</div>
+                          </div>
+                          <div className="bg-yellow-50 rounded-xl p-3 text-center">
+                            <div className="text-2xl font-black text-yellow-600 mb-1">{paperStats.bloomsCounts.Analyze}</div>
+                            <div className="text-xs font-bold text-yellow-700 uppercase">Analyze</div>
+                          </div>
+                          <div className="bg-orange-50 rounded-xl p-3 text-center">
+                            <div className="text-2xl font-black text-orange-600 mb-1">{paperStats.bloomsCounts.Evaluate}</div>
+                            <div className="text-xs font-bold text-orange-700 uppercase">Evaluate</div>
+                          </div>
+                          <div className="bg-red-50 rounded-xl p-3 text-center">
+                            <div className="text-2xl font-black text-red-600 mb-1">{paperStats.bloomsCounts.Create}</div>
+                            <div className="text-xs font-bold text-red-700 uppercase">Create</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 3: Topic Distribution */}
+                    <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-slate-200">
+                      <div className="flex items-center gap-2 mb-5">
+                        <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                          <BarChart3 size={20} className="text-slate-700" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Topic Distribution</h3>
+                          <p className="text-xs text-slate-500">Top {paperStats.topTopics.length} most covered topics</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-black text-indigo-600">{paperStats.topTopics.length}</div>
+                          <div className="text-xs text-slate-500 font-medium">Top Topics</div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-4">
+                        {paperStats.topTopics.map(([topic, count], idx) => {
+                          const percentage = Math.round((count / questions.length) * 100);
+                          const colors = [
+                            'from-blue-500 to-blue-600',
+                            'from-purple-500 to-purple-600',
+                            'from-indigo-500 to-indigo-600',
+                            'from-violet-500 to-violet-600',
+                            'from-pink-500 to-pink-600',
+                            'from-rose-500 to-rose-600',
+                            'from-orange-500 to-orange-600',
+                            'from-amber-500 to-amber-600',
+                          ];
+                          const gradientClass = colors[idx % colors.length];
+
+                          return (
+                            <div key={topic} className="bg-slate-50 rounded-xl p-4 hover:shadow-md transition-shadow">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${gradientClass} flex items-center justify-center shadow-md`}>
+                                  <span className="text-white font-black text-lg">{count}</span>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-xs font-bold text-slate-400 uppercase">Coverage</div>
+                                  <div className="text-lg font-black text-slate-700">{percentage}%</div>
+                                </div>
+                              </div>
+                              <div className="mb-2">
+                                <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                  <div
+                                    className={`bg-gradient-to-r ${gradientClass} h-full rounded-full transition-all`}
+                                    style={{ width: `${percentage}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <h4 className="text-sm font-bold text-slate-800 truncate" title={topic}>
+                                {topic}
+                              </h4>
+                              <p className="text-xs text-slate-500 font-medium">{count} question{count !== 1 ? 's' : ''}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {paperStats.topTopics.length === 0 && (
+                        <div className="text-center py-12 text-slate-400">
+                          <p className="text-sm">No topics available yet. Generate questions to see topic distribution.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-32 text-center rounded-3xl border-4 border-dashed border-slate-200 bg-white">
+                    <div className="w-24 h-24 bg-slate-50 border-2 border-slate-100 rounded-3xl flex items-center justify-center mb-6 text-slate-200">
+                      <BarChart3 size={48} />
+                    </div>
+                    <h2 className="text-3xl font-black text-slate-900 mb-4 font-outfit uppercase tracking-tighter">No Summary Available</h2>
+                    <p className="text-sm text-slate-500 font-bold max-w-md leading-relaxed">
+                      Generate questions to see detailed statistics and analytics.
+                    </p>
+                  </div>
+                )
+              )}
+
+              {viewTab === 'questions' && (
+                (filteredQuestions.length > 0 && filteredVault.length > 0) ? (
+                  filteredQuestions.map((q) => {
+                    const selectedAnswer = userAnswers.get(q.id);
+                    const validatedAnswer = validatedAnswers.get(q.id);
+                    const hasValidated = validatedAnswer !== undefined;
+                    const isCorrect = hasValidated && validatedAnswer === q.correctOptionIndex;
+                    const hasSelected = selectedAnswer !== undefined;
+
+                    return (
+                      <div key={q.id}
+                        className="group bg-white border-2 border-slate-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:border-purple-300 hover:scale-[1.01] transition-all duration-300"
+                      >
+                        {/* Card Header - Clean & Organized */}
+                        <div className="px-6 py-5 bg-gradient-to-br from-slate-50 to-white border-b-2 border-slate-100">
+                          {/* Top Row - Question ID & Actions */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4">
+                              {/* Question Number */}
+                              {(() => {
+                                const qNumMatch = q.id?.match(/Q(\d+)/i);
+                                const qNum = qNumMatch ? qNumMatch[1] : null;
+                                return qNum ? (
+                                  <div className="flex items-center gap-3">
+                                    <div className="relative">
+                                      <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 text-white rounded-2xl flex items-center justify-center shadow-lg transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-2xl">
+                                        <div className="text-center">
+                                          <div className="text-xs font-bold text-purple-200">Q</div>
+                                          <div className="text-2xl font-black leading-none">{qNum}</div>
+                                        </div>
+                                      </div>
+                                      {/* Glow effect on hover */}
+                                      <div className="absolute top-0 left-0 w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500" />
+                                    </div>
+                                    <div className="h-10 w-px bg-slate-300"></div>
+                                  </div>
+                                ) : null;
+                              })()}
+
+                              {/* Domain & Topic */}
+                              {q.domain && (
+                                <div>
+                                  <span className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-xs font-black uppercase tracking-wider shadow-md transition-all group-hover:scale-105">
+                                    {q.domain}
+                                  </span>
+                                  <p className="text-sm font-medium text-slate-500 mt-2 transition-colors group-hover:text-purple-600">{q.topic}</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Save & Delete Actions */}
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleSave(q.id)}
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${savedIds.has(q.id)
+                                  ? 'bg-emerald-100 text-emerald-600'
+                                  : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600'
+                                  }`}
+                                title={savedIds.has(q.id) ? "Saved" : "Save"}
+                              >
+                                <BookmarkPlus size={16} fill={savedIds.has(q.id) ? "currentColor" : "none"} />
+                              </button>
+                              <button
+                                onClick={() => handleTrash(q.id)}
+                                className="w-8 h-8 bg-slate-100 text-slate-400 hover:bg-rose-100 hover:text-rose-600 rounded-lg flex items-center justify-center transition-all"
+                                title="Remove"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Bottom Row - All Tags */}
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg">
+                              {q.year}
+                            </span>
+
+                            <span className={`px-3 py-1.5 text-xs font-bold rounded-lg ${q.diff === 'Hard' ? 'bg-rose-100 text-rose-700' :
+                              q.diff === 'Moderate' ? 'bg-amber-100 text-amber-700' :
+                                'bg-emerald-100 text-emerald-700'
+                              }`}>
+                              {q.diff}
+                            </span>
+
+                            <span className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg">
+                              {q.marks} Mark{parseInt(q.marks) > 1 ? 's' : ''}
+                            </span>
+
+                            {q.pedagogy && (
+                              <span className={`px-3 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 ${getPedagogyColor(q.pedagogy)}`}>
+                                <Brain size={13} />
+                                {q.pedagogy}
                               </span>
-                              <p className="text-sm font-medium text-slate-500 mt-2 transition-colors group-hover:text-purple-600">{q.topic}</p>
+                            )}
+
+                            {q.bloomsTaxonomy && (
+                              <span className={`px-3 py-1.5 text-xs font-bold rounded-lg ${getBloomsColor(q.bloomsTaxonomy)}`}>
+                                {q.bloomsTaxonomy}
+                              </span>
+                            )}
+
+                            {q.relevanceScore && (
+                              <span className="px-3 py-1.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-lg flex items-center gap-1.5">
+                                <Target size={13} />
+                                {q.relevanceScore}% Match
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Question Body */}
+                        <div className="px-5 py-6">
+                          <div className="text-xl font-bold text-slate-900 leading-relaxed mb-6">
+                            <RenderWithMath text={q.text} showOptions={false} />
+                          </div>
+
+                          {/* MCQ Options - 2 per row */}
+                          {q.options && q.options.length > 0 ? (
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                              {q.options.map((option, idx) => {
+                                const isThisCorrect = q.correctOptionIndex === idx;
+                                const isSelected = selectedAnswer === idx;
+                                const isValidatedCorrect = hasValidated && validatedAnswer === idx && isThisCorrect;
+                                const isValidatedWrong = hasValidated && validatedAnswer === idx && !isThisCorrect;
+                                const optionLabel = String.fromCharCode(65 + idx); // A, B, C, D
+
+                                let bgColor = 'bg-white';
+                                let shadowClass = 'shadow-sm';
+                                let ringClass = '';
+
+                                // Before validation - show selection with blue ring
+                                if (isSelected && !hasValidated) {
+                                  bgColor = 'bg-blue-50';
+                                  shadowClass = 'shadow-md';
+                                  ringClass = 'ring-2 ring-blue-500';
+                                }
+
+                                // After validation - show correct/incorrect with subtle styling
+                                if (hasValidated) {
+                                  if (isThisCorrect) {
+                                    bgColor = 'bg-emerald-50';
+                                    shadowClass = 'shadow-md';
+                                    ringClass = 'ring-2 ring-emerald-400';
+                                  } else if (isValidatedWrong) {
+                                    bgColor = 'bg-rose-50';
+                                    shadowClass = 'shadow-md';
+                                    ringClass = 'ring-2 ring-rose-400';
+                                  }
+                                }
+
+                                return (
+                                  <button
+                                    key={idx}
+                                    onClick={() => !hasValidated && handleAnswerSelect(q.id, idx)}
+                                    disabled={hasValidated}
+                                    className={`option-btn group/option relative flex items-start gap-3 px-4 py-3 rounded-xl border border-slate-200 transition-all text-left ${bgColor} ${shadowClass} ${ringClass} ${!hasValidated ? 'cursor-pointer hover:shadow-xl hover:ring-2 hover:ring-purple-400 hover:border-purple-300 hover:bg-purple-50 hover:scale-[1.02] active:scale-[0.99]' : 'cursor-default'}`}
+                                  >
+                                    {/* Option Label */}
+                                    <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center font-bold text-base transition-all duration-300 ${isValidatedCorrect
+                                      ? 'bg-emerald-500 text-white shadow-md'
+                                      : isValidatedWrong
+                                        ? 'bg-rose-500 text-white shadow-md'
+                                        : isSelected && !hasValidated
+                                          ? 'bg-blue-500 text-white shadow-md'
+                                          : 'bg-slate-100 text-slate-700 group-hover/option:bg-purple-100 group-hover/option:text-purple-700 group-hover/option:scale-110 group-hover/option:rotate-3'
+                                      }`}>
+                                      {optionLabel}
+                                    </div>
+
+                                    {/* Option Text */}
+                                    <div className="flex-1 text-sm font-medium text-slate-800 pt-1.5">
+                                      <RenderWithMath text={option} showOptions={false} />
+                                    </div>
+
+                                    {/* Floating Checkmark for Correct Answer */}
+                                    {isValidatedCorrect && (
+                                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-xl border-2 border-white">
+                                        <CheckCircle size={18} className="text-white" strokeWidth={3} />
+                                      </div>
+                                    )}
+
+                                    {/* X mark for Wrong Answer */}
+                                    {isValidatedWrong && (
+                                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center shadow-xl border-2 border-white">
+                                        <XCircle size={18} className="text-white" strokeWidth={3} />
+                                      </div>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            // Fallback for old questions without options
+                            <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                              <div className="flex items-center gap-2 mb-1">
+                                <AlertCircle className="text-amber-600" size={16} />
+                                <h4 className="text-xs font-bold text-amber-900">Legacy Question</h4>
+                              </div>
+                              <p className="text-xs text-slate-600">
+                                Generate new questions to get MCQ options and AI insights.
+                              </p>
+                            </div>
+                          )}
+
+
+                          {/* Visual Element - Compact */}
+                          {((q.hasVisualElement && q.visualElementDescription) || (q.extractedImages && q.extractedImages.length > 0)) && (
+                            <div className="mb-4">
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                                    <Eye size={14} className="text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="text-[10px] font-bold text-blue-900 uppercase mb-1">Visual Element</h4>
+                                    {q.visualElementDescription && (
+                                      <div className="text-xs font-medium text-slate-700 mb-2">
+                                        <RenderWithMath text={q.visualElementDescription} showOptions={false} />
+                                      </div>
+                                    )}
+                                    {q.extractedImages && q.extractedImages.length > 0 && (
+                                      <div className="grid grid-cols-1 gap-2 mt-2">
+                                        {q.extractedImages.map((imgData, idx) => (
+                                          <div key={idx} className="bg-white rounded-lg border border-blue-200 overflow-hidden">
+                                            <img
+                                              src={imgData}
+                                              alt={`Visual ${idx + 1}`}
+                                              className="w-full h-auto object-contain max-h-[300px]"
+                                              style={{
+                                                imageRendering: 'auto',
+                                                objectFit: 'contain'
+                                              }}
+                                            />
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>
 
-                        {/* Save & Delete Actions */}
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleSave(q.id)}
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                              savedIds.has(q.id)
-                                ? 'bg-emerald-100 text-emerald-600'
-                                : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600'
-                            }`}
-                            title={savedIds.has(q.id) ? "Saved" : "Save"}
-                          >
-                            <BookmarkPlus size={16} fill={savedIds.has(q.id) ? "currentColor" : "none"} />
-                          </button>
-                          <button
-                            onClick={() => handleTrash(q.id)}
-                            className="w-8 h-8 bg-slate-100 text-slate-400 hover:bg-rose-100 hover:text-rose-600 rounded-lg flex items-center justify-center transition-all"
-                            title="Remove"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Bottom Row - All Tags */}
-                      <div className="flex items-center gap-2.5 flex-wrap">
-                        <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg">
-                          {q.year}
-                        </span>
-
-                        <span className={`px-3 py-1.5 text-xs font-bold rounded-lg ${
-                          q.diff === 'Hard' ? 'bg-rose-100 text-rose-700' :
-                          q.diff === 'Moderate' ? 'bg-amber-100 text-amber-700' :
-                          'bg-emerald-100 text-emerald-700'
-                        }`}>
-                          {q.diff}
-                        </span>
-
-                        <span className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg">
-                          {q.marks} Mark{parseInt(q.marks) > 1 ? 's' : ''}
-                        </span>
-
-                        {q.pedagogy && (
-                          <span className={`px-3 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 ${getPedagogyColor(q.pedagogy)}`}>
-                            <Brain size={13} />
-                            {q.pedagogy}
-                          </span>
-                        )}
-
-                        {q.bloomsTaxonomy && (
-                          <span className={`px-3 py-1.5 text-xs font-bold rounded-lg ${getBloomsColor(q.bloomsTaxonomy)}`}>
-                            {q.bloomsTaxonomy}
-                          </span>
-                        )}
-
-                        {q.relevanceScore && (
-                          <span className="px-3 py-1.5 bg-purple-100 text-purple-700 text-xs font-bold rounded-lg flex items-center gap-1.5">
-                            <Target size={13} />
-                            {q.relevanceScore}% Match
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Question Body */}
-                    <div className="px-5 py-6">
-                      <div className="text-xl font-bold text-slate-900 leading-relaxed mb-6">
-                        <RenderWithMath text={q.text} showOptions={false} />
-                      </div>
-
-                      {/* MCQ Options - 2 per row */}
-                      {q.options && q.options.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          {q.options.map((option, idx) => {
-                            const isThisCorrect = q.correctOptionIndex === idx;
-                            const isSelected = selectedAnswer === idx;
-                            const isValidatedCorrect = hasValidated && validatedAnswer === idx && isThisCorrect;
-                            const isValidatedWrong = hasValidated && validatedAnswer === idx && !isThisCorrect;
-                            const optionLabel = String.fromCharCode(65 + idx); // A, B, C, D
-
-                            let bgColor = 'bg-white';
-                            let shadowClass = 'shadow-sm';
-                            let ringClass = '';
-
-                            // Before validation - show selection with blue ring
-                            if (isSelected && !hasValidated) {
-                              bgColor = 'bg-blue-50';
-                              shadowClass = 'shadow-md';
-                              ringClass = 'ring-2 ring-blue-500';
-                            }
-
-                            // After validation - show correct/incorrect with subtle styling
-                            if (hasValidated) {
-                              if (isThisCorrect) {
-                                bgColor = 'bg-emerald-50';
-                                shadowClass = 'shadow-md';
-                                ringClass = 'ring-2 ring-emerald-400';
-                              } else if (isValidatedWrong) {
-                                bgColor = 'bg-rose-50';
-                                shadowClass = 'shadow-md';
-                                ringClass = 'ring-2 ring-rose-400';
-                              }
-                            }
-
-                            return (
+                        {/* Card Footer - Action Buttons */}
+                        <div className="px-6 py-5 bg-gradient-to-br from-slate-50 to-white border-t-2 border-slate-100">
+                          <div className="flex items-center justify-center gap-3">
+                            {/* Evaluate Answer Button (before validation) - Academic Style */}
+                            {hasSelected && !hasValidated && (
                               <button
-                                key={idx}
-                                onClick={() => !hasValidated && handleAnswerSelect(q.id, idx)}
-                                disabled={hasValidated}
-                                className={`option-btn group/option relative flex items-start gap-3 px-4 py-3 rounded-xl border border-slate-200 transition-all text-left ${bgColor} ${shadowClass} ${ringClass} ${!hasValidated ? 'cursor-pointer hover:shadow-xl hover:ring-2 hover:ring-purple-400 hover:border-purple-300 hover:bg-purple-50 hover:scale-[1.02] active:scale-[0.99]' : 'cursor-default'}`}
+                                onClick={() => handleValidateAnswer(q.id)}
+                                className="group flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-lg hover:shadow-2xl hover:from-purple-700 hover:to-purple-800 transition-all hover:scale-105"
+                                title="Get Answer Evaluated"
                               >
-                                {/* Option Label */}
-                                <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center font-bold text-base transition-all duration-300 ${
-                                  isValidatedCorrect
-                                    ? 'bg-emerald-500 text-white shadow-md'
-                                    : isValidatedWrong
-                                    ? 'bg-rose-500 text-white shadow-md'
-                                    : isSelected && !hasValidated
-                                    ? 'bg-blue-500 text-white shadow-md'
-                                    : 'bg-slate-100 text-slate-700 group-hover/option:bg-purple-100 group-hover/option:text-purple-700 group-hover/option:scale-110 group-hover/option:rotate-3'
-                                }`}>
-                                  {optionLabel}
-                                </div>
-
-                                {/* Option Text */}
-                                <div className="flex-1 text-sm font-medium text-slate-800 pt-1.5">
-                                  <RenderWithMath text={option} showOptions={false} />
-                                </div>
-
-                                {/* Floating Checkmark for Correct Answer */}
-                                {isValidatedCorrect && (
-                                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-xl border-2 border-white">
-                                    <CheckCircle size={18} className="text-white" strokeWidth={3} />
-                                  </div>
-                                )}
-
-                                {/* X mark for Wrong Answer */}
-                                {isValidatedWrong && (
-                                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center shadow-xl border-2 border-white">
-                                    <XCircle size={18} className="text-white" strokeWidth={3} />
-                                  </div>
-                                )}
+                                <Award size={20} className="transition-transform group-hover:scale-110 group-hover:rotate-12" />
+                                <span className="text-sm font-bold uppercase tracking-wide">Get Evaluated</span>
                               </button>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        // Fallback for old questions without options
-                        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                          <div className="flex items-center gap-2 mb-1">
-                            <AlertCircle className="text-amber-600" size={16} />
-                            <h4 className="text-xs font-bold text-amber-900">Legacy Question</h4>
-                          </div>
-                          <p className="text-xs text-slate-600">
-                            Generate new questions to get MCQ options and AI insights.
-                          </p>
-                        </div>
-                      )}
+                            )}
 
+                            {/* Action Icons (after validation) */}
+                            {hasValidated && (
+                              <>
+                                <button
+                                  onClick={() => openModal('solution', q.id)}
+                                  className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
+                                  title="View Solution"
+                                >
+                                  <Eye size={18} className="transition-transform group-hover:scale-110" />
+                                  <span className="text-sm font-bold uppercase tracking-wide">Solution</span>
+                                </button>
+                                <button
+                                  onClick={() => openModal('insights', q.id)}
+                                  className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
+                                  title="AI Insights"
+                                >
+                                  <Lightbulb size={18} className="transition-transform group-hover:scale-110 group-hover:rotate-12" />
+                                  <span className="text-sm font-bold uppercase tracking-wide">Insights</span>
+                                </button>
+                              </>
+                            )}
 
-                      {/* Visual Element - Compact */}
-                      {((q.hasVisualElement && q.visualElementDescription) || (q.extractedImages && q.extractedImages.length > 0)) && (
-                        <div className="mb-4">
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <div className="flex items-start gap-3">
-                              <div className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                                <Eye size={14} className="text-white" />
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="text-[10px] font-bold text-blue-900 uppercase mb-1">Visual Element</h4>
-                                {q.visualElementDescription && (
-                                  <div className="text-xs font-medium text-slate-700 mb-2">
-                                    <RenderWithMath text={q.visualElementDescription} showOptions={false} />
-                                  </div>
-                                )}
-                                {q.extractedImages && q.extractedImages.length > 0 && (
-                                  <div className="grid grid-cols-1 gap-2 mt-2">
-                                    {q.extractedImages.map((imgData, idx) => (
-                                      <div key={idx} className="bg-white rounded-lg border border-blue-200 overflow-hidden">
-                                        <img
-                                          src={imgData}
-                                          alt={`Visual ${idx + 1}`}
-                                          className="w-full h-auto object-contain max-h-[300px]"
-                                          style={{
-                                            imageRendering: 'high-quality',
-                                            objectFit: 'contain'
-                                          }}
-                                        />
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
+                            {/* Empty state message */}
+                            {!hasSelected && !hasValidated && (
+                              <p className="text-sm text-slate-400 italic font-medium">Select an option to get it evaluated</p>
+                            )}
                           </div>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Card Footer - Action Buttons */}
-                    <div className="px-6 py-5 bg-gradient-to-br from-slate-50 to-white border-t-2 border-slate-100">
-                      <div className="flex items-center justify-center gap-3">
-                        {/* Evaluate Answer Button (before validation) - Academic Style */}
-                        {hasSelected && !hasValidated && (
-                          <button
-                            onClick={() => handleValidateAnswer(q.id)}
-                            className="group flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-lg hover:shadow-2xl hover:from-purple-700 hover:to-purple-800 transition-all hover:scale-105"
-                            title="Get Answer Evaluated"
-                          >
-                            <Award size={20} className="transition-transform group-hover:scale-110 group-hover:rotate-12" />
-                            <span className="text-sm font-bold uppercase tracking-wide">Get Evaluated</span>
-                          </button>
-                        )}
-
-                        {/* Action Icons (after validation) */}
-                        {hasValidated && (
-                          <>
-                            <button
-                              onClick={() => openModal('solution', q.id)}
-                              className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
-                              title="View Solution"
-                            >
-                              <Eye size={18} className="transition-transform group-hover:scale-110" />
-                              <span className="text-sm font-bold uppercase tracking-wide">Solution</span>
-                            </button>
-                            <button
-                              onClick={() => openModal('insights', q.id)}
-                              className="group flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-md hover:shadow-xl hover:from-purple-700 hover:to-purple-800 transition-all"
-                              title="AI Insights"
-                            >
-                              <Lightbulb size={18} className="transition-transform group-hover:scale-110 group-hover:rotate-12" />
-                              <span className="text-sm font-bold uppercase tracking-wide">Insights</span>
-                            </button>
-                          </>
-                        )}
-
-                        {/* Empty state message */}
-                        {!hasSelected && !hasValidated && (
-                          <p className="text-sm text-slate-400 italic font-medium">Select an option to get it evaluated</p>
-                        )}
                       </div>
+                    );
+                  })
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-32 text-center rounded-3xl border-4 border-dashed border-slate-200 bg-white">
+                    <div className="w-24 h-24 bg-slate-50 border-2 border-slate-100 rounded-3xl flex items-center justify-center mb-6 text-slate-200">
+                      <FileQuestion size={48} />
                     </div>
-
+                    <h2 className="text-3xl font-black text-slate-900 mb-4 font-outfit uppercase tracking-tighter">No Questions Yet</h2>
+                    <p className="text-sm text-slate-500 font-bold max-w-md leading-relaxed">
+                      Click "Generate Questions" to create AI-powered questions based on exam patterns.
+                    </p>
                   </div>
-                );
-              })
-            ) : (
-              <div className="flex flex-col items-center justify-center py-32 text-center rounded-3xl border-4 border-dashed border-slate-200 bg-white">
-                <div className="w-24 h-24 bg-slate-50 border-2 border-slate-100 rounded-3xl flex items-center justify-center mb-6 text-slate-200">
-                  <FileQuestion size={48} />
-                </div>
-                <h2 className="text-3xl font-black text-slate-900 mb-4 font-outfit uppercase tracking-tighter">No Questions Yet</h2>
-                <p className="text-sm text-slate-500 font-bold max-w-md leading-relaxed">
-                  Click "Generate Questions" to create AI-powered questions based on exam patterns.
-                </p>
-              </div>
-            )
-            )}
+                )
+              )}
             </div>
           )}
         </div>
@@ -1579,15 +1564,15 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                                 alt={`Diagram ${idx + 1}${activeQuestion.visualElementDescription ? ` - ${activeQuestion.visualElementDescription}` : ''}`}
                                 className="w-full h-auto object-contain max-h-[500px] bg-white"
                                 style={{
-                                  imageRendering: 'high-quality',
+                                  imageRendering: 'auto',
                                   objectFit: 'contain'
                                 }}
                               />
                               {activeQuestion.visualElementDescription && idx === 0 && (
                                 <div className="px-4 py-2 bg-slate-50 border-t border-slate-200">
-                                  <p className="text-xs text-slate-600">
+                                  <div className="text-xs text-slate-600">
                                     <RenderWithMath text={activeQuestion.visualElementDescription} showOptions={false} serif={false} />
-                                  </p>
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -1676,9 +1661,9 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                               <div className="w-5 h-5 bg-slate-700 text-white rounded flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
                                 {idx + 1}
                               </div>
-                              <span className="leading-relaxed">
+                              <div className="leading-relaxed">
                                 <RenderWithMath text={item} showOptions={false} />
-                              </span>
+                              </div>
                             </li>
                           ))}
                         </ul>

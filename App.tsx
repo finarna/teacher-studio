@@ -17,8 +17,9 @@ import { LoginForm } from './components/LoginForm';
 import { SignupForm } from './components/SignupForm';
 import { supabase } from './lib/supabase';
 import { ProfessorTrainingContract } from './types';
-import { Home, LayoutDashboard, GraduationCap, Bell, Search, User, CheckCircle2, Menu, Map, ScanLine, Sparkles, FileText, ChevronRight, Library, ChevronLeft } from 'lucide-react';
+import { Home, LayoutDashboard, GraduationCap, Bell, Search, User, CheckCircle2, Menu, Map, ScanLine, Sparkles, FileText, ChevronRight, Library, ChevronLeft, LayoutGrid, Zap } from 'lucide-react';
 import { useLearningJourney } from './contexts/LearningJourneyContext';
+import { useIsMobile } from './hooks/useIsMobile';
 import { AppContextProvider } from './contexts/AppContext';
 import { SubjectSwitcher } from './components/SubjectSwitcher';
 import { checkAndClearOldCache } from './utils/cacheRefresh';
@@ -468,7 +469,8 @@ const AppShell: React.FC<{
   confirm,
   showToast
 }) => {
-    const { isFocusMode, isDrilledDown, currentView, navigateToView, goBack: ljGoBack } = useLearningJourney();
+    const { isFocusMode, isDrilledDown, currentView, navigateToView, goBack: ljGoBack, selectedSubject, resetToTrajectory } = useLearningJourney();
+    const isMobile = useIsMobile();
 
     // Unified History Management (Nested Sub-Views)
     useEffect(() => {
@@ -561,8 +563,9 @@ const AppShell: React.FC<{
         )}
 
         <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50/50">
-          {/* Global Compact Header - Hidden during test focus */}
-          {!isFocusMode && (
+          {/* Global Compact Header - Hidden during focus mode, mobile LJ, and ALL learning journey sub-views
+              (each LJ page has its own back button + header, so this bar is redundant there) */}
+          {!isFocusMode && activeView !== 'learning_journey' && !isMobile && (
             <header className={`h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-40 shrink-0 sticky top-0 transition-all duration-300 ${isDrilledDown && isStudent && activeView === 'learning_journey' ? 'bg-primary-50/30' : ''}`}>
               <div className="flex items-center gap-3">
                 {/* Contextual Action: Back vs Hamburger */}
@@ -835,44 +838,88 @@ const AppShell: React.FC<{
             </div>
           </main>
 
-          {/* Mobile Bottom Navigation Bar - Hidden during focus mode (Tests) */}
+          {/* Mobile Bottom Navigation Bar - Adaptive & Contextual */}
           {!isFocusMode && (
-            <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex items-center justify-around px-2 z-50 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-              {isStudent ? (
+            <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-slate-200 flex items-center justify-around px-2 z-40 pb-safe shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+              {isStudent && selectedSubject ? (
                 <>
-                  {/* Student Navigation: Journey, Vault (Stats/Archives), Profile */}
-                  <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${activeView === 'learning_journey' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
-                    <Map size={20} className={activeView === 'learning_journey' ? 'fill-primary-50' : ''} />
-                    <span className="text-[9px] font-black uppercase tracking-wider">Journey</span>
+                  {/* Subject Context: Quick toggle between subject pillars */}
+                  <button
+                    onClick={() => navigateToView('topic_dashboard')}
+                    className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${currentView === 'topic_dashboard' || currentView === 'topic_detail' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}
+                  >
+                    <LayoutGrid size={20} className={currentView === 'topic_dashboard' || currentView === 'topic_detail' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Nodes</span>
                   </button>
-                  <button onClick={() => {
-                    setGodModeView('learning_journey');
-                    // This is a bit of a hack to go to a specific sub-view, but for now Journey is the hub
-                  }} className="flex flex-col items-center justify-center w-20 h-full gap-1 text-slate-300">
-                    <Library size={20} />
+
+                  <button
+                    onClick={() => navigateToView('past_year_exams')}
+                    className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${currentView === 'past_year_exams' || currentView === 'vault_detail' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}
+                  >
+                    <Library size={20} className={currentView === 'past_year_exams' || currentView === 'vault_detail' ? 'fill-primary-50' : ''} />
                     <span className="text-[9px] font-black uppercase tracking-wider">Vault</span>
                   </button>
-                  <button onClick={() => setGodModeView('profile')} className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${activeView === 'profile' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+
+                  <button
+                    onClick={() => navigateToView('mock_builder')}
+                    className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${currentView === 'mock_builder' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}
+                  >
+                    <Zap size={20} className={currentView === 'mock_builder' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Missions</span>
+                  </button>
+
+                  <button
+                    onClick={() => setGodModeView('profile')}
+                    className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${activeView === 'profile' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}
+                  >
+                    <User size={20} className={activeView === 'profile' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Profile</span>
+                  </button>
+                </>
+              ) : isStudent ? (
+                <>
+                  {/* Global Student HUD: Dashboard, Journey (Subject Pick), Profile */}
+                  <button
+                    onClick={() => {
+                      setGodModeView('learning_journey');
+                      resetToTrajectory();
+                    }}
+                    className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${activeView === 'learning_journey' && currentView === 'trajectory' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}
+                  >
+                    <Home size={20} className={activeView === 'learning_journey' && currentView === 'trajectory' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Home</span>
+                  </button>
+                  <button
+                    onClick={() => setGodModeView('learning_journey')}
+                    className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${activeView === 'learning_journey' && (currentView === 'subject' || currentView === 'subject_menu') ? 'text-primary-600 scale-105' : 'text-slate-400'}`}
+                  >
+                    <Map size={20} className={activeView === 'learning_journey' && (currentView === 'subject' || currentView === 'subject_menu') ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Journey</span>
+                  </button>
+                  <button
+                    onClick={() => setGodModeView('profile')}
+                    className={`flex flex-col items-center justify-center w-20 h-full gap-1 transition-all ${activeView === 'profile' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}
+                  >
                     <User size={20} className={activeView === 'profile' ? 'fill-primary-50' : ''} />
                     <span className="text-[9px] font-black uppercase tracking-wider">Account</span>
                   </button>
                 </>
               ) : (
                 <>
-                  {/* Staff Navigation: Dashboard, Scan, Journey (Preview), Profile */}
-                  <button onClick={() => setGodModeView('mastermind')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'mastermind' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                  {/* Staff HUD: Admin, Scan, Journey Preview, Profile */}
+                  <button onClick={() => setGodModeView('mastermind')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'mastermind' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}>
                     <LayoutDashboard size={20} className={activeView === 'mastermind' ? 'fill-primary-50' : ''} />
                     <span className="text-[9px] font-black uppercase tracking-wider">Admin</span>
                   </button>
-                  <button onClick={() => setGodModeView('scanning')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'scanning' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                  <button onClick={() => setGodModeView('scanning')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'scanning' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}>
                     <ScanLine size={20} className={activeView === 'scanning' ? 'fill-primary-50' : ''} />
                     <span className="text-[9px] font-black uppercase tracking-wider">Scan</span>
                   </button>
-                  <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'learning_journey' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                  <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'learning_journey' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}>
                     <Map size={20} className={activeView === 'learning_journey' ? 'fill-primary-50' : ''} />
                     <span className="text-[9px] font-black uppercase tracking-wider">Journey</span>
                   </button>
-                  <button onClick={() => setGodModeView('profile')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'profile' ? 'text-primary-600 scale-110' : 'text-slate-400 hover:text-slate-600'}`}>
+                  <button onClick={() => setGodModeView('profile')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'profile' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}>
                     <User size={20} className={activeView === 'profile' ? 'fill-primary-50' : ''} />
                     <span className="text-[9px] font-black uppercase tracking-wider">Account</span>
                   </button>

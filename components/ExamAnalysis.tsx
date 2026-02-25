@@ -1011,8 +1011,8 @@ Schema: {
             showBack
             onBack={onBack}
             icon={<FolderOpen size={24} className="text-white" />}
-            title="Previous Year Question Vault"
-            subtitle={`${scan?.subject || activeSubject} • ${scan?.examContext || examConfig.id}`}
+            title="Exam Vault"
+            subtitle={`${scan?.subject || activeSubject} • ${scan?.examContext || examConfig.id}${year ? ` • ${year}` : ''}`}
             description="Browse and practice exam questions"
             subject={(scan?.subject || activeSubject) as Subject}
             trajectory={(scan?.examContext || examConfig.id) as ExamContext}

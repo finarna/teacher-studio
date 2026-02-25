@@ -42,6 +42,7 @@ import {
   getTestHistory,
   getSubjectProgress,
   getTrajectoryProgress,
+  getStudyStreak,
   createCustomTest,
   countAvailableQuestions,
   getGenerationProgress
@@ -1356,6 +1357,7 @@ app.get('/api/progress/subject/:subject/:examContext', getSubjectProgress);
  * Get overall progress for a trajectory
  */
 app.get('/api/progress/trajectory/:examContext', getTrajectoryProgress);
+app.get('/api/progress/streak', getStudyStreak);
 
 // ============================================================================
 // LEARNING JOURNEY API (Server-side aggregation with SERVICE_ROLE_KEY)
@@ -1471,7 +1473,7 @@ app.get('/api/learning-journey/subjects/:trajectory', async (req, res) => {
             : 0,
           overallAccuracy: topics.filter(t => t.questionsAttempted > 0).length > 0
             ? Math.round(topics.reduce((sum, t) => sum + (t.questionsAttempted > 0 ? t.averageAccuracy : 0), 0) / topics.filter(t => t.questionsAttempted > 0).length)
-            : 100
+            : 0
         };
       })
     );
@@ -1487,6 +1489,34 @@ app.get('/api/learning-journey/subjects/:trajectory', async (req, res) => {
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error'
     });
+  }
+});
+
+/**
+ * POST /api/ops/report-error
+ * Receive and log client-side errors for the ops team
+ */
+app.post('/api/ops/report-error', async (req, res) => {
+  try {
+    const errorData = req.body;
+    const userId = req.userId || errorData.userId || 'anonymous';
+
+    console.error(`🚨 [OPS REPORT] Client Error from User: ${userId}`);
+    console.error(JSON.stringify(errorData, null, 2));
+
+    // Optional: Save to a database table if it exists
+    // await supabaseAdmin.from('ops_error_logs').insert({
+    //   user_id: userId,
+    //   error_message: errorData.error,
+    //   stack: errorData.stack,
+    //   context: errorData.context,
+    //   created_at: new Date().toISOString()
+    // });
+
+    res.json({ success: true, message: 'Error reported to ops team' });
+  } catch (error) {
+    console.error('Error reporting client error:', error);
+    res.status(500).json({ error: 'Failed to record error' });
   }
 });
 
@@ -1896,16 +1926,26 @@ Return ONLY valid JSON (no markdown, no explanation, no LaTeX, no backslashes) i
 
 Be direct, specific, and use actual numbers from the data. No generic advice.`;
 
-    const { GoogleGenAI } = await import('@google/genai');
-    const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
+    const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    if (!GEMINI_KEY) {
+      return res.status(200).json({
+        success: false,
+        error: 'AI analysis unavailable — no API key configured'
+      });
+    }
 
-    const response = await ai.models.generateContent({
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+
+    const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash',
-      contents: prompt,
-      config: { responseMimeType: 'application/json' }
+      generationConfig: { responseMimeType: 'application/json' }
     });
 
-    let rawText = response.text || '';
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    let rawText = response.text() || '';
+
     // Strip markdown code fences if present
     rawText = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
     // Extract first JSON object (handles trailing garbage)
@@ -1914,7 +1954,7 @@ Be direct, specific, and use actual numbers from the data. No generic advice.`;
     if (firstBrace !== -1 && lastBrace !== -1) {
       rawText = rawText.slice(firstBrace, lastBrace + 1);
     }
-    // Fix common Gemini JSON issues: unescaped backslashes outside of known escape sequences
+    // Fix common Gemini JSON issues
     rawText = rawText.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
 
     let summary;
@@ -1997,6 +2037,8 @@ app.use((req, res) => {
       'GET /api/tests/history',
       'GET /api/progress/subject/:subject/:examContext',
       'GET /api/progress/trajectory/:examContext',
+      'GET /api/progress/streak',
+      'POST /api/ops/report-error'
     ],
   });
 });

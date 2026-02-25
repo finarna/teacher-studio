@@ -198,7 +198,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
         markedForReview: response?.markedForReview || false,
         topic: q.topic,
         difficulty: q.difficulty,
-        marks: q.marks,
+        marks: typeof q.marks === 'number' ? q.marks : parseInt(q.marks || '0'),
         createdAt: new Date()
       };
     });
@@ -400,11 +400,10 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                 <div className="flex items-center gap-1.5 flex-wrap">
                   {/* Difficulty */}
                   {currentQuestion.difficulty && (
-                    <span className={`px-2 py-1 text-[10px] font-bold rounded ${
-                      currentQuestion.difficulty === 'Hard' ? 'bg-rose-100 text-rose-700' :
+                    <span className={`px-2 py-1 text-[10px] font-bold rounded ${currentQuestion.difficulty === 'Hard' ? 'bg-rose-100 text-rose-700' :
                       currentQuestion.difficulty === 'Moderate' ? 'bg-amber-100 text-amber-700' :
-                      'bg-emerald-100 text-emerald-700'
-                    }`}>
+                        'bg-emerald-100 text-emerald-700'
+                      }`}>
                       {currentQuestion.difficulty}
                     </span>
                   )}
@@ -412,7 +411,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                   {/* Marks */}
                   {currentQuestion.marks && (
                     <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded">
-                      {currentQuestion.marks} Mark{currentQuestion.marks > 1 ? 's' : ''}
+                      {currentQuestion.marks} Mark{Number(currentQuestion.marks) > 1 ? 's' : ''}
                     </span>
                   )}
 
@@ -446,7 +445,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
                 {/* Compact MCQ Options - 2 Column Grid */}
                 {currentQuestion.options && currentQuestion.options.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
                     {currentQuestion.options.map((option, idx) => {
                       const isSelected = responses.get(currentQuestion.id)?.selectedOption === idx;
                       const isCorrect = currentQuestion.correctOptionIndex === idx;
@@ -494,14 +493,12 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                           key={idx}
                           onClick={() => handleOptionSelect(idx)}
                           disabled={isReviewMode}
-                          className={`relative flex items-start gap-2 px-3 py-2.5 rounded-lg border transition-all text-left ${
-                            getReviewModeStyle()
-                          } ${!isReviewMode ? 'cursor-pointer active:scale-[0.99]' : 'cursor-default'}`}
+                          className={`relative flex items-start gap-2 px-3 py-2.5 rounded-lg border transition-all text-left ${getReviewModeStyle()
+                            } ${!isReviewMode ? 'cursor-pointer active:scale-[0.99]' : 'cursor-default'}`}
                         >
                           {/* Option Label */}
-                          <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm transition-all ${
-                            getLabelStyle()
-                          }`}>
+                          <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm transition-all ${getLabelStyle()
+                            }`}>
                             {optionLabel}
                           </div>
 
@@ -563,11 +560,11 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                             </div>
                           </div>
                         )}
-                        {currentQuestion.masteryMaterial.logicReasoning && (
+                        {currentQuestion.masteryMaterial.logic && (
                           <div>
                             <div className="text-xs font-black text-blue-700 mb-1">Logic & Reasoning</div>
                             <div className="text-sm text-slate-700">
-                              <RenderWithMath text={currentQuestion.masteryMaterial.logicReasoning} showOptions={false} />
+                              <RenderWithMath text={currentQuestion.masteryMaterial.logic} showOptions={false} />
                             </div>
                           </div>
                         )}
@@ -630,11 +627,10 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                 <>
                   <button
                     onClick={handleMarkForReview}
-                    className={`px-3 py-2 rounded-md text-xs font-bold transition-all ${
-                      responses.get(currentQuestion.id)?.markedForReview
-                        ? 'bg-amber-500 text-white hover:bg-amber-600'
-                        : 'bg-white border border-slate-200 text-slate-900 hover:border-slate-300'
-                    }`}
+                    className={`px-3 py-2 rounded-md text-xs font-bold transition-all ${responses.get(currentQuestion.id)?.markedForReview
+                      ? 'bg-amber-500 text-white hover:bg-amber-600'
+                      : 'bg-white border border-slate-200 text-slate-900 hover:border-slate-300'
+                      }`}
                   >
                     <Flag size={13} className="inline mr-1.5" />
                     {responses.get(currentQuestion.id)?.markedForReview ? 'Unmark' : 'Mark for Review'}
@@ -743,11 +739,10 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                     <button
                       key={q.id}
                       onClick={() => handleQuestionJump(idx)}
-                      className={`aspect-square rounded-md text-sm font-bold transition-all relative ${
-                        isCurrent
-                          ? 'ring-2 ring-primary-500 ring-offset-1'
-                          : ''
-                      } ${getStatusColor(status)}`}
+                      className={`aspect-square rounded-md text-sm font-bold transition-all relative ${isCurrent
+                        ? 'ring-2 ring-primary-500 ring-offset-1'
+                        : ''
+                        } ${getStatusColor(status)}`}
                     >
                       {status === 'marked' && (
                         <Flag size={10} className="absolute top-0.5 right-0.5 text-amber-500" strokeWidth={3} />

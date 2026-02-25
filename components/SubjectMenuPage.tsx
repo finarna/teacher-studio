@@ -182,7 +182,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
     {
       id: 'past_exams' as const,
       icon: Calendar,
-      title: 'Past Year Exams',
+      title: 'Exam Vault',
       description: 'Browse and solve previous exam papers with detailed explanations',
       gradient: 'from-blue-500 to-blue-600',
       stats: stats.totalPapers > 0
@@ -194,7 +194,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
     {
       id: 'topicwise' as const,
       icon: BookOpen,
-      title: 'Topicwise Preparation',
+      title: 'Node Syllabus',
       description: 'Master topics systematically with Learn, Practice, Quiz, Flashcards',
       gradient: 'from-purple-500 to-purple-600',
       stats: stats.totalTopics > 0
@@ -206,7 +206,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
     {
       id: 'mock_builder' as const,
       icon: Zap,
-      title: 'Custom Mock Tests',
+      title: 'Mock Missions',
       description: 'Create personalized practice tests tailored to your weak areas',
       gradient: 'from-amber-500 to-amber-600',
       stats: 'AI-powered recommendations',
@@ -560,7 +560,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (mastery === 0) {
                         return (
                           <>
-                            "The <span className="text-white font-bold">{subject} Mission Center</span> is initialized. Since you haven't started yet, I recommend beginning with <span className="text-white font-bold">Topicwise Preparation</span> to establish your baseline concepts."
+                            "The <span className="text-white font-bold">{subject} Mission Center</span> is initialized. Since you haven't started yet, I recommend beginning with <span className="text-white font-bold">Node Syllabus</span> to establish your baseline concepts."
                           </>
                         );
                       }
@@ -568,7 +568,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (mastery < 30) {
                         return (
                           <>
-                            "You are in the <span className="text-white font-bold">Foundation Building</span> phase. Focus on high-weightage topics in <span className="text-white font-bold">Topicwise Preparation</span> to quickly boost your Command metric before moving to papers."
+                            "You are in the <span className="text-white font-bold">Foundation Building</span> phase. Focus on high-weightage topics in <span className="text-white font-bold">Node Syllabus</span> to quickly boost your Command metric before moving to papers."
                           </>
                         );
                       }
@@ -576,7 +576,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (accuracy < 60 && mastery > 20) {
                         return (
                           <>
-                            "Your coverage is growing, but your <span className="text-white font-bold">Accuracy</span> is under 60%. I recommend <span className="text-white font-bold">Custom Mock Tests</span> focused on your recently practiced topics to stabilize your fundamentals."
+                            "Your coverage is growing, but your <span className="text-white font-bold">Accuracy</span> is under 60%. I recommend <span className="text-white font-bold">Mock Missions</span> focused on your recently practiced topics to stabilize your fundamentals."
                           </>
                         );
                       }
@@ -584,7 +584,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (mastery > 70) {
                         return (
                           <>
-                            "Your <span className="text-white font-bold">Concept Density</span> in high-yield topics is excellent. I recommend pivoting to <span className="text-white font-bold">Past Year Exams</span> to improve your session stamina for the upcoming {examContext} cycle."
+                            "Your <span className="text-white font-bold">Concept Density</span> in high-yield topics is excellent. I recommend pivoting to <span className="text-white font-bold">Exam Vault</span> to improve your session stamina for the upcoming {examContext} cycle."
                           </>
                         );
                       }

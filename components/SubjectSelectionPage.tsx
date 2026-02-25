@@ -16,7 +16,8 @@ import {
   Palette,
   FileQuestion,
   Sparkles,
-  Award
+  Award,
+  BarChart3
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Subject, ExamContext, SubjectProgress } from '../types';
@@ -29,6 +30,8 @@ interface SubjectSelectionPageProps {
   onSelectSubject: (subject: Subject) => void;
   onBack: () => void;
   subjectProgress?: Record<Subject, SubjectProgress>;
+  onViewGlobalPerformance?: () => void;
+  onSelectOption?: (subject: Subject, option: 'past_exams' | 'topicwise' | 'mock_builder') => void;
 }
 
 const SUBJECT_ICONS: Record<Subject, React.ElementType> = {
@@ -36,6 +39,13 @@ const SUBJECT_ICONS: Record<Subject, React.ElementType> = {
   'Physics': Atom,
   'Chemistry': FlaskConical,
   'Biology': Dna
+};
+
+const getPotentialGain = (m: number, a: number) => {
+  if (m >= 98) return 1;
+  const base = a > 70 ? 12 : a > 40 ? 8 : 4;
+  const multiplier = (100 - m) / 100;
+  return Math.max(2, Math.round(base * multiplier + (a / 25)));
 };
 
 const containerVariants = {
@@ -61,7 +71,9 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
   examContext,
   onSelectSubject,
   onBack,
-  subjectProgress
+  subjectProgress,
+  onViewGlobalPerformance,
+  onSelectOption
 }) => {
   // Memoize available subjects to prevent reference changes on every render
   const availableSubjects = useMemo(() =>
@@ -377,13 +389,12 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                 };
 
                 return (
-                  <motion.button
+                  <motion.div
                     key={subject}
                     variants={cardVariants}
                     whileHover={{ y: -8, scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
                     onClick={() => onSelectSubject(subject)}
-                    className="group relative bg-white rounded-[2.5rem] p-6 md:p-8 border border-slate-200 shadow-sm hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] hover:border-primary-200 transition-all duration-500 text-left flex flex-col gap-8 overflow-hidden"
+                    className="group relative bg-white rounded-[2.5rem] p-6 md:p-8 border border-slate-200 shadow-sm hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] hover:border-primary-200 transition-all duration-500 text-left flex flex-col gap-8 overflow-hidden cursor-pointer"
                   >
                     {/* Visual Highlights */}
                     <div className="absolute top-0 left-0 w-full h-2 bg-slate-100" />
@@ -440,19 +451,19 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         ].map((s, idx) => {
                           const StatIcon = s.i;
                           return (
-                            <div key={idx} className="bg-white border border-slate-100 rounded-2xl p-3 flex flex-col items-center shadow-sm group-hover:border-slate-200 transition-all">
+                            <div key={idx} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col items-center shadow-sm group-hover:bg-white group-hover:border-slate-200 transition-all">
                               <div className="mb-2" style={{ color: s.c }}>
-                                <StatIcon size={18} strokeWidth={2} />
+                                <StatIcon size={20} strokeWidth={2.5} />
                               </div>
-                              <div className="text-xl font-black text-slate-900 leading-none mb-1">{s.v || 0}</div>
-                              <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">{s.l}</div>
+                              <div className="text-2xl font-black text-slate-900 leading-none mb-1">{s.v || 0}</div>
+                              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">{s.l}</div>
                             </div>
                           );
                         })}
                       </div>
 
                       {/* PERFORMANCE PERFORMANCE PERFORMANCE */}
-                      <div className="space-y-4 pt-4 border-t border-slate-100">
+                      <div className="space-y-4 pt-4 border-t border-slate-100 mt-auto">
                         <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
                           <span>Accuracy Benchmarking</span>
                           <span className="text-slate-900">{Math.round(accuracy)}%</span>
@@ -466,18 +477,58 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         </div>
 
                         <div className="flex items-center justify-between mt-6">
-                          <div className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform">
-                            Launch Subject
-                            <ArrowRight size={14} />
+                          <div className="flex items-center gap-1.5 text-emerald-500 italic font-black uppercase text-[10px] tracking-widest">
+                            <TrendingUp size={12} />
+                            Potential +{getPotentialGain(mastery, accuracy)}%
                           </div>
-                          <div className="flex items-center gap-2 italic">
-                            <TrendingUp size={12} className="text-emerald-500" />
-                            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Potential +12%</span>
+                        </div>
+
+                        {/* REFINED ACTIONS - INLINE TO REDUCE DEPTH */}
+                        <div className="flex flex-col gap-3 pt-6 border-t border-slate-100">
+                          <div className="grid grid-cols-2 gap-3">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSelectOption?.(subject, 'topicwise');
+                              }}
+                              className="flex items-center justify-center gap-2 py-3 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100"
+                            >
+                              <BookOpen size={14} /> Explore Syllabus
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSelectOption?.(subject, 'past_exams');
+                              }}
+                              className="flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 hover:text-white transition-all border border-amber-100"
+                            >
+                              <Target size={14} /> Exam Vault
+                            </button>
                           </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectOption?.(subject, 'mock_builder');
+                            }}
+                            className="w-full flex items-center justify-center gap-2 py-4 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-primary-600 transition-all shadow-lg"
+                          >
+                            <Zap size={16} /> Enter Mock Mission
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectSubject(subject);
+                            }}
+                            className="w-full py-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center hover:text-slate-600 transition-colors"
+                          >
+                            View Full Subject Analysis
+                          </button>
                         </div>
                       </div>
                     </div>
-                  </motion.button>
+                  </motion.div>
                 );
               })}
             </motion.div>
@@ -487,144 +538,162 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
 
       {/* 5. RESPONSIVE AI STRATEGY DRAWER */}
       <AnimatePresence>
-        {isAiDrawerOpen && aiInsights && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsAiDrawerOpen(false)}
-              className="fixed inset-0 bg-slate-950/40 backdrop-blur-md z-[100]"
-            />
+        {
+          isAiDrawerOpen && aiInsights && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsAiDrawerOpen(false)}
+                className="fixed inset-0 bg-slate-950/40 backdrop-blur-md z-[100]"
+              />
 
-            {/* Drawer */}
-            <motion.aside
-              initial={{ x: '100%', y: 0 }} // Desktop default
-              animate={{ x: 0, y: 0 }}
-              exit={{ x: '100%', y: 0 }}
-              variants={{
-                mobile: { y: '100%', x: 0 },
-                desktop: { x: '100%', y: 0 }
-              }}
-              // Responsive logic via custom motion variants can be tricky, using standard media-query based initial/animate in actual render
-              className="fixed right-0 md:top-0 bottom-0 top-[10%] md:w-[420px] w-full bg-[#0f172a] shadow-[-20px_0_50px_rgba(0,0,0,0.3)] z-[101] flex flex-col border-l border-white/10 md:rounded-l-[2rem] rounded-t-[2.5rem] overflow-hidden"
-              style={{
-                // Explicitly overriding desktop/mobile diffs for Framer
-                transform: typeof window !== 'undefined' && window.innerWidth < 768 ? 'translateY(0)' : 'translateX(0)'
-              }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            >
-              {/* Drawer Handle (Mobile) */}
-              <div className="md:hidden w-12 h-1 bg-slate-700/50 rounded-full mx-auto mt-3 mb-1" />
+              {/* Drawer */}
+              <motion.aside
+                initial={{ x: '100%', y: 0 }} // Desktop default
+                animate={{ x: 0, y: 0 }}
+                exit={{ x: '100%', y: 0 }}
+                variants={{
+                  mobile: { y: '100%', x: 0 },
+                  desktop: { x: '100%', y: 0 }
+                }}
+                // Responsive logic via custom motion variants can be tricky, using standard media-query based initial/animate in actual render
+                className="fixed right-0 md:top-0 bottom-0 top-[10%] md:w-[420px] w-full bg-[#0f172a] shadow-[-20px_0_50px_rgba(0,0,0,0.3)] z-[101] flex flex-col border-l border-white/10 md:rounded-l-[2rem] rounded-t-[2.5rem] overflow-hidden"
+                style={{
+                  // Explicitly overriding desktop/mobile diffs for Framer
+                  transform: typeof window !== 'undefined' && window.innerWidth < 768 ? 'translateY(0)' : 'translateX(0)'
+                }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              >
+                {/* Drawer Handle (Mobile) */}
+                <div className="md:hidden w-12 h-1 bg-slate-700/50 rounded-full mx-auto mt-3 mb-1" />
 
-              <div className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto custom-scrollbar">
-                <div className="flex items-center justify-between mb-6 shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center text-primary-400">
-                      <Sparkles size={20} />
+                <div className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto custom-scrollbar">
+                  <div className="flex items-center justify-between mb-6 shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center text-primary-400">
+                        <Sparkles size={20} />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-white uppercase tracking-tight italic">AI Analyst</h2>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Intelligence</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-white uppercase tracking-tight italic">AI Analyst</h2>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Intelligence</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsAiDrawerOpen(false)}
-                    className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 transition-colors"
-                  >
-                    <ArrowRight size={20} />
-                  </button>
-                </div>
-
-                <div className="flex flex-col gap-6">
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-primary-400 uppercase tracking-widest">Current Strategy</span>
-                    <h3 className="text-2xl font-bold text-white tracking-tight italic uppercase font-outfit leading-tight">
-                      {aiInsights.title}
-                    </h3>
-                    <p className="text-sm text-slate-300 font-medium font-instrument leading-relaxed opacity-90">
-                      {aiInsights.description.split(aiInsights.focusArea).map((part, i, arr) => (
-                        <React.Fragment key={i}>
-                          {part}
-                          {i < arr.length - 1 && <span className="text-white font-bold underline decoration-primary-500/50 decoration-2 underline-offset-4">{aiInsights.focusArea}</span>}
-                        </React.Fragment>
-                      ))}
-                    </p>
+                    <button
+                      onClick={() => setIsAiDrawerOpen(false)}
+                      className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 transition-colors"
+                    >
+                      <ArrowRight size={20} />
+                    </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Priority Subject</div>
-                      <div className="text-lg font-bold text-white uppercase italic">{aiInsights.focusArea}</div>
+                  <div className="flex flex-col gap-6">
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-bold text-primary-400 uppercase tracking-widest">Current Strategy</span>
+                      <h3 className="text-2xl font-bold text-white tracking-tight italic uppercase font-outfit leading-tight">
+                        {aiInsights.title}
+                      </h3>
+                      <p className="text-sm text-slate-300 font-medium font-instrument leading-relaxed opacity-90">
+                        {aiInsights.description.split(aiInsights.focusArea).map((part, i, arr) => (
+                          <React.Fragment key={i}>
+                            {part}
+                            {i < arr.length - 1 && <span className="text-white font-bold underline decoration-primary-500/50 decoration-2 underline-offset-4">{aiInsights.focusArea}</span>}
+                          </React.Fragment>
+                        ))}
+                      </p>
                     </div>
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                      <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Est. Impact</div>
-                      <div className="text-xl font-bold text-emerald-400 font-outfit">+18%</div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                        <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Priority Subject</div>
+                        <div className="text-lg font-bold text-white uppercase italic">{aiInsights.focusArea}</div>
+                      </div>
+                      <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                        <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Est. Impact</div>
+                        <div className="text-xl font-bold text-emerald-400 font-outfit">
+                          +{(() => {
+                            const focusSubject = aiInsights.focusArea as Subject;
+                            const m = subjectProgress?.[focusSubject]?.overallMastery || 0;
+                            const a = subjectProgress?.[focusSubject]?.overallAccuracy || 0;
+                            return getPotentialGain(m, a);
+                          })()}%
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          onSelectSubject(aiInsights.focusArea as Subject);
+                          setIsAiDrawerOpen(false);
+                        }}
+                        className="w-full py-4 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-xl flex items-center justify-center gap-3 transition-shadow hover:shadow-2xl"
+                      >
+                        BOOST THIS SUBJECT
+                        <ArrowRight size={16} strokeWidth={2.5} />
+                      </motion.button>
                     </div>
                   </div>
 
-                  <div className="">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                  <div className="mt-6 space-y-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Full Syllabus Status</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                      {availableSubjects.map((s) => {
+                        const m = subjectProgress?.[s]?.overallMastery || 0;
+                        const isPriority = s === aiInsights.focusArea;
+                        let status = "Stable";
+                        let color = "text-slate-400";
+                        let bgColor = "bg-white/5";
+
+                        if (m < 40) { status = "Critical"; color = "text-rose-400"; bgColor = "bg-rose-500/10 border-rose-500/20"; }
+                        else if (m > 80) { status = "Excelling"; color = "text-emerald-400"; bgColor = "bg-emerald-500/10 border-emerald-500/20"; }
+                        else if (m > 60) { status = "Optimal"; color = "text-blue-400"; bgColor = "bg-blue-500/10 border-blue-500/20"; }
+
+                        return (
+                          <div
+                            key={s}
+                            className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isPriority ? 'bg-primary-500/10 border-primary-500/30' : 'bg-white/5 border-white/5'}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-1.5 h-1.5 rounded-full ${color.replace('text', 'bg')}`} />
+                              <span className={`text-xs font-bold uppercase italic tracking-tight ${isPriority ? 'text-primary-400' : 'text-slate-300'}`}>{s}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${bgColor} ${color} border`}>{status}</span>
+                              <span className="text-xs font-bold text-white w-8 text-right">{Math.round(m)}%</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="mt-auto px-6 pb-12 space-y-4">
+                    <button
                       onClick={() => {
-                        onSelectSubject(aiInsights.focusArea as Subject);
+                        onViewGlobalPerformance?.();
                         setIsAiDrawerOpen(false);
                       }}
-                      className="w-full py-4 rounded-xl bg-white text-slate-900 font-bold text-xs shadow-xl flex items-center justify-center gap-3 transition-shadow hover:shadow-2xl"
+                      className="w-full py-4 rounded-xl bg-slate-800 text-white font-bold text-xs border border-white/10 hover:bg-slate-700 transition-colors flex items-center justify-center gap-2"
                     >
-                      BOOST THIS SUBJECT
-                      <ArrowRight size={16} strokeWidth={2.5} />
-                    </motion.button>
+                      <BarChart3 size={16} /> OPEN FULL DASHBOARD
+                    </button>
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest justify-center">
+                      <Zap size={14} className="text-amber-500" />
+                      Strategy recalibrates after every session
+                    </div>
                   </div>
                 </div>
-
-                <div className="mt-6 space-y-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Full Syllabus Status</span>
-                  </div>
-                  <div className="grid grid-cols-1 gap-2">
-                    {availableSubjects.map((s) => {
-                      const m = subjectProgress?.[s]?.overallMastery || 0;
-                      const isPriority = s === aiInsights.focusArea;
-                      let status = "Stable";
-                      let color = "text-slate-400";
-                      let bgColor = "bg-white/5";
-
-                      if (m < 40) { status = "Critical"; color = "text-rose-400"; bgColor = "bg-rose-500/10 border-rose-500/20"; }
-                      else if (m > 80) { status = "Excelling"; color = "text-emerald-400"; bgColor = "bg-emerald-500/10 border-emerald-500/20"; }
-                      else if (m > 60) { status = "Optimal"; color = "text-blue-400"; bgColor = "bg-blue-500/10 border-blue-500/20"; }
-
-                      return (
-                        <div
-                          key={s}
-                          className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isPriority ? 'bg-primary-500/10 border-primary-500/30' : 'bg-white/5 border-white/5'}`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-1.5 h-1.5 rounded-full ${color.replace('text', 'bg')}`} />
-                            <span className={`text-xs font-bold uppercase italic tracking-tight ${isPriority ? 'text-primary-400' : 'text-slate-300'}`}>{s}</span>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md ${bgColor} ${color} border`}>{status}</span>
-                            <span className="text-xs font-bold text-white w-8 text-right">{Math.round(m)}%</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="mt-auto pt-10 border-t border-white/5">
-                  <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                    <Zap size={14} className="text-amber-500" />
-                    Strategy recalibrates after every session
-                  </div>
-                </div>
-              </div>
-            </motion.aside>
-          </>
-        )}
+              </motion.aside>
+            </>
+          )
+        }
       </AnimatePresence>
 
       <style>{`

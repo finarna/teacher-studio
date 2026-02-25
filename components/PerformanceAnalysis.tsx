@@ -24,6 +24,7 @@ import {
   X,
   Signal
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import type { TestAttempt, TestResponse, AnalyzedQuestion } from '../types';
 import { RenderWithMath } from './MathRenderer';
 import { getApiUrl } from '../lib/api';
@@ -77,14 +78,16 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
     topicStats.set(r.topic, stats);
   });
 
-  // Difficulty breakdown
+  // Difficulty breakdown — normalize to title case since AI returns lowercase
   const difficultyStats = {
     Easy: { correct: 0, total: 0 },
     Moderate: { correct: 0, total: 0 },
     Hard: { correct: 0, total: 0 }
   };
   responses.forEach(r => {
-    const diff = r.difficulty as 'Easy' | 'Moderate' | 'Hard';
+    // AI questions return 'easy'/'moderate'/'hard', DB questions return 'Easy'/'Moderate'/'Hard'
+    const rawDiff = r.difficulty || '';
+    const diff = (rawDiff.charAt(0).toUpperCase() + rawDiff.slice(1).toLowerCase()) as 'Easy' | 'Moderate' | 'Hard';
     if (difficultyStats[diff]) {
       difficultyStats[diff].total++;
       if (r.isCorrect) difficultyStats[diff].correct++;
@@ -143,9 +146,15 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
       });
 
       const url = getApiUrl('/api/learning-journey/ai-summary');
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({
           attemptId: attempt.id, // Add attemptId for persistence
           subject: attempt.subject,
@@ -395,7 +404,9 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                 ) : aiSummary && (
                   <div className="space-y-4">
                     <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                      <p className="text-sm font-medium text-slate-800 leading-relaxed"><strong className="font-black">System Verdict:</strong> {aiSummary.verdict}</p>
+                      <div className="text-sm font-medium text-slate-800 leading-relaxed">
+                        <strong className="font-black">System Verdict:</strong> <RenderWithMath text={aiSummary.verdict} showOptions={false} serif={false} />
+                      </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
@@ -408,7 +419,9 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                               <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5"><Check size={12} className="font-bold" /></div>
                               <div>
                                 <h4 className="text-sm font-bold text-slate-900">{s.title}</h4>
-                                <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{s.detail}</p>
+                                <div className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                                  <RenderWithMath text={s.detail} showOptions={false} serif={false} />
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -423,7 +436,9 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                               <div className="w-5 h-5 rounded-full bg-red-500/20 text-red-600 flex items-center justify-center shrink-0 mt-0.5"><X size={12} className="font-bold" /></div>
                               <div>
                                 <h4 className="text-sm font-bold text-slate-900">{w.title}</h4>
-                                <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{w.detail}</p>
+                                <div className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                                  <RenderWithMath text={w.detail} showOptions={false} serif={false} />
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -435,7 +450,9 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                       <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><Lightbulb size={14} /></div>
                       <div>
                         <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Recommended 7-Day Protocol</h3>
-                        <p className="text-sm font-medium leading-relaxed">{aiSummary.studyPlan}</p>
+                        <div className="text-sm font-medium leading-relaxed">
+                          <RenderWithMath text={aiSummary.studyPlan} showOptions={false} dark={true} serif={false} />
+                        </div>
                       </div>
                     </div>
                   </div>

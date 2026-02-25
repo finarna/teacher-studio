@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Search,
+  Filter,
   Calendar,
   CheckCircle2,
   ArrowRight,
@@ -246,7 +248,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
         showBack
         onBack={onBack}
         icon={activeView === 'papers' ? <Calendar size={24} className="text-white" /> : <TrendingUp size={24} className="text-white" />}
-        title={activeView === 'papers' ? "Past Year Exams" : "Predictive Trends"}
+        title={activeView === 'papers' ? "Exam Vault" : "Predictive Trends"}
         subtitle={`${subject} • ${examContext}`}
         description={activeView === 'papers'
           ? "Browse and solve previous exam papers with detailed explanations"
@@ -255,47 +257,65 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
         subject={subject}
         trajectory={examContext}
         mastery={subProg?.overallMastery}
-        accuracy={subProg?.overallAccuracy ?? 100}
+        accuracy={subProg?.overallAccuracy ?? 0}
         actions={null}
       >
         <div className="flex flex-col items-start w-full bg-white backdrop-blur-md rounded-[1.5rem] p-3 md:p-4 border border-slate-200/60 shadow-sm gap-4 mt-2 mb-2 md:mt-4 md:mb-0">
-          <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/50 w-full overflow-x-auto scroller-hide">
-            <button
-              onClick={() => setActiveView('papers')}
-              className={`relative flex-1 snap-center px-4 py-2 md:py-2.5 rounded-xl transition-all duration-300 ${activeView === 'papers' ? 'text-white' : 'text-slate-500 hover:text-slate-900 group'}`}
-            >
-              {activeView === 'papers' && (
-                <motion.div
-                  layoutId="activeExamTabBg"
-                  className="absolute inset-0 bg-slate-900 rounded-xl shadow-sm"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <div className="relative z-10 flex items-center justify-center gap-2.5">
-                <Calendar size={18} className={activeView === 'papers' ? 'text-white' : 'group-hover:scale-110 transition-transform'} />
-                <span className="text-xs font-bold uppercase tracking-wider font-outfit">Archive Papers</span>
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between w-full gap-3">
+            <div className="flex items-center gap-1 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/50 flex-1 overflow-x-auto scroller-hide">
+              <button
+                onClick={() => setActiveView('papers')}
+                className={`relative flex-1 snap-center px-4 py-2 md:py-2.5 rounded-xl transition-all duration-300 ${activeView === 'papers' ? 'text-white' : 'text-slate-500 hover:text-slate-900 group'}`}
+              >
+                {activeView === 'papers' && (
+                  <motion.div
+                    layoutId="activeExamTabBg"
+                    className="absolute inset-0 bg-slate-900 rounded-xl shadow-sm"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <div className="relative z-10 flex items-center justify-center gap-2.5">
+                  <Calendar size={16} className={activeView === 'papers' ? 'text-white' : 'group-hover:scale-110 transition-transform'} />
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider font-outfit whitespace-nowrap">Archive Papers</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveView('trends')}
+                className={`relative flex-1 snap-center px-4 py-2 md:py-2.5 rounded-xl transition-all duration-300 ${activeView === 'trends' ? 'text-white' : 'text-slate-500 hover:text-slate-900 group'}`}
+              >
+                {activeView === 'trends' && (
+                  <motion.div
+                    layoutId="activeExamTabBg"
+                    className="absolute inset-0 bg-slate-900 rounded-xl shadow-sm"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <div className="relative z-10 flex items-center justify-center gap-2.5">
+                  <TrendingUp size={16} className={activeView === 'trends' ? 'text-white' : 'group-hover:scale-110 transition-transform'} />
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider font-outfit whitespace-nowrap">Predictive Trends</span>
+                </div>
+              </button>
+            </div>
+
+            {activeView === 'papers' && yearData.length > 0 && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl shrink-0 justify-center">
+                <Filter size={14} className="text-slate-400" />
+                <select
+                  value={filterYear}
+                  onChange={(e) => setFilterYear(e.target.value)}
+                  className="bg-transparent text-[11px] font-black uppercase text-slate-700 focus:outline-none cursor-pointer tracking-wider"
+                >
+                  <option value="all">All Years</option>
+                  {yearData.map(yd => (
+                    <option key={yd.year} value={yd.year}>{yd.year}</option>
+                  ))}
+                </select>
               </div>
-            </button>
-            <button
-              onClick={() => setActiveView('trends')}
-              className={`relative flex-1 snap-center px-4 py-2 md:py-2.5 rounded-xl transition-all duration-300 ${activeView === 'trends' ? 'text-white' : 'text-slate-500 hover:text-slate-900 group'}`}
-            >
-              {activeView === 'trends' && (
-                <motion.div
-                  layoutId="activeExamTabBg"
-                  className="absolute inset-0 bg-slate-900 rounded-xl shadow-sm"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <div className="relative z-10 flex items-center justify-center gap-2.5">
-                <TrendingUp size={18} className={activeView === 'trends' ? 'text-white' : 'group-hover:scale-110 transition-transform'} />
-                <span className="text-xs font-bold uppercase tracking-wider font-outfit">Predictive Trends</span>
-              </div>
-            </button>
+            )}
           </div>
 
           {activeView === 'papers' && (
-            <div className="flex items-center justify-between w-full overflow-x-auto scroller-hide gap-6 md:gap-8 px-4 py-1">
+            <div className="flex items-center justify-between w-full overflow-x-auto scroller-hide gap-4 md:gap-8 px-2 md:px-4 py-1 border-t border-slate-100 pt-3">
               <div className="flex flex-col">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Archive Questions</span>
                 <span className="text-xl md:text-2xl font-black text-slate-900 leading-none tracking-tighter">
@@ -341,60 +361,6 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
         {/* Papers View */}
         {activeView === 'papers' && (
           <>
-            {/* Combined Filter & Stats Bar */}
-            {yearData.length > 0 && (
-              <div className="mb-6 bg-white rounded-xl p-4 border border-slate-200/60 shadow-sm">
-                <div className="flex items-center gap-6 flex-wrap">
-                  {/* Left - Filter */}
-                  <div className="flex items-center gap-3">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider font-outfit">Filter:</label>
-                    <select
-                      value={filterYear}
-                      onChange={(e) => setFilterYear(e.target.value)}
-                      className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer font-instrument"
-                    >
-                      <option value="all">All Years</option>
-                      {yearData.map(yd => (
-                        <option key={yd.year} value={yd.year}>
-                          {yd.year}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="h-8 w-px bg-slate-200"></div>
-
-                  {/* Right - Stats */}
-                  <div className="flex items-center gap-6 ml-auto">
-                    <div className="text-center">
-                      <div className="text-2xl font-black text-slate-900 font-outfit">
-                        {yearData.length}
-                      </div>
-                      <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                        Years
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-black text-slate-900 font-outfit">
-                        {totalQuestions}
-                      </div>
-                      <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                        Questions
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-black text-blue-600 font-outfit">
-                        {Math.round(overallProgress)}%
-                      </div>
-                      <div className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                        Progress
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Loading state */}
             {isLoading && (

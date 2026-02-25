@@ -340,8 +340,9 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
   );
 
   const getStatusInfo = (topic: TopicResource) => {
-    const m = topic.masteryLevel;
-    if (m === 0 && topic.studyStage === 'not_started') return { label: 'START', color: 'bg-slate-100 text-slate-600', icon: PlayCircle };
+    const m = topic.masteryLevel || 0;
+    const s = topic.studyStage || 'not_started';
+    if (m === 0 && s === 'not_started') return { label: 'START', color: 'bg-slate-100 text-slate-600', icon: PlayCircle };
     if (m < 40) return { label: 'CRITICAL', color: 'bg-red-50 text-red-600', icon: AlertCircle };
     if (m < 85) return { label: 'ACTIVE', color: 'bg-blue-50 text-blue-600', icon: Activity };
     return { label: 'MASTERED', color: 'bg-emerald-50 text-emerald-600', icon: Trophy };
@@ -357,7 +358,7 @@ const TopicDashboardPage: React.FC<TopicDashboardPageProps> = ({
         showBack
         onBack={onBack}
         icon={subjectConfig.iconEmoji}
-        title={`${subjectConfig.displayName} Engine`}
+        title="Node Syllabus"
         subtitle={`Domain-level mastery analysis for ${examContext}`}
         subject={subject}
         trajectory={examContext}

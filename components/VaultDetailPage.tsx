@@ -63,6 +63,12 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => 
 
       if (questionData?.year) {
         setYear(questionData.year);
+      } else {
+        // Fallback: try to extract year from scan name (e.g., "KCET 2023 MATH")
+        const yearMatch = scanData.name?.match(/\b(20\d{2})\b/);
+        if (yearMatch) {
+          setYear(yearMatch[1]);
+        }
       }
     } catch (err) {
       console.error('Error fetching scan:', err);

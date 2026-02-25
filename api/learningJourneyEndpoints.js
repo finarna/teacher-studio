@@ -279,111 +279,168 @@ export async function generateTest(req, res) {
     console.log(`🧪 Generating ${testType} test with AI for ${subject} (${examContext})`);
 
     // Check if AI generation is enabled (requires GEMINI_API_KEY)
-    const useAIGeneration = process.env.GEMINI_API_KEY && testType === 'mock_test';
-
+    // Now enabling for topic_quiz and subject_test as well to ensure fallback works
+    const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    const qCount = totalQuestions || getRecommendedQuestionCount(testType, examContext) || 10;
+    const useAIGeneration = !!GEMINI_KEY;
     let questionSet;
 
+    // ─── Strategy 1: Full AI generation via exam config + historical data ───
     if (useAIGeneration) {
-      // ✨ NEW: AI-powered question generation
-      console.log('🤖 Using AI Question Generator...');
-
+      console.log('🤖 Using AI Question Generator (full context)…');
       try {
-        // Load all context from database (exam config, historical patterns, student profile)
         const context = await loadGenerationContext(
-          supabaseAdmin,
-          userId,
-          examContext,
-          subject
+          supabaseAdmin, userId, examContext, subject, topics
         );
-
-        // Generate fresh questions with AI (no corruption, perfect LaTeX)
         const questions = await generateTestQuestions(
           context,
-          process.env.GEMINI_API_KEY
+          GEMINI_KEY,
+          qCount
         );
+        // Only accept if we actually got questions — empty result falls through to Strategy 2
+        if (Array.isArray(questions) && questions.length > 0) {
+          const difficultyBreakdown = { easy: 0, moderate: 0, hard: 0 };
+          const topicBreakdown = {};
+          let totalDifficulty = 0;
+          questions.forEach(q => {
+            if (q.difficulty) {
+              difficultyBreakdown[q.difficulty] = (difficultyBreakdown[q.difficulty] || 0) + 1;
+              totalDifficulty += q.difficulty === 'easy' ? 1 : q.difficulty === 'moderate' ? 2 : 3;
+            }
+            if (q.topic) topicBreakdown[q.topic] = (topicBreakdown[q.topic] || 0) + 1;
+          });
+          questionSet = {
+            questions,
+            metadata: {
+              totalQuestions: questions.length,
+              difficultyBreakdown,
+              topicBreakdown,
+              averageDifficulty: questions.length > 0 ? totalDifficulty / questions.length : 0,
+              generatedWithAI: true
+            }
+          };
+          console.log(`✅ Strategy 1: Generated ${questions.length} questions (full context)`);
+        } else {
+          console.warn('⚠️  Strategy 1 returned 0 questions (no historical data?) — falling through to Strategy 2');
+        }
+      } catch (aiError) {
+        console.error('⚠️  Strategy 1 failed:', aiError.message);
+        // Falls through to Strategy 2
+      }
+    }
 
-        // Calculate metadata for compatibility
-        const difficultyBreakdown = { easy: 0, moderate: 0, hard: 0 };
-        const topicBreakdown = {};
-        const bloomsBreakdown = {};
-        let totalDifficulty = 0;
-
-        questions.forEach(q => {
-          // Count difficulty
-          if (q.difficulty) {
-            difficultyBreakdown[q.difficulty] = (difficultyBreakdown[q.difficulty] || 0) + 1;
-            totalDifficulty += q.difficulty === 'easy' ? 1 : q.difficulty === 'moderate' ? 2 : 3;
-          }
-
-          // Count topics
-          if (q.topic) {
-            topicBreakdown[q.topic] = (topicBreakdown[q.topic] || 0) + 1;
-          }
-
-          // Count Bloom's levels
-          if (q.bloomsLevel) {
-            bloomsBreakdown[q.bloomsLevel] = (bloomsBreakdown[q.bloomsLevel] || 0) + 1;
-          }
+    // ─── Strategy 2: Direct Gemini prompt (no DB config required) ───────────
+    if (!questionSet && GEMINI_KEY) {
+      console.log('🤖 Falling back to direct Gemini generation (no DB context)…');
+      try {
+        const { GoogleGenerativeAI } = await import('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+        const model = genAI.getGenerativeModel({
+          model: 'gemini-2.0-flash',
+          generationConfig: { responseMimeType: 'application/json' }
         });
 
-        questionSet = {
-          questions,
-          metadata: {
-            totalQuestions: questions.length,
-            difficultyBreakdown,
-            topicBreakdown,
-            bloomsBreakdown,
-            averageDifficulty: questions.length > 0 ? totalDifficulty / questions.length : 0,
-            generatedWithAI: true
+        // topics[] contains UUIDs from the frontend — resolve to readable names first
+        const UUID_REGEX_TOPIC = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        let topicNames = subject; // safe fallback is always the subject name
+
+        if (topics && topics.length > 0) {
+          const uuidTopics = topics.filter(t => UUID_REGEX_TOPIC.test(t));
+          const plainTopics = topics.filter(t => !UUID_REGEX_TOPIC.test(t));
+
+          let resolvedNames = [...plainTopics]; // keep any plain-text names as-is
+
+          if (uuidTopics.length > 0) {
+            // Resolve UUIDs → topic_name from topic_resources table
+            const { data: topicRows } = await supabaseAdmin
+              .from('topic_resources')
+              .select('topic_name')
+              .in('id', uuidTopics);
+            if (topicRows && topicRows.length > 0) {
+              resolvedNames.push(...topicRows.map(r => r.topic_name).filter(Boolean));
+            }
           }
-        };
 
-        console.log(`✅ Generated ${questions.length} fresh AI questions`);
-      } catch (aiError) {
-        console.error('⚠️  AI generation failed, falling back to database:', aiError.message);
-        // Fall back to database selection if AI fails
+          topicNames = resolvedNames.length > 0 ? resolvedNames.join(', ') : subject;
+        }
+
+        console.log(`🎯 Strategy 2: topic names resolved to: "${topicNames}"`);
+
+        const prompt = `You are an expert ${subject} teacher for ${examContext} exam.
+Generate exactly ${qCount} high-quality MCQ questions on the topic(s): "${topicNames}".
+Requirements:
+- Mix difficulty: ~30% easy, ~50% moderate, ~20% hard
+- Each question must have exactly 4 options (strings)
+- Strictly follow the ${examContext} syllabus for ${subject}
+- Return ONLY a valid JSON array. Each object must have:
+  { "id": "q1", "question": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "topic": "${topicNames}", "difficulty": "easy|moderate|hard" }`;
+
+        const result = await model.generateContent(prompt);
+        const raw = result.response.text().trim();
+        const jsonStr = raw.includes('```json')
+          ? raw.match(/```json\n([\s\S]*?)\n```/)?.[1] || raw
+          : raw;
+        const parsed = JSON.parse(jsonStr);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Normalize AI question format → AnalyzedQuestion shape expected by TestInterface
+          // AI returns: { question, options, correctIndex, explanation, topic, difficulty }
+          // Frontend expects: { id, text, options, correctOptionIndex, explanation, topic, difficulty, marks }
+          const normalizedQuestions = parsed.map((q, i) => ({
+            id: q.id || `ai-q-${i + 1}`,
+            text: q.question || q.text || '',          // map 'question' → 'text'
+            options: Array.isArray(q.options) ? q.options : [],
+            correctOptionIndex: q.correctIndex ?? q.correctOptionIndex ?? 0, // map 'correctIndex' → 'correctOptionIndex'
+            explanation: q.explanation || '',
+            topic: q.topic || topicNames,
+            difficulty: q.difficulty || 'moderate',
+            marks: 1,
+            bloomsLevel: 'application',
+            generatedByAI: true,
+          }));
+          questionSet = {
+            questions: normalizedQuestions,
+            metadata: {
+              totalQuestions: normalizedQuestions.length,
+              difficultyBreakdown: { easy: 0, moderate: 0, hard: 0 },
+              topicBreakdown: { [topicNames]: normalizedQuestions.length },
+              generatedWithAI: true
+            }
+          };
+          console.log(`✅ Direct Gemini generation: ${normalizedQuestions.length} questions (normalized)`);
+        }
+      } catch (directErr) {
+        console.error('⚠️  Direct Gemini generation failed:', directErr.message);
+      }
+    }
+
+
+    // ─── Strategy 3: Database question pool (legacy fallback) ───────────────
+    if (!questionSet) {
+      console.log('📦 Falling back to database question selection…');
+      try {
         const previouslyAttempted = await getPreviouslyAttemptedQuestions(
-          supabaseAdmin,
-          userId,
-          testType,
-          subject
+          supabaseAdmin, userId, testType, subject
         );
-
         questionSet = await selectQuestionsForTest(supabaseAdmin, {
-          userId,
-          testType,
-          subject,
-          examContext,
-          topics,
-          totalQuestions: totalQuestions || getRecommendedQuestionCount(testType, examContext),
-          masteryLevel,
+          userId, testType, subject, examContext, topics,
+          totalQuestions: qCount, masteryLevel,
           excludeQuestionIds: previouslyAttempted
         });
+      } catch (dbErr) {
+        console.error('⚠️  Strategy 3 (DB) failed:', dbErr.message);
       }
-    } else {
-      // OLD: Database selection (for non-mock tests or when AI is disabled)
-      console.log('📦 Using database question selection...');
+    }
 
-      const previouslyAttempted = await getPreviouslyAttemptedQuestions(
-        supabaseAdmin,
-        userId,
-        testType,
-        subject
-      );
-
-      questionSet = await selectQuestionsForTest(supabaseAdmin, {
-        userId,
-        testType,
-        subject,
-        examContext,
-        topics,
-        totalQuestions: totalQuestions || getRecommendedQuestionCount(testType, examContext),
-        masteryLevel,
-        excludeQuestionIds: previouslyAttempted
+    // Final guard — all 3 strategies exhausted with no questions
+    if (!questionSet || !Array.isArray(questionSet.questions) || questionSet.questions.length === 0) {
+      return res.status(500).json({
+        error: 'Failed to generate test',
+        message: `No questions could be generated for ${subject} (${examContext}). Please check your GEMINI_API_KEY or ensure questions exist in the database.`
       });
     }
 
     // Create test attempt
+
     const { data: attempt, error: attemptError } = await supabaseAdmin
       .from('test_attempts')
       .insert({
@@ -480,13 +537,18 @@ export async function submitTest(req, res) {
     }
 
     // Insert all responses
-    // Both AI-generated and database questions now use valid UUIDs
-    const responsesToInsert = responses.map(r => {
-      console.log(`📝 Response: questionId=${r.questionId}, topic=${r.topic}, correct=${r.isCorrect}`);
+    // AI questions have IDs like 'ai-q-1' — NOT valid UUIDs, will fail FK constraint.
+    // Strategy: insert DB-question responses with question_id, AI responses without it.
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-      return {
+    const dbResponses = [];
+    const aiResponses = [];
+
+    responses.forEach(r => {
+      const isRealUUID = UUID_REGEX.test(r.questionId);
+      console.log(`📝 Response: questionId=${r.questionId} (${isRealUUID ? 'DB' : 'AI'}), topic=${r.topic}, correct=${r.isCorrect}`);
+      const base = {
         attempt_id: attemptId,
-        question_id: r.questionId,  // Valid UUID for both AI and DB questions
         selected_option: r.selectedOption,
         is_correct: r.isCorrect,
         time_spent: r.timeSpent,
@@ -495,20 +557,37 @@ export async function submitTest(req, res) {
         difficulty: r.difficulty,
         marks: r.marks
       };
+      if (isRealUUID) {
+        dbResponses.push({ ...base, question_id: r.questionId });
+      } else {
+        aiResponses.push(base); // omit question_id entirely for AI questions
+      }
     });
 
-    console.log(`💾 Inserting ${responsesToInsert.length} responses...`);
+    console.log(`💾 Inserting ${dbResponses.length} DB responses + ${aiResponses.length} AI responses...`);
 
-    const { error: responsesError } = await supabaseAdmin
-      .from('test_responses')
-      .insert(responsesToInsert);
-
-    if (responsesError) {
-      console.error(`❌ Error inserting responses:`, responsesError);
-      throw responsesError;
+    // Insert DB responses (with question_id FK)
+    if (dbResponses.length > 0) {
+      const { error: dbRespErr } = await supabaseAdmin.from('test_responses').insert(dbResponses);
+      if (dbRespErr) {
+        console.error(`❌ Error inserting DB responses:`, dbRespErr);
+        throw dbRespErr;
+      }
     }
 
-    console.log(`✅ Successfully inserted ${responsesToInsert.length} responses`);
+    // Insert AI responses (without question_id FK) — non-fatal if schema doesn't support it
+    if (aiResponses.length > 0) {
+      const { error: aiRespErr } = await supabaseAdmin.from('test_responses').insert(aiResponses);
+      if (aiRespErr) {
+        console.warn(`⚠️  Could not persist AI question responses (schema may require question_id): ${aiRespErr.message}`);
+        // Non-fatal: score and mastery still calculated from in-memory `responses`
+      }
+    }
+
+
+
+    console.log(`✅ Successfully inserted ${dbResponses.length + aiResponses.length} responses`);
+
 
     // Get exam configuration for proper marks calculation
     const { data: examConfig } = await supabaseAdmin
@@ -681,13 +760,16 @@ export async function submitTest(req, res) {
           });
 
           // 2. Prepare batch payloads for the `practice_answers` persistent store
+          // Skip AI-generated questions (non-UUID IDs) — they have no FK row in the questions table.
+          const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
           const practiceAnswersToInsert = [];
           for (const r of responses) {
             // Note: `r.topic` is the plain text topic attached to the question metadata
             const topicNameLower = (r.topic || '').toLowerCase();
             const topicResId = topicResourceMap.get(topicNameLower);
+            const isRealQuestion = UUID_RE.test(r.questionId);
 
-            if (topicResId) {
+            if (topicResId && isRealQuestion) {
               practiceAnswersToInsert.push({
                 user_id: userId,
                 question_id: r.questionId,
@@ -695,7 +777,7 @@ export async function submitTest(req, res) {
                 selected_option: r.selectedOption,
                 is_correct: r.isCorrect,
                 time_spent_seconds: r.timeSpent,
-                first_attempt_correct: r.isCorrect, // We treat a mock test environment attempt as primary
+                first_attempt_correct: r.isCorrect,
                 metadata: { source: updatedAttempt.test_type, attempt_id: attemptId }
               });
             }
@@ -729,8 +811,8 @@ export async function submitTest(req, res) {
                     supabaseAdmin,
                     userId,
                     topicResId,
-                    'completed_quiz', // Classifiable as quiz tracking rather than passive practice
-                    r.questionId,
+                    'completed_quiz',
+                    null,         // Pass null for AI question IDs — recordTopicActivity doesn't need the FK
                     r.isCorrect,
                     r.timeSpent
                   );
@@ -1048,6 +1130,76 @@ export async function getTrajectoryProgress(req, res) {
       error: 'Failed to fetch trajectory progress',
       message: error.message
     });
+  }
+}
+
+/**
+ * GET /api/progress/streak
+ * Calculate current daily study streak
+ */
+export async function getStudyStreak(req, res) {
+  try {
+    const userId = req.headers['x-user-id'] || req.query.userId || req.userId;
+
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const [activitiesRes, testsRes] = await Promise.all([
+      supabaseAdmin
+        .from('topic_activities')
+        .select('activity_timestamp')
+        .eq('user_id', userId)
+        .order('activity_timestamp', { ascending: false }),
+      supabaseAdmin
+        .from('test_attempts')
+        .select('created_at')
+        .eq('user_id', userId)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+    ]);
+
+    const allDates = [
+      ...(activitiesRes.data || []).map(a => new Date(a.activity_timestamp).toDateString()),
+      ...(testsRes.data || []).map(t => new Date(t.created_at).toDateString())
+    ];
+
+    if (allDates.length === 0) {
+      return res.json({ success: true, streak: 0 });
+    }
+
+    const uniqueDates = Array.from(new Set(allDates)).sort(
+      (a, b) => new Date(b).getTime() - new Date(a).getTime()
+    );
+
+    let streak = 0;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const firstDate = new Date(uniqueDates[0]);
+    const firstDateNormalized = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+
+    if (firstDateNormalized.getTime() === today.getTime() || firstDateNormalized.getTime() === yesterday.getTime()) {
+      streak = 1;
+      for (let i = 0; i < uniqueDates.length - 1; i++) {
+        const current = new Date(uniqueDates[i]);
+        const currNorm = new Date(current.getFullYear(), current.getMonth(), current.getDate());
+        const next = new Date(uniqueDates[i + 1]);
+        const nextNorm = new Date(next.getFullYear(), next.getMonth(), next.getDate());
+        const diffDays = (currNorm.getTime() - nextNorm.getTime()) / (1000 * 60 * 60 * 24);
+
+        if (Math.round(diffDays) === 1) streak++;
+        else if (Math.round(diffDays) === 0) continue;
+        else break;
+      }
+    }
+
+    res.json({ success: true, streak });
+  } catch (error) {
+    console.error('❌ Error calculating streak:', error);
+    res.status(500).json({ error: 'Failed to calculate streak', message: error.message });
   }
 }
 

@@ -82,123 +82,101 @@ const LearningJourneyHeader: React.FC<LearningJourneyHeaderProps> = ({
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
 
-            {/* Left Section: Mobile Menu + Back Button + Breadcrumbs/Identity */}
-            <div className="flex items-center gap-4 flex-1 w-full md:w-auto">
+            {/* Universal Adaptive Header Content */}
+            <div className="flex items-center justify-between w-full gap-2">
 
-              {/* Mobile Menu Trigger */}
-              <button
-                onClick={() => window.dispatchEvent(new CustomEvent('openMobileMenu'))}
-                className="md:hidden shrink-0 w-10 h-10 flex items-center justify-center bg-white border border-slate-200 shadow-sm rounded-xl hover:bg-slate-50 transition-colors group"
-                aria-label="Open menu"
-              >
-                <Menu size={20} className="text-slate-600 group-hover:text-primary-600 transition-colors" />
-              </button>
+              {/* Left: Navigation Actions */}
+              <div className="flex items-center gap-2 w-20 md:w-auto shrink-0 transition-all">
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('openMobileMenu'))}
+                  className="w-10 h-10 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-full active:bg-slate-100 shadow-sm md:hidden"
+                  aria-label="Open menu"
+                >
+                  <Menu size={20} className="text-slate-400" />
+                </button>
 
-              <AnimatePresence mode="wait">
                 {showBack && onBack && (
-                  <motion.button
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.8, opacity: 0 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={onBack}
-                    className="shrink-0 w-10 h-10 flex items-center justify-center bg-white border border-slate-200 shadow-sm rounded-xl hover:bg-slate-50 transition-colors group"
+                    className="w-10 h-10 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-full active:bg-slate-100 shadow-sm"
                     aria-label="Go back"
                   >
-                    <ChevronLeft size={20} className="text-slate-600 group-hover:text-primary-600 transition-colors" />
-                  </motion.button>
+                    <ChevronLeft size={22} className="text-primary-600" />
+                  </button>
                 )}
-              </AnimatePresence>
-
-              <div className="flex items-center gap-4 flex-1 min-w-0">
-                {icon ? (
-                  <motion.div
-                    layoutId="header-icon"
-                    className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg relative overflow-hidden group text-white"
-                    style={headerStyles.iconBg}
-                  >
-                    {/* Inner Glow/Shine */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                    <div className="relative z-10">
-                      {icon}
-                    </div>
-                  </motion.div>
-                ) : (
-                  <div className="shrink-0 w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center">
-                    <Map size={24} className="text-slate-400" />
-                  </div>
-                )}
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    {trajectory && (
-                      <span className="text-xs font-black bg-slate-900 text-white px-2 py-1 rounded tracking-tighter uppercase leading-none">
-                        {trajectory}
-                      </span>
-                    )}
-                    {subject && (
-                      <span
-                        className="text-xs font-black px-2 py-1 rounded tracking-tighter uppercase leading-none bg-white text-slate-800 border"
-                        style={{ borderColor: subjectConfig?.color }}
-                      >
-                        {subject}
-                      </span>
-                    )}
-                  </div>
-                  <h1 className="font-black text-xl md:text-2xl text-slate-900 font-outfit tracking-tight leading-none truncate">
-                    {title}
-                  </h1>
-                </div>
               </div>
-            </div>
 
-            {/* Right Section: Badges & Actions */}
-            <div className="flex items-center gap-3 shrink-0 ml-auto md:ml-0">
-              {/* Universal Stats HUD */}
-              {(mastery !== undefined) && (
-                <div className="flex items-center gap-3 mr-4">
-                  <div className="hidden lg:flex flex-col items-end mr-1">
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Subject</span>
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight leading-none">Intelligence</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {/* COMMAND pill */}
-                    <div className="flex items-center gap-2.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl shadow-sm">
-                      <span className="text-lg font-bold text-slate-900 leading-none tracking-tight">
-                        {Math.round((mastery * (accuracy ?? 100)) / 100)}%
-                      </span>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Command</span>
-                    </div>
-
-                    {/* MASTERY pill */}
-                    <div className="flex items-center gap-2.5 px-3 py-1.5 bg-slate-900 rounded-xl shadow-lg border border-white/10">
-                      <span className="text-lg font-bold text-white leading-none tracking-tight">{Math.round(mastery)}%</span>
-                      <span className="text-[9px] font-bold text-primary-400 uppercase tracking-widest whitespace-nowrap">Mastery</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Dynamic Badges */}
-              <div className="hidden lg:flex items-center gap-2 mr-2">
-                {additionalContext && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-xl border border-amber-100 shadow-sm">
-                    <Sparkles size={12} className="text-amber-500" />
-                    <span className="text-xs font-black text-amber-700 uppercase tracking-widest leading-none">
+              {/* Center: Identity Stack */}
+              <div className="flex-1 min-w-0 text-center flex flex-col items-center">
+                <div className="flex items-center gap-1.5 mb-1 flex-wrap justify-center">
+                  {trajectory && (
+                    <span className="text-[10px] font-black bg-slate-900 text-white px-2 py-0.5 rounded tracking-wide uppercase leading-none shadow-sm">
+                      {trajectory}
+                    </span>
+                  )}
+                  {subject && (
+                    <span
+                      className="text-[10px] font-black px-2 py-0.5 rounded tracking-wide uppercase leading-none bg-white text-slate-800 border shadow-sm"
+                      style={{ borderColor: subjectConfig?.color }}
+                    >
+                      {subject}
+                    </span>
+                  )}
+                  {additionalContext && (
+                    <span className="text-[10px] font-black bg-white text-primary-600 px-2 py-0.5 rounded border border-primary-200 tracking-wide uppercase leading-none shadow-sm">
                       {additionalContext}
                     </span>
-                  </div>
+                  )}
+                </div>
+                <h1 className="font-black text-base md:text-2xl text-slate-900 font-outfit tracking-tight leading-tight truncate w-full max-w-[240px] md:max-w-none">
+                  {title}
+                </h1>
+                {subtitle && (
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5 truncate w-full px-2">
+                    {subtitle}
+                  </p>
                 )}
               </div>
 
-              {/* Actions Area */}
-              {actions && (
-                <div className="flex items-center gap-2">
-                  {actions}
-                </div>
-              )}
+              {/* Right: Master Stats / Trophy / Actions */}
+              <div className="flex items-center justify-end gap-3 md:w-auto shrink-0 transition-all">
+                {actions && (
+                  <div className="flex items-center gap-2">
+                    {actions}
+                  </div>
+                )}
+
+                {mastery !== undefined && (
+                  <>
+                    <div className="relative group transition-transform active:scale-95 shrink-0">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-slate-50 text-slate-900 border-2 border-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.15)] bg-white">
+                        <span className="text-xs font-black">{Math.round(mastery)}%</span>
+                      </div>
+                      <div className="absolute -top-1 -right-1">
+                        <div className="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm">
+                          <Sparkles size={8} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Desktop Global Stats Pill */}
+                    <div className="hidden lg:flex items-center gap-3 ml-6">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl shadow-sm">
+                          <span className="text-base font-bold text-slate-900 leading-none">{Math.round(accuracy ?? 0)}%</span>
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">Accuracy</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 rounded-xl shadow-lg border border-white/10">
+                          <span className="text-base font-bold text-white leading-none">{Math.round(mastery)}%</span>
+                          <span className="text-[9px] font-bold text-primary-400 uppercase tracking-widest whitespace-nowrap">Mastery</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {(!actions && mastery === undefined) && <div className="w-10 h-10 md:hidden" />}
+              </div>
             </div>
           </div>
         </div>

@@ -30,9 +30,9 @@ import {
   Trophy,
   History,
   X,
-  Info
+  Info,
+  PlayCircle
 } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { safeAiParse } from '../utils/aiParser';
 import type { TopicResource, Subject, ExamContext, AnalyzedQuestion } from '../types';
@@ -54,7 +54,7 @@ interface TopicDetailPageProps {
   subject: Subject;
   examContext: ExamContext;
   onBack: () => void;
-  onStartQuiz: (topicId: string) => void;
+  onStartQuiz: (topicId: string, totalQuestions?: number) => void;
   onRefreshData?: (silent?: boolean) => void;
 }
 
@@ -135,9 +135,83 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
   }, [user, activeTab, topicResource.topicId, examContext, statsRefreshTrigger]);
 
   // Shared questions state that persists across tab switches
-  const [sharedQuestions, setSharedQuestions] = useState<AnalyzedQuestion[]>([]);
+  const [sharedQuestions, setSharedQuestions] = useState<AnalyzedQuestion[]>(topicResource.questions || []);
   const [focusedQuestionId, setFocusedQuestionId] = useState<string | null>(null);
   const [isNavigatorOpen, setIsNavigatorOpen] = useState(false);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+
+  // Unified question loading in parent to ensure availability across all tabs
+  useEffect(() => {
+    const loadQuestionsFromDB = async () => {
+      if (!user?.id || !topicResource.topicName) return;
+      setIsLoadingQuestions(true);
+      try {
+        console.log(`🔍 [TopicDetailPage] Loading questions for topic: ${topicResource.topicName}`);
+
+        // Step 1: Find placeholder scans for AI practice
+        const { data: scans, error: scansError } = await supabase
+          .from('scans')
+          .select('id')
+          .eq('user_id', user.id)
+          .filter('metadata->>is_ai_practice_placeholder', 'eq', 'true')
+          .eq('subject', subject);
+
+        if (scansError) throw scansError;
+        const scanIds = scans?.map(s => s.id) || [];
+
+        // Step 2: Fetch questions belonging to these scans and this topic
+        let allLoadedQuestions = [...(topicResource.questions || [])];
+
+        if (scanIds.length > 0) {
+          const { data: aiQuestions, error } = await supabase
+            .from('questions')
+            .select('*')
+            .eq('subject', subject)
+            .eq('exam_context', examContext)
+            .eq('topic', topicResource.topicName)
+            .in('scan_id', scanIds);
+
+          if (error) throw error;
+
+          if (aiQuestions && aiQuestions.length > 0) {
+            const formattedAIQuestions: AnalyzedQuestion[] = aiQuestions.map(q => ({
+              ...q,
+              id: q.id,
+              text: q.text,
+              difficulty: q.difficulty as 'Easy' | 'Moderate' | 'Hard',
+              correctOptionIndex: q.correct_option_index,
+              bloomsTaxonomy: q.blooms,
+              studyTip: q.exam_tip,
+              keyConcepts: q.mastery_material?.keyConcepts || [],
+              commonMistakes: q.mastery_material?.commonMistakes || [],
+              keyFormulas: q.key_formulas || [],
+              thingsToRemember: q.key_formulas || [],
+              aiReasoning: q.mastery_material?.aiReasoning || '',
+              historicalPattern: q.mastery_material?.historicalPattern || '',
+              predictiveInsight: q.mastery_material?.predictiveInsight || '',
+              whyItMatters: q.mastery_material?.whyItMatters || '',
+              relevanceScore: q.mastery_material?.relevanceScore || 70,
+              markingSteps: q.mastery_material?.markingSteps || []
+            }));
+
+            // Merge with existing
+            const existingIds = new Set(allLoadedQuestions.map(q => q.id));
+            const uniqueNew = formattedAIQuestions.filter(q => !existingIds.has(q.id));
+            allLoadedQuestions = [...allLoadedQuestions, ...uniqueNew];
+          }
+        }
+
+        setSharedQuestions(allLoadedQuestions);
+        setTotalQuestionsIncludingAI(allLoadedQuestions.length);
+      } catch (err) {
+        console.error('❌ [TopicDetailPage] Failed to load questions:', err);
+      } finally {
+        setIsLoadingQuestions(false);
+      }
+    };
+
+    loadQuestionsFromDB();
+  }, [user?.id, topicResource.topicId, topicResource.topicName, subject, examContext]);
 
   const tabs = [
     { id: 'learn' as TabType, label: 'Learn', icon: BookOpen, accent: 'text-blue-500', bg: 'bg-blue-50' },
@@ -174,7 +248,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
         subject={subject}
         additionalContext={localStats.studyStage.replace('_', ' ')}
         mastery={subProg?.overallMastery}
-        accuracy={subProg?.overallAccuracy ?? 100}
+        accuracy={subProg?.overallAccuracy ?? 0}
         actions={null}
       >
         {/* UNIFIED SINGLE BAR: Tabs + Metrics */}
@@ -294,6 +368,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
                 setSharedQuestions={setSharedQuestions}
                 onProgressUpdate={refreshStats}
                 poolCount={totalQuestionsIncludingAI}
+                onStartQuiz={onStartQuiz}
               />
             )}
             {activeTab === 'flashcards' && (
@@ -872,7 +947,10 @@ const PracticeTab: React.FC<{
   onProgressUpdate
 }) => {
     // Use shared questions state that persists across tab switches
-    const [questions, setQuestions] = useState<AnalyzedQuestion[]>(sharedQuestions.length > 0 ? sharedQuestions : (topicResource.questions || []));
+    // We keep a local state 'questions' for PracticeTab UI to allow immediate updates,
+    // but we initialize it from sharedQuestions and sync back via setSharedQuestions.
+    const questions = sharedQuestions;
+    const setQuestions = setSharedQuestions;
 
     // Persistent practice session hook
     const {
@@ -893,7 +971,7 @@ const PracticeTab: React.FC<{
       topicName: topicResource.topicName,
       subject,
       examContext,
-      questions: questions,  // Use local state instead of topicResource.questions
+      questions: questions,  // Use shared questions
       onProgressUpdate
     });
 
@@ -920,88 +998,6 @@ const PracticeTab: React.FC<{
 
     // Get authenticated user from AuthProvider
     const { user } = useAuth();
-
-    // 2. Fetch AI-generated questions for this topic from Supabase
-    useEffect(() => {
-      const loadAIGeneratedQuestions = async () => {
-        if (!user?.id || !topicResource.topicName) return;
-
-        try {
-          console.log(`🔍 [PracticeTab] Loading AI questions for topic: ${topicResource.topicName}`);
-
-          // Step 1: Find placeholder scans for AI practice
-          const { data: scans, error: scansError } = await supabase
-            .from('scans')
-            .select('id')
-            .eq('user_id', user.id)
-            .filter('metadata->>is_ai_practice_placeholder', 'eq', 'true')
-            .eq('subject', subject);
-
-          if (scansError) throw scansError;
-
-          const scanIds = scans?.map(s => s.id) || [];
-          if (scanIds.length === 0) {
-            console.log('ℹ️ [PracticeTab] No placeholder scans found for this user.');
-            return;
-          }
-
-          // Step 2: Fetch questions belonging to these scans and this topic
-          const { data: aiQuestions, error } = await supabase
-            .from('questions')
-            .select('*')
-            .eq('subject', subject)
-            .eq('exam_context', examContext)
-            .eq('topic', topicResource.topicName)
-            .in('scan_id', scanIds);
-
-          if (error) throw error;
-
-          if (aiQuestions && aiQuestions.length > 0) {
-            console.log(`✅ [PracticeTab] Found ${aiQuestions.length} existing AI questions`);
-
-            const formattedAIQuestions: AnalyzedQuestion[] = aiQuestions.map(q => ({
-              ...q,
-              id: q.id,
-              text: q.text,
-              difficulty: q.difficulty as 'Easy' | 'Moderate' | 'Hard',
-              correctOptionIndex: q.correct_option_index,
-              bloomsTaxonomy: q.blooms,
-              studyTip: q.exam_tip,
-              keyConcepts: q.mastery_material?.keyConcepts || [],
-              commonMistakes: q.pitfalls || [],
-              keyFormulas: q.key_formulas || [],
-              thingsToRemember: q.key_formulas || [],
-              aiReasoning: q.mastery_material?.aiReasoning || '',
-              historicalPattern: q.mastery_material?.historicalPattern || '',
-              predictiveInsight: q.mastery_material?.predictiveInsight || '',
-              whyItMatters: q.mastery_material?.whyItMatters || '',
-              relevanceScore: q.mastery_material?.relevanceScore || 70,
-              markingSteps: q.mastery_material?.markingSteps || []
-            }));
-
-            // Update local state and parent shared questions if needed
-            setQuestions(prev => {
-              const existingIds = new Set(prev.map(q => q.id));
-              const newQuestions = formattedAIQuestions.filter(q => !existingIds.has(q.id));
-              if (newQuestions.length === 0) return prev;
-              const updated = [...prev, ...newQuestions];
-
-              // Async update of shared parent state
-              setTimeout(() => {
-                if (onQuestionCountChange) onQuestionCountChange(updated.length);
-                setSharedQuestions(updated);
-              }, 0);
-
-              return updated;
-            });
-          }
-        } catch (err: any) {
-          console.error('❌ [PracticeTab] Failed to load AI questions:', err);
-        }
-      };
-
-      loadAIGeneratedQuestions();
-    }, [user?.id, subject, examContext, topicResource.topicName]);
 
     // Load saved answers into local state whenever they update or session finishes loading
     useEffect(() => {
@@ -1074,111 +1070,26 @@ const PracticeTab: React.FC<{
           return;
         }
 
-        // Use NEW @google/genai library
-        const ai = new GoogleGenAI({ apiKey });
+        // Use stable @google/generative-ai library
+        const genAI = new GoogleGenerativeAI(apiKey);
 
-        // Get model from Settings or force gemini-3-flash-preview
+        // Get model from Settings or force gemini-1.5-flash
         const selectedModel = 'gemini-3-flash-preview';
-        const temperature = 0.7; // Hardcoded fallback or use localStorage
+        const model = genAI.getGenerativeModel({
+          model: selectedModel,
+          generationConfig: { responseMimeType: "application/json" }
+        });
 
         // Topic-specific context
         const topicContext = `Focus EXCLUSIVELY on topic: "${topicResource.topicName}" for ${subject} ${examContext} exam.`;
 
         // EXACT PROMPT from VisualQuestionBank (adapted for topic)
-        const prompt = `Generate ${generateCount} ${subject} MCQ questions with comprehensive metadata and detailed AI insights.
+        const prompt = `Generate ${generateCount} ${subject} MCQ questions for ${examContext} syllabus on "${topicResource.topicName}".
+        Return ONLY valid JSON with a "questions" array containing id, text, options, correctOptionIndex, explanation, topic, domain, difficulty.`;
 
-      ${topicContext}
-
-      CRITICAL REQUIREMENTS:
-      1. Each question MUST have exactly 4 options (A, B, C, D) - THIS IS MANDATORY
-      2. Mark correctOptionIndex (0-3) for the EXACT correct answer per ${examContext} ${subject} syllabus
-      3. All questions must be MCQs with 4 distinct options
-
-      🚨 STRICT CORRECTNESS POLICY FOR CORRECT ANSWER (ZERO TOLERANCE):
-      - The correctOptionIndex MUST point to the EXACT correct answer according to ${examContext} official syllabus
-      - DO NOT accept "technically close" or "approximately correct" answers
-      - DO NOT use answers that are "correct in general" but wrong per ${examContext} standards
-      - For ${examContext === 'NEET' ? 'NEET: Follow NCERT textbook standards exactly (taxonomy, nomenclature, formulas)' : ''}
-      ${examContext === 'JEE' ? '- For JEE: Use rigorous mathematical notation and exact numerical values per JEE standards' : ''}
-      ${examContext === 'KCET' ? '- For KCET: Follow PUC (Pre-University College) Karnataka state board standards' : ''}
-      ${examContext === 'CBSE' ? '- For CBSE: Follow NCERT textbooks and CBSE marking scheme exactly' : ''}
-      - Only ONE option can be marked as correct - the one that matches ${examContext} examination standards EXACTLY
-      - If multiple options seem close, choose the one using ${examContext}-standard notation and conventions
-      - The correct answer must give FULL MARKS in ${examContext} examination
-
-      4. Use LaTeX for math: $...$ or $$...$$
-      5. CRITICAL: Double backslash for LaTeX: "\\\\frac{1}{2}" not "\\frac{1}{2}"
-
-      6. Include pedagogical metadata:
-         - bloomsTaxonomy: Remember|Understand|Apply|Analyze|Evaluate|Create
-         - pedagogy: Conceptual|Analytical|Problem-Solving|Application|Critical-Thinking
-         - relevanceScore: 0-100 (how relevant to exam patterns)
-         - whyItMatters: 1-2 sentence explanation of importance
-
-      7. DETAILED INSIGHTS (make these rich and valuable):
-         - keyConcepts: Array of 2-4 objects with name and explanation
-         - commonMistakes: Array of 2-3 objects with mistake, why, howToAvoid
-         - studyTip: 3-5 sentences of detailed advice
-         - thingsToRemember: Array of 3-5 key formulas/rules with LaTeX
-
-      8. AI REASONING fields:
-         - aiReasoning: 2-3 sentences explaining importance
-         - historicalPattern: Past paper frequency
-         - predictiveInsight: Future likelihood
-
-      9. SOLUTION STEPS (CRITICAL - Make these VERY DETAILED):
-         - solutionSteps: Array of detailed step-by-step solutions
-         - Each step should be 2-4 sentences with complete explanations
-         - Include WHY each step is performed, not just WHAT
-         - Use LaTeX for all mathematical expressions
-         - Format: { "step": "Detailed explanation with $$formula$$ and reasoning", "mark": "1" }
-         - Example: "First, identify the given data: mass $$m = 2kg$$, velocity $$v = 5m/s$$. We use these values because kinetic energy depends on both mass and velocity according to the formula $$KE = \\\\frac{1}{2}mv^2$$. This is a fundamental relationship from classical mechanics."
-
-      RETURN VALID JSON ONLY.
-      Schema: {
-        "questions": [{
-          "text": "Question text...",
-          "options": ["Option A", "Option B", "Option C", "Option D"],
-          "correctOptionIndex": 2,
-          "marks": "1",
-          "year": "2025 Prediction",
-          "diff": "Moderate",
-          "topic": "${topicResource.topicName}",
-          "domain": "${topicResource.topicName}",
-          "bloomsTaxonomy": "Apply",
-          "pedagogy": "Problem-Solving",
-          "relevanceScore": 85,
-          "whyItMatters": "This tests...",
-          "keyConcepts": [{"name": "Concept", "explanation": "Explanation..."}],
-          "commonMistakes": [{"mistake": "Error", "why": "Reason", "howToAvoid": "Solution"}],
-          "studyTip": "Detailed tip...",
-          "thingsToRemember": ["Formula 1", "Rule 2"],
-          "aiReasoning": "Important because...",
-          "historicalPattern": "Appeared X times...",
-          "predictiveInsight": "Likely to appear...",
-          "solutionSteps": [
-            { "step": "Identify given data and explain what we need to find. State the relevant formula with LaTeX $$formula$$ and explain why this formula applies to this problem.", "mark": "1" },
-            { "step": "Substitute the values into the formula, showing each substitution step clearly with LaTeX. Explain what each variable represents and why we use these specific values.", "mark": "1" },
-            { "step": "Perform the calculation step-by-step with intermediate results. Show the final answer with correct units and explain the physical meaning of the result.", "mark": "1" }
-          ]
-        }]
-      }
-
-      CRITICAL: For "diff" field, use ONLY these EXACT values: "Easy", "Moderate", or "Hard"
-      DO NOT use: "Medium", "Intermediate", "Advanced", "Simple", "Difficult" or any other variations.
-      `;
-
-        const response = await ai.models.generateContent({
-          model: selectedModel,
-          contents: prompt,
-          config: {
-            temperature,
-            maxOutputTokens: 16384,
-            responseMimeType: 'application/json'
-          }
-        });
-
-        const text = response.text;
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
         const data = safeAiParse<any>(text, { questions: [] }, true);
 
         if (!data.questions || data.questions.length === 0) {
@@ -1379,7 +1290,8 @@ const PracticeTab: React.FC<{
         const cacheKey = `qbank_${topicResource.topicName}_${subject}_${examContext}`;
 
         try {
-          const token = localStorage.getItem('sb-auth-token');
+          const { data: { session } } = await supabase.auth.getSession();
+          const token = session?.access_token;
           await fetch('/api/questionbank', {
             method: 'POST',
             headers: {
@@ -2101,6 +2013,7 @@ const QuizTab: React.FC<{
   setSharedQuestions: React.Dispatch<React.SetStateAction<any[]>>;
   onProgressUpdate?: (silent?: boolean) => void;
   poolCount: number;
+  onStartQuiz: (topicId: string, totalQuestions?: number) => void;
 }> = ({
   topicResource,
   subject,
@@ -2108,9 +2021,11 @@ const QuizTab: React.FC<{
   sharedQuestions,
   setSharedQuestions,
   onProgressUpdate,
-  poolCount
+  poolCount,
+  onStartQuiz
 }) => {
     const { user } = useAuth();
+    const { isLoading: isTestGenerating } = useLearningJourney();
     const [isGenerating, setIsGenerating] = useState(false);
     const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
     const [questionCount, setQuestionCount] = useState<number>(10);
@@ -2165,12 +2080,6 @@ const QuizTab: React.FC<{
       setIsGenerating(true);
       try {
         const topicQuestions = sharedQuestions || [];
-        if (topicQuestions.length === 0) {
-          alert('No questions available yet. Please generate practice questions first.');
-          setIsGenerating(false);
-          return;
-        }
-
         const masteryLevel = topicResource.masteryLevel || 0;
         const averageScore = topicResource.averageQuizScore || 0;
 
@@ -2184,7 +2093,7 @@ const QuizTab: React.FC<{
           .map(q => q.concept || q.topic)
           .filter(Boolean);
 
-        const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+        const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
         const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({
           model: selectedModel,
@@ -2192,16 +2101,51 @@ const QuizTab: React.FC<{
         });
 
         const prompt = `You are an expert ${subject} teacher creating an ADAPTIVE MCQ quiz for ${examContext} students on "${topicResource.topicName}".
+            The quiz should strictly follow the ${examContext} syllabus and overall topic guidelines.
+            
+            CONTEXT FROM EXISTING PRACTICE QUESTIONS:
+            ${topicQuestions.slice(0, 5).map(q => `- ${q.text}`).join('\n')}
+            
             Generate ${questionCount} high-quality MCQ questions with this difficulty distribution: ${difficultyDistribution}.
-            Return ONLY valid JSON array with id, question, options, correctIndex, explanation, concept, topic, domain, difficulty.`;
+            - Ensure questions are distinct but complementary to the practice questions listed above.
+            - Cover latent concepts within the syllabus of ${topicResource.topicName} that might be missing in basic practice.
+            - Return ONLY valid JSON array with id, question, options, correctIndex, explanation, concept, topic, domain, difficulty.`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const parsed = parseGeminiJSON(response.text() || "[]");
-        if (Array.isArray(parsed)) setQuizQuestions(parsed);
+
+        if (Array.isArray(parsed)) {
+          // Mix with some existing questions from Solve tab for reinforcement (if any)
+          let finalPool = [...parsed];
+          if (sharedQuestions && sharedQuestions.length > 0) {
+            // Take up to 20% from existing questions for reinforcement
+            const existingCount = Math.floor(questionCount * 0.2);
+            if (existingCount > 0) {
+              const shuffled = [...sharedQuestions].sort(() => 0.5 - Math.random());
+              const reinforcement = shuffled.slice(0, existingCount).map(q => ({
+                id: `reinforce-${q.id}`,
+                question: q.text,
+                options: q.options || [q.optionA, q.optionB, q.optionC, q.optionD].filter(Boolean),
+                correctIndex: q.correctOptionIndex,
+                explanation: q.explanation || q.studyTip,
+                concept: q.concept || q.topic,
+                topic: q.topic,
+                difficulty: q.difficulty
+              }));
+              finalPool = [...finalPool.slice(0, questionCount - reinforcement.length), ...reinforcement];
+              // Final Shuffle
+              finalPool.sort(() => 0.5 - Math.random());
+            }
+          }
+          setQuizQuestions(finalPool);
+        }
       } catch (error) {
         console.error('Quiz generation error:', error);
-        alert('Failed to generate quiz.');
+        alert('Failed to generate quiz. Fallback: using practice questions.');
+        if (sharedQuestions && sharedQuestions.length > 0) {
+          setQuizQuestions(sharedQuestions.slice(0, questionCount));
+        }
       } finally {
         setIsGenerating(false);
       }
@@ -2372,15 +2316,28 @@ const QuizTab: React.FC<{
       if (!user) return;
       setLoadingPastQuizzes(true);
       try {
+        // New quiz flow saves to test_attempts (not the old quiz_attempts table)
         const { data, error } = await supabase
-          .from('quiz_attempts')
-          .select('*')
+          .from('test_attempts')
+          .select('id, created_at, percentage, raw_score, total_questions, duration_minutes, status, topic_id, subject, exam_context')
           .eq('user_id', user.id)
-          .eq('topic_resource_id', topicResource.id)
-          .order('created_at', { ascending: false });
+          .eq('topic_id', topicResource.topicId)
+          .eq('test_type', 'topic_quiz')
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
+          .limit(10);
 
         if (error) throw error;
-        setPastQuizzes(data || []);
+        // Map snake_case → camelCase for UI consistency
+        setPastQuizzes((data || []).map(q => ({
+          id: q.id,
+          createdAt: q.created_at,
+          percentage: q.percentage,
+          score: q.raw_score,
+          totalQuestions: q.total_questions,
+          durationMinutes: q.duration_minutes,
+          status: q.status,
+        })));
       } catch (err) {
         console.error('Error loading quizzes:', err);
       } finally {
@@ -2682,9 +2639,9 @@ const QuizTab: React.FC<{
                       }`}>
                       {String.fromCharCode(65 + idx)}
                     </div>
-                    <span className="text-xs font-medium flex-1">
+                    <div className="text-xs font-medium flex-1">
                       <RenderWithMath text={option} showOptions={false} serif={false} />
-                    </span>
+                    </div>
                     {isAnswered && idx === currentQ.correctIndex && (
                       <CheckCircle2 size={14} className="text-green-600 flex-shrink-0" />
                     )}
@@ -2826,29 +2783,63 @@ const QuizTab: React.FC<{
 
         {/* Start Quiz Card - Compact */}
         {quizQuestions.length > 0 && (
-          <div className="bg-[#0B1528] rounded-full p-2 md:p-2 md:pl-3 flex flex-col md:flex-row items-center justify-between shadow-lg gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shrink-0">
-                <Play size={16} className="text-white fill-white ml-0.5" />
+          <div className="bg-[#0B1528] rounded-[2.5rem] p-4 md:p-4 md:pl-6 flex flex-col md:flex-row items-center justify-between shadow-2xl gap-4 border border-white/10 ring-4 ring-slate-900/5">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 shrink-0 shadow-inner">
+                <Play size={20} className="text-emerald-400 fill-emerald-400 ml-1" />
               </div>
               <div className="flex flex-col justify-center">
-                <div className="text-base font-black text-white font-outfit uppercase tracking-widest leading-tight mb-0.5">
+                <div className="text-lg font-black text-white font-outfit uppercase tracking-wider leading-tight mb-0.5">
                   {quizQuestions.length} Questions Ready
                 </div>
-                <div className="text-[10px] text-white/50 font-medium leading-none">
-                  {topicResource.topicName}
+                <div className="text-xs text-white/40 font-black uppercase tracking-widest leading-none">
+                  ADAPTIVE SYNAPSE ACTIVE
                 </div>
               </div>
             </div>
             <button
               onClick={startQuiz}
-              className="px-8 py-2.5 md:px-8 md:py-2.5 bg-white text-[#0B1528] rounded-full font-black hover:bg-slate-100 transition-all flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md text-xs uppercase tracking-wider font-outfit w-full md:w-auto shrink-0 md:mr-1"
+              className="px-10 py-4 bg-emerald-500 text-white rounded-full font-black hover:bg-emerald-600 hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-emerald-500/20 text-xs uppercase tracking-widest font-outfit w-full md:w-auto shrink-0 md:mr-2"
             >
-              <Play size={14} className="fill-[#0B1528] shrink-0" />
-              <span>Start</span>
+              <Zap size={14} className="fill-white" />
+              <span>Launch Session</span>
             </button>
           </div>
         )}
+
+        {/* Exam Protocol Simulation Mode (Matching Mobile) */}
+        <div className="bg-white border-2 border-slate-900/5 rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-slate-900 rounded-xl">
+                <Target size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 font-outfit uppercase italic tracking-tighter">Exam Protocol</h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Standard Simulation Mode</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-500 font-bold max-w-md leading-relaxed">
+              Full-spectrum simulation proctored for performance calibration. Fixed duration, no hints, absolute evaluation.
+            </p>
+          </div>
+          <button
+            onClick={() => !isTestGenerating && onStartQuiz?.(topicResource.topicId)}
+            disabled={isTestGenerating}
+            className={`px-10 py-5 rounded-full font-black uppercase tracking-[0.15em] text-[10px] transition-all flex items-center justify-center gap-3 shadow-2xl shrink-0 w-full md:w-auto ${isTestGenerating
+              ? 'bg-primary-600 text-white cursor-not-allowed opacity-80 scale-[0.98]'
+              : 'bg-slate-900 text-white hover:bg-slate-800 active:scale-95'
+              }`}
+          >
+            {isTestGenerating ? (
+              <><Loader2 size={18} className="animate-spin" /> AI Generating…</>
+            ) : (
+              <><PlayCircle size={20} /> Initialize Simulation</>
+            )}
+          </button>
+        </div>
+
 
         {/* Past Quizzes Section */}
         <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm p-4 md:p-5 md:px-8 mb-8">
@@ -2885,20 +2876,20 @@ const QuizTab: React.FC<{
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className={`w-8 h-8 rounded flex items-center justify-center font-black text-xs ${quiz.accuracy_percentage >= 80
+                          <div className={`w-8 h-8 rounded flex items-center justify-center font-black text-xs ${(quiz.percentage ?? 0) >= 80
                             ? 'bg-green-100 text-green-700'
-                            : quiz.accuracy_percentage >= 60
+                            : (quiz.percentage ?? 0) >= 60
                               ? 'bg-yellow-100 text-yellow-700'
                               : 'bg-red-100 text-red-700'
                             }`}>
-                            {quiz.accuracy_percentage}%
+                            {quiz.percentage ?? 0}%
                           </div>
                           <div>
                             <div className="text-[11px] font-bold text-slate-900">
-                              {quiz.correct_count}/{quiz.question_count} correct
+                              {quiz.score ?? '?'}/{quiz.totalQuestions ?? '?'} correct
                             </div>
                             <div className="text-[9px] text-slate-500">
-                              {new Date(quiz.created_at).toLocaleDateString('en-US', {
+                              {new Date(quiz.createdAt).toLocaleDateString('en-US', {
                                 month: 'short',
                                 day: 'numeric',
                                 hour: '2-digit',
@@ -2909,7 +2900,7 @@ const QuizTab: React.FC<{
                         </div>
                         <div className="flex items-center gap-1 text-[10px] text-slate-500">
                           <Clock size={10} />
-                          {Math.floor(quiz.time_spent_seconds / 60)}:{String(quiz.time_spent_seconds % 60).padStart(2, '0')}
+                          {quiz.durationMinutes ?? '?'} min
                         </div>
                       </div>
                     </div>
@@ -3122,7 +3113,7 @@ const ProgressTab: React.FC<{ topicResource: TopicResource }> = ({ topicResource
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-5xl font-black text-slate-900 tracking-tighter">{topicResource.masteryLevel}%</span>
-              <span className="text-[10px] font-black text-slate-400 uppercase mt-1">Syllabus Command</span>
+              <span className="text-[10px] font-black text-slate-400 uppercase mt-1">Topic Mastery</span>
             </div>
           </div>
 
@@ -3173,7 +3164,7 @@ const ProgressTab: React.FC<{ topicResource: TopicResource }> = ({ topicResource
                 ? `System detects fundamental gaps in ${topicResource.topicName}. PRIORITY: Review syllabus documentation and complete 5 foundational practice sets.`
                 : topicResource.masteryLevel < 85
                   ? `Current mastery is stable but optimization is required. PRIORITY: Initiate "Adaptive Quiz" mode to target moderate-to-hard latent concepts.`
-                  : `Elite stage reached. PRIORITY: Maintenance sync every 72 hours and challenge peer-level rigor questions to sustain 90%+ percentile.`}
+                  : `Elite stage reached. PRIORITY: Maintenance sync every 72 hours and challenge peer-level advanced questions to sustain 90%+ percentile.`}
             </p>
             <div className="flex gap-2">
               <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white uppercase group cursor-pointer hover:bg-white/10 transition-all">Deep Dive Analysis</div>

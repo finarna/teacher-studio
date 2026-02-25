@@ -1,0 +1,8813 @@
+[dotenv@17.2.3] injecting env (13) from .env.local -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+📐 TESTING MATH LEARNING JOURNEY
+
+======================================================================
+Testing for user: 924a88dd-4f98-4a5f-939a-89f9b1ce4174
+
+📊 [TOPIC AGGREGATOR] Loaded 488 questions from table
+📊 [TOPIC AGGREGATOR] Loaded 0 question-topic mappings
+🗺️  [TOPIC AGGREGATOR] Mapped 0 questions to topics
+🔍 [DEBUG] Flashcard records fetched: 0
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c6533ce3',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understand',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c6533ce3',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understand',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6ab9e24e',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6ab9e24e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '93386ffe',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '93386ffe',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e5fe898e',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e5fe898e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6219e4c5',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6219e4c5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '27b0ff0e',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '27b0ff0e',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e0dcfc55',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e0dcfc55',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7c84233b',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7c84233b',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2899d072',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2899d072',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd6b06f7c',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd6b06f7c',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e697c06d',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e697c06d',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7ea076c0',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7ea076c0',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '247876a4',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '247876a4',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0dabbb08',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0dabbb08',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '973fbaac',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '973fbaac',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '78ad0806',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '78ad0806',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ec06bafe',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ec06bafe',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b24948f6',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b24948f6',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6ef09418',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6ef09418',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '39762a79',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '39762a79',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '542a6b2a',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '542a6b2a',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3e2b0113',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3e2b0113',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1e680ebd',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyzing',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1e680ebd',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyzing',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a3ab058f',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a3ab058f',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '03be9410',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '03be9410',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '64982f8e',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '64982f8e',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '72acdd07',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '72acdd07',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8ba55d43',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8ba55d43',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd8bc133c',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd8bc133c',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3d294877',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3d294877',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8b5c1f1c',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8b5c1f1c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b061f292',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b061f292',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1ef023ff',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1ef023ff',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'acfbe326',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'acfbe326',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '37ac6458',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '37ac6458',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '638647a5',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '638647a5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b4cbcaa5',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b4cbcaa5',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e21ab07f',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e21ab07f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '03d4b067',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '03d4b067',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '14a7e9f2',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '14a7e9f2',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c15d7cb4',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c15d7cb4',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'beebb157',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'beebb157',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '467f62ec',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '467f62ec',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ce9bea50',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ce9bea50',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ed1f11f2',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ed1f11f2',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c337f1f6',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c337f1f6',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e9de280e',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e9de280e',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'abf4cc4d',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyzing',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'abf4cc4d',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyzing',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '88516085',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '88516085',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f340c226',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f340c226',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3dc63728',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3dc63728',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '75169015',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '75169015',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '431bed70',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '431bed70',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '541369b3',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '541369b3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '333b8d05',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '333b8d05',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '76af3b8f',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '76af3b8f',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f645eec2',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f645eec2',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '85a83c1d',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '85a83c1d',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8437e5ec',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8437e5ec',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f41ec268',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f41ec268',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '9b71fe2f',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '9b71fe2f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'adad4f57',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'adad4f57',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8d0c7766',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8d0c7766',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '364f6ee1',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '364f6ee1',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '357e8345',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '357e8345',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e8a964b3',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e8a964b3',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '386ba031',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '386ba031',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'eb104600',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'eb104600',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '25e4fa1a',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '25e4fa1a',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0d8d292e',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0d8d292e',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c7cb80a3',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c7cb80a3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f2b80135',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f2b80135',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0383c87d',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0383c87d',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '32707183',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '32707183',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '16cd579e',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '16cd579e',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '03d2aab8',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '03d2aab8',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0a629b61',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0a629b61',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'eee0459f',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'eee0459f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7afeac1f',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7afeac1f',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c47333c7',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c47333c7',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ca915aca',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ca915aca',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ccdb2c8a',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ccdb2c8a',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '85651239',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '85651239',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5597c6c2',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5597c6c2',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8c6f7667',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8c6f7667',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8e48b361',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8e48b361',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b6fa5cab',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b6fa5cab',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f5d844cb',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f5d844cb',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '82795a02',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '82795a02',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b8d6b06b',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b8d6b06b',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5e05060c',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5e05060c',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f86198f7',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f86198f7',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '02e62c82',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '02e62c82',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6d7c3ae7',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6d7c3ae7',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c6149576',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c6149576',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6170b1d5',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6170b1d5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'dc51e927',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'dc51e927',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '81650c82',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '81650c82',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e115b1e4',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e115b1e4',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5336f355',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5336f355',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '87c42c1a',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '87c42c1a',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8c9e2dd1',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8c9e2dd1',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0f5248c8',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0f5248c8',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '25cdc97f',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '25cdc97f',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '23595c6f',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '23595c6f',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '97cd2d03',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '97cd2d03',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'cbdb7fff',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'cbdb7fff',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '41b44934',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '41b44934',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '19bac5b0',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '19bac5b0',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '492d3af5',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '492d3af5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c47c307c',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c47c307c',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '168c0276',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '168c0276',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '71e12469',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '71e12469',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '408e7297',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '408e7297',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c80058f1',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c80058f1',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7ccf27cf',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7ccf27cf',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '36fccd00',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '36fccd00',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ffe4a590',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ffe4a590',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ebfe055c',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ebfe055c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2a7a4929',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2a7a4929',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '22d50c51',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '22d50c51',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f33dc6af',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f33dc6af',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7612b933',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7612b933',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e2bb656a',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e2bb656a',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '80e3c172',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '80e3c172',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6f3db07d',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6f3db07d',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c87b3851',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c87b3851',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5dbdb146',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5dbdb146',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2335cfd3',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2335cfd3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1e6d1812',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1e6d1812',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'acc9a757',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'acc9a757',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '76b25fb3',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '76b25fb3',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4bd48450',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4bd48450',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ee2dddc9',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ee2dddc9',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ed943e2e',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ed943e2e',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6bdfdf6a',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6bdfdf6a',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2b1e4fcc',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2b1e4fcc',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'aec2835f',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'aec2835f',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '518d0fea',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '518d0fea',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c8a97c32',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c8a97c32',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2622a9ca',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2622a9ca',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '74162522',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '74162522',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f155615f',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f155615f',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '96e9dbed',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '96e9dbed',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'aa638d05',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'aa638d05',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '00e10834',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '00e10834',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6763a302',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6763a302',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '19f0067b',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '19f0067b',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '909eb9b5',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '909eb9b5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '71b2a9d6',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '71b2a9d6',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '9ae5a013',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '9ae5a013',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f7685a6b',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f7685a6b',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '374cc6a8',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '374cc6a8',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5b371ba0',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5b371ba0',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7cd5d967',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7cd5d967',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5f47b29e',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5f47b29e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '02f57e2c',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '02f57e2c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8288b934',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8288b934',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0adaf4b6',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0adaf4b6',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3c27762f',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3c27762f',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ddacb057',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ddacb057',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ebdd8e10',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ebdd8e10',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5e328007',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5e328007',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4717dc71',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4717dc71',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b987222c',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b987222c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ebd634a0',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ebd634a0',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'bb277229',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'bb277229',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e7e9d872',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e7e9d872',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '964824c2',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '964824c2',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '63606a72',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '63606a72',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '9da69bf5',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '9da69bf5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd0528c55',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd0528c55',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ee88abec',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ee88abec',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5e5cfb21',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5e5cfb21',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8a381a96',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8a381a96',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4709711a',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4709711a',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4808d6ee',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4808d6ee',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2729ae42',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2729ae42',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '01e0ba3b',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '01e0ba3b',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2bf4181d',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2bf4181d',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e7e13fc8',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e7e13fc8',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ec41eeb1',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ec41eeb1',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '87790657',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '87790657',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0a2c81b9',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0a2c81b9',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4a2eade3',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4a2eade3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7abaa41b',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7abaa41b',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f8d0d486',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f8d0d486',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3599e370',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3599e370',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '42eaef5f',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '42eaef5f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0c914698',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0c914698',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b22378af',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b22378af',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'cf8eeb80',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'cf8eeb80',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4b4f85e9',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4b4f85e9',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '51db7e23',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '51db7e23',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6a76b2e4',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6a76b2e4',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c2321379',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c2321379',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '9473c932',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '9473c932',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '82a60c72',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '82a60c72',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '85efecd6',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '85efecd6',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5a2f2d3a',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5a2f2d3a',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2185450e',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2185450e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3d8a2320',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3d8a2320',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4b983e49',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4b983e49',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7063740c',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7063740c',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c202f14c',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c202f14c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '67bc66da',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '67bc66da',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f221d8a1',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f221d8a1',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4bf4e681',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4bf4e681',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd89cff73',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd89cff73',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '05035259',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '05035259',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1f7116ef',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1f7116ef',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '77c7e77c',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '77c7e77c',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'da489010',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'da489010',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'fa7ac41e',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'fa7ac41e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2831df3f',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2831df3f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ac7a179c',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ac7a179c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '99ed29c0',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '99ed29c0',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8038b2c6',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8038b2c6',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '939425b3',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '939425b3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a48ecc40',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a48ecc40',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c9b8bc5c',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c9b8bc5c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'dddc8e5e',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'dddc8e5e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '906ae3b7',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '906ae3b7',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8044e6fe',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8044e6fe',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f1bc08c6',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f1bc08c6',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'bd60467f',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'bd60467f',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '77becb4a',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '77becb4a',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'bbddf87d',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'bbddf87d',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '02b97405',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '02b97405',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e20111f9',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e20111f9',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6527cf42',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6527cf42',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'bb3b5f0d',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'bb3b5f0d',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1ee7b667',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1ee7b667',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5154218d',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5154218d',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f4f734db',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f4f734db',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2d586a01',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2d586a01',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '55be7e27',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '55be7e27',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '84d76690',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '84d76690',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7b9713ff',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7b9713ff',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '22652b59',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '22652b59',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3ad816a7',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3ad816a7',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5246f49e',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5246f49e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '88a3d376',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '88a3d376',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2935c078',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2935c078',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c556e600',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c556e600',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'caceb0bf',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'caceb0bf',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1f54f9fc',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1f54f9fc',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd7284520',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd7284520',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e13adc34',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e13adc34',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '40dddf7f',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '40dddf7f',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '596d7234',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '596d7234',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e2bc7c16',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e2bc7c16',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1978d6a6',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1978d6a6',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ef4c1471',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ef4c1471',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '21c5bca9',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '21c5bca9',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '121b957a',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '121b957a',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '196f7d91',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '196f7d91',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2d237fa9',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2d237fa9',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2d089533',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2d089533',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '91f7bbf9',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '91f7bbf9',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '64dd29c2',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '64dd29c2',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '65ae7842',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '65ae7842',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4082ba00',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4082ba00',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8acfe9db',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8acfe9db',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ecbafb8f',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ecbafb8f',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1d784d8a',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1d784d8a',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a5e75364',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a5e75364',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4d433008',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4d433008',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b655f017',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b655f017',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'fea4f12c',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'fea4f12c',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a8d7b3c5',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a8d7b3c5',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0d75f4a3',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0d75f4a3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6c6f5f92',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6c6f5f92',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0b683370',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0b683370',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b5af2f6a',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b5af2f6a',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '28bc19f0',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '28bc19f0',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '990f4bf1',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '990f4bf1',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3037e894',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3037e894',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '453c9a43',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '453c9a43',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ca1a5c7f',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ca1a5c7f',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '9c6709d5',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '9c6709d5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7526da79',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7526da79',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5133cde1',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5133cde1',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '61c21074',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '61c21074',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '60ef3a67',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '60ef3a67',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f7285ea3',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f7285ea3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b0d9fd13',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b0d9fd13',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'fa98891c',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'fa98891c',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'dd383b3e',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'dd383b3e',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '20ad06bd',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '20ad06bd',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ee7bceaf',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ee7bceaf',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4b137a4e',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4b137a4e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1039b93b',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1039b93b',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a7d8342e',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a7d8342e',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4a24d7ef',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4a24d7ef',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '35da7135',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '35da7135',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2c21ff35',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2c21ff35',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c4901963',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c4901963',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b527ab7b',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b527ab7b',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '35947027',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '35947027',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '832db37a',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '832db37a',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'cbc39b1c',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'cbc39b1c',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a725c760',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a725c760',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f599cfa3',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f599cfa3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '07c8c34f',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '07c8c34f',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c189f2e0',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c189f2e0',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c22cf41f',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c22cf41f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ae3cdba4',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ae3cdba4',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b07cb95c',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b07cb95c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0dc6b59d',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0dc6b59d',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '27739f18',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '27739f18',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'fa787bfb',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'fa787bfb',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c211407b',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c211407b',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '334dc803',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '334dc803',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ff8007b5',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ff8007b5',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8aeea4dc',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8aeea4dc',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b4dbc206',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b4dbc206',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '13b9705e',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '13b9705e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3e86c7f6',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3e86c7f6',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'df88f45a',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'df88f45a',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '61319caf',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '61319caf',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ba7102a9',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ba7102a9',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8f33f881',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8f33f881',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8eb1df05',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8eb1df05',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '005f1c86',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '005f1c86',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8d64945f',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8d64945f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '486803ba',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '486803ba',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6fdcf0a8',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6fdcf0a8',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6ae74216',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6ae74216',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'fccf1f90',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'fccf1f90',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '560929d2',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '560929d2',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7ec40e56',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7ec40e56',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '86e71378',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '86e71378',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6e07b2fc',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6e07b2fc',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'aabffd92',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'aabffd92',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4c5802ee',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4c5802ee',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3cd3a6d9',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3cd3a6d9',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '81f0496b',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '81f0496b',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c10ab06d',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c10ab06d',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5caf09a5',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5caf09a5',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b3609522',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b3609522',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f754e09b',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f754e09b',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1dc3887f',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1dc3887f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '31f9774d',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '31f9774d',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3355d401',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3355d401',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'cf7f1bbc',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'cf7f1bbc',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c970abb9',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c970abb9',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e9eb7245',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e9eb7245',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '56dcc00c',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '56dcc00c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '94d29b96',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Apply',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '94d29b96',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Apply',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2c88cd16',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2c88cd16',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a255a42f',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a255a42f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '45fa58f4',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '45fa58f4',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e5e70a98',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e5e70a98',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '05a623ee',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '05a623ee',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd133c8fa',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd133c8fa',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8106450b',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8106450b',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a1a96b42',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a1a96b42',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5aa505b9',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5aa505b9',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'dc7697fc',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'dc7697fc',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'dcf40738',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'dcf40738',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f26c19cf',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Analytical'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f26c19cf',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Analytical'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '14d96d7d',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '14d96d7d',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '94c07bab',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyze',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Critical-Thinking'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '94c07bab',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyze',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Critical-Thinking'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1a0cc418',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1a0cc418',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '25989ac6',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '25989ac6',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '16525367',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '16525367',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b5b396f8',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b5b396f8',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '10e39534',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '10e39534',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '660c4f48',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '660c4f48',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e47e644f',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e47e644f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '392500c9',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '392500c9',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a8af7054',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a8af7054',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '70a20293',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '70a20293',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'db66fb9e',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'db66fb9e',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a5cc262d',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a5cc262d',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4fa3c6ea',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4fa3c6ea',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd0effe85',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd0effe85',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '84a8e2a7',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '84a8e2a7',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Applications of Integrals',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8cdecd34',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8cdecd34',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'aed79570',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'aed79570',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '13ca12e5',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '13ca12e5',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3544ecd6',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3544ecd6',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ce61e718',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ce61e718',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'cd1f0cb8',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'cd1f0cb8',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e749f58c',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e749f58c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3ae7c582',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3ae7c582',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ea53a498',
+  topic: 'Applications of Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ea53a498',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '181b8d92',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '181b8d92',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '32e9c7b6',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '32e9c7b6',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '75b58d8b',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '75b58d8b',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'a863a6fe',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyze',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'a863a6fe',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyze',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e9836ab4',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e9836ab4',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1cfdbcc7',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1cfdbcc7',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'bac0f379',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'bac0f379',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '1ea18032',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Evaluate',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Critical-Thinking'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '1ea18032',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Evaluate',
+  year: '2025 Prediction',
+  domain: 'Inverse Trigonometric Functions',
+  pedagogy: 'Critical-Thinking'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'cf338d62',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'cf338d62',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '27f2f9f0',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '27f2f9f0',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '410f1dc0',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '410f1dc0',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'df664a9b',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'df664a9b',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '13c7e028',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '13c7e028',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '81f4a538',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '81f4a538',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'cde938e2',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyze',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'cde938e2',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyze',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '19d7c4c6',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '19d7c4c6',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd8b991c8',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd8b991c8',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0d263fcb',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Evaluate',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Analytical'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0d263fcb',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Evaluate',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Analytical'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b956086c',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b956086c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Determinants',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ee228d20',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ee228d20',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8ea9192e',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8ea9192e',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3c883306',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3c883306',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7259b2a2',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7259b2a2',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6da24c40',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6da24c40',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f1d00d12',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f1d00d12',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '181eb2b6',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '181eb2b6',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e03f8f04',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e03f8f04',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '747bf735',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '747bf735',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c0b394a4',
+  topic: 'Matrices',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c0b394a4',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'de7efea1',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'de7efea1',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c57396f5',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c57396f5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '55ac2c9f',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '55ac2c9f',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd6c9dcd5',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd6c9dcd5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '7df078f6',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '7df078f6',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '636a6ca5',
+  topic: 'Integrals',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '636a6ca5',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '455d259c',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '455d259c',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2021',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e22961f1',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e22961f1',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '049d477f',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '049d477f',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '413b6366',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '413b6366',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f12062b1',
+  topic: 'Linear Programming',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyzing',
+  year: '2021',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f12062b1',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyzing',
+  year: '2021',
+  domain: 'LINEAR PROGRAMMING',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '933f0272',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '933f0272',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '37e1d1b8',
+  topic: 'Vectors',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '37e1d1b8',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '4cd9641b',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understanding',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '4cd9641b',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understanding',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '26c17c22',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '26c17c22',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'CALCULUS',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'cce0a4b2',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'cce0a4b2',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd38ae33b',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd38ae33b',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '9427a932',
+  topic: 'Three Dimensional Geometry',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '9427a932',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'VECTORS & 3D GEOMETRY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e5e74322',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e5e74322',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2021',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '476e4e22',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '476e4e22',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ef75bd45',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ef75bd45',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remembering',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3409ef65',
+  topic: 'Inverse Trigonometric Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3409ef65',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'ac5659bf',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'ac5659bf',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd9aa97c3',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd9aa97c3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'c8a9c206',
+  topic: 'Continuity and Differentiability',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'c8a9c206',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'b57caad3',
+  topic: 'Probability',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'b57caad3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'PROBABILITY',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'e2b7b8e3',
+  topic: 'Determinants',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'e2b7b8e3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Applying',
+  year: '2022',
+  domain: 'ALGEBRA',
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '85738e5c',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '85738e5c',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '64dd57d0',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '64dd57d0',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '9738ad75',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '9738ad75',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8b26c5e7',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Analytical'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8b26c5e7',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Analytical'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd724150f',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyze',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd724150f',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyze',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '5839f660',
+  topic: 'Differential Equations',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '5839f660',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Differential Equations',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'bcbe70da',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Relations',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'bcbe70da',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Relations',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '88c99c12',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Functions',
+  pedagogy: 'Problem-Solving'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '88c99c12',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: '2025 Prediction',
+  domain: 'Functions',
+  pedagogy: 'Problem-Solving'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'f2b148c3',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyze',
+  year: '2025 Prediction',
+  domain: 'Functions',
+  pedagogy: 'Analytical'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'f2b148c3',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyze',
+  year: '2025 Prediction',
+  domain: 'Functions',
+  pedagogy: 'Analytical'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '9bc5c9de',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Functions',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '9bc5c9de',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Functions',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '8fed997a',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Relations',
+  pedagogy: 'Conceptual'
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '8fed997a',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Understand',
+  year: '2025 Prediction',
+  domain: 'Relations',
+  pedagogy: 'Conceptual'
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '55809df6',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Analyze',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '55809df6',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Analyze',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '50d7cfd2',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '50d7cfd2',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '2dcf658b',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Hard',
+  blooms: 'Analyze',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '2dcf658b',
+  marks: '1',
+  diff: 'Hard',
+  bloomsTaxonomy: 'Analyze',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '3e811214',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '3e811214',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '6f492faf',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Understand',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '6f492faf',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Understand',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: 'd2540f39',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Moderate',
+  blooms: 'Apply',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: 'd2540f39',
+  marks: '1',
+  diff: 'Moderate',
+  bloomsTaxonomy: 'Apply',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [transformQuestion] DB Question Metadata: {
+  id: '0dedc530',
+  topic: 'Relations and Functions',
+  marks: 1,
+  difficulty: 'Easy',
+  blooms: 'Remember',
+  year: null,
+  domain: null,
+  pedagogy: null
+}
+✅ [transformQuestion] Transformed Metadata: {
+  id: '0dedc530',
+  marks: '1',
+  diff: 'Easy',
+  bloomsTaxonomy: 'Remember',
+  year: undefined,
+  domain: undefined,
+  pedagogy: undefined
+}
+🔍 [DEBUG] Flashcards grouped by topic:
+✅ Learning Journey returned 13 Math topics
+
+📚 Topics WITH Questions: 12
+
+  ✅ Determinants: 48 questions
+  ✅ Applications of Integrals: 21 questions
+  ✅ Linear Programming: 10 questions
+  ✅ Relations and Functions: 94 questions
+  ✅ Continuity and Differentiability: 56 questions
+  ✅ Differential Equations: 30 questions
+  ✅ Probability: 39 questions
+  ✅ Inverse Trigonometric Functions: 31 questions
+  ✅ Vectors: 29 questions
+  ✅ Matrices: 24 questions
+  ✅ Integrals: 45 questions
+  ✅ Three Dimensional Geometry: 35 questions
+
+📊 Total: 462 questions across 12 topics
+
+======================================================================
+
+✅ SUCCESS: Math topics now show questions in Learning Journey!
+
