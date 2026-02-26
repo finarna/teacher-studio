@@ -728,103 +728,55 @@ const LearnTab: React.FC<{
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          {topicResource.chapterInsights && topicResource.chapterInsights.length > 0 && (
-            <div className="grid grid-cols-1 gap-4">
-              {topicResource.chapterInsights.map((insight, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="group bg-white border border-slate-200 rounded-[2rem] p-6 hover:border-primary-200 hover:shadow-xl transition-all duration-300"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
-                      <Lightbulb size={24} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-black text-slate-900 font-outfit mb-2">{insight.topic}</h3>
-                      <p className="text-sm text-slate-500 leading-relaxed mb-4">{insight.description}</p>
-
-                      {insight.keyConcepts && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {insight.keyConcepts.map((c, i) => (
-                            <span key={i} className="px-3 py-1 bg-slate-50 border border-slate-200 rounded-full text-[10px] font-black uppercase tracking-wider text-slate-600">
-                              {c}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {insight.importantFormulas && (
-                        <div className="space-y-2">
-                          {insight.importantFormulas.map((f, i) => (
-                            <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100 font-mono text-xs text-primary-700">
-                              {f}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          {(!topicResource.chapterInsights || topicResource.chapterInsights.length === 0) && visualSketches.length === 0 && (
-            <div className="bg-white border-2 border-dashed border-slate-200 rounded-[2rem] p-12 text-center">
-              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <BookOpen size={32} className="text-slate-400" />
-              </div>
-              <h3 className="text-xl font-black text-slate-900 mb-2">Knowledge Base Building</h3>
-              <p className="text-slate-500 max-w-sm mx-auto text-sm">Scan papers or start practicing to activate AI knowledge generation for this topic.</p>
-            </div>
-          )}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-2">
+          <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Visual DNA ({visualSketches.length})</h3>
+          <div className="h-px flex-1 bg-slate-200 mx-4" />
         </div>
 
-        <div className="space-y-6">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Visual DNA ({visualSketches.length})</h3>
-            <div className="h-px flex-1 bg-slate-200 mx-4" />
+        {loadingSketches ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="aspect-video bg-slate-100 animate-pulse rounded-[1.5rem]" />
+            ))}
           </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            {loadingSketches ? (
-              [1, 2, 3].map(i => (
-                <div key={i} className="aspect-video bg-slate-100 animate-pulse rounded-[1.5rem]" />
-              ))
-            ) : (
-              visualSketches.map((sketch, idx) => (
-                <motion.button
-                  key={sketch.questionId}
-                  whileHover={{ y: -4 }}
-                  onClick={() => openViewer(idx)}
-                  className="group relative bg-white border border-slate-200 rounded-[1.5rem] overflow-hidden hover:shadow-xl transition-all text-left"
-                >
-                  <div className="aspect-video bg-slate-50 p-4 flex items-center justify-center">
-                    <div className="w-full h-full grayscale group-hover:grayscale-0 transition-all duration-500">
-                      {sketch.sketchSvg.startsWith('data:image') ? (
-                        <img src={sketch.sketchSvg} alt="" className="w-full h-full object-contain" />
-                      ) : (
-                        <div dangerouslySetInnerHTML={{ __html: sketch.sketchSvg }} className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain" />
-                      )}
-                    </div>
-                  </div>
-                  <div className="p-4 bg-white border-t border-slate-100">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest">Visual Module {idx + 1}</span>
-                      {completedSketches.has(sketch.questionId) && <CheckCircle size={12} className="text-emerald-500" />}
-                    </div>
-                    <p className="text-xs font-bold text-slate-900 truncate">{sketch.questionText}</p>
-                  </div>
-                </motion.button>
-              ))
-            )}
+        ) : visualSketches.length === 0 ? (
+          <div className="bg-white border-2 border-dashed border-slate-200 rounded-[2rem] p-12 text-center">
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <BookOpen size={32} className="text-slate-400" />
+            </div>
+            <h3 className="text-xl font-black text-slate-900 mb-2">No Visual Notes Yet</h3>
+            <p className="text-slate-500 max-w-sm mx-auto text-sm">Scan papers to generate AI visual schemas for this topic.</p>
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {visualSketches.map((sketch, idx) => (
+              <motion.button
+                key={sketch.questionId}
+                whileHover={{ y: -4 }}
+                onClick={() => openViewer(idx)}
+                className="group relative bg-white border border-slate-200 rounded-[1.5rem] overflow-hidden hover:shadow-xl transition-all text-left"
+              >
+                <div className="aspect-video bg-slate-50 p-4 flex items-center justify-center">
+                  <div className="w-full h-full grayscale group-hover:grayscale-0 transition-all duration-500">
+                    {sketch.sketchSvg.startsWith('data:image') ? (
+                      <img src={sketch.sketchSvg} alt="" className="w-full h-full object-contain" />
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: sketch.sketchSvg }} className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain" />
+                    )}
+                  </div>
+                </div>
+                <div className="p-4 bg-white border-t border-slate-100">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest">Visual Module {idx + 1}</span>
+                    {completedSketches.has(sketch.questionId) && <CheckCircle size={12} className="text-emerald-500" />}
+                  </div>
+                  <p className="text-xs font-bold text-slate-900 truncate">{sketch.questionText}</p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        )}
       </div>
 
       <AnimatePresence>
