@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>plus2AI - AI-Powered Exam Preparation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fff;
+            color: #1a1a1a;
+            overflow-x: hidden;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(168, 85, 247, 0.9) 100%),
+                url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&h=1080&fit=crop') center/cover;
+            animation: subtle-zoom 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtle-zoom {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            max-width: 900px;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            padding: 1.2rem 3rem;
+            background: white;
+            color: #6366f1;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* Section Base */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 4rem;
+            font-weight: 300;
+        }
+
+        /* Image Grid Layout */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .image-card {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .image-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: transform 0.6s;
+        }
+
+        .image-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+            padding: 2rem;
+            color: white;
+        }
+
+        .image-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-card p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Split Section (Image + Text) */
+        .split-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin: 6rem 0;
+        }
+
+        .split-image {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .split-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .split-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        .split-content p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        .feature-list li {
+            padding: 1rem 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* Full-width Image Section */
+        .fullwidth-image {
+            position: relative;
+            height: 600px;
+            margin: 6rem 0;
+            overflow: hidden;
+        }
+
+        .fullwidth-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .fullwidth-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.85) 0%, rgba(168, 85, 247, 0.85) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .fullwidth-overlay h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .fullwidth-overlay p {
+            font-size: 1.5rem;
+            max-width: 800px;
+            font-weight: 300;
+        }
+
+        /* Pricing Cards */
+        .pricing-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .price-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.4s;
+            position: relative;
+        }
+
+        .price-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .price-card-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .price-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .price-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #6366f1;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .price-content {
+            padding: 2rem;
+        }
+
+        .price-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .price-amount {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #6366f1;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-period {
+            color: #888;
+            margin-bottom: 2rem;
+        }
+
+        .price-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .price-features li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #555;
+        }
+
+        .price-features li::before {
+            content: '✓';
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .price-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .price-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Testimonial Section */
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .testimonial {
+            background: #f9fafb;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .testimonial-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .testimonial-name {
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .testimonial-role {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        /* Gallery Section */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 3rem 0;
+        }
+
+        .gallery-item {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            padding: 6rem 2rem;
+            text-align: center;
+            margin: 6rem 0;
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cta-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-section p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-btn-primary,
+        .cta-btn-secondary {
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-btn-primary {
+            background: white;
+            color: #6366f1;
+        }
+
+        .cta-btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .cta-btn-primary:hover,
+        .cta-btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #aaa;
+            line-height: 1.8;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            color: #888;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+            }
+
+            .split-section {
+                grid-template-columns: 1fr;
+            }
+
+            .image-grid,
+            .pricing-container,
+            .testimonial-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fullwidth-overlay h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Loading Animation */
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content fade-in">
+            <h1>plus2AI</h1>
+            <p class="hero-subtitle">Transform Your Exam Preparation with AI-Powered Visual Learning</p>
+            <a href="#pricing" class="hero-cta">Start Free Trial →</a>
+        </div>
+        <div class="scroll-indicator">↓ Scroll to explore</div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="section">
+        <h2 class="section-title">The Traditional Way Doesn't Work</h2>
+        <p class="section-subtitle">Why 70% of students struggle with conventional learning methods</p>
+
+        <div class="image-grid">
+            <div class="image-card">
+                <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=600&fit=crop" alt="Expensive coaching">
+                <div class="image-overlay">
+                    <h3>Too Expensive</h3>
+                    <p>Coaching fees: ₹40-80K/year. Apps: ₹36-60K. Out of reach for most families.</p>
+                </div>
+            </div>
+            <div class="image-card">
+                <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&h=600&fit=crop" alt="Generic content">
+                <div class="image-overlay">
+                    <h3>One-Size-Fits-All</h3>
+                    <p>Everyone gets the same content. No personalization for YOUR weak areas.</p>
+                </div>
+            </div>
+            <div class="image-card">
+                <img src="https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=800&h=600&fit=crop" alt="Video heavy">
+                <div class="image-overlay">
+                    <h3>Video-Heavy Learning</h3>
+                    <p>15-minute videos for simple concepts. Time-consuming and inefficient.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution: SketchAI -->
+    <section class="section">
+        <div class="split-section">
+            <div class="split-image">
+                <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&h=600&fit=crop" alt="AI Visual Learning">
+            </div>
+            <div class="split-content">
+                <h2>SketchAI Visual Learning</h2>
+                <p>Our proprietary AI generates custom diagrams that make complex concepts crystal clear in seconds.</p>
+                <p><strong>No competitor has this technology.</strong> While others rely on pre-recorded videos or static images, we create personalized visual explanations for every problem.</p>
+                <ul class="feature-list">
+                    <li>Physics: Circuit diagrams, force diagrams, ray optics</li>
+                    <li>Chemistry: Molecular structures, reaction mechanisms</li>
+                    <li>Math: Graphs, geometric constructions, functions</li>
+                    <li>Biology: Process diagrams, anatomical illustrations</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Adaptive Learning -->
+    <section class="section">
+        <div class="split-section" style="direction: rtl;">
+            <div class="split-image">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop" alt="Adaptive AI">
+            </div>
+            <div class="split-content" style="direction: ltr;">
+                <h2>AI That Understands YOU</h2>
+                <p>Your personal study path that adapts in real-time based on your performance.</p>
+                <p>Our AI doesn't just track scores - it identifies patterns, predicts weak areas, and automatically adjusts your learning journey.</p>
+                <ul class="feature-list">
+                    <li>Topic-level personalization (not generic paths)</li>
+                    <li>Auto-skip topics you've mastered</li>
+                    <li>Focus on weak areas automatically</li>
+                    <li>Real-time mastery tracking</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Full-width Inspiration -->
+    <div class="fullwidth-image">
+        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1920&h=1080&fit=crop" alt="Students studying">
+        <div class="fullwidth-overlay">
+            <h2>25,000+ Students Already Transformed</h2>
+            <p>Join thousands of KCET, NEET, and JEE aspirants who improved their scores by 12-18% in just 2 months</p>
+        </div>
+    </div>
+
+    <!-- Vidya AI Section -->
+    <section class="section">
+        <div class="split-section">
+            <div class="split-image">
+                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=600&fit=crop" alt="AI Tutor">
+            </div>
+            <div class="split-content">
+                <h2>Vidya: Your 24/7 AI Study Buddy</h2>
+                <p>Context-aware AI tutor that knows your complete learning journey.</p>
+                <p>Unlike generic chatbots, Vidya understands your exam, current topic, weak areas, and learning patterns. Get instant answers at 2 AM when studying late.</p>
+                <ul class="feature-list">
+                    <li>Unlimited doubt resolution (no cap)</li>
+                    <li>Personalized study recommendations</li>
+                    <li>Step-by-step problem-solving guidance</li>
+                    <li>Concept explanations in simple language</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Gallery -->
+    <section class="section">
+        <h2 class="section-title">Complete Learning Ecosystem</h2>
+        <p class="section-subtitle">Everything you need in one platform</p>
+
+        <div class="gallery">
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=500&fit=crop" alt="Mock tests">
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&h=500&fit=crop" alt="Performance analytics">
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=500&h=500&fit=crop" alt="Past papers">
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&h=500&fit=crop" alt="Team learning">
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="section" id="pricing">
+        <h2 class="section-title">Simple, Transparent Pricing</h2>
+        <p class="section-subtitle">One-time payment valid until your exam. No subscriptions.</p>
+
+        <div class="pricing-container">
+            <div class="price-card">
+                <div class="price-card-image">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=400&fit=crop" alt="KCET">
+                </div>
+                <div class="price-content">
+                    <div class="price-name">KCET</div>
+                    <div class="price-amount">₹3,999</div>
+                    <div class="price-period">Until April 2026 (~60 days)</div>
+                    <ul class="price-features">
+                        <li>Complete PCM/PCB access</li>
+                        <li>Unlimited practice tests</li>
+                        <li>Vidya AI tutor</li>
+                        <li>SketchAI visual learning</li>
+                        <li>Past 10 years papers</li>
+                        <li>Performance analytics</li>
+                    </ul>
+                    <button class="price-btn">Start KCET Prep</button>
+                </div>
+            </div>
+
+            <div class="price-card">
+                <div class="price-card-image">
+                    <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=400&fit=crop" alt="NEET/JEE">
+                    <div class="price-badge">MOST POPULAR</div>
+                </div>
+                <div class="price-content">
+                    <div class="price-name">NEET / JEE</div>
+                    <div class="price-amount">₹5,999</div>
+                    <div class="price-period">Until May 2026 (~90 days)</div>
+                    <ul class="price-features">
+                        <li>Complete PCM/PCB access</li>
+                        <li>Unlimited practice tests</li>
+                        <li>Vidya AI tutor</li>
+                        <li>SketchAI visual learning</li>
+                        <li>Past 10 years papers</li>
+                        <li>Performance analytics</li>
+                        <li>Advanced mock builder</li>
+                    </ul>
+                    <button class="price-btn">Ace NEET/JEE</button>
+                </div>
+            </div>
+
+            <div class="price-card">
+                <div class="price-card-image">
+                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=400&fit=crop" alt="Institutes">
+                </div>
+                <div class="price-content">
+                    <div class="price-name">For Institutes</div>
+                    <div class="price-amount">₹8,499</div>
+                    <div class="price-period">per student/year (200+ students)</div>
+                    <ul class="price-features">
+                        <li>Paper scanning (95%+ accuracy)</li>
+                        <li>Admin dashboard</li>
+                        <li>Student progress tracking</li>
+                        <li>Bulk test creation</li>
+                        <li>Teacher accounts (free)</li>
+                        <li>White-label option</li>
+                    </ul>
+                    <button class="price-btn">Schedule Demo</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: #f9fafb; border-radius: 20px;">
+            <p style="font-size: 1.2rem; color: #555; margin-bottom: 1rem;"><strong>Compare to traditional coaching:</strong></p>
+            <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; font-size: 1.1rem;">
+                <div>Coaching Centers: <span style="text-decoration: line-through; color: #888;">₹40-80K</span></div>
+                <div>Crash Courses: <span style="text-decoration: line-through; color: #888;">₹15-25K</span></div>
+                <div><strong style="color: #6366f1;">plus2AI: ₹3,999-5,999 ✨</strong></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section">
+        <h2 class="section-title">Success Stories</h2>
+        <p class="section-subtitle">Real results from real students</p>
+
+        <div class="testimonial-grid">
+            <div class="testimonial">
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop" alt="Student">
+                    </div>
+                    <div>
+                        <div class="testimonial-name">Priya M.</div>
+                        <div class="testimonial-role">NEET 2024 Qualifier</div>
+                    </div>
+                </div>
+                <p class="testimonial-text">"SketchAI helped me finally understand organic chemistry reactions. My test scores improved by 25% in just 6 weeks! The visual explanations made everything click."</p>
+            </div>
+
+            <div class="testimonial">
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop" alt="Student">
+                    </div>
+                    <div>
+                        <div class="testimonial-name">Arjun K.</div>
+                        <div class="testimonial-role">JEE Main 2024, 97.8%ile</div>
+                    </div>
+                </div>
+                <p class="testimonial-text">"Vidya AI is like having a personal tutor at 2 AM. I could practice unlimited mock tests and the adaptive learning helped me focus on my weak topics. Worth every rupee!"</p>
+            </div>
+
+            <div class="testimonial">
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop" alt="Student">
+                    </div>
+                    <div>
+                        <div class="testimonial-name">Divya R.</div>
+                        <div class="testimonial-role">KCET 2024 Topper</div>
+                    </div>
+                </div>
+                <p class="testimonial-text">"At ₹3,999, this is 10x cheaper than coaching classes and 10x better. The performance analytics showed me exactly where I was weak. Highly recommend!"</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <h2>Ready to Transform Your Preparation?</h2>
+        <p>Join 25,000+ students who are already acing their exams with AI</p>
+        <div class="cta-buttons">
+            <a href="#" class="cta-btn-primary">Start 7-Day Free Trial</a>
+            <a href="#" class="cta-btn-secondary">Schedule Live Demo</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>plus2AI</h3>
+                <p>AI-powered exam preparation for KCET, NEET, and JEE aspirants.</p>
+                <p style="margin-top: 1rem;">Transforming education with intelligent personalization and visual learning.</p>
+            </div>
+            <div class="footer-section">
+                <h3>For Students</h3>
+                <a href="#">🌐 www.plus2ai.com</a>
+                <a href="#">📧 hello@plus2ai.com</a>
+                <a href="#">📱 +91 98765-43210</a>
+                <a href="#">Start Free Trial</a>
+            </div>
+            <div class="footer-section">
+                <h3>For Institutes</h3>
+                <a href="#">🌐 www.plus2ai.com/institutions</a>
+                <a href="#">📧 business@plus2ai.com</a>
+                <a href="#">📞 +91 80-4567-8900</a>
+                <a href="#">Schedule Demo</a>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <a href="#">Instagram: @plus2ai_official</a>
+                <a href="#">YouTube: plus2AI Learning</a>
+                <a href="#">LinkedIn: plus2AI</a>
+                <a href="#">Twitter: @plus2ai</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 plus2AI - Universal Teacher Studio. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Fade in elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section, .split-section, .image-card, .price-card, .testimonial').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

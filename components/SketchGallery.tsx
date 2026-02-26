@@ -30,6 +30,7 @@ import { generateSketch, GenerationMethod, generateTopicBasedSketch, TopicBasedS
 import { useFilteredScans } from '../hooks/useFilteredScans';
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
+import { getApiUrl } from '../lib/api';
 
 interface SketchGalleryProps {
   onBack?: () => void;
@@ -66,7 +67,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   );
   const [groupByDomain, setGroupByDomain] = useState(true);
   const [selectedDomain, setSelectedDomain] = useState<string>('All');
-  const [batchProgress, setBatchProgress] = useState<{current: number, total: number, failed: number} | null>(null);
+  const [batchProgress, setBatchProgress] = useState<{ current: number, total: number, failed: number } | null>(null);
   const [forceRender, setForceRender] = useState(0);
 
   // Use context values instead of local state
@@ -77,7 +78,9 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   const [selectedDomainInGroupedView, setSelectedDomainInGroupedView] = useState<string | null>(null);
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [topicBasedSketches, setTopicBasedSketches] = useState<Record<string, TopicBasedSketchResult>>({});
+  const [questionSketches, setQuestionSketches] = useState<Record<string, string>>({});
   const [selectedTopicPage, setSelectedTopicPage] = useState<Record<string, number>>({});
+  const [isBackingUp, setIsBackingUp] = useState(false);
   const [enlargedImage, setEnlargedImage] = useState<{ imageUrl: string, title: string, topic: string } | null>(null);
   const [flipBookOpen, setFlipBookOpen] = useState<{ topic: string, sketch: TopicBasedSketchResult } | null>(null);
   const [flipBookCurrentPage, setFlipBookCurrentPage] = useState(0);
@@ -104,6 +107,53 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   // CRITICAL FIX: Auto-clear selectedVaultScan when subject changes and current scan doesn't match
   // Use ref to prevent infinite loops
   const lastClearedScanRef = React.useRef<string | null>(null);
+
+  // Load all visuals when scan changes
+  useEffect(() => {
+    if (!selectedVaultScan) {
+      setTopicBasedSketches({});
+      setQuestionSketches({});
+      return;
+    }
+
+    const loadScanVisuals = async () => {
+      try {
+        console.log(`📦 Loading visuals for scan: ${selectedVaultScan.id}`);
+        // Try new unified endpoint first
+        const response = await fetch(getApiUrl(`/api/scan-visuals/${selectedVaultScan.id}`));
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data) {
+            console.log(`✅ Loaded visuals from DB/Redis:`, {
+              topics: Object.keys(result.data.topicSketches || {}).length,
+              questions: Object.keys(result.data.questionSketches || {}).length
+            });
+            if (result.data.topicSketches) setTopicBasedSketches(result.data.topicSketches);
+            if (result.data.questionSketches) setQuestionSketches(result.data.questionSketches);
+            return;
+          }
+        }
+
+        // Fallback to legacy endpoint if unified fails
+        const legacyResp = await fetch(getApiUrl(`/api/topic-sketches/${selectedVaultScan.id}`));
+        if (legacyResp.ok) {
+          const result = await legacyResp.json();
+          if (result.data) {
+            setTopicBasedSketches(result.data);
+          }
+        }
+
+        // Fallback to scan object
+        if (selectedVaultScan.analysisData?.topicBasedSketches) {
+          setTopicBasedSketches(selectedVaultScan.analysisData.topicBasedSketches as any);
+        }
+      } catch (err) {
+        console.error('Failed to load scan visuals:', err);
+      }
+    };
+
+    loadScanVisuals();
+  }, [selectedVaultScan?.id]);
 
   useEffect(() => {
     if (selectedVaultScan) {
@@ -220,63 +270,16 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
 
   // Removed: selectedGrade and selectedSubject now come from context, not local state
 
-  // Load topic-based sketches when scan changes (from DB/Redis via scan object)
-  useEffect(() => {
-    if (!selectedVaultScan) {
-      setTopicBasedSketches({});
-      return;
-    }
+  // Unified scanQuestions source that merges metadata from scan and large sketches from questionSketches state
+  const scanQuestions = useMemo(() => {
+    const rawQuestions = selectedVaultScan?.analysisData?.questions || [];
+    return rawQuestions.map(q => ({
+      ...q,
+      sketchSvg: questionSketches[q.id] || q.sketchSvg
+    }));
+  }, [selectedVaultScan?.analysisData?.questions, questionSketches]);
 
-    console.log('📦 Loading topic sketches for scan:', selectedVaultScan.id);
-
-    // PRIORITY 1: Load from scan.analysisData.topicBasedSketches (Redis/DB)
-    if (selectedVaultScan.analysisData?.topicBasedSketches) {
-      const dbSketches = selectedVaultScan.analysisData.topicBasedSketches as Record<string, TopicBasedSketchResult>;
-      console.log(`✅ Loaded ${Object.keys(dbSketches).length} topics from DB/Redis:`, Object.keys(dbSketches));
-      setTopicBasedSketches(dbSketches);
-      return;
-    }
-
-    // FALLBACK: Try loading from localStorage cache (backwards compatibility)
-    console.log('ℹ️ No DB data found, checking localStorage cache...');
-    const cachedEntries = cache.getByScan(selectedVaultScan.id);
-    const topicSketchEntries = cachedEntries.filter(e => e.type === 'topic-sketch');
-
-    if (topicSketchEntries.length > 0) {
-      console.log(`⚠️ Found ${topicSketchEntries.length} cached topic sketches in localStorage (migrating to DB...)`);
-
-      // Rebuild topicBasedSketches state from cache
-      const loadedSketches: Record<string, TopicBasedSketchResult> = {};
-
-      topicSketchEntries.forEach(entry => {
-        // Extract topic name from cache key: "topic_sketch_{scanId}_{topic}"
-        const keyPrefix = `topic_sketch_${selectedVaultScan.id}_`;
-        const topic = entry.key.replace(keyPrefix, '');
-
-        loadedSketches[topic] = entry.data as TopicBasedSketchResult;
-      });
-
-      setTopicBasedSketches(loadedSketches);
-
-      // Auto-migrate to DB
-      if (onUpdateScan) {
-        console.log('🔄 Auto-migrating localStorage sketches to DB/Redis...');
-        const updatedScan = {
-          ...selectedVaultScan,
-          analysisData: {
-            ...selectedVaultScan.analysisData!,
-            topicBasedSketches: loadedSketches
-          }
-        };
-        onUpdateScan(updatedScan);
-      }
-    } else {
-      console.log('ℹ️ No topic sketches found (DB or cache)');
-      setTopicBasedSketches({});
-    }
-  }, [selectedVaultScan]);
-
-  const scanQuestions = selectedVaultScan?.analysisData?.questions || [];
+  // Removed redundant: const scanQuestions = selectedVaultScan?.analysisData?.questions || [];
 
   // Helper function to clean up visual concept titles
   const cleanVisualTitle = (concept: string, topic?: string): string => {
@@ -336,7 +339,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
         mentalAnchor: q.masteryMaterial?.memoryTrigger || "",
         proceduralLogic: q.solutionSteps || [],
         domain: q.domain,
-        chapter: q.chapter
+        chapter: q.topic
       };
     });
   }, [scanQuestions, selectedVaultScan, forceRender]);
@@ -455,7 +458,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   const topicGroups = useMemo(() => {
     if (!selectedVaultScan) return {};
 
-    const groups: Record<string, {topic: string, questions: AnalyzedQuestion[], count: number}> = {};
+    const groups: Record<string, { topic: string, questions: AnalyzedQuestion[], count: number }> = {};
 
     scanQuestions.forEach(q => {
       const topic = q.topic || 'General';
@@ -583,7 +586,8 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
         q.text,
         selectedVaultScan.subject,
         apiKey,
-        undefined // Status update callback (optional)
+        undefined, // Status update callback (optional)
+        selectedVaultScan.examContext
       );
 
       console.log(`✓ Generated using ${generationMethod}`);
@@ -623,9 +627,26 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
 
         console.log(`✓ Updated scan state with new image for question ${id}`);
 
+        // SAVE to dedicated visuals endpoint (to avoid 413 on scans sync)
+        const updatedQuestionSketches = {
+          ...questionSketches,
+          [id]: result.imageData
+        };
+        setQuestionSketches(updatedQuestionSketches);
+
+        try {
+          fetch(getApiUrl(`/api/scan-visuals/${prevScan.id}`), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionSketches: updatedQuestionSketches })
+          });
+        } catch (sErr) {
+          console.error('Failed to sync question visual:', sErr);
+        }
+
         // If NOT in batch mode, sync immediately to Redis
         if (!skipSync && onUpdateScan) {
-          console.log(`📤 Syncing to Redis immediately (single generation mode)...`);
+          console.log(`📤 Syncing metadata to Redis immediately...`);
           onUpdateScan(updatedScan);
         } else if (skipSync) {
           console.log(`⏭️ Skipping immediate sync (batch mode - will sync periodically)`);
@@ -697,7 +718,8 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
         })),
         selectedVaultScan.subject,
         apiKey,
-        (status) => console.log(`📊 ${status}`)
+        (status) => console.log(`📊 ${status}`),
+        selectedVaultScan.examContext
       );
 
       console.log(`✓ Generated ${result.pages.length} pages for ${topic}`);
@@ -716,9 +738,20 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
         [topic]: 0
       }));
 
-      // PRIORITY: Save to DB/Redis via scan object
+      try {
+        await fetch(getApiUrl(`/api/scan-visuals/${selectedVaultScan.id}`), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topicSketches: updatedTopicSketches })
+        });
+        console.log(`✅ Synced topic sketches to dedicated endpoint`);
+      } catch (syncErr) {
+        console.error('Failed to sync to dedicated endpoint:', syncErr);
+      }
+
+      // PRIORITY: Save to DB/Redis via scan object (metadata only now)
       if (onUpdateScan) {
-        console.log(`📤 Syncing topic sketch "${topic}" to Redis/DB...`);
+        console.log(`📤 Syncing scan metadata to Redis/DB...`);
         const updatedScan = {
           ...selectedVaultScan,
           analysisData: {
@@ -740,6 +773,46 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
       setGenError(err.message);
     } finally {
       setGeneratingId(null);
+    }
+  };
+
+  const handleBackup = async () => {
+    if (!selectedVaultScan || Object.keys(topicBasedSketches).length === 0) return;
+
+    console.log('📤 [Backup] Starting backup for scan:', selectedVaultScan.id);
+    console.log('   - Local Topic Sketches:', Object.keys(topicBasedSketches));
+
+    const payload = {
+      topicSketches: topicBasedSketches,
+      questionSketches: questionSketches
+    };
+    console.log('   - Payload Structure:', Object.keys(payload));
+
+    setIsBackingUp(true);
+    try {
+      const url = getApiUrl(`/api/scan-visuals/${selectedVaultScan.id}`);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      console.log('📡 [Backup] Server Response:', result);
+
+      if (result.success || result.status === 'success') {
+        alert(`✅ Successfully backed up ${Object.keys(topicBasedSketches).length} topic guides to the database! They are now visible in the Learning Journey.`);
+      } else {
+        console.warn('⚠️ [Backup] Server responded but success flag missing. If this persists, please restart the Node server.');
+        throw new Error(result.error || 'Backup failed at server (incomplete response)');
+      }
+    } catch (err) {
+      console.error('Backup error:', err);
+      alert('❌ Failed to backup sketches to database. Please check your connection.');
+    } finally {
+      setIsBackingUp(false);
     }
   };
 
@@ -793,7 +866,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
 
       // Wait between topics to respect rate limits (except for last topic)
       if (i < allTopics.length - 1) {
-        console.log(`⏱️ Waiting ${DELAY_BETWEEN_TOPICS/1000}s before next topic...`);
+        console.log(`⏱️ Waiting ${DELAY_BETWEEN_TOPICS / 1000}s before next topic...`);
         await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TOPICS));
       }
     }
@@ -904,7 +977,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   };
 
   // Render topic-based multi-page card
-  const renderTopicCard = (topic: string, group: {topic: string, questions: AnalyzedQuestion[], count: number}) => {
+  const renderTopicCard = (topic: string, group: { topic: string, questions: AnalyzedQuestion[], count: number }) => {
     const sketch = topicBasedSketches[topic];
     const currentPage = selectedTopicPage[topic] || 0;
     const isGenerating = generatingId === topic;
@@ -972,8 +1045,25 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                 </button>
               </div>
 
-              {/* Page title overlay */}
-              <div className="absolute top-2 left-2 right-2 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 text-[9px] font-bold text-slate-700 truncate">
+              {/* Regenerate Topic Button */}
+              {!isGenerating && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleGenerateTopic(topic);
+                  }}
+                  className="absolute top-2 right-2 z-20 w-8 h-8 bg-white/90 backdrop-blur-sm text-slate-600 rounded-lg flex items-center justify-center hover:bg-white hover:text-primary-600 transition-all shadow-md active:scale-95 group/regen"
+                  title="Regenerate Topic Guide"
+                >
+                  <RotateCw size={14} />
+                  <span className="absolute -bottom-8 right-0 bg-slate-900 text-white text-[8px] px-2 py-1 rounded opacity-0 group-hover/regen:opacity-100 transition-opacity whitespace-nowrap pointer-events-none font-black uppercase tracking-widest">
+                    Regenerate
+                  </span>
+                </button>
+              )}
+
+              {/* Page title overlay - shortened to fit button */}
+              <div className="absolute top-2 left-2 right-12 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 text-[9px] font-bold text-slate-700 truncate">
                 {sketch.pages[currentPage].title}
               </div>
             </>
@@ -1126,11 +1216,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
 
             <button
               onClick={() => setFilterPanelOpen(!filterPanelOpen)}
-              className={`px-3 py-1 rounded flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider transition-all ${
-                filterPanelOpen || groupByDomain || activeTab !== 'Exam Specific'
-                  ? 'bg-slate-900 text-white shadow-md'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
+              className={`px-3 py-1 rounded flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider transition-all ${filterPanelOpen || groupByDomain || activeTab !== 'Exam Specific'
+                ? 'bg-slate-900 text-white shadow-md'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
             >
               <Filter size={12} />
               Filters
@@ -1180,17 +1269,22 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
             </button>
 
             <button
-              onClick={() => {
-                const topicCount = Object.keys(topicBasedSketches).length;
-                const pageCount = Object.values(topicBasedSketches).flatMap(s => s.pages).length;
-                alert(`📚 Topic-Based Study Guides\n\n✅ ${topicCount} topics generated\n📄 ${pageCount} total pages\n\nThese guides are cached locally in your browser.`);
-              }}
-              disabled={!selectedVaultScan}
+              onClick={handleBackup}
+              disabled={!selectedVaultScan || Object.keys(topicBasedSketches).length === 0 || isBackingUp}
               className="px-3 py-1 bg-slate-600 text-white font-bold rounded flex items-center gap-1.5 hover:bg-slate-700 transition-all text-[9px] uppercase tracking-wider disabled:opacity-50 shadow-md"
-              title="View statistics"
+              title="Backup locally cached sketches to the database"
             >
-              <Target size={11} />
-              Backup
+              {isBackingUp ? (
+                <>
+                  <Loader2 className="animate-spin" size={11} />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Target size={11} />
+                  Backup
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -1227,11 +1321,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                   {selectedVaultScan && (
                     <button
                       onClick={() => setActiveTab('Exam Specific')}
-                      className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                        activeTab === 'Exam Specific'
-                          ? 'bg-slate-900 text-white shadow-md'
-                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
-                      }`}
+                      className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'Exam Specific'
+                        ? 'bg-slate-900 text-white shadow-md'
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+                        }`}
                     >
                       Exam Paper ({dynamicSketches.length})
                     </button>
@@ -1240,11 +1333,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${
-                        activeTab === tab
-                          ? 'bg-slate-900 text-white shadow-md'
-                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
-                      }`}
+                      className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === tab
+                        ? 'bg-slate-900 text-white shadow-md'
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+                        }`}
                     >
                       {tab} ({subjectCounts[tab] || 0})
                     </button>
@@ -1270,16 +1362,14 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                         <button
                           key={domain}
                           onClick={() => setSelectedDomainInGroupedView(domain)}
-                          className={`w-full text-left px-3 py-2 rounded-lg transition-all flex items-center justify-between ${
-                            selectedDomainInGroupedView === domain
-                              ? 'bg-slate-900 text-white shadow-md'
-                              : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                          }`}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-all flex items-center justify-between ${selectedDomainInGroupedView === domain
+                            ? 'bg-slate-900 text-white shadow-md'
+                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                            }`}
                         >
                           <span className="text-[10px] font-bold uppercase tracking-wide">{domain}</span>
-                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
-                            selectedDomainInGroupedView === domain ? 'bg-white/20' : 'bg-slate-200'
-                          }`}>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${selectedDomainInGroupedView === domain ? 'bg-white/20' : 'bg-slate-200'
+                            }`}>
                             {sketches.length}
                           </span>
                         </button>
@@ -1307,11 +1397,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                         onClick={() => {
                           setSelectedChapterPerDomain(prev => ({ ...prev, [selectedDomainInGroupedView]: '' }));
                         }}
-                        className={`w-full text-left px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                          !selectedChapterPerDomain[selectedDomainInGroupedView]
-                            ? 'bg-slate-900 text-white'
-                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                        }`}
+                        className={`w-full text-left px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${!selectedChapterPerDomain[selectedDomainInGroupedView]
+                          ? 'bg-slate-900 text-white'
+                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                          }`}
                       >
                         All Chapters ({sketches.length})
                       </button>
@@ -1323,11 +1412,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                             onClick={() => {
                               setSelectedChapterPerDomain(prev => ({ ...prev, [selectedDomainInGroupedView]: chapter }));
                             }}
-                            className={`w-full text-left px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                              selectedChapterPerDomain[selectedDomainInGroupedView] === chapter
-                                ? 'bg-slate-900 text-white'
-                                : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                            }`}
+                            className={`w-full text-left px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${selectedChapterPerDomain[selectedDomainInGroupedView] === chapter
+                              ? 'bg-slate-900 text-white'
+                              : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                              }`}
                           >
                             {chapter} ({chapterSketches.length})
                           </button>
@@ -1348,11 +1436,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                     <button
                       key={method.value}
                       onClick={() => setGenerationMethod(method.value as GenerationMethod)}
-                      className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
-                        generationMethod === method.value
-                          ? 'bg-slate-900 text-white shadow-md'
-                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
-                      }`}
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-all ${generationMethod === method.value
+                        ? 'bg-slate-900 text-white shadow-md'
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+                        }`}
                     >
                       <div className="text-[10px] font-bold uppercase">{method.label}</div>
                       <div className={`text-[9px] mt-0.5 ${generationMethod === method.value ? 'text-slate-300' : 'text-slate-500'}`}>
@@ -1707,6 +1794,17 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                 </button>
                 <div className="flex gap-2">
                   <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleGenerateTopic(flipBookOpen.topic);
+                      closeFlipBook();
+                    }}
+                    className="p-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-all"
+                    aria-label="Regenerate"
+                  >
+                    <RotateCw size={20} />
+                  </button>
+                  <button
                     onClick={() => setShowPrintView(true)}
                     className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all"
                     aria-label="Print"
@@ -1840,11 +1938,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                       onClick={() => {
                         setFlipBookCurrentPage(idx);
                       }}
-                      className={`h-2 rounded-full transition-all ${
-                        idx === flipBookCurrentPage
-                          ? 'w-8 bg-blue-500'
-                          : 'w-2 bg-slate-600 hover:bg-slate-500'
-                      }`}
+                      className={`h-2 rounded-full transition-all ${idx === flipBookCurrentPage
+                        ? 'w-8 bg-blue-500'
+                        : 'w-2 bg-slate-600 hover:bg-slate-500'
+                        }`}
                       aria-label={`Go to page ${idx + 1}`}
                     />
                   ))}
@@ -1873,11 +1970,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                       {/* Cover Page Thumbnail */}
                       <button
                         onClick={() => setFlipBookCurrentPage(0)}
-                        className={`w-full rounded-lg overflow-hidden border-2 transition-all ${
-                          flipBookCurrentPage === 0
-                            ? 'border-blue-500 shadow-lg shadow-blue-500/50'
-                            : 'border-slate-700 hover:border-slate-500'
-                        }`}
+                        className={`w-full rounded-lg overflow-hidden border-2 transition-all ${flipBookCurrentPage === 0
+                          ? 'border-blue-500 shadow-lg shadow-blue-500/50'
+                          : 'border-slate-700 hover:border-slate-500'
+                          }`}
                       >
                         <div className="aspect-[3/4] bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
                           <div className="text-2xl">📖</div>
@@ -1892,11 +1988,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                         <button
                           key={idx}
                           onClick={() => setFlipBookCurrentPage(idx + 1)}
-                          className={`w-full rounded-lg overflow-hidden border-2 transition-all ${
-                            flipBookCurrentPage === idx + 1
-                              ? 'border-blue-500 shadow-lg shadow-blue-500/50'
-                              : 'border-slate-700 hover:border-slate-500'
-                          }`}
+                          className={`w-full rounded-lg overflow-hidden border-2 transition-all ${flipBookCurrentPage === idx + 1
+                            ? 'border-blue-500 shadow-lg shadow-blue-500/50'
+                            : 'border-slate-700 hover:border-slate-500'
+                            }`}
                         >
                           <img
                             src={page.imageData}
@@ -1913,11 +2008,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                       {/* End Page Thumbnail */}
                       <button
                         onClick={() => setFlipBookCurrentPage(flipBookOpen.sketch.pages.length + 1)}
-                        className={`w-full rounded-lg overflow-hidden border-2 transition-all ${
-                          flipBookCurrentPage > flipBookOpen.sketch.pages.length
-                            ? 'border-blue-500 shadow-lg shadow-blue-500/50'
-                            : 'border-slate-700 hover:border-slate-500'
-                        }`}
+                        className={`w-full rounded-lg overflow-hidden border-2 transition-all ${flipBookCurrentPage > flipBookOpen.sketch.pages.length
+                          ? 'border-blue-500 shadow-lg shadow-blue-500/50'
+                          : 'border-slate-700 hover:border-slate-500'
+                          }`}
                       >
                         <div className="aspect-[3/4] bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
                           <div className="text-2xl">✅</div>
@@ -1959,11 +2053,10 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                     {/* Thumbnails Toggle */}
                     <button
                       onClick={() => setShowThumbnails(!showThumbnails)}
-                      className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
-                        showThumbnails
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                          : 'bg-slate-700 hover:bg-slate-600 text-white'
-                      }`}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${showThumbnails
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-slate-700 hover:bg-slate-600 text-white'
+                        }`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -2038,6 +2131,20 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                       </svg>
                       Print
+                    </button>
+
+                    {/* Regenerate Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleGenerateTopic(flipBookOpen.topic);
+                        closeFlipBook();
+                      }}
+                      disabled={generatingId !== null}
+                      className="px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2"
+                    >
+                      {generatingId === flipBookOpen.topic ? <Loader2 size={16} className="animate-spin" /> : <RotateCw size={16} />}
+                      Regenerate
                     </button>
                   </div>
                 </div>

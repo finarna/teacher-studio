@@ -365,6 +365,21 @@ const AppContent: React.FC = () => {
         questionsWithSketches: scan.analysisData?.questions?.filter(q => q.sketchSvg).length || 0
       });
 
+      // CRITICAL: Strip large topic sketch data to avoid 413 Content Too Large errors
+      // These will be saved separately via the dedicated /api/topic-sketches endpoint
+      const scanToSync = {
+        ...scan,
+        analysisData: scan.analysisData ? {
+          ...scan.analysisData,
+          topicBasedSketches: undefined, // Strip the large SVG bundles
+          // CRITICAL: Also strip individual question sketches to avoid 413 Content Too Large
+          questions: scan.analysisData.questions.map(q => ({
+            ...q,
+            sketchSvg: undefined
+          }))
+        } : undefined
+      };
+
       // Get auth token from Supabase
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
@@ -378,20 +393,20 @@ const AppContent: React.FC = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      // Always POST - backend has upsert logic (checks if scan exists and updates/creates accordingly)
-      console.log(`📝 Upserting scan ${scan.id}`);
+      // Always POST - backend has upsert logic
+      console.log(`📝 Upserting stripped scan ${scan.id}`);
 
       const response = await fetch(getApiUrl('/api/scans'), {
         method: 'POST',
         headers,
-        body: JSON.stringify(scan)
+        body: JSON.stringify(scanToSync)
       });
 
-      const result = await response.json();
-      console.log(`✅ Scan upserted in Supabase:`, result);
-
       if (!response.ok) {
+        const result = await response.json();
         console.error(`❌ Failed to sync scan: HTTP ${response.status}`, result);
+      } else {
+        console.log(`✅ Scan (metadata + analysis) upserted in Supabase`);
       }
     } catch (err) {
       console.error('❌ Failed to sync scan to Supabase:', err);

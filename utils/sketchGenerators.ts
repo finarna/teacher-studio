@@ -1,6 +1,34 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
-export type GenerationMethod = 'gemini-3-flash-preview' | 'gemini-2.0-flash-lite' | 'gemini-2.5-flash-latest' | 'gemini-1.5-pro' | 'gemini-2.0-pro-exp' | 'gemini-3-pro' | 'gemini-2.0-flash-exp-image-01' | 'gemini-3-pro-image-preview';
+// Exam-specific syllabus references (textbook scope boundaries)
+const EXAM_SYLLABUS_CONTEXT: Record<string, Record<string, string>> = {
+  KCET: {
+    Math: 'PUC II Year Mathematics textbook (Karnataka). Topics: Relations & Functions, Algebra (Matrices, Determinants), Calculus (Limits, Derivatives, Integrals, Differential Eqs), Vectors & 3D, Linear Programming, Probability.',
+    Physics: 'PUC II Year Physics (Karnataka). Topics as per NCERT Class 12 Physics Part I & II.',
+    Chemistry: 'PUC II Year Chemistry (Karnataka). Topics as per NCERT Class 12 Chemistry Part I & II.',
+    Biology: 'PUC II Year Biology (Karnataka). Topics as per NCERT Class 12 Biology.'
+  },
+  NEET: {
+    Physics: 'NCERT Class 11 & 12 Physics. Topics: Mechanics, Thermodynamics, Waves, Electrostatics, Current Electricity, Magnetism, Optics, Modern Physics. Strictly NCERT scope only.',
+    Chemistry: 'NCERT Class 11 & 12 Chemistry. Topics: Physical, Organic, Inorganic Chemistry as per NMC syllabus. Strictly NCERT scope only.',
+    Biology: 'NCERT Class 11 & 12 Biology. Topics: Diversity, Cell Biology, Plant & Human Physiology, Genetics, Evolution, Ecology, Biotechnology. Strictly NCERT scope only.',
+    Math: 'Not applicable for NEET.'
+  },
+  JEE: {
+    Math: 'NCERT Class 11 & 12 Mathematics + JEE Main syllabus. Topics: Algebra, Coordinate Geometry, Calculus, Vectors & 3D, Statistics, Probability. Strictly within NTA-published JEE Main syllabus.',
+    Physics: 'NCERT Class 11 & 12 Physics + JEE Main addition for Modern Physics, Semiconductors. Strictly NTA-published scope.',
+    Chemistry: 'NCERT Class 11 & 12 Chemistry. Organic, Inorganic, Physical Chemistry as per NTA-published JEE Main syllabus.',
+    Biology: 'Not applicable for JEE.'
+  },
+  CBSE: {
+    Math: 'NCERT Class 12 Mathematics (CBSE). Chapters: Relations & Functions, Inverse Trig, Matrices, Determinants, Continuity & Diff., Applications of Derivatives, Integrals, Diff. Equations, Vectors, 3D Geometry, LPP, Probability.',
+    Physics: 'NCERT Class 12 Physics Parts I & II (CBSE). All chapters as prescribed by CBSE.',
+    Chemistry: 'NCERT Class 12 Chemistry Parts I & II (CBSE). All chapters as prescribed by CBSE.',
+    Biology: 'NCERT Class 12 Biology (CBSE). All chapters as prescribed by CBSE.'
+  }
+};
+
+export type GenerationMethod = 'gemini-3-flash-preview' | 'gemini-2.0-flash-lite' | 'gemini-2.5-flash-latest' | 'gemini-1.5-pro' | 'gemini-2.0-pro-exp' | 'gemini-3-pro' | 'gemini-2.0-flash-exp-image-01' | 'gemini-3-pro-image-preview' | 'gemini-3-pro-image' | 'gemini-2.5-flash-image';
 
 export interface GenerationResult {
   imageData: string; // Base64 encoded PNG image
@@ -150,9 +178,15 @@ export const generateGemini3ProImage = async (
   questionText: string,
   subject: string,
   apiKey: string,
-  onStatusUpdate?: (status: string) => void
+  onStatusUpdate?: (status: string) => void,
+  examContext?: string
 ): Promise<GenerationResult> => {
   const genAI = new GoogleGenerativeAI(apiKey);
+
+  // Resolve exam-specific syllabus scope
+  const examKey = examContext || 'CBSE';
+  const syllabusScope = EXAM_SYLLABUS_CONTEXT[examKey]?.[subject] ||
+    `Official Class 12 ${subject} textbook for ${examKey}. Strictly follow the prescribed syllabus only.`;
 
   // STEP 1: Generate pedagogical content
   onStatusUpdate?.('Professor is drafting the core logic...');
@@ -177,26 +211,24 @@ export const generateGemini3ProImage = async (
     }
   });
 
-  const contentPrompt = `Act as a world-class Professor and Visual Learning Expert for Class 12 ${subject}.
+  const contentPrompt = `Act as an elite Class 12 ${subject} Professor for the ${examKey} exam.
+
+=== CRITICAL SYLLABUS BOUNDARY ===
+You MUST strictly follow ONLY the content covered in: ${syllabusScope}
+DO NOT include any content beyond this official prescribed scope.
 
 TOPIC: "${topic}"
 QUESTION CONTEXT: ${questionText}
 
-Generate comprehensive pedagogical content with these components:
-
-1. visualConcept: Concise, clear title for the concept
-2. detailedNotes: First principles explanation - deep dive into the 'why'
-3. mentalAnchor: Powerful metaphor or analogy for memory retention
-4. proceduralLogic: Step-by-step problem-solving approach
-5. keyFormulas: Essential formulas in LaTeX format (if applicable)
-6. examTip: Specific exam strategy for CBSE Board exams
-7. pitfalls: Common mistakes students make
-8. imageDescription: Detailed description for a perfect hand-drawn sketchnote:
-   - Overall layout and composition (landscape orientation)
-   - Key visual elements (diagrams, icons, metaphors)
-   - Text elements (headers, labels, annotations, formulas)
-   - Visual flow (arrows, numbered steps, connectors)
-   - Style notes (hand-drawn, clean lines, educational aesthetic)`;
+Generate a complete learning blueprint grounded STRICTLY in ${examKey} syllabus:
+1. visualConcept: Engaging title
+2. detailedNotes: Step-by-step breakdown using textbook methods
+3. mentalAnchor: One memorable analogy
+4. proceduralLogic: Algorithmic steps (4-5 steps)
+5. keyFormulas: 2-4 essential formulas (LaTeX)
+6. examTip: Specific ${examKey} strategy
+7. pitfalls: Common student errors in ${examKey}
+8. imageDescription: Detailed instructions for the visual layout`;
 
   const contentResult = await textModel.generateContent(contentPrompt);
   const blueprint = JSON.parse(contentResult.response.text());
@@ -218,10 +250,12 @@ Generate comprehensive pedagogical content with these components:
   // Convert LaTeX formulas to readable notation for image generation
   const displayFormulas = blueprint.keyFormulas.map(f => latexToImageNotation(f));
 
-  const imagePrompt = `Create a professional hand-drawn educational sketchnote illustration:
+  const imagePrompt = `Create a CAPTIVATING, VIBRANT hand-drawn educational sketchnote:
 
-SUBJECT: ${subject} (Class 12 CBSE Board Exam)
+SUBJECT: ${subject} (Class 12 ${examKey} Exam)
 TOPIC: ${blueprint.visualConcept}
+
+⚠️ STRICT CONTENT RULE: Only include content that is EXPLICITLY part of the ${examKey} ${subject} syllabus for "${topic}".
 
 VISUAL CONTENT TO INCLUDE:
 ${blueprint.imageDescription}
@@ -233,12 +267,15 @@ FORMULAS TO DISPLAY (Write EXACTLY as shown):
 ${displayFormulas.join('\n')}
 
 STYLE REQUIREMENTS:
-- Hand-drawn aesthetic with clean, confident black ink lines
-- Professional educational sketchnote style
-- Cream or white paper background
-- Clear visual hierarchy with bold headers and readable subheaders
-- Labeled diagrams with arrows showing relationships
-- Visual icons and metaphors to represent concepts
+- CAPTIVATING hand-drawn sketchnote masterpiece with artistic flair
+- VIBRANT and PREMIUM COLOR PALETTE: 
+  - Deep Indigo (#1e1b4b) for primary structures
+  - Electric Teal (#14b8a6) or Vivid Violet (#8b5cf6) for formula highlight zones
+  - Vibrant Emerald for success/tips, and Bright Coral for warnings
+- Clean white background with artistic-yet-organized hand-drawn layout
+- Whimsical visual hierarchy with creative headers and hand-lettered annotations
+- Labeled diagrams with creative, hand-drawn arrows showing relationships
+- Whimsical visual icons and metaphors (hand-illustrated style)
 ${subject === 'Math' ? `
 CRITICAL MATHEMATICAL NOTATION REQUIREMENTS:
 1. FRACTIONS: Use horizontal fraction bar with numerator above, denominator below (e.g., dy/dx or dy over dx)
@@ -251,27 +288,21 @@ CRITICAL MATHEMATICAL NOTATION REQUIREMENTS:
 8. OPERATORS: × ÷ ± ≤ ≥ ≠ ≈ ∞ → ∫ Σ (use proper symbols)
 9. COPY EXACTLY what is shown - do not invent notation
 
-MATH DIAGRAM REQUIREMENTS:
-- Coordinate grids: Clean axes with tick marks and labels
-- Geometric figures: Precise angles, labeled vertices (A, B, C), dimension lines
-- Function graphs: Smooth curves with equation labels, marked critical points
-- Vectors: Arrows with component labels and magnitude
-- Matrices: Bracket notation with aligned rows and columns
-- Number lines: Clearly marked intervals, shaded regions for inequalities
-- 3D diagrams: Isometric view with dashed hidden lines
-- Tree diagrams: Clean branching structure with probability values
-- Venn diagrams: Overlapping circles with labeled regions
-- Use blue for primary elements, red for solutions/critical points, gray for construction lines` :
-      `- Mathematical formulas clearly displayed`}
-- Numbered steps or process flows
-- Small illustrative sketches to support understanding
-- Callout boxes for key insights
-- Proper spacing and visual balance
-- Scientific accuracy for all diagrams
+MATH SKETCH REQUIREMENTS:
+- Coordinate grids: Artistic-yet-precise axes with ticks and labels
+- Geometric figures: Beautifully hand-drawn accurate angles and shapes
+- Vector/Matrix zones: Creative hand-drawn borders and elegant alignment
+- Use Vivid Indigo for primary elements, Emerald for solutions, Gray for construction lines` :
+      `- Mathematical formulas artistically and elegantly displayed`}
+- Artistic process flows with a human, hand-drawn rhythm
+- Creative illustrative sketches to support deep understanding
+- Whimsical callout boxes with artistic borders for key insights
+- Perfect visual balance that feels alive and engaging
+- High-end educational Sketchnote aesthetic (Artistic masterpiece)
 
-PURPOSE: Create a complete visual learning aid for Class 12 Board exam students.`;
+PURPOSE: Create a CAPTIVATING visual learning sketchnote for Class 12 Board exam students.`;
 
-  const imageResult = await retryWithBackoff(() => imageModel.generateContent(imagePrompt));
+  const imageResult = await retryWithBackoff(() => imageModel.generateContent(imagePrompt)) as any;
   const imagePart = imageResult.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
 
   if (!imagePart?.inlineData) {
@@ -297,9 +328,15 @@ export const generateGemini25FlashImage = async (
   questionText: string,
   subject: string,
   apiKey: string,
-  onStatusUpdate?: (status: string) => void
+  onStatusUpdate?: (status: string) => void,
+  examContext?: string
 ): Promise<GenerationResult> => {
   const genAI = new GoogleGenerativeAI(apiKey);
+
+  // Resolve exam-specific syllabus scope
+  const examKey = examContext || 'CBSE';
+  const syllabusScope = EXAM_SYLLABUS_CONTEXT[examKey]?.[subject] ||
+    `Official Class 12 ${subject} textbook for ${examKey}. Strictly follow the prescribed syllabus only.`;
 
   // STEP 1: Generate pedagogical content
   onStatusUpdate?.('Professor is drafting the core logic...');
@@ -328,41 +365,28 @@ export const generateGemini25FlashImage = async (
     }
   });
 
-  const contentPrompt = `Act as an elite Class 12 ${subject} Professor creating a COMPREHENSIVE LEARNING SKETCHNOTE.
+  const contentPrompt = `Act as an elite Class 12 ${subject} Professor for the ${examKey} exam.
+
+=== CRITICAL SYLLABUS BOUNDARY ===
+You MUST strictly follow ONLY the content covered in: ${syllabusScope}
+DO NOT include any content beyond this official prescribed scope.
 
 TOPIC: "${topic}"
 CONTEXT QUESTION: ${questionText}
 
-Your goal: Help students MASTER this topic through complete understanding, pattern recognition, and practice variations.
-
-Generate a complete learning blueprint with:
-
-1. visualConcept: Clear, engaging title (e.g., "Differential Equations - Variable Separable Method")
-
-2. coreTheory: Core concept explanation in 2-3 sentences using first principles. What IS this topic fundamentally?
-
-3. keyFormulas: 3-5 essential formulas in LaTeX notation (e.g., "\\frac{dy}{dx} = f(x)g(y)")
-
-4. solvedExample: Work through the given question completely, showing every calculation step
-
-5. stepByStep: Universal method to solve ANY question of this type (4-6 algorithmic steps)
-
-6. commonVariations: List 4-5 common variations of this question type students will encounter
-   Examples: "When equation has trigonometric terms", "When variables appear on both sides", etc.
-
-7. patternRecognition: How to instantly identify this question type in exams (key indicators/keywords)
-
-8. relatedConcepts: 3-4 related topics students should connect this with
-
-9. memoryTricks: 2-3 powerful mnemonics, acronyms, or memory aids
-
-10. commonMistakes: 3-4 typical errors students make and how to avoid them
-
-11. examStrategy: Specific board exam tactics (time management, common pitfalls, scoring tips)
-
-12. quickReference: Cheat-sheet items - formulas, conditions, special cases (3-5 items)
-
-Make it comprehensive yet concise - perfect for revision and mastery.`;
+Generate a complete learning blueprint grounded STRICTLY in ${examKey} syllabus:
+1. visualConcept: Engaging title
+2. coreTheory: Core concept explanation (2-3 sentences)
+3. keyFormulas: 3-5 essential formulas (LaTeX)
+4. solvedExample: Complete solution following textbook methods
+5. stepByStep: Universal solving method (4-6 steps)
+6. commonVariations: 4-5 common question variations in ${examKey}
+7. patternRecognition: How to identify this question type in ${examKey}
+8. relatedConcepts: 3-4 connected topics
+9. memoryTricks: 2-3 mnemonics/memory aids
+10. commonMistakes: 3-4 typical errors to avoid
+11. examStrategy: ${examKey} exam tactics
+12. quickReference: Cheat-sheet items (3-5)`;
 
   const contentResult = await textModel.generateContent(contentPrompt);
   const blueprint = JSON.parse(contentResult.response.text());
@@ -387,11 +411,13 @@ Make it comprehensive yet concise - perfect for revision and mastery.`;
   const displayVariations = blueprint.commonVariations.slice(0, 3).map(v => latexToImageNotation(v));
   const displayReference = blueprint.quickReference.map(r => latexToImageNotation(r));
 
-  const imagePrompt = `Create a clear educational visual note for Class 12 ${subject} students preparing for board exams.
+  const imagePrompt = `Create an ARTISTIC, VIBRANT hand-drawn sketchnote for Class 12 ${subject} [${examKey}].
+
+⚠️ STRICT CONTENT RULE: Only include content that is EXPLICITLY part of the ${examKey} ${subject} syllabus for "${topic}".
 
 TOPIC: "${blueprint.visualConcept}"
 
-CONTENT TO DISPLAY (organize in labeled sections with icons):
+CONTENT TO DISPLAY (organize in creative hand-drawn sections with artistic icons):
 
 📚 CORE CONCEPT:
 ${blueprint.coreTheory}
@@ -448,19 +474,17 @@ CRITICAL RENDERING INSTRUCTIONS FOR MATHEMATICAL ACCURACY:
 9. DO NOT invent notation - copy EXACTLY what is shown above
 
 VISUAL STYLE:
-- White background
-- Clear handwritten style (neat, not sketchy)
-- Section boxes with rounded corners
-- Icons: 📚📐✓🎯🔄🧠⚠️⚡ before each section
-- Blue ink for main content
-- Red ink for warnings/mistakes section
-- Yellow highlighting for memory tricks
-- Arrows to show relationships
-- Clean spacing between sections
+- CAPTIVATING hand-drawn sketchnote with artistic mastery.
+- VIBRANT, HIGH-END COLOR SCHEME (Vivid Navy, Electric Teal, Sunburst Gold).
+- Whimsical-yet-organized hand-drawn boxes and borders.
+- Artistic handwriting style (neat-yet-organic).
+- Creative hand-drawn icons (📚📐✓🎯🔄🧠⚠️⚡).
+- Perfect visual flow and rhythmic organization.
+- High-end educational sketchnote masterpiece feel.
 
-PRIORITY: Mathematical accuracy is MORE important than artistic style. If unsure how to draw something, write it clearly and legibly.`;
+PURPOSE: Create a CAPTIVATING, artistic visual summary for revision.`;
 
-  const imageResult = await retryWithBackoff(() => imageModel.generateContent(imagePrompt));
+  const imageResult = await retryWithBackoff(() => imageModel.generateContent(imagePrompt)) as any;
   const imagePart = imageResult.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
 
   if (!imagePart?.inlineData) {
@@ -821,6 +845,81 @@ Be STRICT but FAIR. This content will be used by students preparing for board ex
   }
 };
 
+/**
+ * Helper to generate and validate a specific page with retry logic for high quality
+ * Internal helper for generateTopicBasedSketch
+ */
+const generateAndValidatePage = async (
+  pageNumber: number,
+  pageTitle: string,
+  prompt: string,
+  topic: string,
+  subject: string,
+  apiKey: string,
+  imageModel: any,
+  onStatusUpdate?: (status: string) => void,
+  maxAttempts = 2
+): Promise<{ pageNumber: number, title: string, imageData: string, validation: ValidationResult } | null> => {
+  let attempts = 0;
+  let lastImage = "";
+  let lastValidation: ValidationResult | undefined;
+
+  while (attempts < maxAttempts) {
+    const statusPrefix = attempts > 0 ? `(Attempt ${attempts + 1}) ` : "";
+    onStatusUpdate?.(`${statusPrefix}Generating Page ${pageNumber}: ${pageTitle}...`);
+
+    // If it's a retry, we append the specific issues found to force the model to fix them
+    const currentPrompt = (attempts > 0 && lastValidation)
+      ? `${prompt}\n\nCRITICAL FIXES NEEDED FROM PREVIOUS ATTEMPT (DO NOT MAKE THESE MISTAKES AGAIN):\n- ${lastValidation.issues.join('\n- ')}\n\nPlease ensure ALL these issues are resolved in this new version.`
+      : prompt;
+
+    try {
+      const result = await retryWithBackoff(() => imageModel.generateContent(currentPrompt)) as any;
+      const imagePart = result.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
+
+      if (!imagePart?.inlineData?.data) {
+        attempts++;
+        continue;
+      }
+
+      const imageData = `data:image/png;base64,${imagePart.inlineData.data}`;
+
+      // Step 2: Validate the generated image
+      const validation = await validateGeneratedContent(
+        imageData,
+        pageTitle,
+        topic,
+        subject,
+        apiKey,
+        onStatusUpdate
+      );
+
+      // If approved OR only minor issues remain, we accept it to save time/cost
+      if (validation.approved || (validation.severity !== 'critical' && validation.severity !== 'major')) {
+        return { pageNumber, title: pageTitle, imageData, validation };
+      }
+
+      // If we have MAJOR/CRITICAL issues, we store it and try again if we have attempts left
+      lastImage = imageData;
+      lastValidation = validation;
+      attempts++;
+
+      if (attempts < maxAttempts) {
+        onStatusUpdate?.(`⚠️ Page ${pageNumber} has ${validation.severity} issues. Re-generating...`);
+      }
+    } catch (error) {
+      console.error(`Error generating page ${pageNumber}:`, error);
+      attempts++;
+    }
+  }
+
+  // If we run out of retries, return the best we got (or null if it totally failed)
+  if (lastImage) {
+    return { pageNumber, title: pageTitle, imageData: lastImage, validation: lastValidation! };
+  }
+  return null;
+};
+
 // Topic-based multi-page result interface
 export interface TopicBasedSketchResult {
   topic: string;
@@ -842,21 +941,30 @@ export interface TopicBasedSketchResult {
   };
 }
 
+
+
 /**
  * Generate topic-based multi-page visual study guide
  * Groups questions by topic and creates comprehensive 3-4 page study material
+ * Content is STRICTLY grounded to the exam-specific official textbook syllabus.
  */
 export const generateTopicBasedSketch = async (
   topic: string,
   questions: Array<{ id: string, text: string, difficulty?: string, marks?: number }>,
   subject: string,
   apiKey: string,
-  onStatusUpdate?: (status: string) => void
+  onStatusUpdate?: (status: string) => void,
+  examContext?: string
 ): Promise<TopicBasedSketchResult> => {
   const genAI = new GoogleGenerativeAI(apiKey);
 
+  // Resolve exam-specific syllabus scope
+  const examKey = examContext || 'CBSE';
+  const syllabusScope = EXAM_SYLLABUS_CONTEXT[examKey]?.[subject] ||
+    `Official Class 12 ${subject} textbook for ${examKey}. Strictly follow the prescribed syllabus only.`;
+
   // STEP 1: Analyze all questions and create comprehensive content
-  onStatusUpdate?.(`Analyzing ${questions.length} questions in ${topic}...`);
+  onStatusUpdate?.(`Analyzing ${questions.length} questions in ${topic} [${examKey}]...`);
 
   const textModel = genAI.getGenerativeModel({
     model: 'gemini-3-flash-preview',
@@ -891,22 +999,39 @@ export const generateTopicBasedSketch = async (
 
   const allQuestions = questions.map((q, i) => `${i + 1}. [${q.difficulty || 'Moderate'}, ${q.marks || 1}M] ${q.text}`).join('\n\n');
 
-  const analysisPrompt = `Analyze these ${questions.length} Class 12 ${subject} questions on topic "${topic}" and create a comprehensive study guide.
+  const analysisPrompt = `You are a highly precise academic content specialist for the ${examKey} exam.
 
-QUESTIONS:
+You are generating study content for the topic "${topic}" in Class 12 ${subject}.
+
+=== CRITICAL SYLLABUS BOUNDARY ===
+You MUST strictly follow ONLY the content covered in: ${syllabusScope}
+
+DO NOT include:
+- Any content outside the official prescribed syllabus for ${examKey}
+- Concepts from other exam boards or syllabi unless explicitly shared
+- Advanced or university-level material
+- Topics listed as "deleted" or "not in syllabus" by the exam board
+
+The following actual exam questions from this topic were scanned from real papers:
 ${allQuestions}
 
-Create a complete learning resource with:
-1. coreTheory: Fundamental concept explanation (3-4 sentences covering the essence of this topic)
-2. keyFormulas: ALL essential formulas students need (5-8 formulas in LaTeX)
-3. patterns: How to recognize this question type (3-4 identification patterns)
-4. solvedExamples: Select 3-4 representative questions covering easy→medium→hard difficulty with complete solutions
-5. variations: Common question variations students will encounter (5-6 variations)
-6. commonMistakes: Critical errors students make (4-5 mistakes with explanations)
-7. examStrategies: Board exam tactics for this topic (3-4 specific strategies)
-8. quickReference: Cheat sheet items (5-7 must-remember points)
+Using ONLY the content that falls within the official ${examKey} ${subject} syllabus for "${topic}", generate:
 
-Focus on CBSE Class 12 board exam preparation. Be comprehensive but concise.`;
+1. coreTheory: The exact definition/concept as it appears in the prescribed textbook (2-3 precise sentences). No paraphrasing beyond what the standard textbook says.
+
+2. keyFormulas: ALL formulas from the textbook that apply to this topic (in LaTeX). Only include formulas explicitly listed in the official ${examKey} syllabus for ${subject}.
+
+3. patterns: How to identify this question type in the ${examKey} exam (3-4 specific recognition patterns based on real paper trends).
+
+4. solvedExamples: Pick 2-3 from the scanned questions above (covering different difficulty levels). Solve them with complete step-by-step working as the textbook method prescribes.
+
+5. variations: Common question variations seen in ${examKey} papers for this topic (4-5 variations, grounded in actual exam patterns).
+
+6. commonMistakes: Errors students make specifically on ${examKey} exam for this type of question (3-4 precise mistakes with correct approach).
+
+7. examStrategies: Specific tactics for scoring on this topic in ${examKey} (time management, marking scheme awareness, answer format).
+
+8. quickReference: The minimum set of facts/formulas a student MUST memorize for ${examKey} — nothing beyond prescribed scope.`;
 
   const analysisResult = await textModel.generateContent(analysisPrompt);
   const blueprint = JSON.parse(analysisResult.response.text());
@@ -918,335 +1043,166 @@ Focus on CBSE Class 12 board exam preparation. Be comprehensive but concise.`;
     }
   });
 
-  // STEP 2: Generate multi-page visual study guide
+  // STEP 2: Generate multi-page visual study guide IN PARALLEL for speed
   const imageModel = genAI.getGenerativeModel({
     model: "gemini-3-pro-image-preview"
   });
 
-  const pages: TopicBasedSketchResult['pages'] = [];
-
-  // PAGE 1: Theory + Formulas + Pattern Recognition
-  onStatusUpdate?.('Generating Page 1: Core Theory & Formulas...');
   const displayFormulas = blueprint.keyFormulas.map(f => latexToImageNotation(f));
 
-  const page1Prompt = `Create an ENGAGING, MEMORABLE study guide page for Class 12 ${subject} that students will REMEMBER FOREVER!
+  // PAGE 1 PROMPT: Theory + Formulas + Pattern Recognition
+  const page1Prompt = `Create a VIBRANT, CAPTIVATING hand-drawn sketchnote masterpiece for Class 12 ${subject} [${examKey}].
 
-TITLE: 🎯 ${topic} - MASTER CONCEPTS 🎯
+⚠️ STRICT CONTENT RULE: Only include content that is EXPLICITLY part of the ${examKey} ${subject} textbook for "${topic}". Do NOT add content from other chapters, higher education, or other exam boards.
 
-VISUAL LAYOUT - Make it POP with colors and visual anchors:
-
-┌─────────────────────────────────────────┐
-│ 💡 BIG IDEA (Top banner - gradient blue background with white text):
-│ ${blueprint.coreTheory}
-│ [Add a simple visual icon or diagram representing the core concept]
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ 📐 FORMULAS YOU MUST MEMORIZE (Bright yellow/orange boxes with shadows):
-${displayFormulas.map((f, i) => `│ ${i + 1}. ${f} ✨ [Add memory trick icon]`).join('\n')}
-│
-│ 💭 MEMORY TRICK: Create a visual mnemonic or story connecting formulas
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ 🔍 SPOT THE QUESTION (Green highlight boxes):
-${blueprint.patterns.map((p, i) => `│ ✓ ${p}`).join('\n')}
-│
-│ 🎯 QUICK TIP: If you see [keyword], think [concept]
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ ⚡ DID YOU KNOW? (Cyan info box with lightbulb icon):
-│ [Add 1 fascinating real-world application or historical fact]
-└─────────────────────────────────────────┘
-
-VISUAL DESIGN REQUIREMENTS:
-✨ Use BRIGHT, CONTRASTING COLORS: Blue headers, Yellow formula boxes, Green tip boxes, Red warning boxes
-📦 Put formulas in PROMINENT COLORED BOXES with drop shadows
-🎨 Add simple icons/emojis next to each section (brain 🧠, lightning ⚡, target 🎯, star ✨)
-📊 Include small visual diagrams or graphs where relevant
-🔢 Use large, bold fonts for important formulas
-💡 Add visual memory anchors (associating concepts with images)
-
-MATHEMATICAL ACCURACY:
-1. FRACTIONS: Use horizontal bar ─── or dy/dx format
-2. EXPONENTS: Clear superscripts (x², x³, y', y'')
-3. SQUARE ROOTS: √ symbol with vinculum (line over content)
-4. DERIVATIVES: dy/dx with proper spacing
-5. GREEK LETTERS: θ α β π λ μ σ γ δ (large and clear)
-6. OPERATORS: × ÷ ± ≤ ≥ ≠ ≈ ∞ → ∫ Σ
-7. MATRICES: Proper brackets [ ] or ( )
-
-MAKE IT MEMORABLE: Use colors, boxes, icons, visual anchors, and spatial organization!`;
-
-  const page1Result = await retryWithBackoff(() => imageModel.generateContent(page1Prompt));
-  const page1Image = page1Result.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
-  if (page1Image?.inlineData?.data) {
-    const page1ImageData = `data:image/png;base64,${page1Image.inlineData.data}`;
-
-    // Validate content quality before saving
-    const validation = await validateGeneratedContent(
-      page1ImageData,
-      "Core Theory & Formulas",
-      topic,
-      subject,
-      apiKey,
-      onStatusUpdate
-    );
-
-    pages.push({
-      pageNumber: 1,
-      title: "Core Theory & Formulas",
-      imageData: page1ImageData,
-      validation
-    });
-  }
-
-  // PAGE 2: Solved Examples
-  onStatusUpdate?.('Generating Page 2: Solved Examples...');
-
-  const examples = blueprint.solvedExamples.slice(0, 3).map((ex: any, i: number) =>
-    `EXAMPLE ${i + 1} [${ex.difficulty}]:\nQ: ${latexToImageNotation(ex.question)}\nSolution: ${latexToImageNotation(ex.solution.substring(0, 200))}`
-  ).join('\n\n');
-
-  const page2Prompt = `Create a VISUALLY STUNNING solved examples page for Class 12 ${subject} that makes learning FUN!
-
-TITLE: 📝 ${topic} - SOLVED EXAMPLES (WITH SHORTCUTS!) 📝
-
-${examples}
-
-VISUAL LAYOUT FOR EACH EXAMPLE:
-
-┌─────────────────────────────────────────┐
-│ EXAMPLE 1 [🟢 EASY]  (Green badge with difficulty level)
-│
-│ ❓ QUESTION (Blue box with slight shadow):
-│ [Question text here - use large, readable font]
-│
-│ 💡 SMART APPROACH (Yellow highlight):
-│ "Think: [One-line strategy before solving]"
-│
-│ 📊 SOLUTION (White background with step boxes):
-│ Step 1 → [Work shown clearly]
-│      ↓ (Use arrows between steps)
-│ Step 2 → [Continue work]
-│      ↓
-│ Step 3 → [Final calculation]
-│
-│ ✅ ANSWER (Green box with checkmark):
-│ [Final answer in LARGE BOLD text]
-│
-│ ⚡ SHORTCUT TIP (Orange star box):
-│ [Quick method or memory trick for this type]
-└─────────────────────────────────────────┘
-
-EXAMPLE 2 [🟡 MODERATE] (Yellow badge)
-[Same structure with more complex steps]
-
-EXAMPLE 3 [🔴 HARD] (Red badge)
-[Same structure with advanced techniques]
-
-VISUAL REQUIREMENTS:
-🎨 Use COLOR CODING: Green=Easy, Yellow=Moderate, Red=Hard
-📦 Put each example in a distinct colored border
-➡️ Use ARROWS (→, ↓) to show flow between steps
-✨ Highlight KEY STEPS with yellow background
-🔢 Make FINAL ANSWERS stand out (large, bold, colored box)
-💡 Add SHORTCUT/TRICK boxes in orange with star icons
-📐 Draw small diagrams/graphs where helpful
-🎯 Number steps clearly (1→2→3)
-
-MAKE SOLUTIONS VISUAL: Use boxes, arrows, color highlights, and spatial flow to make each step crystal clear!`;
-
-  const page2Result = await retryWithBackoff(() => imageModel.generateContent(page2Prompt));
-  const page2Image = page2Result.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
-  if (page2Image?.inlineData?.data) {
-    const page2ImageData = `data:image/png;base64,${page2Image.inlineData.data}`;
-
-    // Validate content quality before saving
-    const validation = await validateGeneratedContent(
-      page2ImageData,
-      "Solved Examples",
-      topic,
-      subject,
-      apiKey,
-      onStatusUpdate
-    );
-
-    pages.push({
-      pageNumber: 2,
-      title: "Solved Examples",
-      imageData: page2ImageData,
-      validation
-    });
-  }
-
-  // PAGE 3: Variations, Mistakes, Strategies
-  onStatusUpdate?.('Generating Page 3: Mistakes & Strategies...');
-
-  const page3Prompt = `Create a POWER-PACKED exam tactics page for Class 12 ${subject} that PREVENTS MISTAKES and BOOSTS SCORES!
-
-TITLE: ⚡ ${topic} - DON'T MAKE THESE MISTAKES! ⚡
+TITLE: ${topic} — Core Concepts [${examKey}]
 
 VISUAL LAYOUT:
 
-┌─────────────────────────────────────────┐
-│ 🔄 QUESTION VARIATIONS (Yellow gradient boxes):
-${blueprint.variations.slice(0, 5).map((v: string, i: number) => `│ Variation ${i + 1}: ${latexToImageNotation(v)}
-│ [Add small icon showing how this differs from standard]`).join('\n')}
-│
-│ 💡 TIP: Examiners LOVE these twists! Know them all!
-└─────────────────────────────────────────┘
+💡 CORE CONCEPT (Top section — sourced directly from ${examKey} textbook):
+${blueprint.coreTheory}
+[Draw a creative, artistic diagram or visual metaphor directly relevant to this concept — make it visually striking]
 
-┌─────────────────────────────────────────┐
-│ ❌ COMMON MISTAKES (RED WARNING BOXES with X icons):
-${blueprint.commonMistakes.slice(0, 4).map((m: string, i: number) => `│
-│ MISTAKE #${i + 1}: ${latexToImageNotation(m)}
-│ [Show incorrect work with red X]
-│ ✅ CORRECT WAY: [Show right method with green checkmark]`).join('\n')}
-│
-│ ⚠️ REMEMBER: These mistakes cost you 10-15 marks!
-└─────────────────────────────────────────┘
+📐 TEXTBOOK FORMULAS (Only formulas explicitly in the ${examKey} ${subject} syllabus):
+${displayFormulas.map((f, i) => `${i + 1}. ${f}`).join('\n')}
 
-┌─────────────────────────────────────────┐
-│ 🎯 EXAM WINNING STRATEGIES (Green boxes with star icons):
-${blueprint.examStrategies.map((s: string, i: number) => `│ ${i + 1}. ${s} ✨`).join('\n')}
-│
-│ 🏆 PRO TIP: Follow these to score 95%+
-└─────────────────────────────────────────┘
+🔍 HOW TO SPOT THIS QUESTION TYPE (Based on real ${examKey} paper patterns):
+${blueprint.patterns.map((p, i) => `✓ ${p}`).join('\n')}
 
-┌─────────────────────────────────────────┐
-│ ⏱️ TIME MANAGEMENT (Blue clock icon box):
-│ • This topic takes [X] minutes typically
-│ • Allocate [Y] mins for calculation, [Z] for checking
-│ • Skip if stuck > 5 mins, come back later
-└─────────────────────────────────────────┘
+🎯 EXAM TACTIC [${examKey} specific]: Focus on identifying the exact sub-type before applying formula.
 
-VISUAL REQUIREMENTS:
-🔴 Use BRIGHT RED for mistakes with X marks and warning symbols
-✅ Show CORRECT vs INCORRECT side-by-side comparisons
-🟡 Yellow highlighting for variations
-🟢 Green checkmarks and boxes for strategies
-⚡ Add lightning bolts, stars, and warning symbols
-📊 Use before/after visual comparisons
-🎨 Make mistakes VISUALLY OBVIOUS so students remember NOT to do them
+⚡ TEXTBOOK ANCHOR: One key insight from the ${examKey} prescribed textbook for ${topic}.
 
-MAKE IT IMPACTFUL: Students should feel "I'll NEVER make that mistake!" after seeing this page!`;
+VISUAL DESIGN REQUIREMENTS:
+✨ Use a PREMIUM, VIBRANT, and CAPTIVATING COLOR PALETTE: 
+   - Deep Indigo or Charcoal for primary headers
+   - Electric Teal (#2dd4bf) or Bright Violet (#8b5cf6) for formula highlight zones
+   - Vibrant Emerald (#10b981) for patterns and high-score tips
+   - Sun-Kissed Amber (#f59e0b) for key anchors
+📦 Use elegant hand-drawn boxes with artistic borders and whimsical connectors.
+🎨 Add beautiful, hand-drawn doodles and minimalist-yet-creative icons.
+📊 Include artistic-yet-precise diagrams or graphs with a human, hand-drawn touch.
+🔢 Use expressive, clear, hand-lettered style for important formulas.
+💡 Add captivating visual memory anchors that make the page feel like an artistic study guide.
 
-  const page3Result = await retryWithBackoff(() => imageModel.generateContent(page3Prompt));
-  const page3Image = page3Result.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
-  if (page3Image?.inlineData?.data) {
-    const page3ImageData = `data:image/png;base64,${page3Image.inlineData.data}`;
+CRITICAL MATHEMATICAL ACCURACY:
+1. FRACTIONS: Use horizontal bar ─── or dy/dx format.
+2. EXPONENTS: Clear superscripts (x², x³, y', y'').
+3. SQUARE ROOTS: √ symbol with vinculum (line over content).
+4. MATRICES/DETERMINANTS: Use proper brackets [ ] or ( ). 
+5. GREEK LETTERS: θ α β π λ μ σ γ δ (large and clear).
+6. OPERATORS: × ÷ ± ≤ ≥ ≠ ≈ ∞ → ∫ Σ
 
-    // Validate content quality before saving
-    const validation = await validateGeneratedContent(
-      page3ImageData,
-      "Variations & Exam Tactics",
-      topic,
-      subject,
-      apiKey,
-      onStatusUpdate
-    );
+MAKE IT CAPTIVATING: Create an artistic sketchnote that is a visual feast, perfectly organized, and makes learning feel like an adventure!`;
 
-    pages.push({
-      pageNumber: 3,
-      title: "Variations & Exam Tactics",
-      imageData: page3ImageData,
-      validation
-    });
-  }
+  // PAGE 2 PROMPT: Solved Examples
+  const examEx = blueprint.solvedExamples.slice(0, 2).map((ex: any, i: number) =>
+    `EXAMPLE ${i + 1} [${ex.difficulty}]:\nQ: ${latexToImageNotation(ex.question)}\nSolution: ${latexToImageNotation(ex.solution.substring(0, 250))}`
+  ).join('\n\n');
 
-  // PAGE 4: Quick Reference Cheat Sheet
-  onStatusUpdate?.('Generating Page 4: Quick Reference...');
+  const page2Prompt = `Create a CAPTIVATING hand-drawn solved examples sketchnote for Class 12 ${subject} [${examKey}].
 
-  const page4Prompt = `Create an ULTIMATE CHEAT SHEET for Class 12 ${subject} - Everything students need ON ONE PAGE!
+⚠️ STRICT CONTENT RULE: All solutions MUST strictly follow the method prescribed in the ${examKey} ${subject} textbook for "${topic}". No methods from other boards or higher education.
 
-TITLE: 📋 ${topic} - ULTIMATE CHEAT SHEET (Memorize This!) 📋
+TITLE: ${topic} — Solved from Real ${examKey} Papers
 
-LAYOUT - DENSELY PACKED BUT ORGANIZED:
+${examEx}
 
-┌─────────────────────────────────────────┐
-│ 🔥 TOP 5 MUST-KNOW FORMULAS (Large yellow boxes):
-${blueprint.quickReference.slice(0, 5).map((ref: string, i: number) => `│ ${i + 1}. ${latexToImageNotation(ref)} ★`).join('\n')}
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ 💡 MEMORY TRICKS (Light blue boxes):
-│ • [Mnemonic for remembering formulas]
-│ • [Visual anchor for key concept]
-│ • [Story/association for difficult topic]
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ ⚡ QUICK SOLVING STEPS (Green numbered boxes):
-│ 1→ [First thing to check/identify]
-│ 2→ [Which formula to apply]
-│ 3→ [Common calculation approach]
-│ 4→ [How to verify answer]
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ 🎯 EXAM PATTERN (Orange highlight):
-│ • Typical marks: [X] marks
-│ • Time needed: [Y] minutes
-│ • Difficulty: [Easy/Medium/Hard]
-│ • Frequency: Appears [every year/often/sometimes]
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ ❌ DON'T FORGET! (Red warning boxes):
-│ • [Most common mistake - 1 line]
-│ • [Special case to remember]
-│ • [Unit/sign to check]
-└─────────────────────────────────────────┘
-
-┌─────────────────────────────────────────┐
-│ 🏆 PRO SHORTCUTS (Gold star boxes):
-│ • [Quick calculation method]
-│ • [Pattern recognition trick]
-│ • [Elimination strategy]
-└─────────────────────────────────────────┘
+VISUAL LAYOUT FOR EACH EXAMPLE:
+Difficulty badge using vibrant-yet-readable tones (Emerald for Easy, Gold for Moderate, Vibrant Coral for Hard).
+❓ QUESTION: In an artistic hand-drawn slate box.
+💡 TEXTBOOK METHOD: One-line approach exactly as ${examKey} textbook prescribes.
+📊 SOLUTION: Artistic flow-charts, perfectly aligned hand-drawn steps, creative connectors (→, ↓).
+✅ FINAL ANSWER: In a vibrant Emerald green hand-drawn bubble.
+⚡ ${examKey} APPROVED SHORTCUT: Only using ${examKey} syllabus knowledge.
 
 VISUAL REQUIREMENTS:
-⭐ Use MAXIMUM COLOR: Yellow, Blue, Green, Orange, Red, Gold
-📦 Put EVERY formula in a colored box with borders
-🔢 Use LARGE, BOLD fonts for important formulas
-📊 Add small quick-reference diagrams/graphs
-✨ Use stars, checkmarks, and icons throughout
-🎨 Make it VISUALLY DENSE but ORGANIZED with clear sections
-📐 Include visual symbols and arrows to show relationships
+🎨 Vibrant-yet-premium hand-drawn aesthetics.
+📦 Creative, hand-sketched boxes with artistic borders.
+➡️ Whimsical-yet-clear hand-drawn arrows for logical flow.
+✨ Artistic highlighting for key steps using neon-pastel tones.
+📐 Diagrams drawn with a rich, hand-illustrated look.
 
-GOAL: Student should be able to scan this page in 30 seconds before exam and remember everything!`;
+STRICT RULE: Content must be 100% within ${examKey} syllabus scope.`;
 
-  const page4Result = await retryWithBackoff(() => imageModel.generateContent(page4Prompt));
-  const page4Image = page4Result.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
-  if (page4Image?.inlineData?.data) {
-    const page4ImageData = `data:image/png;base64,${page4Image.inlineData.data}`;
+  // PAGE 3 PROMPT: Variations, Mistakes, Strategies
+  const page3Prompt = `Create an EXCITING, SYLLABUS-STRICT exam tactics sketchnote for Class 12 ${subject} [${examKey}] on "${topic}".
 
-    // Validate content quality before saving
-    const validation = await validateGeneratedContent(
-      page4ImageData,
-      "Quick Reference",
-      topic,
-      subject,
-      apiKey,
-      onStatusUpdate
-    );
+⚠️ STRICT CONTENT RULE: All content MUST be within the ${examKey} prescribed syllabus for ${subject}. No deleted topics or out-of-scope material.
 
-    pages.push({
-      pageNumber: 4,
-      title: "Quick Reference",
-      imageData: page4ImageData,
-      validation
-    });
-  }
+TITLE: ${topic} — ${examKey} Exam Traps and Winning Tactics
+
+🔄 QUESTION VARIATIONS IN ${examKey} (Based on actual paper trends):
+${blueprint.variations.slice(0, 4).map((v: string, i: number) => `Variation ${i + 1}: ${latexToImageNotation(v)}`).join('\n')}
+
+❌ COMMON MISTAKES IN ${examKey} PAPERS:
+${blueprint.commonMistakes.slice(0, 3).map((m: string, i: number) => `MISTAKE: ${latexToImageNotation(m)}\n✅ CORRECT (per ${examKey} marking scheme): [Provide exact correct approach]`).join('\n')}
+
+🎯 ${examKey}-SPECIFIC WINNING STRATEGIES:
+${blueprint.examStrategies.map((s: string, i: number) => `• ${s}`).join('\n')}
+
+⏱️ ${examKey} PAPER PATTERN for ${topic}:
+How many questions, marks weightage, and time to allocate in the actual exam.
+
+VISUAL REQUIREMENTS:
+🔴 Vibrant-yet-professional coral for mistakes.
+✅ CORRECT vs INCORRECT side-by-side in creative, hand-drawn panels.
+🟡 Bright Amber for variations.
+🟢 Vivid Emerald for winning strategies.
+📐 Energetic, organized, hand-drawn layout — exciting and crystal clear.`;
+
+  // PAGE 4 PROMPT: Quick Reference Cheat Sheet  
+  const page4Prompt = `Create a VIBRANT, SYLLABUS-LOCKED hand-drawn cheat sheet for Class 12 ${subject} [${examKey}] on "${topic}".
+
+⚠️ STRICT CONTENT RULE: Include ONLY facts and formulas from the official ${examKey} ${subject} prescribed textbook for "${topic}". Nothing beyond that scope.
+
+TITLE: ${topic} — Official ${examKey} Sketchnote Revision Sheet
+
+🔥 TEXTBOOK MUST-KNOWS (Only what the ${examKey} syllabus prescribes):
+${blueprint.quickReference.slice(0, 4).map((ref: string, i: number) => `★ ${latexToImageNotation(ref)}`).join('\n')}
+
+💡 MEMORY AIDS (Using only concepts within ${examKey} ${subject} scope):
+Provide 2-3 creative memory aids grounded in prescribed textbook concepts only.
+
+⚡ ${examKey} OFFICIAL SOLVING SEQUENCE:
+1→ Identify question sub-type within ${topic}
+2→ Apply the correct textbook formula/method
+3→ Execute carefully (sign rules, units per textbook notation)
+4→ Verify against ${examKey} marking scheme expectation
+
+🎯 ${examKey} PAPER PATTERN for ${topic}:
+Marks weightage and typical question frequency in ${examKey}.
+
+VISUAL REQUIREMENTS:
+⭐ High information density, ARTISTIC MASTERPIECE ORGANIZATION.
+📦 Each item in its own hand-drawn vibrant box (Slate, Vivid Indigo, or Emerald).
+🎨 Creative hand-drawn line icons for every section.
+💡 CAPTIVATING, rich palette — exciting to look at.
+✨ Premium, artistic revision feel — strictly ${examKey} syllabus scope only.`;
+
+  // DEFINE PARALLEL TASKS
+  onStatusUpdate?.(`🚀 Starting parallel generation of 4 pages for ${topic}...`);
+
+  const pageTasks = [
+    generateAndValidatePage(1, "Core Theory & Formulas", page1Prompt, topic, subject, apiKey, imageModel, onStatusUpdate),
+    generateAndValidatePage(2, "Solved Examples", page2Prompt, topic, subject, apiKey, imageModel, onStatusUpdate),
+    generateAndValidatePage(3, "Variations & Exam Tactics", page3Prompt, topic, subject, apiKey, imageModel, onStatusUpdate),
+    generateAndValidatePage(4, "Quick Reference", page4Prompt, topic, subject, apiKey, imageModel, onStatusUpdate)
+  ];
+
+  const results = await Promise.all(pageTasks);
+
+  // Filter out any null results and sort by page number
+  const pages = results
+    .filter((r): r is NonNullable<typeof r> => r !== null)
+    .sort((a, b) => a.pageNumber - b.pageNumber);
 
   // Check if any pages have critical issues
   const criticalIssues = pages.filter(p => p.validation?.severity === 'critical');
   if (criticalIssues.length > 0) {
-    onStatusUpdate?.(`⚠️ Generated ${pages.length} pages with ${criticalIssues.length} critical issues - Review recommended`);
+    onStatusUpdate?.(`⚠️ Completed ${pages.length} pages with ${criticalIssues.length} critical issues - Review recommended`);
   } else {
-    onStatusUpdate?.(`✓ Generated and validated ${pages.length}-page study guide for ${topic}`);
+    onStatusUpdate?.(`✓ Successfully generated and validated ${pages.length}-page study guide for ${topic}`);
   }
 
   return {
@@ -1275,9 +1231,15 @@ const generateUnifiedSketch = async (
   questionText: string,
   subject: string,
   apiKey: string,
-  onStatusUpdate?: (status: string) => void
+  onStatusUpdate?: (status: string) => void,
+  examContext?: string
 ): Promise<GenerationResult> => {
   const genAI = new GoogleGenerativeAI(apiKey);
+
+  // Resolve exam-specific syllabus scope
+  const examKey = examContext || 'CBSE';
+  const syllabusScope = EXAM_SYLLABUS_CONTEXT[examKey]?.[subject] ||
+    `Official Class 12 ${subject} textbook for ${examKey}. Strictly follow the prescribed syllabus only.`;
 
   // Map text models to image models (image models support both text and image generation)
   const imageModelMap: Record<string, string> = {
@@ -1319,8 +1281,13 @@ const generateUnifiedSketch = async (
     }
   });
 
-  const textPrompt = `You are an expert educator creating a comprehensive visual learning note for: "${topic}"
+  const textPrompt = `You are an expert educator creating a visual learning note for the ${examKey} exam.
 
+=== CRITICAL SYLLABUS BOUNDARY ===
+You MUST strictly follow ONLY the content covered in: ${syllabusScope}
+DO NOT include any content beyond this official prescribed scope.
+
+Topic: "${topic}"
 Question Context: ${questionText}
 Subject: ${subject}
 
@@ -1341,10 +1308,11 @@ Focus on clarity, visual hierarchy, and educational value.`;
   // STEP 2: Generate image using the same image model
   onStatusUpdate?.('Generating visual sketchnote...');
 
-  const imagePrompt = `Create a professional hand-drawn educational sketchnote on white background for:
+  const imagePrompt = `Create an ARTISTIC, CAPTIVATING hand-drawn sketchnote for Class 12 ${subject} [${examKey}]:
+
+⚠️ STRICT CONTENT RULE: Only include content that is EXPLICITLY part of the ${examKey} ${subject} syllabus for "${topic}".
 
 **Topic**: ${topic}
-**Subject**: ${subject}
 
 **Visual Concept**: ${blueprint.visualConcept}
 
@@ -1359,21 +1327,23 @@ ${blueprint.keyPoints.map((p: string, i: number) => `${i + 1}. ${p}`).join('\n')
 **Quick Reference**: ${blueprint.quickReference}
 
 **Style Requirements**:
-- Hand-drawn sketchnote aesthetic with clean lines
-- Use bullet points, arrows, boxes, and visual hierarchy
-- Include formulas and equations prominently
-- Add small icons and visual anchors
-- Use different text sizes for hierarchy
-- Black ink on white background
-- Educational poster style
-- Clear, readable handwriting style
-- Organized layout with good spacing`;
+- CAPTIVATING hand-drawn sketchnote masterpiece with artistic flair
+- VIBRANT and PREMIUM COLOR PALETTE: 
+  - Deep Navy (#0f172a) for primary structures
+  - Vivid Teal (#0d9488) or Electric Indigo (#4f46e5) for highlights
+  - Vibrant Emerald for success, Bright Coral for warnings
+- Creative hand-drawn boxes with whimsical-yet-organized borders
+- Artistic, clear hand-lettering for all text
+- Artistic visual metaphors and illustrated icons
+- Rhythmic hand-drawn connectors and arrows
+- Perfect visual balance that feels artistic-yet-educational
+- High-end educational Sketchnote aesthetic (Human, Hand-drawn, Captivating).`;
 
   const imageModel = genAI.getGenerativeModel({
     model: actualImageModel
   });
 
-  const imageResult = await imageModel.generateContent(imagePrompt);
+  const imageResult = await imageModel.generateContent(imagePrompt) as any;
 
   // Extract image data from response (correct format for image models)
   const imagePart = imageResult.response.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
@@ -1406,8 +1376,9 @@ export const generateSketch = async (
   questionText: string,
   subject: string,
   apiKey: string,
-  onStatusUpdate?: (status: string) => void
+  onStatusUpdate?: (status: string) => void,
+  examContext?: string
 ): Promise<GenerationResult> => {
   // Use the selected model for both text and image generation
-  return generateUnifiedSketch(method, topic, questionText, subject, apiKey, onStatusUpdate);
+  return generateUnifiedSketch(method, topic, questionText, subject, apiKey, onStatusUpdate, examContext);
 };

@@ -627,6 +627,7 @@ function transformQuestion(dbQuestion: any): AnalyzedQuestion {
     examTip: dbQuestion.exam_tip,
     visualConcept: dbQuestion.visual_concept,
     diagramUrl: dbQuestion.diagram_url,
+    sketchSvg: dbQuestion.sketch_svg_url, // NEW: map from DB field
     extractedImages: dbQuestion.diagram_url ? [dbQuestion.diagram_url] : [],
     keyFormulas: dbQuestion.key_formulas || [],
     pitfalls: dbQuestion.pitfalls || [],

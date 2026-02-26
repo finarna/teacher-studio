@@ -46,6 +46,7 @@ import { useSubjectTheme } from '../hooks/useSubjectTheme';
 import { useFilteredScans } from '../hooks/useFilteredScans';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import PredictiveTrendsTab from './PredictiveTrendsTab';
+import { getApiUrl } from '../lib/api';
 
 interface MetricCardProps {
   title: string;
@@ -95,6 +96,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const [enlargedVisualNote, setEnlargedVisualNote] = useState<{ imageUrl: string, questionId: string } | null>(null);
   const [isGroupedView, setIsGroupedView] = useState(false);
   const [mobileVaultView, setMobileVaultView] = useState<'list' | 'detail'>('list');
+  const [questionSketches, setQuestionSketches] = useState<Record<string, string>>({});
 
   // CRITICAL FIX: Auto-select first scan if none selected or scan doesn't match active subject
   // Use ref to track last selected scan ID to prevent infinite loops
@@ -136,9 +138,40 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
 
   // Extract analysis data with safe defaults (MUST be before any conditional returns)
   const analysis = (scan?.analysisData || { questions: [] }) as ExamAnalysisData;
-  const questions = analysis.questions || [];
-  // Safe subject value for useMemo dependencies
+  const rawQuestions = analysis.questions || [];
   const safeSubject = scan?.subject || activeSubject;
+
+  // Load sketches for this scan
+  useEffect(() => {
+    if (!scan?.id) {
+      setQuestionSketches({});
+      return;
+    }
+
+    const loadVisuals = async () => {
+      try {
+        const response = await fetch(getApiUrl(`/api/scan-visuals/${scan.id}`));
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data?.questionSketches) {
+            setQuestionSketches(result.data.questionSketches);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load visuals:', err);
+      }
+    };
+
+    loadVisuals();
+  }, [scan?.id]);
+
+  // Main questions source that merges metadata from scan and large sketches from questionSketches state
+  const questions = React.useMemo(() => {
+    return rawQuestions.map(q => ({
+      ...q,
+      sketchSvg: questionSketches[q.id] || q.sketchSvg
+    }));
+  }, [rawQuestions, questionSketches]);
 
   // Debug: Log visual elements in vault questions
   React.useEffect(() => {
@@ -521,7 +554,25 @@ Schema: {
 
       console.log(`✓ Generated visual note for ${qId}`);
 
-      // Update the scan with the new visual note
+      // Local update for immediate UI feedback
+      const updatedQuestionSketches = {
+        ...questionSketches,
+        [qId]: result.imageData
+      };
+      setQuestionSketches(updatedQuestionSketches);
+
+      // SAVE to dedicated visuals endpoint (to avoid 413 on scans sync)
+      try {
+        fetch(getApiUrl(`/api/scan-visuals/${scan.id}`), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionSketches: updatedQuestionSketches })
+        });
+      } catch (sErr) {
+        console.error('Failed to sync question visual:', sErr);
+      }
+
+      // Update the scan with the new visual note (metadata only sync now)
       const updatedQuestions = scan.analysisData.questions.map(q =>
         q.id === qId ? { ...q, sketchSvg: result.imageData } : q
       );
@@ -580,7 +631,29 @@ Schema: {
 
         console.log(`✓ Generated visual note for ${question.id}`);
 
-        // Update scan incrementally for each question
+        // Local update for immediate UI feedback
+        const updatedQuestionSketchesAccumulated = {
+          ...questionSketches,
+          [question.id]: result.imageData
+        };
+        // Note: In rapid loop, closure might be stale, but React will batch it.
+        // Better to use functional update
+        setQuestionSketches(prev => ({ ...prev, [question.id]: result.imageData }));
+
+        // SAVE to dedicated visuals endpoint
+        try {
+          fetch(getApiUrl(`/api/scan-visuals/${scan.id}`), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              questionSketches: { ...questionSketches, [question.id]: result.imageData }
+            })
+          });
+        } catch (sErr) {
+          console.error('Failed to sync question visual:', sErr);
+        }
+
+        // Update scan incrementally for each question (App.tsx strips huge SVGs)
         const updatedQuestions = scan.analysisData.questions.map(q =>
           q.id === question.id ? { ...q, sketchSvg: result.imageData } : q
         );

@@ -163,7 +163,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
         const result = await response.json();
         setState(prev => ({
           ...prev,
-          topics: result.data,
+          topics: result.data || [],
           isLoading: false,
           error: null
         }));
@@ -434,7 +434,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
         progressMap[item.subject as Subject] = {
           overallMastery: item.overallMastery,
           topicsTotal: item.totalTopics,
-          topicsMastered: item.topicsWithQuestions,
+          topicsMastered: item.topicsWithQuestions, // Set B aggregator uses topicsWithQuestions
           totalQuestionsAttempted: item.totalQuestions,
           overallAccuracy: item.overallAccuracy ?? 0
         } as any;
@@ -449,7 +449,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-      const url = getApiUrl(`/api/progress/streak?userId=${encodeURIComponent(userId)}`);
+      const url = getApiUrl(`/api/progress/streak`);
       const response = await fetch(url, {
         headers: {
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})

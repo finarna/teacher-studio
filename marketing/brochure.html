@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>plus2AI - AI-Powered Exam Preparation Platform</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Modern Bohemian Color Palette */
+            --sage: #8B9D83;
+            --terracotta: #D4816E;
+            --cream: #F5EFE6;
+            --sand: #E8DCC4;
+            --charcoal: #2C2C2C;
+            --coral: #FF6B6B;
+            --teal: #4ECDC4;
+            --mustard: #F7B731;
+            --lavender: #A8DADC;
+
+            /* Gradients */
+            --gradient-warm: linear-gradient(135deg, var(--terracotta) 0%, var(--mustard) 100%);
+            --gradient-cool: linear-gradient(135deg, var(--teal) 0%, var(--lavender) 100%);
+            --gradient-earth: linear-gradient(135deg, var(--sage) 0%, var(--sand) 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--cream);
+            color: var(--charcoal);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+            background-image:
+                radial-gradient(circle at 20% 50%, var(--sage) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, var(--terracotta) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, var(--teal) 0%, transparent 50%);
+            animation: drift 20s ease-in-out infinite;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+
+        nav .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--charcoal);
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            background: var(--gradient-warm);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 2rem;
+            background: var(--gradient-warm);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 129, 110, 0.3);
+        }
+
+        /* Flip Book Container */
+        .flip-book-container {
+            margin-top: 80px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flip-book {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 700px;
+            perspective: 2000px;
+        }
+
+        .page-wrapper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.1);
+            overflow: hidden;
+            backface-visibility: hidden;
+        }
+
+        .page-content {
+            padding: 4rem;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Custom Scrollbar */
+        .page-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .page-content::-webkit-scrollbar-track {
+            background: var(--sand);
+            border-radius: 10px;
+        }
+
+        .page-content::-webkit-scrollbar-thumb {
+            background: var(--sage);
+            border-radius: 10px;
+        }
+
+        /* Page Decorations */
+        .page-decoration {
+            position: absolute;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .deco-circle {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: var(--gradient-earth);
+            top: -100px;
+            right: -100px;
+        }
+
+        .deco-wave {
+            width: 100%;
+            height: 200px;
+            background: var(--gradient-cool);
+            bottom: -50px;
+            left: 0;
+            clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-warm);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--charcoal);
+        }
+
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 2rem 0 1rem;
+            color: var(--sage);
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--terracotta);
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .lead-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        /* Feature Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(139, 157, 131, 0.1) 0%, rgba(232, 220, 196, 0.1) 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid rgba(139, 157, 131, 0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(139, 157, 131, 0.2);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-warm);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--charcoal);
+        }
+
+        .feature-desc {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Pricing Cards */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .price-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.08);
+            border: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .price-card.featured {
+            border-color: var(--terracotta);
+            transform: scale(1.05);
+        }
+
+        .price-card.featured::before {
+            content: '⭐ MOST POPULAR';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-warm);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .price-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+        }
+
+        .price-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .price-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            margin-bottom: 1rem;
+        }
+
+        .price-amount {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--terracotta);
+        }
+
+        .price-period {
+            font-size: 1rem;
+            color: #888;
+        }
+
+        .price-features {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .price-features li {
+            padding: 0.75rem 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .price-features li::before {
+            content: '✓';
+            color: var(--teal);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .price-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-warm);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .price-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 129, 110, 0.3);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        th {
+            background: var(--gradient-earth);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        th:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+
+        th:last-child {
+            border-radius: 0 10px 10px 0;
+        }
+
+        td {
+            background: white;
+            padding: 1rem;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        td:first-child {
+            border-left: 1px solid #f0f0f0;
+            border-radius: 10px 0 0 10px;
+            font-weight: 600;
+        }
+
+        td:last-child {
+            border-right: 1px solid #f0f0f0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        /* Navigation Controls */
+        .page-controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.1);
+        }
+
+        .page-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-warm);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(212, 129, 110, 0.4);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 1rem;
+        }
+
+        .page-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .page-dot.active {
+            background: var(--terracotta);
+            transform: scale(1.5);
+        }
+
+        .page-dot:hover {
+            background: var(--sage);
+        }
+
+        /* CTA Sections */
+        .cta-box {
+            background: var(--gradient-warm);
+            color: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .cta-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-text {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-button {
+            background: white;
+            color: var(--terracotta);
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--teal);
+            color: white;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .badge.unique {
+            background: var(--coral);
+        }
+
+        .badge.better {
+            background: var(--mustard);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .flip-book {
+                height: 600px;
+            }
+
+            .page-content {
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            h2 {
+                font-size: 2rem;
+            }
+
+            h3 {
+                font-size: 1.5rem;
+            }
+
+            .feature-grid,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-controls {
+                bottom: 1rem;
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        /* Floating Elements */
+        .float-element {
+            position: absolute;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .float-1 { top: 10%; left: 5%; animation-delay: 0s; }
+        .float-2 { top: 30%; right: 10%; animation-delay: 1s; }
+        .float-3 { bottom: 20%; left: 15%; animation-delay: 2s; }
+    </style>
+</head>
+<body>
+    <!-- Background Pattern -->
+    <div class="bg-pattern"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="logo">plus<span>2AI</span></div>
+            <button class="nav-btn" onclick="window.location.href='#contact'">Start Free Trial</button>
+        </div>
+    </nav>
+
+    <!-- Flip Book Container -->
+    <div class="flip-book-container">
+        <div class="flip-book" id="flipBook">
+            <!-- Page 1: Cover -->
+            <div class="page-wrapper page-1">
+                <div class="page">
+                    <div class="page-decoration deco-circle float-element float-1"></div>
+                    <div class="page-content">
+                        <div style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                            <h1 style="font-size: 4rem; margin-bottom: 2rem;">plus2AI</h1>
+                            <div class="subtitle" style="font-size: 1.8rem;">AI-Powered Learning for KCET, NEET & JEE Success</div>
+                            <div class="lead-text" style="max-width: 700px; margin: 2rem 0;">
+                                India's most advanced AI-powered exam preparation platform. Master Physics, Chemistry, Mathematics, and Biology faster with intelligent personalization and visual learning.
+                            </div>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 2rem;">
+                                <span class="badge unique">⭐ UNIQUE AI Features</span>
+                                <span class="badge better">📊 95%+ Accuracy</span>
+                                <span class="badge">💰 10x More Affordable</span>
+                            </div>
+                            <div style="margin-top: 3rem; font-size: 3rem;">
+                                🎓 📚 🤖
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2: Problem Statement -->
+            <div class="page-wrapper page-2">
+                <div class="page">
+                    <div class="page-decoration deco-wave"></div>
+                    <div class="page-content">
+                        <h2>The Problem With Traditional Learning</h2>
+                        <div class="subtitle">Why students struggle with existing options</div>
+
+                        <div class="feature-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">💸</div>
+                                <div class="feature-title">Too Expensive</div>
+                                <div class="feature-desc">Coaching: ₹40-80K/year<br>Apps: ₹36-60K/year<br>Crash Courses: ₹15-25K</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">👥</div>
+                                <div class="feature-title">One-Size-Fits-All</div>
+                                <div class="feature-desc">Generic content for everyone. No personalization based on YOUR weak areas.</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🎥</div>
+                                <div class="feature-title">Video-Heavy</div>
+                                <div class="feature-desc">Watch 15-min videos for simple concepts. Time-consuming and inefficient.</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🔒</div>
+                                <div class="feature-title">Limited Practice</div>
+                                <div class="feature-desc">Fixed test papers. Can't customize topics, difficulty, or question count.</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">❓</div>
+                                <div class="feature-title">No 24/7 Support</div>
+                                <div class="feature-desc">Doubts at 2 AM? Wait until tomorrow. No instant help when studying.</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📉</div>
+                                <div class="feature-title">Poor Analytics</div>
+                                <div class="feature-desc">Basic stats. Can't identify exact weak topics or track real progress.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 3: Solution -->
+            <div class="page-wrapper page-3">
+                <div class="page">
+                    <div class="page-content">
+                        <h2>The plus2AI Solution</h2>
+                        <div class="subtitle">Complete AI-powered learning ecosystem</div>
+
+                        <h3>🎯 Adaptive Learning Journey</h3>
+                        <p class="lead-text">Your personal AI-guided study path that understands exactly what YOU need to study next.</p>
+                        <div class="feature-grid" style="grid-template-columns: 1fr 1fr;">
+                            <div>
+                                <strong>✅ What You Get:</strong>
+                                <ul style="margin-top: 0.5rem; color: #666;">
+                                    <li>Visual topic map of entire syllabus</li>
+                                    <li>Real-time mastery tracking</li>
+                                    <li>Auto-skip mastered topics</li>
+                                    <li>Focus on weak areas automatically</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <strong>🏆 Why It's Better:</strong>
+                                <ul style="margin-top: 0.5rem; color: #666;">
+                                    <li>vs Byju's: Not everyone gets same content</li>
+                                    <li>vs Toppr: Topic-level, not module-level</li>
+                                    <li>vs Vedantu: Self-paced, no schedule</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <h3>🎨 SketchAI Visual Learning</h3>
+                        <p class="lead-text"><span class="badge unique">⭐ UNIQUE - No competitor has this</span></p>
+                        <p>AI-generated diagrams that make complex concepts crystal clear. Understand 3x faster than video lectures.</p>
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+                            <span class="badge">⚡ Physics Circuits</span>
+                            <span class="badge">🧪 Chemistry Structures</span>
+                            <span class="badge">📐 Math Graphs</span>
+                            <span class="badge">🧬 Biology Processes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 4: More Features -->
+            <div class="page-wrapper page-4">
+                <div class="page">
+                    <div class="page-content">
+                        <h2>Powerful Features</h2>
+
+                        <h3>⚡ Custom Mock Test Builder</h3>
+                        <p class="lead-text">Most flexible test builder in India. Create unlimited practice tests YOUR way.</p>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
+                            <div style="padding: 1rem; background: rgba(78, 205, 196, 0.1); border-radius: 10px;">
+                                ✓ Choose any topic combination
+                            </div>
+                            <div style="padding: 1rem; background: rgba(78, 205, 196, 0.1); border-radius: 10px;">
+                                ✓ Set question count (10-100)
+                            </div>
+                            <div style="padding: 1rem; background: rgba(78, 205, 196, 0.1); border-radius: 10px;">
+                                ✓ Control difficulty mix
+                            </div>
+                            <div style="padding: 1rem; background: rgba(78, 205, 196, 0.1); border-radius: 10px;">
+                                ✓ Unlimited generation
+                            </div>
+                        </div>
+
+                        <h3>🤖 Vidya - Your 24/7 AI Study Buddy</h3>
+                        <p class="lead-text">Context-aware AI tutor that knows your complete learning journey.</p>
+                        <div style="background: linear-gradient(135deg, rgba(168, 218, 220, 0.2) 0%, rgba(247, 183, 49, 0.2) 100%); padding: 2rem; border-radius: 15px; margin: 1rem 0;">
+                            <strong style="display: block; margin-bottom: 1rem; font-size: 1.1rem;">Vidya Understands:</strong>
+                            <div style="display: grid; gap: 0.75rem;">
+                                <div>✓ Your current exam, subject, topic</div>
+                                <div>✓ Your weak areas from test history</div>
+                                <div>✓ Questions you've attempted</div>
+                                <div>✓ Your learning patterns</div>
+                            </div>
+                            <div style="margin-top: 1.5rem; font-style: italic; color: #666;">
+                                "Get answers instantly at 2 AM. No waiting for teachers!"
+                            </div>
+                        </div>
+
+                        <h3>📊 Performance Analytics</h3>
+                        <p>Deep insights: Radar charts, heat maps, study streaks, predicted scores, time tracking.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 5: Pricing -->
+            <div class="page-wrapper page-5">
+                <div class="page">
+                    <div class="page-content">
+                        <h2>Student Pricing</h2>
+                        <div class="subtitle">One-time payment valid until your exam</div>
+
+                        <div class="pricing-grid">
+                            <div class="price-card">
+                                <div class="price-header">
+                                    <div class="price-name">KCET</div>
+                                    <div class="price-amount">₹3,999</div>
+                                    <div class="price-period">Until April 2026 (~60 days)</div>
+                                </div>
+                                <ul class="price-features">
+                                    <li>Complete PCM/PCB access</li>
+                                    <li>Unlimited practice tests</li>
+                                    <li>Vidya AI tutor (unlimited)</li>
+                                    <li>SketchAI visual learning</li>
+                                    <li>Past 10 years papers</li>
+                                    <li>Performance analytics</li>
+                                </ul>
+                                <button class="price-btn">Start KCET Prep</button>
+                            </div>
+
+                            <div class="price-card featured">
+                                <div class="price-header">
+                                    <div class="price-name">NEET / JEE</div>
+                                    <div class="price-amount">₹5,999</div>
+                                    <div class="price-period">Until May 2026 (~90 days)</div>
+                                </div>
+                                <ul class="price-features">
+                                    <li>Complete PCM/PCB access</li>
+                                    <li>Unlimited practice tests</li>
+                                    <li>Vidya AI tutor (unlimited)</li>
+                                    <li>SketchAI visual learning</li>
+                                    <li>Past 10 years papers</li>
+                                    <li>Performance analytics</li>
+                                    <li>Advanced mock builder</li>
+                                </ul>
+                                <button class="price-btn">Ace NEET/JEE</button>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(247, 183, 49, 0.1); border-left: 4px solid var(--mustard); border-radius: 10px;">
+                            <strong style="display: block; margin-bottom: 0.5rem;">💡 Why One-Time Pricing?</strong>
+                            <p style="color: #666;">You're preparing for an exam that's 2-3 months away, not signing up for Netflix. Pay once, use until your exam. No recurring charges, no subscription anxiety.</p>
+                        </div>
+
+                        <div style="margin-top: 2rem; text-align: center;">
+                            <p style="font-size: 1.1rem; margin-bottom: 1rem;">Compare to:</p>
+                            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                                <span class="badge" style="background: #ddd; color: #666;">Coaching: ₹40-80K</span>
+                                <span class="badge" style="background: #ddd; color: #666;">Crash Courses: ₹15-25K</span>
+                                <span class="badge better">plus2AI: ₹3,999-5,999 ✨</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 6: Institute Pricing -->
+            <div class="page-wrapper page-6">
+                <div class="page">
+                    <div class="page-content">
+                        <h2>For Coaching Institutes</h2>
+                        <div class="subtitle">Transform your coaching business with AI</div>
+
+                        <div class="comparison-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Tier</th>
+                                        <th>Students</th>
+                                        <th>Price/Student/Year</th>
+                                        <th>What You Get</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Basic</strong></td>
+                                        <td>30-74</td>
+                                        <td><strong>₹12,999</strong></td>
+                                        <td>Everything below</td>
+                                    </tr>
+                                    <tr style="background: rgba(212, 129, 110, 0.05);">
+                                        <td><strong>Professional ⭐</strong></td>
+                                        <td>75-199</td>
+                                        <td><strong>₹9,999</strong></td>
+                                        <td>Best value + full scanning</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Enterprise</strong></td>
+                                        <td>200+</td>
+                                        <td><strong>₹8,499</strong></td>
+                                        <td>+ White-label option</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h3>⭐ UNIQUE Institute Features</h3>
+                        <div class="feature-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">📄</div>
+                                <div class="feature-title">Paper Scanning</div>
+                                <div class="feature-desc">95%+ accuracy AI extraction. Save 10+ hours/week. NO competitor offers this!</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📊</div>
+                                <div class="feature-title">Admin Dashboard</div>
+                                <div class="feature-desc">Track every student in real-time. Class & individual analytics.</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📝</div>
+                                <div class="feature-title">Test Creator</div>
+                                <div class="feature-desc">Generate unlimited custom tests. Zero cost per test.</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">👥</div>
+                                <div class="feature-title">Student Tracking</div>
+                                <div class="feature-desc">Parent-ready reports. Identify struggling students early.</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, rgba(139, 157, 131, 0.1) 0%, rgba(232, 220, 196, 0.1) 100%); border-radius: 15px;">
+                            <strong style="display: block; font-size: 1.2rem; margin-bottom: 1rem;">ROI Example (200 students):</strong>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <div style="color: #999; font-size: 0.9rem;">You charge per student:</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--charcoal);">₹50,000</div>
+                                </div>
+                                <div>
+                                    <div style="color: #999; font-size: 0.9rem;">Plus2AI costs you:</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--terracotta);">₹9,999 (20%)</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 2px dashed #ddd;">
+                                <strong>You gain:</strong> Digital question bank + 10 hrs/week saved + parent-ready analytics
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 7: Comparison -->
+            <div class="page-wrapper page-7">
+                <div class="page">
+                    <div class="page-content">
+                        <h2>Why plus2AI Wins</h2>
+                        <div class="subtitle">Honest comparison with leading platforms</div>
+
+                        <div class="comparison-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Feature</th>
+                                        <th>plus2AI</th>
+                                        <th>Byju's</th>
+                                        <th>Unacademy</th>
+                                        <th>Embibe</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Pricing</td>
+                                        <td><strong style="color: var(--teal);">₹3,999-5,999 (one-time)</strong></td>
+                                        <td>₹36-60K/year</td>
+                                        <td>₹10-30K/year</td>
+                                        <td>₹6-12K/year</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Visual AI Learning</td>
+                                        <td><strong style="color: var(--teal);">✅ SketchAI</strong></td>
+                                        <td>❌ Videos only</td>
+                                        <td>❌ Videos</td>
+                                        <td>❌ No visuals</td>
+                                    </tr>
+                                    <tr>
+                                        <td>24/7 AI Tutor</td>
+                                        <td><strong style="color: var(--teal);">✅ Context-aware</strong></td>
+                                        <td>⚠️ Generic bot</td>
+                                        <td>❌ No</td>
+                                        <td>❌ No</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Custom Mock Builder</td>
+                                        <td><strong style="color: var(--teal);">✅ Full control</strong></td>
+                                        <td>❌ Fixed tests</td>
+                                        <td>❌ Pre-made</td>
+                                        <td>⚠️ Limited</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Adaptive Learning</td>
+                                        <td><strong style="color: var(--teal);">✅ Topic-level</strong></td>
+                                        <td>⚠️ Module-level</td>
+                                        <td>⚠️ Course-level</td>
+                                        <td>⚠️ Test-based</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Institute Features</td>
+                                        <td><strong style="color: var(--teal);">✅ Full platform</strong></td>
+                                        <td>❌ No</td>
+                                        <td>⚠️ Enterprise only</td>
+                                        <td>⚠️ Enterprise only</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Paper Scanning</td>
+                                        <td><strong style="color: var(--coral);">✅ UNIQUE (95%+)</strong></td>
+                                        <td>❌ No</td>
+                                        <td>❌ No</td>
+                                        <td>❌ No</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="margin-top: 2rem;">
+                            <h3>🏆 Our Competitive Advantages</h3>
+                            <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                                <div style="padding: 1rem; background: rgba(255, 107, 107, 0.1); border-left: 4px solid var(--coral); border-radius: 8px;">
+                                    <strong style="color: var(--coral);">⭐ UNIQUE:</strong> Paper Scanning (95%+ accuracy) - NO competitor has this
+                                </div>
+                                <div style="padding: 1rem; background: rgba(255, 107, 107, 0.1); border-left: 4px solid var(--coral); border-radius: 8px;">
+                                    <strong style="color: var(--coral);">⭐ UNIQUE:</strong> SketchAI Visual Learning - Proprietary AI technology
+                                </div>
+                                <div style="padding: 1rem; background: rgba(247, 183, 49, 0.1); border-left: 4px solid var(--mustard); border-radius: 8px;">
+                                    <strong style="color: var(--mustard);">✅ BETTER:</strong> True adaptive learning (topic-level, not generic)
+                                </div>
+                                <div style="padding: 1rem; background: rgba(247, 183, 49, 0.1); border-left: 4px solid var(--mustard); border-radius: 8px;">
+                                    <strong style="color: var(--mustard);">✅ BETTER:</strong> Context-aware AI tutor (knows your progress)
+                                </div>
+                                <div style="padding: 1rem; background: rgba(78, 205, 196, 0.1); border-left: 4px solid var(--teal); border-radius: 8px;">
+                                    <strong style="color: var(--teal);">💰 VALUE:</strong> 10x more affordable with MORE features
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 8: CTA -->
+            <div class="page-wrapper page-8">
+                <div class="page">
+                    <div class="page-content">
+                        <div style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                            <h2 style="text-align: center;">Ready to Transform Your Exam Prep?</h2>
+
+                            <div class="cta-box">
+                                <div class="cta-title">Start Your Free Trial</div>
+                                <div class="cta-text">7 days. No credit card required. Full access to all features.</div>
+                                <button class="cta-button">Get Started Now →</button>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+                                <div style="text-align: center; padding: 2rem; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎓</div>
+                                    <h3 style="margin-bottom: 1rem;">For Students</h3>
+                                    <div style="color: #666; margin-bottom: 1.5rem;">
+                                        Early Bird: ₹500 OFF<br>
+                                        KCET: ₹3,499 | NEET/JEE: ₹5,499
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; text-align: left;">
+                                        <div>🌐 www.plus2ai.com</div>
+                                        <div>📧 hello@plus2ai.com</div>
+                                        <div>📱 +91 98765-43210</div>
+                                    </div>
+                                </div>
+
+                                <div style="text-align: center; padding: 2rem; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+                                    <div style="font-size: 3rem; margin-bottom: 1rem;">🏫</div>
+                                    <h3 style="margin-bottom: 1rem;">For Institutes</h3>
+                                    <div style="color: #666; margin-bottom: 1.5rem;">
+                                        30-day free trial<br>
+                                        20% discount + Free onboarding
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; text-align: left;">
+                                        <div>🌐 www.plus2ai.com/institutions</div>
+                                        <div>📧 business@plus2ai.com</div>
+                                        <div>📞 +91 80-4567-8900</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; margin-top: 2rem;">
+                                <div style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--sage);">✨ Join 25,000+ students & 500+ institutes ✨</div>
+                                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                                    <span class="badge">📈 92% improved confidence</span>
+                                    <span class="badge">🎯 12-18% score improvement</span>
+                                    <span class="badge">⭐ 4.8/5 rating</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Controls -->
+    <div class="page-controls">
+        <button class="page-btn" id="prevBtn" onclick="previousPage()">←</button>
+        <div class="page-indicator" id="pageIndicator"></div>
+        <button class="page-btn" id="nextBtn" onclick="nextPage()">→</button>
+    </div>
+
+    <script>
+        let currentPage = 0;
+        const totalPages = 8;
+
+        // Initialize page indicators
+        function initPageIndicators() {
+            const indicator = document.getElementById('pageIndicator');
+            indicator.innerHTML = '';
+            for (let i = 0; i < totalPages; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'page-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => goToPage(i);
+                indicator.appendChild(dot);
+            }
+        }
+
+        function updatePage() {
+            // Hide all pages
+            document.querySelectorAll('.page-wrapper').forEach(page => {
+                page.style.display = 'none';
+            });
+
+            // Show current page with animation
+            const currentPageEl = document.querySelector(`.page-${currentPage + 1}`);
+            if (currentPageEl) {
+                currentPageEl.style.display = 'block';
+                currentPageEl.style.animation = 'fadeIn 0.5s ease-in-out';
+            }
+
+            // Update indicators
+            document.querySelectorAll('.page-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentPage);
+            });
+
+            // Update buttons
+            document.getElementById('prevBtn').disabled = currentPage === 0;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages - 1;
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                updatePage();
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                updatePage();
+            }
+        }
+
+        function goToPage(pageNum) {
+            currentPage = pageNum;
+            updatePage();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === 'ArrowLeft') previousPage();
+        });
+
+        // Swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) nextPage();
+            if (touchEndX > touchStartX + 50) previousPage();
+        }
+
+        // Add fade-in animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        initPageIndicators();
+        updatePage();
+    </script>
+</body>
+</html>

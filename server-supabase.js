@@ -373,6 +373,134 @@ app.post('/api/cache/clear', async (req, res) => {
   }
 });
 
+// =====================================================
+// SCAN VISUALS API (separate from scan to avoid 413 on large payloads)
+// Handles both topic guide flip-books and individual question sketches
+// =====================================================
+
+let scanVisualsCache = new Map(); // { scanId: { topicSketches, questionSketches } }
+
+// GET visuals for a scan
+app.get('/api/scan-visuals/:scanId', async (req, res) => {
+  try {
+    const { scanId } = req.params;
+
+    if (redis && redis.status === 'ready') {
+      const cached = await redis.get(`scan_visuals:${scanId}`);
+      if (cached) {
+        const data = JSON.parse(cached);
+        scanVisualsCache.set(scanId, data);
+        return res.json({ data, cached: true });
+      }
+    }
+
+    if (scanVisualsCache.has(scanId)) {
+      return res.json({ data: scanVisualsCache.get(scanId), cached: true });
+    }
+
+    res.json({ data: { topicSketches: null, questionSketches: null }, cached: false });
+  } catch (err) {
+    console.error('Failed to fetch scan visuals:', err);
+    res.status(500).json({ error: 'Failed to fetch scan visuals' });
+  }
+});
+
+// POST visuals for a scan
+app.post('/api/scan-visuals/:scanId', async (req, res) => {
+  try {
+    const { scanId } = req.params;
+    const { topicSketches, questionSketches } = req.body;
+
+    console.log(`📥 [API] received backup for scan: ${scanId}`);
+    console.log(`   - Topics in body: ${Object.keys(topicSketches || {}).length}`, Object.keys(topicSketches || {}));
+    console.log(`   - Questions in body: ${Object.keys(questionSketches || {}).length}`, Object.keys(questionSketches || {}));
+
+    // 1. Sync to Cache (Redis/Memory)
+    const currentData = scanVisualsCache.get(scanId) || { topicSketches: {}, questionSketches: {} };
+    const updatedData = {
+      topicSketches: topicSketches ? { ...(currentData.topicSketches || {}), ...topicSketches } : currentData.topicSketches,
+      questionSketches: questionSketches ? { ...(currentData.questionSketches || {}), ...questionSketches } : currentData.questionSketches
+    };
+
+    scanVisualsCache.set(scanId, updatedData);
+
+    if (redis && redis.status === 'ready') {
+      await redis.set(`scan_visuals:${scanId}`, JSON.stringify(updatedData));
+    }
+
+    let persistLogs = [];
+
+    // 2. Persist to Postgres (Supabase) for long-term storage and Learning Journey visibility
+    // Sync Topic Sketches (Flip-Books)
+    if (topicSketches && Object.keys(topicSketches).length > 0) {
+      for (const [topicName, result] of Object.entries(topicSketches)) {
+        // Find existing record to get its ID for update
+        const { data: existing, error: findError } = await supabaseAdmin
+          .from('topic_sketches')
+          .select('id')
+          .eq('scan_id', scanId)
+          .eq('topic', topicName)
+          .maybeSingle();
+
+        if (findError) console.error(`❌ FindError for ${topicName}:`, findError);
+
+        const upsertData = {
+          scan_id: scanId,
+          topic: topicName,
+          title: result.topic || topicName,
+          page_count: result.pages?.length || 0,
+          pages: (result.pages || []).map((p, idx) => ({
+            ...p,
+            pageNumber: p.pageNumber || idx + 1
+          })),
+          updated_at: new Date().toISOString()
+        };
+
+        if (existing) {
+          upsertData.id = existing.id;
+        }
+
+        console.log(`💾 Upserting topic sketch: "${topicName}" (${upsertData.page_count} pages)`);
+        const { error } = await supabaseAdmin
+          .from('topic_sketches')
+          .upsert(upsertData);
+
+        if (error) {
+          console.error(`❌ Update failed for ${topicName}:`, error);
+          persistLogs.push({ topic: topicName, success: false, error: error.message });
+        } else {
+          console.log(`✅ Success for ${topicName}`);
+          persistLogs.push({ topic: topicName, success: true });
+        }
+      }
+    }
+
+    // Sync Question Sketches
+    if (questionSketches && Object.keys(questionSketches).length > 0) {
+      for (const [qId, svg] of Object.entries(questionSketches)) {
+        const { error } = await supabaseAdmin
+          .from('questions')
+          .update({ sketch_svg_url: svg })
+          .eq('id', qId);
+        if (error) console.error(`❌ Q-Update failed for ${qId}:`, error);
+      }
+    }
+
+    const success = persistLogs.every(l => l.success !== false);
+    res.json({
+      success: true,
+      status: 'success',
+      synced: !!(redis && redis.status === 'ready'),
+      persisted: true,
+      scanId,
+      results: persistLogs
+    });
+  } catch (err) {
+    console.error('❌ Failed to save scan visuals:', err);
+    res.status(500).json({ success: false, error: 'Failed to save scan visuals', message: err.message });
+  }
+});
+
 /**
  * Get All Scans
  * Supports filtering: ?subject=Physics&examContext=KCET

@@ -246,6 +246,63 @@ app.post('/api/questionbank', async (req, res) => {
 });
 
 // ============================================================================
+// SCAN VISUALS API (separate from scan to avoid 413 on large payloads)
+// Handles both topic guide flip-books and individual question sketches
+// ============================================================================
+
+let scanVisualsCache = new Map(); // { scanId: { topicSketches, questionSketches } }
+
+// GET visuals for a scan
+app.get('/api/scan-visuals/:scanId', async (req, res) => {
+    try {
+        const { scanId } = req.params;
+
+        if (redis.status === 'ready') {
+            const cached = await redis.get(`scan_visuals:${scanId}`);
+            if (cached) {
+                const data = JSON.parse(cached);
+                scanVisualsCache.set(scanId, data);
+                return res.json({ data, cached: true });
+            }
+        }
+
+        if (scanVisualsCache.has(scanId)) {
+            return res.json({ data: scanVisualsCache.get(scanId), cached: true });
+        }
+
+        res.json({ data: { topicSketches: null, questionSketches: null }, cached: false });
+    } catch (err) {
+        console.error('Failed to fetch scan visuals:', err);
+        res.status(500).json({ error: 'Failed to fetch scan visuals' });
+    }
+});
+
+// POST visuals for a scan
+app.post('/api/scan-visuals/:scanId', async (req, res) => {
+    try {
+        const { scanId } = req.params;
+        const { topicSketches, questionSketches } = req.body;
+
+        const currentData = scanVisualsCache.get(scanId) || { topicSketches: {}, questionSketches: {} };
+        const updatedData = {
+            topicSketches: topicSketches ? { ...(currentData.topicSketches || {}), ...topicSketches } : currentData.topicSketches,
+            questionSketches: questionSketches ? { ...(currentData.questionSketches || {}), ...questionSketches } : currentData.questionSketches
+        };
+
+        scanVisualsCache.set(scanId, updatedData);
+
+        if (redis.status === 'ready') {
+            await redis.set(`scan_visuals:${scanId}`, JSON.stringify(updatedData));
+        }
+
+        res.json({ status: 'success', synced: redis.status === 'ready' });
+    } catch (err) {
+        console.error('Failed to save scan visuals:', err);
+        res.json({ status: 'success', synced: false });
+    }
+});
+
+// ============================================================================
 // LEARNING JOURNEY API
 // ============================================================================
 

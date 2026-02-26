@@ -413,65 +413,115 @@ const LearnTab: React.FC<{
       }
 
       try {
-        const { data: scans, error } = await supabase
+        console.log('🔍 [LearnTab] Loading visuals for:', { topic: topicResource.topicName, subject, examContext, userId: user.id });
+
+        // 1. Get IDs of all relevant scans (user scans + published system scans)
+        const { data: scanRecords, error: scansError } = await supabase
           .from('scans')
-          .select('id, name, analysis_data')
-          .eq('user_id', user.id)
+          .select('id, analysis_data')
+          .or(`user_id.eq.${user.id},is_system_scan.eq.true`)
           .eq('subject', subject)
-          .eq('exam_context', examContext)
-          .eq('status', 'Complete');
+          .eq('exam_context', examContext);
 
-        if (error) {
-          console.error('❌ Failed to load scans:', error);
-          setLoadingSketches(false);
-          return;
-        }
+        if (scansError) throw scansError;
 
-        if (!scans || scans.length === 0) {
+        const scanIds = scanRecords?.map(s => s.id) || [];
+        console.log(`📊 [LearnTab] Found ${scanIds.length} relevant scans:`, scanIds);
+
+        if (scanIds.length === 0) {
+          console.log('⚠️ [LearnTab] No relevant scans found for this topic/subject/context');
           setLoadingSketches(false);
           return;
         }
 
         const sketches: Array<{ questionId: string; sketchSvg: string; questionText: string }> = [];
 
-        for (const scan of scans) {
+        // 2. Fetch MODERN Topic Sketches (Flip-books from topic_sketches table)
+        if (scanIds.length > 0) {
+          console.log(`🧬 [LearnTab] Fetching ALL topic_sketches for ${scanIds.length} scans...`);
+          const { data: allDbSketches, error: dbError } = await supabase
+            .from('topic_sketches')
+            .select('*')
+            .in('scan_id', scanIds);
+
+          if (dbError) console.error('❌ [LearnTab] DB Topic Sketches Error:', dbError);
+
+          if (allDbSketches) {
+            const topicNameLower = topicResource.topicName.toLowerCase();
+            const matchingSketches = allDbSketches.filter(s => {
+              const sTopicLower = (s.topic || '').toLowerCase();
+              return sTopicLower.includes(topicNameLower) || topicNameLower.includes(sTopicLower);
+            });
+
+            console.log(`✅ [LearnTab] Found ${matchingSketches.length} matching sketches out of ${allDbSketches.length} total`);
+
+            matchingSketches.forEach(s => {
+              const pages = (s.pages || []) as any[];
+              pages.forEach((page, idx) => {
+                const imageData = page.imageData || page.imageUrl;
+                if (imageData) {
+                  sketches.push({
+                    questionId: `${s.scan_id}-topic-db-${s.topic}-p${idx}`,
+                    sketchSvg: imageData,
+                    questionText: page.title || `${s.topic} - Page ${idx + 1}`
+                  });
+                }
+              });
+            });
+          }
+
+          // 3. Fetch Question-Level Sketches (from questions table)
+          console.log(`🔍 [LearnTab] Fetching Question sketches for ${scanIds.length} scans...`);
+          const { data: allQuestionSketches } = await supabase
+            .from('questions')
+            .select('id, topic, text, sketch_svg_url, diagram_url')
+            .in('scan_id', scanIds)
+            .or('sketch_svg_url.not.is.null,diagram_url.not.is.null');
+
+          if (allQuestionSketches) {
+            const topicNameLower = topicResource.topicName.toLowerCase();
+            const matchingQs = allQuestionSketches.filter(q => {
+              const qTopicLower = (q.topic || '').toLowerCase();
+              return qTopicLower.includes(topicNameLower) || topicNameLower.includes(qTopicLower);
+            });
+
+            console.log(`✅ [LearnTab] Found ${matchingQs.length} matching question sketches out of ${allQuestionSketches.length} total`);
+
+            matchingQs.forEach(q => {
+              const sketchData = q.sketch_svg_url || q.diagram_url;
+              if (sketchData) {
+                sketches.push({
+                  questionId: q.id,
+                  sketchSvg: sketchData,
+                  questionText: q.text?.substring(0, 100) || 'Question Concept'
+                });
+              }
+            });
+          }
+        }
+
+        // 4. LEGACY: Check scans.analysis_data (Fallback for old data)
+        for (const scan of (scanRecords || [])) {
           if (scan.analysis_data?.topicBasedSketches) {
             const topicBasedSketches = scan.analysis_data.topicBasedSketches;
             for (const [topicKey, topicSketch] of Object.entries(topicBasedSketches)) {
-              const matches = topicKey === topicResource.topicName ||
-                topicKey.includes(topicResource.topicName) ||
-                topicResource.topicName.includes(topicKey);
+              const matches = topicKey.toLowerCase().includes(topicResource.topicName.toLowerCase()) ||
+                topicResource.topicName.toLowerCase().includes(topicKey.toLowerCase());
 
               if (matches && topicSketch && typeof topicSketch === 'object' && 'pages' in topicSketch) {
                 const pages = (topicSketch as any).pages || [];
                 pages.forEach((page: any, idx: number) => {
                   const imageData = page.imageData || page.imageUrl;
-                  if (imageData) {
+                  // Avoid duplicates
+                  const qId = `${scan.id}-topic-${topicKey}-page-${idx}`;
+                  if (imageData && !sketches.some(s => s.questionId === qId)) {
                     sketches.push({
-                      questionId: `${scan.id}-topic-${topicKey}-page-${idx}`,
+                      questionId: qId,
                       sketchSvg: imageData,
                       questionText: page.title || `${topicKey} - Page ${idx + 1}`
                     });
                   }
                 });
-              }
-            }
-          }
-
-          if (scan.analysis_data?.questions) {
-            for (const question of scan.analysis_data.questions) {
-              if (question.topic === topicResource.topicName ||
-                question.topic?.includes(topicResource.topicName) ||
-                topicResource.topicName?.includes(question.topic)) {
-
-                const sketchData = question.sketch_svg_url || question.sketchSvg || question.diagram_url || question.diagramUrl;
-                if (sketchData) {
-                  sketches.push({
-                    questionId: question.id,
-                    sketchSvg: sketchData,
-                    questionText: question.text?.substring(0, 100) || 'Question'
-                  });
-                }
               }
             }
           }
@@ -903,7 +953,6 @@ const PracticeTab: React.FC<{
     // but we initialize it from sharedQuestions and sync back via setSharedQuestions.
     const questions = sharedQuestions;
     const setQuestions = setSharedQuestions;
-
     // Persistent practice session hook
     const {
       savedAnswers,
