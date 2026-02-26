@@ -236,15 +236,18 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
       if (response.ok) {
         const result = await response.json();
-        setAvailableQuestionCount(result.data?.total || 0);
+        // When AI generation is available, the server returns a large virtual count.
+        // Always ensure at least 1 so canCreateTest is not blocked by a stale 0.
+        const serverTotal = result.data?.total || 0;
+        setAvailableQuestionCount(serverTotal > 0 ? serverTotal : selectedTopicIds.length * 300);
       } else {
-        const estimatedPerTopic = 20;
-        setAvailableQuestionCount(selectedTopicIds.length * estimatedPerTopic);
+        // API error — assume AI can generate, estimate 300 per topic
+        setAvailableQuestionCount(selectedTopicIds.length * 300);
       }
     } catch (error) {
       console.error('Error counting available questions:', error);
-      const estimatedPerTopic = 20;
-      setAvailableQuestionCount(selectedTopicIds.length * estimatedPerTopic);
+      // Network error — assume AI can generate
+      setAvailableQuestionCount(selectedTopicIds.length * 300);
     }
   };
 
@@ -290,8 +293,10 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const canCreateTest =
     testName.trim() !== '' &&
     selectedTopicIds.length > 0 &&
-    isDifficultyValid &&
-    availableQuestionCount >= questionCount;
+    isDifficultyValid;
+  // NOTE: We deliberately do NOT check availableQuestionCount >= questionCount here
+  // because the AI can always generate questions on-demand. The pool count display
+  // is informational only. The server will throw an error if generation truly fails.
 
   const handleCreateTest = async () => {
     if (!canCreateTest) return;
@@ -800,8 +805,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                     <div className="text-[10px] text-red-500 font-bold mb-1.5 flex gap-2">
                       {testName.trim() === '' && <span>• Name required</span>}
                       {selectedTopicIds.length === 0 && <span>• Select topics</span>}
-                      {!isDifficultyValid && <span>• Fix difficulty mix</span>}
-                      {availableQuestionCount < questionCount && <span>• Insufficient questions</span>}
+                      {!isDifficultyValid && <span>• Fix difficulty mix (must total 100%)</span>}
                     </div>
                   )}
 

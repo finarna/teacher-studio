@@ -887,48 +887,78 @@ export async function getTestResults(req, res) {
 
     if (responsesError) throw responsesError;
 
-    // Get questions for this test
-    const questionIds = responses.map(r => r.question_id);
-    const { data: questions, error: questionsError } = await supabaseAdmin
-      .from('questions')
-      .select('*')
-      .in('id', questionIds);
+    // Get question IDs from responses (AI-generated responses may have null question_id)
+    const questionIds = (responses || []).map(r => r.question_id).filter(Boolean);
 
-    if (questionsError) throw questionsError;
+    let orderedQuestions = [];
+    let mappedQuestions = [];
 
-    // Create a map of questions by ID for easy lookup
-    const questionsMap = new Map();
-    (questions || []).forEach(q => questionsMap.set(q.id, q));
+    if (questionIds.length > 0) {
+      // Fetch DB-persisted questions
+      const { data: dbQuestions, error: questionsError } = await supabaseAdmin
+        .from('questions')
+        .select('*')
+        .in('id', questionIds);
 
-    // Order questions based on the order they appear in responses (which preserves test order)
-    // This ensures questions appear in the same sequence as during the test
-    const orderedQuestions = questionIds.map(id => questionsMap.get(id)).filter(Boolean);
+      if (questionsError) throw questionsError;
 
-    // Map questions to frontend format
-    const mappedQuestions = orderedQuestions.map(q => ({
-      id: q.id,
-      text: q.text,
-      options: q.options,
-      marks: q.marks,
-      difficulty: q.difficulty,
-      diff: q.difficulty,
-      topic: q.topic,
-      domain: q.domain,
-      year: q.year,
-      blooms: q.blooms,
-      bloomsTaxonomy: q.blooms,
-      solutionSteps: q.solution_steps || [],
-      examTip: q.exam_tip,
-      visualConcept: q.visual_concept,
-      keyFormulas: q.key_formulas || [],
-      pitfalls: q.pitfalls || [],
-      masteryMaterial: q.mastery_material,
-      hasVisualElement: q.has_visual_element,
-      visualElementType: q.visual_element_type,
-      diagramUrl: q.diagram_url,
-      correctOptionIndex: q.correct_option_index,
-      source: q.source,
-    }));
+      const questionsMap = new Map();
+      (dbQuestions || []).forEach(q => questionsMap.set(q.id, q));
+      orderedQuestions = questionIds.map(id => questionsMap.get(id)).filter(Boolean);
+
+      mappedQuestions = orderedQuestions.map(q => ({
+        id: q.id,
+        text: q.text,
+        options: q.options,
+        marks: q.marks,
+        difficulty: q.difficulty,
+        diff: q.difficulty,
+        topic: q.topic,
+        domain: q.domain,
+        year: q.year,
+        blooms: q.blooms,
+        bloomsTaxonomy: q.blooms,
+        solutionSteps: q.solution_steps || [],
+        examTip: q.exam_tip,
+        visualConcept: q.visual_concept,
+        keyFormulas: q.key_formulas || [],
+        pitfalls: q.pitfalls || [],
+        masteryMaterial: q.mastery_material,
+        hasVisualElement: q.has_visual_element,
+        visualElementType: q.visual_element_type,
+        diagramUrl: q.diagram_url,
+        correctOptionIndex: q.correct_option_index,
+        source: q.source,
+      }));
+    }
+
+    // FALLBACK: if no DB questions found (e.g., AI-generated test whose questions weren't
+    // persisted), read the snapshot stored in test_attempts.test_config.questions
+    if (mappedQuestions.length === 0 && attempt.test_config?.questions?.length > 0) {
+      console.log(`📦 [getTestResults] No DB questions found for attempt ${attemptId} - using test_config snapshot (${attempt.test_config.questions.length} qs)`);
+      mappedQuestions = attempt.test_config.questions.map(q => ({
+        id: q.id,
+        text: q.text,
+        options: q.options || [],
+        marks: q.marks || 1,
+        difficulty: q.difficulty || 'Moderate',
+        diff: q.difficulty || 'Moderate',
+        topic: q.topic || '',
+        domain: q.domain,
+        year: q.year,
+        blooms: q.blooms || q.bloomsTaxonomy,
+        bloomsTaxonomy: q.bloomsTaxonomy || q.blooms,
+        solutionSteps: q.solutionSteps || [],
+        examTip: q.examTip,
+        keyFormulas: q.keyFormulas || [],
+        pitfalls: q.pitfalls || [],
+        masteryMaterial: q.masteryMaterial,
+        hasVisualElement: q.hasVisualElement,
+        diagramUrl: q.diagramUrl,
+        correctOptionIndex: q.correctOptionIndex,
+        source: q.source || 'ai'
+      }));
+    }
 
     // Map DB snake_case to frontend camelCase for attempt
     const mappedAttempt = {
@@ -957,14 +987,35 @@ export async function getTestResults(req, res) {
       completedAt: attempt.completed_at,
     };
 
-    // Map responses to include question data - order by questionIds to match questions order
-    const responsesMap = new Map();
-    responses.forEach(r => responsesMap.set(r.question_id, r));
+    // Map responses to frontend format
+    // For DB-question tests: match by question_id
+    // For AI-question tests: responses have null question_id — match by position using snapshot question IDs
+    let formattedResponses;
 
-    const formattedResponses = questionIds.map(qId => {
-      const r = responsesMap.get(qId);
-      return r ? {
-        questionId: r.question_id,
+    const hasNullIds = (responses || []).some(r => !r.question_id);
+
+    if (!hasNullIds && questionIds.length > 0) {
+      // Normal DB-question path: match by question_id
+      const responsesMap = new Map();
+      responses.forEach(r => responsesMap.set(r.question_id, r));
+      formattedResponses = questionIds.map(qId => {
+        const r = responsesMap.get(qId);
+        return r ? {
+          questionId: r.question_id,
+          selectedOption: r.selected_option,
+          isCorrect: r.is_correct,
+          timeSpent: r.time_spent,
+          markedForReview: r.marked_for_review,
+          topic: r.topic,
+          difficulty: r.difficulty,
+          marks: r.marks
+        } : null;
+      }).filter(Boolean);
+    } else {
+      // AI-question path: match responses positionally to snapshot question IDs
+      const snapshotQuestions = mappedQuestions; // already built from test_config snapshot
+      formattedResponses = (responses || []).map((r, idx) => ({
+        questionId: snapshotQuestions[idx]?.id || r.question_id || `ai-q-${idx}`,
         selectedOption: r.selected_option,
         isCorrect: r.is_correct,
         timeSpent: r.time_spent,
@@ -972,8 +1023,10 @@ export async function getTestResults(req, res) {
         topic: r.topic,
         difficulty: r.difficulty,
         marks: r.marks
-      } : null;
-    }).filter(Boolean);
+      }));
+    }
+
+
 
     res.json({
       success: true,
@@ -1222,11 +1275,18 @@ export async function getWeakTopics(req, res) {
     console.log(`🤖 Analyzing weak topics for ${subject} (${examContext}) - User: ${userId}`);
 
     // Get all topics for this subject
-    const { data: topics, error: topicsError } = await supabaseAdmin
+    // topics table uses 'name' column (not 'topic_name'); it has no 'exam_context' column
+    // Filter by exam is done via exam_weightage JSON field
+    const { data: allTopicsRaw, error: topicsError } = await supabaseAdmin
       .from('topics')
-      .select('id, topic_name, subject, exam_context')
-      .eq('subject', subject)
-      .eq('exam_context', examContext);
+      .select('id, name, subject, exam_weightage')
+      .eq('subject', subject);
+
+    // Filter topics that belong to this exam context (exam_weightage > 0)
+    const topics = (allTopicsRaw || []).filter(t => {
+      const w = t.exam_weightage;
+      return w && (w[examContext] ?? 0) > 0;
+    });
 
     if (topicsError) throw topicsError;
 
@@ -1247,12 +1307,14 @@ export async function getWeakTopics(req, res) {
       const topicResource = topicResources?.find(tr => tr.topic_id === topic.id);
 
       // Get practice accuracy for this topic
+      // questions table uses 'topic' (singular TEXT), NOT 'topics' (array)
+      // topics table uses 'name', NOT 'topic_name'
       const { data: questions } = await supabaseAdmin
         .from('questions')
         .select('id')
         .eq('subject', subject)
         .eq('exam_context', examContext)
-        .contains('topics', [topic.topic_name]);
+        .eq('topic', topic.name);
 
       const questionIds = questions?.map(q => q.id) || [];
 
@@ -1297,7 +1359,7 @@ export async function getWeakTopics(req, res) {
       if (weaknessScore > 0) {
         weakTopics.push({
           topicId: topic.id,
-          topicName: topic.topic_name,
+          topicName: topic.name, // topics table column is 'name'
           masteryLevel,
           practiceAccuracy,
           weaknessScore,
@@ -1353,13 +1415,14 @@ async function generateTestInBackground({ userId, testName, subject, examContext
         // Get topic names from the topics table (UI uses UUID IDs from topics table)
         let selectedTopicNames = null;
         if (topicIds && topicIds.length > 0) {
+          // topics table uses 'name' column (NOT 'topic_name')
           const { data: selectedTopics } = await supabaseAdmin
             .from('topics')
-            .select('id, name, domain')
+            .select('id, name')
             .in('id', topicIds);
 
-          selectedTopicNames = selectedTopics?.map(t => t.name) || [];
-          console.log(`🎯 Selected topic names:`, selectedTopicNames);
+          selectedTopicNames = selectedTopics?.map(t => t.name).filter(Boolean) || [];
+          console.log(`🎯 Selected topic names (${selectedTopicNames.length}):`, selectedTopicNames);
         }
 
         // ==========================================================================================
@@ -1447,104 +1510,194 @@ async function generateTestInBackground({ userId, testName, subject, examContext
 
         console.log(`✅ Generated ${finalQuestions.length} fresh AI questions for custom test (total time: ${Date.now() - aiStartTime}ms)`);
       } catch (aiError) {
-        console.error('⚠️  AI generation failed for custom test, falling back to database:', aiError.message);
-        console.error('Stack trace:', aiError.stack);
-        // Fall back to database selection
+        console.error('⚠️  Strategy 1 AI (full context) failed for custom test:', aiError.message);
+        // Falls through to Strategy 2
         useAIGeneration = false;
       }
     }
 
-    if (!useAIGeneration || finalQuestions.length === 0) {
-      // OLD: Database selection (for non-AI tests or when AI fails)
-      console.log('📦 Using database question selection for custom test...');
+    // ─── Strategy 2: Direct Gemini prompt (no DB config required) ───────────
+    if (finalQuestions.length === 0) {
+      const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+      if (GEMINI_KEY) {
+        console.log('🤖 Strategy 2: Direct Gemini generation for custom mock test...');
+        try {
+          const { GoogleGenerativeAI } = await import('@google/generative-ai');
+          const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+          const model = genAI.getGenerativeModel({
+            model: 'gemini-2.0-flash',
+            generationConfig: { responseMimeType: 'application/json' }
+          });
 
-      // Get topic names for these IDs
-      const { data: topics } = await supabaseAdmin
+          // Resolve topic names if we don't have them yet
+          let topicNamesForPrompt = subject;
+          if (topicIds && topicIds.length > 0) {
+            // topics table uses 'name' column
+            const { data: topicRows } = await supabaseAdmin
+              .from('topics')
+              .select('name')
+              .in('id', topicIds);
+            const resolved = topicRows?.map(r => r.name).filter(Boolean) || [];
+            if (resolved.length > 0) topicNamesForPrompt = resolved.join(', ');
+          }
+
+          console.log(`🎯 Strategy 2 topic names: "${topicNamesForPrompt}"`);
+
+          const difficultyInstruction = `Mix difficulty: ~${difficultyMix.easy}% easy, ~${difficultyMix.moderate}% moderate, ~${difficultyMix.hard}% hard`;
+
+          const prompt = `You are an expert ${subject} teacher for ${examContext} exam.
+Generate exactly ${questionCount} high-quality MCQ questions on the topic(s): "${topicNamesForPrompt}".
+Requirements:
+- ${difficultyInstruction}
+- Each question must have exactly 4 options (strings)
+- Strictly follow the ${examContext} syllabus for ${subject}
+- Return ONLY a valid JSON array with no markdown around it. Each object must have:
+  { "id": "q1", "question": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "topic": "...", "difficulty": "easy|moderate|hard" }`;
+
+          const result = await model.generateContent(prompt);
+          const raw = result.response.text().trim();
+          const jsonStr = raw.includes('```json')
+            ? raw.match(/```json\n([\s\S]*?)\n```/)?.[1] || raw
+            : raw.startsWith('[') ? raw : raw;
+          const parsed = JSON.parse(jsonStr.trim());
+
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            finalQuestions = parsed.map((q, i) => ({
+              id: q.id || `ai-mock-${i + 1}`,
+              text: q.question || q.text || '',
+              options: Array.isArray(q.options) ? q.options : [],
+              correctOptionIndex: q.correctIndex ?? q.correctOptionIndex ?? 0,
+              explanation: q.explanation || '',
+              topic: q.topic || topicNamesForPrompt,
+              difficulty: q.difficulty || 'moderate',
+              diff: q.difficulty || 'moderate',
+              marks: 1,
+              bloomsLevel: 'application',
+              subject,
+              examContext,
+              generatedByAI: true,
+            }));
+            console.log(`✅ Strategy 2: Generated ${finalQuestions.length} questions via direct Gemini`);
+          }
+        } catch (directErr) {
+          console.error('⚠️  Strategy 2 (direct Gemini) failed:', directErr.message);
+          // Falls through to Strategy 3
+        }
+      }
+    }
+
+    // ─── Strategy 3: Database question pool (broad fallback) ────────────────
+    if (finalQuestions.length === 0) {
+      console.log('📦 Strategy 3: Using database question selection for custom test...');
+
+      // topics table uses 'name' column
+      const { data: topicRows } = await supabaseAdmin
         .from('topics')
-        .select('topic_name')
+        .select('name')
         .in('id', topicIds);
+      const topicNames = topicRows?.map(t => t.name).filter(Boolean) || [];
 
-      const topicNames = topics?.map(t => t.topic_name) || [];
-
-      // Calculate questions needed per difficulty
-      const easyCount = Math.round((questionCount * difficultyMix.easy) / 100);
-      const moderateCount = Math.round((questionCount * difficultyMix.moderate) / 100);
-      const hardCount = questionCount - easyCount - moderateCount; // Ensure total is exact
-
-      // Get system scans for this subject
-      const { data: scans } = await supabaseAdmin
+      // Search across ALL scans for this subject/exam (not just system scans)
+      const { data: allScans } = await supabaseAdmin
         .from('scans')
         .select('id')
-        .eq('is_system_scan', true)
         .eq('subject', subject)
         .eq('exam_context', examContext);
 
-      const scanIds = scans?.map(s => s.id) || [];
+      const scanIds = allScans?.map(s => s.id) || [];
 
-      if (scanIds.length === 0) {
-        throw new Error('No questions available for this subject');
-      }
-
-      // Sample questions by difficulty
       const selectedQuestions = [];
 
-      // Easy questions
-      if (easyCount > 0) {
-        const { data: easyQuestions } = await supabaseAdmin
+      if (scanIds.length > 0 && topicNames.length > 0) {
+        // Fetch and filter by topic overlap, difficulty via both 'difficulty' and 'diff' columns
+        const { data: allQs } = await supabaseAdmin
           .from('questions')
           .select('*')
           .in('scan_id', scanIds)
-          .eq('diff', 'Easy')
-          .overlaps('topics', topicNames)
-          .limit(easyCount * 2); // Get more than needed for random sampling
+          .limit(500);
 
-        if (easyQuestions && easyQuestions.length > 0) {
-          const shuffled = easyQuestions.sort(() => 0.5 - Math.random());
-          selectedQuestions.push(...shuffled.slice(0, easyCount));
+        // questions table uses 'topic' (singular TEXT), not 'topics' array
+        const pool = (allQs || []).filter(q => {
+          if (topicNames.length === 0) return true;
+          const qTopic = (q.topic || '').toLowerCase();
+          return topicNames.some(tn =>
+            qTopic.includes(tn.toLowerCase()) || tn.toLowerCase().includes(qTopic)
+          );
+        });
+
+        console.log(`📦 Strategy 3: pool has ${pool.length} questions after topic filter`);
+
+        const easyCount = Math.round((questionCount * difficultyMix.easy) / 100);
+        const moderateCount = Math.round((questionCount * difficultyMix.moderate) / 100);
+        const hardCount = questionCount - easyCount - moderateCount;
+
+        const getDiff = (q) => (q.difficulty || q.diff || 'moderate').toLowerCase();
+
+        const easyPool = pool.filter(q => getDiff(q) === 'easy').sort(() => 0.5 - Math.random());
+        const modPool = pool.filter(q => ['moderate', 'medium'].includes(getDiff(q))).sort(() => 0.5 - Math.random());
+        const hardPool = pool.filter(q => getDiff(q) === 'hard').sort(() => 0.5 - Math.random());
+
+        selectedQuestions.push(...easyPool.slice(0, easyCount));
+        selectedQuestions.push(...modPool.slice(0, moderateCount));
+        selectedQuestions.push(...hardPool.slice(0, hardCount));
+
+        // If we still don't have enough, fill from any remaining pool
+        if (selectedQuestions.length < questionCount) {
+          const usedIds = new Set(selectedQuestions.map(q => q.id));
+          const remaining = pool.filter(q => !usedIds.has(q.id)).sort(() => 0.5 - Math.random());
+          selectedQuestions.push(...remaining.slice(0, questionCount - selectedQuestions.length));
         }
-      }
-
-      // Moderate questions
-      if (moderateCount > 0) {
-        const { data: moderateQuestions } = await supabaseAdmin
+      } else if (scanIds.length > 0) {
+        // No topic filter — just pull any questions for this subject
+        const { data: anyQs } = await supabaseAdmin
           .from('questions')
           .select('*')
           .in('scan_id', scanIds)
-          .eq('diff', 'Moderate')
-          .overlaps('topics', topicNames)
-          .limit(moderateCount * 2);
-
-        if (moderateQuestions && moderateQuestions.length > 0) {
-          const shuffled = moderateQuestions.sort(() => 0.5 - Math.random());
-          selectedQuestions.push(...shuffled.slice(0, moderateCount));
-        }
+          .limit(questionCount * 3);
+        selectedQuestions.push(...(anyQs || []).sort(() => 0.5 - Math.random()).slice(0, questionCount));
       }
 
-      // Hard questions
-      if (hardCount > 0) {
-        const { data: hardQuestions } = await supabaseAdmin
-          .from('questions')
-          .select('*')
-          .in('scan_id', scanIds)
-          .eq('diff', 'Hard')
-          .overlaps('topics', topicNames)
-          .limit(hardCount * 2);
-
-        if (hardQuestions && hardQuestions.length > 0) {
-          const shuffled = hardQuestions.sort(() => 0.5 - Math.random());
-          selectedQuestions.push(...shuffled.slice(0, hardCount));
-        }
+      if (selectedQuestions.length > 0) {
+        finalQuestions = selectedQuestions.slice(0, questionCount).map(q => ({
+          ...q,
+          text: q.text || q.question_text || '',
+          correctOptionIndex: q.correct_option_index ?? q.correctOptionIndex ?? 0,
+        }));
+        console.log(`✅ Strategy 3: Selected ${finalQuestions.length} questions from DB`);
+      } else {
+        throw new Error(`No questions found for ${subject} (${examContext}). Please upload papers or enable AI generation.`);
       }
-
-      if (selectedQuestions.length < questionCount) {
-        throw new Error(`Insufficient questions available. Found ${selectedQuestions.length}, needed ${questionCount}`);
-      }
-
-      // Shuffle all questions together
-      finalQuestions = selectedQuestions.sort(() => 0.5 - Math.random());
     }
 
-    // Create test attempt
+    // ─── Final guard: all 3 strategies exhausted ────────────────────────────
+    if (!finalQuestions || finalQuestions.length === 0) {
+      throw new Error(`Could not generate questions for ${subject} (${examContext}). Please check your Gemini API key or upload past papers.`);
+    }
+
+    // Create test attempt — store the full questions snapshot so review always works
+    // (AI questions are not persisted in the questions table, so we need this fallback)
+    const questionsSnapshot = finalQuestions.map(q => ({
+      id: q.id,
+      text: q.text,
+      options: q.options,
+      marks: q.marks,
+      difficulty: q.difficulty,
+      topic: q.topic,
+      blooms: q.blooms,
+      domain: q.domain,
+      year: q.year,
+      solutionSteps: q.solutionSteps || q.solution_steps || [],
+      examTip: q.examTip || q.exam_tip,
+      keyFormulas: q.keyFormulas || q.key_formulas || [],
+      pitfalls: q.pitfalls || [],
+      masteryMaterial: q.masteryMaterial || q.mastery_material,
+      correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index,
+      hasVisualElement: q.hasVisualElement ?? q.has_visual_element,
+      diagramUrl: q.diagramUrl || q.diagram_url,
+      bloomsTaxonomy: q.bloomsTaxonomy || q.blooms,
+      source: q.source
+    }));
+
     const { data: attempt, error: attemptError } = await supabaseAdmin
       .from('test_attempts')
       .insert({
@@ -1562,7 +1715,8 @@ async function generateTestInBackground({ userId, testName, subject, examContext
           topicIds,
           difficultyMix,
           questionCount,
-          durationMinutes
+          durationMinutes,
+          questions: questionsSnapshot // ← snapshot for review fallback
         }
       })
       .select()
@@ -1735,15 +1889,18 @@ export async function countAvailableQuestions(req, res) {
     console.log(`🔢 Counting available questions for ${subject} (${examContext})`);
 
     // Get topic names for these IDs
-    const { data: topics } = await supabaseAdmin
+    // topics table uses 'name' column (not 'topic_name')
+    const { data: topicsData } = await supabaseAdmin
       .from('topics')
-      .select('topic_name')
+      .select('name')
       .in('id', topicIds);
 
-    const topicNames = topics?.map(t => t.topic_name) || [];
+    const topicNames = topicsData?.map(t => t.name).filter(Boolean) || [];
 
     // Check if AI generation is enabled - if so we have essentially infinite questions
-    const useAIGeneration = !!(process.env.GEMINI_API_KEY && examContext && subject);
+    // Check both GEMINI_API_KEY and VITE_GEMINI_API_KEY (same as generateTest strategy)
+    const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    const useAIGeneration = !!(GEMINI_KEY && examContext && subject);
 
     if (useAIGeneration) {
       console.log(`🤖 AI generation is enabled -> Reporting virtually infinite question capacity`);
@@ -1792,34 +1949,35 @@ export async function countAvailableQuestions(req, res) {
     // Count questions by difficulty
     const counts = { easy: 0, moderate: 0, hard: 0 };
 
+    // questions table uses: 'difficulty' (not 'diff'), 'topic' singular TEXT (not 'topics' array)
     // Count Easy questions
-    const { count: easyCount } = await supabaseAdmin
+    let easyQuery = supabaseAdmin
       .from('questions')
       .select('id', { count: 'exact', head: true })
       .in('scan_id', scanIds)
-      .eq('diff', 'Easy')
-      .overlaps('topics', topicNames);
-
+      .eq('difficulty', 'Easy');
+    if (topicNames.length > 0) easyQuery = easyQuery.in('topic', topicNames);
+    const { count: easyCount } = await easyQuery;
     counts.easy = easyCount || 0;
 
     // Count Moderate questions
-    const { count: moderateCount } = await supabaseAdmin
+    let modQuery = supabaseAdmin
       .from('questions')
       .select('id', { count: 'exact', head: true })
       .in('scan_id', scanIds)
-      .eq('diff', 'Moderate')
-      .overlaps('topics', topicNames);
-
+      .eq('difficulty', 'Moderate');
+    if (topicNames.length > 0) modQuery = modQuery.in('topic', topicNames);
+    const { count: moderateCount } = await modQuery;
     counts.moderate = moderateCount || 0;
 
     // Count Hard questions
-    const { count: hardCount } = await supabaseAdmin
+    let hardQuery = supabaseAdmin
       .from('questions')
       .select('id', { count: 'exact', head: true })
       .in('scan_id', scanIds)
-      .eq('diff', 'Hard')
-      .overlaps('topics', topicNames);
-
+      .eq('difficulty', 'Hard');
+    if (topicNames.length > 0) hardQuery = hardQuery.in('topic', topicNames);
+    const { count: hardCount } = await hardQuery;
     counts.hard = hardCount || 0;
 
     const total = counts.easy + counts.moderate + counts.hard;

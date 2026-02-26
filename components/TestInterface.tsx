@@ -10,7 +10,11 @@ import {
   AlertTriangle,
   X,
   Check,
-  Brain
+  Brain,
+  LogOut,
+  Zap,
+  TrendingUp,
+  Target
 } from 'lucide-react';
 import type { AnalyzedQuestion, TestAttempt, TestResponse, ExamContext } from '../types';
 import { RenderWithMath } from './MathRenderer';
@@ -64,7 +68,8 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   const [responses, setResponses] = useState<Map<string, QuestionResponse>>(initializeResponses());
   const [showNavigator, setShowNavigator] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(attempt.durationMinutes * 60); // in seconds
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(attempt.durationMinutes * 60);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -72,22 +77,34 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   // Guard: If no current question, show error state
   if (!currentQuestion) {
     return (
-      <div className="h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center p-8 bg-white border-2 border-red-200 rounded-xl">
-          <div className="text-red-600 mb-4">
+      <div className="h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white border-2 border-amber-200 rounded-2xl max-w-md shadow-lg">
+          <div className="text-amber-500 mb-4">
             <AlertTriangle size={48} className="mx-auto" />
           </div>
-          <h2 className="font-black text-xl text-slate-900 mb-2">No Questions Available</h2>
-          <p className="text-slate-600 mb-4">Unable to load test questions.</p>
+          <h2 className="font-black text-xl text-slate-900 mb-2">
+            {isReviewMode ? 'Review Unavailable' : 'No Questions Available'}
+          </h2>
+          <p className="text-slate-600 mb-2 text-sm leading-relaxed">
+            {isReviewMode
+              ? 'This test was generated before question snapshots were introduced. Questions from older AI-generated tests cannot be recovered for review.'
+              : 'Unable to load test questions. Please try again.'}
+          </p>
+          {isReviewMode && (
+            <p className="text-slate-500 text-xs mb-5 bg-slate-50 rounded-lg p-3">
+              💡 All <strong>new</strong> tests you create will support full review & re-engagement.
+            </p>
+          )}
           <button
             onClick={onExit}
-            className="px-6 py-3 bg-slate-900 text-white rounded-lg font-bold hover:bg-slate-800"
+            className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all"
           >
-            Go Back
+            ← Go Back
           </button>
         </div>
       </div>
     );
+
   }
 
   // Timer effect - only in take mode
@@ -274,6 +291,16 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
           <div className="flex items-center justify-between">
             {/* Test Info */}
             <div className="flex items-center gap-3">
+              {/* Quit Button - only in take mode */}
+              {!isReviewMode && (
+                <button
+                  onClick={() => setShowQuitConfirm(true)}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-red-50 hover:border-red-200 hover:text-red-700 text-slate-600 border border-slate-200 rounded-md text-xs font-bold transition-all flex items-center gap-1.5"
+                >
+                  <LogOut size={13} />
+                  Quit
+                </button>
+              )}
               {/* Back Button - Show in Review Mode */}
               {isReviewMode && (
                 <button
@@ -814,6 +841,127 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
           </div>
         </div>
       )}
+
+      {/* Quit Test Confirmation Modal - Only in Take Mode */}
+      {!isReviewMode && showQuitConfirm && (() => {
+        const pct = Math.round((answeredCount / questions.length) * 100);
+        type MotivationEntry = { range: [number, number]; icon: React.ReactNode; color: string; title: string; msg: string };
+        const motivations: MotivationEntry[] = [
+          {
+            range: [0, 20], color: 'amber',
+            icon: <Zap size={28} className="text-amber-500" />,
+            title: "You're Just Getting Started!",
+            msg: "Every champion starts somewhere. The questions ahead could be the ones that make the difference. Don't quit — your future self will thank you for pushing through!"
+          },
+          {
+            range: [21, 50], color: 'blue',
+            icon: <TrendingUp size={28} className="text-blue-500" />,
+            title: "You're Building Momentum!",
+            msg: `You're almost halfway through. Elite performers don't stop when it's hard — they stop when it's done. Keep going and finish what you started!`
+          },
+          {
+            range: [51, 80], color: 'indigo',
+            icon: <Target size={28} className="text-indigo-500" />,
+            title: "So Close to the Finish!",
+            msg: `You've answered ${answeredCount} questions — only ${unansweredCount} left. The final stretch is where champions separate from the rest. Push through!`
+          },
+          {
+            range: [81, 100], color: 'emerald',
+            icon: <CheckCircle2 size={28} className="text-emerald-500" />,
+            title: "Almost Done — Don't Stop Now!",
+            msg: `You've conquered ${answeredCount} out of ${questions.length} questions. You are THIS close. Finish strong and see how well you really know this!`
+          },
+        ];
+        const m = motivations.find(entry => pct >= entry.range[0] && pct <= entry.range[1]) || motivations[0];
+        const accentMap: Record<string, string> = {
+          amber: 'bg-amber-50 border-amber-200 text-amber-900',
+          blue: 'bg-blue-50 border-blue-200 text-blue-900',
+          indigo: 'bg-indigo-50 border-indigo-200 text-indigo-900',
+          emerald: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+        };
+        const accentClass = accentMap[m.color] || accentMap.amber;
+        return (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
+              {/* Dark header */}
+              <div className="bg-gradient-to-br from-slate-900 to-slate-800 px-6 py-5 text-white relative">
+                <button
+                  onClick={() => setShowQuitConfirm(false)}
+                  className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+                >
+                  <X size={14} />
+                </button>
+                <div className="flex items-center gap-2 mb-1">
+                  <LogOut size={16} className="text-red-400" />
+                  <h2 className="font-black text-lg">Quit Test?</h2>
+                </div>
+                <p className="text-slate-400 text-xs font-medium">{attempt.testName} &bull; {attempt.subject} &bull; {attempt.examContext}</p>
+              </div>
+
+              {/* Motivational card */}
+              <div className={`mx-5 mt-5 p-4 rounded-xl border ${accentClass} flex items-start gap-3`}>
+                {m.icon}
+                <div>
+                  <div className="font-black text-sm mb-1">{m.title}</div>
+                  <div className="text-xs font-medium leading-relaxed opacity-90">{m.msg}</div>
+                </div>
+              </div>
+
+              {/* Quick stats */}
+              <div className="mx-5 mt-4 grid grid-cols-3 gap-2">
+                <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                  <div className="text-2xl font-black text-emerald-600">{answeredCount}</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Answered</div>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                  <div className="text-2xl font-black text-slate-400">{unansweredCount}</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Remaining</div>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                  <div className="text-2xl font-black text-amber-500">{markedCount}</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Flagged</div>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="mx-5 mt-4">
+                <div className="flex justify-between text-[10px] font-bold text-slate-500 mb-1.5">
+                  <span>Completion</span>
+                  <span>{pct}%</span>
+                </div>
+                <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Warning note */}
+              <div className="mx-5 mt-3 flex items-center gap-2 text-[11px] text-slate-500 font-medium">
+                <AlertTriangle size={11} className="text-amber-500 flex-shrink-0" />
+                <span>Your progress will be lost if you exit without submitting.</span>
+              </div>
+
+              {/* Action buttons */}
+              <div className="p-5 flex gap-3 mt-1">
+                <button
+                  onClick={() => setShowQuitConfirm(false)}
+                  className="flex-1 px-4 py-3 bg-slate-900 text-white rounded-xl text-sm font-black hover:bg-slate-800 transition-all"
+                >
+                  Continue Test
+                </button>
+                <button
+                  onClick={onExit}
+                  className="px-4 py-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm font-bold hover:bg-red-100 transition-all"
+                >
+                  Exit Anyway
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

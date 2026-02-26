@@ -377,22 +377,26 @@ export default function UserProfile({ onBack }: UserProfileProps) {
                                     ACTIVE PLAN
                                   </div>
                                   <h3 className="text-2xl font-black font-outfit mb-1">{subscription.plan?.name}</h3>
-                                  <p className="text-white/90 text-xs font-semibold">{subscription.plan?.billing_period === 'yearly' ? 'Billed Annually' : 'Billed Monthly'}</p>
+                                  <p className="text-white/90 text-xs font-semibold">{subscription.plan?.price_inr === 0 ? 'Manual Onboard' : subscription.plan?.billing_period === 'yearly' ? 'Billed Annually' : 'Billed Monthly'}</p>
                                 </div>
                                 <div className="text-right">
                                   <div className="text-3xl font-black font-outfit leading-none mb-1">
-                                    ₹{(subscription.plan?.price_inr / 100).toLocaleString('en-IN')}
+                                    {subscription.plan?.price_inr === 0
+                                      ? 'Manual Onboard'
+                                      : `₹${(subscription.plan?.price_inr / 100).toLocaleString('en-IN')}`}
                                   </div>
                                   <div className="text-white/90 text-xs font-bold">
-                                    /{subscription.plan?.billing_period === 'yearly' ? 'month' : 'month'}
+                                    {subscription.plan?.price_inr === 0 ? 'Direct Access' : `/${subscription.plan?.billing_period === 'yearly' ? 'yr' : 'mo'}`}
                                   </div>
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-1.5 text-xs bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 inline-flex">
-                                <Calendar size={14} />
-                                <span className="font-semibold">Renews {formatDate(subscription.current_period_end)}</span>
-                              </div>
+                              {subscription.plan?.price_inr !== 0 && (
+                                <div className="flex items-center gap-1.5 text-xs bg-white/15 backdrop-blur-sm rounded-lg px-3 py-1.5 inline-flex">
+                                  <Calendar size={14} />
+                                  <span className="font-semibold">Renews {formatDate(subscription.current_period_end)}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
 

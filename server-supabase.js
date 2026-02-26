@@ -1004,9 +1004,30 @@ app.get('/api/subscription/status', async (req, res) => {
     if (profile?.role === 'admin' || profile?.role === 'teacher') {
       return res.json({
         hasActiveSubscription: true,
-        subscription: { plan: { name: 'Staff Bypass' } },
+        subscription: {
+          plan: {
+            name: 'Staff Bypass',
+            billing_period: 'monthly',
+            price_inr: 0,       // Free for staff
+            features: [
+              'Unlimited scans',
+              'Full AI analysis',
+              'All subjects',
+              'Question bank (full)',
+              'Priority support',
+              'Admin dashboard',
+              'Performance analytics',
+              'Custom training materials'
+            ]
+          },
+          status: 'active',
+          scans_used: 0,
+          scans_limit: -1,      // Unlimited
+          current_period_end: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString(), // +100 years
+        },
       });
     }
+
 
     // Return standardized response
     const hasActiveSubscription = !!subscription;
@@ -1561,12 +1582,13 @@ app.get('/api/learning-journey/weak-topics', async (req, res) => {
       const topicResource = topicResources?.find(tr => tr.topic_id === topic.id);
 
       // Get practice accuracy for this topic
+      // questions table: 'topic' is singular TEXT (not 'topics' array); topics table: 'name' (not 'topic_name')
       const { data: questions } = await supabaseAdmin
         .from('questions')
         .select('id')
         .eq('subject', subject)
         .eq('exam_context', examContext)
-        .contains('topics', [topic.topic_name]);
+        .eq('topic', topic.name);
 
       const questionIds = questions?.map(q => q.id) || [];
 
@@ -1732,22 +1754,40 @@ app.post('/api/learning-journey/count-available-questions', async (req, res) => 
 
     const topicNames = topics?.map(t => t.name) || [];
 
-    // Get system scans for this subject
+    // Query ALL scans for this subject (not just system scans — user scans also have questions)
     const { data: scans } = await supabaseAdmin
       .from('scans')
       .select('id')
-      .eq('is_system_scan', true)
       .eq('subject', subject)
       .eq('exam_context', examContext);
 
     const scanIds = scans?.map(s => s.id) || [];
+    const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
-    if (scanIds.length === 0) {
+    if (scanIds.length === 0 && !GEMINI_KEY) {
       return res.json({
         success: true,
         data: {
           total: 0,
           byDifficulty: { easy: 0, moderate: 0, hard: 0 }
+        }
+      });
+    }
+
+    // If AI is available or no scans, return estimated/AI count
+    if (GEMINI_KEY) {
+      const topicsMultiplier = Math.max(1, topicNames.length);
+      const totalAvailable = topicsMultiplier * 300;
+      return res.json({
+        success: true,
+        data: {
+          total: totalAvailable,
+          byDifficulty: {
+            easy: Math.floor(totalAvailable * 0.3),
+            moderate: Math.floor(totalAvailable * 0.5),
+            hard: Math.floor(totalAvailable * 0.2)
+          },
+          isAIGenerated: true
         }
       });
     }
