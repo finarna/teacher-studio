@@ -239,7 +239,7 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                             <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-active:scale-90 transition-transform">
                                 <ChevronRight className="rotate-180" size={16} />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-white/50">Mission Selection</span>
+                            <span className="text-[10px] font-bold text-white/50 tracking-wide">Mission Selection</span>
                         </button>
                         <button
                             onClick={() => setIsAiDrawerOpen(true)}
@@ -252,20 +252,20 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         </button>
                     </div>
 
-                    <h1 className="text-3xl font-black text-white font-outfit uppercase tracking-tight italic mb-2">
-                        Subject <span className="text-primary-400 non-italic">Matrix</span>
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-white font-outfit tracking-tight mb-2">
+                        Subject <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-indigo-400">Matrix</span>
                     </h1>
 
                     <div className="flex items-center gap-4 mt-6">
                         <div className="flex-1 bg-white/5 backdrop-blur-md rounded-2xl p-3 border border-white/10">
-                            <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Global Mastery</p>
+                            <p className="text-[9px] font-bold text-white/40 tracking-wide mb-1">Global Mastery</p>
                             <div className="flex items-baseline gap-1">
                                 <span className="text-2xl font-black text-white">{Math.round(averageMastery)}%</span>
                                 <span className="text-[10px] font-bold text-primary-400">SYNCED</span>
                             </div>
                         </div>
                         <div className="flex-1 bg-white/5 backdrop-blur-md rounded-2xl p-3 border border-white/10">
-                            <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Global Accuracy</p>
+                            <p className="text-[9px] font-bold text-white/40 tracking-wide mb-1">Global Accuracy</p>
                             <div className="flex items-baseline gap-1">
                                 <span className="text-2xl font-black text-white">{Math.round(averageAccuracy)}%</span>
                                 <span className="text-[10px] font-bold text-indigo-400">LIVE</span>
@@ -299,10 +299,10 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black text-primary-400 uppercase tracking-[0.2em]">Active Intelligence</span>
+                                        <span className="text-[10px] font-bold text-primary-400 tracking-wide">Active Intelligence</span>
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
                                     </div>
-                                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-1">Real-time Strategy Pivot</p>
+                                    <p className="text-[9px] font-bold text-slate-500 tracking-wide leading-none mt-1">Real-time Strategy Pivot</p>
                                 </div>
                             </div>
                             <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400 border border-white/5">
@@ -311,10 +311,10 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         </div>
 
                         <div className="relative z-10">
-                            <h3 className="text-xl font-black text-white italic uppercase tracking-tight mb-2 font-outfit">
+                            <h3 className="text-xl font-extrabold text-white tracking-tight mb-2 font-outfit">
                                 {aiInsights ? aiInsights.title : "Initializing Neural Map..."}
                             </h3>
-                            <p className="text-sm font-medium text-slate-400 leading-relaxed font-instrument italic">
+                            <p className="text-sm font-medium text-slate-400 leading-relaxed font-instrument">
                                 "{aiInsights ? aiInsights.description : "Analyzing your latest cognitive footprint to optimize your rank displacement..."}"
                             </p>
                         </div>
@@ -322,7 +322,7 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         {aiInsights && (
                             <div className="flex gap-2 relative z-10">
                                 {aiInsights.tags.map(tag => (
-                                    <span key={tag} className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[8px] font-black text-slate-500 uppercase tracking-widest">{tag}</span>
+                                    <span key={tag} className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[8px] font-bold text-slate-500 tracking-wide">{tag}</span>
                                 ))}
                             </div>
                         )}
@@ -330,7 +330,7 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                 </motion.div>
 
                 {/* Subject Cards */}
-                <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-3 mb-8">
                     {availableSubjects.map((subject, index) => {
                         const config = SUBJECT_CONFIGS[subject];
                         const mastery = subjectProgress?.[subject]?.overallMastery || 0;
@@ -347,44 +347,34 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
-                                className={`w-full bg-white rounded-[2.5rem] overflow-hidden border transition-all ${isExpanded ? 'shadow-2xl border-slate-200 ring-4 ring-slate-900/5' : 'border-slate-100 shadow-sm'}`}
+                                className={`w-full bg-white rounded-3xl overflow-hidden border transition-all ${isExpanded ? 'shadow-xl border-slate-200 ring-2 ring-slate-900/5 col-span-2' : 'border-slate-100 shadow-sm'}`}
                             >
                                 <button
                                     onClick={() => setExpandedSubjectId(isExpanded ? null : subject)}
-                                    className="w-full p-6 text-left active:scale-[0.99] transition-all relative"
+                                    className="w-full p-4 text-left active:scale-[0.98] transition-all relative"
                                 >
-                                    {/* Mastery Progress Bar (Top) */}
-                                    <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-50">
+                                    <div className="flex flex-col items-center text-center gap-2 mb-3">
                                         <div
-                                            className="h-full transition-all duration-1000"
-                                            style={{ width: `${mastery}%`, backgroundColor: config.color }}
-                                        />
+                                            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                                            style={{ background: `linear-gradient(135deg, ${config.color}, ${config.colorDark})` }}
+                                        >
+                                            <Icon size={24} strokeWidth={2.5} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-base font-extrabold text-slate-900 font-outfit tracking-tight">
+                                                {config.displayName}
+                                            </h3>
+                                            <div className="flex items-center justify-center gap-1.5">
+                                                <span className={`text-[8px] font-bold tracking-wide ${isExpanded ? 'text-primary-600' : 'text-slate-400'}`}>
+                                                    {isExpanded ? 'Active Arena' : 'Core Path'}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="flex items-start justify-between mb-8">
-                                        <div className="flex items-center gap-4">
-                                            <div
-                                                className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg"
-                                                style={{ background: `linear-gradient(135deg, ${config.color}, ${config.colorDark})` }}
-                                            >
-                                                <Icon size={28} strokeWidth={2.5} />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-2xl font-black text-slate-900 font-outfit uppercase italic tracking-tighter">
-                                                    {config.displayName}
-                                                </h3>
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className={`text-[10px] font-black uppercase tracking-widest ${isExpanded ? 'text-primary-600' : 'text-slate-400'}`}>
-                                                        {isExpanded ? 'Active Arena' : 'Core Path'}
-                                                    </span>
-                                                    <div className="w-1 h-3 bg-slate-100 rounded-full" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="text-2xl font-black text-slate-900 font-outfit">{Math.round(mastery)}%</span>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mastery</p>
-                                        </div>
+                                    <div className="flex items-center justify-center gap-2 mb-3">
+                                        <span className="text-xl font-extrabold text-slate-900 font-outfit">{Math.round(mastery)}%</span>
+                                        <p className="text-[8px] font-bold text-slate-400">Mastery</p>
                                     </div>
 
                                     {/* DYNAMIC CALCULATION FOR POTENTIAL */}
@@ -392,45 +382,12 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                         const potential = getPotentialGain(mastery, accuracy);
 
                                         return (
-                                            <>
-                                                {!isExpanded && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        className="grid grid-cols-4 gap-2 mb-6"
-                                                    >
-                                                        <div className="bg-slate-100/50 rounded-2xl p-2 text-center border border-slate-200/50">
-                                                            <div className="text-sm font-black text-slate-900 leading-none mb-1">{Math.round(accuracy)}%</div>
-                                                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Acc</div>
-                                                        </div>
-                                                        <div className="bg-slate-100/50 rounded-2xl p-2 text-center border border-slate-200/50">
-                                                            <div className="text-sm font-black text-slate-900 leading-none mb-1">{stats.topics}</div>
-                                                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Nodes</div>
-                                                        </div>
-                                                        <div className="bg-slate-100/50 rounded-2xl p-2 text-center border border-slate-200/50">
-                                                            <div className="text-sm font-black text-slate-900 leading-none mb-1">{stats.questions}</div>
-                                                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Qns</div>
-                                                        </div>
-                                                        <div className="bg-slate-100/50 rounded-2xl p-2 text-center border border-slate-200/50">
-                                                            <div className="text-sm font-black text-slate-900 leading-none mb-1">{stats.flashcards}</div>
-                                                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Recall</div>
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2 text-[10px] font-black text-primary-600 uppercase tracking-widest">
-                                                        <TrendingUp size={14} />
-                                                        Potential +{potential}%
-                                                    </div>
-                                                    <motion.div
-                                                        animate={{ rotate: isExpanded ? 90 : 0 }}
-                                                        className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-lg"
-                                                    >
-                                                        <ArrowRight size={18} />
-                                                    </motion.div>
+                                            <div className="flex items-center justify-center">
+                                                <div className="flex items-center gap-1 text-[9px] font-bold text-primary-600 tracking-wide">
+                                                    <TrendingUp size={12} />
+                                                    +{potential}%
                                                 </div>
-                                            </>
+                                            </div>
                                         );
                                     })()}
                                 </button>
@@ -441,66 +398,66 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            className="bg-slate-50 border-t border-slate-100 p-6 space-y-4"
+                                            className="bg-slate-50 border-t border-slate-100 p-4 space-y-4"
                                         >
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <div className="w-1 h-4 bg-slate-900 rounded-full" />
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arena Quick Actions</span>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className="w-1 h-3 bg-slate-900 rounded-full" />
+                                                <span className="text-[9px] font-bold text-slate-400 tracking-wide">Arena Quick Actions</span>
                                             </div>
 
-                                            <div className="grid grid-cols-1 gap-3">
+                                            <div className="grid grid-cols-1 gap-2">
                                                 <button
                                                     onClick={() => onSelectOption?.(subject, 'topicwise')}
-                                                    className="w-full bg-white rounded-2xl p-4 flex items-center justify-between border border-slate-200 shadow-sm active:bg-indigo-50 transition-colors"
+                                                    className="w-full bg-white rounded-xl p-3 flex items-center justify-between border border-slate-200 shadow-sm active:bg-indigo-50 transition-colors"
                                                 >
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
-                                                            <BookOpen size={20} />
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                                                            <BookOpen size={16} />
                                                         </div>
                                                         <div className="text-left">
-                                                            <div className="text-sm font-black text-slate-900 uppercase italic">Node Syllabus</div>
-                                                            <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Conceptual Masterclass</div>
+                                                            <div className="text-xs font-bold text-slate-900">Node Syllabus</div>
+                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">Conceptual Masterclass</div>
                                                         </div>
                                                     </div>
-                                                    <ArrowRight size={14} className="text-slate-300" />
+                                                    <ArrowRight size={12} className="text-slate-300" />
                                                 </button>
 
                                                 <button
                                                     onClick={() => onSelectOption?.(subject, 'past_exams')}
-                                                    className="w-full bg-white rounded-2xl p-4 flex items-center justify-between border border-slate-200 shadow-sm active:bg-amber-50 transition-colors"
+                                                    className="w-full bg-white rounded-xl p-3 flex items-center justify-between border border-slate-200 shadow-sm active:bg-amber-50 transition-colors"
                                                 >
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-                                                            <HistoryIcon size={20} />
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+                                                            <HistoryIcon size={16} />
                                                         </div>
                                                         <div className="text-left">
-                                                            <div className="text-sm font-black text-slate-900 uppercase italic">Exam Vault</div>
-                                                            <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Practice Past Papers</div>
+                                                            <div className="text-xs font-bold text-slate-900">Exam Vault</div>
+                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">Practice Past Papers</div>
                                                         </div>
                                                     </div>
-                                                    <ArrowRight size={14} className="text-slate-300" />
+                                                    <ArrowRight size={12} className="text-slate-300" />
                                                 </button>
 
                                                 <button
                                                     onClick={() => onSelectOption?.(subject, 'mock_builder')}
-                                                    className="w-full bg-white rounded-2xl p-4 flex items-center justify-between border border-slate-200 shadow-sm active:bg-primary-50 transition-colors"
+                                                    className="w-full bg-white rounded-xl p-3 flex items-center justify-between border border-slate-200 shadow-sm active:bg-primary-50 transition-colors"
                                                 >
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 shrink-0">
-                                                            <Zap size={20} />
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600 shrink-0">
+                                                            <Zap size={16} />
                                                         </div>
                                                         <div className="text-left">
-                                                            <div className="text-sm font-black text-slate-900 uppercase italic">Mock Missions</div>
-                                                            <div className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Custom Skill Sprint</div>
+                                                            <div className="text-xs font-bold text-slate-900">Mock Missions</div>
+                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">Custom Skill Sprint</div>
                                                         </div>
                                                     </div>
-                                                    <ArrowRight size={14} className="text-slate-300" />
+                                                    <ArrowRight size={12} className="text-slate-300" />
                                                 </button>
                                             </div>
 
                                             <button
                                                 onClick={() => onSelectSubject(subject)}
-                                                className="w-full py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-[0.98] transition-all"
+                                                className="w-full py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-bold tracking-wide active:scale-[0.98] transition-all"
                                             >
                                                 Full subject dashboard
                                             </button>

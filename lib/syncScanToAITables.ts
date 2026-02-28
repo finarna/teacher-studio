@@ -115,7 +115,8 @@ export async function syncScanToAITables(
       total_marks: totalMarks,
       difficulty_easy_pct: difficultyEasyPct,
       difficulty_moderate_pct: difficultyModeratePct,
-      difficulty_hard_pct: difficultyHardPct
+      difficulty_hard_pct: difficultyHardPct,
+      evolution_note: analysis_data?.evolutionNote || analysis_data?.evolutionInsight || null
     };
 
     const { data: upsertedPattern, error: patternError } = await supabase

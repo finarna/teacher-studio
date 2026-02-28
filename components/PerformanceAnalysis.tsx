@@ -377,8 +377,8 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                       <Sparkles size={18} className="text-white" />
                     </div>
                     <div>
-                      <h2 className="text-base font-black text-slate-900 font-outfit tracking-tight">AI Student Understanding</h2>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Post Mock Analysis</p>
+                      <h2 className="text-base font-black text-slate-900 font-outfit tracking-tight">Personal Coaching & Analysis</h2>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Professor's Insight Report</p>
                     </div>
                   </div>
                   <button
@@ -405,14 +405,14 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                   <div className="space-y-4">
                     <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                       <div className="text-sm font-medium text-slate-800 leading-relaxed">
-                        <strong className="font-black">System Verdict:</strong> <RenderWithMath text={aiSummary.verdict} showOptions={false} serif={false} />
+                        <strong className="font-black">Coach's Verdict:</strong> <RenderWithMath text={aiSummary.verdict} showOptions={false} serif={false} />
                       </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
                       {/* Strengths Board */}
                       <div className="bg-emerald-50/50 border border-emerald-100/50 rounded-2xl p-4">
-                        <h3 className="text-xs font-black text-emerald-700 uppercase tracking-widest flex items-center gap-1.5 mb-3"><Check size={14} /> Superiority Matrix</h3>
+                        <h3 className="text-xs font-black text-emerald-700 uppercase tracking-widest flex items-center gap-1.5 mb-3"><Check size={14} /> Your Strengths</h3>
                         <div className="space-y-3">
                           {aiSummary.strengths.map((s, i) => (
                             <div key={i} className="flex gap-3">
@@ -429,7 +429,7 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                       </div>
                       {/* Weakness Board */}
                       <div className="bg-red-50/50 border border-red-100/50 rounded-2xl p-4">
-                        <h3 className="text-xs font-black text-red-700 uppercase tracking-widest flex items-center gap-1.5 mb-3"><X size={14} /> Vulnerabilities Found</h3>
+                        <h3 className="text-xs font-black text-red-700 uppercase tracking-widest flex items-center gap-1.5 mb-3"><X size={14} /> Areas to Improve & Focus</h3>
                         <div className="space-y-3">
                           {aiSummary.weaknesses.map((w, i) => (
                             <div key={i} className="flex gap-3">
@@ -449,7 +449,7 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                     <div className="bg-slate-900 text-white rounded-2xl p-4 flex items-start gap-4">
                       <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><Lightbulb size={14} /></div>
                       <div>
-                        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Recommended 7-Day Protocol</h3>
+                        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Your 7-Day Action Plan</h3>
                         <div className="text-sm font-medium leading-relaxed">
                           <RenderWithMath text={aiSummary.studyPlan} showOptions={false} dark={true} serif={false} />
                         </div>

@@ -280,6 +280,7 @@ export interface ExamAnalysisData {
   topicWeightage: { name: string; marks: number; color: string }[];
   trends: { title: string; description: string; type: 'positive' | 'negative' | 'neutral' }[];
   predictiveTopics: { topic: string; probability: number; reason: string }[];
+  evolutionNote?: string; // Qualitative insight from the Auditor
   faq: { question: string; answer: string }[];
   strategy: string[];
   chapterInsights?: ChapterInsight[]; // NEW: Grouped chapter data

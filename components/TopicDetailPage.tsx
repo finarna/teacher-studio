@@ -31,7 +31,10 @@ import {
   History,
   X,
   Info,
-  PlayCircle
+  PlayCircle,
+  Signal,
+  Settings,
+  Monitor
 } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { safeAiParse } from '../utils/aiParser';
@@ -48,6 +51,8 @@ import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import { supabase } from '../lib/supabase';
 import { cache } from '../utils/cache';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
+import { useMemo } from 'react';
+import ComplexityMatrix from './ComplexityMatrix';
 
 interface TopicDetailPageProps {
   topicResource: TopicResource;
@@ -2041,10 +2046,51 @@ const QuizTab: React.FC<{
     const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
     const [quizSaved, setQuizSaved] = useState(false);
 
+    // Difficulty Distribution State
+    const [easy, setEasy] = useState(70);
+    const [moderate, setModerate] = useState(25);
+    const [hard, setHard] = useState(5);
+    const [isAutoComplexity, setIsAutoComplexity] = useState(true);
+
     // Past quizzes
     const [pastQuizzes, setPastQuizzes] = useState<any[]>([]);
     const [showPastQuizzes, setShowPastQuizzes] = useState(false);
     const [loadingPastQuizzes, setLoadingPastQuizzes] = useState(false);
+
+    // Derived Stats for Complexity Matrix
+    const matrixStats = useMemo(() => {
+      // 1. Learning: Based on notes completed and visual engagements
+      const learning = topicResource.notesCompleted ? 100 : 20;
+
+      // 2. Solve: Practice accuracy
+      const solve = topicResource.averageAccuracy || 0;
+
+      // 3. Master: Topic mastery level
+      const master = topicResource.masteryLevel || 0;
+
+      // 4. Recall: Flashcard performance (approximated if not direct)
+      const recall = Math.min(100, (topicResource.quizzesTaken * 20) + (master * 0.5));
+
+      return { learning, solve, master, recall };
+    }, [topicResource]);
+
+    // Auto-adjust complexity based on stats
+    useEffect(() => {
+      if (isAutoComplexity) {
+        const mastery = topicResource.masteryLevel || 0;
+        const accuracy = topicResource.averageAccuracy || 0;
+
+        if (mastery < 30) {
+          setEasy(70); setModerate(25); setHard(5);
+        } else if (mastery < 60) {
+          setEasy(40); setModerate(40); setHard(20);
+        } else if (mastery < 85) {
+          setEasy(20); setModerate(40); setHard(40);
+        } else {
+          setEasy(10); setModerate(30); setHard(60);
+        }
+      }
+    }, [isAutoComplexity, topicResource.masteryLevel]);
 
     // Timer for active quiz
     useEffect(() => {
@@ -2084,9 +2130,7 @@ const QuizTab: React.FC<{
         const masteryLevel = topicResource.masteryLevel || 0;
         const averageScore = topicResource.averageQuizScore || 0;
 
-        let difficultyDistribution = masteryLevel < 30 ? "70% Easy, 25% Medium, 5% Hard" :
-          masteryLevel < 60 ? "30% Easy, 50% Medium, 20% Hard" :
-            "10% Easy, 40% Medium, 50% Hard";
+        let difficultyDistribution = `${easy}% Foundation, ${moderate}% Standard, ${hard}% Advanced`;
 
         const weakConcepts = topicQuestions
           .filter(q => q.userAttempted && q.userCorrect === false)
@@ -2110,7 +2154,22 @@ const QuizTab: React.FC<{
             Generate ${questionCount} high-quality MCQ questions with this difficulty distribution: ${difficultyDistribution}.
             - Ensure questions are distinct but complementary to the practice questions listed above.
             - Cover latent concepts within the syllabus of ${topicResource.topicName} that might be missing in basic practice.
-            - Return ONLY valid JSON array with id, question, options, correctIndex, explanation, concept, topic, domain, difficulty.`;
+            - Provide detailed solution steps and pedagogical insights for each question.
+            - Return ONLY a valid JSON array. Each object must have:
+            {
+              "id": "q1",
+              "question": "...",
+              "options": ["A", "B", "C", "D"],
+              "correctIndex": 0,
+              "solutionSteps": ["Step 1", "Step 2", ...],
+              "examTip": "...",
+              "keyFormulas": ["..."],
+              "pitfalls": ["..."],
+              "concept": "...",
+              "topic": "...",
+              "difficulty": "Easy|Moderate|Hard"
+            }
+            `;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
@@ -2218,7 +2277,11 @@ const QuizTab: React.FC<{
           isCorrect: answeredQuestions.get(idx) === (q.correctIndex ?? q.correctOptionIndex),
           difficulty: q.difficulty,
           topic: q.topic,
-          explanation: q.explanation || ''
+          explanation: q.explanation || '',
+          solutionSteps: q.solutionSteps || (q.explanation ? [q.explanation] : []),
+          examTip: q.examTip || '',
+          keyFormulas: q.keyFormulas || [],
+          pitfalls: q.pitfalls || []
         }));
 
         await supabase.from('quiz_attempts').insert({
@@ -2495,8 +2558,30 @@ const QuizTab: React.FC<{
                           </div>
                         </div>
 
-                        {/* Explanation Section */}
-                        {q.explanation && (
+                        {/* Solution Steps */}
+                        {q.solutionSteps && q.solutionSteps.length > 0 && (
+                          <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Brain size={16} className="text-indigo-600" />
+                              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">Solution Steps</h4>
+                            </div>
+                            <div className="space-y-3">
+                              {q.solutionSteps.map((step: any, sIdx: number) => (
+                                <div key={sIdx} className="flex gap-3">
+                                  <div className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                    {sIdx + 1}
+                                  </div>
+                                  <div className="text-sm text-slate-700 leading-relaxed py-0.5">
+                                    <RenderWithMath text={step.content || step} showOptions={false} serif={false} />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Legacy Explanation fallback */}
+                        {!q.solutionSteps && q.explanation && (
                           <div className="mb-4">
                             <div className="flex items-center gap-2 mb-3">
                               <Lightbulb size={16} className="text-blue-600" />
@@ -2504,6 +2589,36 @@ const QuizTab: React.FC<{
                             </div>
                             <div className="bg-white border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-700 leading-relaxed">
                               <RenderWithMath text={q.explanation} showOptions={false} serif={false} />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Exam Tip */}
+                        {q.examTip && (
+                          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Zap size={14} className="text-amber-600" />
+                              <span className="text-[10px] font-black text-amber-800 uppercase tracking-wider">Exam Tip</span>
+                            </div>
+                            <div className="text-xs text-amber-900 leading-relaxed font-medium">
+                              <RenderWithMath text={q.examTip} showOptions={false} serif={false} />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Key Formulas */}
+                        {q.keyFormulas && q.keyFormulas.length > 0 && (
+                          <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Target size={14} className="text-indigo-600" />
+                              <span className="text-[10px] font-black text-indigo-800 uppercase tracking-wider">Key Formulas</span>
+                            </div>
+                            <div className="space-y-1">
+                              {q.keyFormulas.map((f: string, fIdx: number) => (
+                                <div key={fIdx} className="text-xs text-indigo-900 font-mono">
+                                  <RenderWithMath text={f} showOptions={false} serif={false} />
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -2710,6 +2825,21 @@ const QuizTab: React.FC<{
     // Main Quiz Setup Screen
     return (
       <div className="max-w-5xl mx-auto space-y-6">
+        {/* Adaptive Complexity Matrix (Student Progress Stats) */}
+        <ComplexityMatrix
+          easy={easy}
+          moderate={moderate}
+          hard={hard}
+          isAuto={isAutoComplexity}
+          onAdjust={(e, m, h) => {
+            setEasy(e);
+            setModerate(m);
+            setHard(h);
+          }}
+          onToggleAuto={setIsAutoComplexity}
+          stats={matrixStats}
+        />
+
         {/* Inline Quiz Stats - Single Line */}
         <div className="flex flex-col md:flex-row md:items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl px-6 py-4 shadow-sm gap-4">
           <div className="flex items-center gap-3">
@@ -3079,26 +3209,36 @@ const FlashcardsTab: React.FC<{
 const ProgressTab: React.FC<{ topicResource: TopicResource }> = ({ topicResource }) => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* High-Intelligence Status Header */}
-      <div className="bg-slate-900 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-white/10 shadow-xl overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-[40px] -mr-16 -mt-16" />
-
-        <div className="relative z-10 flex items-center gap-4">
-          <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center backdrop-blur-md border border-indigo-500/20">
-            <BarChart3 size={20} className="text-indigo-400" />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Learning', val: topicResource.notesCompleted ? 100 : 25, icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-50', status: topicResource.notesCompleted ? 'SYNCED' : 'ACTIVE' },
+          { label: 'Solving', val: topicResource.averageAccuracy || 0, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50', status: topicResource.averageAccuracy > 70 ? 'STABLE' : 'CALIBRATING' },
+          { label: 'Mastering', val: topicResource.averageQuizScore || 0, icon: Target, color: 'text-emerald-500', bg: 'bg-emerald-50', status: topicResource.quizzesTaken > 2 ? 'VERIFIED' : 'INITIAL' },
+          { label: 'Recall', val: Math.min(100, (topicResource.quizzesTaken * 20) + (topicResource.masteryLevel * 0.3)), icon: Brain, color: 'text-purple-500', bg: 'bg-purple-50', status: 'SYNAPTIC' }
+        ].map((mod, i) => (
+          <div key={i} className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm relative overflow-hidden group">
+            <div className={`absolute top-0 left-0 w-1 h-full ${mod.bg.replace('bg-', 'bg-opacity-50 bg-')}`} />
+            <div className="flex items-center justify-between mb-4">
+              <div className={`w-10 h-10 rounded-xl ${mod.bg} ${mod.color} flex items-center justify-center`}>
+                <mod.icon size={20} />
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-black text-slate-900">{mod.val}%</div>
+                <div className={`text-[8px] font-black px-1.5 py-0.5 rounded-full border ${mod.color.replace('text-', 'border-').replace('-500', '-200')} ${mod.bg}`}>
+                  {mod.status}
+                </div>
+              </div>
+            </div>
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{mod.label} Integrity</div>
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${mod.val}%` }}
+                className={`h-full ${mod.color.replace('text-', 'bg-')}`}
+              />
+            </div>
           </div>
-          <div>
-            <div className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-0.5">Performance Intelligence</div>
-            <div className="text-base font-black text-white">Advanced Learning Analytics</div>
-          </div>
-        </div>
-
-        <div className="relative z-10 flex items-center gap-4">
-          <div className="px-4 py-1.5 bg-white/5 rounded-xl border border-white/10 text-center">
-            <div className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Current Standing</div>
-            <div className="text-sm font-black text-indigo-400">{topicResource.masteryLevel >= 80 ? 'Master' : topicResource.masteryLevel >= 50 ? 'Proficient' : 'Novice'} Stage</div>
-          </div>
-        </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

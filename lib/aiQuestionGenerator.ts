@@ -49,6 +49,7 @@ export interface HistoricalExamData {
   }>;
   overallDifficulty: { easy: number; moderate: number; hard: number };
   totalMarks: number;
+  evolutionNote?: string;
 }
 
 export interface StudentProfile {
@@ -97,11 +98,81 @@ export interface GenerationRules {
     daysSinceLastAttempt: number; // Avoid questions attempted in last N days
     maxRepetitionAllowed: number; // Max times same concept can appear
   };
+
+  // Strategy Mode: Predictive (Exam-sim) vs Adaptive (Student-sim)
+  strategyMode: 'predictive_mock' | 'adaptive_growth' | 'hybrid';
+
+  // REI v3.0 "Machine Mode" (Oracle Prediction)
+  oracleMode?: {
+    enabled: boolean;
+    idsTarget?: number; // Target Intelligence Discovery Score (e.g., 0.95)
+    directives?: string[]; // Specific RWC corrections injected from the Auditor
+    boardSignature?: 'SYNTHESIZER' | 'LOGICIAN' | 'INTIMIDATOR' | 'ANCHOR' | 'DEFAULT';
+  };
 }
 
 // ============================================
-// MAIN GENERATOR FUNCTION
+// RIGOR PROTOCOLS - Exam-specific directives
 // ============================================
+
+const RIGOR_BASE_PROTOCOLS: Record<ExamContext, any> = {
+  JEE: {
+    title: 'REI v3.0 JEE PROTOCOL (SYNTHESIS-MAX)',
+    signature: 'THE LOGICIAN',
+    focus: 'Multi-concept fusion and analytical depth.',
+    subjectLogic: {
+      Math: 'MANDATORY: Integrate ≥2 distinct chapters (e.g., Vectors + Calculus). Solve requires nonlinear logical jumps.',
+      Physics: 'MANDATORY: Fusion of Mechanics with Electromagnetism or Thermodynamics. Avoid direct formula application.',
+      Chemistry: 'MANDATORY: Mechanistic depth in Organic and multi-step stoichiometry in Physical.',
+      Biology: 'Focus on complex physiological systems and genetic cross-linkage.'
+    }
+  },
+  NEET: {
+    title: 'REI v3.0 NEET PROTOCOL (LETHAL-SPEED)',
+    signature: 'THE INTIMIDATOR',
+    focus: 'Linguistic noise, Statement-logic, and speed-accuracy balance.',
+    subjectLogic: {
+      Biology: 'MANDATORY: High frequency of A-R and Statement Pair questions. Hide false statements in technically complex Bio-clauses.',
+      Physics: 'Focus on property traps and "Behavioral" physics. Use "Correct/Incorrect" pair identifications (at least 30%).',
+      Chemistry: 'Focus on inorganic statement logic and NCERT-plus catalytic pathways.',
+      Math: 'Not typical for NEET - use clear logical anchors.'
+    }
+  },
+  KCET: {
+    title: 'REI v3.0 CET PROTOCOL (HEURISTIC-FLUID)',
+    signature: 'THE SYNTHESIZER',
+    focus: 'Property-based speed-solving shortcuts and Heuristic Resonance.',
+    subjectLogic: {
+      Math: 'LOGICAL SEAMS: Matrix Inverse Shortcut Fusion, ITF-LPP Constraint Mapping, Integration-Area fusion (+12%).',
+      Physics: 'LOGICAL SEAMS: Dimensional analysis shortcuts and limiting-case behavior. Avoid brute-force algebra.',
+      Chemistry: 'LOGICAL SEAMS: Inorganic trend prediction and Physical chemistry "Zero-Step" numerical shortcuts.',
+      Biology: 'LOGICAL SEAMS: Statement-level trickery and NCERT-Anchor evolution.'
+    }
+  },
+  CBSE: {
+    title: 'REI v3.0 BOARD PROTOCOL (STAGING-ANCHOR)',
+    signature: 'THE ANCHOR',
+    focus: 'Blueprint replication and step-wise credit stability.',
+    subjectLogic: {
+      Math: '85% locking to Textbook/PYQ blueprints. Focus on proper staging of steps.',
+      Physics: 'Focus on derivation-centric anchors and standard numerical patterns.',
+      Chemistry: 'Focus on direct valency, reaction mechanisms from NCERT, and standard physical formulas.',
+      Biology: 'Direct diagram-based identifications and NCERT paragraph anchors.'
+    }
+  }
+};
+
+function getExamRigorDirective(context: ExamContext, subject: Subject): string {
+  const protocol = RIGOR_BASE_PROTOCOLS[context] || RIGOR_BASE_PROTOCOLS['CBSE'];
+  const subjectLogic = protocol.subjectLogic[subject] || 'Standard conceptual depth.';
+
+  return `
+${protocol.title}:
+1. BOARD SIGNATURE: ${protocol.signature}. Focus on ${protocol.focus}
+2. CORE LOGIC: ${subjectLogic}
+3. TARGET: Deterministic 2026 performance calibration (IDS >0.85).
+`;
+}
 
 export async function generateTestQuestions(
   context: GenerationContext,
@@ -130,37 +201,46 @@ export async function generateTestQuestions(
   const allocation = calculateTopicAllocation(context, prediction);
   console.log(`📊 Allocated ${allocation.length} topics across ${context.examConfig.totalQuestions} questions`);
 
-  // Step 3: Generate questions for each topic using AI (PARALLEL for speed!)
+  // Step 3: Generate questions using Smart Batching (Reduces latency for multiple topics)
   const generationStartTime = Date.now();
+  const activeAllocations = allocation.filter(topicAlloc => topicAlloc.questionCount > 0);
 
-  const generationPromises = allocation
-    .filter(topicAlloc => topicAlloc.questionCount > 0)
-    .map(async (topicAlloc) => {
-      console.log(`🎯 Generating ${topicAlloc.questionCount} questions for: ${topicAlloc.topicName}`);
+  // OPTIMIZATION: Combine multiple topics into fewer LLM calls.
+  // Each LLM trip has ~15-20s overhead; batching topics cuts this by 80%+.
+  const MAX_QUESTIONS_PER_BATCH = 15;
+  const batches: (typeof activeAllocations)[] = [];
+  let currentBatch: typeof activeAllocations = [];
+  let questionsInBatch = 0;
 
-      const topicStartTime = Date.now();
-      const questions = await generateTopicQuestions({
-        topicMetadata: topicAlloc.topicMetadata,
-        questionCount: topicAlloc.questionCount,
-        difficultyDistribution: topicAlloc.difficultyDistribution,
-        examConfig: context.examConfig,
-        studentMastery: topicAlloc.studentMastery,
-        generationRules: context.generationRules
-      }, geminiApiKey);
+  for (const alloc of activeAllocations) {
+    if (questionsInBatch + alloc.questionCount > MAX_QUESTIONS_PER_BATCH && currentBatch.length > 0) {
+      batches.push(currentBatch);
+      currentBatch = [alloc];
+      questionsInBatch = alloc.questionCount;
+    } else {
+      currentBatch.push(alloc);
+      questionsInBatch += alloc.questionCount;
+    }
+  }
+  if (currentBatch.length > 0) batches.push(currentBatch);
 
-      const elapsed = ((Date.now() - topicStartTime) / 1000).toFixed(1);
-      console.log(`✅ ${topicAlloc.topicName}: ${questions.length} questions in ${elapsed}s`);
+  console.log(`⚡ Optimized into ${batches.length} generation batches (Batch size limit: ${MAX_QUESTIONS_PER_BATCH})`);
 
-      return questions;
-    });
+  const generationPromises = batches.map(async (batch, idx) => {
+    console.log(`🎯 Batch ${idx + 1}: Generating ${batch.reduce((sum, b) => sum + b.questionCount, 0)} questions across ${batch.length} topics...`);
 
-  // Wait for ALL topics to generate in parallel
-  console.log(`⚡ Generating ${allocation.length} topics in parallel...`);
-  const allTopicQuestions = await Promise.all(generationPromises);
-  const allQuestions = allTopicQuestions.flat();
+    return generateTopicQuestionsBatch({
+      batchAllocations: batch,
+      examConfig: context.examConfig,
+      generationRules: context.generationRules
+    }, geminiApiKey);
+  });
+
+  const allBatchResults = await Promise.all(generationPromises);
+  const allQuestions = allBatchResults.flat();
 
   const totalGenTime = ((Date.now() - generationStartTime) / 1000).toFixed(1);
-  console.log(`⚡ Parallel generation completed in ${totalGenTime}s (${allocation.length} topics)`);
+  console.log(`⚡ Smart Batching completed in ${totalGenTime}s (${batches.length} batches, ${allQuestions.length} questions)`);
 
   // Step 4: Final validation and shuffling
   const validatedQuestions = validateQuestions(allQuestions, context);
@@ -185,6 +265,7 @@ interface PredictedPattern {
     trend: 'increasing' | 'stable' | 'decreasing';
     confidence: number; // 0-1
     reasoning: string;
+    evolutionNote?: string; // Captured from AI analysis
   }>;
   difficultyDistribution: { easy: number; moderate: number; hard: number };
   overallConfidence: number;
@@ -230,15 +311,13 @@ ${JSON.stringify(historicalSummary, null, 2)}
 AVAILABLE TOPICS:
 ${JSON.stringify(topicsSummary, null, 2)}
 
-TASK:
-Analyze the historical pattern and predict the ${nextYear} exam pattern with:
-1. Which topics will have MORE questions (increasing trend)
-2. Which topics will have FEWER questions (decreasing trend)
-3. Which topics will remain STABLE
-4. Expected difficulty distribution
-5. Confidence level for each prediction
+Analyze the historical pattern and perform a "Recursive Concept Evolution" analysis:
+1. Identifying Concepts that are CORE (appear every year).
+2. Identifying Concepts that are SHIFTING (e.g., were easy 3 years ago, now asked with 2-step complexity).
+3. Predict the "Next Logical Twist": If last year asked for A, and the year before for B, what is the unseen 'C' for ${nextYear}?
+4. Expected difficulty distribution and statistical probability for each topic.
 
-CRITICAL: Use the EXACT topicId from the AVAILABLE TOPICS list above (e.g., "calculus", "algebra" NOT "calculus_01").
+CRITICAL: Use the EXACT topicId from the AVAILABLE TOPICS list above.
 
 Return ONLY valid JSON:
 {
@@ -249,8 +328,9 @@ Return ONLY valid JSON:
       "probability": 0.85,
       "expectedQuestionCount": 12,
       "trend": "increasing",
+      "evolutionNote": "AI Insight: Expect integration with Thermodynamics this year, following the recent trend of multi-concept physics questions.",
       "confidence": 0.8,
-      "reasoning": "Based on 3-year upward trend and syllabus changes"
+      "reasoning": "..."
     }
   ],
   "difficultyDistribution": { "easy": 40, "moderate": 45, "hard": 15 },
@@ -261,7 +341,7 @@ Return ONLY valid JSON:
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3-flash-preview',
       generationConfig: {
         temperature: 0.2,
         topK: 1,
@@ -303,6 +383,7 @@ interface TopicAllocation {
   difficultyDistribution: { easy: number; moderate: number; hard: number };
   studentMastery: number;
   allocationReason: string;
+  evolutionNote?: string; // Captured from AI pattern analysis
 }
 
 function calculateTopicAllocation(
@@ -327,44 +408,56 @@ function calculateTopicAllocation(
     const studentMasteryData = studentProfile.topicMastery.find(m => m.topicId === predictedTopic.topicId);
     const studentMastery = studentMasteryData?.accuracy || 50;
 
-    // Calculate allocation score using weighted formula
+    const isOracle = generationRules.oracleMode?.enabled || false;
+    const mode = generationRules.strategyMode || 'hybrid';
     let allocationScore = 0;
     let reasons: string[] = [];
 
-    // Factor 1: Predicted exam pattern
-    allocationScore += (predictedTopic.probability * weights.predictedExamPattern);
-    if (predictedTopic.trend === 'increasing') {
-      reasons.push(`📈 ${predictedTopic.trend} trend`);
-    }
-
-    // Factor 2: Student weak areas (inverse of mastery)
-    if (studentMastery < 60) {
-      const weaknessBonus = (100 - studentMastery) / 100 * weights.studentWeakAreas;
-      allocationScore += weaknessBonus;
-      reasons.push(`🎯 Weak area (${studentMastery}%)`);
+    if (isOracle || mode === 'predictive_mock') {
+      // MODE 1: PREDICTIVE/ORACLE (Simulate the real exam 1:1)
+      // Ignore student mastery entirely. 100% weight on pattern.
+      allocationScore = predictedTopic.probability;
+      reasons.push(isOracle ? `🔮 Oracle Mode: IDS 1.0 Deterministic Calibration` : `🦅 Predictive Mode: Forced Exam Weightage`);
+    } else if (mode === 'adaptive_growth') {
+      // MODE 2: ADAPTIVE GROWTH (Surgical fix for student weaknesses)
+      // 70% weight on student weakness, 30% on exam importance
+      const inverseMastery = (100 - studentMastery) / 100;
+      allocationScore = (inverseMastery * 0.7) + (predictedTopic.probability * 0.3);
+      reasons.push(`🎯 Adaptive Mode: Vulnerability Focus (${studentMastery}% accuracy)`);
     } else {
-      allocationScore += 0.3 * weights.studentWeakAreas; // Some coverage even if strong
+      // MODE 3: HYBRID (Default balanced approach)
+      allocationScore += (predictedTopic.probability * weights.predictedExamPattern);
+      if (studentMastery < 60) {
+        allocationScore += ((100 - studentMastery) / 100 * weights.studentWeakAreas);
+        reasons.push(`⚖️ Hybrid: Weakness Balance`);
+      } else {
+        allocationScore += 0.3 * weights.studentWeakAreas;
+      }
+      allocationScore += (weights.curriculumBalance * 0.5);
     }
-
-    // Factor 3: Curriculum balance (ensure all topics covered)
-    allocationScore += weights.curriculumBalance;
-
-    // Factor 4: Recent trends (confidence-weighted)
-    allocationScore += (predictedTopic.confidence * weights.recentTrends);
 
     // Calculate question count
     const questionCount = Math.round(allocationScore * examConfig.totalQuestions);
 
     console.log(`   ${predictedTopic.topicName}: score=${allocationScore.toFixed(2)} → ${questionCount} questions`);
 
-    // Determine difficulty distribution based on student mastery
+    // Determine difficulty distribution 
     let difficultyDist: { easy: number; moderate: number; hard: number };
-    if (studentMastery < 40) {
-      difficultyDist = { easy: 60, moderate: 30, hard: 10 };
-    } else if (studentMastery < 70) {
-      difficultyDist = { easy: 35, moderate: 45, hard: 20 };
+
+    // MACHINE MODE / PREDICTIVE CALIBRATION: Respect the Exam Blueprint 1:1
+    if (isOracle || mode === 'predictive_mock') {
+      const blueprint = (examConfig as any).difficultyProfile || { easy: 30, moderate: 50, hard: 20 };
+      difficultyDist = { ...blueprint };
+      console.log(`      Locked to Exam Blueprint: E:${difficultyDist.easy} M:${difficultyDist.moderate} H:${difficultyDist.hard}`);
     } else {
-      difficultyDist = { easy: 20, moderate: 40, hard: 40 };
+      // ADAPTIVE CALIBRATION: Adjust based on student mastery
+      if (studentMastery < 40) {
+        difficultyDist = { easy: 60, moderate: 30, hard: 10 };
+      } else if (studentMastery < 70) {
+        difficultyDist = { easy: 35, moderate: 45, hard: 20 };
+      } else {
+        difficultyDist = { easy: 20, moderate: 40, hard: 40 };
+      }
     }
 
     allocations.push({
@@ -374,7 +467,8 @@ function calculateTopicAllocation(
       questionCount,
       difficultyDistribution: difficultyDist,
       studentMastery,
-      allocationReason: reasons.join(', ')
+      allocationReason: reasons.join(', '),
+      evolutionNote: predictedTopic.evolutionNote
     });
   }
 
@@ -418,7 +512,8 @@ function calculateTopicAllocation(
       questionCount: s.questionCount,
       difficultyDistribution: s.difficultyDistribution,
       studentMastery: s.studentMastery,
-      allocationReason: s.allocationReason
+      allocationReason: s.allocationReason,
+      evolutionNote: s.evolutionNote
     }));
   }
 
@@ -441,6 +536,143 @@ function calculateTopicAllocation(
 
 // ============================================
 // QUESTION GENERATION ENGINE
+// ============================================
+
+/**
+ * GENERATE QUESTIONS IN BATCHES (Multiple topics in one prompt)
+ * This is the high-performance replacement for per-topic generation.
+ */
+async function generateTopicQuestionsBatch(
+  params: {
+    batchAllocations: Array<{
+      topicMetadata: TopicMetadata;
+      questionCount: number;
+      difficultyDistribution: { easy: number; moderate: number; hard: number };
+      studentMastery: number;
+      evolutionNote?: string;
+    }>;
+    examConfig: ExamConfiguration;
+    generationRules: GenerationRules;
+  },
+  geminiApiKey: string
+): Promise<AnalyzedQuestion[]> {
+
+  const { batchAllocations, examConfig } = params;
+  const totalInBatch = batchAllocations.reduce((sum, a) => sum + a.questionCount, 0);
+  const topicsText = batchAllocations.map(a => `- ${a.topicMetadata.topicName} (${a.questionCount} questions)\n  Targets: ${a.difficultyDistribution.easy}% Easy, ${a.difficultyDistribution.moderate}% Mod, ${a.difficultyDistribution.hard}% Hard${a.evolutionNote ? `\n  Evolution Insight: ${a.evolutionNote}` : ''}`).join('\n');
+  const syllabusText = batchAllocations.map(a => `[TOPIC: ${a.topicMetadata.topicName}] SYLLABUS: ${a.topicMetadata.syllabus}`).join('\n\n');
+
+  const rigorDirective = getExamRigorDirective(examConfig.examContext as ExamContext, examConfig.subject as Subject);
+
+  // REI v3.0 MACHINE MODE OVERRIDE
+  const isOracle = params.generationRules.oracleMode?.enabled;
+  const oracleDirectives = params.generationRules.oracleMode?.directives || [];
+  const boardSignature = params.generationRules.oracleMode?.boardSignature || 'DEFAULT';
+
+  const missionText = isOracle
+    ? `MISSION: DETERMINISTIC EXAM ORACLE (IDS Target: ${params.generationRules.oracleMode?.idsTarget || 0.95})
+Applying Board Signature: ${boardSignature}
+Recursive Directives:
+${oracleDirectives.map(d => `- ${d}`).join('\n')}`
+    : `MISSION: PRE-EMPTIVE COMPETITIVE FORECAST`;
+
+  const oracleMandate = isOracle ? `
+ORACLE MANDATE (IDS 1.0 TARGET):
+- BAN all "Standard Property" questions (e.g., direct Adjoint properties).
+- MANDATORY: Every question must be a "Deterministic Forecast."
+- Engineering: Create a "Logical Seam" where two distinct concepts must be merged to solve the trap.
+- Distractors: One distractor MUST target a high-level cognitive bias found in the 2025 Audit.
+- Logic: Explain in 'masteryMaterial.logic' why this is an Oracle-level prediction.` : '';
+
+  const prompt = `You are a World-Class Entrance Exam Question Architect for ${examConfig.examContext} ${examConfig.subject}.
+
+${rigorDirective}
+
+${missionText}
+
+${oracleMandate}
+
+Generate a total of ${totalInBatch} ULTIMATE-RIGOR MCQ questions.
+
+TOPICS & DISTRIBUTION:
+${topicsText}
+
+CONTEXT:
+${syllabusText}
+
+QUALITY MANDATE:
+1. ZERO "Definition" questions. Use Scenario-based applications.
+2. Focus on "The Prediction Gap": Create questions that pre-empt trends for ${new Date().getFullYear() + 1}.
+3. MANDATORY SOLUTIONS: Every question MUST have "solutionSteps" (min 2 steps), "examTip", and "pitfalls".
+4. LATEX: Use PROPER LaTeX ($...$ inline, $$...$$ display). Ensure ALL braces and dollar signs are balanced.
+5. NO direct Theory questions. Focus on speed-tricks and analytical synthesis.
+
+Return ONLY a valid JSON array:
+[
+  {
+    "text": "Question text with $proper \\\\LaTeX$...",
+    "options": ["...", "...", "...", "..."],
+    "correctOptionIndex": 0,
+    "marks": ${examConfig.marksPerQuestion === 'variable' ? '1' : examConfig.marksPerQuestion},
+    "difficulty": "Easy|Moderate|Hard",
+    "topic": "Must match one of the topic names above",
+    "blooms": "Understand|Apply|Analyze|Evaluate",
+    "solutionSteps": ["Step 1", "Step 2"],
+    "examTip": "Strategical shortcut for this problem",
+    "keyFormulas": ["$formula$"],
+    "pitfalls": ["Conceptual trap"],
+    "masteryMaterial": { 
+      "coreConcept": "...", 
+      "logic": "Detailed RWC/IDS Logic" 
+    }
+  }
+]`;
+
+  try {
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-3-flash-preview',
+      generationConfig: {
+        temperature: isOracle ? 0.3 : 0.7, // Lower temperature for deterministic precision in Oracle Mode
+        topK: 40,
+        topP: 0.9,
+        maxOutputTokens: 12000,
+        responseMimeType: 'application/json'
+      }
+    });
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text() || '[]';
+
+    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\[[\s\S]*\]/);
+    const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : text;
+    const questions = JSON.parse(jsonStr);
+
+    const { randomUUID } = await import('crypto');
+    return questions.map((q: any) => ({
+      id: randomUUID(),
+      text: q.text,
+      options: q.options || [],
+      marks: q.marks || examConfig.marksPerQuestion,
+      difficulty: q.difficulty,
+      topic: q.topic,
+      blooms: q.blooms || 'Apply',
+      solutionSteps: q.solutionSteps || q.solution_steps || [],
+      examTip: q.examTip || q.exam_tip || '',
+      keyFormulas: q.keyFormulas || q.key_formulas || [],
+      pitfalls: q.pitfalls || q.pit_falls || [],
+      masteryMaterial: q.masteryMaterial || q.mastery_material,
+      correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? 0,
+      source: `AI-Generated (Smart-Batch ${examConfig.examContext})`
+    }));
+
+  } catch (error) {
+    console.error('❌ Batch generation failed:', error);
+    return [];
+  }
+}
 // ============================================
 
 const MAX_GENERATION_RETRIES = 3;
@@ -538,35 +770,42 @@ async function generateTopicQuestionsInternal(
 
   const { topicMetadata, questionCount, difficultyDistribution, examConfig } = params;
 
-  const prompt = `You are an expert ${examConfig.examContext} ${examConfig.subject} question creator.
+  const rigorDirective = getExamRigorDirective(examConfig.examContext as ExamContext, examConfig.subject as Subject);
 
-TOPIC: ${topicMetadata.topicName}
-SYLLABUS: ${topicMetadata.syllabus}
-REQUIRED BLOOM'S LEVELS: ${topicMetadata.bloomsLevels.join(', ')}
+  const prompt = `You are a World-Class Entrance Exam Question Architect specializing in ${examConfig.examContext} ${examConfig.subject}.
+Your mission is to generate questions that are indistinguishable from the Most Competitive National Level Exam papers.
 
-GENERATE: ${questionCount} high-quality MCQ questions
+${rigorDirective}
 
-DIFFICULTY DISTRIBUTION:
-- Easy: ${Math.round(questionCount * difficultyDistribution.easy / 100)} questions
-- Moderate: ${Math.round(questionCount * difficultyDistribution.moderate / 100)} questions
-- Hard: ${Math.round(questionCount * difficultyDistribution.hard / 100)} questions
+MISSION: PRE-EMPTIVE COMPETITIVE FORECAST
+1. Your goal is to generate questions that pre-empt the expected "Recursive Evolution" of this topic for ${new Date().getFullYear() + 1}.
+2. Focus on "The Prediction Gap": Create questions that are 'New Twists' never seen exactly in past papers but logical within current competitive trends.
+3. TOPIC: ${topicMetadata.topicName}
+4. CONTEXT: ${topicMetadata.syllabus}
+5. REQUIRED BLOOM'S LEVELS: ${topicMetadata.bloomsLevels.join(', ')}
 
-EXAM SPECIFICATIONS:
-- Marks per question: ${examConfig.marksPerQuestion}
-- Exam format: ${examConfig.examContext} (follow EXACT pattern and style)
-- Duration consideration: ${examConfig.durationMinutes} minutes total
+GENERATE: ${questionCount} ULTIMATE-RIGOR MCQ questions.
 
-REQUIREMENTS:
-1. Use PROPER LaTeX for ALL math expressions ($...$ inline, $$...$$ display)
-2. CRITICAL: Balance ALL braces {} and dollar signs $ in LaTeX
-3. NO corrupted text, NO missing spaces, NO broken LaTeX
-4. Use proper spacing between words (no "Theequationofstraight...")
-5. Double-check LaTeX syntax before outputting
-6. Include complete solution steps
-7. Add exam-specific tips and shortcuts
-8. List key formulas and common pitfalls
-9. Each question must have EXACTLY 4 options
-10. Mark correct answer clearly with correctOptionIndex (0-3)
+DIFFICULTY CALIBRATION:
+- Foundation (Easy): ${Math.round(questionCount * difficultyDistribution.easy / 100)} - NOT trivial; must require concept recall.
+- Target (Moderate): ${Math.round(questionCount * difficultyDistribution.moderate / 100)} - Requires 2-step reasoning.
+- Elite (Hard): ${Math.round(questionCount * difficultyDistribution.hard / 100)} - Multi-concept; requires deep analytical synthesis.
+
+QUALITY MANDATE:
+1. ZERO "Definition" questions. If a question can be answered by simple rote memorization, REJECT IT.
+2. Every question must be a "Scenario" or "Application".
+3. Use the specific syntax and trickery found in 2024-2025 elite papers.
+4. "THE PREDICTION GAP": Create 1 question in this set that is a 'New Twist' never seen exactly in past papers but logical within current trends.
+5. Ensure solutions are Masterclass-level: explain the 'Why' and 'How to Solve in 30 seconds'.
+
+TECHNICAL REQUIREMENTS:
+1. Use PROPER LaTeX for ALL math expressions ($...$ inline, $$...$$ display).
+2. CRITICAL: Balance ALL braces {} and dollar signs $ in LaTeX.
+3. NO corrupted text, NO missing spaces, NO broken LaTeX.
+4. Include complete solution steps with Pedagogical Insights.
+5. Add "Pro-Exam Tips" and "Concept Traps" to avoid.
+6. Each question must have EXACTLY 4 options.
+7. Mark correct answer clearly with correctOptionIndex (0-3).
 
 Return ONLY valid JSON array:
 [
@@ -578,29 +817,30 @@ Return ONLY valid JSON array:
     "difficulty": "Easy|Moderate|Hard",
     "topic": "${topicMetadata.topicName}",
     "blooms": "Remember|Understand|Apply|Analyze|Evaluate|Create",
-    "solutionSteps": ["Step 1 with $LaTeX$", "Step 2", "Step 3"],
-    "examTip": "Quick solving strategy for exam",
+    "solutionSteps": ["Analytical Step 1 with $LaTeX$", "Step 2", "Step 3"],
+    "examTip": "Strategical shortcut or focus area",
     "keyFormulas": ["$formula_1$", "$formula_2$"],
-    "pitfalls": ["Common mistake students make"],
+    "pitfalls": ["Common conceptual trap to avoid"],
     "masteryMaterial": {
-      "coreConcept": "Core concept explanation",
-      "logic": "Why this approach works"
+      "coreConcept": "Explain the foundational theorem used",
+      "logic": "Why this specific solving path was chosen"
     }
   }
 ]
 
+CRITICAL: YOU MUST PROVIDE DETAILED solutionSteps (min 2 steps) AND examTip FOR EVERY SINGLE QUESTION. NEVER RETURN EMPTY ARRAYS FOR THESE FIELDS.
 CRITICAL: Output MUST be valid JSON with NO markdown, NO extra text, JUST the array.`;
 
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3-flash-preview',
       generationConfig: {
-        temperature: 0.8,
+        temperature: 0.7,
         topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 8192,
+        topP: 0.9,
+        maxOutputTokens: 12000,
         responseMimeType: 'application/json'
       }
     });
@@ -623,14 +863,14 @@ CRITICAL: Output MUST be valid JSON with NO markdown, NO extra text, JUST the ar
       marks: q.marks || examConfig.marksPerQuestion,
       difficulty: q.difficulty,
       topic: topicMetadata.topicName,
-      blooms: q.blooms,
-      solutionSteps: q.solutionSteps || [],
-      examTip: q.examTip || '',
-      keyFormulas: q.keyFormulas || [],
-      pitfalls: q.pitfalls || [],
-      masteryMaterial: q.masteryMaterial,
-      correctOptionIndex: q.correctOptionIndex,
-      source: `AI-Generated (${examConfig.examContext})`
+      blooms: q.blooms || q.blooms_level || q.bloomsLevel || 'Apply',
+      solutionSteps: q.solutionSteps || q.solution_steps || (q.explanation ? [q.explanation] : []),
+      examTip: q.examTip || q.exam_tip || '',
+      keyFormulas: q.keyFormulas || q.key_formulas || [],
+      pitfalls: q.pitfalls || q.pit_falls || [],
+      masteryMaterial: q.masteryMaterial || q.mastery_material,
+      correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? 0,
+      source: `AI-Generated (High-Rigor ${examConfig.examContext})`
     }));
 
   } catch (error) {
@@ -678,8 +918,8 @@ function validateQuestion(q: AnalyzedQuestion): ValidationResult {
     }
 
     // Check for unbalanced braces in LaTeX
-    const latexSegments = q.text.match(/\$[^$]+\$/g) || [];
-    latexSegments.forEach(segment => {
+    const latexSegments = (q.text.match(/\$[^$]+\$/g) || []) as string[];
+    latexSegments.forEach((segment: string) => {
       const openBraces = (segment.match(/\{/g) || []).length;
       const closeBraces = (segment.match(/\}/g) || []).length;
       if (openBraces !== closeBraces) {

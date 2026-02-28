@@ -2063,36 +2063,38 @@ app.post('/api/learning-journey/ai-summary', async (req, res) => {
       .map(([d, s]) => `  - ${d}: ${s.correct}/${s.total} correct (${s.total > 0 ? Math.round(s.correct / s.total * 100) : 0}%)`)
       .join('\n');
 
-    const prompt = `You are an expert ${examContext} exam coach. Analyze this mock test result and give a sharp, personalized report.
+    const prompt = `You are a Senior Professor and Expert Coach for the ${examContext} exam. 
+    Analyze this dedicated student's mock test results and provide a deeply personal, authoritative, yet supportive coaching report.
+    Speak directly to the student ("You did well in...", "I noticed that you...", "Your priority must be...").
 
-TEST: "${testName}" | ${subject} | ${examContext}
-SCORE: ${percentage}% (${correctAnswers} correct, ${incorrectAnswers} incorrect, ${skippedAnswers} skipped out of ${totalQuestions})
-AVG TIME/QUESTION: ${avgTimePerQuestion}s
-TOTAL TIME: ${Math.round((totalTimeSeconds || 0) / 60)} min
+    TEST DATA:
+    - Test Name: "${testName}"
+    - Subject: ${subject}
+    - Score: ${percentage}%
+    - Performance: ${correctAnswers} correct, ${incorrectAnswers} incorrect, ${skippedAnswers} skipped out of ${totalQuestions}
+    - Speed Analysis: Average ${avgTimePerQuestion}s per question (Total Time: ${Math.round((totalTimeSeconds || 0) / 60)} min).
 
-TOPIC BREAKDOWN:
-${topicLines || '  (not available)'}
+    TOPIC-WISE PERFORMANCE:
+    ${topicLines || '  (not available)'}
 
-DIFFICULTY BREAKDOWN:
-${diffLines || '  (not available)'}
+    DIFFICULTY ANALYSIS:
+    ${diffLines || '  (not available)'}
 
-Return ONLY valid JSON (no markdown, no explanation, no LaTeX, no backslashes) in exactly this structure:
-{
-  "verdict": "One sharp sentence: what this score means for their ${examContext} preparation and the single most important thing to fix",
-  "strengths": [
-    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers from their data"},
-    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers from their data"},
-    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers from their data"}
-  ],
-  "weaknesses": [
-    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers and why it matters for ${examContext}"},
-    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers and why it matters for ${examContext}"},
-    {"title": "Short title (3-5 words)", "detail": "One specific sentence with numbers and why it matters for ${examContext}"}
-  ],
-  "studyPlan": "3-4 sentence concrete action plan for the next 7 days — specific topics, hours, and techniques. Reference actual weak topics from their data."
-}
+    Return ONLY valid JSON in exactly this structure:
+    {
+      "verdict": "A sharp, professor-like 1-2 sentence assessment. Tell them exactly where they stand in their ${examContext} journey and the #1 breakthrough they need.",
+      "strengths": [
+        {"title": "Mastery in [Topic]", "detail": "A coaching insight about why they succeeded here, using specific accuracy % from their data."},
+        {"title": "Skill Breakthrough", "detail": "A positive observation about their performance (e.g., speed, accuracy, or difficulty handling) based on numbers."}
+      ],
+      "weaknesses": [
+        {"title": "Critical Gap: [Topic]", "detail": "Explain exactly what went wrong in this topic and why this specific weakness will cost them marks in ${examContext}."},
+        {"title": "Performance Leak", "detail": "Identify a specific pattern (e.g., time management on Hard questions or skipping behavior) and translate it into a direct area for focus."}
+      ],
+      "studyPlan": "Your 7-Day Action Plan: Provide a concrete roadmap. Mention specific hours, priority topics from their data, and study techniques (e.g., 'Spend 2 hours on Tuesday specifically on [Topic] to master [Specific Sub-concept]'). Be precise and actionable."
+    }
 
-Be direct, specific, and use actual numbers from the data. No generic advice.`;
+    PROFESSOR'S DIRECTIVE: Be direct, specific, and use actual numbers from the data. Avoid generic advice at all costs. Talk to them like a mentor in a private session.`;
 
     const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
     if (!GEMINI_KEY) {
@@ -2106,7 +2108,7 @@ Be direct, specific, and use actual numbers from the data. No generic advice.`;
     const genAI = new GoogleGenerativeAI(GEMINI_KEY);
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
       generationConfig: { responseMimeType: 'application/json' }
     });
 

@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  Scan,
   RotateCw,
   ChevronLeft,
   ChevronRight,
@@ -21,6 +20,7 @@ import { useFilteredScans } from '../hooks/useFilteredScans';
 import { supabase } from '../lib/supabase';
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
+import { Scan } from '../types';
 
 interface Flashcard {
   term: string;
@@ -30,15 +30,6 @@ interface Flashcard {
   topic?: string;
 }
 
-interface Scan {
-  id: string;
-  name: string;
-  subject: string;
-  grade: string;
-  analysisData?: {
-    questions?: any[];
-  };
-}
 
 interface RapidRecallProps {
   recentScans?: Scan[];
@@ -48,7 +39,7 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
   // Use AppContext for filtering
   const { subjectConfig } = useAppContext();
   const theme = useSubjectTheme();
-  const { scans: filteredScans } = useFilteredScans(recentScans);
+  const { scans: filteredScans } = useFilteredScans(recentScans || []);
 
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -225,7 +216,7 @@ const RapidRecall: React.FC<RapidRecallProps> = ({ recentScans = [] }) => {
 
     setIsGenerating(true);
     try {
-      const scan = recentScans.find(s => s.id === selectedScan);
+      const scan = filteredScans.find(s => s.id === selectedScan);
       if (!scan || !scan.analysisData?.questions) {
         throw new Error('No analysis data found');
       }

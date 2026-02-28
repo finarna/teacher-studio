@@ -278,7 +278,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
     : 0;
 
   return (
-    <div className="relative h-screen min-h-screen w-full bg-[#fcfdfe] flex flex-col font-outfit overflow-hidden">
+    <div className="relative h-screen w-full bg-[#fcfdfe] flex flex-col font-outfit overflow-hidden">
 
       {/* 1. AMBIENT MESH BACKGROUND */}
       <div className="fixed inset-0 pointer-events-none">
@@ -311,14 +311,14 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
         }
       />
 
-      <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-10">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <main className="flex-1 overflow-hidden p-4 md:p-6 lg:p-8 flex flex-col">
+        <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0 space-y-4 md:space-y-6">
 
           {/* 3. HERO AI COACH MESSAGE */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative bg-slate-900 rounded-[2rem] p-6 md:p-8 overflow-hidden shadow-2xl border border-white/5"
+            className="relative bg-slate-900 rounded-[2rem] p-4 md:p-6 overflow-hidden shadow-2xl border border-white/5 shrink-0"
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-[80px] -mr-32 -mt-32" />
             <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
@@ -327,37 +327,37 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
               </div>
               <div className="flex-1 text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                  <span className="px-2 py-0.5 bg-primary-500/20 text-primary-400 rounded text-[10px] font-black uppercase tracking-widest border border-primary-500/30">Active Coach</span>
+                  <span className="px-2 py-0.5 bg-primary-500/20 text-primary-400 rounded text-[10px] font-bold tracking-wide border border-primary-500/30">Active Coach</span>
                   <div className="flex gap-1.5 overflow-hidden">
                     {aiInsights?.tags.map(tag => (
-                      <span key={tag} className="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded border border-white/5 whitespace-nowrap">{tag}</span>
+                      <span key={tag} className="text-[9px] font-bold text-slate-500 bg-white/5 px-2 py-0.5 rounded border border-white/5 whitespace-nowrap">{tag}</span>
                     ))}
                   </div>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-black text-white italic uppercase tracking-tight mb-2">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-2">
                   {aiInsights ? aiInsights.title : "Calibrating Performance Matrix"}
                 </h2>
-                <p className="text-slate-400 font-instrument text-lg leading-snug max-w-2xl">
+                <p className="text-slate-400 font-medium text-base md:text-lg leading-snug max-w-2xl">
                   {aiInsights ? aiInsights.description : "Reviewing your latest test responses to generate strategic blueprints."}
                 </p>
               </div>
               <div className="shrink-0 flex gap-4">
                 <div className="text-center px-6 py-3 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
-                  <div className="text-3xl font-black text-white leading-none mb-1">{Math.round(averageMastery)}%</div>
-                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Avg Mastery</div>
+                  <div className="text-3xl font-bold text-white leading-none mb-1">{Math.round(averageMastery)}%</div>
+                  <div className="text-[10px] font-bold text-slate-500">Avg Mastery</div>
                 </div>
               </div>
             </div>
           </motion.section>
 
           {/* 4. THE SUBJECT GRID (Levelled Up & Clean) */}
-          <section className="space-y-6">
-            <div className="flex items-center justify-between px-2">
+          <section className="space-y-4 flex-1 min-h-0 flex flex-col">
+            <div className="flex items-center justify-between px-2 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-6 bg-slate-900 rounded-full" />
-                <h2 className="text-sm font-black text-slate-900 uppercase tracking-[0.3em]">Arena Selection</h2>
+                <h2 className="text-sm font-bold text-slate-900 tracking-wide">Arena Selection</h2>
               </div>
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <div className="text-[10px] font-bold text-slate-400 tracking-wide">
                 {availableSubjects.length} Subjects Active
               </div>
             </div>
@@ -366,7 +366,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pb-12"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 flex-1 min-h-0 overflow-y-auto pr-1 custom-scrollbar pb-6"
             >
               {availableSubjects.map((subject) => {
                 const config = SUBJECT_CONFIGS[subject];
@@ -392,9 +392,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                   <motion.div
                     key={subject}
                     variants={cardVariants}
-                    whileHover={{ y: -8, scale: 1.01 }}
-                    onClick={() => onSelectSubject(subject)}
-                    className="group relative bg-white rounded-[2.5rem] p-6 md:p-8 border border-slate-200 shadow-sm hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] hover:border-primary-200 transition-all duration-500 text-left flex flex-col gap-8 overflow-hidden cursor-pointer"
+                    className="group relative bg-white rounded-[2rem] p-4 md:p-6 border border-slate-200 shadow-sm hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] hover:border-primary-200 transition-all duration-500 text-left flex flex-col gap-6 overflow-hidden cursor-pointer"
                   >
                     {/* Visual Highlights */}
                     <div className="absolute top-0 left-0 w-full h-2 bg-slate-100" />
@@ -403,40 +401,40 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                       style={{ width: `${mastery}%`, backgroundColor: config.color }}
                     />
 
-                    <div className="relative z-10 flex flex-col gap-8 w-full">
+                    <div className="relative z-10 flex flex-col gap-6 w-full">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-6">
                           <div
-                            className="w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-white shadow-2xl transition-all group-hover:rotate-6 group-hover:scale-110 duration-500"
+                            className="w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] md:rounded-[1.5rem] flex items-center justify-center text-white shadow-xl transition-all group-hover:rotate-6 group-hover:scale-110 duration-500"
                             style={{ background: `linear-gradient(135deg, ${config.color}, ${config.colorDark})` }}
                           >
-                            <Icon size={32} strokeWidth={2.5} />
+                            <Icon size={28} strokeWidth={2.5} />
                           </div>
                           <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subject</span>
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-[10px] font-bold text-slate-400">Subject</span>
                               <div className="w-1 h-3 bg-slate-200 rounded-full" />
                             </div>
-                            <h4 className="text-3xl font-black text-slate-900 uppercase italic font-outfit leading-none tracking-tight">
+                            <h4 className="text-2xl md:text-3xl font-extrabold text-slate-900 font-outfit leading-none tracking-tight">
                               {config.displayName}
                             </h4>
                           </div>
                         </div>
                         <div className="text-right flex flex-col items-end">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-4xl font-black text-slate-900 font-outfit leading-none tracking-tighter">{Math.round(mastery)}%</span>
+                            <span className="text-3xl md:text-4xl font-bold text-slate-900 font-outfit leading-none tracking-tighter">{Math.round(mastery)}%</span>
                           </div>
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Global Mastery</div>
+                          <div className="text-[10px] font-bold text-slate-400 mt-1">Global Mastery</div>
                         </div>
                       </div>
 
                       {/* AI COACH MICRO-TIP */}
                       <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-100 group-hover:bg-white group-hover:border-slate-200 transition-all">
-                        <div className="flex items-center gap-2 mb-1.5">
+                        <div className="flex items-center gap-2 mb-1">
                           <Sparkles size={12} className="text-primary-500" />
-                          <span className="text-[9px] font-black text-primary-600 uppercase tracking-[0.15em]">AI Coach Recommendation</span>
+                          <span className="text-[9px] font-bold text-primary-600 tracking-wide">AI Coach Recommendation</span>
                         </div>
-                        <p className="text-xs font-bold text-slate-600 italic leading-relaxed">
+                        <p className="text-xs font-semibold text-slate-600 leading-snug">
                           "{getCoachTip(subject, mastery, accuracy, stats.questions || volume)}"
                         </p>
                       </div>
@@ -451,12 +449,12 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         ].map((s, idx) => {
                           const StatIcon = s.i;
                           return (
-                            <div key={idx} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col items-center shadow-sm group-hover:bg-white group-hover:border-slate-200 transition-all">
-                              <div className="mb-2" style={{ color: s.c }}>
-                                <StatIcon size={20} strokeWidth={2.5} />
+                            <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-2 md:p-3 flex flex-col items-center shadow-sm group-hover:bg-white group-hover:border-slate-200 transition-all">
+                              <div className="mb-1" style={{ color: s.c }}>
+                                <StatIcon size={18} strokeWidth={2.5} />
                               </div>
-                              <div className="text-2xl font-black text-slate-900 leading-none mb-1">{s.v || 0}</div>
-                              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">{s.l}</div>
+                              <div className="text-lg md:text-xl font-bold text-slate-900 leading-none mb-0.5">{s.v || 0}</div>
+                              <div className="text-[9px] font-bold text-slate-500 leading-none">{s.l}</div>
                             </div>
                           );
                         })}
@@ -484,14 +482,14 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         </div>
 
                         {/* REFINED ACTIONS - INLINE TO REDUCE DEPTH */}
-                        <div className="flex flex-col gap-3 pt-6 border-t border-slate-100">
-                          <div className="grid grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
+                          <div className="grid grid-cols-2 gap-2">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onSelectOption?.(subject, 'topicwise');
                               }}
-                              className="flex items-center justify-center gap-2 py-3 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100"
+                              className="flex items-center justify-center gap-2 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-bold tracking-wide hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100"
                             >
                               <BookOpen size={14} /> Explore Syllabus
                             </button>
@@ -500,7 +498,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                 e.stopPropagation();
                                 onSelectOption?.(subject, 'past_exams');
                               }}
-                              className="flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 hover:text-white transition-all border border-amber-100"
+                              className="flex items-center justify-center gap-2 py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-bold tracking-wide hover:bg-amber-600 hover:text-white transition-all border border-amber-100"
                             >
                               <Target size={14} /> Exam Vault
                             </button>
@@ -511,7 +509,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                               e.stopPropagation();
                               onSelectOption?.(subject, 'mock_builder');
                             }}
-                            className="w-full flex items-center justify-center gap-2 py-4 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-primary-600 transition-all shadow-lg"
+                            className="w-full flex items-center justify-center gap-2 py-3 bg-slate-900 text-white rounded-xl text-[11px] font-bold tracking-wide hover:bg-primary-600 transition-all shadow-lg"
                           >
                             <Zap size={16} /> Enter Mock Mission
                           </button>
@@ -521,7 +519,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                               e.stopPropagation();
                               onSelectSubject(subject);
                             }}
-                            className="w-full py-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center hover:text-slate-600 transition-colors"
+                            className="w-full py-1 text-[9px] font-bold text-slate-400 text-center hover:text-slate-600 transition-colors"
                           >
                             View Full Subject Analysis
                           </button>
@@ -694,7 +692,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
             </>
           )
         }
-      </AnimatePresence>
+      </AnimatePresence >
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
@@ -702,7 +700,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 20px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
       `}</style>
-    </div>
+    </div >
   );
 };
 

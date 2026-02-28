@@ -86,15 +86,14 @@ export async function getScan(scanId: string, userId?: string) {
   let query = supabaseAdmin
     .from('scans')
     .select('*')
-    .eq('id', scanId)
-    .single();
+    .eq('id', scanId);
 
   // Optionally filter by user_id for additional security
   if (userId) {
     query = query.eq('user_id', userId);
   }
 
-  const { data, error } = await query;
+  const { data, error } = await query.single();
 
   if (error) {
     console.error('Error fetching scan:', error);
@@ -436,10 +435,25 @@ export async function saveFlashcards(
  */
 export async function checkDatabaseConnection() {
   try {
-    const { data, error } = await supabaseAdmin.from('users').select('count').limit(1);
+    // Check 'profiles' table instead of 'users' as it's more likely to exist in public schema
+    // and use a very fast query
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .limit(1)
+      .abortSignal(AbortSignal.timeout(5000) as any);
 
     if (error) {
-      return { healthy: false, error: error.message };
+      // If profiles doesn't exist, try scans as a fallback
+      const { error: scansError } = await supabaseAdmin
+        .from('scans')
+        .select('id')
+        .limit(1)
+        .abortSignal(AbortSignal.timeout(5000) as any);
+
+      if (scansError) {
+        return { healthy: false, error: `Profiles: ${error.message}, Scans: ${scansError.message}` };
+      }
     }
 
     return { healthy: true, error: null };

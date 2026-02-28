@@ -336,8 +336,12 @@ export async function generateTest(req, res) {
         const { GoogleGenerativeAI } = await import('@google/generative-ai');
         const genAI = new GoogleGenerativeAI(GEMINI_KEY);
         const model = genAI.getGenerativeModel({
-          model: 'gemini-2.0-flash',
-          generationConfig: { responseMimeType: 'application/json' }
+          model: 'gemini-3-flash-preview',
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.7,
+            maxOutputTokens: 12000
+          }
         });
 
         // topics[] contains UUIDs from the frontend — resolve to readable names first
@@ -366,14 +370,34 @@ export async function generateTest(req, res) {
 
         console.log(`🎯 Strategy 2: topic names resolved to: "${topicNames}"`);
 
-        const prompt = `You are an expert ${subject} teacher for ${examContext} exam.
-Generate exactly ${qCount} high-quality MCQ questions on the topic(s): "${topicNames}".
-Requirements:
-- Mix difficulty: ~30% easy, ~50% moderate, ~20% hard
-- Each question must have exactly 4 options (strings)
-- Strictly follow the ${examContext} syllabus for ${subject}
-- Return ONLY a valid JSON array. Each object must have:
-  { "id": "q1", "question": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "topic": "${topicNames}", "difficulty": "easy|moderate|hard" }`;
+        const prompt = `You are a World-Class Question Architect for the ${examContext} entrance exam in ${subject}.
+Your goal is to generate ${qCount} questions that match the RIGOR and STYLE of real Past Year Papers (2021-2024).
+
+${examContext === 'JEE' ? 'JEE FOCUS: Numerical rigor, multi-step calculus-based application, and complex logical synthesis.' : ''}
+${examContext === 'NEET' ? 'NEET FOCUS: Conceptual precision, assertion-reasoning style, and NCERT-plus depth.' : ''}
+${examContext === 'KCET' ? 'KCET FOCUS: Trickiness, speed-accuracy challenges, and syllabus-edge cases.' : ''}
+
+REQUIREMENTS:
+1. Topic(s): "${topicNames}"
+2. QUALITY: ZERO "Definition" questions. Every question must be a Scenario or Application problem.
+3. STRUCTURE: 4 options, exactly 1 correct.
+4. SOLUTIONS: Include masterclass analytical steps.
+
+Return ONLY a valid JSON array:
+[
+  { 
+    "id": "q1", 
+    "text": "The rigorous question with $Proper \\\\LaTeX$...", 
+    "options": ["...", "...", "...", "..."], 
+    "correctOptionIndex": 0, 
+    "solutionSteps": ["Step 1", "Step 2"],
+    "examTip": "Strategical insight",
+    "keyFormulas": ["$formula$"],
+    "pitfalls": ["The conceptual trap set here"],
+    "topic": "${topicNames}", 
+    "difficulty": "Easy|Moderate|Hard" 
+  }
+]`;
 
         const result = await model.generateContent(prompt);
         const raw = result.response.text().trim();
@@ -382,17 +406,17 @@ Requirements:
           : raw;
         const parsed = JSON.parse(jsonStr);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Normalize AI question format → AnalyzedQuestion shape expected by TestInterface
-          // AI returns: { question, options, correctIndex, explanation, topic, difficulty }
-          // Frontend expects: { id, text, options, correctOptionIndex, explanation, topic, difficulty, marks }
           const normalizedQuestions = parsed.map((q, i) => ({
             id: q.id || `ai-q-${i + 1}`,
-            text: q.question || q.text || '',          // map 'question' → 'text'
+            text: q.text || q.question || '',
             options: Array.isArray(q.options) ? q.options : [],
-            correctOptionIndex: q.correctIndex ?? q.correctOptionIndex ?? 0, // map 'correctIndex' → 'correctOptionIndex'
-            explanation: q.explanation || '',
+            correctOptionIndex: q.correctOptionIndex ?? q.correctIndex ?? 0,
+            solutionSteps: q.solutionSteps || (q.explanation ? [q.explanation] : []),
+            examTip: q.examTip || '',
+            keyFormulas: q.keyFormulas || [],
+            pitfalls: q.pitfalls || [],
             topic: q.topic || topicNames,
-            difficulty: q.difficulty || 'moderate',
+            difficulty: q.difficulty || 'Moderate',
             marks: 1,
             bloomsLevel: 'application',
             generatedByAI: true,
@@ -406,7 +430,7 @@ Requirements:
               generatedWithAI: true
             }
           };
-          console.log(`✅ Direct Gemini generation: ${normalizedQuestions.length} questions (normalized)`);
+          console.log(`✅ Strategy 2: Generated ${normalizedQuestions.length} questions with full insights (normalized)`);
         }
       } catch (directErr) {
         console.error('⚠️  Direct Gemini generation failed:', directErr.message);
@@ -453,7 +477,10 @@ Requirements:
         total_questions: questionSet.questions.length,
         duration_minutes: durationMinutes || getRecommendedDuration(testType, examContext, questionSet.questions.length),
         start_time: new Date().toISOString(),
-        status: 'in_progress'
+        status: 'in_progress',
+        test_config: {
+          questions: questionSet.questions
+        }
       })
       .select()
       .single();
@@ -579,8 +606,8 @@ export async function submitTest(req, res) {
     if (aiResponses.length > 0) {
       const { error: aiRespErr } = await supabaseAdmin.from('test_responses').insert(aiResponses);
       if (aiRespErr) {
-        console.warn(`⚠️  Could not persist AI question responses (schema may require question_id): ${aiRespErr.message}`);
-        // Non-fatal: score and mastery still calculated from in-memory `responses`
+        console.warn(`⚠️  Could not persist AI question responses to table (schema requires question_id FK): ${aiRespErr.message}`);
+        console.log(`💡 Snapshotting responses into test_attempts.test_config as fallback instead.`);
       }
     }
 
@@ -665,6 +692,19 @@ export async function submitTest(req, res) {
         marks_obtained: marksObtained,
         marks_total: marksTotal,
         topic_analysis: topicStats,
+        test_config: {
+          ...attempt.test_config,
+          responses_snapshot: responses.map(r => ({
+            questionId: r.questionId,
+            selectedOption: r.selectedOption,
+            isCorrect: r.isCorrect,
+            timeSpent: r.timeSpent,
+            markedForReview: r.markedForReview,
+            topic: r.topic,
+            difficulty: r.difficulty,
+            marks: r.marks
+          }))
+        },
         time_analysis: {
           total: totalTime,
           average: avgTime,
@@ -1020,6 +1060,22 @@ export async function getTestResults(req, res) {
         isCorrect: r.is_correct,
         timeSpent: r.time_spent,
         markedForReview: r.marked_for_review,
+        topic: r.topic,
+        difficulty: r.difficulty,
+        marks: r.marks
+      }));
+    }
+
+    // FALLBACK: If formattedResponses is empty (happens for AI tests where test_responses insert failed FK)
+    // Read from the snapshot we saved in test_config during submission
+    if (formattedResponses.length === 0 && attempt.test_config?.responses_snapshot?.length > 0) {
+      console.log(`📦 [getTestResults] test_responses table empty - using test_config.responses_snapshot (${attempt.test_config.responses_snapshot.length} entries)`);
+      formattedResponses = attempt.test_config.responses_snapshot.map(r => ({
+        questionId: r.questionId,
+        selectedOption: r.selectedOption,
+        isCorrect: r.isCorrect,
+        timeSpent: r.timeSpent,
+        markedForReview: r.markedForReview,
         topic: r.topic,
         difficulty: r.difficulty,
         marks: r.marks
@@ -1394,20 +1450,22 @@ export async function getWeakTopics(req, res) {
  * Background worker: runs AI generation + DB writes after the HTTP response is sent.
  * Stores the final result (or error) in generationProgress so the client can poll.
  */
-async function generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId }) {
+async function generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId, strategyMode, oracleMode }) {
   // Check if AI generation is enabled (requires GEMINI_API_KEY)
   let useAIGeneration = !!(process.env.GEMINI_API_KEY && examContext && subject);
 
   let finalQuestions = [];
 
   try {
+    const mode = strategyMode || 'hybrid';
+
     if (useAIGeneration) {
       // ✨ AI-powered question generation (always use AI if available)
       console.log('🤖 Using AI Question Generator for custom test...');
       const aiStartTime = Date.now();
 
       try {
-        updateProgress(progressId, 'analyzing', '🎯 Analyzing your performance and past exam patterns...', 10);
+        updateProgress(progressId, 'analyzing', '🎯 Analyzing your performance and past exam patterns...', 10, { strategy: 'Strategy 1: Full Contextual AI' });
 
         console.log(`📊 Loading generation context for ${subject} (${examContext})...`);
         console.log(`🎯 User selected ${topicIds?.length || 0} topics:`, topicIds);
@@ -1448,12 +1506,17 @@ async function generateTestInBackground({ userId, testName, subject, examContext
         console.log(`✅ Context loaded in ${Date.now() - aiStartTime}ms`);
         console.log(`🎯 Context: examConfig=${!!context.examConfig}, topics=${context.topics?.length}, patterns=${context.historicalPatterns?.length}`);
 
-        // Override total questions with user's custom count
+        // Override total questions and set strategy mode
         context.examConfig.totalQuestions = questionCount;
+        if (context.generationRules) {
+          context.generationRules.strategyMode = mode;
+          if (oracleMode) {
+            context.generationRules.oracleMode = oracleMode;
+          }
+        }
+        updateProgress(progressId, 'requesting', `🤖 AI Agent [Strategy 1] generating questions using ${mode} logic...`, 30, { strategy: 'Strategy 1: Full Contextual AI', mode: mode });
 
-        updateProgress(progressId, 'requesting', '🤖 Requesting AI agent to generate personalized questions...', 30);
-
-        console.log(`🤖 Generating ${questionCount} questions with Gemini AI...`);
+        console.log(`🤖 Generating ${questionCount} questions (${mode}) with Gemini AI...`);
         const genStartTime = Date.now();
 
         // Generate fresh questions with AI (no corruption, perfect LaTeX)
@@ -1518,6 +1581,7 @@ async function generateTestInBackground({ userId, testName, subject, examContext
 
     // ─── Strategy 2: Direct Gemini prompt (no DB config required) ───────────
     if (finalQuestions.length === 0) {
+      updateProgress(progressId, 'requesting', `🤖 AI Agent [Strategy 2] generating questions using ${mode} logic...`, 40, { strategy: 'Strategy 2: Direct Prompt (Fallback)', mode: mode });
       const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
       if (GEMINI_KEY) {
         console.log('🤖 Strategy 2: Direct Gemini generation for custom mock test...');
@@ -1525,8 +1589,12 @@ async function generateTestInBackground({ userId, testName, subject, examContext
           const { GoogleGenerativeAI } = await import('@google/generative-ai');
           const genAI = new GoogleGenerativeAI(GEMINI_KEY);
           const model = genAI.getGenerativeModel({
-            model: 'gemini-2.0-flash',
-            generationConfig: { responseMimeType: 'application/json' }
+            model: 'gemini-3-flash-preview',
+            generationConfig: {
+              responseMimeType: 'application/json',
+              temperature: 0.7,
+              maxOutputTokens: 12000
+            }
           });
 
           // Resolve topic names if we don't have them yet
@@ -1543,16 +1611,39 @@ async function generateTestInBackground({ userId, testName, subject, examContext
 
           console.log(`🎯 Strategy 2 topic names: "${topicNamesForPrompt}"`);
 
-          const difficultyInstruction = `Mix difficulty: ~${difficultyMix.easy}% easy, ~${difficultyMix.moderate}% moderate, ~${difficultyMix.hard}% hard`;
+          const rigorDirective = (examContext === 'JEE') ? 'JEE FOCUS: Numerical rigor, multi-concept integration, and multi-step reasoning.' : (examContext === 'NEET' ? 'NEET FOCUS: Conceptual depth, assertion-reasoning, and NCERT-plus level details.' : 'KCET FOCUS: Rapid trickiness and syllabus-edge cases.');
 
-          const prompt = `You are an expert ${subject} teacher for ${examContext} exam.
-Generate exactly ${questionCount} high-quality MCQ questions on the topic(s): "${topicNamesForPrompt}".
-Requirements:
-- ${difficultyInstruction}
-- Each question must have exactly 4 options (strings)
-- Strictly follow the ${examContext} syllabus for ${subject}
-- Return ONLY a valid JSON array with no markdown around it. Each object must have:
-  { "id": "q1", "question": "...", "options": ["A","B","C","D"], "correctIndex": 0, "explanation": "...", "topic": "...", "difficulty": "easy|moderate|hard" }`;
+          const prompt = `You are a World-Class Question Architect for the ${examContext} entrance exam in ${subject}.
+Your mission is to generate ${questionCount} ULTIMATE-RIGOR MCQ questions.
+
+STRATEGY: ${mode === 'predictive_mock' ? 'PREDICTIVE MOCK (Focus 100% on real exam pattern probability)' : (mode === 'adaptive_growth' ? 'ADAPTIVE GROWTH (Focus heavily on common student vulnerabilities)' : 'HYBRID BALANCE')}
+
+${rigorDirective}
+
+QUALITY MANDATE:
+1. ZERO "Definition" questions. Every question must be a Scenario or Application problem.
+2. Focus on "The Prediction Gap": Create questions that pre-empt how real exams evolve each year.
+3. MANDATORY SOLUTIONS: Every single question MUST include detailed "solutionSteps", an "examTip", and "pitfalls". NEVER leave these empty.
+4. STRUCTURE: 4 options, exactly 1 correct.
+5. Topic(s): "${topicNamesForPrompt}"
+6. Difficulty: ~${difficultyMix.easy}% Easy, ~${difficultyMix.moderate}% Moderate, ~${difficultyMix.hard}% Hard.
+7. Use PROPER LaTeX for all expressions.
+
+Return ONLY a valid JSON array:
+[
+  { 
+    "id": "q1", 
+    "text": "The rigorous question with $Proper \\\\LaTeX$...", 
+    "options": ["...", "...", "...", "..."], 
+    "correctOptionIndex": 0, 
+    "solutionSteps": ["Step 1", "Step 2"],
+    "examTip": "Strategical insight",
+    "keyFormulas": ["$formula$"],
+    "pitfalls": ["The conceptual trap"],
+    "topic": "${topicNamesForPrompt}", 
+    "difficulty": "Moderate" 
+  }
+]`;
 
           const result = await model.generateContent(prompt);
           const raw = result.response.text().trim();
@@ -1564,20 +1655,22 @@ Requirements:
           if (Array.isArray(parsed) && parsed.length > 0) {
             finalQuestions = parsed.map((q, i) => ({
               id: q.id || `ai-mock-${i + 1}`,
-              text: q.question || q.text || '',
+              text: q.text || q.question || '',
               options: Array.isArray(q.options) ? q.options : [],
-              correctOptionIndex: q.correctIndex ?? q.correctOptionIndex ?? 0,
-              explanation: q.explanation || '',
+              correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? q.correctIndex ?? 0,
+              solutionSteps: q.solutionSteps || q.solution_steps || (q.explanation ? [q.explanation] : []),
+              examTip: q.examTip || q.exam_tip || '',
+              keyFormulas: q.keyFormulas || q.key_formulas || [],
+              pitfalls: q.pitfalls || q.pit_falls || [],
               topic: q.topic || topicNamesForPrompt,
-              difficulty: q.difficulty || 'moderate',
-              diff: q.difficulty || 'moderate',
+              difficulty: q.difficulty || 'Moderate',
               marks: 1,
               bloomsLevel: 'application',
               subject,
               examContext,
               generatedByAI: true,
             }));
-            console.log(`✅ Strategy 2: Generated ${finalQuestions.length} questions via direct Gemini`);
+            console.log(`✅ Strategy 2: Generated ${finalQuestions.length} questions with full insights via direct Gemini`);
           }
         } catch (directErr) {
           console.error('⚠️  Strategy 2 (direct Gemini) failed:', directErr.message);
@@ -1796,7 +1889,9 @@ export async function createCustomTest(req, res) {
       questionCount,
       difficultyMix,
       durationMinutes,
-      saveAsTemplate
+      saveAsTemplate,
+      strategyMode,
+      oracleMode
     } = req.body;
 
     if (!userId || userId === 'anonymous') {
@@ -1818,7 +1913,7 @@ export async function createCustomTest(req, res) {
     res.json({ success: true, data: { progressId } });
 
     // Fire-and-forget background generation
-    generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId })
+    generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId, strategyMode, oracleMode })
       .catch(err => {
         console.error('❌ Unhandled background generation error:', err);
         updateProgress(progressId, 'error', err.message || 'Failed to create test', 0);

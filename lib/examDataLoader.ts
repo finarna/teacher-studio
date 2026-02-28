@@ -148,7 +148,8 @@ export async function loadHistoricalPatterns(
         moderate: pattern.difficulty_moderate_pct || 45,
         hard: pattern.difficulty_hard_pct || 20
       },
-      totalMarks: pattern.total_marks
+      totalMarks: pattern.total_marks,
+      evolutionNote: pattern.evolution_note
     });
   }
 
@@ -256,7 +257,8 @@ export async function loadGenerationRules(
         avoidRecentQuestions: true,
         daysSinceLastAttempt: 30,
         maxRepetitionAllowed: 2
-      }
+      },
+      strategyMode: 'hybrid'
     };
   }
 
@@ -276,7 +278,8 @@ export async function loadGenerationRules(
       avoidRecentQuestions: data.avoid_recent_questions,
       daysSinceLastAttempt: data.days_since_last_attempt,
       maxRepetitionAllowed: data.max_repetition_allowed
-    }
+    },
+    strategyMode: data.strategy_mode || 'hybrid'
   };
 }
 
@@ -296,13 +299,35 @@ export async function loadGenerationContext(
     console.log(`🎯 Filtering to ${selectedTopicNames.length} selected topics:`, selectedTopicNames);
   }
 
-  const [examConfig, allTopics, historicalData, studentProfile, generationRules] = await Promise.all([
+  const [examConfig, allTopics, historicalData, studentProfile, generationRules, oracleCalibration] = await Promise.all([
     loadExamConfiguration(supabase, examContext, subject),
     loadTopicMetadata(supabase, examContext, subject),
     loadHistoricalPatterns(supabase, examContext, subject),
     loadStudentProfile(supabase, userId, examContext, subject),
-    loadGenerationRules(supabase, examContext, subject)
+    loadGenerationRules(supabase, examContext, subject),
+    // [NEW] Call the REI Evolution Engine to get the 2026 Forecast
+    (async () => {
+      try {
+        const { getForecastedCalibration } = await import('./reiEvolutionEngine.ts');
+        return await getForecastedCalibration(examContext, subject);
+      } catch (e) {
+        console.error('⚠️ REI Engine Error:', e);
+        return null;
+      }
+    })()
   ]);
+
+  // Inject Oracle Calibration into Generation Rules
+  if (oracleCalibration) {
+    console.log(`🧠 [REI v3.0] Oracle Forecast Detected: Rigor Velocity ${oracleCalibration.rigorVelocity}x`);
+    // Provide the forecast metadata, but don't force 'enabled' unless already set or requested
+    generationRules.oracleMode = {
+      enabled: generationRules.oracleMode?.enabled || false,
+      idsTarget: 0.95,
+      directives: oracleCalibration.directives,
+      boardSignature: oracleCalibration.boardSignature
+    };
+  }
 
   // Filter topics if user selected specific ones (by topic ID or name)
   const topics = selectedTopicNames && selectedTopicNames.length > 0

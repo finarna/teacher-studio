@@ -749,6 +749,7 @@ ${generatePhysicsExtractionInstructions()}
           "bloomsTaxonomy": [{"name": "Remembering", "percentage": 20, "color": "#6366f1"}, ...],
           "topicWeightage": [{"name": "Optics", "marks": 14, "color": "#f59e0b"}, ...],
           "predictiveTopics": [{"topic": "Compound Microscope", "probability": 85, "reason": "High-yield derivation frequency in late-stage board cycles."}],
+          "evolutionNote": "Qualitative insight (max 15 words) on how this paper's rigor or style has evolved compared to past standards (e.g., 'Increasing focus on multi-chapter conceptual fusion' or 'Shift towards calculation-heavy mechanics').",
           "strategy": ["Prioritize derivation A...", "Logic focus on B..."]
         }`;
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Sparkles, Zap, Brain, Box } from 'lucide-react';
+import { ArrowLeft, Sparkles, Zap, Brain, Box, Calculator, Info } from 'lucide-react';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
 import { useAuth } from './AuthProvider';
 import { AdminUsersPanel } from './AdminUsersPanel';
@@ -109,8 +109,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                       key={model.id}
                       onClick={() => handleModelChange(model.id)}
                       className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${isSelected
-                          ? 'border-slate-900 bg-slate-50 shadow-md'
-                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-slate-900 bg-slate-50 shadow-md'
+                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                         }`}
                     >
                       <div
@@ -182,8 +182,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                   <button
                     onClick={() => handleTemperatureChange(0.3)}
                     className={`px-3 py-2 rounded-lg border-2 text-xs font-bold transition-all ${temperature <= 0.3
-                        ? 'border-slate-900 bg-slate-50'
-                        : 'border-slate-200 hover:border-slate-300'
+                      ? 'border-slate-900 bg-slate-50'
+                      : 'border-slate-200 hover:border-slate-300'
                       }`}
                   >
                     Focused (0.3)
@@ -191,8 +191,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                   <button
                     onClick={() => handleTemperatureChange(0.7)}
                     className={`px-3 py-2 rounded-lg border-2 text-xs font-bold transition-all ${temperature > 0.3 && temperature <= 0.8
-                        ? 'border-slate-900 bg-slate-50'
-                        : 'border-slate-200 hover:border-slate-300'
+                      ? 'border-slate-900 bg-slate-50'
+                      : 'border-slate-200 hover:border-slate-300'
                       }`}
                   >
                     Balanced (0.7)
@@ -200,8 +200,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
                   <button
                     onClick={() => handleTemperatureChange(1.0)}
                     className={`px-3 py-2 rounded-lg border-2 text-xs font-bold transition-all ${temperature > 0.8
-                        ? 'border-slate-900 bg-slate-50'
-                        : 'border-slate-200 hover:border-slate-300'
+                      ? 'border-slate-900 bg-slate-50'
+                      : 'border-slate-200 hover:border-slate-300'
                       }`}
                   >
                     Creative (1.0)
@@ -210,6 +210,79 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
               </div>
             </div>
 
+
+            {/* Pedagogical Algorithms */}
+            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-8 shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/10 rounded-full blur-[50px] -mr-16 -mt-16 group-hover:bg-primary-500/20 transition-all duration-700" />
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white ring-1 ring-white/20">
+                  <Calculator size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-white uppercase tracking-tight font-outfit italic">
+                    Pedagogical Algorithms
+                  </h2>
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] leading-none mt-1">
+                    System Intelligence & Performance Logic
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {/* Accuracy */}
+                <div className="p-6 bg-white/5 border border-white/10 rounded-[1.5rem] group/item hover:bg-white/[0.08] transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                      <h3 className="text-xs font-black text-white uppercase tracking-widest">Accuracy Truth</h3>
+                    </div>
+                    <Info size={14} className="text-white/20 group-hover/item:text-white/40 transition-colors" />
+                  </div>
+                  <div className="bg-black/20 rounded-xl p-4 font-mono text-[11px] text-emerald-400 border border-white/5 flex items-center justify-center">
+                    Accuracy = (Σ Correct / Σ Attempted) × 100
+                  </div>
+                  <p className="text-[10px] text-white/40 font-medium mt-3 italic">
+                    The absolute benchmark of correctness across all practice nodes and mock simulations.
+                  </p>
+                </div>
+
+                {/* Control/Command */}
+                <div className="p-6 bg-white/5 border border-white/10 rounded-[1.5rem] group/item hover:bg-white/[0.08] transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                      <h3 className="text-xs font-black text-white uppercase tracking-widest">Syllabus Control (Command)</h3>
+                    </div>
+                    <Info size={14} className="text-white/20 group-hover/item:text-white/40 transition-colors" />
+                  </div>
+                  <div className="bg-black/20 rounded-xl p-4 font-mono text-[11px] text-primary-400 border border-white/5 flex flex-col items-center gap-2">
+                    <span className="text-center">Control = Min(1, UniqueSolved / SaturationPoint) × 100</span>
+                    <span className="text-[9px] text-white/30">SaturationPoint = Min(TotalPool, Max(15, Pool × 0.5))</span>
+                  </div>
+                  <p className="text-[10px] text-white/40 font-medium mt-3 italic">
+                    Eliminates inflation from repeat answers. Mastery requires exploring a critical cross-section of the syllabus.
+                  </p>
+                </div>
+
+                {/* Mastery */}
+                <div className="p-6 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/10 rounded-[1.5rem] group/item hover:bg-white/[0.08] transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+                      <h3 className="text-xs font-black text-white uppercase tracking-widest">Mastery Synthesis</h3>
+                    </div>
+                    <Info size={14} className="text-white/20 group-hover/item:text-white/40 transition-colors" />
+                  </div>
+                  <div className="bg-black/20 rounded-xl p-4 font-mono text-[11px] text-amber-400 border border-white/5 flex flex-col items-center gap-1 leading-relaxed">
+                    <div className="text-center">Mastery = (Accuracy × 0.60 × Control)</div>
+                    <div className="text-center text-[10px] text-amber-400/70">+ Max(20, Quizzes × 10) + Max(10, (Vol/10) × 5) + (Notes ? 10 : 0)</div>
+                  </div>
+                  <p className="text-[10px] text-white/40 font-medium mt-3 italic">
+                    The global indicator of proficiency. Synthesizes rigor, consistency, and syllabus depth into a single numeric trajectory.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Storage Info */}
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">

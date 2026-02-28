@@ -151,7 +151,7 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
   userProgress
 }) => {
   return (
-    <div className="relative min-h-screen bg-[#fcfdfe] overflow-hidden">
+    <div className="relative h-[100dvh] bg-[#fcfdfe] flex flex-col overflow-hidden">
       {/* 1. PREMIUM AMBIENT BACKGROUND */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-500/5 rounded-full blur-[120px] animate-pulse" />
@@ -164,33 +164,33 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
         subtitle="Your personalized roadmap to academic excellence"
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
-        <div className="mb-16 text-center max-w-3xl mx-auto">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 flex-1 flex flex-col justify-center py-2 md:py-4 overflow-hidden">
+        <div className="mb-4 md:mb-6 text-center max-w-3xl mx-auto shrink-0">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-900 text-primary-400 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 border border-white/10 shadow-2xl"
+            className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50/50 text-indigo-600 rounded-full text-[11px] font-bold mb-4 border border-indigo-100 shadow-sm"
           >
-            <Sparkles size={14} className="animate-pulse" />
+            <Sparkles size={12} className="text-indigo-500" />
             AI-Powered Personalization Engine
           </motion.div>
 
           <motion.h2
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-black text-slate-900 font-outfit mb-6 tracking-tight italic uppercase"
+            className="text-3xl md:text-5xl font-extrabold text-slate-900 font-outfit mb-2 tracking-tight"
           >
-            Choose Your <span className="text-primary-600 non-italic">Trajectory</span>
+            Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">Trajectory</span>
           </motion.h2>
 
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-slate-500 font-instrument text-xl md:text-2xl leading-relaxed"
+            className="text-slate-500 font-medium text-base md:text-lg leading-relaxed px-4"
           >
             We've analyzed current exam trends to tailor your learning path.
-            Pick the arena where you'll prove your excellence today.
+            <br className="hidden md:block" /> Pick the arena where you'll prove your excellence today.
           </motion.p>
         </div>
 
@@ -198,7 +198,7 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 pb-12"
+          className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 flex-1 min-h-0 items-stretch"
         >
           {TRAJECTORY_CARDS.map((trajectory) => {
             const progress = userProgress?.[trajectory.id];
@@ -212,7 +212,7 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
                 whileHover={{ y: -12, transition: { type: "spring", stiffness: 300 } }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => onSelectTrajectory(trajectory.id)}
-                className="group relative bg-white rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] hover:border-primary-300/50 transition-all duration-500 text-left overflow-hidden flex flex-col h-full"
+                className="group relative bg-white rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.08)] hover:border-primary-300/50 transition-all duration-500 text-left overflow-hidden flex flex-col h-full min-h-0"
               >
                 {/* Visual Accent Layer */}
                 <div className={`absolute top-0 right-0 w-48 h-48 -mr-12 -mt-12 rounded-full blur-[80px] opacity-0 group-hover:opacity-30 transition-opacity bg-gradient-to-br ${trajectory.gradient}`} />
@@ -222,84 +222,84 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
                   <Target size={120} style={{ color: trajectory.color }} />
                 </div>
 
-                <div className="p-8 flex flex-col h-full relative z-10">
+                <div className="p-3 md:p-5 flex flex-col h-full relative z-10 min-h-0">
                   {/* Top Badge & Progress */}
-                  <div className="flex items-start justify-between mb-8">
-                    <div className={`w-16 h-16 rounded-[1.5rem] bg-gradient-to-br ${trajectory.gradient} flex items-center justify-center shadow-xl transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500`}>
-                      <Icon size={32} className="text-white" strokeWidth={2.5} />
+                  <div className="flex items-start justify-between mb-3 md:mb-6">
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${trajectory.gradient} flex items-center justify-center shadow-xl transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-500`}>
+                      <Icon size={24} className="text-white" strokeWidth={2.5} />
                     </div>
                     {hasProgress ? (
                       <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</span>
+                        <span className="text-[10px] font-bold text-slate-400 tracking-wide leading-none mb-1">Status</span>
                         <div className="flex items-baseline gap-1">
-                          <span className="text-2xl font-black text-slate-900 leading-none">{progress.overallMastery}%</span>
-                          <span className="text-[10px] font-bold text-slate-400">Mastery</span>
+                          <span className="text-2xl font-bold text-slate-900 leading-none">{progress.overallMastery}%</span>
+                          <span className="text-[10px] font-semibold text-slate-400">Mastery</span>
                         </div>
                       </div>
                     ) : (
-                      <div className="px-3 py-1 bg-slate-50 rounded-full border border-slate-100 italic font-bold text-[10px] text-slate-400 uppercase tracking-widest">
+                      <div className="px-3 py-1 bg-slate-50 rounded-full border border-slate-100 font-bold text-[10px] text-slate-400 tracking-wide">
                         Not Started
                       </div>
                     )}
                   </div>
 
                   {/* Identity Section */}
-                  <div className="mb-8">
+                  <div className="mb-2 md:mb-3">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[10px] font-black text-primary-500 uppercase tracking-[0.2em] leading-none">
+                      <span className="text-[10px] font-bold text-primary-600 tracking-wider leading-none">
                         {trajectory.description}
                       </span>
                       <div className="w-1 h-3 bg-primary-200 rounded-full" />
                     </div>
-                    <h3 className="text-3xl font-black text-slate-900 font-outfit tracking-tighter group-hover:text-primary-600 transition-colors uppercase italic">
+                    <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 font-outfit tracking-tight group-hover:text-primary-600 transition-colors">
                       {trajectory.name}
                     </h3>
-                    <p className="text-sm font-bold text-slate-500 mt-1 line-clamp-1">
+                    <p className="text-xs font-bold text-slate-500 mt-0.5 line-clamp-1">
                       {trajectory.fullName}
                     </p>
                   </div>
 
-                  {/* Highlights List */}
-                  <div className="space-y-4 mb-10 flex-1">
+                  {/* Highlights List - Hidden on some mobile heights or more compact */}
+                  <div className="space-y-1 md:space-y-2 mb-3 md:mb-4 flex-1 overflow-hidden">
                     {trajectory.highlights.map((h, i) => (
-                      <div key={i} className="flex items-center gap-3 text-sm text-slate-600 font-semibold group/item">
-                        <div className={`p-2 rounded-xl ${trajectory.lightColor} group-hover/item:scale-110 transition-transform`}>
-                          <h.icon size={16} style={{ color: trajectory.color }} strokeWidth={2.5} />
+                      <div key={i} className="flex items-center gap-2.5 text-xs text-slate-600 font-bold group/item">
+                        <div className={`p-1.5 rounded-lg ${trajectory.lightColor} group-hover/item:scale-110 transition-transform`}>
+                          <h.icon size={14} style={{ color: trajectory.color }} strokeWidth={2.5} />
                         </div>
-                        <span className="group-hover:text-slate-900 transition-colors">{h.text}</span>
+                        <span className="group-hover:text-slate-900 transition-colors line-clamp-1">{h.text}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Predictive/Pattern Stats */}
-                  <div className="grid grid-cols-2 gap-4 pt-6 mt-auto border-t border-slate-100">
+                  <div className="grid grid-cols-2 gap-2 md:gap-4 pt-3 md:pt-4 mt-auto border-t border-slate-100">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5 mb-1">
                         <FileQuestion size={10} className="text-slate-400" />
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Patterns</span>
+                        <span className="text-[9px] font-bold text-slate-400 tracking-wider">Patterns</span>
                       </div>
-                      <span className="text-sm font-black text-slate-900 uppercase italic">
+                      <span className="text-sm font-bold text-slate-900">
                         {trajectory.pattern.totalQuestions} Questions
                       </span>
                     </div>
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5 mb-1">
                         <Clock size={10} className="text-slate-400" />
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Window</span>
+                        <span className="text-[9px] font-bold text-slate-400 tracking-wider">Window</span>
                       </div>
-                      <span className="text-sm font-black text-slate-900 uppercase italic">
+                      <span className="text-sm font-bold text-slate-900">
                         {trajectory.pattern.duration} Minutes
                       </span>
                     </div>
                   </div>
 
                   {/* Action Link */}
-                  <div className="mt-8 flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.25em] group-hover:translate-x-2 transition-transform duration-300">
+                  <div className="mt-2 md:mt-4 flex items-center justify-between shrink-0">
+                    <span className="text-[10px] md:text-[11px] font-bold text-slate-900 group-hover:text-primary-600 transition-colors duration-300">
                       Engage Mission
                     </span>
-                    <div className={`w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-xl transition-all duration-300`}>
-                      <ArrowRight size={20} className="transform group-hover:scale-125 transition-transform" />
+                    <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white group-hover:shadow-xl transition-all duration-300`}>
+                      <ArrowRight size={16} className="transform group-hover:scale-125 transition-transform" />
                     </div>
                   </div>
 
@@ -319,21 +319,21 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
           })}
         </motion.div>
 
-        {/* AI INSIGHT PILL */}
+        {/* AI INSIGHT PILL - More compact for no-scroll */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5 }}
-          className="mt-12 flex justify-center"
+          className="mt-2 md:mt-4 flex justify-center shrink-0 pb-2"
         >
-          <div className="px-6 py-4 bg-white border border-slate-200 rounded-3xl shadow-2xl flex items-center gap-4 max-w-xl mx-auto">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
-              <Zap size={24} className="fill-emerald-600/20" />
+          <div className="px-4 py-2 bg-white border border-slate-200 rounded-xl shadow-xl flex items-center gap-3 max-w-lg mx-auto mx-4">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
+              <Zap size={16} className="fill-emerald-600/20" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Live AI Tip</p>
-              <p className="text-sm font-bold text-slate-700 italic leading-snug">
-                "Based on latest exam pattern updates, <span className="text-primary-600">JEE Math</span> weightage has shifted slightly towards vectors. Your roadmap is already updated."
+              <p className="text-[10px] font-bold text-slate-400 mb-0 leading-none">Live Update</p>
+              <p className="text-[11px] md:text-sm font-semibold text-slate-700 leading-tight">
+                "JEE Math weightage shifted towards <span className="text-indigo-600">Vectors</span>. Your roadmap is synchronized."
               </p>
             </div>
           </div>
