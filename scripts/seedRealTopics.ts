@@ -446,7 +446,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 8,
     description: 'Types of relations, functions, composition, inverse',
     keyConcepts: ['Relations', 'Functions', 'Bijective', 'Inverse Functions'],
-    examWeightage: { JEE: 4, CBSE: 4 }
+    examWeightage: { JEE: 4, KCET: 4, CBSE: 4 }
   },
   {
     name: 'Inverse Trigonometric Functions',
@@ -455,7 +455,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 6,
     description: 'Properties and graphs of inverse trig functions',
     keyConcepts: ['Arcsin', 'Arccos', 'Arctan', 'Domain and Range'],
-    examWeightage: { JEE: 3, CBSE: 3 }
+    examWeightage: { JEE: 3, KCET: 3, CBSE: 3 }
   },
   {
     name: 'Matrices',
@@ -464,7 +464,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 10,
     description: 'Matrix operations, transpose, inverse, rank',
     keyConcepts: ['Matrix Operations', 'Transpose', 'Inverse', 'Elementary Operations'],
-    examWeightage: { JEE: 5, CBSE: 5 }
+    examWeightage: { JEE: 5, KCET: 5, CBSE: 5 }
   },
   {
     name: 'Determinants',
@@ -473,7 +473,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 8,
     description: 'Properties, cofactors, adjoint, Cramer\'s rule',
     keyConcepts: ['Determinant Properties', 'Cofactors', 'Adjoint', 'Cramers Rule'],
-    examWeightage: { JEE: 5, CBSE: 4 }
+    examWeightage: { JEE: 5, KCET: 5, CBSE: 4 }
   },
   {
     name: 'Continuity and Differentiability',
@@ -482,7 +482,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 12,
     description: 'Limits, continuity, derivatives, chain rule, L\'Hospital',
     keyConcepts: ['Continuity', 'Differentiability', 'Chain Rule', 'Mean Value Theorem'],
-    examWeightage: { JEE: 8, CBSE: 6 }
+    examWeightage: { JEE: 8, KCET: 7, CBSE: 6 }
   },
   {
     name: 'Applications of Derivatives',
@@ -491,7 +491,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 10,
     description: 'Rate of change, tangent/normal, maxima/minima, approximations',
     keyConcepts: ['Rate of Change', 'Tangent Normal', 'Maxima Minima', 'Approximations'],
-    examWeightage: { JEE: 7, CBSE: 6 }
+    examWeightage: { JEE: 7, KCET: 6, CBSE: 6 }
   },
   {
     name: 'Integrals',
@@ -500,7 +500,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 14,
     description: 'Integration methods, definite integrals, properties',
     keyConcepts: ['Integration Techniques', 'Definite Integrals', 'Integration by Parts', 'Substitution'],
-    examWeightage: { JEE: 9, CBSE: 7 }
+    examWeightage: { JEE: 9, KCET: 8, CBSE: 7 }
   },
   {
     name: 'Applications of Integrals',
@@ -509,7 +509,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 8,
     description: 'Area under curves, volume of solids of revolution',
     keyConcepts: ['Area Under Curve', 'Area Between Curves', 'Volume of Revolution'],
-    examWeightage: { JEE: 5, CBSE: 5 }
+    examWeightage: { JEE: 5, KCET: 5, CBSE: 5 }
   },
   {
     name: 'Differential Equations',
@@ -518,7 +518,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 10,
     description: 'Order, degree, solving methods, applications',
     keyConcepts: ['First Order DE', 'Linear DE', 'Variable Separable', 'Homogeneous DE'],
-    examWeightage: { JEE: 6, CBSE: 5 }
+    examWeightage: { JEE: 6, KCET: 5, CBSE: 5 }
   },
   {
     name: 'Vectors',
@@ -527,7 +527,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 8,
     description: 'Vector operations, dot product, cross product',
     keyConcepts: ['Vector Addition', 'Dot Product', 'Cross Product', 'Scalar Triple Product'],
-    examWeightage: { JEE: 5, CBSE: 4 }
+    examWeightage: { JEE: 5, KCET: 5, CBSE: 4 }
   },
   {
     name: 'Three Dimensional Geometry',
@@ -536,7 +536,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 10,
     description: 'Direction cosines, lines, planes, shortest distance',
     keyConcepts: ['Direction Cosines', 'Line Equations', 'Plane Equations', 'Shortest Distance'],
-    examWeightage: { JEE: 6, CBSE: 5 }
+    examWeightage: { JEE: 6, KCET: 5, CBSE: 5 }
   },
   {
     name: 'Linear Programming',
@@ -554,7 +554,7 @@ const MATH_CLASS12_TOPICS = [
     estimatedHours: 12,
     description: 'Conditional probability, Bayes theorem, distributions',
     keyConcepts: ['Conditional Probability', 'Bayes Theorem', 'Random Variables', 'Binomial Distribution'],
-    examWeightage: { JEE: 7, CBSE: 6 }
+    examWeightage: { JEE: 7, KCET: 6, CBSE: 6 }
   }
 ];
 

@@ -396,6 +396,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                   <motion.div
                     key={subject}
                     variants={cardVariants}
+                    onClick={() => onSelectSubject(subject)}
                     className="group relative bg-white rounded-[2rem] p-4 md:p-6 border border-slate-200 shadow-sm hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] hover:border-primary-200 transition-all duration-500 text-left flex flex-col gap-6 overflow-hidden cursor-pointer"
                   >
                     {/* Visual Highlights */}
