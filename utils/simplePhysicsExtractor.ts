@@ -1,181 +1,277 @@
 /**
- * Simplified Physics Question Extraction using Schema-Driven Approach
- *
- * Similar to simpleMathExtractor.ts but for Physics
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * SIMPLIFIED PHYSICS EXTRACTION SYSTEM (Worker-Queue Architecture)
+ * ═══════════════════════════════════════════════════════════════════════════════
  */
 
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI, Type } from "@google/genai";
+// REMOVED: latexFixer causes double backslash issues
+// import { fixLatexErrors, fixLatexInObject } from './latexFixer';
 
-// Helper function to convert File to base64 string
-const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove the Data URL prefix (e.g., "data:image/jpeg;base64,")
-      const base64 = result.split(",")[1];
-      resolve(base64);
-    };
-    reader.onerror = (error) => reject(error);
-  });
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Retry wrapper with exponential backoff
+ */
+const withRetry = async <T>(fn: () => Promise<T>, maxRetries = 5): Promise<T> => {
+  let lastError: any;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      const errorText = error?.message || error?.stack || "";
+      const isRateLimit = error?.status === 429 || errorText.includes('429') || errorText.includes('QUOTA_EXCEEDED');
+
+      if (isRateLimit && i < maxRetries - 1) {
+        const wait = Math.pow(2, i) * 3000 + Math.random() * 1000;
+        console.warn(`[PHYSICS_RETRY] Rate limit (429) at attempt ${i + 1}. Backoff: ${Math.round(wait)}ms...`);
+        await sleep(wait);
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw lastError;
 };
 
+/**
+ * Robust JSON salvage
+ */
+const salvageTruncatedJSON = (jsonString: string): any => {
+  try {
+    let cleaned = jsonString.trim();
+    cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    const start = cleaned.indexOf('{');
+    if (start === -1) return null;
+    let end = cleaned.lastIndexOf('}');
+    while (end > start) {
+      const candidate = cleaned.substring(start, end + 1);
+      try { return JSON.parse(candidate); } catch (e) { end = cleaned.lastIndexOf('}', end - 1); }
+    }
+    return null;
+  } catch (e) { return null; }
+};
+
+/**
+ * PDF Loader (Scale 1.5 for speed)
+ */
+const loadImage = async (file: File): Promise<HTMLImageElement[]> => {
+  if (file.type === 'application/pdf') {
+    const data = await file.arrayBuffer();
+    const pdfjsLib = (window as any).pdfjsLib;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({ data }).promise;
+    const images: HTMLImageElement[] = [];
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext('2d')!, viewport }).promise;
+      const img = new Image();
+      img.src = canvas.toDataURL('image/jpeg', 0.8);
+      await new Promise(r => img.onload = r);
+      images.push(img);
+    }
+    return images;
+  }
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+  await new Promise(r => img.onload = r);
+  return [img];
+};
+
+/**
+ * Parallel Processing
+ */
+export const processInParallel = async <T, R>(
+  items: T[],
+  task: (item: T, index: number) => Promise<R>,
+  concurrency = 3
+): Promise<R[]> => {
+  const results: R[] = new Array(items.length);
+  let currentIndex = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (currentIndex < items.length) {
+      const idx = currentIndex++;
+      try { results[idx] = await task(items[idx], idx); } catch (e) { results[idx] = [] as any; }
+    }
+  });
+  await Promise.all(workers);
+  return results;
+};
+
+/**
+ * MAIN EXTRACTION (Physics)
+ */
 export async function extractPhysicsQuestionsSimplified(
   file: File,
   apiKey: string,
-  model: string = 'gemini-2.0-flash-exp'
-) {
+  model: string,  // Always provided by the UI selector — no hardcoded default
+  onProgress?: (current: number, total: number, found: number) => void
+): Promise<any[]> {
+
+
   const ai = new GoogleGenAI({ apiKey });
+  const pages = await loadImage(file);
+  console.log(`🚀 [PHYSICS] Processing ${pages.length} pages in parallel...`);
 
-  // Convert file to base64
-  const base64Data = await fileToBase64(file);
+  const resultsArray = await processInParallel(pages, async (pageImg, i) => {
+    const base64 = pageImg.src.split(',')[1];
+    const pageNum = i + 1;
+    const totalPages = pages.length;
+    const prompt = `
+# ROLE: Expert Physics Examination Parser
+# PAGE: ${pageNum} of ${totalPages}
 
-  const prompt = `Extract all Physics MCQs. Preserve word spaces. Use double backslash LaTeX: \\\\frac, \\\\theta. Units: $10\\\\,\\\\text{m/s}$. Brackets: $\\\\left[x\\\\right]$.
+Extract EVERY SINGLE MCQ visible on this page.
+⚠️ Count: This page may have 8–12 questions. Do NOT stop early.
+⚠️ If a question starts here and continues on the next page, extract what is visible.
 
-CRITICAL - TRUTH TABLES & MATRICES:
-- ⚠️ NEVER USE \\\\begin{tabular} - KaTeX DOES NOT SUPPORT IT!
-- ALWAYS use \\\\begin{array}{ccc}...\\\\end{array} for all tables
-- Example truth table: $$\\\\begin{array}{|c|c|c|} \\\\hline A & B & Y \\\\\\\\ \\\\hline 0 & 0 & 1 \\\\\\\\ 1 & 0 & 1 \\\\\\\\ \\\\hline \\\\end{array}$$
-- Example match table: $$\\\\begin{array}{|l|l|} \\\\hline \\\\text{List-I} & \\\\text{List-II} \\\\\\\\ \\\\hline \\\\text{A. Item} & \\\\text{I. Value} \\\\\\\\ \\\\hline \\\\end{array}$$
-- NEVER output standalone rows like "$A & B & Y \\\\\\\\$" - always wrap in array!
-- For matrices use \\\\begin{pmatrix}...\\\\end{pmatrix}
-- For determinants use \\\\begin{vmatrix}...\\\\end{vmatrix}
+🚨🚨🚨 GOLDEN RULES:
+1. SYLLABUS: Class 12 NCERT Physics only.
+2. MARKING: 1 Mark per MCQ.
+3. VERBATIM: Copy text EXACTLY. Preserve ALL word spaces.
+4. COMPLETENESS: Include FULL question text and ALL 4 options.
 
-CLASSIFY each question:
-- domain: MECHANICS | ELECTRODYNAMICS | MODERN PHYSICS | OPTICS | OSCILLATIONS & WAVES
-- topic: Short chapter name (e.g., "Electrostatics", "Ray Optics")
-- difficulty: Easy | Medium | Hard
-- blooms: Remembering | Understanding | Applying | Analyzing
+🚨 LATEX FORMATTING:
+- Wrap ALL math and units in $...$ (inline) or $$...$$ (display).
+- Use SINGLE backslash: \\times \\frac \\sqrt \\alpha \\beta \\theta \\lambda \\mu \\Omega \\Delta \\vec \\hat \\leq \\geq \\pm
+- UNITS: Use \\text{} — e.g., $10\\,\\text{m/s}^2$, $5\\,\\text{kg}$
+- SCIENTIFIC NOTATION: $3 \\times 10^8$ NOT "3 x 10^8"
+- CIRCUIT TABLES: \\begin{array}{|c|c|}...\\end{array}
 
-VISUALS:
-- hasVisualElement: true if diagram present
-- visualElementType: circuit-diagram | ray-diagram | free-body-diagram | wave-diagram | field-diagram | energy-level-diagram | truth-table
-- visualElementDescription: 5 words max or null
-- visualBoundingBox: {"pageNumber": N, "x": "10%", "y": "20%", "width": "80%", "height": "30%"} OR null
+DOMAIN options: MECHANICS | ELECTRODYNAMICS | MODERN PHYSICS | OPTICS | OSCILLATIONS & WAVES
 
-DETERMINING CORRECT ANSWER:
-- First, check if answer key is explicitly marked/indicated in document
-- If answer key visible: Mark that option as isCorrect = true
-- If NO answer key visible: You MUST solve the problem and determine correct answer yourself
+OUTPUT: Valid JSON. Include ALL questions. Do NOT truncate.
+    `.trim();
 
-🚨 STRICT CORRECTNESS POLICY (WHEN DETERMINING ANSWER):
-- Correct answer MUST be EXACTLY correct per CBSE/NCERT Class 12 Physics syllabus
-- DO NOT accept "technically close" or "approximately correct" answers
-- DO NOT mark answers "correct in general" but wrong per NCERT standards
-- Follow NCERT textbook formulas, notation, SI units EXACTLY
-- Only ONE option can be isCorrect = true
-- If options seem close, choose the one using NCERT-standard notation/units
-- Answer must give FULL MARKS in CBSE Class 12 examination
-- When in doubt, solve step-by-step using NCERT methods before marking
 
-Map options to A,B,C,D. Generate ALL questions (no truncation).`;
-
-  // Define the schema using the Type enum from @google/genai
-  const responseSchema = {
-    type: Type.ARRAY,
-    items: {
+    const responseSchema = {
       type: Type.OBJECT,
       properties: {
-        id: { type: Type.INTEGER, description: "The question number" },
-        text: { type: Type.STRING, description: "The question text with LaTeX" },
-        options: {
+        questions: {
           type: Type.ARRAY,
           items: {
             type: Type.OBJECT,
             properties: {
-              id: { type: Type.STRING, description: "Option label (A, B, C, D)" },
-              text: { type: Type.STRING, description: "Option text with LaTeX" },
-              isCorrect: { type: Type.BOOLEAN, description: "Whether this is the correct answer" },
+              id: { type: Type.STRING },
+              text: { type: Type.STRING },
+              options: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    id: { type: Type.STRING },
+                    text: { type: Type.STRING },
+                    isCorrect: { type: Type.BOOLEAN }
+                  },
+                  required: ["id", "text", "isCorrect"]
+                }
+              },
+              topic: { type: Type.STRING },
+              domain: { type: Type.STRING },
+              difficulty: { type: Type.STRING },
+              blooms: { type: Type.STRING },
+              hasVisualElement: { type: Type.BOOLEAN },
+              visualElementType: { type: Type.STRING, nullable: true }
             },
-            required: ["id", "text", "isCorrect"],
-          },
-        },
-        topic: { type: Type.STRING, description: "Specific chapter/topic name (e.g., 'Current Electricity', 'Ray Optics and Optical Instruments')" },
-        domain: { type: Type.STRING, description: "Major domain: MECHANICS | ELECTRODYNAMICS | MODERN PHYSICS | OPTICS | OSCILLATIONS & WAVES" },
-        difficulty: { type: Type.STRING, description: "Difficulty level: Easy | Medium | Hard" },
-        blooms: { type: Type.STRING, description: "Bloom's taxonomy: Remembering | Understanding | Applying | Analyzing | Evaluating | Creating" },
-        hasVisualElement: { type: Type.BOOLEAN, description: "Whether question has diagram/figure" },
-        visualElementType: { type: Type.STRING, description: "Type of visual element (circuit-diagram, ray-diagram, etc.)", nullable: true },
-        visualElementDescription: { type: Type.STRING, description: "Brief description (max 15 words, can omit to save tokens)", nullable: true },
-        visualBoundingBox: {
-          type: Type.OBJECT,
-          description: "Bounding box coordinates for the diagram (percentage-based)",
-          nullable: true,
-          properties: {
-            pageNumber: { type: Type.INTEGER, description: "Page number where diagram appears" },
-            x: { type: Type.STRING, description: "Distance from left edge as percentage (e.g., '10%')" },
-            y: { type: Type.STRING, description: "Distance from top edge as percentage (e.g., '30%')" },
-            width: { type: Type.STRING, description: "Diagram width as percentage (e.g., '80%')" },
-            height: { type: Type.STRING, description: "Diagram height as percentage (e.g., '25%')" }
-          },
-          required: ["pageNumber", "x", "y", "width", "height"]
-        },
-      },
-      required: ["id", "text", "options", "hasVisualElement", "topic", "domain", "difficulty", "blooms"],
-    },
-  };
+            required: ["id", "text", "options", "topic", "domain", "difficulty", "blooms", "hasVisualElement"]
+          }
+        }
+      }
+    };
 
-  console.log(`🔄 Extracting Physics questions with schema validation...`);
+    try {
+      const response = await withRetry(() => ai.models.generateContent({
+        model,
+        contents: [{
+          parts: [
+            { inlineData: { mimeType: "image/jpeg", data: base64 } },
+            { text: prompt }
+          ]
+        }],
+        config: {
+          responseMimeType: "application/json",
+          responseSchema,
+          temperature: 0.05,
+          maxOutputTokens: 8192   // Enough for 12 complex Physics questions
+        }
 
-  const response = await ai.models.generateContent({
-    model,
-    contents: {
-      parts: [
-        {
-          inlineData: {
-            mimeType: file.type,
-            data: base64Data,
-          },
-        },
-        { text: prompt },
-      ],
-    },
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: responseSchema, // Re-enable schema to enforce array format
-      temperature: 0.1,
-      maxOutputTokens: 65536,
-    },
+      }));
+
+      const parsed = salvageTruncatedJSON(response.text || "{}");
+      const questions = parsed?.questions || [];
+
+      const mapped = questions.map((q: any) => ({
+        ...q,
+        metadata: {
+          topic: q.topic,
+          domain: q.domain,
+          difficulty: q.difficulty?.toLowerCase(),
+          bloomLevel: q.blooms,
+          isPastYear: true,
+          year: "2025",
+          sourcePage: i + 1
+        }
+      }));
+
+      if (mapped.length === 0 && i < pages.length) {
+        console.warn(`[PHYSICS_PAGE_${i + 1}] Got 0 questions. Will be handled by per-page retry logic.`);
+      }
+
+      if (onProgress) onProgress(i + 1, pages.length, mapped.length);
+      return mapped;
+    } catch (e) {
+      console.error(`[PHYSICS_PAGE_FAIL] Page ${i + 1}:`, e);
+      return [];
+    }
+  }, 2); // Concurrency 2 to reduce rate-limit pressure
+
+
+  const allQuestions = resultsArray.flat();
+  console.log(`✅ [PHYSICS] Raw extracted: ${allQuestions.length} questions across ${pages.length} pages`);
+
+  // Deduplicate by question ID — keep most-complete version (most options wins)
+  const seenIds = new Map<string, any>();
+  for (const q of allQuestions) {
+    const qId = (q.id || '').toString().trim();
+    const existing = seenIds.get(qId);
+    if (!existing || (q.options?.length || 0) > (existing.options?.length || 0)) {
+      seenIds.set(qId, q);
+    }
+  }
+  const deduped = Array.from(seenIds.values());
+
+  // Sort by numeric question ID
+  deduped.sort((a, b) => {
+    const numA = parseInt((a.id || '').toString().replace(/\D/g, '')) || 0;
+    const numB = parseInt((b.id || '').toString().replace(/\D/g, '')) || 0;
+    return numA - numB;
   });
 
-  if (!response.text) {
-    throw new Error('No response from Gemini API');
-  }
+  // Final Fidelity Pass: Sequential re-indexing (NO latexFixer - store Gemini output as-is)
+  const cleanQuestions = deduped.map((q, idx) => {
+    // REMOVED: fixLatexInObject(q) - causes double backslashes
+    // Gemini returns correct LaTeX format, store it directly
+    return {
+      ...q,
+      id: idx + 1,
+      metadata: {
+        ...q.metadata,
+        topic: q.metadata?.topic || ""  // REMOVED: fixLatexErrors
+      }
+    };
+  });
 
-  let cleanText = response.text.trim();
-
-  // Debug: Log response length and preview
-  console.log(`📥 [SIMPLIFIED PHYSICS] Response length: ${cleanText.length} chars`);
-  console.log(`📥 [SIMPLIFIED PHYSICS] First 500 chars:`, cleanText.substring(0, 500));
-  console.log(`📥 [SIMPLIFIED PHYSICS] Last 500 chars:`, cleanText.substring(Math.max(0, cleanText.length - 500)));
-
-  // Remove markdown code blocks if present
-  if (cleanText.startsWith('```')) {
-    cleanText = cleanText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
-  }
-
-  // Check if JSON is truncated
-  const openBraces = (cleanText.match(/\{/g) || []).length;
-  const closeBraces = (cleanText.match(/\}/g) || []).length;
-  const openBrackets = (cleanText.match(/\[/g) || []).length;
-  const closeBrackets = (cleanText.match(/\]/g) || []).length;
-
-  if (openBraces !== closeBraces || openBrackets !== closeBrackets) {
-    console.error(`❌ [SIMPLIFIED PHYSICS] JSON appears truncated!`);
-    console.error(`   { : ${openBraces}, } : ${closeBraces}`);
-    console.error(`   [ : ${openBrackets}, ] : ${closeBrackets}`);
-    throw new Error(`JSON response truncated: { ${openBraces}/${closeBraces}, [ ${openBrackets}/${closeBrackets}`);
-  }
-
-  try {
-    const questions = JSON.parse(cleanText);
-    console.log(`✅ [SIMPLIFIED PHYSICS] Extracted ${questions.length} questions with schema validation`);
-    return questions;
-  } catch (parseError: any) {
-    console.error(`❌ [SIMPLIFIED PHYSICS] JSON parse error:`, parseError.message);
-    console.error(`   Error at position: ${parseError.message.match(/position (\d+)/)?.[1] || 'unknown'}`);
-    console.error(`   Context around error:`, cleanText.substring(8500, 8600));
-    throw new Error(`Failed to parse Physics questions: ${parseError.message}`);
-  }
+  console.log(`✅ [PHYSICS] Final clean questions: ${cleanQuestions.length}`);
+  return cleanQuestions;
 }
+
+
+
+

@@ -74,15 +74,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
           id: data.id,
           email: data.email || '',
           role: data.role || 'student', // DEFAULT to student for safety
-          subscription_status: data.subscription_status || 'active',
+          subscription_status: data.subscription_status || 'inactive',
           subscription_end_date: data.subscription_end_date,
           full_name: data.full_name
         });
       } else {
+        // If profile fetch fails (406/404), it means the user was likely deleted
+        // or the session is invalid. Force a sign out to clear ghost sessions.
+        console.warn('Profile fetch failed, clearing orphan session:', error?.message);
         setUserProfile(null);
+        if (userId) {
+          await supabase.auth.signOut();
+        }
       }
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
+      // Optional: don't sign out on network errors, only clear DB-level missing profile
     }
   };
 

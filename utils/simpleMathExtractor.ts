@@ -1,460 +1,378 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * SIMPLIFIED MATH EXTRACTION SYSTEM
+ * SIMPLIFIED MATH EXTRACTION SYSTEM (Worker-Queue Architecture)
  * ═══════════════════════════════════════════════════════════════════════════════
  *
- * Based on Google AI Studio experiments - WORKS PERFECTLY with double backslashes
- * Uses @google/genai with schema-driven extraction
+ * Extracts MCQs page-by-page using parallel workers.
+ * Key principles:
+ *  - Each page is sent as an image to Gemini with structured JSON output
+ *  - Concurrency limited to 3 to avoid rate limits
+ *  - Retry with exponential backoff on failures
+ *  - Per-page retry if 0 questions extracted (catches transient API issues)
+ *  - maxOutputTokens: 8192 per page to prevent truncation
+ *  - Final pass de-duplicates by question ID to handle boundary-overlap
  */
 
 import { GoogleGenAI, Type } from "@google/genai";
+// REMOVED: latexFixer causes double backslash issues
+// import { fixLatexErrors, fixLatexInObject } from './latexFixer';
+
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
- * Converts a File object to a Base64 string.
+ * Retry wrapper with exponential backoff (rate limits + generic errors)
  */
-const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove the Data URL prefix (e.g., "data:image/jpeg;base64,")
-      const base64 = result.split(",")[1];
-      resolve(base64);
-    };
-    reader.onerror = (error) => reject(error);
-  });
-};
+const withRetry = async <T>(fn: () => Promise<T>, maxRetries = 5): Promise<T> => {
+  let lastError: any;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      const errorText = error?.message || error?.stack || "";
+      const isRateLimit = error?.status === 429 || errorText.includes('429') || errorText.includes('QUOTA_EXCEEDED');
 
-/**
- * Attempts to repair malformed JSON by closing unclosed brackets and strings
- */
-const repairJSON = (jsonString: string): string => {
-  let repaired = jsonString.trim();
-
-  // Count opening and closing brackets
-  const openBrackets = (repaired.match(/\[/g) || []).length;
-  const closeBrackets = (repaired.match(/\]/g) || []).length;
-  const openBraces = (repaired.match(/\{/g) || []).length;
-  const closeBraces = (repaired.match(/\}/g) || []).length;
-
-  // Close unclosed strings (look for odd number of quotes before final bracket)
-  const lastBracketIndex = repaired.lastIndexOf(']');
-  const lastBraceIndex = repaired.lastIndexOf('}');
-  const lastIndex = Math.max(lastBracketIndex, lastBraceIndex);
-
-  if (lastIndex !== -1) {
-    const beforeLast = repaired.substring(0, lastIndex);
-    const quotes = (beforeLast.match(/"/g) || []).length;
-    if (quotes % 2 !== 0) {
-      // Odd number of quotes - add closing quote before last bracket/brace
-      repaired = beforeLast + '"' + repaired.substring(lastIndex);
+      if (i < maxRetries - 1) {
+        // Always backoff: shorter for generic errors, longer for rate limits
+        const wait = isRateLimit
+          ? Math.pow(2, i) * 4000 + Math.random() * 2000
+          : Math.pow(1.5, i) * 1000 + Math.random() * 500;
+        console.warn(`[MATH_RETRY] Attempt ${i + 1} failed${isRateLimit ? ' (rate limit)' : ''}. Backoff: ${Math.round(wait)}ms...`);
+        await sleep(wait);
+        continue;
+      }
+      throw error;
     }
   }
-
-  // Close unclosed brackets
-  for (let i = 0; i < openBrackets - closeBrackets; i++) {
-    repaired += ']';
-  }
-
-  // Close unclosed braces
-  for (let i = 0; i < openBraces - closeBraces; i++) {
-    repaired += '}';
-  }
-
-  return repaired;
+  throw lastError;
 };
 
 /**
- * Safely parse JSON with automatic repair attempts
+ * Robust JSON salvage for truncated responses
  */
-const safeJSONParse = (text: string): any => {
+const salvageTruncatedJSON = (jsonString: string): any => {
   try {
-    return JSON.parse(text);
-  } catch (firstError) {
-    console.warn('Initial JSON parse failed, attempting repair...', firstError);
-
-    try {
-      const repaired = repairJSON(text);
-      console.log('Attempting to parse repaired JSON...');
-      return JSON.parse(repaired);
-    } catch (secondError) {
-      console.error('JSON repair failed:', secondError);
-      throw new Error(`Failed to parse Gemini response. Original error: ${firstError}. Repair error: ${secondError}`);
+    let cleaned = jsonString.trim();
+    cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    const start = cleaned.indexOf('{');
+    if (start === -1) return null;
+    let end = cleaned.lastIndexOf('}');
+    while (end > start) {
+      const candidate = cleaned.substring(start, end + 1);
+      try {
+        return JSON.parse(candidate);
+      } catch (e) {
+        end = cleaned.lastIndexOf('}', end - 1);
+      }
     }
-  }
+    return null;
+  } catch (e) { return null; }
 };
 
 /**
- * Auto-fix common LaTeX errors in extracted text
- * This is a safety net in case Gemini fails to follow the double-backslash rules
- * EXPORTED for use in solution generation (ExamAnalysis.tsx)
+ * Load PDF as array of images (Scale 2.5 for better OCR accuracy)
+ * Higher scale helps Gemini better extract from complex multi-column layouts
  */
-export const fixLatexErrors = (text: string): string => {
-  if (!text) return text;
+const loadImage = async (file: File): Promise<HTMLImageElement[]> => {
+  if (file.type === 'application/pdf') {
+    const data = await file.arrayBuffer();
+    const pdfjsLib = (window as any).pdfjsLib;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({ data }).promise;
+    const images: HTMLImageElement[] = [];
 
-  let fixed = text;
-
-  // Common missing backslash patterns (case-sensitive)
-  const fixes: [RegExp, string][] = [
-    // Missing backslash before common commands
-    [/([^\\])frac\{/g, '$1\\frac{'],           // "rac{" → "\frac{"
-    [/([^\\])int\s/g, '$1\\int '],             // "int " → "\int "
-    [/([^\\])sum\s/g, '$1\\sum '],             // "sum " → "\sum "
-    [/([^\\])prod\s/g, '$1\\prod '],           // "prod " → "\prod "
-    [/([^\\])lim\s/g, '$1\\lim '],             // "lim " → "\lim "
-    [/([^\\])sqrt\{/g, '$1\\sqrt{'],           // "sqrt{" → "\sqrt{"
-
-    // Trigonometric functions
-    [/([^\\])sin\s/g, '$1\\sin '],             // "sin " → "\sin "
-    [/([^\\])cos\s/g, '$1\\cos '],             // "cos " → "\cos "
-    [/([^\\])tan\s/g, '$1\\tan '],             // "tan " → "\tan "
-    [/([^\\])tan\^/g, '$1\\tan^'],             // "tan^" → "\tan^"
-    [/([^\\])cot\s/g, '$1\\cot '],             // "cot " → "\cot "
-    [/([^\\])sec\s/g, '$1\\sec '],             // "sec " → "\sec "
-    [/([^\\])csc\s/g, '$1\\csc '],             // "csc " → "\csc "
-
-    // Logarithms
-    [/([^\\])log\s/g, '$1\\log '],             // "log " → "\log "
-    [/([^\\])ln\s/g, '$1\\ln '],               // "ln " → "\ln "
-
-    // Left/Right delimiters
-    [/([^\\])left\(/g, '$1\\left('],           // "left(" → "\left("
-    [/([^\\])right\)/g, '$1\\right)'],         // "ight)" → "\right)"
-    [/([^\\])left\[/g, '$1\\left['],           // "left[" → "\left["
-    [/([^\\])right\]/g, '$1\\right]'],         // "ight]" → "\right]"
-
-    // Accents
-    [/([^\\])bar\{/g, '$1\\bar{'],             // "bar{" → "\bar{"
-    [/([^\\])vec\{/g, '$1\\vec{'],             // "vec{" → "\vec{"
-    [/([^\\])hat\{/g, '$1\\hat{'],             // "hat{" → "\hat{"
-    [/([^\\])tilde\{/g, '$1\\tilde{'],         // "tilde{" → "\tilde{"
-
-    // Greek letters
-    [/([^\\])alpha\b/g, '$1\\alpha'],          // "alpha" → "\alpha"
-    [/([^\\])beta\b/g, '$1\\beta'],            // "beta" → "\beta"
-    [/([^\\])gamma\b/g, '$1\\gamma'],          // "gamma" → "\gamma"
-    [/([^\\])theta\b/g, '$1\\theta'],          // "theta" → "\theta"
-    [/([^\\])pi\b/g, '$1\\pi'],                // "pi" → "\pi"
-
-    // Relations
-    [/([^\\])leq\b/g, '$1\\leq'],              // "leq" → "\leq"
-    [/([^\\])geq\b/g, '$1\\geq'],              // "geq" → "\geq"
-    [/([^\\])neq\b/g, '$1\\neq'],              // "neq" → "\neq"
-
-    // Remove trailing backslashes before closing delimiters
-    [/\\+(\s*[\)\]\}$])/g, '$1'],              // "...\" → "..."
-  ];
-
-  let fixCount = 0;
-  for (const [pattern, replacement] of fixes) {
-    const before = fixed;
-    fixed = fixed.replace(pattern, replacement);
-    if (fixed !== before) {
-      fixCount++;
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 2.5 });  // Increased from 1.5 to 2.5
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext('2d')!, viewport }).promise;
+      const img = new Image();
+      img.src = canvas.toDataURL('image/png');  // PNG instead of JPEG for better text clarity
+      await new Promise(r => img.onload = r);
+      images.push(img);
     }
+    return images;
   }
-
-  if (fixCount > 0) {
-    console.log(`🔧 Auto-fixed ${fixCount} LaTeX pattern(s) in text`);
-  }
-
-  return fixed;
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+  await new Promise(r => img.onload = r);
+  return [img];
 };
 
 /**
- * Clean unwrapped LaTeX commands and ensure proper spacing around $ delimiters
- * This fixes rendering issues where LaTeX outside $...$ is displayed as raw text
+ * Parallel processing with worker queue
  */
-const cleanUnwrappedLatex = (text: string): string => {
-  if (!text) return text;
-
-  // First, ensure proper spacing around $ delimiters
-  let cleaned = text.replace(/([^\s])(\$)/g, '$1 $2');  // Add space before $ if missing
-  cleaned = cleaned.replace(/(\$)([^\s])/g, '$1 $2');    // Add space after $ if missing
-
-  // Split by $ to find LaTeX-wrapped and non-wrapped sections
-  const parts = cleaned.split('$');
-
-  // Process odd-indexed parts (outside $...$), keep even-indexed parts (inside $...$)
-  const result = parts.map((part, idx) => {
-    if (idx % 2 === 1) {
-      // Inside $...$ - preserve as is (for MathJax)
-      return part;
-    } else {
-      // Outside $...$ - clean up any raw LaTeX commands
-      return part
-        .replace(/\\{/g, '{')
-        .replace(/\\}/g, '}')
-        .replace(/\\dots/g, '...')
-        .replace(/\\([a-z])(?![a-zA-Z])/g, '$1');  // Remove stray backslashes
+export const processInParallel = async <T, R>(
+  items: T[],
+  task: (item: T, index: number) => Promise<R>,
+  concurrency = 3
+): Promise<R[]> => {
+  const results: R[] = new Array(items.length);
+  let currentIndex = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (currentIndex < items.length) {
+      const idx = currentIndex++;
+      try {
+        results[idx] = await task(items[idx], idx);
+      } catch (e) {
+        console.error(`[MATH_WORKER] Error on page ${idx}:`, e);
+        results[idx] = [] as any;
+      }
     }
   });
-
-  return result.join('$');
+  await Promise.all(workers);
+  return results;
 };
 
 /**
- * Recursively fix LaTeX in all string fields of an object
- * EXPORTED for use in solution generation (ExamAnalysis.tsx)
+ * Build the extraction prompt for a single page.
+ * Includes page number for context and strict LaTeX rules.
  */
-export const fixLatexInObject = (obj: any): any => {
-  if (typeof obj === 'string') {
-    // First fix missing backslashes, then clean unwrapped LaTeX and spacing
-    return cleanUnwrappedLatex(fixLatexErrors(obj));
-  } else if (Array.isArray(obj)) {
-    return obj.map(fixLatexInObject);
-  } else if (obj && typeof obj === 'object') {
-    const fixed: any = {};
-    for (const key in obj) {
-      fixed[key] = fixLatexInObject(obj[key]);
-    }
-    return fixed;
-  }
-  return obj;
-};
+function buildPagePrompt(pageNum: number, totalPages: number): string {
+  return `
+# ROLE: Expert Mathematics Examination Parser
+# PAGE: ${pageNum} of ${totalPages}
 
-/**
- * Simplified extraction using Gemini 3 Flash with schema-driven approach
- * Includes automatic retry with JSON repair on failures
- */
-export const extractQuestionsSimplified = async (
-  file: File,
-  apiKey: string,
-  model: string = "gemini-3-flash-preview",
-  maxRetries: number = 2
-): Promise<any[]> => {
-  const ai = new GoogleGenAI({ apiKey });
-  const base64Data = await fileToBase64(file);
+Extract EVERY SINGLE MCQ visible on this page with 100% fidelity.
+⚠️ A question may START on the previous page and CONTINUE here — extract the full question if the start is visible. If only the options are visible (no question stem), skip it.
+⚠️ A question may START on this page and END on the next — extract it with its visible options only (mark remaining options if cut off).
 
-  const prompt = `
-    Analyze the provided image or document which contains a Mathematics exam paper.
-    Extract all multiple-choice questions, the question text, and their specific options.
+🚨🚨🚨 GOLDEN RULES:
+1. SYLLABUS: Class 12 NCERT Mathematics only.
+2. MARKING: MCQs are 1 Mark unless stated.
+3. VERBATIM: Copy text EXACTLY. Preserve ALL word spaces ("If x = 2" NOT "Ifx=2").
+4. COUNT: This page may have 8–12 questions. Extract ALL of them — do NOT stop early.
+5. COMPLETENESS: Even if the LaTeX is complex, include the FULL question text and all 4 options.
 
-    ⚠️ CRITICAL TEXT EXTRACTION: PRESERVE ALL SPACES BETWEEN WORDS!
-    - WRONG: "Ifthematricesareequal"
-    - RIGHT: "If the matrices are equal"
-    - If OCR fails to detect spaces, use context to insert proper word breaks.
-    - NEVER output text without spaces between words!
+🚨 LATEX FORMATTING (CRITICAL — KaTeX output):
+- Wrap ALL math in $...$ (inline) or $$...$$ (display). NEVER use raw Unicode symbols.
+- Use SINGLE backslash for ALL commands: \\frac{a}{b} \\sqrt{x} \\sin\\theta \\vec{v} \\hat{i} \\leq \\geq \\pm \\infty \\to \\int \\sum \\lim
+- PIECEWISE FUNCTIONS: ALWAYS use \\begin{cases} ... \\end{cases}
+- MATRICES/DETERMINANTS: ALWAYS use \\begin{bmatrix} ... \\end{bmatrix} or \\begin{vmatrix} ... \\end{vmatrix}
+- INVERSE TRIG: \\sin^{-1} \\cos^{-1} \\tan^{-1}
+- Nested roots: $\\sqrt{a + \\sqrt{b}}$
+- Vectors: $\\vec{v}$ or $\\hat{i}$
 
-    🚨🚨🚨 CRITICAL LATEX FORMATTING RULES (MUST FOLLOW EXACTLY) 🚨🚨🚨
+DOMAIN options: ALGEBRA | CALCULUS | VECTORS & 3D GEOMETRY | LINEAR PROGRAMMING | PROBABILITY
+DIFFICULTY options: Easy | Moderate | Hard
+BLOOM options: Knowledge | Understanding | Apply | Analyze | Evaluate | Create
 
-    ═══════════════════════════════════════════════════════════════════════
-    RULE #1: ALWAYS USE DOUBLE BACKSLASHES IN JSON STRINGS
-    ═══════════════════════════════════════════════════════════════════════
-    Because you are outputting JSON, you MUST escape backslashes by doubling them.
+OUTPUT: Valid JSON matching the schema. Include ALL questions. Do NOT truncate.
+`.trim();
+}
 
-    ❌ CATASTROPHIC ERRORS (NEVER DO THIS):
-    - "\\frac{a}{b}" → Will become "rac{a}{b}" after JSON parsing (BROKEN!)
-    - "\\int dx" → Will become "int dx" (BROKEN!)
-    - "\\tan^{-1}" → Will become "an^{-1}" (BROKEN!)
-    - "\\right)" → Will become "ight)" (BROKEN!)
-    - "\\sqrt{x}" → Will become "sqrt{x}" (BROKEN!)
-    - "\\bar{A}\\" → Trailing backslash (INVALID!)
-
-    ✅ CORRECT FORMAT (ALWAYS DO THIS):
-    - "\\\\frac{a}{b}" → Becomes "\\frac{a}{b}" after JSON parsing ✓
-    - "\\\\int dx" → Becomes "\\int dx" ✓
-    - "\\\\tan^{-1}" → Becomes "\\tan^{-1}" ✓
-    - "\\\\right)" → Becomes "\\right)" ✓
-    - "\\\\sqrt{x}" → Becomes "\\sqrt{x}" ✓
-    - "\\\\bar{A}" → NO trailing backslash ✓
-
-    ═══════════════════════════════════════════════════════════════════════
-    RULE #2: NEVER HAVE TRAILING BACKSLASHES
-    ═══════════════════════════════════════════════════════════════════════
-    ❌ WRONG: "\\\\bar{A}\\\\" or "P(A) = 1 - \\\\frac{1}{1024}\\\\"
-    ✅ RIGHT: "\\\\bar{A}" or "P(A) = 1 - \\\\frac{1}{1024}"
-
-    ═══════════════════════════════════════════════════════════════════════
-    RULE #3: CHECK EVERY LATEX COMMAND HAS DOUBLE BACKSLASH
-    ═══════════════════════════════════════════════════════════════════════
-    Common commands that MUST have \\\\ prefix:
-    - \\\\frac, \\\\int, \\\\sum, \\\\prod, \\\\lim
-    - \\\\sin, \\\\cos, \\\\tan, \\\\cot, \\\\sec, \\\\csc
-    - \\\\log, \\\\ln, \\\\exp
-    - \\\\sqrt, \\\\cdot, \\\\times, \\\\div
-    - \\\\left, \\\\right (MUST be paired!)
-    - \\\\vec, \\\\bar, \\\\hat, \\\\tilde
-    - \\\\alpha, \\\\beta, \\\\gamma, \\\\theta, \\\\pi
-    - \\\\infty, \\\\partial, \\\\nabla
-    - \\\\leq, \\\\geq, \\\\neq, \\\\approx
-    - \\\\in, \\\\subset, \\\\cup, \\\\cap
-    - \\\\Rightarrow, \\\\Leftrightarrow
-
-    ═══════════════════════════════════════════════════════════════════════
-    RULE #4: ENCLOSE MATH IN DELIMITERS
-    ═══════════════════════════════════════════════════════════════════════
-    - Inline math: $...$
-    - Display math: $$...$$
-
-    ═══════════════════════════════════════════════════════════════════════
-    RULE #5: BRACKETS AND PARENTHESES
-    ═══════════════════════════════════════════════════════════════════════
-    - Square brackets: Use \\\\left[ and \\\\right] like $\\\\left[x\\\\right]$
-    - NEVER use $[x]$ - causes KaTeX error!
-    - Parentheses: Use \\\\left( and \\\\right) for large expressions
-
-    ═══════════════════════════════════════════════════════════════════════
-    RULE #6: MATRICES & TABLES
-    ═══════════════════════════════════════════════════════════════════════
-    - ⚠️ NEVER USE \\\\begin{tabular} - KaTeX DOES NOT SUPPORT IT!
-    - Matrices: $$\\\\begin{pmatrix} a & b \\\\\\\\ c & d \\\\end{pmatrix}$$
-    - Determinants: $$\\\\begin{vmatrix} a & b \\\\\\\\ c & d \\\\end{vmatrix}$$
-    - Tables: $$\\\\begin{array}{|c|c|} \\\\hline x & y \\\\\\\\ \\\\hline 1 & 2 \\\\\\\\ \\\\hline \\\\end{array}$$
-    - NEVER output standalone rows like "$a & b \\\\\\\\$" without array wrapper!
-
-    ⚠️ BEFORE OUTPUTTING JSON: Double-check EVERY LaTeX command has \\\\ prefix!
-
-    TOPIC CLASSIFICATION (Class 12 Mathematics):
-    DOMAINS & CHAPTERS:
-    - ALGEBRA: Relations and Functions, Inverse Trigonometric Functions, Matrices, Determinants, Continuity and Differentiability, Application of Derivatives, Maxima and Minima, Rate of Change, Monotonicity
-    - CALCULUS: Integrals, Indefinite Integration, Definite Integration, Applications of Integrals, Area under Curves, Differential Equations, Variable Separable, Linear Differential Equations, Homogeneous Equations
-    - VECTORS & 3D GEOMETRY: Vectors, Scalar and Vector Products, Dot Product, Cross Product, Scalar Triple Product, Three Dimensional Geometry, Direction Cosines, Direction Ratios, Equation of Line, Equation of Plane, Angle Between Lines, Angle Between Planes, Distance Formulae
-    - LINEAR PROGRAMMING: Linear Programming Problems, Optimization, Feasible Region, Objective Function, Constraints, Graphical Method, Corner Point Method
-    - PROBABILITY: Probability, Conditional Probability, Bayes Theorem, Multiplication Theorem, Independent Events, Random Variables, Probability Distributions, Binomial Distribution, Mean and Variance
-
-    CLASSIFY each question:
-    - domain: ALGEBRA | CALCULUS | VECTORS & 3D GEOMETRY | LINEAR PROGRAMMING | PROBABILITY
-    - topic: Short chapter name (e.g., "Matrices", "Differential Equations")
-    - difficulty: Easy | Medium | Hard
-    - blooms: Remembering | Understanding | Applying | Analyzing
-
-    CRITICAL INSTRUCTIONS FOR STRUCTURE:
-    1. Map the options to 'A', 'B', 'C', 'D'.
-    2. DETERMINING CORRECT ANSWER:
-       - First, check if the correct answer is explicitly marked or indicated in the document (answer key visible)
-       - If answer key is visible: Mark that option as isCorrect = true
-       - If NO answer key visible: You MUST solve the problem and determine the correct answer yourself
-
-    🚨 STRICT CORRECTNESS POLICY (WHEN DETERMINING ANSWER):
-       - The correct answer MUST be EXACTLY correct according to CBSE/NCERT Class 12 Mathematics syllabus
-       - DO NOT accept "technically close" or "approximately correct" answers
-       - DO NOT mark answers that are "correct in general" but wrong per NCERT standards
-       - Follow NCERT textbook formulas, notation, and conventions EXACTLY
-       - Only ONE option can be marked as isCorrect = true
-       - If multiple options seem close, choose the one using NCERT-standard notation
-       - The correct answer must give FULL MARKS in CBSE Class 12 examination
-       - When in doubt, solve the problem step-by-step using NCERT methods before marking
-
-    3. Ensure the text is clean and readable.
-    4. IMPORTANT: Generate complete, valid JSON. Do not truncate the response.
-  `;
-
-  // Define the schema using the Type enum from @google/genai
-  const responseSchema = {
-    type: Type.ARRAY,
-    items: {
-      type: Type.OBJECT,
-      properties: {
-        id: { type: Type.INTEGER, description: "The question number" },
-        text: { type: Type.STRING, description: "The question text with LaTeX" },
-        options: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              id: { type: Type.STRING, description: "Option label (A, B, C, D)" },
-              text: { type: Type.STRING, description: "Option text with LaTeX" },
-              isCorrect: { type: Type.BOOLEAN, description: "Whether this is the correct answer" },
-            },
-            required: ["id", "text", "isCorrect"],
-          },
-        },
-        topic: { type: Type.STRING, description: "Specific chapter/topic name (e.g., 'Matrices', 'Differential Equations', 'Vectors')" },
-        domain: { type: Type.STRING, description: "Major domain: ALGEBRA | CALCULUS | VECTORS & 3D GEOMETRY | LINEAR PROGRAMMING | PROBABILITY" },
-        difficulty: { type: Type.STRING, description: "Difficulty level: Easy | Medium | Hard" },
-        blooms: { type: Type.STRING, description: "Bloom's taxonomy: Remembering | Understanding | Applying | Analyzing | Evaluating | Creating" },
-      },
-      required: ["id", "text", "options", "topic", "domain", "difficulty", "blooms"],
-    },
-  };
-
-  let lastError: Error | null = null;
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`🔄 Extraction attempt ${attempt + 1}/${maxRetries + 1}...`);
-
-      const response = await ai.models.generateContent({
-        model,
-        contents: {
-          parts: [
-            {
-              inlineData: {
-                mimeType: file.type,
-                data: base64Data,
+const responseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    questions: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          id: { type: Type.STRING, description: "Question number as it appears in the PDF (e.g. '1', '2', '10')" },
+          text: { type: Type.STRING, description: "Full question text with LaTeX" },
+          options: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                text: { type: Type.STRING },
+                isCorrect: { type: Type.BOOLEAN }
               },
-            },
-            { text: prompt },
-          ],
+              required: ["id", "text", "isCorrect"]
+            }
+          },
+          topic: { type: Type.STRING },
+          domain: { type: Type.STRING },
+          difficulty: { type: Type.STRING },
+          blooms: { type: Type.STRING }
         },
+        required: ["id", "text", "options", "topic", "domain", "difficulty", "blooms"]
+      }
+    }
+  }
+};
+
+/**
+ * Extract questions from a single page image.
+ * Retries up to 2 times if 0 questions returned (transient failure).
+ */
+async function extractPageQuestions(
+  ai: any,
+  model: string,
+  pageImg: HTMLImageElement,
+  pageNum: number,
+  totalPages: number
+): Promise<any[]> {
+  const base64 = pageImg.src.split(',')[1];
+  const prompt = buildPagePrompt(pageNum, totalPages);
+
+  // Increased to 4 attempts for complex multi-column pages
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const response = await withRetry(() => ai.models.generateContent({
+        model,
+        contents: [{
+          parts: [
+            { inlineData: { mimeType: "image/png", data: base64 } },  // FIXED: Changed from jpeg to png
+            { text: prompt }
+          ]
+        }],
         config: {
           responseMimeType: "application/json",
-          responseSchema: responseSchema,
-          temperature: 0.1, // Low temperature for factual extraction
-          maxOutputTokens: 65536, // Maximum tokens to prevent truncation
-        },
-      });
-
-      if (response.text) {
-        let cleanText = response.text.trim();
-        // Remove markdown code blocks if present (e.g. ```json ... ```)
-        if (cleanText.startsWith('```')) {
-          cleanText = cleanText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+          responseSchema,
+          temperature: 0.05,   // Lower = more deterministic
+          maxOutputTokens: 8192 // Enough for 12 complex questions with LaTeX
         }
+      }));
 
-        // Pre-flight check: Ensure response looks complete (basic heuristic)
-        const openBrackets = (cleanText.match(/\[/g) || []).length;
-        const closeBrackets = (cleanText.match(/\]/g) || []).length;
-        const openBraces = (cleanText.match(/\{/g) || []).length;
-        const closeBraces = (cleanText.match(/\}/g) || []).length;
+      const rawText = (response as any).text || "{}";
+      const parsed = salvageTruncatedJSON(rawText);
+      const questions = parsed?.questions || [];
 
-        if (openBrackets > closeBrackets + 5 || openBraces > closeBraces + 5) {
-          console.warn(`⚠️ Response appears truncated (brackets: ${openBrackets}/${closeBrackets}, braces: ${openBraces}/${closeBraces}). Will attempt repair...`);
-        }
-
-        // Use safe JSON parser with automatic repair
-        const parsedData = safeJSONParse(cleanText);
-
-        // Validate that we got an array
-        if (!Array.isArray(parsedData)) {
-          throw new Error('Parsed data is not an array');
-        }
-
-        // Ensure IDs are unique numbers just in case the AI hallucinates duplicates or weird strings
-        const result = parsedData.map((q: any, index: number) => ({
-          ...q,
-          id: index + 1
-        }));
-
-        // Auto-fix LaTeX errors in all questions
-        const fixedResult = fixLatexInObject(result);
-
-        console.log(`✅ Successfully extracted ${fixedResult.length} questions`);
-        return fixedResult;
-      } else {
-        throw new Error("No response text received from Gemini.");
+      if (questions.length === 0 && attempt < 3) {
+        console.warn(`[MATH_PAGE_${pageNum}] Attempt ${attempt + 1}: Got 0 questions. Retrying...`);
+        console.warn(`[MATH_PAGE_${pageNum}] Raw response preview: ${rawText.substring(0, 200)}...`);
+        // Increased delay: 3s, 4.5s, 6s for attempts 1, 2, 3
+        await sleep(3000 + attempt * 1500);
+        continue;
       }
-    } catch (error) {
-      lastError = error as Error;
-      console.error(`❌ Attempt ${attempt + 1} failed:`, error);
 
-      if (attempt < maxRetries) {
-        // Exponential backoff with jitter to prevent thundering herd
-        // Formula: baseDelay * (2 ^ attempt) + random jitter
-        const baseDelay = 1000; // 1 second base
-        const exponentialDelay = baseDelay * Math.pow(2, attempt);
-        const jitter = Math.random() * 1000; // 0-1000ms random jitter
-        const totalDelay = Math.min(exponentialDelay + jitter, 10000); // Cap at 10 seconds
+      console.log(`✅ [PAGE ${pageNum}/${totalPages}] Extracted ${questions.length} questions`);
+      return questions;
+    } catch (e) {
+      console.error(`[MATH_PAGE_${pageNum}] Attempt ${attempt + 1} failed:`, e);
+      if (attempt === 3) return [];
+      await sleep(3000);  // Increased from 2000ms
+    }
+  }
+  return [];
+}
 
-        console.log(`⏳ Retrying in ${(totalDelay / 1000).toFixed(1)} seconds... (attempt ${attempt + 2}/${maxRetries + 1})`);
-        await new Promise(resolve => setTimeout(resolve, totalDelay));
+/**
+ * MAIN EXTRACTION FUNCTION (Page-by-page with deduplication)
+ */
+export async function extractQuestionsSimplified(
+  file: File,
+  apiKey: string,
+  model: string,  // Always provided by the UI selector — no hardcoded default
+  onProgress?: (current: number, total: number, found: number) => void
+): Promise<any[]> {
+
+  const ai = new GoogleGenAI({ apiKey });
+  const pages = await loadImage(file);
+  const totalPages = pages.length;
+
+  // Estimate: Most pages have 8-10 questions, total ~60 for a 7-page exam
+  const estimatedQuestions = totalPages * 9; // Average estimate
+  console.log(`🚀 [MATH] Processing ${totalPages} pages (concurrency: 2)...`);
+  console.log(`📊 [MATH] Estimated questions: ~${estimatedQuestions} (actual count will vary by page)`);
+  console.log(`🔧 [MATH] Using: Scale 2.5x, PNG format, 4 retry attempts per page`);
+  console.log(`⏱️  [MATH] Expected time: ~${Math.ceil(totalPages * 30 / 60)} minutes\n`);
+
+  // Use concurrency 2 to reduce rate-limit pressure while still being fast
+  const resultsArray = await processInParallel(pages, async (pageImg, i) => {
+    const questions = await extractPageQuestions(ai, model, pageImg, i + 1, totalPages);
+
+    const mapped = questions.map((q: any) => ({
+      ...q,
+      id: q.id || `p${i + 1}_q${Math.random().toString(36).substr(2, 4)}`,
+      metadata: {
+        topic: q.topic,
+        domain: q.domain,
+        difficulty: q.difficulty?.toLowerCase(),
+        bloomLevel: q.blooms,
+        isPastYear: true,
+        year: "2025",
+        sourcePage: i + 1
+      }
+    }));
+
+    if (onProgress) onProgress(i + 1, totalPages, mapped.length);
+    return mapped;
+  }, 2); // ← Concurrency 2 is safer for rate limits
+
+  const allQuestions = resultsArray.flat();
+
+  // Log per-page breakdown with success/failure indicators
+  console.log('\n📊 EXTRACTION SUMMARY:');
+  let successCount = 0;
+  let failedPages: number[] = [];
+  resultsArray.forEach((pageQuestions, i) => {
+    const count = pageQuestions.length;
+    const status = count > 0 ? '✅' : '❌';
+    console.log(`   ${status} Page ${i + 1}: ${count} questions`);
+    if (count > 0) successCount++;
+    else failedPages.push(i + 1);
+  });
+  console.log(`\n✅ Total extracted: ${allQuestions.length} questions from ${totalPages} pages`);
+  console.log(`📈 Success rate: ${successCount}/${totalPages} pages (${Math.round(successCount/totalPages*100)}%)`);
+  if (failedPages.length > 0) {
+    console.warn(`⚠️  Failed pages: ${failedPages.join(', ')} - these pages returned 0 questions`);
+  }
+
+  // Deduplicate by question ID (same question may appear on adjacent page boundaries)
+  // Keep the one with the most complete options (4 options > fewer)
+  const seenIds = new Map<string, any>();
+  for (const q of allQuestions) {
+    const qId = (q.id || '').toString().trim();
+    const existing = seenIds.get(qId);
+    if (!existing) {
+      seenIds.set(qId, q);
+    } else {
+      // Keep the one with more options (more complete)
+      const existingOptions = existing.options?.length || 0;
+      const newOptions = q.options?.length || 0;
+      if (newOptions > existingOptions) {
+        console.log(`[MATH_DEDUP] Q${qId}: Replacing ${existingOptions}-option version with ${newOptions}-option version`);
+        seenIds.set(qId, q);
       }
     }
   }
 
-  // All retries exhausted
-  console.error("Error parsing exam file after all retries:", lastError);
-  throw new Error(`Failed to extract questions after ${maxRetries + 1} attempts. Last error: ${lastError?.message}`);
-};
+  const deduped = Array.from(seenIds.values());
+  if (deduped.length < allQuestions.length) {
+    console.log(`🔄 Deduplication: Removed ${allQuestions.length - deduped.length} duplicates. Final: ${deduped.length} unique questions`);
+  }
+
+  // Sort by numeric question ID if possible
+  deduped.sort((a, b) => {
+    const numA = parseInt((a.id || '').toString().replace(/\D/g, '')) || 0;
+    const numB = parseInt((b.id || '').toString().replace(/\D/g, '')) || 0;
+    return numA - numB;
+  });
+
+  // Final Fidelity Pass: Sequential re-indexing (NO latexFixer - store Gemini output as-is)
+  const cleanQuestions = deduped.map((q, idx) => {
+    // REMOVED: fixLatexInObject(q) - causes double backslashes
+    // Gemini returns correct LaTeX format, store it directly
+    return {
+      ...q,
+      id: idx + 1,
+      metadata: {
+        ...q.metadata,
+        topic: q.metadata?.topic || ""  // REMOVED: fixLatexErrors
+      }
+    };
+  });
+
+  // Check for missing questions (gaps in sequence)
+  const extractedIds = cleanQuestions.map(q => parseInt(q.id?.toString() || '0')).filter(id => id > 0).sort((a, b) => a - b);
+  const maxId = Math.max(...extractedIds, 0);
+  const missing: number[] = [];
+  for (let i = 1; i <= maxId; i++) {
+    if (!extractedIds.includes(i)) missing.push(i);
+  }
+
+  console.log(`\n✅ FINAL: ${cleanQuestions.length} questions ready`);
+  if (missing.length > 0) {
+    console.warn(`⚠️  Missing questions: ${missing.join(', ')} (Total missing: ${missing.length})`);
+  }
+  console.log('\n' + '='.repeat(60) + '\n');
+
+  return cleanQuestions;
+}

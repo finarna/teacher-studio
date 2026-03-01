@@ -42,13 +42,15 @@ export const repairJson = (raw: string): string => {
 
         if (inString) {
             if (escape) {
-                // Potential JSON escapes. If it's a quote, we MUST stay in string.
-                // If it's anything else, we might need to double-escape it for JSON validity (LaTeX case).
-                if (char === '"' || char === '\\' || char === '/' || char === 'n' || char === 'r' || char === 't' || char === 'b' || char === 'f' || char === 'u') {
+                // CRITICAL FIX: Only treat \" and \\ as JSON escapes
+                // DO NOT treat \f, \n, \t, \r, \b as JSON escapes because they conflict with LaTeX commands
+                // (e.g., \frac, \theta, \tan, \nabla, etc.)
+                if (char === '"' || char === '\\') {
+                    // Valid JSON escapes: \" and \\
                     repaired += char;
                 } else {
-                    // It's a non-standard escape (like \O in \Omega). 
-                    // We turn \O into \\O so JSON.parse is happy and UI gets \O.
+                    // Everything else is LaTeX - escape the backslash
+                    // Turn \frac into \\frac so JSON.parse gives us \frac (not form-feed!)
                     repaired += '\\' + char;
                 }
                 escape = false;

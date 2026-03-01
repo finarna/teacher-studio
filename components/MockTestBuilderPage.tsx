@@ -120,9 +120,9 @@ const EXAM_UI_THEMES: Record<string, any> = {
     protocol: 'SYLLABUS-MAX',
     description: 'Advanced cross-topic conceptual synthesis',
     strategyNote: {
-      predictive_mock: 'Targets multivariable synthesis and analytical depth.',
-      hybrid: 'Balances JEE trends with your personal weak links.',
-      adaptive_growth: 'Surgical focus on your lowest-rigor chapters.'
+      predictive_mock: 'REI-v3 Neural Simulation: Mimics exact JEE trends, linguistic traps, and Assertion-Reasoning complexity for maximum score predictability.',
+      hybrid: 'Precision Growth Engine: Fuses your personal accuracy gaps with high-yield exam patterns to bridge the score gap effectively.',
+      adaptive_growth: 'Surgical Score Recovery: Targeted AI intervention focused on flipping your lowest-rigor chapters into scoring strengths.'
     }
   },
   NEET: {
@@ -132,9 +132,9 @@ const EXAM_UI_THEMES: Record<string, any> = {
     protocol: 'ACCURACY-PRECISION',
     description: 'Focus on NCERT-based logic and trap detection',
     strategyNote: {
-      predictive_mock: 'Targets linguistic traps and Assertion-Reasoning speed.',
-      hybrid: 'NCERT-plus trends fused with your accuracy gaps.',
-      adaptive_growth: 'Focuses on rapid-fire conceptual recall vulnerabilities.'
+      predictive_mock: 'NCERT Pattern Simulation: Targets linguistic traps and Assertion-Reasoning speed with AI-predicted high-rigor drills.',
+      hybrid: 'Adaptive Skill Synthesis: NCERT-plus trends fused with your personal accuracy gaps for holistic score improvement.',
+      adaptive_growth: 'Vulnerability Elimination: Focuses AI generation on rapid-fire conceptual recall to secure easy marks first.'
     }
   },
   KCET: {
@@ -144,9 +144,9 @@ const EXAM_UI_THEMES: Record<string, any> = {
     protocol: 'PATTERN-RECOGNITION',
     description: 'Heuristic pattern calibration and fast recall',
     strategyNote: {
-      predictive_mock: 'Targets 1:1 real exam pattern property logic.',
-      hybrid: 'Trends + personal property-solving speed gaps.',
-      adaptive_growth: 'Prioritizes your specific property-recall vulnerabilities.'
+      predictive_mock: 'Heuristic Exam Simulation: 1:1 real exam pattern logic with AI-predicted trending properties and recall traps.',
+      hybrid: 'Pattern Growth Bridge: Fuses official trends with your personal property-solving speed gaps for optimized performance.',
+      adaptive_growth: 'Property Mastery Recovery: Prioritizes AI drills for your specific property-recall vulnerabilities to recover lost marks.'
     }
   },
   CBSE: {
@@ -156,9 +156,9 @@ const EXAM_UI_THEMES: Record<string, any> = {
     protocol: 'STAGING-CORE',
     description: 'High-fidelity alignment with Board standards',
     strategyNote: {
-      predictive_mock: 'Targets blueprint replication and step-wise credit.',
-      hybrid: 'Pattern stability fused with your conceptual gaps.',
-      adaptive_growth: 'Ensures mastery of high-yield annual patterns.'
+      predictive_mock: 'Board Standard Simulation: High-fidelity blueprint replication with AI-generated step-wise credit verification questions.',
+      hybrid: 'Conceptual Stability Bridge: Board pattern stability fused with your individual conceptual gaps for peak assurance.',
+      adaptive_growth: 'Success-Buffer Mode: Ensures guaranteed mastery of high-yield annual patterns and recurring board topics.'
     }
   }
 };
@@ -702,30 +702,74 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                               placeholder="e.g. KCET Mathematics Mock #01"
                             />
                           </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {[
-                              { id: 'predictive_mock', label: 'Full Simulation', icon: <Cpu size={18} />, desc: 'Real exam pattern', color: 'indigo' },
-                              { id: 'hybrid', label: 'Balanced Mix', icon: <Cpu size={18} />, desc: 'Weak + Strong topics', color: 'emerald' },
-                              { id: 'adaptive_growth', label: 'Recovery Mode', icon: <TrendingDown size={18} />, desc: 'Focus on weak areas', color: 'rose' }
+                              {
+                                id: 'predictive_mock',
+                                label: 'Ultimate Simulation',
+                                tagline: 'Real-Exam Rigor',
+                                icon: <Sparkles size={20} />,
+                                desc: 'Master the official pattern',
+                                impact: 'EXAM-READY PRECISION',
+                                color: 'indigo'
+                              },
+                              {
+                                id: 'hybrid',
+                                label: 'Mastery Mix',
+                                tagline: 'Balanced Growth',
+                                icon: <Target size={20} />,
+                                desc: 'Weak Spots + Exam Trends',
+                                impact: 'MAX SCORE VELOCITY',
+                                color: 'emerald'
+                              },
+                              {
+                                id: 'adaptive_growth',
+                                label: 'Rapid Recovery',
+                                tagline: 'Targeted Fixes',
+                                icon: <Zap size={20} />,
+                                desc: 'Turn weakness into strength',
+                                impact: 'STOP SCORE LEAKS',
+                                color: 'rose'
+                              }
                             ].map(s => {
                               const isSelected = strategyMode === s.id && !oracleModeEnabled;
                               const colorMap = {
-                                indigo: 'text-indigo-600 bg-indigo-50',
-                                emerald: 'text-emerald-600 bg-emerald-50',
-                                rose: 'text-rose-600 bg-rose-50'
+                                indigo: 'bg-indigo-600 shadow-indigo-100',
+                                emerald: 'bg-emerald-600 shadow-emerald-100',
+                                rose: 'bg-rose-600 shadow-rose-100'
                               };
+
                               return (
                                 <button
                                   key={s.id}
                                   onClick={() => { setStrategyMode(s.id as StrategyMode); setOracleModeEnabled(false); }}
-                                  className={`p-4 rounded-2xl border-2 transition-all text-left flex items-center gap-4 ${isSelected ? 'bg-white border-slate-900 shadow-md ring-4 ring-slate-900/5' : 'bg-white border-slate-100 hover:border-slate-200'}`}
+                                  className={`relative group p-5 rounded-3xl border-2 transition-all text-left flex flex-col gap-4 overflow-hidden ${isSelected ? 'bg-white border-slate-900 shadow-[0_20px_40px_rgba(0,0,0,0.08)] ring-4 ring-slate-900/5' : 'bg-white border-slate-100 hover:border-slate-300'}`}
                                 >
-                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isSelected ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                                  {/* AI Badge */}
+                                  <div className="absolute top-0 right-0">
+                                    <div className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest rounded-bl-xl ${isSelected ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                      AI POWERED
+                                    </div>
+                                  </div>
+
+                                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-transform group-hover:scale-110 ${isSelected ? colorMap[s.color as keyof typeof colorMap] + ' text-white' : 'bg-slate-50 text-slate-400'}`}>
                                     {s.icon}
                                   </div>
-                                  <div className="min-w-0">
-                                    <span className={`text-sm font-bold block truncate ${isSelected ? 'text-slate-900' : 'text-slate-600'}`}>{s.label}</span>
-                                    <span className="text-[10px] font-medium text-slate-400 leading-none truncate block">{s.desc}</span>
+
+                                  <div className="space-y-1">
+                                    <div className="flex flex-col">
+                                      <span className={`text-[10px] font-black uppercase tracking-widest ${isSelected ? 'text-indigo-600' : 'text-slate-400'}`}>{s.tagline}</span>
+                                      <span className={`text-base font-bold block leading-tight ${isSelected ? 'text-slate-900' : 'text-slate-600'}`}>{s.label}</span>
+                                    </div>
+                                    <p className="text-[11px] font-medium text-slate-400 leading-snug line-clamp-1">{s.desc}</p>
+                                  </div>
+
+                                  {/* Impact Bar */}
+                                  <div className="mt-auto pt-2">
+                                    <div className={`px-2 py-1 rounded-lg inline-flex items-center gap-1.5 ${isSelected ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                                      <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-indigo-400 animate-pulse' : 'bg-slate-300'}`} />
+                                      <span className="text-[9px] font-bold uppercase tracking-tight">{s.impact}</span>
+                                    </div>
                                   </div>
                                 </button>
                               );
@@ -734,53 +778,72 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
                           <button
                             onClick={handleTogglePeakMode}
-                            className={`w-full p-4 rounded-2xl border-2 transition-all flex items-center justify-between group overflow-hidden relative ${oracleModeEnabled ? 'bg-white border-slate-900 shadow-md ring-4 ring-slate-900/5' : 'bg-white border-slate-100 hover:border-slate-200'}`}
+                            className={`w-full p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between group overflow-hidden relative ${oracleModeEnabled ? 'bg-slate-900 border-slate-900 shadow-2xl scale-[1.02]' : 'bg-white border-indigo-100 hover:border-indigo-200'}`}
                           >
-                            <div className="flex items-center gap-4 relative z-10 text-left">
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${oracleModeEnabled ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-600 group-hover:text-white'}`}>
-                                <Sparkles size={20} fill={oracleModeEnabled ? "currentColor" : "none"} />
+                            {/* Oracle Mode Background Pattern */}
+                            {oracleModeEnabled && (
+                              <div className="absolute inset-0 opacity-20 pointer-events-none">
+                                <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '16px 16px' }} />
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full blur-[80px] -mr-32 -mt-32" />
+                              </div>
+                            )}
+
+                            <div className="flex items-center gap-6 relative z-10 text-left">
+                              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 rotate-12 shadow-[0_0_30px_rgba(255,255,255,0.4)]' : 'bg-indigo-50 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-12'}`}>
+                                <Sparkles size={28} fill={oracleModeEnabled ? "currentColor" : "none"} />
                               </div>
                               <div>
-                                <span className="text-base font-bold block text-slate-900">Premium REI Oracle v3.0</span>
-                                <span className={`text-[10px] font-medium block ${oracleModeEnabled ? 'text-slate-600' : 'text-slate-400'}`}>Advanced AI Autonomous Calibration</span>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded ${oracleModeEnabled ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-600'}`}>Ultimate Core</span>
+                                  {oracleModeEnabled && <span className="animate-pulse flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]" />}
+                                </div>
+                                <span className={`text-xl font-black block font-outfit ${oracleModeEnabled ? 'text-white' : 'text-slate-900'}`}>Premium REI Oracle v3.0</span>
+                                <span className={`text-xs font-bold block ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-400'}`}>Full Autonomous Calibration & Score Projection</span>
                               </div>
                             </div>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${oracleModeEnabled ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-100 text-slate-300'}`}>
-                              {oracleModeEnabled ? <Check size={16} strokeWidth={3} /> : <Settings size={16} />}
+
+                            <div className="flex items-center gap-3 relative z-10">
+                              <div className={`flex flex-col items-end hidden md:flex mr-4 ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-300'}`}>
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Neural Mode</span>
+                                <span className="text-xs font-bold uppercase">{oracleModeEnabled ? 'Fully Active' : 'Standby'}</span>
+                              </div>
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 shadow-lg scale-110' : 'bg-slate-50 text-slate-300'}`}>
+                                {oracleModeEnabled ? <Check size={24} strokeWidth={3} /> : <div className="w-2 h-2 rounded-full bg-slate-200" />}
+                              </div>
                             </div>
                           </button>
 
                           <motion.div
                             key={oracleModeEnabled ? 'oracle' : strategyMode}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className={`p-6 rounded-2xl border-2 flex gap-5 items-center bg-slate-50 border-slate-200`}
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            className={`p-6 rounded-[2rem] border-2 flex gap-6 items-center transition-all duration-500 ${oracleModeEnabled ? 'bg-slate-900 border-slate-800 text-white shadow-2xl' : 'bg-indigo-50/50 border-indigo-100 text-slate-900'}`}
                           >
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-slate-100 text-slate-900`}>
-                              {oracleModeEnabled ? <Sparkles size={24} /> : strategyMode === 'predictive_mock' ? <Cpu size={24} /> : strategyMode === 'hybrid' ? <Settings size={24} /> : <TrendingDown size={24} />}
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${oracleModeEnabled ? 'bg-indigo-600 text-white animate-pulse' : 'bg-white text-indigo-600 border border-indigo-100'}`}>
+                              {oracleModeEnabled ? <Sparkles size={28} /> : strategyMode === 'predictive_mock' ? <Cpu size={28} /> : strategyMode === 'hybrid' ? <Activity size={28} /> : <TrendingDown size={28} />}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-1">
-                                <h4 className="text-sm font-bold uppercase tracking-wider text-slate-900">
-                                  Intelligent Strategy: {oracleModeEnabled ? 'Oracle Mode' : strategyMode === 'predictive_mock' ? 'Simulation' : strategyMode === 'hybrid' ? 'Balanced' : 'Recovery'}
+                              <div className="flex items-center gap-3 mb-1.5">
+                                <h4 className={`text-sm font-black uppercase tracking-[0.15em] ${oracleModeEnabled ? 'text-indigo-400' : 'text-indigo-600'}`}>
+                                  {oracleModeEnabled ? 'Autonomous Oracle Protocol' : strategyMode === 'predictive_mock' ? 'Ultimate Simulation' : strategyMode === 'hybrid' ? 'Mastery Mix' : 'Rapid Recovery'}
                                 </h4>
-                                <div className="flex items-center gap-2 px-2 py-1 bg-slate-50 rounded-lg border border-slate-200">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
-                                  <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tight">System Optimized</span>
+                                <div className={`flex items-center gap-2 px-2 py-1 rounded-lg border ${oracleModeEnabled ? 'bg-indigo-500/20 border-indigo-500/30' : 'bg-white border-indigo-100'}`}>
+                                  <div className={`w-1.5 h-1.5 rounded-full ${oracleModeEnabled ? 'bg-emerald-400' : 'bg-indigo-500'} shadow-[0_0_8px_rgba(99,102,241,0.6)]`} />
+                                  <span className={`text-[10px] font-bold uppercase tracking-tight ${oracleModeEnabled ? 'text-indigo-200' : 'text-indigo-600'}`}>Engine Calibrated</span>
                                 </div>
                               </div>
-                              <p className="text-sm font-medium text-slate-500 leading-relaxed">
+                              <p className={`text-sm font-medium leading-relaxed ${oracleModeEnabled ? 'text-indigo-100/80' : 'text-slate-500'}`}>
                                 {oracleModeEnabled
-                                  ? "Autonomous high-rigor synthesis enabled. All topics and difficulty parameters are being managed by the Oracle v3.0 logic."
-                                  : theme.strategyNote?.[strategyMode === 'predictive_mock' ? 'predictive_mock' : strategyMode === 'hybrid' ? 'hybrid' : 'adaptive_growth'] || "Your test is being optimized based on your selection."
+                                  ? "Full autonomous synthesis enabled. The REI Oracle is now managing all topic weightages, difficulty profiling, and pattern replication for maximum score impact."
+                                  : theme.strategyNote?.[strategyMode === 'predictive_mock' ? 'predictive_mock' : strategyMode === 'hybrid' ? 'hybrid' : 'adaptive_growth'] || "Your assessment is being optimized based on selected intelligence parameters."
                                 }
                               </p>
                             </div>
-                            <div className="hidden lg:flex flex-col items-end shrink-0 gap-1 border-l border-slate-200 pl-6 py-1">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Assessment Flow</span>
-                              <span className="text-xs font-bold text-slate-900">
-                                {oracleModeEnabled || strategyMode === 'predictive_mock' ? 'Ready for Deployment' : 'Calibration Recommended'}
+                            <div className={`hidden lg:flex flex-col items-end shrink-0 gap-1 border-l pl-6 py-1 ${oracleModeEnabled ? 'border-slate-700' : 'border-indigo-100'}`}>
+                              <span className={`text-[10px] font-bold uppercase tracking-widest ${oracleModeEnabled ? 'text-slate-500' : 'text-slate-400'}`}>Status</span>
+                              <span className={`text-xs font-black uppercase ${oracleModeEnabled ? 'text-emerald-400' : 'text-indigo-600'}`}>
+                                {oracleModeEnabled || strategyMode === 'predictive_mock' ? 'Ready for Deployment' : 'Optimization Active'}
                               </span>
                             </div>
                           </motion.div>
@@ -790,10 +853,10 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           <button
                             onClick={scrollToCalibration}
                             disabled={!testName.trim()}
-                            className={`px-12 py-4 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 ${!testName.trim() ? 'bg-slate-50 text-slate-300 border border-slate-200 cursor-not-allowed' : 'bg-white text-slate-900 border-2 border-slate-200 hover:border-slate-900 shadow-sm hover:shadow-xl active:scale-95'}`}
+                            className={`px-12 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-3 ${!testName.trim() ? 'bg-slate-50 text-slate-300 border border-slate-200 cursor-not-allowed' : 'bg-slate-900 text-white shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-1 active:scale-95'}`}
                           >
-                            {strategyMode === 'predictive_mock' || oracleModeEnabled ? 'Review Assessment Profile' : 'Configure Test Chapters'}
-                            <ArrowRight size={20} />
+                            {strategyMode === 'predictive_mock' || oracleModeEnabled ? 'Review Deployment Matrix' : 'Initialize Calibration'}
+                            <ArrowRight size={20} className={!testName.trim() ? '' : 'animate-pulse'} />
                           </button>
                         </div>
                       </div>
@@ -823,7 +886,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                             <div className="flex flex-col items-end">
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Strategy</span>
                               <span className="text-xs font-bold uppercase tracking-tight text-slate-900">
-                                {oracleModeEnabled ? 'Intelligence Oracle Control' : strategyMode === 'predictive_mock' ? 'Expert Simulation' : strategyMode === 'hybrid' ? 'Balanced' : 'Recovery'}
+                                {oracleModeEnabled ? 'Intelligence Oracle Control' : strategyMode === 'predictive_mock' ? 'Ultimate Simulation' : strategyMode === 'hybrid' ? 'Mastery Mix' : 'Rapid Recovery'}
                               </span>
                             </div>
                           </div>
@@ -910,6 +973,88 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           </div>
 
                           <div className="space-y-4">
+                            {/* REI v3.0 Neural Forecast Panel */}
+                            {(oracleModeEnabled || strategyMode === 'predictive_mock') && (
+                              <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-slate-900 rounded-[2.5rem] p-6 text-white shadow-2xl relative overflow-hidden group border border-slate-800"
+                              >
+                                <div className="absolute inset-0 opacity-10">
+                                  <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                                </div>
+
+                                <div className="relative z-10 space-y-6">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                                        <Cpu size={20} />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">REI-v3 Forecast</span>
+                                        <h3 className="text-sm font-bold font-outfit">Predictive Analytics</h3>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                                      <div className="w-1 h-1 rounded-full bg-emerald-400 animate-ping" />
+                                      <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest leading-none">Live Sync</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
+                                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Rigor Velocity</span>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xl font-black font-mono text-white italic">{forecast?.rigorVelocity || '1.02'}x</span>
+                                        <TrendingUp size={14} className="text-emerald-400" />
+                                      </div>
+                                    </div>
+                                    <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
+                                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Score Accuracy</span>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xl font-black font-mono text-white italic">ULTRA-HIGH</span>
+                                        <ShieldCheck size={14} className="text-indigo-400" />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="space-y-4">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Neural Intent Signatures</span>
+                                      <Dna size={14} className="text-indigo-400 opacity-50" />
+                                    </div>
+                                    <div className="space-y-3">
+                                      {[
+                                        { label: 'Synthesis', value: forecast?.intentSignature?.synthesis || 0.85, color: 'bg-indigo-500' },
+                                        { label: 'Trap Density', value: forecast?.intentSignature?.trapDensity || 0.72, color: 'bg-rose-500' },
+                                        { label: 'Speed Requirement', value: forecast?.intentSignature?.speedRequirement || 0.90, color: 'bg-amber-500' }
+                                      ].map(sig => (
+                                        <div key={sig.label} className="space-y-1">
+                                          <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-tight">
+                                            <span className="text-slate-400">{sig.label}</span>
+                                            <span className="text-white">{Math.round(sig.value * 100)}%</span>
+                                          </div>
+                                          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                                            <motion.div
+                                              initial={{ width: 0 }}
+                                              animate={{ width: `${sig.value * 100}%` }}
+                                              className={`h-full ${sig.color} shadow-[0_0_8px_rgba(255,255,255,0.1)]`}
+                                            />
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  <div className="pt-2 border-t border-white/5">
+                                    <p className="text-[10px] font-medium text-slate-400 italic leading-relaxed">
+                                      Generated questions will target linguistic traps and multivariable logic gaps based on latest {examContext} trends.
+                                    </p>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+
                             <div className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-100 shadow-xl space-y-8 flex flex-col">
                               <div className="flex items-center justify-between border-b pb-4 border-slate-100 gap-4">
                                 <div className="flex items-center gap-3">
@@ -995,41 +1140,67 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                             </div>
                           </div>
 
-                          <div className="flex flex-col gap-3">
+                          <div className="flex flex-col gap-4 mt-2">
                             <motion.button
-                              whileHover={canCreateTest && !isCreatingTest ? { scale: 1.01, y: -1 } : {}}
+                              whileHover={canCreateTest && !isCreatingTest ? { y: -4, scale: 1.01 } : {}}
                               whileTap={canCreateTest && !isCreatingTest ? { scale: 0.98 } : {}}
                               onClick={handleCreateTest}
                               disabled={!canCreateTest || isCreatingTest}
-                              className={`w-full py-5 rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-3 ${canCreateTest && !isCreatingTest ? 'bg-white text-slate-900 border-2 border-slate-900 shadow-xl' : 'bg-slate-50 text-slate-300 border border-slate-200 cursor-not-allowed shadow-none'}`}
+                              className={`w-full py-6 rounded-[2rem] font-black text-lg transition-all flex items-center justify-center gap-4 relative overflow-hidden ${canCreateTest && !isCreatingTest ? 'bg-slate-900 text-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] group' : 'bg-slate-50 text-slate-300 border border-slate-200 cursor-not-allowed'}`}
                             >
+                              {canCreateTest && !isCreatingTest && (
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 bg-[length:200%_100%] animate-gradient-x" />
+                              )}
+
                               {isCreatingTest ? (
                                 <>
-                                  <Loader2 size={24} className="animate-spin text-slate-400" />
-                                  Generating Assessment...
+                                  <div className="relative">
+                                    <Loader2 size={24} className="animate-spin text-indigo-400" />
+                                    <div className="absolute inset-0 animate-ping opacity-20 bg-indigo-400 rounded-full" />
+                                  </div>
+                                  <span className="relative z-10 uppercase tracking-widest text-sm">Synthesizing Neural Blueprint...</span>
                                 </>
                               ) : (
                                 <>
-                                  <Play size={24} />
-                                  Confirm & Start Mock Test
+                                  <Sparkles size={24} className={canCreateTest ? 'text-indigo-400' : 'text-slate-300'} />
+                                  <span className="relative z-10">Confirm & Deploy Assessment</span>
                                 </>
                               )}
                             </motion.button>
+
                             {!canCreateTest && !isCreatingTest && (
-                              <div className="flex items-center justify-center gap-2 text-rose-500 bg-rose-50 py-2 rounded-lg border border-rose-100">
-                                <AlertCircle size={14} />
-                                <p className="text-[10px] font-bold uppercase tracking-widest">Please Select Topics & Name Test</p>
+                              <div className="flex items-center justify-center gap-2 text-rose-500 bg-rose-50/50 py-3 rounded-2xl border border-rose-100">
+                                <AlertCircle size={16} />
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em]">Select Chapters & Name Assessment</p>
                               </div>
                             )}
 
                             {isCreatingTest && (
-                              <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl p-3 border border-indigo-100 shadow-lg">
-                                <div className="flex justify-between items-center mb-1.5">
-                                  <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest">{progressMessage}</span>
-                                  <span className="text-sm font-black text-indigo-600 font-mono">{progressPercentage}%</span>
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-slate-900 rounded-[2rem] p-5 border border-slate-800 shadow-2xl space-y-4"
+                              >
+                                <div className="flex justify-between items-end">
+                                  <div className="space-y-1">
+                                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">{progressMessage}</span>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                      <span className="text-xs font-bold text-slate-400">REI-v3 Engine Active</span>
+                                    </div>
+                                  </div>
+                                  <span className="text-2xl font-black text-white font-mono">{progressPercentage}%</span>
                                 </div>
-                                <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-                                  <motion.div animate={{ width: `${progressPercentage}%` }} className="h-full bg-indigo-600 rounded-full" />
+                                <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                  <motion.div
+                                    animate={{ width: `${progressPercentage}%` }}
+                                    className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)]"
+                                  />
+                                </div>
+                                <div className="flex justify-between items-center text-[9px] font-bold text-slate-500 uppercase tracking-tight">
+                                  <span>Pattern Matching</span>
+                                  <span>Question Synthesis</span>
+                                  <span>Rigor Calibration</span>
                                 </div>
                               </motion.div>
                             )}

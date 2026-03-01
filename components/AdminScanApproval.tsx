@@ -374,7 +374,8 @@ const AdminScanApproval: React.FC = () => {
           question_order: index,
           subject: scan.subject,
           exam_context: scan.exam_context,
-          year: extractedYear || null,  // ✅ Use extracted year
+          year: extractedYear || null,
+          is_system_question: true,  // ✅ Mark as system question (bypasses RLS user ownership)
         }));
 
         // Insert questions into questions table

@@ -121,8 +121,7 @@ export async function autoMapScanQuestions(
         .insert({
           topic_id: topicId,
           question_id: question.id,
-          confidence: 1.0,
-          created_at: new Date().toISOString()
+          confidence: 1.0
         });
 
       if (mappingError) {

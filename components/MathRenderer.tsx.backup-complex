@@ -1,0 +1,451 @@
+import React, { useEffect, useRef } from 'react';
+import { LATEX_MACROS, LATEX_PATTERNS } from '../utils/mathLatexReference';
+
+// Declare global katex since we loaded it via script tag
+declare global {
+  interface Window {
+    katex: any;
+  }
+}
+
+interface MathRendererProps {
+  expression?: string;
+  content?: string; // Alias for expression
+  inline?: boolean;
+  className?: string;
+  displayMode?: boolean;
+}
+
+const MathRenderer: React.FC<MathRendererProps> = ({ expression, content, inline = false, className = '', displayMode }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const rawExpression = expression || content || '';
+  const isDisplayMode = displayMode !== undefined ? displayMode : !inline;
+  const [katexReady, setKatexReady] = React.useState(false);
+  const hasWarnedRef = useRef(false);
+
+  // Check if KaTeX is loaded - single check on mount
+  useEffect(() => {
+    if (window.katex) {
+      setKatexReady(true);
+      return;
+    }
+
+    // If not loaded, wait and check periodically
+    const maxAttempts = 50; // 5 seconds max
+    let attempts = 0;
+
+    const checkKatex = () => {
+      attempts++;
+      if (window.katex) {
+        setKatexReady(true);
+      } else if (attempts < maxAttempts) {
+        setTimeout(checkKatex, 100);
+      } else if (!hasWarnedRef.current) {
+        hasWarnedRef.current = true;
+        console.error('❌ KaTeX failed to load after 5 seconds');
+      }
+    };
+
+    checkKatex();
+  }, []);
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    if (!katexReady) {
+      ref.current.innerText = typeof rawExpression === 'string' ? rawExpression : String(rawExpression);
+      return;
+    }
+
+    // Defensive check: if rawExpression is not a string, convert it
+    if (typeof rawExpression !== 'string') {
+      console.error('❌ MathRenderer received non-string expression:', typeof rawExpression, rawExpression);
+      ref.current.innerText = String(rawExpression);
+      return;
+    }
+
+    if (rawExpression.trim()) {
+      try {
+        let cleanExpression = rawExpression
+          .replace(/\n/g, ' ')      // Remove actual newline characters
+          // ⚠️ CRITICAL: Do NOT use /\r/g here — \r matches CR (\x0D).
+          // In JS strings, "\right" starts with CR (\x0D) + "ight" because \r is CR.
+          // We only strip CR when it's genuinely orphaned (not preceded by a backslash-like sequence).
+          // Instead, replace CR only at start-of-string or after non-backslash chars:
+          .replace(/([^\\])\r/g, '$1')   // CR after non-backslash → remove
+          .replace(/^\r/, '')             // CR at very start → remove
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        // Fix corrupted commands from old DB data or Gemini output glitches
+        // \ight → \right  (caused by CR stripping incorrectly eating the 'r')
+        cleanExpression = cleanExpression.replace(/\\ight/g, '\\right');
+        // \lef( → \left(  (similar truncation)
+        cleanExpression = cleanExpression.replace(/\\lef([^t]|$)/g, '\\left$1');
+
+        // Fix common LaTeX errors
+        // 1. Fix invalid superscript+spacing: \,^\circ → ^\circ
+        cleanExpression = cleanExpression.replace(/\\,\s*\^\\circ/g, '^\\circ');
+
+        // 2. Fix double superscripts: 10^{-5}^\circ → 10^{-5\circ}
+        cleanExpression = cleanExpression.replace(/\^(\{[^}]+\})\s*\^(\{[^}]+\})/g, '^{$1$2}');
+        cleanExpression = cleanExpression.replace(/\^(\{[^}]+\})\s*\^(\\[a-zA-Z]+)/g, '^{$1$2}');
+
+        // 3. Fix \begin{tabular} → \begin{array} (KaTeX doesn't support tabular)
+        cleanExpression = cleanExpression.replace(/\\begin\{tabular\}/g, '\\begin{array}');
+        cleanExpression = cleanExpression.replace(/\\end\{tabular\}/g, '\\end{array}');
+
+        // 4. Fix dimensional analysis brackets: [ ] → ( )
+        // KaTeX has issues with square brackets, use parentheses instead for dimensional analysis
+        // This is mathematically equivalent and renders cleanly
+
+
+        // 5. Fix Greek letter names to LaTeX symbols (for physics/dimensional analysis)
+        // Use simple string replacement with space boundaries
+        cleanExpression = cleanExpression.replace(/ alpha /g, ' \\alpha ');
+        cleanExpression = cleanExpression.replace(/ beta /g, ' \\beta ');
+        cleanExpression = cleanExpression.replace(/ gamma /g, ' \\gamma ');
+        cleanExpression = cleanExpression.replace(/ delta /g, ' \\delta ');
+        cleanExpression = cleanExpression.replace(/ epsilon /g, ' \\epsilon ');
+        cleanExpression = cleanExpression.replace(/ zeta /g, ' \\zeta ');
+        cleanExpression = cleanExpression.replace(/ eta /g, ' \\eta ');
+        cleanExpression = cleanExpression.replace(/ theta /g, ' \\theta ');
+        cleanExpression = cleanExpression.replace(/ lambda /g, ' \\lambda ');
+        cleanExpression = cleanExpression.replace(/ mu /g, ' \\mu ');
+        cleanExpression = cleanExpression.replace(/ nu /g, ' \\nu ');
+        cleanExpression = cleanExpression.replace(/ rho /g, ' \\rho ');
+        cleanExpression = cleanExpression.replace(/ sigma /g, ' \\sigma ');
+        cleanExpression = cleanExpression.replace(/ tau /g, ' \\tau ');
+        cleanExpression = cleanExpression.replace(/ phi /g, ' \\phi ');
+        cleanExpression = cleanExpression.replace(/ omega /g, ' \\omega ');
+        // Also handle at start/end of expression
+        cleanExpression = cleanExpression.replace(/^eta /g, '\\eta ');
+        cleanExpression = cleanExpression.replace(/ eta$/g, ' \\eta');
+        cleanExpression = cleanExpression.replace(/\(eta /g, '(\\eta ');
+        cleanExpression = cleanExpression.replace(/ eta\)/g, ' \\eta)');
+        cleanExpression = cleanExpression.replace(/^beta /g, '\\beta ');
+        cleanExpression = cleanExpression.replace(/ beta$/g, ' \\beta');
+        cleanExpression = cleanExpression.replace(/\(beta /g, '(\\beta ');
+        cleanExpression = cleanExpression.replace(/ beta\)/g, ' \\beta)');
+        cleanExpression = cleanExpression.replace(/^alpha /g, '\\alpha ');
+        cleanExpression = cleanExpression.replace(/ alpha$/g, ' \\alpha');
+        cleanExpression = cleanExpression.replace(/\(alpha /g, '(\\alpha ');
+        cleanExpression = cleanExpression.replace(/ alpha\)/g, ' \\alpha)');
+
+        // 6. Detect incomplete table rows (has & and \\ but no array wrapper)
+        // If expression contains & and ends with \\, wrap it in array
+        if (cleanExpression.includes('&') && cleanExpression.trim().endsWith('\\\\')) {
+          // Don't auto-wrap if already in array/matrix/aligned environment
+          if (!cleanExpression.includes('\\begin{')) {
+            // Skip wrapping - these are likely fragments that shouldn't be rendered alone
+            // Just render as-is and KaTeX will show error (better than corrupting valid math)
+            console.warn('⚠️ Detected table fragment without array wrapper:', cleanExpression.substring(0, 50));
+          }
+        }
+
+        // Heal truncated LaTeX expressions (close dangling braces/brackets)
+        let healedExpression = cleanExpression;
+        const openBraces = (healedExpression.match(/{/g) || []).length;
+        const closeBraces = (healedExpression.match(/}/g) || []).length;
+        if (openBraces > closeBraces) healedExpression += '}'.repeat(openBraces - closeBraces);
+
+        const openBrack = (healedExpression.match(/\[/g) || []).length;
+        const closeBrack = (healedExpression.match(/\]/g) || []).length;
+        if (openBrack > closeBrack) healedExpression += ']'.repeat(openBrack - closeBrack);
+
+        window.katex.render(healedExpression, ref.current, {
+          throwOnError: false,
+          displayMode: isDisplayMode,
+          trust: true,
+          strict: false,
+          macros: LATEX_MACROS
+        });
+      } catch (error) {
+        console.error('❌ KaTeX rendering error:', error, 'Expression:', rawExpression);
+        ref.current.innerText = rawExpression.replace(/\$/g, '');
+      }
+    } else if (ref.current) {
+      ref.current.innerText = rawExpression;
+    }
+  }, [rawExpression, isDisplayMode, katexReady]);
+
+  return (
+    <span
+      ref={ref}
+      className={`math-rendered ${className} ${isDisplayMode ? 'block my-4 text-center scale-110' : 'inline-block mx-0.5 shadow-sm'}`}
+    />
+  );
+};
+
+export const DerivationStep: React.FC<{ index: number, title?: string, content: string }> = ({ index, title, content }) => {
+  const [isExpanded, setIsExpanded] = React.useState(true);
+  const [isCopied, setIsCopied] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  return (
+    <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-700 group/container">
+      {/* Step Header - Always Visible */}
+      <div
+        className="flex items-center gap-4 mb-3 cursor-pointer select-none"
+        onClick={() => setIsExpanded(!isExpanded)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Step Number Badge */}
+        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 text-white flex items-center justify-center text-sm font-black shadow-lg shrink-0 transition-all duration-300 ${isExpanded ? 'scale-100' : 'scale-90 opacity-70'
+          } ${isHovered ? 'ring-4 ring-primary-500/20' : ''}`}>
+          {index}
+        </div>
+
+        {/* Title */}
+        <div className="flex-1 flex items-center gap-3 min-w-0">
+          <div className={`text-[11px] font-bold text-slate-700 uppercase tracking-wider font-outfit transition-colors duration-300 truncate ${isHovered ? 'text-slate-900' : ''
+            }`}>
+            {title || `Step ${index}`}
+          </div>
+          {!isExpanded && (
+            <div className="text-[9px] text-slate-400 font-medium px-2 py-0.5 bg-slate-100 rounded-full">
+              Click to expand
+            </div>
+          )}
+        </div>
+
+        {/* Expand/Collapse Icon */}
+        <div className={`transition-transform duration-300 text-slate-400 ${isExpanded ? 'rotate-180' : ''}`}>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Step Content - Collapsible */}
+      <div className={`transition-all duration-500 ease-out ${isExpanded ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'
+        }`}>
+        <div className="ml-13 relative group/step">
+          {/* Connecting Line */}
+          <div className="absolute left-[-26px] top-0 bottom-0 w-[2px] bg-gradient-to-b from-slate-200 via-slate-200 to-transparent" />
+
+          {/* Content Card */}
+          <div className="bg-gradient-to-br from-white to-slate-50/30 border border-slate-200/60 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md relative overflow-hidden transition-all duration-500">
+            {/* Subtle Grid Background */}
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graph-paper.png')] opacity-[0.02] pointer-events-none" />
+
+            {/* Top Gradient Accent */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary-500/30 to-transparent" />
+
+            {/* Action Buttons - Show on Hover */}
+            <div className={`absolute top-3 right-3 flex items-center gap-1.5 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
+              }`}>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleCopy(); }}
+                className="p-1.5 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm group/btn"
+                title="Copy step"
+              >
+                {isCopied ? (
+                  <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4 text-slate-600 group-hover/btn:text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            {/* Math Content */}
+            <div className="relative z-10 pr-12">
+              <RenderWithMath text={content} className="text-lg md:text-xl font-serif text-slate-800 leading-[1.85]" showOptions={false} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const RenderWithMath: React.FC<{
+  text: string,
+  className?: string,
+  showOptions?: boolean,
+  serif?: boolean,
+  autoSteps?: boolean,
+  dark?: boolean,
+  compact?: boolean,
+  correctOptionIndex?: number
+}> = ({ text, className, showOptions = true, serif = true, autoSteps = false, dark = false, compact = false, correctOptionIndex }) => {
+  if (!text) return null;
+
+  // Defensive type check: Ensure text is always a string
+  const textStr = typeof text === 'string' ? text : JSON.stringify(text);
+
+  // 1. Basic Cleaning
+  let cleanText = textStr
+    .replace(/\\\\n/g, '\n')       // \\n → actual newline
+    .replace(/\\\\r/g, '\r')       // \\r → actual cr
+    .replace(/\\\\"/g, '"')         // \\" → "
+    .replace(/\n{3,}/g, '\n\n');   // collapse 3+ newlines
+
+  // 2. Normalize double backslashes → single (catches Gemini/DB \\frac → \frac)
+  // Only inside math regions to avoid mangling text
+  cleanText = cleanText
+    // Collapse \\cmd to \cmd for known LaTeX commands inside $...$
+    .replace(/\\\\(frac|sqrt|int|sum|prod|lim|sin|cos|tan|cot|sec|csc|log|ln|left|right|alpha|beta|gamma|delta|theta|phi|psi|sigma|omega|pi|lambda|mu|nu|xi|tau|vec|hat|bar|tilde|begin|end|leq|geq|neq|approx|pm|times|cdot|infty|to|in|subset|cup|cap|forall|exists|partial|nabla|text|mathrm|mathbf|mathcal|overline|underline|underbrace|overbrace|binom|pmatrix|bmatrix|vmatrix|cases|aligned|dots|ldots|cdots|vdots|ddots|ge|le|ne|ll|gg|sim|simeq|equiv|propto|perp|parallel|angle|circ|bullet|star|dagger|oplus|otimes|oint|iint|iiint|quad|qquad)\b/g, '\\$1');
+
+
+  // 2b. Fix DB corruptions (saved before LaTeX fixes were active)
+  // \ight → \right  (Gemini truncation glitch stored to DB)
+  cleanText = cleanText.replace(/\\ight\b/g, '\\right');
+  cleanText = cleanText.replace(/\\lef\b(?![t])/g, '\\left');
+
+  // 2b2. Fix JSON \b (backspace) corruption of \begin, \beta, etc.
+  // When LaTeX was stored as single-backslash in a JSON string via AI synthesis,
+  // \begin → JSON \b (backspace char, 0x08) + "egin" in the stored string.
+  // We detect these by looking for "egin{", "eta", "imes", "rac{" without a backslash.
+  // Replace the invisible backspace (0x08) or just the bare command with proper \cmd.
+  cleanText = cleanText
+    .replace(/\x08egin\b/g, '\\begin')   // backspace + egin → \begin
+    .replace(/\x08eta\b/g, '\\beta')     // backspace + eta → \beta
+    .replace(/\x08eright\b/g, '\\right') // edge case
+    .replace(/(?<!\\)egin\{/g, '\\begin{')  // bare "egin{" with no backslash → \begin.
+    .replace(/\bend\{/g, '\\end{')       // "end{" without backslash (careful — only word-boundary)
+    .replace(/\x09imes\b/g, '\\times')   // tab + imes → \times  (JSON \t + imes)
+    .replace(/\x0Crac\{/g, '\\frac{')   // form-feed + rac → \frac  (JSON \f + rac)
+    .replace(/\x0Bright\b/g, '\\right')  // vertical tab + right
+    .replace(/\x0Bight\b/g, '\\right');  // line-tab + ight
+
+  // 2c. Auto-wrap bare \left...\right pairs outside $...$ in $...$
+  // e.g. DB: 'direction cosines are \left( \frac{...} \right) and'
+  cleanText = cleanText.replace(
+    /(\\left\s*[([|{][\s\S]*?\\right\s*[)\]|}])/g,
+    '$$$1$'
+  );
+  // 2. Identify Options (if needed)
+  const optionMatches = textStr.match(/\(([1-4A-D])\).*?(?=\([1-4A-D]\)|$)/gs);
+
+  // 3. Handle Auto-Steps (if enabled)
+  if (autoSteps && cleanText.length > 200) {
+    const stepMarkers = cleanText.match(/(?:^|\n)(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*(.*?)(?=\n(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*|$)/gs);
+    if (stepMarkers && stepMarkers.length > 1) {
+      return (
+        <div className="space-y-4">
+          {stepMarkers.map((step, idx) => {
+            const titleMatch = step.match(/(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*(.*?)\n/i);
+            const title = titleMatch ? titleMatch[1].trim() : `Step ${idx + 1}`;
+            const content = step.replace(/(?:\d+\.|\*\*Step \d+:\*\*|### Step \d+)\s*(.*?)\n/i, '').trim();
+            return <DerivationStep key={idx} index={idx + 1} title={title} content={content} />;
+          })}
+        </div>
+      );
+    }
+  }
+
+  // 4. Split into paragraphs
+  const paragraphs = cleanText.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+  const hasCustomFontSize = className?.includes('text-');
+
+  return (
+    <div className={`${compact ? '' : 'prose prose-slate max-w-none'} ${serif ? 'font-serif' : 'font-instrument'} ${className}`}>
+      <div className={compact ? 'space-y-2' : 'space-y-4'}>
+        {paragraphs.map((p, i) => {
+          // Regex to match math regions:
+          // - $$...$$ multi-line display math
+          // - $...$ inline math (NO newlines inside to prevent greedy cross-paragraph matching)
+          // - \begin{env}..\end{env} block environments
+          // Interior spaces are allowed (trimmed in handler below)
+          const regex = /(\$\$[\s\S]*?\$\$|\$[^\n$]*?\$|\\begin\{[a-z*]+\}[\s\S]+?\\end\{[a-z*]+\})/g;
+          const parts = p.split(regex);
+
+
+          return (
+            <div key={i} className={`leading-[1.9] ${hasCustomFontSize ? '' : (serif ? 'text-lg md:text-xl' : 'text-base font-medium')} ${dark ? 'text-white' : 'text-slate-800'}`}>
+              {parts.map((part, pIdx) => {
+                if (!part) return null;
+
+                const trimmed = part.trim();
+
+                // 1. Display Math ($$ or \begin)
+                if ((trimmed.startsWith('$$') && trimmed.endsWith('$$')) ||
+                  (trimmed.startsWith('\\begin{') && trimmed.endsWith('}'))) {
+
+                  const isBlock = trimmed.startsWith('$$');
+                  // Trim interior spaces — critical for "$$ \frac... $$" → "\frac..."
+                  let expr = isBlock ? trimmed.slice(2, -2).trim() : trimmed;
+
+                  if (compact || !isBlock) {
+                    return <MathRenderer key={pIdx} expression={expr} inline={true} className={`font-bold ${dark ? 'text-emerald-300' : 'text-primary-900'}`} />;
+                  }
+
+                  return (
+                    <div key={pIdx} className="my-6 relative group/math">
+                      <div className="bg-gradient-to-br from-white via-slate-50/40 to-white border border-slate-200/70 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
+                        <MathRenderer expression={expr} displayMode={true} className={dark ? 'text-white' : 'text-slate-900'} />
+                      </div>
+                    </div>
+                  );
+                }
+
+                // 2. Inline Math ($...$)
+                // Trim interior spaces — critical for "$ \lim... $" → "\lim..."
+                if (trimmed.startsWith('$') && trimmed.endsWith('$') && trimmed.length > 2) {
+                  const innerExpr = trimmed.slice(1, -1).trim();
+                  if (innerExpr.length === 0) {
+                    // Empty $ $ — render nothing
+                    return null;
+                  }
+                  // Render as math. KaTeX has throwOnError:false so variables like A, B, x, ABCD
+                  // will render correctly as italicised math variables.
+                  // Only skip if it looks like a plain English word (all lowercase, no special chars)
+                  const looksLikeEnglishWord = /^[a-z]{4,}$/.test(innerExpr);
+                  if (!looksLikeEnglishWord) {
+                    return <MathRenderer key={pIdx} expression={innerExpr} inline={true} className={`font-bold ${dark ? 'text-emerald-300' : 'text-primary-900'}`} />;
+                  }
+                  // Plain lowercase English word — show as text without dollar signs
+                  return <span key={pIdx} className="whitespace-pre-wrap">{innerExpr}</span>;
+                }
+
+                // 3. Plain Text
+                return <span key={pIdx} className="whitespace-pre-wrap">{part}</span>;
+              })}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Render Options if present and requested */}
+      {showOptions && optionMatches && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12 pt-12 border-t border-slate-200/50">
+          {optionMatches.map((opt, i) => {
+            const labelMatch = opt.match(/\(([1-4A-D])\)/);
+            const label = labelMatch ? labelMatch[1] : (i + 1).toString();
+            const content = opt.replace(/\([1-4A-D]\)/, '').trim();
+            const isCorrect = correctOptionIndex !== undefined && i === correctOptionIndex;
+
+            return (
+              <div key={i} className={`flex gap-4 p-6 border rounded-[2rem] shadow-sm hover:shadow-xl transition-all group/opt relative ${isCorrect
+                ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-300'
+                : 'bg-white border-slate-100 hover:border-primary-200'
+                }`}>
+                <div className={`w-12 h-12 rounded-xl text-white flex items-center justify-center text-xs font-black shrink-0 transition-all shadow-2xl ${isCorrect
+                  ? 'bg-emerald-600 shadow-emerald-900/20'
+                  : 'bg-slate-950 shadow-slate-900/10'
+                  }`}>{label}</div>
+                <div className={`text-sm font-bold pt-3 flex-1 leading-relaxed ${isCorrect ? 'text-emerald-900' : 'text-slate-800'}`}>
+                  <RenderWithMath text={content} showOptions={false} serif={false} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MathRenderer;

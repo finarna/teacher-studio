@@ -12,6 +12,10 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { OFFICIAL_BIOLOGY_TOPICS } from './officialTopics';
+// REMOVED: latexFixer causes double backslash issues
+// import { fixLatexErrors, fixLatexInObject } from './latexFixer';
+
+
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -146,14 +150,15 @@ const loadImage = async (file: File): Promise<HTMLImageElement[]> => {
 
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 2.0 });
+      const viewport = page.getViewport({ scale: 1.5 });
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       await page.render({ canvasContext: canvas.getContext('2d')!, viewport }).promise;
 
       const img = new Image();
-      img.src = canvas.toDataURL('image/jpeg', 0.9);
+      img.src = canvas.toDataURL('image/jpeg', 0.8);
+
       await new Promise(r => img.onload = r);
       images.push(img);
     }
@@ -203,10 +208,11 @@ export const processInParallel = async <T, R>(
 export async function extractBiologyQuestionsSimplified(
   file: File,
   apiKey: string,
-  model: string = 'gemini-3-flash-preview',
+  model: string,  // Always provided by the UI selector — no hardcoded default
   examContext: string = 'KCET',
   onProgress?: (current: number, total: number, found: number) => void
 ): Promise<any[]> {
+
   const ai = new GoogleGenAI({ apiKey });
 
   console.log(`🚀 [BIOLOGY] Starting extraction with ${model} for ${examContext}...`);
@@ -214,26 +220,37 @@ export async function extractBiologyQuestionsSimplified(
 
   // Step 1: Load PDF as images (one per page)
   const pages = await loadImage(file);
-  console.log(`[BIOLOGY_INIT] File: ${file.name}, Subject: Biology. Total Pages: ${pages.length}. Concurrency: 3.`);
+  const totalPages = pages.length;
+  console.log(`[BIOLOGY_INIT] Pages: ${totalPages}. Concurrency: 2 (rate-limit safe).`);
+
 
   if (pages.length === 0) {
     console.error("[BIOLOGY_INIT] Aborted: No pages rendered.");
     return [];
   }
 
-  // Step 2: Process pages in parallel (3 concurrent workers)
+  // Step 2: Process pages in parallel (2 concurrent workers — rate-limit safe)
   const allQuestionsArray = await processInParallel(pages, async (pageImg, i) => {
-    console.log(`[BIOLOGY_PAGE] Deep Extraction Phase: Page ${i + 1}/${pages.length}...`);
+    console.log(`[BIOLOGY_PAGE] Deep Extraction Phase: Page ${i + 1}/${totalPages}...`);
     const base64 = pageImg.src.split(',')[1];
 
-    const prompt = `
+    // Per-page retry: if 0 questions returned, retry up to 2 more times
+    for (let attempt = 0; attempt < 3; attempt++) {
+
+      const prompt = `
 # CONTEXT:
 Exam: ${examContext}
 Subject: Biology (Class 12)
-Page: ${i + 1}
+Page: ${i + 1} of ${totalPages}
 
 # ROLE: Elite Biology STEM Analyst & Learning Coach
-Extract ALL questions from this page with complete solutions and metadata.
+Extract ALL MCQs visible on this page. This page may have 8–12 questions — do NOT stop early.
+⚠️ If a question starts here and ends on the next page, extract what is visible.
+
+🚨🚨🚨 GOLDEN RULE: SYLLABUS & MARKING COMPLIANCE
+1. SYLLABUS: Strictly adhere to the latest official NCERT Class 12 Biology syllabus.
+2. MARKING: Extract marks verbatim from the paper. MCQs are worth EXACTLY 1 Mark unless specified otherwise.
+3. VERBATIM: Copy text exactly as seen. Extract what you OBSERVE, not what you EXPECT.
 
 CRITICAL: If a question has a DIAGRAM, FIGURE, GRAPH, or TABLE, you MUST:
 1. Set diagramBox with coordinates { "ymin": 0-1000, "xmin": 0-1000, "ymax": 0-1000, "xmax": 0-1000 }
@@ -281,7 +298,7 @@ You MUST map every question to one of these official chapter names:
 IMPORTANT RULES:
 1. Extract the ACTUAL question number from the PDF as "id" (e.g., "1", "2", "3", NOT auto-generated IDs)
 2. For diagrams/figures: Estimate bounding box coordinates (0-1000 scale for page dimensions)
-3. Scientific names: $\\\\textit{Homo sapiens}$ format
+3. Scientific names: $\textit{Homo sapiens}$ format
 4. Match-the-following: "List-I: a) Item1, b) Item2..." and "List-II: p) Value1, q) Value2..."
 5. Extract complete solution steps with biological reasoning
 6. NO PREAMBLE. Return ONLY the JSON object.
@@ -289,116 +306,165 @@ IMPORTANT RULES:
 Extract ALL questions visible on this page.
     `.trim();
 
-    try {
-      console.log(`[BIOLOGY_AI] Page ${i + 1}: Sending base64 payload to ${model}...`);
-      const startTime = Date.now();
+      try {
+        console.log(`[BIOLOGY_AI] Page ${i + 1} Attempt ${attempt + 1}: Sending to ${model}...`);
+        const startTime = Date.now();
 
-      const result: any = await withRetry(() => ai.models.generateContent({
-        model,
-        contents: [{
-          parts: [
-            { inlineData: { mimeType: "image/jpeg", data: base64 } },
-            { text: prompt }
-          ]
-        }],
-        config: {
-          responseMimeType: "application/json",
-          temperature: 0.1,
-          maxOutputTokens: 100000
-        }
-      }));
+        const result: any = await withRetry(() => ai.models.generateContent({
 
-      const elapsed = Date.now() - startTime;
-      const responseText = result.text;
-      console.log(`[BIOLOGY_AI] Page ${i + 1}: Received ${responseText?.length || 0} chars in ${elapsed}ms.`);
-
-      const parsedData = salvageTruncatedJSON(responseText || "{}");
-      const questions = parsedData?.questions || [];
-      console.log(`[BIOLOGY_MAP] Page ${i + 1}: Extracted ${questions.length} questions.`);
-
-      // Map to internal format with diagram cropping
-      const mapped = questions.map((q: any, idx: number) => {
-        console.log(`[BIOLOGY_MAP] Mapping Question ${idx + 1} on Page ${i + 1}: ${q.text?.substring(0, 30)}...`);
-
-        return {
-          id: q.id || `bio_${Date.now()}_${i * 100 + idx}`,
-          text: q.text,
-          subject: 'Biology',
-          options: q.options?.map((optStr: string, optIdx: number) => {
-            const id = optStr.match(/\((.*?)\)/)?.[1] || String.fromCharCode(65 + optIdx);
-            const text = optStr.replace(/^\(.\)\s*/, '');
-            return {
-              id,
-              text,
-              isCorrect: optIdx === q.correctOptionIndex
-            };
-          }) || [],
-          correctOptionIndex: q.correctOptionIndex,
-          // Top-level fields expected by BoardMastermind & database
-          topic: q.topic || 'Evolution',
-          domain: determineDomain(q.topic),
-          difficulty: q.metadata?.difficulty || 'medium',
-          blooms: q.metadata?.bloomLevel || 'Understanding',
-          marks: q.metadata?.marksWeight || 1,
-          // Crop diagram from page image if coordinates provided
-          imageUrl: q.diagramBox ? cropDiagram(pageImg, q.diagramBox) : undefined,
-          hasVisualElement: !!q.diagramBox,
-          visualElementType: q.diagramBox ? 'diagram' : null,
-          visualElementDescription: q.diagramBox ? 'Question contains diagram' : null,
-          visualBoundingBox: q.diagramBox,
-          // Rich pedagogical data
-          strategicHook: q.strategicHook || q.solutionData?.finalTip,
-          // Convert solutionData.steps to solutionSteps (array of strings) for database
-          solutionSteps: q.solutionData?.steps?.map((s: any) => {
-            const stepText = s.text || s;
-            // Clean up LaTeX itemize markup and stray backslashes
-            return stepText
-              .replace(/\\begin\{itemize\}/g, '')
-              .replace(/\\end\{itemize\}/g, '')
-              .replace(/\\item\s*/g, '• ')
-              .replace(/\$\\textit\{([^}]+)\}\$/g, '$1')  // Remove $\textit{...}$
-              .replace(/\\textit\{([^}]+)\}/g, '$1')  // Remove \textit{...} without $
-              .replace(/\\text(bf|it|rm)\{([^}]+)\}/g, '$2')  // Remove other text commands
-              .replace(/\\([a-z])/g, '$1')  // Remove remaining stray backslashes before lowercase letters
-              .replace(/\s+/g, ' ')  // Clean multiple spaces
-              .trim();
-          }) || [],
-          examTip: q.solutionData?.finalTip || q.strategicHook,
-          smartNotes: q.smartNotes,
-          // Keep metadata for additional info
-          metadata: {
-            subTopic: q.metadata?.subTopic || '',
-            trapPotential: q.metadata?.trapPotential || 5,
-            isPastYear: true,
-            year: "2025",
-            source: examContext
+          model,
+          contents: [{
+            parts: [
+              { inlineData: { mimeType: "image/jpeg", data: base64 } },
+              { text: prompt }
+            ]
+          }],
+          config: {
+            responseMimeType: "application/json",
+            temperature: 0.1,
+            maxOutputTokens: 100000
           }
-        };
-      });
+        }));
 
-      if (onProgress) {
-        onProgress(i + 1, pages.length, mapped.length);
+        const elapsed = Date.now() - startTime;
+        const responseText = result.text;
+        console.log(`[BIOLOGY_AI] Page ${i + 1} A${attempt + 1}: ${responseText?.length || 0} chars in ${elapsed}ms.`);
+
+        const parsedData = salvageTruncatedJSON(responseText || "{}");
+        const questions = parsedData?.questions || [];
+        console.log(`[BIOLOGY_MAP] Page ${i + 1} A${attempt + 1}: ${questions.length} questions extracted.`);
+
+        if (questions.length === 0 && attempt < 2) {
+          console.warn(`[BIOLOGY_PAGE_${i + 1}] Got 0 questions on attempt ${attempt + 1}. Retrying...`);
+          await sleep(2000 + attempt * 1000);
+          continue;
+        }
+
+        // Map to internal format with diagram cropping
+        const mapped = questions.map((q: any, idx: number) => {
+          console.log(`[BIOLOGY_MAP] Mapping Question ${idx + 1} on Page ${i + 1}: ${q.text?.substring(0, 30)}...`);
+
+          return {
+            id: q.id || `bio_${Date.now()}_${i * 100 + idx}`,
+            text: q.text,
+            subject: 'Biology',
+            options: q.options?.map((optStr: string, optIdx: number) => {
+              const id = optStr.match(/\((.*?)\)/)?.[1] || String.fromCharCode(65 + optIdx);
+              const text = optStr.replace(/^\(.\)\s*/, '');
+              return {
+                id,
+                text,
+                isCorrect: optIdx === q.correctOptionIndex
+              };
+            }) || [],
+            correctOptionIndex: q.correctOptionIndex,
+            // Top-level fields expected by BoardMastermind & database
+            topic: q.topic || 'Evolution',
+            domain: determineDomain(q.topic),
+            difficulty: q.metadata?.difficulty || 'medium',
+            blooms: q.metadata?.bloomLevel || 'Understanding',
+            marks: q.metadata?.marksWeight || 1,
+            // Crop diagram from page image if coordinates provided
+            imageUrl: q.diagramBox ? cropDiagram(pageImg, q.diagramBox) : undefined,
+            hasVisualElement: !!q.diagramBox,
+            visualElementType: q.diagramBox ? 'diagram' : null,
+            visualElementDescription: q.diagramBox ? 'Question contains diagram' : null,
+            visualBoundingBox: q.diagramBox,
+            // Rich pedagogical data
+            strategicHook: q.strategicHook || q.solutionData?.finalTip,
+            // Convert solutionData.steps to solutionSteps (array of strings) for database
+            solutionSteps: q.solutionData?.steps?.map((s: any) => {
+              const stepText = s.text || s;
+              // Clean up LaTeX itemize markup and stray backslashes
+              return stepText
+                .replace(/\\begin\{itemize\}/g, '')
+                .replace(/\\end\{itemize\}/g, '')
+                .replace(/\\item\s*/g, '• ')
+                .replace(/\$\\textit\{([^}]+)\}\$/g, '$1')  // Remove $\textit{...}$
+                .replace(/\\textit\{([^}]+)\}/g, '$1')  // Remove \textit{...} without $
+                .replace(/\\text(bf|it|rm)\{([^}]+)\}/g, '$2')  // Remove other text commands
+                .replace(/\\([a-z])/g, '$1')  // Remove remaining stray backslashes before lowercase letters
+                .replace(/\s+/g, ' ')  // Clean multiple spaces
+                .trim();
+            }) || [],
+            examTip: q.solutionData?.finalTip || q.strategicHook,
+            smartNotes: q.smartNotes,
+            // Keep metadata for additional info
+            metadata: {
+              subTopic: q.metadata?.subTopic || '',
+              trapPotential: q.metadata?.trapPotential || 5,
+              isPastYear: true,
+              year: "2025",
+              source: examContext
+            }
+          };
+        });
+
+        if (onProgress) {
+          onProgress(i + 1, totalPages, mapped.length);
+        }
+
+        return mapped;
+      } catch (e) {
+        console.error(`[BIOLOGY_FATAL] Page ${i + 1} Attempt ${attempt + 1} Error:`, e);
+        if (attempt < 2) {
+          await sleep(2000);
+          continue;
+        }
+        return []; // All retries exhausted
       }
+    } // end attempt loop
+    return [];
+  }, 2); // 2 concurrent workers (rate-limit safe)
 
-      return mapped;
 
-    } catch (e) {
-      console.error(`[BIOLOGY_FATAL] Page ${i + 1} Error:`, e);
-      return []; // Continue processing other pages
-    }
-  }, 3); // 3 concurrent workers
-
-  // Step 3: Flatten results from all pages
+  // Step 3: Flatten + deduplicate + sort + fidelity pass
   const allQuestions = allQuestionsArray.flat();
+  console.log(`✅ [BIOLOGY] Raw extracted: ${allQuestions.length} questions across ${totalPages} pages`);
 
-  console.log(`✅ [BIOLOGY] Extraction complete!`);
-  console.log(`📊 [BIOLOGY] Total questions: ${allQuestions.length}`);
-  console.log(`📄 [BIOLOGY] From ${pages.length} pages`);
-  console.log(`🖼️  [BIOLOGY] With diagrams: ${allQuestions.filter((q: any) => q.imageUrl).length}`);
-  console.log(`📚 [BIOLOGY] Topics covered: ${[...new Set(allQuestions.map((q: any) => q.topic))].length}`);
+  // Deduplicate by question ID — keep version with more options (most complete)
+  const seenIds = new Map<string, any>();
+  for (const q of allQuestions) {
+    const qId = (q.id || '').toString().trim();
+    const existing = seenIds.get(qId);
+    if (!existing || (q.options?.length || 0) > (existing.options?.length || 0)) {
+      seenIds.set(qId, q);
+    }
+  }
+  const deduped = Array.from(seenIds.values());
 
-  return allQuestions;
+  // Sort by numeric question ID
+  deduped.sort((a, b) => {
+    const numA = parseInt((a.id || '').toString().replace(/\D/g, '')) || 0;
+    const numB = parseInt((b.id || '').toString().replace(/\D/g, '')) || 0;
+    return numA - numB;
+  });
+
+  console.log(`📊 [BIOLOGY] After dedup: ${deduped.length} questions`);
+  console.log(`🗄️ [BIOLOGY] From ${totalPages} pages`);
+  console.log(`🖼️  [BIOLOGY] With diagrams: ${deduped.filter((q: any) => q.imageUrl).length}`);
+  console.log(`📚 [BIOLOGY] Topics covered: ${[...new Set(deduped.map((q: any) => q.topic))].length}`);
+
+  // Final fidelity pass: Sequential re-indexing (NO latexFixer - store Gemini output as-is)
+  const finalQuestions = deduped.map((q, idx) => {
+    // REMOVED: fixLatexInObject(q) - causes double backslashes
+    // Gemini returns correct LaTeX format, store it directly
+    return {
+      ...q,
+      id: idx + 1,  // Re-index sequentially
+      metadata: {
+        ...q.metadata,
+        topic: q.metadata?.topic || ""  // REMOVED: fixLatexErrors
+      }
+    };
+  });
+
+  console.log(`✅ [BIOLOGY] Final clean questions: ${finalQuestions.length}`);
+  return finalQuestions;
 }
+
+
+
 
 /**
  * Helper: Determine Biology domain from topic name

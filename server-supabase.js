@@ -198,6 +198,7 @@ function transformDbScanToApi(dbScan) {
     grade: dbScan.grade,
     subject: dbScan.subject,
     examContext: dbScan.exam_context || 'KCET', // Default to KCET if not set
+    year: dbScan.year,
     analysisData: dbScan.analysis_data || {
       summary: dbScan.summary,
       overallDifficulty: dbScan.overall_difficulty,

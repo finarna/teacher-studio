@@ -24,6 +24,11 @@ CRITICAL: Errors in extraction (merged words, incorrect symbols, missing diagram
 
 # EXTRACTION METHODOLOGY
 
+🚨🚨🚨 GOLDEN RULE: SYLLABUS & MARKING COMPLIANCE
+1. SYLLABUS: Strictly adhere to the latest official NCERT Class 12 Biology syllabus.
+2. MARKING: Extract marks verbatim from the paper. MCQs are worth EXACTLY 1 Mark unless specified otherwise.
+3. VERBATIM: Copy text exactly as seen. Extract what you OBSERVE, not what you EXPECT.
+
 ## STEP 1: VISUAL ANALYSIS
 Before extracting, carefully examine the PDF image:
 1. Identify ALL question numbers (Q1, Q2, Q3... through Q60)
@@ -44,30 +49,33 @@ When you read text from the PDF, type it EXACTLY as a human would—with natural
 
 TECHNIQUE: Read each word individually, type it, press SPACE, move to next word.
 
-## STEP 3: SCIENTIFIC NAME FORMATTING
+## STEP 3: UNICODE → LATEX MANDATORY CONVERSIONS (CRITICAL):
+   α → $\\alpha$ | β → $\\beta$ | γ → $\\gamma$ | δ → $\\delta$ | π → $\\pi$
+   x² → $x^2$ | x₁ → $x_1$ | θ → $\\theta$ | λ → $\\lambda$ | □ → $\\Box$
+   - NEVER use raw Unicode symbols or plain text like "alpha-cells".
 
+## STEP 4: SCIENTIFIC NAME FORMATTING
 Convert ALL scientific names to proper italic LaTeX format:
+1. DELIMITERS: Wrap ALL scientific names in $...$.
+2. ITALICS: Use \\textit{} (e.g., $\\textit{Homo sapiens}$).
 
-### BINOMIAL NOMENCLATURE:
-Homo sapiens → $\\textit{Homo sapiens}$
-Escherichia coli → $\\textit{Escherichia coli}$
-Plasmodium vivax → $\\textit{Plasmodium vivax}$
+✅ CORRECT: "The ancestor of $\\textit{Homo sapiens}$ is"
+❌ WRONG:   "The ancestor of \\\\textit{Homo sapiens} is" (DO NOT double-escape)
 
-### GENUS NAMES:
-Homo → $\\textit{Homo}$
-Drosophila → $\\textit{Drosophila}$
+### 4A. EXAMPLES:
+- Binomial: $\\textit{Escherichia coli}$, $\\textit{Plasmodium vivax}$
+- Genus: $\\textit{Drosophila}$, $\\textit{Oryza}$
 
-## STEP 4: GREEK SYMBOLS
+## STEP 5: GREEK SYMBOLS
+Convert ALL Greek letters to standard LaTeX:
+1. DELIMITERS: Wrap ALL Greek letters in $...$.
+2. COMMANDS: Use \\alpha, \\beta, \\gamma, \\delta, etc.
 
-Convert Greek letter names to proper symbols:
-alpha → α
-beta → β
-gamma → γ
-delta → δ
+✅ CORRECT: "The $\\alpha$-cells of pancreas"
+❌ WRONG:   "The alpha-cells" or "The α-cells"
 
-DO NOT use LaTeX for Greek letters in Biology - use the actual Unicode symbols.
 
-## STEP 5: MATCH-THE-FOLLOWING TABLES
+## STEP 6: MATCH-THE-FOLLOWING TABLES
 
 When you see a "Match List-I with List-II" question:
 
@@ -124,7 +132,7 @@ EVERY question MUST have EXACTLY 4 options labeled (A), (B), (C), (D).
 ### OPTION FORMAT:
 Each option must start with its label:
 "(A) Option text with proper formatting"
-"(B) Another option with $\\textit{Scientific name}$"
+"(B) Another option with $\\\\textit{Scientific name}$"
 "(C) Third option"
 "(D) Fourth option"
 
@@ -170,7 +178,7 @@ NOTE: If hasVisualElement is true, include the visualBoundingBox with percentage
 
 Before submitting your JSON, verify:
 □ ALL words have spaces between them (no "Thedomainofthe" merging)
-□ ALL scientific names use $\\textit{Name}$ format
+□ ALL scientific names use $\\\\textit{Name}$ format
 □ ALL match-the-following questions are properly formatted
 □ ALL questions have EXACTLY 4 options with (A)(B)(C)(D) labels
 □ ALL topics are specific (not "General" or empty)

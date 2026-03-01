@@ -35,48 +35,48 @@ function fixLatexErrors(text) {
 
   const fixes = [
     // Missing backslash before common commands
-    [/([^\\])frac\{/g, '$1\\frac{'],
-    [/([^\\])int\s/g, '$1\\int '],
-    [/([^\\])sum\s/g, '$1\\sum '],
-    [/([^\\])prod\s/g, '$1\\prod '],
-    [/([^\\])lim\s/g, '$1\\lim '],
-    [/([^\\])sqrt\{/g, '$1\\sqrt{'],
+    [/\bfrac\{/g, '\\frac{'],
+    [/\bint\b/g, '\\int'],
+    [/\bsum\b/g, '\\sum'],
+    [/\bprod\b/g, '\\prod'],
+    [/\blim\b/g, '\\lim'],
+    [/\bsqrt\{/g, '\\sqrt{'],
 
     // Trigonometric functions
-    [/([^\\])sin\s/g, '$1\\sin '],
-    [/([^\\])cos\s/g, '$1\\cos '],
-    [/([^\\])tan\s/g, '$1\\tan '],
-    [/([^\\])tan\^/g, '$1\\tan^'],
-    [/([^\\])cot\s/g, '$1\\cot '],
-    [/([^\\])sec\s/g, '$1\\sec '],
-    [/([^\\])csc\s/g, '$1\\csc '],
+    [/\bsin\b/g, '\\sin'],
+    [/\bcos\b/g, '\\cos'],
+    [/\btan\b/g, '\\tan'],
+    [/\btan\^/g, '\\tan^'],
+    [/\bcot\b/g, '\\cot'],
+    [/\bsec\b/g, '\\sec'],
+    [/\bcsc\b/g, '\\csc'],
 
     // Logarithms
-    [/([^\\])log\s/g, '$1\\log '],
-    [/([^\\])ln\s/g, '$1\\ln '],
+    [/\blog\b/g, '\\log'],
+    [/\bln\b/g, '\\ln'],
 
     // Left/Right delimiters
-    [/([^\\])left\(/g, '$1\\left('],
-    [/([^\\])right\)/g, '$1\\right)'],
-    [/([^\\])left\[/g, '$1\\left['],
-    [/([^\\])right\]/g, '$1\\right]'],
+    [/\bleft\(/g, '\\left('],
+    [/\bright\)/g, '\\right)'],
+    [/\bleft\[/g, '\\left['],
+    [/\bright\]/g, '\\right]'],
 
     // Accents
-    [/([^\\])bar\{/g, '$1\\bar{'],
-    [/([^\\])vec\{/g, '$1\\vec{'],
-    [/([^\\])hat\{/g, '$1\\hat{'],
+    [/\bbar\{/g, '\\bar{'],
+    [/\bvec\{/g, '\\vec{'],
+    [/\bhat\{/g, '\\hat{'],
 
     // Greek letters
-    [/([^\\])alpha\b/g, '$1\\alpha'],
-    [/([^\\])beta\b/g, '$1\\beta'],
-    [/([^\\])gamma\b/g, '$1\\gamma'],
-    [/([^\\])theta\b/g, '$1\\theta'],
-    [/([^\\])pi\b/g, '$1\\pi'],
+    [/\balpha\b/g, '\\alpha'],
+    [/\bbeta\b/g, '\\beta'],
+    [/\bgamma\b/g, '\\gamma'],
+    [/\btheta\b/g, '\\theta'],
+    [/\bpi\b/g, '\\pi'],
 
     // Relations
-    [/([^\\])leq\b/g, '$1\\leq'],
-    [/([^\\])geq\b/g, '$1\\geq'],
-    [/([^\\])neq\b/g, '$1\\neq'],
+    [/\bleq\b/g, '\\leq'],
+    [/\bgeq\b/g, '\\geq'],
+    [/\bneq\b/g, '\\neq'],
 
     // Remove trailing backslashes
     [/\\+(\s*[\)\]\}$])/g, '$1'],
@@ -233,7 +233,7 @@ function testScan(scan) {
  */
 async function runTests() {
   console.log('🧪 LATEX/KATEX FIX VALIDATION TEST');
-  console.log('=' .repeat(80));
+  console.log('='.repeat(80));
 
   try {
     // Fetch recent Math scans (try both "Math" and "Mathematics")

@@ -19,55 +19,58 @@
  * These shortcuts are registered with KaTeX for efficient rendering
  */
 export const LATEX_MACROS = {
-  "\\label": "\\href{###1}",
+   "\\label": "\\href{###1}",
 
-  // NUMBER SYSTEMS (Blackboard Bold)
-  "\\R": "\\mathbb{R}",
-  "\\N": "\\mathbb{N}",
-  "\\Z": "\\mathbb{Z}",
-  "\\Q": "\\mathbb{Q}",
-  "\\C": "\\mathbb{C}",
+   // NUMBER SYSTEMS (Blackboard Bold)
+   "\\R": "\\mathbb{R}",
+   "\\N": "\\mathbb{N}",
+   "\\Z": "\\mathbb{Z}",
+   "\\Q": "\\mathbb{Q}",
+   "\\C": "\\mathbb{C}",
 
-  // VECTOR & MATRIX SHORTCUTS
-  "\\vectorbold": "\\mathbf{#1}",
-  "\\norm": "\\left\\| #1 \\right\\|",
-  "\\abs": "\\left| #1 \\right|",
+   // VECTOR & MATRIX SHORTCUTS
+   "\\vectorbold": "\\mathbf{#1}",
+   "\\norm": "\\left\\| #1 \\right\\|",
+   "\\abs": "\\left| #1 \\right|",
 
-  // CALCULUS SHORTCUTS
-  "\\diff": "\\frac{d#1}{d#2}",              // d/dx notation
-  "\\pdiff": "\\frac{\\partial#1}{\\partial#2}", // ∂/∂x notation
-  "\\dd": "\\,\\mathrm{d}",                  // Differential d (spacing)
-  "\\dv": "\\frac{d#1}{d#2}",                // Derivative (alias)
-  "\\pdv": "\\frac{\\partial#1}{\\partial#2}", // Partial derivative (alias)
+   // CALCULUS SHORTCUTS
+   "\\diff": "\\frac{d#1}{d#2}",              // d/dx notation
+   "\\pdiff": "\\frac{\\partial#1}{\\partial#2}", // ∂/∂x notation
+   "\\dd": "\\,\\mathrm{d}",                  // Differential d (spacing)
+   "\\dv": "\\frac{d#1}{d#2}",                // Derivative (alias)
+   "\\pdv": "\\frac{\\partial#1}{\\partial#2}", // Partial derivative (alias)
 
-  // LIMITS & INTEGRALS
-  "\\liminf": "\\lim\\inf",
-  "\\limsup": "\\lim\\sup",
+   // LIMITS & INTEGRALS
+   "\\liminf": "\\lim\\inf",
+   "\\limsup": "\\lim\\sup",
 
-  // COMMON FUNCTIONS
-  "\\arctg": "\\arctan",
-  "\\tg": "\\tan",
-  "\\ctg": "\\cot",
-  "\\cosec": "\\csc",
+   // COMMON FUNCTIONS
+   "\\arctg": "\\arctan",
+   "\\tg": "\\tan",
+   "\\ctg": "\\cot",
+   "\\cosec": "\\csc",
 
-  // CUSTOM OPERATORS
-  "\\rank": "\\operatorname{rank}",
-  "\\tr": "\\operatorname{tr}",
-  "\\Tr": "\\operatorname{Tr}",
-  "\\det": "\\operatorname{det}",
-  "\\diag": "\\operatorname{diag}",
-  "\\lcm": "\\operatorname{lcm}",
-  "\\gcd": "\\operatorname{gcd}",
+   // CUSTOM OPERATORS
+   "\\rank": "\\operatorname{rank}",
+   "\\tr": "\\operatorname{tr}",
+   "\\Tr": "\\operatorname{Tr}",
+   "\\det": "\\operatorname{det}",
+   "\\diag": "\\operatorname{diag}",
+   "\\lcm": "\\operatorname{lcm}",
+   "\\gcd": "\\operatorname{gcd}",
 
-  // PROBABILITY & STATISTICS
-  "\\Var": "\\operatorname{Var}",
-  "\\Cov": "\\operatorname{Cov}",
-  "\\E": "\\mathbb{E}",                      // Expected value
-  "\\Prob": "\\operatorname{P}",
+   // PROBABILITY & STATISTICS
+   "\\Var": "\\operatorname{Var}",
+   "\\Cov": "\\operatorname{Cov}",
+   "\\E": "\\mathbb{E}",                      // Expected value
+   "\\Prob": "\\operatorname{P}",
 
-  // COMMON MATH STRUCTURES
-  "\\floor": "\\left\\lfloor #1 \\right\\rfloor",
-  "\\ceil": "\\left\\lceil #1 \\right\\rceil"
+   // COMMON MATH STRUCTURES
+   "\\floor": "\\left\\lfloor #1 \\right\\rfloor",
+   "\\ceil": "\\left\\lceil #1 \\right\\rceil",
+
+   // CHEMISTRY (mhchem support)
+   "\\ce": "\\ce"
 };
 
 /**
@@ -75,100 +78,100 @@ export const LATEX_MACROS = {
  * Used for auto-detection of LaTeX commands in raw text
  */
 export const LATEX_PATTERNS = [
-  // BASIC OPERATIONS & ARITHMETIC
-  '\\frac', '\\sqrt', '\\pm', '\\mp', '\\times', '\\div', '\\cdot', '\\ast',
+   // BASIC OPERATIONS & ARITHMETIC
+   '\\frac', '\\sqrt', '\\pm', '\\mp', '\\times', '\\div', '\\cdot', '\\ast',
 
-  // CALCULUS - Integrals, Limits, Derivatives, Summations
-  '\\int', '\\iint', '\\iiint', '\\oint', '\\sum', '\\prod', '\\lim', '\\sup', '\\inf',
-  '\\partial', '\\nabla', '\\diff', '\\pdiff', '\\frac{d', '\\frac{\\partial',
+   // CALCULUS - Integrals, Limits, Derivatives, Summations
+   '\\int', '\\iint', '\\iiint', '\\oint', '\\sum', '\\prod', '\\lim', '\\sup', '\\inf',
+   '\\partial', '\\nabla', '\\diff', '\\pdiff', '\\frac{d', '\\frac{\\partial',
 
-  // ALGEBRA - Sets, Logic, Relations
-  '\\in', '\\notin', '\\subset', '\\subseteq', '\\supset', '\\supseteq',
-  '\\cup', '\\cap', '\\setminus', '\\emptyset', '\\varnothing',
-  '\\forall', '\\exists', '\\nexists', '\\implies', '\\iff', '\\neg', '\\land', '\\lor',
-  '\\mathbb{', '\\R', '\\N', '\\Z', '\\Q', '\\C', '\\Bbb',
+   // ALGEBRA - Sets, Logic, Relations
+   '\\in', '\\notin', '\\subset', '\\subseteq', '\\supset', '\\supseteq',
+   '\\cup', '\\cap', '\\setminus', '\\emptyset', '\\varnothing',
+   '\\forall', '\\exists', '\\nexists', '\\implies', '\\iff', '\\neg', '\\land', '\\lor',
+   '\\mathbb{', '\\R', '\\N', '\\Z', '\\Q', '\\C', '\\Bbb',
 
-  // MATRICES & DETERMINANTS
-  '\\begin{matrix}', '\\begin{pmatrix}', '\\begin{bmatrix}', '\\begin{vmatrix}', '\\begin{Vmatrix}',
-  '\\begin{array}', '\\begin{cases}',
+   // MATRICES & DETERMINANTS
+   '\\begin{matrix}', '\\begin{pmatrix}', '\\begin{bmatrix}', '\\begin{vmatrix}', '\\begin{Vmatrix}',
+   '\\begin{array}', '\\begin{cases}',
 
-  // MULTI-LINE EQUATIONS & ALIGNMENT
-  '\\begin{aligned}', '\\begin{align}', '\\begin{align*}',
-  '\\begin{gather}', '\\begin{gather*}',
-  '\\begin{equation}', '\\begin{equation*}',
-  '\\begin{split}',
-  '\\\\', '&', // Alignment markers (double backslash for new line, & for alignment)
+   // MULTI-LINE EQUATIONS & ALIGNMENT
+   '\\begin{aligned}', '\\begin{align}', '\\begin{align*}',
+   '\\begin{gather}', '\\begin{gather*}',
+   '\\begin{equation}', '\\begin{equation*}',
+   '\\begin{split}',
+   '\\\\', '&', // Alignment markers (double backslash for new line, & for alignment)
 
-  // EQUATION NUMBERING & TAGS
-  '\\tag{', '\\notag', '\\eqref{',
+   // EQUATION NUMBERING & TAGS
+   '\\tag{', '\\notag', '\\eqref{',
 
-  // VECTORS & 3D GEOMETRY
-  '\\vec{', '\\overrightarrow{', '\\overleftarrow{', '\\mathbf{',
-  '\\hat{', '\\bar{', '\\tilde{', '\\dot{', '\\ddot{',
-  '\\norm', '\\abs', '\\langle', '\\rangle',
+   // VECTORS & 3D GEOMETRY
+   '\\vec{', '\\overrightarrow{', '\\overleftarrow{', '\\mathbf{',
+   '\\hat{', '\\bar{', '\\tilde{', '\\dot{', '\\ddot{',
+   '\\norm', '\\abs', '\\langle', '\\rangle',
 
-  // LINEAR PROGRAMMING - Inequalities & Optimization
-  '\\leq', '\\geq', '\\ll', '\\gg', '\\neq', '\\equiv', '\\approx', '\\sim', '\\simeq',
-  '\\max', '\\min', '\\arg\\max', '\\arg\\min',
+   // LINEAR PROGRAMMING - Inequalities & Optimization
+   '\\leq', '\\geq', '\\ll', '\\gg', '\\neq', '\\equiv', '\\approx', '\\sim', '\\simeq',
+   '\\max', '\\min', '\\arg\\max', '\\arg\\min',
 
-  // PROBABILITY & STATISTICS
-  '\\binom', '\\choose', '^n', '_n', 'C_', 'P_',
-  '\\overline{', '\\bar{', '\\hat{', '\\sigma', '\\mu', '\\Sigma',
-  '\\cap', '\\cup', '\\mid', '\\perp',
+   // PROBABILITY & STATISTICS
+   '\\binom', '\\choose', '^n', '_n', 'C_', 'P_',
+   '\\overline{', '\\bar{', '\\hat{', '\\sigma', '\\mu', '\\Sigma',
+   '\\cap', '\\cup', '\\mid', '\\perp',
 
-  // GREEK LETTERS (lowercase)
-  '\\alpha', '\\beta', '\\gamma', '\\delta', '\\epsilon', '\\varepsilon',
-  '\\zeta', '\\eta', '\\theta', '\\vartheta', '\\iota', '\\kappa',
-  '\\lambda', '\\mu', '\\nu', '\\xi', '\\pi', '\\varpi',
-  '\\rho', '\\varrho', '\\sigma', '\\varsigma', '\\tau', '\\upsilon',
-  '\\phi', '\\varphi', '\\chi', '\\psi', '\\omega',
+   // GREEK LETTERS (lowercase)
+   '\\alpha', '\\beta', '\\gamma', '\\delta', '\\epsilon', '\\varepsilon',
+   '\\zeta', '\\eta', '\\theta', '\\vartheta', '\\iota', '\\kappa',
+   '\\lambda', '\\mu', '\\nu', '\\xi', '\\pi', '\\varpi',
+   '\\rho', '\\varrho', '\\sigma', '\\varsigma', '\\tau', '\\upsilon',
+   '\\phi', '\\varphi', '\\chi', '\\psi', '\\omega',
 
-  // GREEK LETTERS (uppercase)
-  '\\Gamma', '\\Delta', '\\Theta', '\\Lambda', '\\Xi', '\\Pi',
-  '\\Sigma', '\\Upsilon', '\\Phi', '\\Psi', '\\Omega',
+   // GREEK LETTERS (uppercase)
+   '\\Gamma', '\\Delta', '\\Theta', '\\Lambda', '\\Xi', '\\Pi',
+   '\\Sigma', '\\Upsilon', '\\Phi', '\\Psi', '\\Omega',
 
-  // ARROWS & MAPPINGS
-  '\\to', '\\mapsto', '\\rightarrow', '\\leftarrow', '\\leftrightarrow',
-  '\\Rightarrow', '\\Leftarrow', '\\Leftrightarrow', '\\longrightarrow',
+   // ARROWS & MAPPINGS
+   '\\to', '\\mapsto', '\\rightarrow', '\\leftarrow', '\\leftrightarrow',
+   '\\Rightarrow', '\\Leftarrow', '\\Leftrightarrow', '\\longrightarrow',
 
-  // ADVANCED BRACKETS & DELIMITERS
-  '\\left(', '\\right)', '\\left[', '\\right]', '\\left\\{', '\\right\\}',
-  '\\left|', '\\right|', '\\left\\langle', '\\right\\rangle',
-  '\\left\\lfloor', '\\right\\rfloor', '\\left\\lceil', '\\right\\rceil',
-  '\\big(', '\\Big(', '\\bigg(', '\\Bigg(',
+   // ADVANCED BRACKETS & DELIMITERS
+   '\\left(', '\\right)', '\\left[', '\\right]', '\\left\\{', '\\right\\}',
+   '\\left|', '\\right|', '\\left\\langle', '\\right\\rangle',
+   '\\left\\lfloor', '\\right\\rfloor', '\\left\\lceil', '\\right\\rceil',
+   '\\big(', '\\Big(', '\\bigg(', '\\Bigg(',
 
-  // OVER/UNDER BRACES & ARROWS
-  '\\overbrace{', '\\underbrace{', '\\overline{', '\\underline{',
-  '\\overset{', '\\underset{', '\\stackrel{',
-  '\\xrightarrow{', '\\xleftarrow{',
+   // OVER/UNDER BRACES & ARROWS
+   '\\overbrace{', '\\underbrace{', '\\overline{', '\\underline{',
+   '\\overset{', '\\underset{', '\\stackrel{',
+   '\\xrightarrow{', '\\xleftarrow{',
 
-  // SPACING COMMANDS
-  '\\quad', '\\qquad', '\\,', '\\:', '\\;', '\\!',
-  '\\hspace{', '\\vspace{',
+   // SPACING COMMANDS
+   '\\quad', '\\qquad', '\\,', '\\:', '\\;', '\\!',
+   '\\hspace{', '\\vspace{',
 
-  // SPECIAL SYMBOLS
-  '\\infty', '\\angle', '\\degree', '\\triangle', '\\square', '\\circ',
-  '\\parallel', '\\perp', '\\cong', '\\ncong', '\\propto',
-  '\\therefore', '\\because', '\\dots', '\\cdots', '\\ldots', '\\vdots', '\\ddots',
+   // SPECIAL SYMBOLS
+   '\\infty', '\\angle', '\\degree', '\\triangle', '\\square', '\\circ',
+   '\\parallel', '\\perp', '\\cong', '\\ncong', '\\propto',
+   '\\therefore', '\\because', '\\dots', '\\cdots', '\\ldots', '\\vdots', '\\ddots',
 
-  // OPERATORS & FUNCTIONS
-  '\\sin', '\\cos', '\\tan', '\\cot', '\\sec', '\\csc',
-  '\\arcsin', '\\arccos', '\\arctan',
-  '\\sinh', '\\cosh', '\\tanh',
-  '\\log', '\\ln', '\\lg', '\\exp',
-  '\\det', '\\dim', '\\ker', '\\rank', '\\deg',
-  '\\gcd', '\\lcm', '\\mod', '\\pmod{',
+   // OPERATORS & FUNCTIONS
+   '\\sin', '\\cos', '\\tan', '\\cot', '\\sec', '\\csc',
+   '\\arcsin', '\\arccos', '\\arctan',
+   '\\sinh', '\\cosh', '\\tanh',
+   '\\log', '\\ln', '\\lg', '\\exp',
+   '\\det', '\\dim', '\\ker', '\\rank', '\\deg',
+   '\\gcd', '\\lcm', '\\mod', '\\pmod{',
 
-  // LIMITS & BOUNDS
-  '\\lim_{', '\\sup_{', '\\inf_{', '\\max_{', '\\min_{',
-  '\\limsup', '\\liminf',
+   // LIMITS & BOUNDS
+   '\\lim_{', '\\sup_{', '\\inf_{', '\\max_{', '\\min_{',
+   '\\limsup', '\\liminf',
 
-  // CHEMISTRY (for cross-subject support)
-  '\\ce{',
+   // CHEMISTRY (for cross-subject support)
+   '\\ce{',
 
-  // TEXT & FORMATTING
-  '\\text{', '\\mathrm{', '\\mathit{', '\\mathcal{', '\\mathfrak{',
-  '\\textbf{', '\\textit{', '\\underline{', '\\overline{'
+   // TEXT & FORMATTING
+   '\\text{', '\\mathrm{', '\\mathit{', '\\mathcal{', '\\mathfrak{',
+   '\\textbf{', '\\textit{', '\\underline{', '\\overline{'
 ];
 
 /**
@@ -180,7 +183,7 @@ export const LATEX_PATTERNS = [
  * Used in BoardMastermind prompts to ensure AI extracts formulas correctly
  */
 export function generateMathExtractionInstructions(): string {
-  return `
+   return `
 ══════════════════════════════════════════════════════════════════════════
 CRITICAL MATH NOTATION - Convert Visual Symbols to Proper LaTeX
 ══════════════════════════════════════════════════════════════════════════
@@ -420,7 +423,7 @@ END OF CONVERSION GUIDE
  * Focused on essential patterns only to reduce cognitive load
  */
 export function generateStreamlinedMathInstructions(): string {
-  return `
+   return `
 ══════════════════════════════════════════════════════════════════════════
 ESSENTIAL MATH NOTATION (Focused Extraction Rules)
 ══════════════════════════════════════════════════════════════════════════
@@ -463,7 +466,7 @@ CRITICAL PATTERNS:
  * Get compact notation examples for prompt injection
  */
 export function getMathNotationExamples(): string {
-  return `
+   return `
 KEY NOTATION CONVERSIONS (Quick Reference):
 →a, a→ → $\\vec{a}$ | â, î → $\\hat{a}$, $\\hat{i}$ | dy/dx → $\\frac{dy}{dx}$ | x₁ → $x_1$ | x² → $x^2$ | α → $\\alpha$ | ∫₀¹ → $\\int_0^1$ | ≤ → $\\leq$ | ∞ → $\\infty$
 `;

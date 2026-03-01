@@ -173,7 +173,10 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
             if (!publishedScans) return;
 
             const scanIds = publishedScans.map(s => s.id);
-            const { data: flashcardRecords } = await supabase.from('flashcards').select('scan_id, data').in('scan_id', scanIds);
+            // Guard: `.in('col', [])` → `col=in.()` → 404. Skip when no scan IDs.
+            const flashcardRecords = scanIds.length > 0
+                ? (await supabase.from('flashcards').select('scan_id, data').in('scan_id', scanIds)).data ?? []
+                : [];
             const { data: allTopics } = await supabase.from('topics').select('id, subject, domain');
 
             const subjectPromises = availableSubjects.map(async (subject) => {

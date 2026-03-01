@@ -27,6 +27,11 @@ CRITICAL: Errors in extraction (merged words, hallucinated symbols, incorrect La
 
 # EXTRACTION METHODOLOGY
 
+🚨🚨🚨 GOLDEN RULE: SYLLABUS & MARKING COMPLIANCE
+1. SYLLABUS: Strictly adhere to the latest official NCERT Class 12 Mathematics syllabus.
+2. MARKING: Extract marks verbatim from the paper. MCQs are worth EXACTLY 1 Mark unless specified otherwise.
+3. VERBATIM: Copy text exactly as seen. Extract what you OBSERVE, not what you EXPECT.
+
 ## STEP 1: VISUAL ANALYSIS
 Before extracting, carefully examine the PDF image:
 1. Identify ALL question numbers (Q1, Q2, Q3... through Q60 for Math)
@@ -58,42 +63,34 @@ REAL EXAMPLES FROM PAPERS:
 
 ## STEP 3: LATEX CONVERSION (CRITICAL)
 
-Convert ALL mathematical notation to KaTeX-compatible LaTeX with proper backslashes:
+### 3A. UNICODE → LATEX MANDATORY CONVERSIONS (CRITICAL):
+   x² → $x^2$ | x₁ → $x_1$ | θ → $\\theta$ | π → $\\pi$ | α → $\\alpha$
+   ≤ → $\\leq$ | ≥ → $\\geq$ | ≠ → $\\neq$ | ≈ → $\\approx$ | ± → $\\pm$
+   √ → $\\sqrt{x}$ | ∫ → $\\int$ | ∑ → $\\sum$ | ∞ → $\\infty$ | → → $\\vec{v}$
+   - NEVER use raw Unicode symbols or plain text like "alpha" in output.
 
-### 3A. UNICODE → LATEX MANDATORY CONVERSIONS:
-x² → x^2 | x₁ → x_1 | x₃ → x_3
-≤ → \\leq | ≥ → \\geq | ≠ → \\neq | ≈ → \\approx
-θ → \\theta | π → \\pi | α → \\alpha | β → \\beta | γ → \\gamma
-√ → \\sqrt{} | ∫ → \\int | ∑ → \\sum | ∏ → \\prod
-∂ → \\partial | ∇ → \\nabla | ∞ → \\infty
-→ → \\vec{} | ° → ^\\circ
+### 3B. LATEX CONVERSION RULES:
+1. DELIMITERS: Wrap ALL math in $...$ for inline and $$...$$ for display.
+2. COMMANDS: Use standard LaTeX commands (e.g., \\frac{a}{b}, \\sqrt{x}, \\sin\\theta, \\int, \\pm, \\vec{v}).
+3. FRACTIONS: Always use \\frac{num}{den} (e.g., "dy/dx" → $\\frac{dy}{dx}$).
+4. MATRICES & DETERMINANTS: Use standard environments like \\begin{vmatrix} ... \\end{vmatrix}.
+5. Piecewise Functions: Use \\begin{cases} ... \\end{cases}.
 
-### 3B. INVERSE TRIGONOMETRIC FUNCTIONS:
-sin⁻¹ → \\sin^{-1} | cos⁻¹ → \\cos^{-1} | tan⁻¹ → \\tan^{-1}
-arctan → \\tan^{-1} | arcsin → \\sin^{-1} | arccos → \\cos^{-1}
+✅ CORRECT: "If $f(x) = \\frac{1}{x}$, then"
+❌ WRONG:   "If f(x) = \\\\frac{1}{x}, then" (DO NOT double-escape commands manually)
 
-### 3C. FRACTIONS - ALWAYS USE \\frac{}{}:
-"dy/dx" → "\\frac{dy}{dx}"
-"x+1/2" → "\\frac{x+1}{2}"
-"dy+2 = x²" → "\\frac{dy}{dx} + \\frac{y}{x} = x^2"
+### 3C. INVERSE TRIGONOMETRIC FUNCTIONS:
+sin⁻¹ → $\\sin^{-1}$ | cos⁻¹ → $\\cos^{-1}$ | tan⁻¹ → $\\tan^{-1}$
+
+### 3D. EXAMPLES:
+- "dy/dx" → $\\frac{dy}{dx}$
+- "x+1/2" → $\\frac{x+1}{2}$
 
 ### 3D. MATRICES - ALWAYS USE \\begin{bmatrix}:
-When you see a matrix with elements arranged in rows/columns:
 \\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}
 
-CRITICAL: Matrix subscripts A_n or A₁, A₂ must use LaTeX subscripts:
-"A_n" (if single char) or "A_{n}" (if multiple chars) or "A_1, A_2, A_3"
-
 ### 3E. PIECEWISE FUNCTIONS - ALWAYS USE \\begin{cases}:
-When you see function definitions with multiple conditions (like Q31):
-
-❌ WRONG FORMAT:
-"2x : x > 3"
-"f(x) = x² : 1 < x ≤ 3"
-"3x : x ≤ 1"
-
-✅ CORRECT FORMAT:
-"f(x) = \\begin{cases} 2x, & x > 3 \\\\ x^2, & 1 < x \\leq 3 \\\\ 3x, & x \\leq 1 \\end{cases}"
+\\begin{cases} x^2 & x > 0 \\\\ -x & x \leq 0 \\end{cases}
 
 ## STEP 4: INTEGRAL EXTRACTION (ZERO-TOLERANCE FOR HALLUCINATION)
 
@@ -274,7 +271,7 @@ function fixPiecewiseFunction(text: string): string {
   // Detect pattern: "f(x) = ... : condition" on separate lines
   // Common pattern in Q31: "2x : x > 3" followed by "f(x) = x² : 1 < x ≤ 3" etc.
   if (text.includes(':') && (text.includes('f(x)') || text.includes('f :')) &&
-      (text.includes('>') || text.includes('<') || text.includes('≤') || text.includes('≥'))) {
+    (text.includes('>') || text.includes('<') || text.includes('≤') || text.includes('≥'))) {
 
     // Try to detect if this is a piecewise function
     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);

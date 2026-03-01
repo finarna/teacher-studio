@@ -40,7 +40,7 @@ import { Scan, AnalyzedQuestion, Subject, ExamContext, ExamAnalysisData } from '
 import { RenderWithMath, DerivationStep } from './MathRenderer';
 import { safeAiParse } from '../utils/aiParser';
 import { generateSketch } from '../utils/sketchGenerators';
-import { fixLatexInObject } from '../utils/simpleMathExtractor';
+// import { fixLatexInObject } from '../utils/latexFixer'; // REMOVED - Gemini returns correct LaTeX
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
 import { useFilteredScans } from '../hooks/useFilteredScans';
@@ -166,12 +166,13 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   }, [scan?.id]);
 
   // Main questions source that merges metadata from scan and large sketches from questionSketches state
-  const questions = React.useMemo(() => {
+  const questions = React.useMemo((): AnalyzedQuestion[] => {
     return rawQuestions.map(q => ({
       ...q,
       sketchSvg: questionSketches[q.id] || q.sketchSvg
     }));
   }, [rawQuestions, questionSketches]);
+
 
   // Debug: Log visual elements in vault questions
   React.useEffect(() => {
@@ -213,7 +214,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
       if (!question) return;
 
       // Get model from Settings
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
 
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
       const model = genAI.getGenerativeModel({
@@ -229,71 +230,24 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
       // Generate pedagogical solution with JSON escaping examples
       // Biology-specific rules for space preservation and correct answer validation
       const isBiology = scan.subject?.toLowerCase() === 'biology';
-      console.log(`[SOLUTION GEN - SINGLE] Subject: ${scan.subject}, isBiology: ${isBiology}, Question: ${question.id}`);
-
-      const biologyRules = isBiology ? `
-1. **PRESERVE SPACES** (Biology): ALL explanation text must have proper spacing between words.
-   ❌ WRONG: "HumanHormone−α−Antitrypsin"
-   ✅ CORRECT: "Human Hormone − α − Antitrypsin"
-
-2. **SCIENTIFIC NAMES** (Biology): Use proper italic LaTeX format for species names.
-   Example: $\\\\textit{Homo sapiens}$, $\\\\textit{Escherichia coli}$
-
-` : '';
-
-      const correctAnswerRule = isBiology && question.options && question.options.length > 0 ? `
-**CORRECT ANSWER** (Biology): You MUST determine which ONE option is correct according to the official ${scan.subject} ${scan.grade} syllabus.
-
-   STEP-BY-STEP PROCESS:
-   1. Read the question carefully and identify the biological concept being tested
-   2. Recall the EXACT definition/principle from NCERT Class 12 Biology textbook
-   3. Compare EACH option (A, B, C, D) against this official definition
-   4. Select the option that EXACTLY matches the NCERT/CBSE/NEET curriculum content
-   5. Reject options that are:
-      - Partially correct but incomplete
-      - True statements but not answering the question asked
-      - Contradicting official textbook content
-
-   There is EXACTLY ONE correct answer per question. Return:
-   - correctOptionIndex: 0 (if A is correct), 1 (if B is correct), 2 (if C is correct), or 3 (if D is correct)
-
-   DO NOT guess. DO NOT select multiple answers. Use your knowledge of NCERT Biology curriculum.
-` : '';
-
       const prompt = `Elite Academic Specialist: Generate pedagogical solution for ${scan.subject} ${scan.grade}: "${question.text}"${optionsText}
 
-CRITICAL RULES:
-
-${biologyRules}${correctAnswerRule}
-🚨 **LATEX ESCAPING IN JSON** 🚨
-You are outputting JSON. EVERY backslash must be DOUBLED for JSON escaping.
-
-❌ CATASTROPHIC ERRORS (WILL BREAK RENDERING):
-"\\frac{a}{b}" → Becomes "rac{a}{b}" after JSON parsing (BROKEN!)
-"\\int dx" → Becomes "int dx" (BROKEN!)
-"\\tan^{-1}" → Becomes "an^{-1}" (BROKEN!)
-"\\sqrt{x}" → Becomes "sqrt{x}" (BROKEN!)
-"\\bar{A}\\" → Trailing backslash (INVALID!)
-
-✅ CORRECT FORMAT (ALWAYS USE THIS):
-"\\\\frac{a}{b}" → Becomes "\\frac{a}{b}" ✓
-"\\\\int dx" → Becomes "\\int dx" ✓
-"\\\\tan^{-1}" → Becomes "\\tan^{-1}" ✓
-"\\\\sqrt{x}" → Becomes "\\sqrt{x}" ✓
-"\\\\bar{A}" → NO trailing backslash ✓
-
-ALL LaTeX commands need \\\\:
-\\\\frac, \\\\int, \\\\sum, \\\\sin, \\\\cos, \\\\tan, \\\\sqrt, \\\\left, \\\\right, \\\\bar, \\\\vec, \\\\alpha, \\\\beta, \\\\theta, \\\\pi, \\\\leq, \\\\geq
-
-NEVER have trailing backslashes before closing delimiters!
+RULES:
+1. SYLLABUS COMPLIANCE: Strictly adhere to the latest official NCERT Class 12 syllabus for ${scan.subject}.
+2. MARKING SCHEME: Match solution depth to marks (${question.marks} Marks).
+3. PEDAGOGY: Provide clear, step-by-step logic.
+4. MATH: Wrap ALL math in $$ blocks for display or $ for inline. Use standard LaTeX (\\frac, \\sqrt, \\int, etc.).
+5. LATEX DELIMITERS: ALWAYS use $$ ... $$ for blocks and $ ... $ for inline.
+6. BIOLOGY: ${isBiology ? 'Preserve spaces between words. Use italics for scientific names.' : 'N/A'}
+7. JSON: Output valid JSON.
 
 Schema: {
-  "solutionSteps": ["Step Title ::: Explanation with ${isBiology ? 'proper spacing and ' : ''}$$Formula$$ blocks"],
-  ${question.options && question.options.length > 0 ? `"correctOptionIndex": 0-3 (REQUIRED${isBiology ? ': Based on official syllabus' : ''} - 0=A, 1=B, 2=C, 3=D),` : ''}
+  "solutionSteps": ["Step Title ::: Explanation with $$Formula$$ blocks"],
+  ${question.options && question.options.length > 0 ? `"correctOptionIndex": 0-3 (Identify correct option A=0, B=1, C=2, D=3),` : ''}
   "masteryMaterial": {
-    "coreConcept": "Professional summary with $$Key Formula$$${isBiology ? ' and proper spacing' : ''}",
-    "logic": "Bulleted reasoning${isBiology ? ' with proper word spacing' : ''}",
-    "memoryTrigger": "Mnemonic/Rule"
+    "coreConcept": "Core principle with $$Key Formula$$",
+    "logic": "Reasoning for the solution",
+    "memoryTrigger": "Mnemonic or shortcut"
   }
 }`;
 
@@ -310,33 +264,10 @@ Schema: {
         qData = qData[0];
       }
 
-      // Auto-fix LaTeX errors in solution (safety net for missing backslashes)
-      if (qData) {
-        qData = fixLatexInObject(qData);
-        console.log('🔧 [LATEX FIX] Applied auto-fix to solution LaTeX');
-      }
+      // Store Gemini's response directly - NO fixing needed (Gemini returns correct LaTeX)
+      console.log('✅ [SOLUTION] Storing AI response as-is (no LaTeX processing)');
 
       if (qData && (qData.solutionSteps || qData.masteryMaterial)) {
-        // Check for corruption (but NOT inside valid \text{...} commands)
-        const firstStep = qData.solutionSteps?.[0] || '';
-        // Remove valid \text{...} commands before checking
-        const withoutText = firstStep.replace(/\\text\{[^}]*\}/g, '');
-        const hasCorruption = /\brac\b|\bimes\b|\bheta\b/.test(withoutText) || /(?<!\\)ext\b/.test(withoutText);
-        console.log(hasCorruption ? '⚠️  CORRUPTED FORMULAS DETECTED' : '✨ FORMULAS CLEAN');
-        if (hasCorruption) {
-          console.log('Corruption found:', withoutText.substring(0, 150));
-        } else {
-          console.log('First step preview:', firstStep.substring(0, 150));
-        }
-
-        // DEBUG: Log correctOptionIndex
-        console.log('🎯 [CORRECT ANSWER DEBUG] AI returned correctOptionIndex:', qData.correctOptionIndex);
-        console.log('🎯 [CORRECT ANSWER DEBUG] Question has options:', question.options?.length > 0);
-        if (qData.correctOptionIndex !== undefined) {
-          console.log('✅ [CORRECT ANSWER] Will save correctOptionIndex:', qData.correctOptionIndex);
-        } else {
-          console.log('❌ [CORRECT ANSWER] AI did not return correctOptionIndex');
-        }
         // Deep clone for React state detection & Redis sync
         const clonedQuestions = JSON.parse(JSON.stringify(scan.analysisData.questions));
         const finalQuestions = clonedQuestions.map((q: any) =>
@@ -373,7 +304,7 @@ Schema: {
     setIsSynthesizingAll(true);
     try {
       // Get model from Settings
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
 
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
       const model = genAI.getGenerativeModel({
@@ -403,91 +334,36 @@ Schema: {
       const batchSize = 3;
       let currentQuestions = [...scan.analysisData!.questions];
 
-      // Biology-specific rules for batch synthesis
       const isBiology = scan.subject?.toLowerCase() === 'biology';
-      console.log(`[SOLUTION GEN - BATCH] Subject: ${scan.subject}, isBiology: ${isBiology}, Total questions: ${questionsToSync.length}`);
 
       for (let i = 0; i < questionsToSync.length; i += batchSize) {
         const batch = questionsToSync.slice(i, i + batchSize);
         const batchPromises = batch.map(async (q) => {
-          // Build options string if question has options (MCQ)
-          const optionsText = q.options && q.options.length > 0
-            ? `\n\nOPTIONS:\n${q.options.map((opt, idx) => `${['A', 'B', 'C', 'D'][idx]}: ${opt}`).join('\n')}`
-            : '';
-
-          const biologyRules = isBiology ? `
-**PRESERVE SPACES** (Biology): ALL explanation text must have proper spacing between words.
-   ❌ WRONG: "HumanHormone−α−Antitrypsin"
-   ✅ CORRECT: "Human Hormone − α − Antitrypsin"
-
-**SCIENTIFIC NAMES** (Biology): Use proper italic LaTeX format for species names.
-   Example: $\\\\textit{Homo sapiens}$, $\\\\textit{Escherichia coli}$
-
-` : '';
-
-          const correctAnswerRule = isBiology && q.options && q.options.length > 0 ? `
-**CORRECT ANSWER** (Biology): You MUST determine which ONE option is correct according to the official ${scan.subject} ${scan.grade} syllabus.
-
-   STEP-BY-STEP PROCESS:
-   1. Read the question carefully and identify the biological concept being tested
-   2. Recall the EXACT definition/principle from NCERT Class 12 Biology textbook
-   3. Compare EACH option (A, B, C, D) against this official definition
-   4. Select the option that EXACTLY matches the NCERT/CBSE/NEET curriculum content
-   5. Reject options that are:
-      - Partially correct but incomplete
-      - True statements but not answering the question asked
-      - Contradicting official textbook content
-
-   There is EXACTLY ONE correct answer per question. Return:
-   - correctOptionIndex: 0 (if A is correct), 1 (if B is correct), 2 (if C is correct), or 3 (if D is correct)
-
-   DO NOT guess. DO NOT select multiple answers. Use your knowledge of NCERT Biology curriculum.
-
-` : '';
-
+          const optionsText = q.options && q.options.length > 0 ? `\n\nOPTIONS:\n${q.options.map((opt, idx) => `${['A', 'B', 'C', 'D'][idx]}: ${opt}`).join('\n')}` : '';
           const prompt = `Elite Academic Specialist: Synthesize pedagogical solution for ${scan.subject} ${scan.grade}: "${q.text || ''}"${optionsText}
 
-CRITICAL RULES:
-
-${biologyRules}${correctAnswerRule}
-🚨 **LATEX ESCAPING IN JSON** 🚨
-You are outputting JSON. EVERY backslash must be DOUBLED for JSON escaping.
-
-❌ CATASTROPHIC ERRORS (WILL BREAK RENDERING):
-"\\frac{a}{b}" → Becomes "rac{a}{b}" after JSON parsing (BROKEN!)
-"\\int dx" → Becomes "int dx" (BROKEN!)
-"\\tan^{-1}" → Becomes "an^{-1}" (BROKEN!)
-"\\sqrt{x}" → Becomes "sqrt{x}" (BROKEN!)
-"\\bar{A}\\" → Trailing backslash (INVALID!)
-
-✅ CORRECT FORMAT (ALWAYS USE THIS):
-"\\\\frac{a}{b}" → Becomes "\\frac{a}{b}" ✓
-"\\\\int dx" → Becomes "\\int dx" ✓
-"\\\\tan^{-1}" → Becomes "\\tan^{-1}" ✓
-"\\\\sqrt{x}" → Becomes "\\sqrt{x}" ✓
-"\\\\bar{A}" → NO trailing backslash ✓
-
-ALL LaTeX commands need \\\\:
-\\\\frac, \\\\int, \\\\sum, \\\\sin, \\\\cos, \\\\tan, \\\\sqrt, \\\\left, \\\\right, \\\\bar, \\\\vec, \\\\alpha, \\\\beta, \\\\theta, \\\\pi, \\\\leq, \\\\geq
-
-NEVER have trailing backslashes before closing delimiters!
+RULES:
+1. SYLLABUS COMPLIANCE: Strictly follow the latest official NCERT Class 12 syllabus for ${scan.subject}.
+2. MARKING SCHEME: Scale depth based on marks (${q.marks} Marks).
+3. PEDAGOGY: Provide clear, step-by-step logic.
+4. MATH: Wrap ALL math in $$ blocks for display or $ for inline. Use standard LaTeX (\\frac, \\sqrt, \\int, etc.).
+5. LATEX DELIMITERS: ALWAYS use $$ ... $$ for blocks and $ ... $ for inline.
+6. BIOLOGY: ${isBiology ? 'Preserve spaces between words. Use italics for scientific names.' : 'N/A'}
+7. JSON: Output valid JSON.
 
 Schema: {
-  "solutionSteps": ["Step Title ::: Explanation with ${isBiology ? 'proper spacing and ' : ''}$$Formula$$ blocks"],
-  ${q.options && q.options.length > 0 ? `"correctOptionIndex": 0-3 (REQUIRED${isBiology ? ': Based on official syllabus' : ''} - 0=A, 1=B, 2=C, 3=D),` : ''}
+  "solutionSteps": ["Step Title ::: Explanation with $$Formula$$ blocks"],
+  ${q.options && q.options.length > 0 ? `"correctOptionIndex": 0-3 (Identify correct option A=0, B=1, C=2, D=3),` : ''}
   "masteryMaterial": {
-    "coreConcept": "Professional summary with $$Key Formula$$${isBiology ? ' and proper spacing' : ''}",
-    "logic": "Bulleted reasoning${isBiology ? ' with proper word spacing' : ''}",
-    "memoryTrigger": "Mnemonic/Rule"
+    "coreConcept": "Core principle with $$Key Formula$$",
+    "logic": "Reasoning for the solution",
+    "memoryTrigger": "Mnemonic or shortcut"
   }
 }`;
           try {
             const res = await model.generateContent(prompt);
             let data = safeAiParse<any>(res.response.text(), null);
-            // Auto-fix LaTeX errors in batch solution
-            if (data) {
-              data = fixLatexInObject(data);
-            }
+            // Store Gemini's response as-is - LaTeX is already correct
             return { id: q.id, data };
           } catch (err) {
             console.error(`Failed question ${q.id}:`, err);
@@ -496,20 +372,16 @@ Schema: {
         });
 
         const results = await Promise.all(batchPromises);
-
-        // Update local array for next batch iteration
         currentQuestions = currentQuestions.map(q => {
           const result = results.find(r => r.id === q.id && r.data);
           return result ? {
             ...q,
             solutionSteps: result.data.solutionSteps,
             masteryMaterial: result.data.masteryMaterial,
-            // Update correctOptionIndex if AI provided it (for MCQs)
             ...(result.data.correctOptionIndex !== undefined && { correctOptionIndex: result.data.correctOptionIndex })
           } : q;
         });
 
-        // Progressive update so user sees items populating
         const progressingScan = {
           ...scan,
           analysisData: {
@@ -588,7 +460,7 @@ Schema: {
       onUpdateScan(updatedScan);
     } catch (err: any) {
       console.error(err);
-      alert(`Failed to generate visual note: ${err.message}`);
+      alert(`Failed to generate visual note: ${err.message} `);
     } finally {
       setIsGeneratingVisual(null);
     }
@@ -604,7 +476,7 @@ Schema: {
       return;
     }
 
-    const confirmed = confirm(`Generate visual notes for ${questionsWithoutVisuals.length} questions? This may take several minutes.`);
+    const confirmed = confirm(`Generate visual notes for ${questionsWithoutVisuals.length} questions ? This may take several minutes.`);
     if (!confirmed) return;
 
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -626,7 +498,7 @@ Schema: {
           question.text,
           scan.subject,
           apiKey,
-          (status) => console.log(`📊 ${status}`)
+          (status) => console.log(`📊 ${status} `)
         );
 
         console.log(`✓ Generated visual note for ${question.id}`);
@@ -671,7 +543,7 @@ Schema: {
         // Small delay to avoid rate limits
         await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (err: any) {
-        console.error(`Failed to generate visual for ${question.id}:`, err);
+        console.error(`Failed to generate visual for ${question.id}: `, err);
         // Continue with next question even if one fails
       }
     }
@@ -845,7 +717,7 @@ Schema: {
 
       // Debug: Log first few classifications
       if (questions.indexOf(q) < 5) {
-        console.log(`🔍 [CLASSIFICATION DEBUG] Q${questions.indexOf(q) + 1}: topic="${q.topic}" | chapter="${qData.chapter || 'N/A'}" | using="${rawTopic}" → matched="${matchedKey}" (score: ${maxMatchScore})`);
+        console.log(`🔍[CLASSIFICATION DEBUG] Q${questions.indexOf(q) + 1}: topic = "${q.topic}" | chapter="${qData.chapter || 'N/A'}" | using="${rawTopic}" → matched = "${matchedKey}"(score: ${maxMatchScore})`);
       }
 
       return { ...q, mappedKey: maxMatchScore > 0 ? matchedKey : 'General' };
@@ -856,7 +728,7 @@ Schema: {
     mappedQuestions.forEach(q => {
       classificationSummary[q.mappedKey] = (classificationSummary[q.mappedKey] || 0) + 1;
     });
-    console.log(`📊 [CLASSIFICATION SUMMARY] Subject: ${safeSubject}, Distribution:`, classificationSummary);
+    console.log(`📊[CLASSIFICATION SUMMARY] Subject: ${safeSubject}, Distribution: `, classificationSummary);
 
     // 2. Aggregate metrics by domain
     const domainsFound: Record<string, any> = {};
@@ -1085,7 +957,7 @@ Schema: {
             onBack={onBack}
             icon={<FolderOpen size={24} className="text-white" />}
             title="Exam Vault"
-            subtitle={`${scan?.subject || activeSubject} • ${scan?.examContext || examConfig.id}${year ? ` • ${year}` : ''}`}
+            subtitle={`${scan?.subject || activeSubject} • ${scan?.examContext || examConfig.id}${year ? ` • ${year}` : ''} `}
             description="Browse and practice exam questions"
             subject={(scan?.subject || activeSubject) as Subject}
             trajectory={(scan?.examContext || examConfig.id) as ExamContext}
@@ -1103,10 +975,10 @@ Schema: {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-[11px] font-bold uppercase tracking-wide transition-all border-b-2 ${activeTab === tab
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded - t - lg text-[11px] font-bold uppercase tracking-wide transition-all border-b-2 ${activeTab === tab
                         ? 'bg-slate-50 text-slate-900 border-accent-600'
                         : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-transparent'
-                        }`}
+                        } `}
                     >
                       <TabIcon size={16} />
                       {tab}
@@ -1200,7 +1072,7 @@ Schema: {
                       <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-3">
                         {professorInsights.map((insight, idx) => (
                           <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl group/finding">
-                            <div className={`w-7 h-7 rounded-lg bg-white shadow-sm flex items-center justify-center ${insight.color}`}>{insight.icon}</div>
+                            <div className={`w - 7 h - 7 rounded-lg bg-white shadow-sm flex items-center justify-center ${insight.color} `}>{insight.icon}</div>
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{insight.text}</span>
                           </div>
                         ))}
@@ -1338,7 +1210,7 @@ Schema: {
                                 </div>
 
                                 <div className="flex items-center gap-2 pt-2">
-                                  <div className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter ${stat.avgDifficulty >= 2.5 ? 'bg-rose-100 text-rose-600' : 'bg-accent-100 text-accent-600'}`}>
+                                  <div className={`px-2.5 py-1 rounded-lg text - [8px] font-black uppercase tracking - tighter ${stat.avgDifficulty >= 2.5 ? 'bg-rose-100 text-rose-600' : 'bg-accent-100 text-accent-600'} `}>
                                     {stat.avgDifficulty >= 2.5 ? 'Rigorous' : 'Balanced'}
                                   </div>
                                   <div className="px-2.5 py-1 bg-slate-800 text-white rounded-lg text-[8px] font-black uppercase tracking-tighter">
@@ -1358,7 +1230,7 @@ Schema: {
                           { title: "Calculation Friction", description: "Reduction in repetitive arithmetic; focus on high-level variable modeling.", type: "positive" }
                         ]).map((trend, i) => (
                           <div key={i} className="p-6 rounded-[2rem] border border-slate-100 bg-slate-50/30 hover:bg-white hover:border-indigo-100 hover:shadow-xl transition-all group">
-                            <div className={`w-8 h-8 rounded-full mb-4 flex items-center justify-center ${trend.type === 'positive' ? 'bg-emerald-100 text-emerald-600' : trend.type === 'negative' ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                            <div className={`w-8 h-8 rounded-full mb-4 flex items-center justify-center ${trend.type === 'positive' ? 'bg-emerald-100 text-emerald-600' : trend.type === 'negative' ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'} `}>
                               {trend.type === 'positive' ? <Zap size={14} /> : <Activity size={14} />}
                             </div>
                             <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-2 font-outfit">{trend.title}</h4>
@@ -1409,7 +1281,7 @@ Schema: {
                               </span>
                             </div>
                             <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                              <div className="h-full bg-slate-900 transition-all duration-1000" style={{ width: `${(stat.totalMarks / 70) * 100}%` }} />
+                              <div className="h-full bg-slate-900 transition-all duration-1000" style={{ width: `${(stat.totalMarks / 70) * 100}% ` }} />
                             </div>
                           </div>
                         ))}
@@ -1436,7 +1308,7 @@ Schema: {
                               <span className="text-[10px] font-black text-white bg-accent-600 px-2.5 py-1 rounded-lg tracking-tighter shadow-lg shadow-accent-500/20">{Math.round(prob)}%</span>
                             </div>
                             <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden shadow-inner group-hover/item:h-2 transition-all">
-                              <div className="h-full bg-accent-500 shadow-[0_0_8px_rgba(20,184,166,0.5)] transition-all duration-1000 origin-left" style={{ width: `${prob}%` }} />
+                              <div className="h-full bg-accent-500 shadow-[0_0_8px_rgba(20,184,166,0.5)] transition-all duration-1000 origin-left" style={{ width: `${prob}% ` }} />
                             </div>
                           </div>
                         );
@@ -1470,8 +1342,8 @@ Schema: {
                           </td>
                           <td className="px-8 py-6">
                             <div className="flex flex-wrap gap-1.5">
-                              {cat.chapters.map((ch, ci) => (
-                                <span key={ci} className="text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-sm hover:border-accent-400 transition-all">{ch}</span>
+                              {cat.chapters.map((ch: any, ci: number) => (
+                                <span key={ci} className="text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1.5 rounded-xl shadow-sm hover:border-accent-400 transition-all">{(ch as any).toString()}</span>
                               ))}
                             </div>
                           </td>
@@ -1479,16 +1351,16 @@ Schema: {
                             <span className="text-[15px] font-black text-slate-900 italic font-outfit">{cat.totalMarks}</span>
                           </td>
                           <td className="px-8 py-6">
-                            <span className="px-3 py-1 bg-slate-900 shadow-md text-white rounded-lg text-[9px] font-black uppercase tracking-[0.15em]">{cat.dominantBlooms}</span>
+                            <span className="px-3 py-1 bg-slate-900 shadow-md text-white rounded-lg text-[9px] font-black uppercase tracking-[0.15em]">{cat.dominantBlooms as string}</span>
                           </td>
                           <td className="px-8 py-6">
                             <div className="flex flex-col gap-2 min-w-[140px]">
                               <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-wider">
-                                <span>{cat.difficultyDNA}</span>
-                                <span className="text-slate-900">{Math.round((cat.avgDifficulty / 3) * 100)}%</span>
+                                <span>{cat.difficultyDNA as string}</span>
+                                <span className="text-slate-900">{Math.round(((cat.avgDifficulty as number) / 3) * 100)}%</span>
                               </div>
                               <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                                <div className={`h-full ${cat.difficultyDNA === 'Hard' ? 'bg-rose-500' : 'bg-accent-500'} transition-all shadow-[0_0_8px_rgba(20,184,166,0.4)]`} style={{ width: `${(cat.avgDifficulty / 3) * 100}%` }} />
+                                <div className={`h-full ${cat.difficultyDNA === 'Hard' ? 'bg-rose-500' : 'bg-accent-500'} transition-all shadow - [0_0_8px_rgba(20, 184, 166, 0.4)]`} style={{ width: `${(cat.avgDifficulty / 3) * 100}% ` }} />
                               </div>
                             </div>
                           </td>
@@ -1568,7 +1440,7 @@ Schema: {
                           <span className="text-slate-900">{bloom.percentage}%</span>
                         </div>
                         <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                          <div className="h-full transition-all shadow-[0_0_8px_rgba(0,0,0,0.1)]" style={{ width: `${bloom.percentage}%`, backgroundColor: bloom.color || '#3b82f6' }} />
+                          <div className="h-full transition-all shadow-[0_0_8px_rgba(0,0,0,0.1)]" style={{ width: `${bloom.percentage}% `, backgroundColor: bloom.color || '#3b82f6' }} />
                         </div>
                       </div>
                     ))}
@@ -1583,7 +1455,7 @@ Schema: {
                         <div key={i} className="p-4 bg-slate-50 border border-slate-100 rounded-xl hover:bg-white hover:border-accent-100 transition-all shadow-sm group">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-[10px] font-black text-slate-900 uppercase tracking-wider">{insight.topic}</span>
-                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${insight.difficulty === 'Hard' ? 'bg-rose-100 text-rose-600' : 'bg-accent-100 text-accent-600'}`}>{insight.difficulty}</span>
+                            <span className={`text - [9px] font-black px-2 py - 0.5 rounded-md ${insight.difficulty === 'Hard' ? 'bg-rose-100 text-rose-600' : 'bg-accent-100 text-accent-600'} `}>{insight.difficulty}</span>
                           </div>
                           <p className="text-[11px] font-bold text-slate-500 line-clamp-2 uppercase tracking-tight leading-relaxed group-hover:text-slate-700">{insight.description}</p>
                         </div>
@@ -1624,7 +1496,7 @@ Schema: {
                       className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${!isGroupedView
                         ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50 scale-[1.02]'
                         : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                        } `}
                     >
                       List
                     </button>
@@ -1633,7 +1505,7 @@ Schema: {
                       className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${isGroupedView
                         ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50 scale-[1.02]'
                         : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                        } `}
                     >
                       Group
                     </button>
@@ -1644,11 +1516,11 @@ Schema: {
                 {!isGroupedView && (
                   <div className="flex-1 overflow-y-auto scroller-hide p-3 space-y-2">
                     {questions.map((q, i) => {
-                      const qId = q.id || `frag-${i}`;
+                      const qId = q.id || `frag-${i} `;
                       const isActive = (expandedQuestionId || questions[0]?.id) === qId;
                       const qNumMatch = q.id?.match(/Q(\d+)/i);
                       const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
-                      const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
+                      const hasVisual = q.hasVisualElement || q.imageUrl || (q.extractedImages && q.extractedImages.length > 0);
 
                       return (
                         <button
@@ -1657,19 +1529,19 @@ Schema: {
                           className={`group w-full text-left p-3 rounded-xl transition-all duration-200 border-2 ${isActive
                             ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-300 shadow-lg shadow-purple-200/50 scale-[1.02]'
                             : 'bg-white hover:bg-gradient-to-br hover:from-slate-50 hover:to-white border-slate-200 hover:border-slate-300 hover:shadow-md'
-                            }`}
+                            } `}
                         >
                           <div className="flex items-center gap-2 mb-2">
                             <span className={`flex items-center justify-center w-8 h-8 rounded-lg text-xs font-black transition-all duration-200 ${isActive
                               ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-md shadow-purple-500/30'
                               : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 group-hover:from-slate-200 group-hover:to-slate-300'
-                              }`}>
+                              } `}>
                               {qNum}
                             </span>
                             <span className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-colors ${isActive
                               ? 'bg-purple-200 text-purple-700'
                               : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-                              }`}>
+                              } `}>
                               {q.marks}M
                             </span>
                             {hasVisual && (
@@ -1718,10 +1590,10 @@ Schema: {
                                 <span className="px-2 py-1 bg-white border border-slate-200 text-slate-700 text-[9px] font-black rounded-lg shadow-sm">
                                   {domain.totalMarks}M
                                 </span>
-                                <span className={`px-2 py-1 text-[9px] font-bold rounded-lg shadow-sm ${domain.difficultyDNA === 'Hard' ? 'bg-gradient-to-br from-red-100 to-red-200 text-red-700 border border-red-300' :
+                                <span className={`px-2 py-1 text - [9px] font-bold rounded-lg shadow-sm ${domain.difficultyDNA === 'Hard' ? 'bg-gradient-to-br from-red-100 to-red-200 text-red-700 border border-red-300' :
                                   domain.difficultyDNA === 'Moderate' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 text-yellow-700 border border-yellow-300' :
                                     'bg-gradient-to-br from-green-100 to-green-200 text-green-700 border border-green-300'
-                                  }`}>
+                                  } `}>
                                   {domain.difficultyDNA}
                                 </span>
                               </div>
@@ -1730,11 +1602,11 @@ Schema: {
                           {isDomainExpanded && (
                             <div className="p-2.5 space-y-2 bg-gradient-to-b from-slate-50 to-white">
                               {domainQuestions.map((q, i) => {
-                                const qId = q.id || `frag-${i}`;
+                                const qId = q.id || `frag-${i} `;
                                 const isActive = (expandedQuestionId || questions[0]?.id) === qId;
                                 const qNumMatch = q.id?.match(/Q(\d+)/i);
                                 const qNum = qNumMatch ? qNumMatch[1] : (i + 1);
-                                const hasVisual = q.hasVisualElement || (q.extractedImages && q.extractedImages.length > 0);
+                                const hasVisual = q.hasVisualElement || q.imageUrl || (q.extractedImages && q.extractedImages.length > 0);
 
                                 return (
                                   <button
@@ -1743,19 +1615,19 @@ Schema: {
                                     className={`group w-full text-left p-2.5 rounded-xl transition-all duration-200 border-2 ${isActive
                                       ? 'bg-gradient-to-br from-purple-50 to-purple-100/50 border-purple-300 shadow-lg shadow-purple-200/50'
                                       : 'bg-white hover:bg-gradient-to-br hover:from-slate-50 hover:to-white border-slate-200 hover:border-slate-300 hover:shadow-md'
-                                      }`}
+                                      } `}
                                   >
                                     <div className="flex items-center gap-2 mb-1.5">
-                                      <span className={`flex items-center justify-center w-7 h-7 rounded-lg text-[11px] font-black transition-all duration-200 ${isActive
+                                      <span className={`flex items-center justify-center w - 7 h - 7 rounded-lg text-[11px] font-black transition-all duration-200 ${isActive
                                         ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-md shadow-purple-500/30'
                                         : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-700 group-hover:from-slate-200 group-hover:to-slate-300'
-                                        }`}>
+                                        } `}>
                                         {qNum}
                                       </span>
-                                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-lg transition-colors ${isActive
+                                      <span className={`px-2 py - 0.5 text-[10px] font-bold rounded-lg transition-colors ${isActive
                                         ? 'bg-purple-200 text-purple-700'
                                         : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-                                        }`}>
+                                        } `}>
                                         {q.marks}M
                                       </span>
                                       {hasVisual && (
@@ -1792,7 +1664,7 @@ Schema: {
               </div>
 
               {/* Right Column - Question Details */}
-              <div className={`flex-1 overflow-y-auto scroller-hide p-4 md:p-6 ${mobileVaultView === 'list' ? 'hidden md:block' : 'block'}`}>
+              <div className={`flex-1 overflow-y-auto scroller - hide p-4 md:p-6 ${mobileVaultView === 'list' ? 'hidden md:block' : 'block'} `}>
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 md:p-8">
                   {/* Mobile Back Button */}
                   <button
@@ -1828,10 +1700,10 @@ Schema: {
                                 {selectedQ.marks}M
                               </span>
                               {selectedQ.difficulty && (
-                                <span className={`px-2 py-0.5 text-[10px] font-semibold rounded ${selectedQ.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
+                                <span className={`px-2 py - 0.5 text-[10px] font-semibold rounded ${selectedQ.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
                                   selectedQ.difficulty === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
                                     'bg-green-100 text-green-700'
-                                  }`}>
+                                  } `}>
                                   {selectedQ.difficulty}
                                 </span>
                               )}
@@ -1908,7 +1780,7 @@ Schema: {
                                     className={`flex items-center gap-2 p-3 rounded-lg transition-colors relative ${isCorrect
                                       ? 'bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-300'
                                       : 'bg-slate-50 hover:bg-slate-100'
-                                      }`}
+                                      } `}
                                   >
                                     {isCorrect && (
                                       <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-md">
@@ -1920,10 +1792,10 @@ Schema: {
                                     <span className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold ${isCorrect
                                       ? 'bg-emerald-600 text-white'
                                       : 'bg-slate-200 text-slate-700'
-                                      }`}>
+                                      } `}>
                                       {['A', 'B', 'C', 'D'][idx]}
                                     </span>
-                                    <div className={`flex-1 text-sm ${isCorrect ? 'text-emerald-900 font-semibold' : 'text-slate-700'}`}>
+                                    <div className={`flex-1 text-sm ${isCorrect ? 'text-emerald-900 font-semibold' : 'text-slate-700'} `}>
                                       <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
                                     </div>
                                   </div>
@@ -1941,7 +1813,7 @@ Schema: {
                                 className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${intelligenceBreakdownTab === 'logic'
                                   ? 'bg-slate-900 text-white shadow-sm'
                                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                                  }`}
+                                  } `}
                               >
                                 <span className="text-sm">📝</span>
                                 <span>Logic</span>
@@ -1951,7 +1823,7 @@ Schema: {
                                 className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${intelligenceBreakdownTab === 'visual'
                                   ? 'bg-slate-900 text-white shadow-sm'
                                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                                  }`}
+                                  } `}
                               >
                                 <span className="text-sm">👁</span>
                                 <span>Visual</span>
@@ -1961,19 +1833,71 @@ Schema: {
                             {/* Content Tabs */}
                             {intelligenceBreakdownTab === 'logic' ? (
                               <div className="space-y-4">
-                                {/* Extracted Images - Minimal */}
+                                {/* Question Diagrams/Images — show all sources */}
+                                {/* Source 1: imageUrl — Biology extractor's cropDiagram() output */}
+                                {selectedQ.imageUrl && (
+                                  <div className="mb-4 rounded-xl overflow-hidden border border-indigo-200 shadow-sm">
+                                    <div className="bg-indigo-50 px-3 py-1.5 border-b border-indigo-100 flex items-center gap-2">
+                                      <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                                      <span className="text-[10px] font-semibold text-indigo-700 uppercase tracking-wide">Extracted Diagram</span>
+                                    </div>
+                                    <img
+                                      src={selectedQ.imageUrl}
+                                      alt="Question diagram"
+                                      className="w-full h-auto max-h-64 object-contain bg-white p-2"
+                                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                    />
+                                    {selectedQ.visualElementDescription && (
+                                      <p className="text-[10px] text-slate-500 px-3 py-1.5 border-t border-indigo-100 italic">
+                                        {selectedQ.visualElementDescription}
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Source 2: extractedImages array — legacy pdfImageExtractor output */}
                                 {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (
-                                  <div className="mb-4">
-                                    {selectedQ.extractedImages.map((imgData, idx) => (
-                                      <img
-                                        key={idx}
-                                        src={imgData}
-                                        alt={`Diagram ${idx + 1}`}
-                                        className="w-full rounded-lg border border-slate-200"
-                                      />
+                                  <div className="mb-4 space-y-2">
+                                    {selectedQ.extractedImages.map((imgData: string, idx: number) => (
+                                      <div key={idx} className="rounded-xl overflow-hidden border border-blue-200 shadow-sm">
+                                        <div className="bg-blue-50 px-3 py-1.5 border-b border-blue-100 flex items-center gap-2">
+                                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                          <span className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide">
+                                            Figure {selectedQ.extractedImages.length > 1 ? idx + 1 : ''}
+                                          </span>
+                                        </div>
+                                        <img
+                                          src={imgData}
+                                          alt={`Diagram ${idx + 1}`}
+                                          className="w-full h-auto max-h-64 object-contain bg-white p-2"
+                                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                        />
+                                      </div>
                                     ))}
                                   </div>
                                 )}
+
+                                {/* Source 3: hasVisualElement but no images yet — show indicator */}
+                                {selectedQ.hasVisualElement && !selectedQ.imageUrl && (!selectedQ.extractedImages || selectedQ.extractedImages.length === 0) && (
+                                  <div className="mb-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 flex items-start gap-3">
+                                    <span className="text-2xl flex-shrink-0">🖼️</span>
+                                    <div>
+                                      <p className="text-xs font-semibold text-slate-600 mb-0.5">
+                                        {selectedQ.visualElementType || 'Diagram'} referenced in question
+                                      </p>
+                                      {selectedQ.visualElementDescription && (
+                                        <p className="text-[11px] text-slate-500 italic leading-relaxed">
+                                          {selectedQ.visualElementDescription}
+                                        </p>
+                                      )}
+                                      <p className="text-[10px] text-slate-400 mt-1">
+                                        Re-scan the paper to extract the diagram image.
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+
+
 
                                 {/* Solution Steps - Minimal */}
                                 {isSynthesizingQuestion === qId ? (
@@ -1983,7 +1907,7 @@ Schema: {
                                 ) : selectedQ.solutionSteps ? (
                                   <div className="space-y-3">
                                     {selectedQ.solutionSteps.map((step: string, sIdx: number) => {
-                                      const [title, content] = step.includes(':::') ? step.split(':::') : [`${sIdx + 1}`, step];
+                                      const [title, content] = step.includes(':::') ? step.split(':::').map(s => s.trim()) : [`${sIdx + 1}`, step.trim()];
                                       return (
                                         <div key={sIdx} className="flex gap-3 pb-3 border-b border-slate-100 last:border-0">
                                           <span className="flex-shrink-0 w-5 h-5 rounded bg-slate-100 text-slate-600 flex items-center justify-center text-[10px] font-semibold">

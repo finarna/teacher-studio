@@ -257,7 +257,9 @@ export interface AnalyzedQuestion {
   visualElementPosition?: 'above' | 'below' | 'inline' | 'side';
   visualBoundingBox?: { pageNumber: number; x: string; y: string; width: string; height: string };
   extractedImages?: string[];
+  imageUrl?: string;           // Diagram image cropped from PDF page (e.g. Biology extractor's cropDiagram())
 }
+
 
 export interface ChapterInsight {
   topic: string;

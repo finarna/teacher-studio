@@ -220,6 +220,7 @@ export async function createQuestions(scanId: string, questions: any[]) {
     marks: q.marks || 0,
     difficulty: normalizeDifficulty(q.difficulty),
     topic: q.topic,
+    domain: q.domain,           // ✅ Now saving domain to its own column
     blooms: q.blooms,
     options: q.options,
     correct_option_index: q.correctOptionIndex,
@@ -238,8 +239,17 @@ export async function createQuestions(scanId: string, questions: any[]) {
     sketch_svg_url: q.sketchSvgUrl,
     source: q.source,
     question_order: index,
-    metadata: q.metadata || {},
+    metadata: {
+      ...(q.metadata || {}),
+      // Also store chapter, domain at metadata level for downstream consumers
+      chapter: q.chapter || q.topic,
+      domain: q.domain,
+      subject: q.subject,
+      year: q.year,
+      exam_context: q.exam_context,
+    },
   }));
+
 
   const { data, error } = await supabaseAdmin
     .from('questions')

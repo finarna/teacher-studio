@@ -59,7 +59,7 @@ const AppContent: React.FC = () => {
   // ===== ALL HOOKS MUST BE AT THE TOP (before any conditional returns) =====
   const { showToast } = useToast();
   const { confirm } = useConfirm();
-  const { user, userProfile, loading: authLoading, signOut } = useAuth();
+  const { user, session, userProfile, loading: authLoading, signOut } = useAuth();
 
   // App State
   // Navigation State
@@ -287,10 +287,9 @@ const AppContent: React.FC = () => {
               loading: false,
             });
           } else {
-            console.warn('Subscription API returned error, bypassing in development');
-            // In development, bypass subscription check if API fails
+            console.warn('Subscription API returned error - blocking access');
             setSubscriptionStatus({
-              hasActiveSubscription: import.meta.env.DEV ? true : false,
+              hasActiveSubscription: false,
               loading: false,
             });
           }
@@ -301,17 +300,17 @@ const AppContent: React.FC = () => {
           } else {
             console.error('Subscription check failed:', fetchError);
           }
-          // In development mode, bypass subscription gate
+          // Block access on fetch error
           setSubscriptionStatus({
-            hasActiveSubscription: import.meta.env.DEV ? true : false,
+            hasActiveSubscription: false,
             loading: false,
           });
         }
       } catch (error) {
         console.error('Failed to check subscription status:', error);
-        // In development mode, bypass subscription gate
+        // Block access on error
         setSubscriptionStatus({
-          hasActiveSubscription: import.meta.env.DEV ? true : false,
+          hasActiveSubscription: false,
           loading: false,
         });
       }
@@ -380,8 +379,7 @@ const AppContent: React.FC = () => {
         } : undefined
       };
 
-      // Get auth token from Supabase
-      const { data: { session } } = await supabase.auth.getSession();
+      // Use session from useAuth hook
       const token = session?.access_token;
 
       const headers: HeadersInit = {

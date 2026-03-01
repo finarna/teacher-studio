@@ -50,6 +50,13 @@ NEVER output text without spaces between words!
 
 # STEP-BY-STEP EXTRACTION METHODOLOGY
 
+# EXTRACTION METHODOLOGY
+
+🚨🚨🚨 GOLDEN RULE: SYLLABUS & MARKING COMPLIANCE
+1. SYLLABUS: Strictly adhere to the latest official NCERT Class 12 Physics syllabus.
+2. MARKING: Extract marks verbatim from the paper. MCQs are worth EXACTLY 1 Mark unless specified otherwise.
+3. VERBATIM: Copy text exactly as seen. Extract what you OBSERVE, not what you EXPECT.
+
 ## STEP 1: LOCATE QUESTIONS
 
 Find all ${grade} Physics MCQ questions. Each has:
@@ -69,26 +76,33 @@ COMMON ERRORS TO AVOID:
 ## STEP 3: PHYSICS NOTATION CONVERSION TO LaTeX
 
 ### 3A. VECTORS (Bold or Arrow Notation)
-Visual: **F**, **v**, **a** (bold) → LaTeX: $\\mathbf{F}$, $\\mathbf{v}$, $\\mathbf{a}$
-Visual: →F, F→, F⃗ (arrow) → LaTeX: $\\vec{F}$
-Visual: F̂, v̂ (unit vector) → LaTeX: $\\hat{F}$, $\\hat{v}$
+Visual: **F**, **v**, **a** (bold) → LaTeX: $\\\\mathbf{F}$, $\\\\mathbf{v}$, $\\\\mathbf{a}$
+Visual: →F, F→, F⃗ (arrow) → LaTeX: $\\\\vec{F}$
+Visual: F̂, v̂ (unit vector) → LaTeX: $\\\\hat{F}$, $\\\\hat{v}$
 
 EXAMPLES:
-- "Net force F = ma" → "Net force $\\mathbf{F} = m\\mathbf{a}$"
-- "Electric field E" → "Electric field $\\mathbf{E}$"
+- "Net force F = ma" → "Net force $\\\\mathbf{F} = m\\\\mathbf{a}$"
+- "Electric field E" → "Electric field $\\\\mathbf{E}$"
 
 ### 3B. SUBSCRIPTS & SUPERSCRIPTS
 Visual: v₀, v₁, T₁, R₁, aₓ → LaTeX: $v_0$, $v_1$, $T_1$, $R_1$, $a_x$
-Visual: m², cm³, m/s² → LaTeX: $\\text{m}^2$, $\\text{cm}^3$, $\\text{m/s}^2$
+Visual: m², cm³, m/s² → LaTeX: $\\\\text{m}^2$, $\\\\text{cm}^3$, $\\\\text{m/s}^2$
 
 EXAMPLES:
-- "initial velocity v0 = 10 m/s" → "initial velocity $v_0 = 10\\,\\text{m/s}$"
-- "Resistance R1 = 5Ω" → "Resistance $R_1 = 5\\,\\Omega$"
+- "initial velocity v0 = 10 m/s" → "initial velocity $v_0 = 10\\\\,\\\\text{m/s}$"
+- "Resistance R1 = 5Ω" → "Resistance $R_1 = 5\\\\,\\\\Omega$"
 
-### 3C. UNITS (CRITICAL - Use \\text{} and \\, spacing)
-RULE: Thin space (\\,) before units, wrapped in \\text{}
+### 3C. UNITS (CRITICAL - Use \\\\text{} and \\\\, spacing)
+RULE: Thin space (\\\\,) before units, wrapped in \\\\text{}
 
 Visual Units → LaTeX:
+- 10 m/s → $10\\\\,\\\\text{m/s}$
+- 9.8 m/s² → $9.8\\\\,\\\\text{m/s}^2$
+- 100 N → $100\\\\,\\\\text{N}$
+- 5 kg → $5\\\\,\\\\text{kg}$
+- 20°C → $20^\\\\circ\\\\text{C}$ (NO \\\\, space before degree!)
+- 5Ω → $5\\\\,\\\\Omega$
+- 10μF → $10\\\\,\\\\mu\\\\text{F}$
 - 10 m/s → $10\\,\\text{m/s}$
 - 9.8 m/s² → $9.8\\,\\text{m/s}^2$
 - 100 N → $100\\,\\text{N}$
@@ -102,44 +116,29 @@ Visual Units → LaTeX:
 ❌ WRONG: $10^{-5}\\,^\\circ\\text{C}^{-1}$ (has \\, before degree - causes KaTeX error!)
 ✅ RIGHT: $10^{-5}^\\circ\\text{C}^{-1}$ (NO space before degree symbol)
 
-### 3D. SCIENTIFIC NOTATION (CRITICAL - Use \\times with BACKSLASH, NOT x)
-⚠️ CRITICAL: ALWAYS use \\times (with backslash) for multiplication!
+### 3A. UNICODE → LATEX MANDATORY CONVERSIONS (CRITICAL):
+   x² → $x^2$ | x₁ → $x_1$ | θ → $\\theta$ | π → $\\pi$ | α → $\\alpha$
+   ≤ → $\\leq$ | ≥ → $\\geq$ | ≠ → $\\neq$ | ≈ → $\\approx$ | ± → $\\pm$
+   √ → $\\sqrt{x}$ | λ → $\\lambda$ | μ → $\\mu$ | Ω → $\\Omega$ | Δ → $\\Delta$
+   - NEVER use raw Unicode symbols or plain text like "theta" in the final text.
 
-Visual: 3 × 10⁸ → LaTeX: $3 \\times 10^8$
-Visual: 6.626 × 10⁻³⁴ → LaTeX: $6.626 \\times 10^{-34}$
-Visual: 1.6 × 10⁻¹⁹ C → LaTeX: $1.6 \\times 10^{-19}\\,\\text{C}$
+### 3B. LATEX CONVERSION RULES:
+1. DELIMITERS: Wrap ALL math and units in $...$ for inline and $$...$$ for display.
+2. MULTIPLICATION: Use \\times (e.g., $3 \\times 10^8$ NOT 3 x 10^8).
+3. UNITS: Use \\text{} for units (e.g., $10\\,\\text{m/s}^2$, $5\\,\\text{kg}$).
+4. GREEK: Use standard LaTeX (\\alpha, \\beta, \\theta, \\lambda, \\mu, \\Omega).
+5. FRACTIONS: Use \\frac{num}{den} (e.g., $\\frac{1}{2}mv^2$).
+6. FORMAT: Use standard LaTeX (e.g., \\sqrt{x}, \\int f(x)\\,dx).
 
-❌ WRONG: "3 x 10^8" or "3×10^8" or "3times10^8" (missing backslash!)
-✅ RIGHT: "$3 \\times 10^8$" (with backslash before times)
+✅ CORRECT: "The wavelength $\\lambda = 500\\,\\text{nm}$"
+❌ WRONG:   "The wavelength \\lambda = 500nm" (DO NOT double-escape)
 
-COMMON CONSTANTS:
+### 3C. EXAMPLES:
 - Speed of light: $c = 3 \\times 10^8\\,\\text{m/s}$
-- Planck's constant: $h = 6.626 \\times 10^{-34}\\,\\text{J·s}$
-- Elementary charge: $e = 1.6 \\times 10^{-19}\\,\\text{C}$
-- Gravitational constant: $G = 6.674 \\times 10^{-11}\\,\\text{N·m}^2/\\text{kg}^2$
+- Planck's constant: $h = 6.626 \\times 10^{-34}\\,\\text{J}\\cdot\\text{s}$
+- Angular velocity: $\\omega = 2\\pi f$
+- Proportion: $F \\propto \\frac{m_1 m_2}{r^2}$
 
-### 3E. GREEK LETTERS (Common in Physics)
-α (alpha) → $\\alpha$ | β (beta) → $\\beta$ | γ (gamma) → $\\gamma$
-Δ (delta) → $\\Delta$ | θ (theta) → $\\theta$ | λ (lambda) → $\\lambda$
-μ (mu) → $\\mu$ | ρ (rho) → $\\rho$ | σ (sigma) → $\\sigma$
-τ (tau) → $\\tau$ | φ (phi) → $\\phi$ | ω (omega) → $\\omega$
-Ω (Omega) → $\\Omega$
-
-EXAMPLES:
-- "angular velocity ω = 2πf" → "angular velocity $\\omega = 2\\pi f$"
-- "wavelength λ = 500nm" → "wavelength $\\lambda = 500\\,\\text{nm}$"
-- "coefficient of friction μ = 0.3" → "coefficient of friction $\\mu = 0.3$"
-
-### 3F. FRACTIONS & EQUATIONS
-Visual: 1/2 mv² → LaTeX: $\\frac{1}{2}mv^2$
-Visual: F = GMm/r² → LaTeX: $F = \\frac{GMm}{r^2}$
-Visual: v² = u² + 2as → LaTeX: $v^2 = u^2 + 2as$
-
-### 3G. SPECIAL SYMBOLS
-∝ (proportional) → $\\propto$ | ≈ (approximately) → $\\approx$
-∞ (infinity) → $\\infty$ | ∫ (integral) → $\\int$
-· (dot product) → $\\cdot$ | × (cross product) → $\\times$
-≠ (not equal) → $\\neq$ | ≤, ≥ → $\\leq$, $\\geq$
 
 ## STEP 4: ANSWER OPTIONS EXTRACTION
 

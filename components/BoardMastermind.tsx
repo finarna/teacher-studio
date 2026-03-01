@@ -25,10 +25,13 @@ import { generatePhysicsExtractionInstructions } from '../utils/physicsNotationR
 import { generateCleanMathPrompt, validateExtraction } from '../utils/cleanMathExtractor';
 import { generateCleanPhysicsPrompt } from '../utils/cleanPhysicsExtractor';
 import { generateCleanBiologyPrompt } from '../utils/cleanBiologyExtractor';
+import { generateCleanChemistryPrompt } from '../utils/cleanChemistryExtractor';
 import { processQuestionsUnicode } from '../utils/unicodeToLatex'; // Latest: fixed escape char regex patterns
-import { extractQuestionsSimplified } from '../utils/simpleMathExtractor'; // NEW: Simplified extraction
-import { extractPhysicsQuestionsSimplified } from '../utils/simplePhysicsExtractor'; // NEW: Simplified Physics extraction
-import { extractBiologyQuestionsSimplified } from '../utils/simpleBiologyExtractor'; // NEW: Simplified Biology extraction
+import { extractQuestionsSimplified } from '../utils/simpleMathExtractor';
+import { extractPhysicsQuestionsSimplified } from '../utils/simplePhysicsExtractor';
+import { extractBiologyQuestionsSimplified } from '../utils/simpleBiologyExtractor';
+import { extractChemistryQuestionsSimplified } from '../utils/simpleChemistryExtractor'; // NEW: Simplified Chemistry
+
 import { mapTopicsFast } from '../utils/topicMapper'; // NEW: Instant keyword-based topic mapping
 import { useAppContext } from '../contexts/AppContext';
 import { useFilteredScans, useSubjectStats } from '../hooks/useFilteredScans';
@@ -49,6 +52,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
   // Use context values instead of local state
   const selectedSubject = activeSubject;
+  const subj: any = selectedSubject;
   const selectedGrade = 'Class 12'; // Can be derived from examConfig if needed
 
   const [selectedModel, setSelectedModel] = useState('gemini-3-flash-preview');
@@ -106,8 +110,6 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       });
 
       const allExtractedQuestions: AnalyzedQuestion[] = [];
-      updatePipelineStatus('extraction', 'active');
-
       // Process files one by one for maximum clarity and per-file progress tracking
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -138,7 +140,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
         // 🎯 SIMPLIFIED EXTRACTION (if enabled for Math or Physics)
         let extractedData: any;
-        if (useSimplifiedExtraction && selectedSubject === 'Math') {
+        if (useSimplifiedExtraction && subj === 'Math') {
           console.log('🚀 [SIMPLIFIED MODE - MATH] Using schema-driven extraction with @google/genai');
           const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel);
           // Convert simplified format to our existing format
@@ -163,7 +165,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           if (fileImageMapping) {
             console.log('🖼️ [BULK - SIMPLIFIED MATH] Using pre-extracted images:', fileImageMapping.size);
           }
-        } else if (useSimplifiedExtraction && selectedSubject === 'Physics') {
+        } else if (useSimplifiedExtraction && subj === 'Physics') {
           console.log('🚀 [SIMPLIFIED MODE - PHYSICS] Using schema-driven extraction with @google/genai');
           const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel);
           // Convert simplified format to our existing format
@@ -191,98 +193,38 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           }
         } else {
           // Legacy extraction
-          const extractionPrompt = selectedSubject === 'Math'
+          const extractionPrompt = subj === 'Math'
             ? generateCleanMathPrompt(selectedGrade)
-            : selectedSubject === 'Physics'
+            : subj === 'Physics'
               ? generateCleanPhysicsPrompt(selectedGrade)
-              : selectedSubject === 'Biology'
+              : subj === 'Biology'
                 ? generateCleanBiologyPrompt(activeExamContext)
-                : `Extract ALL questions verbatim from this ${selectedSubject} paper.
+                : `Extract ALL questions verbatim from this ${subj} paper.
+
         RULES:
-        0. ⚠️ CRITICAL TEXT EXTRACTION: PRESERVE ALL SPACES BETWEEN WORDS!
-           - WRONG: "Asmalltelescopehas tan objectiveoffocallength"
-           - RIGHT: "A small telescope has tan objective of focal length"
-           - If OCR fails to detect spaces, use context to insert proper word breaks. NEVER output text without spaces!
-        1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise in the text.
-        2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
-           - Wrap ALL math in $ delimiters: inline math uses $...$ and display math uses $$...$$
-           - Convert ALL Unicode symbols (√, θ, π, ∑, ∫, etc.) to proper LaTeX commands
-           - NEVER output corrupted text like "2 2 2 2cos8" - use proper nested LaTeX like "$\\sqrt{2+\\sqrt{2+\\sqrt{2+2\\cos 8\\theta}}}$"
-           - NEVER output raw Unicode or plaintext for math - ALWAYS use LaTeX
-           - CRITICAL TRIG FUNCTIONS: ALWAYS use backslash! Write \\sin, \\cos, \\tan, \\sec, \\csc, \\cot, \\sinh, \\cosh, \\tanh NOT sin, cos, tan, etc.
-           - CRITICAL EXPRESSION INTEGRITY: NEVER break expressions across multiple lines or close $ delimiters mid-expression
-             Example WRONG: "$x = e^\\theta$$\\sin\\theta, y = e^\\theta$" or "$x = e^\\theta$\\n$\\sin\\theta, y = e^\\theta$"
-             Example RIGHT: "$x = e^\\theta \\sin\\theta, y = e^\\theta \\cos\\theta$"
-           - CRITICAL SQRT: ALWAYS use \\sqrt{} with curly braces! Write \\sqrt{x}, \\sqrt{2}, \\sqrt{x^2+1} NOT sqrt x or sqrtx
-           - ⚠️ CRITICAL: Extract EXACTLY what you see - DO NOT add/move variables based on what "should" be there
-        ${selectedSubject === 'Math' ? `3. CRITICAL MATH NOTATION - READ CAREFULLY:
-
-${generateStreamlinedMathInstructions()}
-` : selectedSubject === 'Physics' ? `3. CRITICAL PHYSICS NOTATION - READ CAREFULLY:
-
-${generatePhysicsExtractionInstructions()}
-` : ''}.
-        ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '4' : '3'}. Classify each question into the correct NCERT Class 12 ${selectedSubject} domain and chapter.
-        ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '5' : '4'}. VISUAL ELEMENT DETECTION:
-           - If question has a diagram/figure/table/graph nearby OR text mentions "shown"/"following figure", set hasVisualElement=true and visualElementDescription="[Brief 1-sentence description]"
-           - If no visual, set hasVisualElement=false
-           ${selectedSubject === 'Math' ? `
-           - MATH-SPECIFIC VISUALS: Look for coordinate planes, geometric figures (triangles, circles), 3D diagrams, matrices, number lines, Venn diagrams, tree diagrams (probability), or flowcharts
-           - Set appropriate visualElementType: coordinate-plane, geometric-figure, 3d-diagram, matrix, number-line, venn-diagram, tree-diagram, or flowchart
-           ` : selectedSubject === 'Physics' ? `
-           - PHYSICS-SPECIFIC VISUALS: Look for circuit diagrams (resistors, capacitors, batteries, switches), ray diagrams (lenses, mirrors, prisms, light paths), free body diagrams (forces with arrows), wave diagrams (interference patterns, standing waves), field diagrams (electric/magnetic field lines), energy level diagrams (atomic transitions)
-           - Set appropriate visualElementType: circuit-diagram, ray-diagram, free-body-diagram, wave-diagram, field-diagram, or energy-level-diagram
-           ` : ''}
-
-        ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '6' : '5'}. Extract ALL questions. Use minimal text in descriptions to fit everything.
-
-        ${selectedSubject === 'Physics' ? `
-        PHYSICS DOMAINS & CHAPTERS (Class 12 NCERT):
-        - MECHANICS: Circular Motion, Laws of Motion, Work Energy and Power, System of Particles and Rotational Motion, Gravitation, Kinematics, Mechanical Properties of Solids, Mechanical Properties of Fluids, Thermodynamics
-        - ELECTRODYNAMICS: Current Electricity, Moving Charges and Magnetism, Electromagnetic Induction, Alternating Current, Electrostatics, Magnetism and Matter, Electrostatic Potential and Capacitance, Electromagnetic Waves, Semiconductor Electronics
-        - MODERN PHYSICS: Atoms, Nuclei, Dual Nature of Radiation and Matter
-        - OPTICS: Wave Optics, Ray Optics and Optical Instruments
-        - OSCILLATIONS & WAVES: Oscillations, Waves
-        ` : selectedSubject === 'Chemistry' ? `
-        CHEMISTRY DOMAINS & CHAPTERS (Class 12 NCERT):
-        - PHYSICAL CHEMISTRY: Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, Solid State
-        - ORGANIC CHEMISTRY: Alcohols Phenols and Ethers, Aldehydes Ketones and Carboxylic Acids, Amines, Biomolecules, Polymers, Chemistry in Everyday Life, Haloalkanes and Haloarenes
-        - INORGANIC CHEMISTRY: p-Block Elements, d and f Block Elements, Coordination Compounds, General Principles and Processes of Isolation of Elements
-        ` : selectedSubject === 'Math' ? `
-        MATHEMATICS DOMAINS & CHAPTERS (Class 12 NCERT):
-        - ALGEBRA: Relations and Functions, Inverse Trigonometric Functions, Matrices, Determinants, Continuity and Differentiability, Application of Derivatives, Maxima and Minima, Rate of Change, Monotonicity
-        - CALCULUS: Integrals, Indefinite Integration, Definite Integration, Applications of Integrals, Area under Curves, Differential Equations, Variable Separable, Linear Differential Equations, Homogeneous Equations
-        - VECTORS & 3D GEOMETRY: Vectors, Scalar and Vector Products, Dot Product, Cross Product, Scalar Triple Product, Three Dimensional Geometry, Direction Cosines, Direction Ratios, Equation of Line, Equation of Plane, Angle Between Lines, Angle Between Planes, Distance Formulae
-        - LINEAR PROGRAMMING: Linear Programming Problems, Optimization, Feasible Region, Objective Function, Constraints, Graphical Method, Corner Point Method
-        - PROBABILITY: Probability, Conditional Probability, Bayes Theorem, Multiplication Theorem, Independent Events, Random Variables, Probability Distributions, Binomial Distribution, Mean and Variance
-        ` : `
-        BIOLOGY DOMAINS & CHAPTERS (Class 12 NCERT):
-        - GENETICS & EVOLUTION: Heredity and Variation, Molecular Basis of Inheritance, Evolution
-        - BIOLOGY IN HUMAN WELFARE: Human Health and Disease, Strategies for Enhancement in Food Production, Microbes in Human Welfare
-        - BIOTECHNOLOGY: Biotechnology Principles and Processes, Biotechnology and its Applications
-        - ECOLOGY: Organisms and Populations, Ecosystem, Biodiversity and Conservation, Environmental Issues
-        - REPRODUCTION: Reproduction in Organisms, Sexual Reproduction in Flowering Plants, Human Reproduction, Reproductive Health
-        `}
+        1. SYLLABUS COMPLIANCE: Strictly follow the latest official syllabus for ${subj} (${selectedGrade}).
+        2. MARKING SCHEME: Extract marks verbatim. MCQs are usually 1 Mark.
+        3. Verbatim Extraction: Copy text exactly as seen in the paper.
+        4. Math Formatting: Wrap ALL mathematical expressions, symbols, and formulas in $ delimiters ($...$ for inline, $$...$$ for display).
+        5. LaTeX Commands: Use standard LaTeX for math (e.g., \\frac{a}{b}, \\sqrt{x}, \\sin\\theta).
+        6. Space Preservation: Ensure spaces are preserved between words. Avoid merging words.
+        7. Visual Elements: Detect if a question has a diagram/table/graph and provide a brief description and location.
 
         SCHEMA: { "questions": [{
           "id": "Q1",
-          "text": "...",
+          "text": "The question text with math wrapped in $...$",
           "options": ["(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4"],
-          "correctOptionIndex": 0 (0-based index: 0=A, 1=B, 2=C, 3=D. REQUIRED for MCQs. Identify from answer key/marking scheme),
+          "correctOptionIndex": 0-3 (Identify from answer key or solve if possible),
           "marks": 1,
-          "difficulty": "...",
-          "topic": "Same as chapter name OR more specific sub-topic (e.g., 'Differential Equations' or 'Matrices'). NEVER leave empty!",
-          "blooms": "...",
-          "domain": "MECHANICS | ELECTRODYNAMICS | etc. (major domain from above)",
-          "chapter": "Specific chapter name from the list above that best matches this question",
-          "hasVisualElement": true | false,
-          "visualElementType": "diagram" | "table" | "graph" | "illustration" | "chart" | "image" | "coordinate-plane" | "geometric-figure" | "3d-diagram" | "matrix" | "number-line" | "venn-diagram" | "tree-diagram" | "flowchart" | "circuit-diagram" | "ray-diagram" | "free-body-diagram" | "wave-diagram" | "field-diagram" | "energy-level-diagram" (if hasVisualElement is true),
-          "visualElementDescription": "Detailed description of the diagram/table/image content, including all labels, values, and key features. For Math: describe axes, equations, vertices, measurements. For Physics: describe circuit components, ray paths, forces, field directions, etc." (if hasVisualElement is true),
-          "visualElementPosition": "above" | "below" | "inline" | "side" (if hasVisualElement is true),
-          "visualBoundingBox": { "pageNumber": 3, "x": "10%", "y": "45%", "width": "80%", "height": "25%" } (if hasVisualElement is true, percentage coordinates from page edges)
-        }] }
-
-        IMPORTANT: For MCQ questions, you MUST identify and include the correctOptionIndex from the answer key/marking scheme in the paper.`;
+          "difficulty": "Easy|Medium|Hard",
+          "topic": "Specific chapter name",
+          "chapter": "Specific chapter name",
+          "domain": "Domain name",
+          "hasVisualElement": boolean,
+          "visualElementType": "diagram|table|graph",
+          "visualElementDescription": "Detailed description for the diagram",
+          "visualBoundingBox": { "pageNumber": 1, "x": "10%", "y": "20%", "width": "80%", "height": "30%" }
+        }] }`;
 
           const result = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]);
           const data = safeAiParse<any>(result.response.text(), { questions: [] }, true);
@@ -492,10 +434,7 @@ ${generatePhysicsExtractionInstructions()}
       let imageMapping: Map<number, any[]> | null = null;
 
       // --- PHASE 1: PARALLEL NEURAL TRACKS ---
-      updatePipelineStatus('extraction', 'active');
       updatePipelineStatus('analysis', 'active');
-      setLoadingStage(`Analyzing ${file.name}...`);
-
       const genModel = genAI.getGenerativeModel({
         model: selectedModel,
         generationConfig: {
@@ -511,7 +450,7 @@ ${generatePhysicsExtractionInstructions()}
       let analyticData: any;
       const extractionId = Date.now().toString().slice(-4); // Unique ID for this extraction
 
-      if (useSimplifiedExtraction && selectedSubject === 'Math') {
+      if (useSimplifiedExtraction && subj === 'Math') {
         console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - MATH] Using schema-driven extraction with @google/genai');
         const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel);
         // Convert simplified format to our existing format
@@ -519,7 +458,7 @@ ${generatePhysicsExtractionInstructions()}
           questions: simpleQuestions.map((sq: any) => ({
             id: `Q${sq.id}`,
             text: sq.text,
-            options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
+            options: (sq.options || []).map((opt: any) => `(${opt.id}) ${opt.text}`),
             marks: 1,
             difficulty: sq.difficulty || 'Medium',
             topic: sq.topic || 'Mathematics',
@@ -543,7 +482,7 @@ ${generatePhysicsExtractionInstructions()}
             console.warn('⚠️ [SIMPLIFIED MATH - IMAGE] Failed:', err);
           }
         }
-      } else if (useSimplifiedExtraction && selectedSubject === 'Physics') {
+      } else if (useSimplifiedExtraction && subj === 'Physics') {
         console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - PHYSICS] Using schema-driven extraction with @google/genai');
         const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel);
         // Convert simplified format to our existing format
@@ -593,7 +532,7 @@ ${generatePhysicsExtractionInstructions()}
             console.warn('⚠️ [SIMPLIFIED PHYSICS - IMAGE] Failed:', err);
           }
         }
-      } else if (useSimplifiedExtraction && selectedSubject === 'Biology') {
+      } else if (useSimplifiedExtraction && subj === 'Biology') {
         console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - BIOLOGY] Using schema-driven extraction with @google/genai');
         const simpleQuestions = await extractBiologyQuestionsSimplified(file, apiKey, selectedModel, activeExamContext);
         // Convert simplified format to our existing format
@@ -643,35 +582,65 @@ ${generatePhysicsExtractionInstructions()}
             console.warn('⚠️ [SIMPLIFIED BIOLOGY - IMAGE] Failed:', err);
           }
         }
+      } else if (useSimplifiedExtraction && subj === 'Chemistry') {
+        console.log('🚀 [SIMPLIFIED MODE - CHEMISTRY] Using schema-driven page-by-page extraction...');
+        const simpleQuestions = await extractChemistryQuestionsSimplified(file, apiKey, selectedModel);
+        extractedData = {
+          questions: simpleQuestions.map((sq: any) => ({
+            id: `Q${sq.id}`,
+            text: sq.text,
+            options: sq.options?.map((opt: any) => `(${opt.id}) ${opt.text}`) || [],
+            marks: 1,
+            difficulty: sq.difficulty || 'Moderate',
+            topic: sq.topic || 'Chemistry',
+            domain: sq.domain || 'Physical Chemistry',
+            blooms: sq.blooms || 'Apply',
+            hasVisualElement: sq.hasVisualElement || false,
+            visualElementType: sq.visualElementType || null,
+            visualElementDescription: sq.visualElementDescription || null,
+            visualBoundingBox: sq.visualBoundingBox || null,
+            source: `${file.name}`
+          }))
+        };
+
+        // Image extraction for Chemistry (basic proximity-based)
+        if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+          try {
+            const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+            imageMapping = await extractAndMapImages(file);
+            console.log('✅ [SIMPLIFIED CHEMISTRY - IMAGE] Extracted', imageMapping?.size || 0, 'images');
+          } catch (err) {
+            console.warn('⚠️ [SIMPLIFIED CHEMISTRY - IMAGE] Failed:', err);
+          }
+        }
       } else {
-        // Legacy extraction
-        const extractionPrompt = selectedSubject === 'Math'
+
+        const extractionPrompt = subj === 'Math'
           ? generateCleanMathPrompt(selectedGrade)
-          : selectedSubject === 'Physics'
+          : subj === 'Physics'
             ? generateCleanPhysicsPrompt(selectedGrade)
-            : selectedSubject === 'Biology'
+            : subj === 'Biology'
               ? generateCleanBiologyPrompt(activeExamContext)
-              : `Extract ALL questions verbatim from this ${selectedSubject} (${selectedGrade}) paper.
+              : subj === 'Chemistry'
+                ? generateCleanChemistryPrompt(selectedGrade)
+                : `Extract ALL questions verbatim from this ${subj} (${selectedGrade}) paper.
       RULES:
-      1. Multiple Choice Questions (MCQs) are worth EXACTLY 1 Mark unless explicitly stated otherwise.
-      2. CRITICAL: Use high fidelity LaTeX for ALL mathematical expressions, formulas, equations, and symbols. NEVER skip LaTeX conversion.
-         - Wrap ALL math in $ delimiters: inline math uses $...$ and display math uses $$...$$
-         - Convert ALL Unicode symbols (√, θ, π, ∑, ∫, etc.) to proper LaTeX commands
-         - NEVER output corrupted text like "2 2 2 2cos8" - use proper nested LaTeX like "$\\sqrt{2+\\sqrt{2+\\sqrt{2+2\\cos 8\\theta}}}$"
-         - NEVER output raw Unicode or plaintext for math - ALWAYS use LaTeX
-         - CRITICAL TRIG FUNCTIONS: ALWAYS use backslash! Write \\sin, \\cos, \\tan, \\sec, \\csc, \\cot, \\sinh, \\cosh, \\tanh NOT sin, cos, tan, etc.
-         - CRITICAL EXPRESSION INTEGRITY: NEVER break expressions across multiple lines or close $ delimiters mid-expression
-         - CRITICAL SQRT: ALWAYS use \\sqrt{} with curly braces! Write \\sqrt{x}, \\sqrt{2}, \\sqrt{x^2+1} NOT sqrt x or sqrtx
-         - ⚠️ CRITICAL: Extract EXACTLY what you see - DO NOT add/move variables based on what "should" be there
-      ${selectedSubject === 'Math' ? `3. CRITICAL MATH NOTATION - READ CAREFULLY:
+      1. SYLLABUS COMPLIANCE: Strictly follow the latest official NCERT Class 12 syllabus for ${subj}.
+      2. MARKING SCHEME: Extract marks verbatim. MCQs are usually 1 Mark.
+      3. Verbatim Extraction: Copy text exactly as seen in the paper. Extract what you OBSERVE, not what you EXPECT.
+      4. Math Formatting: Wrap ALL mathematical expressions, symbols, and formulas in $ delimiters ($...$ for inline, $$...$$ for display).
+      5. LaTeX Commands: Use standard LaTeX for math (e.g., \\frac{a}{b}, \\sqrt{x}, \\sin\\theta).
+      6. Space Preservation: Ensure spaces are preserved between words. Avoid merging words.
+      7. Visual Elements: Detect if a question has a diagram/table/graph and provide a brief description and location.
+      ${subj === 'Math' ? `4. CRITICAL MATH NOTATION - READ CAREFULLY:
 
 ${generateStreamlinedMathInstructions()}
-` : selectedSubject === 'Physics' ? `3. CRITICAL PHYSICS NOTATION - READ CAREFULLY:
+` : subj === 'Physics' ? `4. CRITICAL PHYSICS NOTATION - READ CAREFULLY:
 
 ${generatePhysicsExtractionInstructions()}
 ` : ''}.
-      ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '4' : '3'}. Classify each question into the correct NCERT ${selectedGrade} ${selectedSubject} domain and chapter.
-      ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '5' : '4'}. VISUAL ELEMENT DETECTION WITH PRECISE LOCATION:
+      ${subj === 'Math' || subj === 'Physics' ? '5' : '4'}. Classify each question into the correct NCERT ${selectedGrade} ${subj} domain and chapter.
+      ${subj === 'Math' || subj === 'Physics' ? '6' : '5'}. VISUAL ELEMENT DETECTION WITH PRECISE LOCATION:
          - If question has a diagram/figure/table/graph nearby OR text mentions "shown"/"following figure":
            * Set hasVisualElement=true
            * Provide visualElementDescription="[Detailed description]"
@@ -685,36 +654,36 @@ ${generatePhysicsExtractionInstructions()}
              }
            * This gives us pixel-perfect extraction of the diagram
          - If no visual, set hasVisualElement=false
-         ${selectedSubject === 'Math' ? `
+         ${subj === 'Math' ? `
          - MATH-SPECIFIC VISUALS: Look for coordinate planes, geometric figures (triangles, circles), 3D diagrams, matrices, number lines, Venn diagrams, tree diagrams (probability), or flowcharts
          - Set appropriate visualElementType: coordinate-plane, geometric-figure, 3d-diagram, matrix, number-line, venn-diagram, tree-diagram, or flowchart
-         ` : selectedSubject === 'Physics' ? `
+         ` : subj === 'Physics' ? `
          - PHYSICS-SPECIFIC VISUALS: Look for circuit diagrams (resistors, capacitors, batteries, switches), ray diagrams (lenses, mirrors, prisms, light paths), free body diagrams (forces with arrows), wave diagrams (interference patterns, standing waves), field diagrams (electric/magnetic field lines), energy level diagrams (atomic transitions)
          - Set appropriate visualElementType: circuit-diagram, ray-diagram, free-body-diagram, wave-diagram, field-diagram, or energy-level-diagram
          ` : ''}
 
-      ${selectedSubject === 'Math' || selectedSubject === 'Physics' ? '6' : '5'}. CRITICAL: Extract ALL questions from the paper (scan every page, no limit). Use minimal text in descriptions to fit all questions in response.
+      ${subj === 'Math' || subj === 'Physics' ? '6' : '5'}. CRITICAL: Extract ALL questions from the paper (scan every page, no limit). Use minimal text in descriptions to fit all questions in response.
 
-      ${selectedSubject === 'Physics' ? `
+      ${subj === 'Physics' ? `
       PHYSICS DOMAINS & CHAPTERS (Class 12 NCERT):
       - MECHANICS: Circular Motion, Laws of Motion, Work Energy and Power, System of Particles and Rotational Motion, Gravitation, Kinematics, Mechanical Properties of Solids, Mechanical Properties of Fluids, Thermodynamics
       - ELECTRODYNAMICS: Current Electricity, Moving Charges and Magnetism, Electromagnetic Induction, Alternating Current, Electrostatics, Magnetism and Matter, Electrostatic Potential and Capacitance, Electromagnetic Waves, Semiconductor Electronics
       - MODERN PHYSICS: Atoms, Nuclei, Dual Nature of Radiation and Matter
       - OPTICS: Wave Optics, Ray Optics and Optical Instruments
       - OSCILLATIONS & WAVES: Oscillations, Waves
-      ` : selectedSubject === 'Chemistry' ? `
+      ` : subj === 'Chemistry' ? `
       CHEMISTRY DOMAINS & CHAPTERS (Class 12 NCERT):
       - PHYSICAL CHEMISTRY: Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, Solid State
       - ORGANIC CHEMISTRY: Alcohols Phenols and Ethers, Aldehydes Ketones and Carboxylic Acids, Amines, Biomolecules, Polymers, Chemistry in Everyday Life, Haloalkanes and Haloarenes
       - INORGANIC CHEMISTRY: p-Block Elements, d and f Block Elements, Coordination Compounds, General Principles and Processes of Isolation of Elements
-      ` : selectedSubject === 'Math' ? `
+      ` : subj === 'Math' ? `
       MATHEMATICS DOMAINS & CHAPTERS (Class 12 NCERT):
       - ALGEBRA: Relations and Functions, Inverse Trigonometric Functions, Matrices, Determinants, Continuity and Differentiability, Application of Derivatives, Maxima and Minima, Rate of Change, Monotonicity
       - CALCULUS: Integrals, Indefinite Integration, Definite Integration, Applications of Integrals, Area under Curves, Differential Equations, Variable Separable, Linear Differential Equations, Homogeneous Equations
       - VECTORS & 3D GEOMETRY: Vectors, Scalar and Vector Products, Dot Product, Cross Product, Scalar Triple Product, Three Dimensional Geometry, Direction Cosines, Direction Ratios, Equation of Line, Equation of Plane, Angle Between Lines, Angle Between Planes, Distance Formulae
       - LINEAR PROGRAMMING: Linear Programming Problems, Optimization, Feasible Region, Objective Function, Constraints, Graphical Method, Corner Point Method
       - PROBABILITY: Probability, Conditional Probability, Bayes Theorem, Multiplication Theorem, Independent Events, Random Variables, Probability Distributions, Binomial Distribution, Mean and Variance
-      ` : selectedSubject === 'Biology' ? `
+      ` : subj === 'Biology' ? `
       BIOLOGY DOMAINS & CHAPTERS (Class 12 NCERT):
       - GENETICS & EVOLUTION: Heredity and Variation, Molecular Basis of Inheritance, Evolution
       - BIOLOGY IN HUMAN WELFARE: Human Health and Disease, Strategies for Enhancement in Food Production, Microbes in Human Welfare
@@ -753,7 +722,7 @@ ${generatePhysicsExtractionInstructions()}
           "strategy": ["Prioritize derivation A...", "Logic focus on B..."]
         }`;
 
-        console.log(`🚀 [${selectedSubject.toUpperCase()} EXTRACTION] Starting ${selectedSubject === 'Biology' ? 'cleanBiologyExtractor' : selectedSubject === 'Math' ? 'cleanMathExtractor' : selectedSubject === 'Physics' ? 'cleanPhysicsExtractor' : 'legacy'} for ${file.name}`);
+        console.log(`🚀 [${selectedSubject.toUpperCase()} EXTRACTION] Starting ${subj === 'Biology' ? 'cleanBiologyExtractor' : subj === 'Math' ? 'cleanMathExtractor' : subj === 'Physics' ? 'cleanPhysicsExtractor' : 'legacy'} for ${file.name}`);
         const [extractRes, analysisRes] = await Promise.all([
           genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]),
           genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, analysisPrompt])
@@ -780,7 +749,7 @@ ${generatePhysicsExtractionInstructions()}
       } // End of legacy extraction
 
       // For simplified mode, set minimal analysis data
-      if (useSimplifiedExtraction && (selectedSubject === 'Math' || selectedSubject === 'Physics')) {
+      if (useSimplifiedExtraction && (subj === 'Math' || subj === 'Physics')) {
         analyticData = {
           summary: `Questions extracted using simplified mode for ${selectedSubject}`,
           overallDifficulty: 'Moderate',
@@ -806,13 +775,14 @@ ${generatePhysicsExtractionInstructions()}
 
       // ⭐ CRITICAL: Convert Unicode symbols (θ, √, etc.) to LaTeX before processing
       // SKIP for simplified mode - it already produces correct double-backslash LaTeX
-      const isSimplifiedMode = useSimplifiedExtraction && (selectedSubject === 'Math' || selectedSubject === 'Physics');
+      const isSimplifiedMode = useSimplifiedExtraction && (subj === 'Math' || subj === 'Physics' || subj === 'Biology' || subj === 'Chemistry');
+
       if (extractedData.questions && extractedData.questions.length > 0 && !isSimplifiedMode) {
         extractedData.questions = processQuestionsUnicode(extractedData.questions);
         console.log(`✨ [UNICODE CONVERSION] Processed ${extractedData.questions.length} questions for Unicode→LaTeX conversion`);
 
         // ⭐ VALIDATION: Check for common extraction errors (Math only)
-        if (selectedSubject === 'Math') {
+        if (subj === 'Math') {
           const validation = validateExtraction(extractedData);
           console.log(`🔍 [VALIDATION] Questions: ${validation.questionCount}, Valid: ${validation.valid}, Errors: ${validation.errors.length}`);
 
@@ -841,7 +811,7 @@ ${generatePhysicsExtractionInstructions()}
 
       // 🔄 RECURSIVE SECOND PASS: Keep extracting until we have all questions (Math papers typically have 60 questions)
       // SKIP for simplified mode - it extracts all questions in one pass
-      const expectedQuestions = selectedSubject === 'Math' ? 60 : 50; // Math = 60, others ~50
+      const expectedQuestions = subj === 'Math' ? 60 : 50; // Math = 60, others ~50
       let passNumber = 2;
       const MAX_PASSES = 5; // Safety limit to prevent infinite loops
 
@@ -858,38 +828,40 @@ ${generatePhysicsExtractionInstructions()}
           const lastQNum = extractedData.questions.length;
 
           // Use CLEAN Math prompt for second pass if subject is Math
-          console.log(`🔍 [PASS ${passNumber} DEBUG] Subject: ${selectedSubject}, Using clean Math prompt: ${selectedSubject === 'Math'}`);
+          console.log(`🔍 [PASS ${passNumber} DEBUG] Subject: ${selectedSubject}, Using clean Math prompt: ${subj === 'Math'}`);
 
-          const remainingPrompt = selectedSubject === 'Math'
+          const remainingPrompt = subj === 'Math'
             ? generateCleanMathPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
 
 Already extracted: Q1-Q${lastQNum}
 NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
 DO NOT repeat Q1-Q${lastQNum}`
-            : selectedSubject === 'Physics'
+            : subj === 'Physics'
               ? generateCleanPhysicsPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
 
 Already extracted: Q1-Q${lastQNum}
 NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
 DO NOT repeat Q1-Q${lastQNum}`
-              : selectedSubject === 'Biology'
+              : subj === 'Biology'
                 ? generateCleanBiologyPrompt(activeExamContext) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
 
 Already extracted: Q1-Q${lastQNum}
 NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
 DO NOT repeat Q1-Q${lastQNum}`
-                : `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${selectedSubject} paper.
+                : `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${subj} paper.
 
 CRITICAL RULES:
-1. Use high fidelity LaTeX for ALL math (wrap in $ delimiters)
-2. Convert ALL Unicode symbols to LaTeX commands (\\sin, \\cos, \\theta, \\pi, \\int, etc.)
-3. NEVER skip LaTeX conversion - expressions like "xex" must be "xe^x"
-4. CRITICAL TRIG FUNCTIONS: ALWAYS use backslash! Write \\sin, \\cos, \\tan, \\sec, \\csc, \\cot NOT sin, cos, tan
-5. CRITICAL EXPRESSION INTEGRITY: NEVER break expressions across multiple lines or close $ delimiters mid-expression
+1. SYLLABUS COMPLIANCE: Strictly follow the latest official NCERT Class 12 syllabus for ${subj}.
+2. MARKING SCHEME: Scale depth based on marks provided in the paper.
+3. Use high fidelity LaTeX for ALL math (wrap in $ delimiters)
+4. Convert ALL Unicode symbols to LaTeX commands (\\sin, \\cos, \\theta, \\pi, \\int, etc.)
+5. NEVER skip LaTeX conversion - expressions like "xex" must be "xe^x"
+6. CRITICAL TRIG FUNCTIONS: ALWAYS use backslash! Write \\sin, \\cos, \\tan, \\sec, \\csc, \\cot NOT sin, cos, tan
+7. CRITICAL EXPRESSION INTEGRITY: NEVER break expressions across multiple lines or close $ delimiters mid-expression
    Example WRONG: "$x = e^\\theta$$\\sin\\theta$" or "$x = e^\\theta$\\n$\\sin\\theta$"
    Example RIGHT: "$x = e^\\theta \\sin\\theta, y = e^\\theta \\cos\\theta$"
-6. CRITICAL SQRT: ALWAYS use \\sqrt{} with curly braces! Write \\sqrt{x}, \\sqrt{2} NOT sqrt x or sqrtx
-7. Use the FULL SCHEMA with ALL fields (especially topic, chapter, domain):
+8. CRITICAL SQRT: ALWAYS use \\sqrt{} with curly braces! Write \\sqrt{x}, \\sqrt{2} NOT sqrt x or sqrtx
+9. Use the FULL SCHEMA with ALL fields (especially topic, chapter, domain):
 {
   "id": "Q${lastQNum + 1}",
   "text": "... (with proper LaTeX wrapped in $ delimiters)",
@@ -898,7 +870,7 @@ CRITICAL RULES:
   "difficulty": "Easy|Moderate|Hard",
   "topic": "Same as chapter name OR specific sub-topic (e.g., 'Differential Equations', 'Matrices'). NEVER leave empty!",
   "blooms": "Knowledge|Understand|Apply|Analyze|Evaluate|Create",
-  "domain": "${selectedSubject === 'Math' ? 'ALGEBRA|CALCULUS|VECTORS & 3D GEOMETRY|LINEAR PROGRAMMING|PROBABILITY' : selectedSubject === 'Physics' ? 'MECHANICS|ELECTRODYNAMICS|MODERN PHYSICS|OPTICS|OSCILLATIONS & WAVES' : 'Domain from subject'}",
+  "domain": "${subj === 'Math' ? 'ALGEBRA|CALCULUS|VECTORS & 3D GEOMETRY|LINEAR PROGRAMMING|PROBABILITY' : subj === 'Physics' ? 'MECHANICS|ELECTRODYNAMICS|MODERN PHYSICS|OPTICS|OSCILLATIONS & WAVES' : 'Domain from subject'}",
   "chapter": "Specific chapter name from NCERT Class 12 ${selectedSubject} syllabus",
   "hasVisualElement": true|false,
   "visualElementType": "diagram"|"table"|"graph"|"coordinate-plane"|"circuit-diagram" (if has visual),
@@ -1094,6 +1066,10 @@ CRITICAL RULES:
         questions: extractedData.questions || []
       };
 
+      // Extract year from filename if present
+      const yearMatch = file.name.match(/\b(19|20)\d{2}\b/);
+      const extractedYear = yearMatch ? yearMatch[0] : null;
+
       const newScan: Scan = {
         id: crypto.randomUUID(), // Generate proper UUID for database compatibility
         name: `${file.name.split('.')[0]} [${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}]`,
@@ -1103,6 +1079,7 @@ CRITICAL RULES:
         grade: selectedGrade || 'Class 12',
         subject: selectedSubject,
         examContext: activeExamContext, // Multi-subject context
+        year: extractedYear || undefined,
         analysisData: brainData
       };
 
