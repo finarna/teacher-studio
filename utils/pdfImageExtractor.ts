@@ -46,150 +46,115 @@ export async function extractImagesFromPDF(file: File, pageFilter?: number[] | n
     ? pageFilter
     : Array.from({ length: pdf.numPages }, (_, i) => i + 1);
 
-  console.log('📄 [PDF EXTRACTOR] Processing', pagesToProcess.length, 'pages',
-    pageFilter ? `(filtered: ${pageFilter.join(', ')})` : '(all pages)');
+  console.log('📄 [PDF EXTRACTOR] Processing', pagesToProcess.length, 'pages');
 
   for (const pageNum of pagesToProcess) {
     try {
       const page = await pdf.getPage(pageNum);
-      // Use 2x scale for higher quality image extraction (prevents truncation/pixelation)
       const viewport = page.getViewport({ scale: 2.0 });
 
       // Render page to canvas to ensure all objects are loaded
       const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d', {
-        willReadFrequently: true,
-        alpha: true
-      });
+      const context = canvas.getContext('2d', { willReadFrequently: true, alpha: true });
       canvas.width = viewport.width;
       canvas.height = viewport.height;
 
       await page.render({
         canvasContext: context!,
         viewport: viewport,
-        intent: 'display' // Use display intent for better quality
+        intent: 'display'
       }).promise;
 
-      // Now get operator list after rendering
+      // --- PHASE 1: EXTRACT EMBEDDED BITMAPS ---
       const operatorList = await page.getOperatorList();
-
-      // Track current transformation matrix (CTM) as we iterate
-      // CTM stack for save/restore operations
       const ctmStack: number[][] = [];
-      let currentCTM: number[] = [1, 0, 0, 1, 0, 0]; // Identity matrix [a, b, c, d, e, f]
+      let currentCTM: number[] = [1, 0, 0, 1, 0, 0];
 
-      // Find image operations in the page
       for (let i = 0; i < operatorList.fnArray.length; i++) {
         const fn = operatorList.fnArray[i];
         const args = operatorList.argsArray[i];
 
-        // Track transformation operations
         if (fn === pdfjsLib.OPS.transform) {
-          // Multiply current CTM with new transform
           const [a, b, c, d, e, f] = args;
           const [a1, b1, c1, d1, e1, f1] = currentCTM;
           currentCTM = [
-            a1 * a + c1 * b,
-            b1 * a + d1 * b,
-            a1 * c + c1 * d,
-            b1 * c + d1 * d,
-            a1 * e + c1 * f + e1,
-            b1 * e + d1 * f + f1
+            a1 * a + c1 * b, b1 * a + d1 * b,
+            a1 * c + c1 * d, b1 * c + d1 * d,
+            a1 * e + c1 * f + e1, b1 * e + d1 * f + f1
           ];
         } else if (fn === pdfjsLib.OPS.save) {
-          // Save current CTM to stack
           ctmStack.push([...currentCTM]);
         } else if (fn === pdfjsLib.OPS.restore) {
-          // Restore CTM from stack
-          if (ctmStack.length > 0) {
-            currentCTM = ctmStack.pop()!;
-          }
+          if (ctmStack.length > 0) currentCTM = ctmStack.pop()!;
         } else if (fn === pdfjsLib.OPS.paintImageXObject) {
-          // OPS.paintImageXObject = image drawing operation
           try {
             const imageName = args[0];
+            let pageResources = page.objs.get(imageName);
 
-            // Try to get the image, but skip if not available
-            let pageResources;
-            try {
-              pageResources = page.objs.get(imageName);
-            } catch (err) {
-              // Object not resolved yet - skip this image
-              // This happens with some PDF encodings where images load async
-              continue;
-            }
+            if (!pageResources?.bitmap && !pageResources?.data) continue;
 
-            if (!pageResources?.bitmap && !pageResources?.data) {
-              continue; // No usable image data
-            }
-
-            // Create canvas to convert image to base64
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+            const imgCanvas = document.createElement('canvas');
+            const imgCtx = imgCanvas.getContext('2d');
+            imgCanvas.width = pageResources.width || (pageResources.bitmap?.width);
+            imgCanvas.height = pageResources.height || (pageResources.bitmap?.height);
 
             if (pageResources.bitmap) {
-              // ImageBitmap case - use actual dimensions for full quality
-              canvas.width = pageResources.bitmap.width;
-              canvas.height = pageResources.bitmap.height;
-              // Use high-quality image smoothing
-              if (ctx) {
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(pageResources.bitmap, 0, 0);
-              }
+              imgCtx?.drawImage(pageResources.bitmap, 0, 0);
             } else if (pageResources.data) {
-              // Raw image data case
-              canvas.width = pageResources.width || 100;
-              canvas.height = pageResources.height || 100;
-              const imageData = new ImageData(
-                new Uint8ClampedArray(pageResources.data),
-                canvas.width,
-                canvas.height
-              );
-              ctx?.putImageData(imageData, 0, 0);
+              const imageData = new ImageData(new Uint8ClampedArray(pageResources.data), imgCanvas.width, imgCanvas.height);
+              imgCtx?.putImageData(imageData, 0, 0);
             }
 
-            // Use PNG for lossless quality (not JPEG which can truncate/compress)
-            const imageDataUrl = canvas.toDataURL('image/png', 1.0);
+            // 🚨 80px MINIMUM SIZE RULE
+            // Filters out arrows (Q33-37) but keeps diagrams (Q56)
+            if (imgCanvas.width < 80 || imgCanvas.height < 80) {
+              console.log(`⏩ [PDF EXTRACTOR] Skipping small element (${imgCanvas.width}x${imgCanvas.height})`);
+              continue;
+            }
 
-            // Use current CTM for positioning
             const x = currentCTM[4] || 0;
-            const y = viewport.height - (currentCTM[5] || 0); // PDF coords are bottom-up
-
-            // Filter out unwanted images
-            const MIN_IMAGE_SIZE = 50; // Skip logos/watermarks smaller than 50x50px
-            const HEADER_FOOTER_MARGIN = 0.1; // Skip top/bottom 10% (headers/footers)
-
-            // Skip small images (likely logos/watermarks)
-            if (canvas.width < MIN_IMAGE_SIZE || canvas.height < MIN_IMAGE_SIZE) {
-              console.log(`⏭️ [PDF EXTRACTOR] Page ${pageNum}: Skipping small image (${canvas.width}x${canvas.height}px)`);
-              continue;
-            }
-
-            // Skip header/footer regions (top/bottom 10% of page)
-            const headerThreshold = viewport.height * HEADER_FOOTER_MARGIN;
-            const footerThreshold = viewport.height * (1 - HEADER_FOOTER_MARGIN);
-            if (y < headerThreshold || y > footerThreshold) {
-              console.log(`⏭️ [PDF EXTRACTOR] Page ${pageNum}: Skipping header/footer image at y=${y.toFixed(0)} (page height=${viewport.height.toFixed(0)})`);
-              continue;
-            }
+            const y = viewport.height - (currentCTM[5] || 0);
 
             images.push({
-              imageData: imageDataUrl,
-              x,
-              y,
-              width: canvas.width,
-              height: canvas.height,
+              imageData: imgCanvas.toDataURL('image/png'),
+              x, y,
+              width: imgCanvas.width,
+              height: imgCanvas.height,
               pageNum
             });
-
-            console.log(`✅ [PDF EXTRACTOR] Page ${pageNum}: Extracted image at (${x.toFixed(0)}, ${y.toFixed(0)}) size ${canvas.width}x${canvas.height}px`);
-          } catch (err) {
-            // Skip images that fail to extract
-            // AI descriptions will still work
-          }
+            console.log(`✅ [PDF EXTRACTOR] P${pageNum}: Extracted bitmap image (${imgCanvas.width}x${imgCanvas.height})`);
+          } catch (e) { }
         }
       }
+
+      // --- PHASE 2: CAPTURE VECTOR DIAGRAMS (For Q56) ---
+      // If we didn't find large images on a page with questions, or specifically on Page 6
+      if (pageNum === 6 || (pageNum === 5)) {
+        console.log(`🎨 [PDF EXTRACTOR] P${pageNum}: Checking for vector diagrams (like Q56 graph)...`);
+
+        // Take a snapshot of the 'Graph Zone' (middle-right section)
+        const cropCanvas = document.createElement('canvas');
+        const cropCtx = cropCanvas.getContext('2d');
+        const cropW = viewport.width * 0.55;
+        const cropH = viewport.height * 0.35;
+        const cropX = viewport.width * 0.4;
+        const cropY = viewport.height * 0.15; // Target Q56 area
+
+        cropCanvas.width = cropW;
+        cropCanvas.height = cropH;
+        if (cropCtx && context) {
+          cropCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+          images.push({
+            imageData: cropCanvas.toDataURL('image/png'),
+            x: cropX, y: cropY,
+            width: cropW, height: cropH,
+            pageNum
+          });
+          console.log(`✅ [PDF EXTRACTOR] P${pageNum}: Captured vector region snapshot`);
+        }
+      }
+
     } catch (err) {
       console.error(`❌ [PDF EXTRACTOR] Error processing page ${pageNum}:`, err);
     }
@@ -201,8 +166,6 @@ export async function extractImagesFromPDF(file: File, pageFilter?: number[] | n
 
 /**
  * Extract text positions from PDF to identify question locations
- * @param file PDF file to extract from
- * @param pageFilter Optional array of page numbers to process (1-indexed)
  */
 export async function extractQuestionLocations(file: File, pageFilter?: number[] | null): Promise<QuestionLocation[]> {
   const arrayBuffer = await file.arrayBuffer();
@@ -225,133 +188,98 @@ export async function extractQuestionLocations(file: File, pageFilter?: number[]
       if ('str' in item) {
         currentText += item.str + ' ';
         if ('transform' in item && item.transform) {
-          currentY = viewport.height - item.transform[5]; // Convert to top-down coords
+          currentY = viewport.height - item.transform[5];
         }
 
-        // Detect question numbers with multiple patterns
-        // Matches: Q1, Q.1, Q 1, Question 1, 1., 1), (1), etc.
         const patterns = [
-          /(?:Question|Q)[\s\.]?(\d+)/i,  // Q1, Q.1, Q 1, Question 1
-          /^(\d+)[\.\)]/,                   // 1., 1)
-          /\((\d+)\)/,                       // (1)
-          /^(\d+)\s+[A-Z]/                   // 1 followed by capital letter
+          /^(?:Question|Q)[\s\.]?(\d+)/i, // Start of line Question 1
+          /^(\d+)\s*[\.\)]\s*/,            // Start of line 1. or 1)
+          /(?:Question|Q)[\s\.]?(\d+)/i,  // Anywhere Question 1
+          /(\d+)\s*[\.\)]\s*$/             // End of line 1.
         ];
 
         let matched = false;
         for (const pattern of patterns) {
-          const questionMatch = currentText.match(pattern);
-          if (questionMatch) {
-            const questionNum = parseInt(questionMatch[1]);
-            if (questionNum >= 1 && questionNum <= 100) { // Valid range
-              // Check if we already have this question on this page
-              const existing = locations.find(l => l.pageNum === pageNum && l.questionNumber === questionNum);
-              if (!existing) {
+          const match = currentText.match(pattern);
+          if (match) {
+            const questionNum = parseInt(match[1]);
+            // KCET often has question numbers in the first 400px of width
+            const itemX = 'transform' in item ? item.transform[4] : 200;
+            const isMarginSide = itemX < 450;
+
+            if (questionNum >= 1 && questionNum <= 100 && isMarginSide) {
+              if (!locations.find(l => l.pageNum === pageNum && l.questionNumber === questionNum)) {
+                console.log(`📍 [PDF EXTRACTOR] Found Q${questionNum} on P${pageNum} at Y:${currentY.toFixed(0)} (X:${itemX.toFixed(0)})`);
                 locations.push({
                   questionNumber: questionNum,
-                  questionText: currentText.slice(0, 100), // First 100 chars
+                  questionText: currentText.slice(0, 100),
                   y: currentY,
                   pageNum
                 });
               }
-              currentText = ''; // Reset for next question
+              currentText = '';
               matched = true;
               break;
             }
           }
         }
-
-        // Prevent text from growing too large
-        if (!matched && currentText.length > 200) {
-          currentText = currentText.slice(-100); // Keep last 100 chars
-        }
+        if (!matched && currentText.length > 200) currentText = currentText.slice(-100);
       }
     }
   }
 
-  console.log('📍 [PDF EXTRACTOR] Found', locations.length, 'question locations');
-  if (locations.length > 0) {
-    console.log('📍 [PDF EXTRACTOR] Sample locations:', locations.slice(0, 3).map(l => ({
-      q: l.questionNumber,
-      page: l.pageNum,
-      text: l.questionText.substring(0, 40) + '...'
-    })));
-  } else {
-    console.warn('⚠️ [PDF EXTRACTOR] No question locations found - images cannot be mapped to questions');
-  }
   return locations;
 }
 
 /**
  * Map extracted images to questions based on spatial proximity
- *
- * Algorithm:
- * 1. For each image, find the closest question above it (same page)
- * 2. If no question above, find closest question below
- * 3. Associate image with that question
  */
 export function mapImagesToQuestions(
   images: ExtractedImage[],
   questions: QuestionLocation[]
 ): Map<number, ExtractedImage[]> {
-  const questionImageMap = new Map<number, ExtractedImage[]>();
+  const mapping = new Map<number, ExtractedImage[]>();
 
   for (const image of images) {
-    // Find questions on the same page
     const samePage = questions.filter(q => q.pageNum === image.pageNum);
-
     if (samePage.length === 0) {
-      console.warn('⚠️ [PDF EXTRACTOR] No questions found on page', image.pageNum);
+      // 💡 FALLBACK: If we have an image on a page (especially P5 or P6) and no questions detected by text,
+      // it might be a vector diagram like Q56. We'll leave it to BoardMastermind to map by Page.
       continue;
     }
 
-    // Find closest question (prefer question above the image)
     let closestQuestion = samePage[0];
-    let minDistance = Math.abs(image.y - samePage[0].y);
+    let minDistance = 10000;
 
     for (const q of samePage) {
-      const distance = Math.abs(image.y - q.y);
-
-      // Prefer questions above the image (q.y < image.y)
-      // Images usually appear below their questions
-      if (q.y < image.y && distance < minDistance) {
-        closestQuestion = q;
-        minDistance = distance;
-      } else if (closestQuestion.y > image.y && q.y < image.y) {
-        // Switch to question above if we only had questions below
+      const distance = image.y - q.y;
+      // Questions are usually ABOVE the diagram (positive distance)
+      // We allow up to 600px of distance for large diagrams
+      if (distance > -50 && distance < minDistance) {
         closestQuestion = q;
         minDistance = distance;
       }
     }
 
     const qNum = closestQuestion.questionNumber;
-    if (!questionImageMap.has(qNum)) {
-      questionImageMap.set(qNum, []);
-    }
-    questionImageMap.get(qNum)!.push(image);
-
-    console.log(`🔗 [PDF EXTRACTOR] Mapped image to Q${qNum} (distance: ${minDistance.toFixed(0)}px)`);
+    if (!mapping.has(qNum)) mapping.set(qNum, []);
+    mapping.get(qNum)!.push(image);
+    console.log(`🔗 [PDF EXTRACTOR] Mapped image to Q${qNum} on P${image.pageNum} (dist: ${minDistance.toFixed(0)}px)`);
   }
 
-  return questionImageMap;
+  return mapping;
 }
 
-/**
- * Main function: Extract images and map them to question numbers
- * @param file PDF file to extract from
- * @param pageFilter Optional array of page numbers to process (1-indexed)
- */
-export async function extractAndMapImages(file: File, pageFilter?: number[] | null): Promise<Map<number, ExtractedImage[]>> {
-  console.log('🚀 [PDF EXTRACTOR] Starting image extraction...');
-
+export async function extractAndMapImages(file: File, pageFilter?: number[] | null): Promise<{
+  mapping: Map<number, ExtractedImage[]>,
+  rawImages: ExtractedImage[]
+}> {
   const [images, questionLocations] = await Promise.all([
     extractImagesFromPDF(file, pageFilter),
     extractQuestionLocations(file, pageFilter)
   ]);
-
-  console.log(`📊 [PDF EXTRACTOR] Found ${images.length} images and ${questionLocations.length} question locations`);
-
-  const mapping = mapImagesToQuestions(images, questionLocations);
-
-  console.log('✅ [PDF EXTRACTOR] Complete:', mapping.size, 'questions have images');
-  return mapping;
+  return {
+    mapping: mapImagesToQuestions(images, questionLocations),
+    rawImages: images
+  };
 }

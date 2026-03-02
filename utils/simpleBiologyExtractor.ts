@@ -11,7 +11,7 @@
  */
 
 import { GoogleGenAI } from "@google/genai";
-import { OFFICIAL_BIOLOGY_TOPICS } from './officialTopics';
+import { generateTopicInstruction } from './officialTopics';
 // REMOVED: latexFixer causes double backslash issues
 // import { fixLatexErrors, fixLatexInObject } from './latexFixer';
 
@@ -256,9 +256,7 @@ CRITICAL: If a question has a DIAGRAM, FIGURE, GRAPH, or TABLE, you MUST:
 1. Set diagramBox with coordinates { "ymin": 0-1000, "xmin": 0-1000, "ymax": 0-1000, "xmax": 0-1000 }
 2. The coordinates should tightly bound the visual element on the page
 
-# TAXONOMY (Strict Official Syllabus):
-You MUST map every question to one of these official chapter names:
-[ ${OFFICIAL_BIOLOGY_TOPICS.join(', ')} ]
+${generateTopicInstruction('Biology')}
 
 # JSON STRUCTURE
 {

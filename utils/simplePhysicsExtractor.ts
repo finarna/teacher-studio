@@ -5,6 +5,7 @@
  */
 
 import { GoogleGenAI, Type } from "@google/genai";
+import { generateTopicInstruction } from "./officialTopics";
 // REMOVED: latexFixer causes double backslash issues
 // import { fixLatexErrors, fixLatexInObject } from './latexFixer';
 
@@ -111,21 +112,24 @@ export const processInParallel = async <T, R>(
 export async function extractPhysicsQuestionsSimplified(
   file: File,
   apiKey: string,
-  model: string,  // Always provided by the UI selector — no hardcoded default
+  model: string,
+  subject: string = 'Physics',
+  examContext: string = 'KCET',
   onProgress?: (current: number, total: number, found: number) => void
 ): Promise<any[]> {
 
 
   const ai = new GoogleGenAI({ apiKey });
   const pages = await loadImage(file);
-  console.log(`🚀 [PHYSICS] Processing ${pages.length} pages in parallel...`);
+  console.log(`🚀 [${subject.toUpperCase()}] Processing ${pages.length} pages in parallel for ${examContext}...`);
 
   const resultsArray = await processInParallel(pages, async (pageImg, i) => {
     const base64 = pageImg.src.split(',')[1];
     const pageNum = i + 1;
     const totalPages = pages.length;
     const prompt = `
-# ROLE: Expert Physics Examination Parser
+# ROLE: Expert ${subject} Examination Parser
+# EXAM: ${examContext}
 # PAGE: ${pageNum} of ${totalPages}
 
 Extract EVERY SINGLE MCQ visible on this page.
@@ -146,6 +150,8 @@ Extract EVERY SINGLE MCQ visible on this page.
 - CIRCUIT TABLES: \\begin{array}{|c|c|}...\\end{array}
 
 DOMAIN options: MECHANICS | ELECTRODYNAMICS | MODERN PHYSICS | OPTICS | OSCILLATIONS & WAVES
+
+${generateTopicInstruction(subject)}
 
 OUTPUT: Valid JSON. Include ALL questions. Do NOT truncate.
     `.trim();

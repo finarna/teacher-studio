@@ -31,6 +31,7 @@ import { extractQuestionsSimplified } from '../utils/simpleMathExtractor';
 import { extractPhysicsQuestionsSimplified } from '../utils/simplePhysicsExtractor';
 import { extractBiologyQuestionsSimplified } from '../utils/simpleBiologyExtractor';
 import { extractChemistryQuestionsSimplified } from '../utils/simpleChemistryExtractor'; // NEW: Simplified Chemistry
+import { matchToOfficialTopic } from '../utils/officialTopics'; // NEW: Official Topic Mapping
 
 import { mapTopicsFast } from '../utils/topicMapper'; // NEW: Instant keyword-based topic mapping
 import { useAppContext } from '../contexts/AppContext';
@@ -126,13 +127,15 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         const mimeType = file.type || 'application/pdf';
 
         // Extract images from PDF (if PDF file)
-        let fileImageMapping: Map<number, any[]> | null = null;
+        let fileImageMapping: any = null;
         if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
           try {
             console.log(`🖼️ [BULK PDF EXTRACTOR] Starting image extraction from ${file.name}...`);
             const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
-            fileImageMapping = await extractAndMapImages(file);
-            console.log(`✅ [BULK PDF EXTRACTOR] ${file.name}: Extracted images for`, fileImageMapping.size, 'questions');
+            const result = await extractAndMapImages(file);
+            fileImageMapping = result?.mapping;
+            (window as any).rawExtractedImages = result?.rawImages;
+            console.log(`✅ [BULK PDF EXTRACTOR] ${file.name}: Extracted images for`, (fileImageMapping?.size !== undefined ? fileImageMapping.size : "0"), 'questions');
           } catch (err) {
             console.warn(`⚠️ [BULK PDF EXTRACTOR] ${file.name}: Image extraction failed:`, err);
           }
@@ -142,19 +145,24 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         let extractedData: any;
         if (useSimplifiedExtraction && subj === 'Math') {
           console.log('🚀 [SIMPLIFIED MODE - MATH] Using schema-driven extraction with @google/genai');
-          const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel);
+          const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
           // Convert simplified format to our existing format
           extractedData = {
             questions: simpleQuestions.map((sq: any) => ({
               id: `Q${sq.id}`,
               text: sq.text,
-              options: sq.options,
+              options: Array.isArray(sq.options) ? sq.options.map((opt: any) => {
+                if (typeof opt === 'string') return opt;
+                const idStr = opt.id ? `(${opt.id.toLowerCase()}) ` : "";
+                return `${idStr}${opt.text || opt}`;
+              }) : [],
+              correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
               marks: 1,
               difficulty: sq.difficulty || 'Medium',
               topic: sq.topic || 'General',
               domain: sq.domain || 'ALGEBRA',
               blooms: sq.blooms || 'Apply',
-              hasVisualElement: false,
+              hasVisualElement: !!sq.diagramBox || !!sq.hasVisualElement,
               visualElementType: null,
               visualElementDescription: null,
               source: `${file.name}`
@@ -167,19 +175,20 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           }
         } else if (useSimplifiedExtraction && subj === 'Physics') {
           console.log('🚀 [SIMPLIFIED MODE - PHYSICS] Using schema-driven extraction with @google/genai');
-          const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel);
+          const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
           // Convert simplified format to our existing format
           extractedData = {
             questions: simpleQuestions.map((sq: any) => ({
               id: `Q${sq.id}`,
               text: sq.text,
               options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
+              correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
               marks: 1,
               difficulty: sq.difficulty || 'Medium',
               topic: sq.topic || 'Physics',
               domain: sq.domain || 'MECHANICS',
               blooms: sq.blooms || 'Apply',
-              hasVisualElement: sq.hasVisualElement || false,
+              hasVisualElement: !!sq.hasVisualElement,
               visualElementType: sq.visualElementType || null,
               visualElementDescription: sq.visualElementDescription || null,
               visualBoundingBox: sq.visualBoundingBox || null,
@@ -431,7 +440,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       const mimeType = file.type || 'application/pdf';
 
       // Image mapping will be done after Gemini provides bounding boxes
-      let imageMapping: Map<number, any[]> | null = null;
+      let imageMapping: any = null;
 
       // --- PHASE 1: PARALLEL NEURAL TRACKS ---
       updatePipelineStatus('analysis', 'active');
@@ -444,59 +453,98 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         }
       });
 
-      // Track 1: Verbatim Intelligence Extraction (Questions Only)
-      // 🎯 SIMPLIFIED EXTRACTION (if enabled for Math)
-      let extractedData: any;
+      // 🎯 SIMPLIFIED EXTRACTION (if enabled)
+      let extractionData: any;
       let analyticData: any;
-      const extractionId = Date.now().toString().slice(-4); // Unique ID for this extraction
+      const extractionId = Date.now().toString().slice(-4);
 
       if (useSimplifiedExtraction && subj === 'Math') {
-        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - MATH] Using schema-driven extraction with @google/genai');
-        const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel);
-        // Convert simplified format to our existing format
-        extractedData = {
-          questions: simpleQuestions.map((sq: any) => ({
-            id: `Q${sq.id}`,
-            text: sq.text,
-            options: (sq.options || []).map((opt: any) => `(${opt.id}) ${opt.text}`),
-            marks: 1,
-            difficulty: sq.difficulty || 'Medium',
-            topic: sq.topic || 'Mathematics',
-            blooms: sq.blooms || 'Apply',
-            domain: sq.domain || 'ALGEBRA',
-            chapter: sq.topic || 'General Mathematics',
-            hasVisualElement: false,
-            visualElementType: null,
-            visualElementDescription: null
-          }))
+        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - MATH] Restoring SUCCESS-MATH_FORMAT_ALL logic');
+        const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
+
+        // Convert the rich Gemini output to our database schema
+        extractionData = {
+          questions: simpleQuestions.map((sq: any, sIdx: number) => {
+            const hasVisual = !!sq.visualBoundingBox || !!sq.hasVisualElement;
+
+            return {
+              id: sq.id ? sq.id.toString() : (sIdx + 1).toString(),
+              question_number: sq.id ? sq.id.toString().replace(/\D/g, '') : (sIdx + 1).toString(),
+              page_number: sq.page || 1,
+              text: sq.text,
+              correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
+              options: (sq.options || []).map((opt: any) => {
+                const idStr = opt.id ? `(${opt.id.toLowerCase()}) ` : "";
+                return `${idStr}${opt.text || opt}`;
+              }),
+              marks: 1,
+              difficulty: sq.difficulty || 'Medium',
+              topic: matchToOfficialTopic(sq.chapter || sq.topic || 'Mathematics', 'Math') || 'Mathematics',
+              blooms: sq.blooms || 'Apply',
+              domain: sq.domain || 'Mathematics',
+              chapter: matchToOfficialTopic(sq.chapter || sq.topic || 'General Mathematics', 'Math') || 'General Mathematics',
+              hasVisualElement: hasVisual,
+              visualElementType: hasVisual ? 'diagram' : null,
+              visualBoundingBox: sq.visualBoundingBox || null,
+              visualElementDescription: null
+            };
+          })
         };
 
-        // --- IMAGE EXTRACTION FOR SIMPLIFIED MATH (if any diagrams) ---
+        // Baseline analytic data
+        analyticData = {
+          subject: 'Math',
+          examType: activeExamContext,
+          topicDistribution: { 'General': extractionData.questions.length },
+          performanceMetrics: { overallScore: 0, accuracy: 0 }
+        };
+
+        // --- IMAGE EXTRACTION FOR SIMPLIFIED MATH ---
         if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
           try {
-            console.log('🖼️ [SIMPLIFIED MATH] Extracting images...');
-            const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
-            imageMapping = await extractAndMapImages(file);
-            console.log('✅ [SIMPLIFIED MATH] Extracted', imageMapping?.size || 0, 'images');
+            // Priority 1: Vision-Guided (Using AI-provided bounding boxes)
+            const questionsWithBoxes = extractionData.questions
+              .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
+              .map((q: any) => ({
+                questionNumber: parseInt(q.question_number),
+                boundingBox: q.visualBoundingBox
+              }))
+              .filter((item: any) => item.questionNumber && item.boundingBox);
+
+            if (questionsWithBoxes.length > 0) {
+              console.log('🎯 [SIMPLIFIED MATH - VISION] Using precise AI bounding boxes:', questionsWithBoxes.length);
+              const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+              imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoxes);
+              console.log('✅ [SIMPLIFIED MATH - VISION] Extracted diagrams for', imageMapping.size, 'questions');
+            } else {
+              // Priority 2: Basic Proximity Fallback (Only if no boxes provided)
+              console.log('🖼️ [SIMPLIFIED MATH - BASIC] Page-Level fallback...');
+              const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+              const result = await extractAndMapImages(file);
+              imageMapping = result?.mapping;
+              (window as any).rawExtractedImages = result?.rawImages;
+              console.log('✅ [SIMPLIFIED MATH - BASIC] Extracted', (imageMapping?.size || 0), 'images');
+            }
           } catch (err) {
             console.warn('⚠️ [SIMPLIFIED MATH - IMAGE] Failed:', err);
           }
         }
       } else if (useSimplifiedExtraction && subj === 'Physics') {
         console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - PHYSICS] Using schema-driven extraction with @google/genai');
-        const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel);
+        const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
         // Convert simplified format to our existing format
-        extractedData = {
+        extractionData = {
           questions: simpleQuestions.map((sq: any) => ({
             id: `Q${sq.id}`,
             text: sq.text,
             options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
+            correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
             marks: 1,
             difficulty: sq.difficulty || 'Medium',
-            topic: sq.topic || 'Physics',
+            topic: matchToOfficialTopic(sq.topic || 'Physics', 'Physics') || 'Physics',
             domain: sq.domain || 'MECHANICS',
             blooms: sq.blooms || 'Apply',
-            hasVisualElement: sq.hasVisualElement || false,
+            hasVisualElement: !!sq.hasVisualElement,
             visualElementType: sq.visualElementType || null,
             visualElementDescription: sq.visualElementDescription || null,
             visualBoundingBox: sq.visualBoundingBox || null,
@@ -508,7 +556,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
           try {
             if (enableVisionExtraction) {
-              const questionsWithBoundingBoxes = extractedData.questions
+              const questionsWithBoundingBoxes = extractionData.questions
                 .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
                 .map((q: any) => ({
                   questionNumber: parseInt(q.id.replace(/\D/g, '')),
@@ -525,7 +573,9 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
             } else {
               console.log('🖼️ [SIMPLIFIED PHYSICS - BASIC] Extracting images...');
               const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
-              imageMapping = await extractAndMapImages(file);
+              const result = await extractAndMapImages(file);
+              imageMapping = result.mapping;
+              (window as any).rawExtractedImages = result.rawImages;
               console.log('✅ [SIMPLIFIED PHYSICS - BASIC] Extracted', imageMapping?.size || 0, 'images');
             }
           } catch (err) {
@@ -536,17 +586,18 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - BIOLOGY] Using schema-driven extraction with @google/genai');
         const simpleQuestions = await extractBiologyQuestionsSimplified(file, apiKey, selectedModel, activeExamContext);
         // Convert simplified format to our existing format
-        extractedData = {
+        extractionData = {
           questions: simpleQuestions.map((sq: any) => ({
             id: `Q${sq.id}`,
             text: sq.text,
             options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
+            correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
             marks: 1,
             difficulty: sq.difficulty || 'Medium',
-            topic: sq.topic || 'Biology',
+            topic: matchToOfficialTopic(sq.topic || 'Biology', 'Biology') || 'Biology',
             domain: sq.domain || 'Biotechnology',
             blooms: sq.blooms || 'Apply',
-            hasVisualElement: sq.hasVisualElement || false,
+            hasVisualElement: !!sq.hasVisualElement,
             visualElementType: sq.visualElementType || null,
             visualElementDescription: sq.visualElementDescription || null,
             visualBoundingBox: sq.visualBoundingBox || null,
@@ -558,7 +609,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
           try {
             if (enableVisionExtraction) {
-              const questionsWithBoundingBoxes = extractedData.questions
+              const questionsWithBoundingBoxes = extractionData.questions
                 .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
                 .map((q: any) => ({
                   questionNumber: parseInt(q.id.replace(/\D/g, '')),
@@ -575,7 +626,9 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
             } else {
               console.log('🖼️ [SIMPLIFIED BIOLOGY - BASIC] Extracting images...');
               const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
-              imageMapping = await extractAndMapImages(file);
+              const result = await extractAndMapImages(file);
+              imageMapping = result.mapping;
+              (window as any).rawExtractedImages = result.rawImages;
               console.log('✅ [SIMPLIFIED BIOLOGY - BASIC] Extracted', imageMapping?.size || 0, 'images');
             }
           } catch (err) {
@@ -584,18 +637,19 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         }
       } else if (useSimplifiedExtraction && subj === 'Chemistry') {
         console.log('🚀 [SIMPLIFIED MODE - CHEMISTRY] Using schema-driven page-by-page extraction...');
-        const simpleQuestions = await extractChemistryQuestionsSimplified(file, apiKey, selectedModel);
-        extractedData = {
+        const simpleQuestions = await extractChemistryQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
+        extractionData = {
           questions: simpleQuestions.map((sq: any) => ({
             id: `Q${sq.id}`,
             text: sq.text,
             options: sq.options?.map((opt: any) => `(${opt.id}) ${opt.text}`) || [],
+            correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
             marks: 1,
             difficulty: sq.difficulty || 'Moderate',
-            topic: sq.topic || 'Chemistry',
+            topic: matchToOfficialTopic(sq.topic || 'Chemistry', 'Chemistry') || 'Chemistry',
             domain: sq.domain || 'Physical Chemistry',
             blooms: sq.blooms || 'Apply',
-            hasVisualElement: sq.hasVisualElement || false,
+            hasVisualElement: !!sq.hasVisualElement,
             visualElementType: sq.visualElementType || null,
             visualElementDescription: sq.visualElementDescription || null,
             visualBoundingBox: sq.visualBoundingBox || null,
@@ -607,7 +661,9 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
           try {
             const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
-            imageMapping = await extractAndMapImages(file);
+            const result = await extractAndMapImages(file);
+            imageMapping = result.mapping;
+            (window as any).rawExtractedImages = result.rawImages;
             console.log('✅ [SIMPLIFIED CHEMISTRY - IMAGE] Extracted', imageMapping?.size || 0, 'images');
           } catch (err) {
             console.warn('⚠️ [SIMPLIFIED CHEMISTRY - IMAGE] Failed:', err);
@@ -744,7 +800,7 @@ ${generatePhysicsExtractionInstructions()}
         console.warn('⚠️ [JSON STRUCTURE] Open braces:', openBraces, 'Close braces:', closeBraces, 'Diff:', openBraces - closeBraces);
         console.warn('⚠️ [JSON STRUCTURE] Open brackets:', openBrackets, 'Close brackets:', closeBrackets, 'Diff:', openBrackets - closeBrackets);
 
-        extractedData = safeAiParse<any>(rawExtract, { questions: [] }, true);
+        extractionData = safeAiParse<any>(rawExtract, { questions: [] }, true);
         analyticData = safeAiParse<any>(rawAnalysis, {}, false);
       } // End of legacy extraction
 
@@ -762,9 +818,9 @@ ${generatePhysicsExtractionInstructions()}
       }
 
       // 🐛 DEBUG: Log BEFORE Unicode conversion to see raw extraction
-      if (extractedData.questions && extractedData.questions.length > 0) {
+      if (extractionData.questions && extractionData.questions.length > 0) {
         console.log(`🔍 [RAW EXTRACTION DEBUG] First 3 questions BEFORE Unicode conversion:`,
-          extractedData.questions.slice(0, 3).map((q: any) => ({
+          extractionData.questions.slice(0, 3).map((q: any) => ({
             id: q.id,
             text: q.text?.substring(0, 100),
             topic: q.topic,
@@ -777,13 +833,13 @@ ${generatePhysicsExtractionInstructions()}
       // SKIP for simplified mode - it already produces correct double-backslash LaTeX
       const isSimplifiedMode = useSimplifiedExtraction && (subj === 'Math' || subj === 'Physics' || subj === 'Biology' || subj === 'Chemistry');
 
-      if (extractedData.questions && extractedData.questions.length > 0 && !isSimplifiedMode) {
-        extractedData.questions = processQuestionsUnicode(extractedData.questions);
-        console.log(`✨ [UNICODE CONVERSION] Processed ${extractedData.questions.length} questions for Unicode→LaTeX conversion`);
+      if (extractionData.questions && extractionData.questions.length > 0 && !isSimplifiedMode) {
+        extractionData.questions = processQuestionsUnicode(extractionData.questions);
+        console.log(`✨ [UNICODE CONVERSION] Processed ${extractionData.questions.length} questions for Unicode→LaTeX conversion`);
 
         // ⭐ VALIDATION: Check for common extraction errors (Math only)
         if (subj === 'Math') {
-          const validation = validateExtraction(extractedData);
+          const validation = validateExtraction(extractionData);
           console.log(`🔍 [VALIDATION] Questions: ${validation.questionCount}, Valid: ${validation.valid}, Errors: ${validation.errors.length}`);
 
           if (validation.errors.length > 0) {
@@ -795,7 +851,7 @@ ${generatePhysicsExtractionInstructions()}
         }
 
         // 🐛 DEBUG: Log topic assignments for classification debugging
-        const topicSummary = extractedData.questions.slice(0, 10).map((q: any) => ({
+        const topicSummary = extractionData.questions.slice(0, 10).map((q: any) => ({
           id: q.id,
           text: q.text?.substring(0, 60),
           options: q.options?.length || 0,
@@ -807,7 +863,7 @@ ${generatePhysicsExtractionInstructions()}
         console.log(`✅ [SIMPLIFIED MODE - ${selectedSubject}] Skipping Unicode conversion - LaTeX already correct with double backslashes`);
       }
 
-      console.log('🔧 [PARSER DEBUG] Parsed questions count:', extractedData.questions?.length || 0);
+      console.log('🔧 [PARSER DEBUG] Parsed questions count:', extractionData.questions?.length || 0);
 
       // 🔄 RECURSIVE SECOND PASS: Keep extracting until we have all questions (Math papers typically have 60 questions)
       // SKIP for simplified mode - it extracts all questions in one pass
@@ -817,15 +873,15 @@ ${generatePhysicsExtractionInstructions()}
 
       while (
         !isSimplifiedMode && // Skip recursive passes for both Math AND Physics simplified modes
-        extractedData.questions &&
-        extractedData.questions.length > 0 &&
-        extractedData.questions.length < expectedQuestions &&
+        extractionData.questions &&
+        extractionData.questions.length > 0 &&
+        extractionData.questions.length < expectedQuestions &&
         passNumber <= MAX_PASSES
       ) {
-        console.warn(`⚠️ [INCOMPLETE EXTRACTION - PASS ${passNumber}] Got ${extractedData.questions.length}/${expectedQuestions} questions, attempting another pass...`);
+        console.warn(`⚠️ [INCOMPLETE EXTRACTION - PASS ${passNumber}] Got ${extractionData.questions.length}/${expectedQuestions} questions, attempting another pass...`);
 
         try {
-          const lastQNum = extractedData.questions.length;
+          const lastQNum = extractionData.questions.length;
 
           // Use CLEAN Math prompt for second pass if subject is Math
           console.log(`🔍 [PASS ${passNumber} DEBUG] Subject: ${selectedSubject}, Using clean Math prompt: ${subj === 'Math'}`);
@@ -885,10 +941,10 @@ CRITICAL RULES:
             // ⭐ Convert Unicode to LaTeX for additional pass questions too
             remainingData.questions = processQuestionsUnicode(remainingData.questions);
             console.log(`✅ [PASS ${passNumber}] Extracted additional ${remainingData.questions.length} questions (Unicode converted)`);
-            extractedData.questions.push(...remainingData.questions);
+            extractionData.questions.push(...remainingData.questions);
             passNumber++;
           } else {
-            console.warn(`⚠️ [PASS ${passNumber}] No more questions extracted, stopping at ${extractedData.questions.length} total`);
+            console.warn(`⚠️ [PASS ${passNumber}] No more questions extracted, stopping at ${extractionData.questions.length} total`);
             break; // No more questions found, exit loop
           }
         } catch (err) {
@@ -898,11 +954,11 @@ CRITICAL RULES:
       }
 
       if (passNumber > 2) {
-        console.log(`✅ [EXTRACTION COMPLETE] Total passes: ${passNumber - 1}, Final count: ${extractedData.questions.length}/${expectedQuestions} questions`);
+        console.log(`✅ [EXTRACTION COMPLETE] Total passes: ${passNumber - 1}, Final count: ${extractionData.questions.length}/${expectedQuestions} questions`);
 
         // Deduplicate questions by ID (fix duplicate keys from recursive passes)
         const seenIds = new Set<string>();
-        const deduplicatedQuestions = extractedData.questions.filter((q: any) => {
+        const deduplicatedQuestions = extractionData.questions.filter((q: any) => {
           if (seenIds.has(q.id)) {
             console.warn(`⚠️ [DEDUPLICATION] Removing duplicate question: ${q.id}`);
             return false;
@@ -911,16 +967,16 @@ CRITICAL RULES:
           return true;
         });
 
-        if (deduplicatedQuestions.length < extractedData.questions.length) {
-          console.log(`🔧 [DEDUPLICATION] Removed ${extractedData.questions.length - deduplicatedQuestions.length} duplicate questions`);
-          extractedData.questions = deduplicatedQuestions;
+        if (deduplicatedQuestions.length < extractionData.questions.length) {
+          console.log(`🔧 [DEDUPLICATION] Removed ${extractionData.questions.length - deduplicatedQuestions.length} duplicate questions`);
+          extractionData.questions = deduplicatedQuestions;
         }
       }
 
       // Debug: Log visual element detection
-      console.log('🔍 [SCAN DEBUG] Extracted questions count:', extractedData.questions?.length || 0);
-      if (extractedData.questions && extractedData.questions.length > 0) {
-        const questionsWithVisuals = extractedData.questions.filter((q: any) => q.hasVisualElement);
+      console.log('🔍 [SCAN DEBUG] Extracted questions count:', extractionData.questions?.length || 0);
+      if (extractionData.questions && extractionData.questions.length > 0) {
+        const questionsWithVisuals = extractionData.questions.filter((q: any) => q.hasVisualElement);
         console.log('🖼️ [SCAN DEBUG] Questions with visual elements:', questionsWithVisuals.length);
         if (questionsWithVisuals.length > 0) {
           console.log('🖼️ [SCAN DEBUG] Sample visual element:', {
@@ -935,12 +991,12 @@ CRITICAL RULES:
 
       // --- IMAGE EXTRACTION (vision-guided if enabled, otherwise basic) ---
       if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) &&
-        extractedData.questions && extractedData.questions.length > 0) {
+        extractionData.questions && extractionData.questions.length > 0) {
         try {
           if (enableVisionExtraction) {
             // VISION-GUIDED MODE: Use AI-provided bounding boxes for precise extraction
             // ⚡ PERFORMANCE: Adds 1-2 minutes per upload
-            const questionsWithBoundingBoxes = extractedData.questions
+            const questionsWithBoundingBoxes = extractionData.questions
               .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
               .map((q: any) => {
                 const questionNumMatch = q.id?.match(/Q?(\d+)/i);
@@ -975,12 +1031,14 @@ CRITICAL RULES:
             } else {
               console.log('ℹ️ [VISION-GUIDED] No bounding boxes provided, skipping image extraction');
             }
-          } else {
+          } else if (!imageMapping || (typeof imageMapping.size === 'number' && imageMapping.size === 0) || typeof imageMapping.get !== 'function') {
             // BASIC MODE: Extract all images from PDF pages (faster, less precise)
             console.log('🖼️ [BASIC IMAGE EXTRACTION] Extracting images from PDF pages...');
             const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
-            imageMapping = await extractAndMapImages(file);
-            console.log('✅ [BASIC IMAGE EXTRACTION] Extracted images for', imageMapping?.size || 0, 'question pages');
+            const result = await extractAndMapImages(file);
+            imageMapping = result?.mapping;
+            (window as any).rawExtractedImages = result?.rawImages;
+            console.log('✅ [BASIC IMAGE EXTRACTION] Extracted images for', (imageMapping?.size !== undefined ? imageMapping.size : "0"), 'question pages');
           }
         } catch (err) {
           console.warn('⚠️ [IMAGE EXTRACTION] Failed:', err);
@@ -988,11 +1046,11 @@ CRITICAL RULES:
         }
       }
 
-      console.log('🔍 [MERGE CHECKPOINT] About to check extractedData.questions. Has questions?', !!extractedData.questions, 'Count:', extractedData.questions?.length);
+      console.log('🔍 [MERGE CHECKPOINT] About to check extractionData.questions. Has questions?', !!extractionData.questions, 'Count:', extractionData.questions?.length);
       console.log('🔍 [MERGE CHECKPOINT] imageMapping still available?', !!imageMapping, 'Size:', imageMapping?.size);
 
-      if (extractedData.questions) {
-        console.log('✅ [MERGE CHECKPOINT] Inside merge block! Processing', extractedData.questions.length, 'questions');
+      if (extractionData.questions) {
+        console.log('✅ [MERGE CHECKPOINT] Inside merge block! Processing', extractionData.questions.length, 'questions');
 
         // Debug image mapping
         if (imageMapping && imageMapping.size > 0) {
@@ -1002,7 +1060,7 @@ CRITICAL RULES:
           console.warn('⚠️ [IMAGE MERGE DEBUG] imageMapping is null or empty');
         }
 
-        extractedData.questions = extractedData.questions.map((q: any, idx: number) => {
+        extractionData.questions = extractionData.questions.map((q: any, idx: number) => {
           const newQuestion: any = {
             ...q,
             id: q.id ? `${extractionId}-${q.id}` : `${extractionId}-q-${idx}`,
@@ -1011,22 +1069,29 @@ CRITICAL RULES:
 
           // Merge extracted images if available
           if (imageMapping) {
-            // Extract question number from ID (e.g., "Q1" -> 1, "Q5" -> 5)
-            const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+            const questionNumMatch = q.id?.match(/(\d+)(?!.*\d)/);
             if (questionNumMatch) {
               const questionNum = parseInt(questionNumMatch[1]);
-              const images = imageMapping.get(questionNum);
-              if (images && images.length > 0) {
-                newQuestion.extractedImages = images.map(img => img.imageData);
-                console.log(`🔗 [IMAGE MERGE] Attached ${images.length} image(s) to question ${questionNum}`);
-              } else {
-                // Debug why no images for this question
-                if (idx < 5) { // Only log first 5 to avoid spam
-                  console.log(`🔍 [IMAGE MERGE DEBUG] Q${questionNum}: No images (original ID: ${q.id})`);
+
+              // 🛡️ DEFENSIVE: Check if imageMapping is a Map with .get function
+              let images = (typeof imageMapping.get === 'function') ? imageMapping.get(questionNum) : null;
+
+              // 💡 FALLBACK: Page-Level Lock (Page 6 graph lock)
+              // If spatial mapping failed but AI detected a visual element, 
+              // grab ANY images from that specific page.
+              if ((!images || images.length === 0) && q.hasVisualElement && (window as any).rawExtractedImages) {
+                const pageImages = ((window as any).rawExtractedImages as any[]).filter(img => img.pageNum === q.page_number);
+                if (pageImages.length > 0) {
+                  console.log(`🎯 [IMAGE FALLBACK] Q${questionNum} Page-Level Lock: Found ${pageImages.length} images on page ${q.page_number}`);
+                  images = pageImages;
                 }
               }
-            } else {
-              console.warn(`⚠️ [IMAGE MERGE DEBUG] Could not extract number from question ID: ${q.id}`);
+
+              if (images && images.length > 0) {
+                newQuestion.extractedImages = images.map(img => img.imageData);
+                newQuestion.hasVisualElement = true; // Force UI to recognize images
+                console.log(`🔗 [IMAGE MERGE] Attached ${images.length} image(s) to question ${questionNum}`);
+              }
             }
           }
 
@@ -1036,7 +1101,7 @@ CRITICAL RULES:
         // Debug: Check if extractedImages actually made it onto the questions
         if (imageMapping && imageMapping.size > 0) {
           const questionNumbersWithImages = Array.from(imageMapping.keys());
-          const sampleQuestionsWithImages = extractedData.questions.filter((q: any) => {
+          const sampleQuestionsWithImages = extractionData.questions.filter((q: any) => {
             const numMatch = q.id?.match(/Q(\d+)/i);
             if (numMatch) {
               const num = parseInt(numMatch[1]);
@@ -1063,7 +1128,7 @@ CRITICAL RULES:
 
       const brainData: ExamAnalysisData = {
         ...analyticData,
-        questions: extractedData.questions || []
+        questions: extractionData.questions || []
       };
 
       // Extract year from filename if present

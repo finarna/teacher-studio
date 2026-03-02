@@ -13,6 +13,7 @@
  */
 
 import { GoogleGenAI, Type } from "@google/genai";
+import { generateTopicInstruction } from "./officialTopics";
 import { fixLatexErrors, fixLatexInObject } from './latexFixer';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -119,9 +120,10 @@ const processInParallel = async <T, R>(
 /**
  * Build the extraction prompt for a single Chemistry page.
  */
-function buildChemPagePrompt(pageNum: number, totalPages: number): string {
+function buildChemPagePrompt(pageNum: number, totalPages: number, subject: string, examContext: string): string {
     return `
-# ROLE: Expert Chemistry Examination Parser
+# ROLE: Expert ${subject} Examination Parser
+# EXAM: ${examContext}
 # PAGE: ${pageNum} of ${totalPages}
 
 Extract EVERY SINGLE MCQ visible on this page with 100% fidelity.
@@ -144,9 +146,7 @@ Extract EVERY SINGLE MCQ visible on this page with 100% fidelity.
 - Subscript/superscript: $\\text{CO}_2$, $25^\\circ\\text{C}$, $10^{-3}$
 - NEVER use raw Unicode (→ ⇌ Δ α β) — always use LaTeX
 
-DOMAIN options: PHYSICAL CHEMISTRY | ORGANIC CHEMISTRY | INORGANIC CHEMISTRY
-DIFFICULTY options: Easy | Moderate | Hard
-BLOOM options: Knowledge | Understanding | Apply | Analyze | Evaluate | Create
+${generateTopicInstruction(subject)}
 
 OUTPUT: Valid JSON matching the schema. Include ALL questions. Do NOT truncate.
 `.trim();
@@ -191,7 +191,9 @@ const responseSchema = {
 export async function extractChemistryQuestionsSimplified(
     file: File,
     apiKey: string,
-    model: string,  // Always provided by the UI selector — no hardcoded default
+    model: string,
+    subject: string = 'Chemistry',
+    examContext: string = 'KCET',
     onProgress?: (current: number, total: number, found: number) => void
 ): Promise<any[]> {
     const ai = new GoogleGenAI({ apiKey });
@@ -202,7 +204,7 @@ export async function extractChemistryQuestionsSimplified(
     const resultsArray = await processInParallel(pages, async (pageImg, i) => {
         const base64 = pageImg.src.split(',')[1];
         const pageNum = i + 1;
-        const prompt = buildChemPagePrompt(pageNum, totalPages);
+        const prompt = buildChemPagePrompt(pageNum, totalPages, subject, examContext);
 
         // Per-page retry: if 0 questions returned, retry up to 2 more times
         for (let attempt = 0; attempt < 3; attempt++) {
