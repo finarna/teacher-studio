@@ -28,6 +28,20 @@ export async function getHistoricalTrends(req, res) {
       .order('year', { ascending: true });
 
     if (patternsError) {
+      // If table doesn't exist, return empty data structure gracefully
+      if (patternsError.code === 'PGRST205') {
+        console.warn('⚠️ Historical patterns table missing. Return empty results.');
+        return res.json({
+          success: true,
+          data: {
+            patterns: [],
+            topicDistributions: [],
+            topicTrends: {},
+            predictions: {},
+            message: 'Historical analysis tables not found. Please run database migrations.'
+          }
+        });
+      }
       console.error('Error loading patterns:', patternsError);
       throw patternsError;
     }
@@ -56,6 +70,19 @@ export async function getHistoricalTrends(req, res) {
       .order('historical_pattern_id', { ascending: true });
 
     if (distError) {
+      if (distError.code === 'PGRST205') {
+        console.warn('⚠️ Topic distributions table missing. Return empty results.');
+        return res.json({
+          success: true,
+          data: {
+            patterns: patterns || [],
+            topicDistributions: {},
+            topicTrends: {},
+            predictions: {},
+            message: 'Topic performance tables not found.'
+          }
+        });
+      }
       console.error('Error loading distributions:', distError);
       throw distError;
     }
@@ -206,21 +233,37 @@ export async function getTopicEvolution(req, res) {
     const { examContext, subject, topicId } = req.params;
 
     // Get topic metadata
-    const { data: topicMeta } = await supabaseAdmin
+    const { data: topicMeta, error: metaError } = await supabaseAdmin
       .from('topic_metadata')
       .select('*')
       .eq('topic_id', topicId)
       .eq('exam_context', examContext)
       .eq('subject', subject)
-      .single();
+      .maybeSingle();
+
+    if (metaError && metaError.code !== 'PGRST116') {
+      if (metaError.code === 'PGRST205') {
+        console.warn('⚠️ Topic metadata table missing.');
+      } else {
+        console.error('Error fetching topic meta:', metaError);
+      }
+    }
 
     // Get historical patterns
-    const { data: patterns } = await supabaseAdmin
+    const { data: patterns, error: patternsError } = await supabaseAdmin
       .from('exam_historical_patterns')
       .select('*')
       .eq('exam_context', examContext)
       .eq('subject', subject)
       .order('year', { ascending: true });
+
+    if (patternsError) {
+      if (patternsError.code === 'PGRST205') {
+        console.warn('⚠️ Historical patterns table missing.');
+        return res.json({ success: true, data: { evolution: [], topicMeta: topicMeta || { topic_id: topicId } } });
+      }
+      throw patternsError;
+    }
 
     if (!patterns || patterns.length === 0) {
       return res.json({ success: true, data: { evolution: [], topicMeta } });
@@ -229,11 +272,22 @@ export async function getTopicEvolution(req, res) {
     const patternIds = patterns.map(p => p.id);
 
     // Get topic distributions
-    const { data: distributions } = await supabaseAdmin
+    const { data: distributions, error: distError } = await supabaseAdmin
       .from('exam_topic_distributions')
       .select('*')
       .eq('topic_id', topicId)
       .in('historical_pattern_id', patternIds);
+
+    if (distError && distError.code === 'PGRST205') {
+      console.warn('⚠️ Topic distributions table missing.');
+      return res.json({
+        success: true,
+        data: {
+          evolution: patterns.map(p => ({ year: p.year, questionCount: 0, difficulty: { easy: 0, moderate: 0, hard: 0 }, avgMarks: 0 })),
+          topicMeta
+        }
+      });
+    }
 
     // Combine data
     const evolution = patterns.map(pattern => {

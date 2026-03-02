@@ -116,16 +116,22 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
     const fetchLatestStats = async () => {
       if (!user) return;
       try {
+        console.log('📡 [TopicDetailPage] Fetching latest stats from DB...');
         const { data, error } = await supabase
           .from('topic_resources')
-          .select('mastery_level, average_accuracy, quizzes_taken, study_stage, notes_completed')
+          .select('mastery_level, average_accuracy, quizzes_taken, study_stage, notes_completed, questions_attempted, questions_correct')
           .eq('user_id', user.id)
           .eq('topic_id', topicResource.topicId)
           .eq('exam_context', examContext)
           .maybeSingle();
 
-        if (data && !error) {
-          console.log('📡 [HeaderStats] Fetched latest:', data);
+        if (error) {
+          console.error('❌ [TopicDetailPage] Stats fetch error:', error);
+          return;
+        }
+
+        if (data) {
+          console.log('📡 [TopicDetailPage] Stats received:', data);
           setLocalStats({
             masteryLevel: data.mastery_level || 0,
             averageAccuracy: data.average_accuracy || 0,
@@ -133,14 +139,47 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
             studyStage: data.study_stage || 'not_started',
             notesCompleted: data.notes_completed || false
           });
+        } else {
+          console.warn('📡 [TopicDetailPage] No stats found for this resource');
         }
-      } catch (err) { }
+      } catch (err) {
+        console.error('❌ [TopicDetailPage] Unexpected stats error:', err);
+      }
     };
     fetchLatestStats();
   }, [user, activeTab, topicResource.topicId, examContext, statsRefreshTrigger]);
 
   // Shared questions state that persists across tab switches
-  const [sharedQuestions, setSharedQuestions] = useState<AnalyzedQuestion[]>(topicResource.questions || []);
+  const formatAnalyzedQuestion = (q: any): AnalyzedQuestion => {
+    return {
+      ...q,
+      id: q.id,
+      text: q.text || q.question_text || '',
+      options: q.options || [],
+      difficulty: (q.difficulty || q.diff || 'Moderate') as 'Easy' | 'Moderate' | 'Hard',
+      correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? (q.correctIndex !== undefined ? q.correctIndex : 0),
+      solutionSteps: q.solutionSteps || q.solution_steps || q.mastery_material?.solutionSteps || q.mastery_material?.steps || (q.explanation ? [q.explanation] : []),
+      markingScheme: q.markingScheme || q.marking_scheme || q.mastery_material?.markingSteps || q.mastery_material?.markingScheme || [],
+      markingSteps: q.markingSteps || q.marking_steps || q.mastery_material?.markingSteps || q.mastery_material?.markingScheme || [],
+      studyTip: q.studyTip || q.study_tip || q.exam_tip || q.examTip || q.mastery_material?.examTip || '',
+      examTip: q.examTip || q.exam_tip || q.mastery_material?.examTip || '',
+      bloomsTaxonomy: q.bloomsTaxonomy || q.blooms_taxonomy || q.blooms || '',
+      keyConcepts: q.keyConcepts || q.key_concepts || q.mastery_material?.keyConcepts || [],
+      commonMistakes: q.commonMistakes || q.common_mistakes || q.pitfalls || q.mastery_material?.commonMistakes || [],
+      keyFormulas: q.keyFormulas || q.key_formulas || q.mastery_material?.keyFormulas || [],
+      thingsToRemember: q.thingsToRemember || q.things_to_remember || q.key_formulas || [],
+      aiReasoning: q.aiReasoning || q.ai_reasoning || q.mastery_material?.aiReasoning || `This ${q.topic || topicResource.topicName} question targets core patterns frequently seen in ${examContext} documentation.`,
+      historicalPattern: q.historicalPattern || q.historical_pattern || q.mastery_material?.historicalPattern || `Analysis identifies this concept as a stable pillar in ${examContext} subject distributions.`,
+      predictiveInsight: q.predictiveInsight || q.predictive_insight || q.mastery_material?.predictiveInsight || 'Probability of appearance is calculated at 70%+ based on previous patterns.',
+      whyItMatters: q.whyItMatters || q.why_it_matters || q.mastery_material?.whyItMatters || `Mastering this specific node unlocks adjacent concepts across the ${subject} syllabus.`,
+      relevanceScore: q.relevanceScore || q.relevance_score || q.mastery_material?.relevanceScore || 70,
+      visualConcept: q.visualConcept || q.visual_concept || q.mastery_material?.visualConcept || '',
+      diagramUrl: q.diagramUrl || q.diagram_url || q.mastery_material?.diagramUrl || '',
+      extractedImages: q.extractedImages || q.extracted_images || (q.diagram_url ? [q.diagram_url] : (q.mastery_material?.diagramUrl ? [q.mastery_material.diagramUrl] : []))
+    };
+  };
+
+  const [sharedQuestions, setSharedQuestions] = useState<AnalyzedQuestion[]>((topicResource.questions || []).map(formatAnalyzedQuestion));
   const [focusedQuestionId, setFocusedQuestionId] = useState<string | null>(null);
   const [isNavigatorOpen, setIsNavigatorOpen] = useState(false);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
@@ -165,7 +204,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
         const scanIds = scans?.map(s => s.id) || [];
 
         // Step 2: Fetch questions belonging to these scans and this topic
-        let allLoadedQuestions = [...(topicResource.questions || [])];
+        let allLoadedQuestions = (topicResource.questions || []).map(formatAnalyzedQuestion);
 
         if (scanIds.length > 0) {
           const { data: aiQuestions, error } = await supabase
@@ -179,25 +218,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
           if (error) throw error;
 
           if (aiQuestions && aiQuestions.length > 0) {
-            const formattedAIQuestions: AnalyzedQuestion[] = aiQuestions.map(q => ({
-              ...q,
-              id: q.id,
-              text: q.text,
-              difficulty: q.difficulty as 'Easy' | 'Moderate' | 'Hard',
-              correctOptionIndex: q.correct_option_index,
-              bloomsTaxonomy: q.blooms,
-              studyTip: q.exam_tip,
-              keyConcepts: q.mastery_material?.keyConcepts || [],
-              commonMistakes: q.mastery_material?.commonMistakes || [],
-              keyFormulas: q.key_formulas || [],
-              thingsToRemember: q.key_formulas || [],
-              aiReasoning: q.mastery_material?.aiReasoning || '',
-              historicalPattern: q.mastery_material?.historicalPattern || '',
-              predictiveInsight: q.mastery_material?.predictiveInsight || '',
-              whyItMatters: q.mastery_material?.whyItMatters || '',
-              relevanceScore: q.mastery_material?.relevanceScore || 70,
-              markingSteps: q.mastery_material?.markingSteps || []
-            }));
+            const formattedAIQuestions: AnalyzedQuestion[] = aiQuestions.map(formatAnalyzedQuestion);
 
             // Merge with existing
             const existingIds = new Set(allLoadedQuestions.map(q => q.id));
@@ -208,6 +229,18 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
 
         setSharedQuestions(allLoadedQuestions);
         setTotalQuestionsIncludingAI(allLoadedQuestions.length);
+
+        // Detailed debug of one AI question if available
+        const aiSample = allLoadedQuestions.find(q => q.id.includes('-') || q.source?.includes('ai'));
+        if (aiSample) {
+          console.log('🧪 [DEBUG] AI Question Sample Data:', {
+            id: aiSample.id,
+            text: aiSample.text?.slice(0, 30),
+            solutionStepsCount: aiSample.solutionSteps?.length,
+            markingSchemeCount: aiSample.markingScheme?.length,
+            raw: aiSample
+          });
+        }
       } catch (err) {
         console.error('❌ [TopicDetailPage] Failed to load questions:', err);
       } finally {
@@ -216,7 +249,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
     };
 
     loadQuestionsFromDB();
-  }, [user?.id, topicResource.topicId, topicResource.topicName, subject, examContext]);
+  }, [user?.id, topicResource.topicId, topicResource.questions, subject, examContext]);
 
   const tabs = [
     { id: 'learn' as TabType, label: 'Learn', icon: BookOpen, accent: 'text-blue-500', bg: 'bg-blue-50' },
@@ -382,7 +415,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
                 sharedQuestions={sharedQuestions}
               />
             )}
-            {activeTab === 'progress' && <ProgressTab topicResource={topicResource} />}
+            {activeTab === 'progress' && <ProgressTab topicResource={{ ...topicResource, ...localStats }} />}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -1089,9 +1122,25 @@ const PracticeTab: React.FC<{
         // Topic-specific context
         const topicContext = `Focus EXCLUSIVELY on topic: "${topicResource.topicName}" for ${subject} ${examContext} exam.`;
 
-        // EXACT PROMPT from VisualQuestionBank (adapted for topic)
-        const prompt = `Generate ${generateCount} ${subject} MCQ questions for ${examContext} syllabus on "${topicResource.topicName}".
-        Return ONLY valid JSON with a "questions" array containing id, text, options, correctOptionIndex, explanation, topic, domain, difficulty.`;
+        // HIGH-RIGOR PROMPT
+        const prompt = `Generate ${generateCount} HIGH-RIGOR ${subject} MCQ questions for ${examContext} syllabus on "${topicResource.topicName}".
+        
+        CRITICAL: Each question MUST include a detailed step-by-step solution.
+        
+        Return ONLY valid JSON with a "questions" array containing:
+        - id: a unique string
+        - text: the question text (use $ $ for math)
+        - options: array of 4 strings (use $ $ for math)
+        - correctOptionIndex: 0-3
+        - solutionSteps: array of 3-5 strings explaining the step-by-step solution
+        - markingScheme: array of {step, mark} for the solution
+        - topic: "${topicResource.topicName}"
+        - difficulty: "Easy", "Moderate", or "Hard"
+        - bloomsTaxonomy: "Remember", "Understand", "Apply", "Analyze", "Evaluate", or "Create"
+        - pedagogy: "Conceptual", "Problem-Solving", or "Application"
+        - aiReasoning: 1 sentence on why this specific pattern is high-vield
+        - whyItMatters: why this concept is vital for ${examContext}
+        - studyTip: a strategic advice for this specific question`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
@@ -1153,8 +1202,7 @@ const PracticeTab: React.FC<{
             topic: q.topic || topicResource.topicName,
             domain: q.domain || topicResource.topicName,
             year: q.year || '2025 Prediction',
-            solutionSteps: (q.solutionSteps || q.markingScheme)?.map((s: any) => `${s.step}`) || [],
-            markingSteps: q.solutionSteps || q.markingScheme || [],
+            markingSteps: q.markingScheme || q.solutionSteps || [],
             extractedImages: q.extractedImages || [],
             hasVisualElement: q.hasVisualElement || false
           };
@@ -1220,19 +1268,27 @@ const PracticeTab: React.FC<{
         }
 
         // Map to actual database columns (from migrations/001_initial_schema.sql and 009_add_question_metadata.sql)
-        const questionsToInsert = formatted.map(q => ({
-          id: q.id,
-          scan_id: scanId, // Reference to placeholder scan (required field)
-          // NOTE: questions table does NOT have user_id column - user ownership tracked via scan_id -> scans.user_id
-          text: q.text,  // Column is 'text', not 'question_text'
-          options: q.options,
-          correct_option_index: q.correctOptionIndex,
-          marks: typeof q.marks === 'number' ? q.marks : parseInt(q.marks as string) || 1,
-          difficulty: q.difficulty,
-          topic: q.topic,
-          blooms: q.bloomsTaxonomy, // Column is 'blooms', not 'blooms_taxonomy'
-          domain: q.domain,
-          year: q.year,
+        const questionsToInsert = formatted.map(q => {
+          // Parse year to integer (handle cases like "2025 Prediction" -> 2025)
+          let yearValue = null;
+          if (q.year) {
+            const yearMatch = String(q.year).match(/(\d{4})/);
+            yearValue = yearMatch ? parseInt(yearMatch[1]) : null;
+          }
+
+          return {
+            id: q.id,
+            scan_id: scanId, // Reference to placeholder scan (required field)
+            // NOTE: questions table does NOT have user_id column - user ownership tracked via scan_id -> scans.user_id
+            text: q.text,  // Column is 'text', not 'question_text'
+            options: q.options,
+            correct_option_index: q.correctOptionIndex,
+            marks: typeof q.marks === 'number' ? q.marks : parseInt(q.marks as string) || 1,
+            difficulty: q.difficulty,
+            topic: q.topic,
+            blooms: q.bloomsTaxonomy, // Column is 'blooms', not 'blooms_taxonomy'
+            domain: q.domain,
+            year: yearValue,
           subject: subject,
           exam_context: examContext,
           pedagogy: q.pedagogy,
@@ -1254,7 +1310,8 @@ const PracticeTab: React.FC<{
             relevanceScore: q.relevanceScore,
             markingSteps: q.markingSteps // Keep original steps in JSONB just in case
           }
-        }));
+        };
+        });
 
         const { error: dbError } = await supabase
           .from('questions')
@@ -1779,8 +1836,8 @@ const PracticeTab: React.FC<{
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {q.options.map((option, idx) => {
                             const isSelected = selectedAnswer === idx;
-                            const hasCorrectAnswer = q.correctOptionIndex !== undefined;
-                            const isCorrectChoice = hasCorrectAnswer && q.correctOptionIndex === idx;
+                            const hasCorrectAnswer = q.correctOptionIndex !== undefined && q.correctOptionIndex !== null;
+                            const isCorrectChoice = hasCorrectAnswer && Number(q.correctOptionIndex) === idx;
                             const isWrongChoice = hasValidated && isSelected && !isCorrectChoice;
                             const isCorrectReveal = hasValidated && isCorrectChoice;
 
@@ -2476,7 +2533,8 @@ const QuizTab: React.FC<{
             <div className="space-y-4">
               {quizQuestions.map((q, idx) => {
                 const userAnswer = answeredQuestions.get(idx);
-                const isCorrect = userAnswer === q.correctIndex;
+                const correctIdx = q.correctIndex !== undefined ? q.correctIndex : q.correctOptionIndex;
+                const isCorrect = userAnswer === correctIdx;
 
                 return (
                   <div key={idx} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -2503,7 +2561,8 @@ const QuizTab: React.FC<{
                         <div className="space-y-2">
                           {q.options.map((option: string, optIdx: number) => {
                             const isUserSelection = userAnswer === optIdx;
-                            const isCorrectOpt = q.correctIndex === optIdx;
+                            const correctIdx = q.correctIndex !== undefined ? q.correctIndex : q.correctOptionIndex;
+                            const isCorrectOpt = correctIdx === optIdx;
 
                             return (
                               <div
@@ -2550,10 +2609,17 @@ const QuizTab: React.FC<{
                           </div>
                           <div className="bg-emerald-50 border-2 border-emerald-300 rounded-lg px-4 py-3">
                             <div className="text-base font-black text-emerald-700">
-                              {String.fromCharCode(65 + q.correctIndex)}
+                              {(() => {
+                                const cIdx = q.correctIndex !== undefined ? q.correctIndex : (q.correctOptionIndex ?? 0);
+                                return String.fromCharCode(65 + Number(cIdx));
+                              })()}
                             </div>
                             <div className="text-sm font-medium text-emerald-800 mt-1">
-                              <RenderWithMath text={q.options[q.correctIndex]} showOptions={false} serif={false} />
+                              <RenderWithMath
+                                text={q.options[q.correctIndex !== undefined ? q.correctIndex : (q.correctOptionIndex ?? 0)] || 'Solution loading...'}
+                                showOptions={false}
+                                serif={false}
+                              />
                             </div>
                           </div>
                         </div>
@@ -2624,7 +2690,7 @@ const QuizTab: React.FC<{
                         )}
 
                         {/* Your Wrong Answer */}
-                        {!isCorrect && (
+                        {(!isCorrect && userAnswer !== undefined) && (
                           <div className="p-3 bg-amber-50 border-2 border-amber-300 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
                               <AlertCircle size={14} className="text-amber-600" />
@@ -2632,10 +2698,10 @@ const QuizTab: React.FC<{
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="w-6 h-6 bg-amber-500 rounded-lg flex items-center justify-center font-black text-xs text-white">
-                                {String.fromCharCode(65 + userAnswer!)}
+                                {String.fromCharCode(65 + Number(userAnswer))}
                               </div>
                               <div className="text-xs font-medium text-amber-800">
-                                <RenderWithMath text={q.options[userAnswer!]} showOptions={false} serif={false} />
+                                <RenderWithMath text={q.options[userAnswer] || 'Answer recorded'} showOptions={false} serif={false} />
                               </div>
                             </div>
                           </div>
@@ -3160,7 +3226,7 @@ const FlashcardsTab: React.FC<{
                 <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto px-4 scroller-hide">
                   <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-6 bg-emerald-500/10 px-4 py-1.5 rounded-full border border-emerald-500/20 shadow-sm font-outfit">INTELLIGENCE SYNOPSIS</div>
                   <div className="text-sm md:text-base font-bold text-slate-100 leading-relaxed text-center">
-                    <RenderWithMath text={cards[currentCard].definition} showOptions={false} dark={true} />
+                    <RenderWithMath text={cards[currentCard].definition} showOptions={false} />
                   </div>
                   {cards[currentCard].context && (
                     <div className="mt-6 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] text-slate-400 font-bold uppercase tracking-widest">

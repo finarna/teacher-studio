@@ -170,14 +170,15 @@ export async function aggregateTopicsForUser(
       }
     });
 
-    // 7. Group insights by topic
-    const insightsByTopic = new Map<string, ChapterInsight[]>();
+    // 7. Group insights by topic (store with lowercase key for fuzzy matching)
+    const insightsByTopicLower = new Map<string, {originalTopic: string, insights: ChapterInsight[]}>();
     (insights || []).forEach(i => {
       const topic = i.topic || 'Uncategorized';
-      if (!insightsByTopic.has(topic)) {
-        insightsByTopic.set(topic, []);
+      const topicLower = topic.toLowerCase();
+      if (!insightsByTopicLower.has(topicLower)) {
+        insightsByTopicLower.set(topicLower, {originalTopic: topic, insights: []});
       }
-      insightsByTopic.get(topic)!.push(transformInsight(i));
+      insightsByTopicLower.get(topicLower)!.insights.push(transformInsight(i));
     });
 
     // 8. Group sketches by topic
@@ -249,9 +250,9 @@ export async function aggregateTopicsForUser(
       const topicQuestions = questionsByTopicId.get(topicId) || [];
       const existing = existingMap.get(topicId) as any;
 
-      // For insights, sketches, flashcards: still use topic NAME matching
-      // (these resources don't have mappings yet, they rely on exact name match)
-      const topicInsights = insightsByTopic.get(topicName) || [];
+      // For insights, sketches, flashcards: use fuzzy NAME matching
+      // (these resources don't have mappings yet, they rely on name match with tolerance)
+      const topicInsights = fuzzyMatchInsights(topicName, insightsByTopicLower);
       const topicSketches = sketchesByTopic.get(topicName) || [];
       const topicFlashcards = flashcardsByTopic.get(topicName) || [];
 
@@ -670,6 +671,33 @@ function transformInsight(dbInsight: any): ChapterInsight {
     preparationChecklist: dbInsight.preparation_checklist,
     highYieldTopics: dbInsight.high_yield_topics
   };
+}
+
+/**
+ * Helper: Fuzzy match insights by topic name
+ * Uses bidirectional substring matching (case-insensitive)
+ */
+function fuzzyMatchInsights(
+  topicName: string,
+  insightsByTopicLower: Map<string, {originalTopic: string, insights: ChapterInsight[]}>
+): ChapterInsight[] {
+  const topicNameLower = topicName.toLowerCase();
+  const allInsights: ChapterInsight[] = [];
+
+  // Try exact match first
+  const exactMatch = insightsByTopicLower.get(topicNameLower);
+  if (exactMatch) {
+    return exactMatch.insights;
+  }
+
+  // Try fuzzy match (bidirectional substring)
+  for (const [insightTopicLower, data] of insightsByTopicLower.entries()) {
+    if (insightTopicLower.includes(topicNameLower) || topicNameLower.includes(insightTopicLower)) {
+      allInsights.push(...data.insights);
+    }
+  }
+
+  return allInsights;
 }
 
 /**

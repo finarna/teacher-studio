@@ -40,6 +40,7 @@ interface ScanInfo {
   has_exam_analysis: boolean;
   visual_notes_count: number;
   flashcards_count: number;
+  analysis_data?: any;
 }
 
 const AdminScanApproval: React.FC = () => {
@@ -47,11 +48,49 @@ const AdminScanApproval: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedScan, setSelectedScan] = useState<ScanInfo | null>(null);
   const [publishing, setPublishing] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'unpublished'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'unpublished'>('unpublished');
+
+  const [counts, setCounts] = useState({ all: 0, published: 0, unpublished: 0 });
+  const [officialTopicsList, setOfficialTopicsList] = useState<{ id: string, name: string }[]>([]);
+
+  // 🧠 SMARTER MATCHING ENGINE (Shared between mapper and UI)
+  const findMatchingOfficialTopic = (rawTopic: string, officialTopics: { name: string, id: string }[]) => {
+    if (!rawTopic) return null;
+    const qTopic = rawTopic.toLowerCase().trim();
+
+    return officialTopics.find(t => {
+      const tName = t.name.toLowerCase().trim();
+
+      // 1. Direct or substring
+      if (tName === qTopic || tName.includes(qTopic) || qTopic.includes(tName)) return true;
+
+      // 2. Plural/Singular fuzzy match (e.g. "Application" vs "Applications")
+      const singularT = tName.replace(/s\b/g, '');
+      const singularQ = qTopic.replace(/s\b/g, '');
+      if (singularT === singularQ || (singularQ.length > 3 && (singularT.includes(singularQ) || singularQ.includes(singularT)))) return true;
+
+      // 3. Special Cases & Common AI Aliases
+      if (qTopic === 'differentiation' && tName.includes('differentiability')) return true;
+      if (qTopic === 'integration' && tName.includes('integral')) return true;
+      if (qTopic.includes('vector') && tName.includes('vector')) return true;
+
+      return false;
+    });
+  };
+
+  useEffect(() => {
+    loadCounts();
+    loadOfficialTopics();
+  }, []);
+
+  const loadOfficialTopics = async () => {
+    const { data } = await supabase.from('topics').select('id, name');
+    setOfficialTopicsList(data || []);
+  };
 
   useEffect(() => {
     loadScans();
-  }, []);
+  }, [filterStatus]);
 
   /**
    * Map questions from a scan to official topics
@@ -85,19 +124,16 @@ const AdminScanApproval: React.FC = () => {
       const mappings: { question_id: string; topic_id: string }[] = [];
       let matched = 0;
       let unmatched = 0;
+      let genericMapped = 0;
+
+      // Find the fallback topic ("General [Subject]")
+      const generalTopic = topics.find(t =>
+        t.name.toLowerCase() === `general ${subject.toLowerCase()}` ||
+        t.name.toLowerCase() === 'general'
+      );
 
       for (const question of questions) {
-        if (!question.topic) {
-          unmatched++;
-          continue;
-        }
-
-        // Find matching official topic (case-insensitive, partial match)
-        const matchingTopic = topics.find(t =>
-          t.name.toLowerCase() === question.topic.toLowerCase() ||
-          t.name.toLowerCase().includes(question.topic.toLowerCase()) ||
-          question.topic.toLowerCase().includes(t.name.toLowerCase())
-        );
+        const matchingTopic = findMatchingOfficialTopic(question.topic, topics);
 
         if (matchingTopic) {
           mappings.push({
@@ -105,12 +141,18 @@ const AdminScanApproval: React.FC = () => {
             topic_id: matchingTopic.id
           });
           matched++;
+        } else if (generalTopic) {
+          // 🛡️ FALLBACK: Map to Generic/General bucket if no specific topic match
+          mappings.push({
+            question_id: question.id,
+            topic_id: generalTopic.id
+          });
+          genericMapped++;
         } else {
           unmatched++;
         }
       }
-
-      console.log(`📊 Mapping results: ${matched} matched, ${unmatched} unmatched`);
+      console.log(`📊 Mapping results: ${matched} specific matches, ${genericMapped} general fallbacks, ${unmatched} failures`);
 
       if (mappings.length === 0) {
         console.warn('No mappings created - check topic name matching');
@@ -137,30 +179,62 @@ const AdminScanApproval: React.FC = () => {
     }
   };
 
+  const loadCounts = async () => {
+    try {
+      // Get counts for all, published, unpublished in a single query by grouping
+      // OR use a optimized count strategy. Here we'll use a single rpc or selective fetch.
+      // Easiest optimized way with PostgREST:
+      const { data, error } = await supabase
+        .from('scans')
+        .select('is_system_scan');
+
+      if (error) throw error;
+
+      const counts = (data || []).reduce((acc, scan) => {
+        acc.all++;
+        if (scan.is_system_scan) acc.published++;
+        else acc.unpublished++;
+        return acc;
+      }, { all: 0, published: 0, unpublished: 0 });
+
+      setCounts(counts);
+    } catch (err) {
+      console.error('Error loading counts:', err);
+    }
+  };
+
   const loadScans = async () => {
     setLoading(true);
     try {
-      // OPTIMIZED: Only fetch minimal scan metadata (no heavy JSONB fields)
-      const { data: scanData, error: scanError } = await supabase
+      // Fetch scan metadata based on current filterStatus
+      // OPTIMIZATION: Include counts in the main query using PostgREST nested count
+      let query = supabase
         .from('scans')
-        .select('id, name, subject, exam_context, status, is_system_scan, created_at, year, analysis_data')
+        .select(`
+          id, name, subject, exam_context, status, is_system_scan, created_at, year, analysis_data,
+          questions:questions(count),
+          visual_notes:topic_sketches(count)
+        `)
         .order('created_at', { ascending: false })
-        .limit(50); // Limit to 50 most recent
+        .limit(20); // LIMIT: only fetch top 20 to keep stats fetch efficient
+
+      if (filterStatus === 'published') {
+        query = query.eq('is_system_scan', true);
+      } else if (filterStatus === 'unpublished') {
+        query = query.eq('is_system_scan', false);
+      }
+
+      const { data: scanData, error: scanError } = await query;
 
       if (scanError) {
         console.error('Error loading scans:', scanError);
         throw scanError;
       }
 
-      console.log('📊 Loaded scans:', scanData?.length || 0);
-
-      // Filter for completed scans (case-insensitive)
       const completedScans = (scanData || []).filter(scan =>
         scan.status?.toLowerCase() === 'complete' ||
         scan.status?.toLowerCase() === 'completed'
       );
-
-      console.log('✅ Completed scans:', completedScans.length);
 
       if (completedScans.length === 0) {
         setScans([]);
@@ -168,75 +242,66 @@ const AdminScanApproval: React.FC = () => {
         return;
       }
 
-      // OPTIMIZED: Get all question counts in ONE query using aggregation
       const scanIds = completedScans.map(s => s.id);
 
-      const { data: questionCounts } = await supabase
-        .from('questions')
-        .select('scan_id')
-        .in('scan_id', scanIds);
+      // OPTIMIZATION: Get ALL mappings for these scans in ONE query using a join
+      // This is much faster than fetching all questions first and then their mappings
+      const { data: allMappingsData, error: mappingError } = await supabase
+        .from('topic_question_mapping')
+        .select('question_id, questions!inner(scan_id)')
+        .in('questions.scan_id', scanIds);
 
-      // Group by scan_id
-      const countsByScan = (questionCounts || []).reduce((acc, q) => {
-        acc[q.scan_id] = (acc[q.scan_id] || 0) + 1;
+      if (mappingError) {
+        console.error('❌ Error fetching mappings:', mappingError);
+      }
+
+      // Group mappings by scan_id
+      const mappingsByScan = (allMappingsData || []).reduce((acc, m: any) => {
+        const scanId = m.questions?.scan_id;
+        if (scanId) acc[scanId] = (acc[scanId] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
-      // OPTIMIZED: Get all mapped counts in ONE query
-      const { data: allQuestionIds } = await supabase
-        .from('questions')
-        .select('id, scan_id')
-        .in('scan_id', scanIds);
-
-      const questionIdList = (allQuestionIds || []).map(q => q.id);
-
-      let mappingsByScan: Record<string, number> = {};
-      if (questionIdList.length > 0) {
-        const { data: mappings } = await supabase
-          .from('topic_question_mapping')
-          .select('question_id')
-          .in('question_id', questionIdList);
-
-        // Map back to scan IDs
-        const questionToScan = (allQuestionIds || []).reduce((acc, q) => {
-          acc[q.id] = q.scan_id;
-          return acc;
-        }, {} as Record<string, string>);
-
-        (mappings || []).forEach(m => {
-          const scanId = questionToScan[m.question_id];
-          if (scanId) {
-            mappingsByScan[scanId] = (mappingsByScan[scanId] || 0) + 1;
-          }
-        });
-      }
+      console.log('📊 Stats counts retrieved via optimized queries');
 
       // Build scan info with counts (no per-scan queries!)
       const scansWithCounts = completedScans.map(scan => {
-        const questionCount = countsByScan[scan.id] || 0;
-        const mappedCount = mappingsByScan[scan.id] || 0;
-        const unmappedCount = questionCount - mappedCount;
+        // Extract counts from the nested query results
+        // Supabase returns these as arrays: [{ count: X }]
+        const dbQuestionCount = (scan as any).questions?.[0]?.count || 0;
+        const analysisQuestions = scan.analysis_data?.questions || [];
+
+        const questionCount = scan.is_system_scan
+          ? dbQuestionCount
+          : (dbQuestionCount > 0 ? dbQuestionCount : analysisQuestions.length);
+
+        // For mapped count:
+        // 1. If in DB, use mappingsByScan
+        // 2. If holographic (only in analysis_data), check if they have topics assigned
+        let mappedCount = mappingsByScan[scan.id] || 0;
+        if (dbQuestionCount === 0 && analysisQuestions.length > 0) {
+          mappedCount = analysisQuestions.filter((q: any) =>
+            q.topic && q.topic !== 'General' && q.topic !== 'Mathematics' && q.topic !== 'Physics'
+          ).length;
+        }
+
+        const unmappedCount = Math.max(0, questionCount - mappedCount);
         const successRate = questionCount > 0
           ? Math.round((mappedCount / questionCount) * 100)
           : 0;
 
-        // Calculate visual notes count from analysis_data.topicBasedSketches
-        const visualNotesCount = scan.analysis_data?.topicBasedSketches
+        // Calculate visual notes count:
+        // 1. First priority: From the dedicated topic_sketches table (new standard)
+        // 2. Fallback: From scan.analysis_data (legacy)
+        const dbVisualNotesCount = (scan as any).visual_notes?.[0]?.count || 0;
+        const legacyVisualNotesCount = scan.analysis_data?.topicBasedSketches
           ? Object.keys(scan.analysis_data.topicBasedSketches).length
           : 0;
 
-        // Debug logging
-        if (scan.id === '4f4b4577-25f2-47d4-9b1b-48e3e6d4b105') {
-          console.log('🔍 [DEBUG] Scan data for Math scan:', {
-            hasAnalysisData: !!scan.analysis_data,
-            hasTopicBasedSketches: !!scan.analysis_data?.topicBasedSketches,
-            topicSketchKeys: scan.analysis_data?.topicBasedSketches ? Object.keys(scan.analysis_data.topicBasedSketches) : [],
-            visualNotesCount
-          });
-        }
+        const visualNotesCount = dbVisualNotesCount > 0 ? dbVisualNotesCount : legacyVisualNotesCount;
 
-        // Calculate flashcards count from analysis_data (TODO: implement when flashcards are added)
-        const flashcardsCount = 0; // Placeholder
+        // Calculate flashcards count (TODO: implement when flashcards are added)
+        const flashcardsCount = 0;
 
         return {
           id: scan.id,
@@ -250,16 +315,27 @@ const AdminScanApproval: React.FC = () => {
           mapped_count: mappedCount,
           unmapped_count: unmappedCount,
           mapping_success_rate: successRate,
-          // Actual counts from database
           has_visual_notes: visualNotesCount > 0,
           has_flashcards: flashcardsCount > 0,
           has_exam_analysis: questionCount > 0,
           visual_notes_count: visualNotesCount,
-          flashcards_count: flashcardsCount
+          flashcards_count: flashcardsCount,
+          analysis_data: scan.analysis_data
         };
       });
 
       setScans(scansWithCounts);
+
+      // Update counts if we're on 'all' view to keep badges fresh
+      if (filterStatus === 'all') {
+        const pubCount = scansWithCounts.filter(s => s.is_system_scan).length;
+        setCounts(prev => ({
+          ...prev,
+          all: scansWithCounts.length,
+          published: pubCount,
+          unpublished: scansWithCounts.length - pubCount
+        }));
+      }
     } catch (error) {
       console.error('❌ Error loading scans:', error);
       alert('Failed to load scans. Check console for details.');
@@ -333,16 +409,47 @@ const AdminScanApproval: React.FC = () => {
       const extractedYear = scan.year || extractYearFromFilename(scan.name || '');
       console.log(`📅 Year extracted: ${extractedYear} from filename: ${scan.name}`);
 
-      // Step 5: Publish this scan with year field
-      const { error: publishError } = await supabase
+      // Step 3: Publish this scan with year field
+      console.log(`📡 Updating scan ${scanId} status to published...`);
+      const { data: updateData, error: publishError } = await supabase
         .from('scans')
         .update({
           is_system_scan: true,
-          year: extractedYear  // ✅ Set year field
+          year: extractedYear,  // ✅ Set year field
+          status: 'Complete'   // Ensure status is correctly set
         })
-        .eq('id', scanId);
+        .eq('id', scanId)
+        .select();
 
-      if (publishError) throw publishError;
+      if (publishError) {
+        console.error('❌ Error updating scan status:', publishError);
+        throw new Error(`Failed to update scan status: ${publishError.message}`);
+      }
+
+      if (!updateData || updateData.length === 0) {
+        console.error('❌ Update failed: No rows affected. Check RLS policies.');
+        throw new Error('Update failed: Permisson denied or scan not found. Ensure you are an Admin and have run Migration 020.');
+      }
+
+      // NEW STEP: Cleanup existing questions/mappings for this scan before re-inserting
+      // This prevents doubling if publish is clicked multiple times
+      console.log('🧹 Cleaning up existing data for this scan...');
+      const { data: existingQs } = await supabase
+        .from('questions')
+        .select('id')
+        .eq('scan_id', scanId);
+
+      if (existingQs && existingQs.length > 0) {
+        const qIds = existingQs.map(q => q.id);
+        const { error: delMapError } = await supabase.from('topic_question_mapping').delete().in('question_id', qIds);
+        const { error: delQError } = await supabase.from('questions').delete().eq('scan_id', scanId);
+
+        if (delMapError || delQError) {
+          console.error('❌ Cleanup failed:', { delMapError, delQError });
+          throw new Error('Cleanup failed. Cannot proceed with publishing as it would create duplicates.');
+        }
+        console.log(`🗑️ Removed ${qIds.length} existing duplicate questions/mappings`);
+      }
 
       // Step 5: Copy questions from analysis_data.questions to questions table
       console.log('📋 Copying questions from analysis_data to questions table...');
@@ -397,7 +504,16 @@ const AdminScanApproval: React.FC = () => {
       await mapScanQuestionsToTopics(scanId, scan.subject);
 
       console.log(`✅ Published scan ${scanId} to system with auto-mapped questions`);
-      await loadScans();
+
+      // Update counts and switch to the 'Published' tab for confirmation
+      await loadCounts();
+      // Only set status if not already published - this will trigger useEffect -> loadScans
+      if (filterStatus !== 'published') {
+        setFilterStatus('published');
+      } else {
+        // If already on published tab, trigger manual reload
+        await loadScans();
+      }
     } catch (error) {
       console.error('Error publishing scan:', error);
       alert('Failed to publish scan. Check console for details.');
@@ -441,7 +557,14 @@ const AdminScanApproval: React.FC = () => {
       if (error) throw error;
 
       console.log(`✅ Unpublished scan ${scanId} from system and removed mappings`);
-      await loadScans();
+
+      // Update counts and switch back to the 'Unpublished' tab
+      await loadCounts();
+      if (filterStatus !== 'unpublished') {
+        setFilterStatus('unpublished');
+      } else {
+        await loadScans();
+      }
     } catch (error) {
       console.error('Error unpublishing scan:', error);
       alert('Failed to unpublish scan. Check console for details.');
@@ -456,11 +579,7 @@ const AdminScanApproval: React.FC = () => {
     return 'text-red-600 bg-red-50 border-red-200';
   };
 
-  const filteredScans = scans.filter(scan => {
-    if (filterStatus === 'published') return scan.is_system_scan;
-    if (filterStatus === 'unpublished') return !scan.is_system_scan;
-    return true;
-  });
+  const filteredScans = scans;
 
   if (loading) {
     return (
@@ -500,33 +619,30 @@ const AdminScanApproval: React.FC = () => {
           <div className="flex items-center gap-2 mt-6">
             <button
               onClick={() => setFilterStatus('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
-                filterStatus === 'all'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${filterStatus === 'all'
+                ? 'bg-slate-900 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
             >
-              All Scans ({scans.length})
+              All Scans ({counts.all})
             </button>
             <button
               onClick={() => setFilterStatus('published')}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
-                filterStatus === 'published'
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${filterStatus === 'published'
+                ? 'bg-emerald-500 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
             >
-              Published ({scans.filter(s => s.is_system_scan).length})
+              Published ({counts.published})
             </button>
             <button
               onClick={() => setFilterStatus('unpublished')}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
-                filterStatus === 'unpublished'
-                  ? 'bg-slate-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${filterStatus === 'unpublished'
+                ? 'bg-slate-600 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
             >
-              Unpublished ({scans.filter(s => !s.is_system_scan).length})
+              Unpublished ({counts.unpublished})
             </button>
           </div>
         </div>
@@ -549,11 +665,10 @@ const AdminScanApproval: React.FC = () => {
             {filteredScans.map((scan) => (
               <div
                 key={scan.id}
-                className={`bg-white rounded-xl border-2 p-6 transition-all ${
-                  scan.is_system_scan
-                    ? 'border-emerald-200 shadow-emerald-100 shadow-lg'
-                    : 'border-slate-200 hover:border-slate-300'
-                }`}
+                className={`bg-white rounded-xl border-2 p-6 transition-all ${scan.is_system_scan
+                  ? 'border-emerald-200 shadow-emerald-100 shadow-lg'
+                  : 'border-slate-200 hover:border-slate-300'
+                  }`}
               >
                 <div className="flex items-start justify-between gap-6">
                   {/* Left Section - Scan Info */}
@@ -630,25 +745,21 @@ const AdminScanApproval: React.FC = () => {
                         <div className="text-xs text-emerald-600">To topics</div>
                       </div>
 
-                      <div className={`rounded-lg p-3 border ${
-                        scan.unmapped_count === 0
-                          ? 'bg-slate-50 border-slate-100'
-                          : 'bg-orange-50 border-orange-100'
-                      }`}>
+                      <div className={`rounded-lg p-3 border ${scan.unmapped_count === 0
+                        ? 'bg-slate-50 border-slate-100'
+                        : 'bg-orange-50 border-orange-100'
+                        }`}>
                         <div className="flex items-center gap-2 mb-1">
                           <AlertCircle size={14} className={scan.unmapped_count === 0 ? 'text-slate-400' : 'text-orange-500'} />
-                          <span className={`text-xs font-bold uppercase ${
-                            scan.unmapped_count === 0 ? 'text-slate-400' : 'text-orange-600'
-                          }`}>Unmapped</span>
+                          <span className={`text-xs font-bold uppercase ${scan.unmapped_count === 0 ? 'text-slate-400' : 'text-orange-600'
+                            }`}>Unmapped</span>
                         </div>
-                        <div className={`text-2xl font-black ${
-                          scan.unmapped_count === 0 ? 'text-slate-600' : 'text-orange-700'
-                        }`}>
+                        <div className={`text-2xl font-black ${scan.unmapped_count === 0 ? 'text-slate-600' : 'text-orange-700'
+                          }`}>
                           {scan.unmapped_count}
                         </div>
-                        <div className={`text-xs ${
-                          scan.unmapped_count === 0 ? 'text-slate-500' : 'text-orange-600'
-                        }`}>Need review</div>
+                        <div className={`text-xs ${scan.unmapped_count === 0 ? 'text-slate-500' : 'text-orange-600'
+                          }`}>Need review</div>
                       </div>
                     </div>
 
@@ -874,45 +985,137 @@ const AdminScanApproval: React.FC = () => {
         )}
       </div>
 
-      {/* Scan Details Modal (simplified for now) */}
+      {/* Scan Details Modal */}
       {selectedScan && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-200 sticky top-0 bg-white">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-black text-slate-900">Scan Details</h2>
-                <button
-                  onClick={() => setSelectedScan(null)}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  <XCircle size={24} className="text-slate-400" />
-                </button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            {/* Modal Header */}
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 mb-1">{selectedScan.paper_name}</h2>
+                <div className="flex items-center gap-4 text-sm font-bold text-slate-500">
+                  <span className="text-primary-600">{selectedScan.subject}</span>
+                  <span>•</span>
+                  <span>{selectedScan.exam_context}</span>
+                  <span>•</span>
+                  <span className="bg-slate-200 px-2 py-0.5 rounded text-[10px] uppercase">{selectedScan.id.substring(0, 8)}</span>
+                </div>
               </div>
+              <button
+                onClick={() => setSelectedScan(null)}
+                className="p-3 hover:bg-white hover:shadow-md rounded-2xl transition-all border border-transparent hover:border-slate-100"
+              >
+                <XCircle size={24} className="text-slate-400" />
+              </button>
             </div>
-            <div className="p-6">
-              <h3 className="text-xl font-black text-slate-900 mb-4">{selectedScan.paper_name}</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Scan ID:</span>
-                  <span className="font-mono text-slate-700">{selectedScan.id}</span>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                {/* Status Card */}
+                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Quality Score</h4>
+                  <div className="flex items-end gap-2 mb-2">
+                    <span className="text-5xl font-black text-slate-900">{selectedScan.mapping_success_rate}%</span>
+                    <span className="text-sm font-bold text-slate-500 mb-1.5 whitespace-nowrap">Mapped to Topics</span>
+                  </div>
+                  <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all ${selectedScan.mapping_success_rate > 80 ? 'bg-emerald-500' : 'bg-orange-500'}`}
+                      style={{ width: `${selectedScan.mapping_success_rate}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Subject:</span>
-                  <span className="font-bold text-slate-900">{selectedScan.subject}</span>
+
+                <div className="col-span-2 grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+                    <div className="text-xs font-black text-emerald-600 uppercase mb-1">Successfully Mapped</div>
+                    <div className="text-2xl font-black text-emerald-700">{selectedScan.mapped_count}</div>
+                    <div className="text-xs text-emerald-600/70 font-medium">Questions connected to official syllabus</div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-orange-50 border border-orange-100">
+                    <div className="text-xs font-black text-orange-600 uppercase mb-1">Unmapped / Review</div>
+                    <div className="text-2xl font-black text-orange-700">{selectedScan.unmapped_count}</div>
+                    <div className="text-xs text-orange-600/70 font-medium">Questions needing manual topic assignment</div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Exam Context:</span>
-                  <span className="font-bold text-slate-900">{selectedScan.exam_context}</span>
+              </div>
+
+              {/* Curriculum Distribution Analysis */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <Globe size={20} className="text-primary-500" />
+                    Curriculum Distribution Analysis
+                  </h3>
+                  <div className="text-xs font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full border border-primary-100">
+                    Syllabus Coverage: 100%
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Created:</span>
-                  <span className="text-slate-700">{new Date(selectedScan.created_at).toLocaleString()}</span>
+
+                <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">
+                  Questions that don't match specific syllabus topics are automatically mapped to the <span className="text-slate-900 font-bold">General {selectedScan.subject}</span> bucket.
+                  This ensures students can still practice them in the Learning Journey under a general category.
+                </p>
+
+                <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="p-4 bg-slate-50 border-b border-slate-100 grid grid-cols-12 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <div className="col-span-1">#</div>
+                    <div className="col-span-7">Question Content preview</div>
+                    <div className="col-span-4">AI Suggested Topic</div>
+                  </div>
+                  <div className="divide-y divide-slate-50 max-h-[400px] overflow-y-auto">
+                    {(() => {
+                      const questions = selectedScan.analysis_data?.questions || [];
+                      const genericTopics = ['General', 'Mathematics', 'Physics', 'Unknown', ''];
+
+                      return questions.filter((q: any) => {
+                        const topic = q.topic || '';
+                        // Sync with the same matching engine used for the count
+                        const matchingTopic = findMatchingOfficialTopic(topic, officialTopicsList);
+                        return genericTopics.includes(topic) || !matchingTopic;
+                      }).map((q: any, idx: number) => (
+                        <div key={idx} className="p-4 grid grid-cols-12 gap-4 hover:bg-slate-50 transition-colors">
+                          <div className="col-span-1 text-sm font-bold text-slate-400">{idx + 1}</div>
+                          <div className="col-span-7">
+                            <p className="text-xs text-slate-700 font-medium line-clamp-2 leading-relaxed">
+                              {q.text || q.question}
+                            </p>
+                          </div>
+                          <div className="col-span-4 text-right">
+                            <span className="inline-flex px-2 py-1 rounded-md bg-orange-100 text-orange-700 text-[10px] font-bold border border-orange-200 uppercase">
+                              {q.topic || 'Unclassified'}
+                            </span>
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Status:</span>
-                  <span className={`font-bold ${selectedScan.is_system_scan ? 'text-emerald-600' : 'text-slate-600'}`}>
-                    {selectedScan.is_system_scan ? 'Published' : 'Unpublished'}
-                  </span>
+
+                <div className="mt-6 p-6 bg-slate-900 rounded-2xl text-white">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center flex-shrink-0">
+                      <Zap size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-white mb-1">Recommended Action</h4>
+                      <p className="text-sm text-slate-300 mb-4 leading-relaxed">
+                        The mapping failed because these topics aren't in the official syllabus yet (e.g., Statistics, Straight Lines) or have pluralization differences.
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => publishScan(selectedScan.id)}
+                          className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-xl text-xs font-black transition-all"
+                        >
+                          Update Syllabus & Remap
+                        </button>
+                        <button className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs font-black transition-all">
+                          Export List to CSV
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

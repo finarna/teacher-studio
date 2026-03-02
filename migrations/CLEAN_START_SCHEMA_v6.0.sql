@@ -1,9 +1,9 @@
--- 🛡️ EDUJOURNEY CATEGORICAL CLEAN START SCHEMA v5.6
+-- 🛡️ EDUJOURNEY CATEGORICAL CLEAN START SCHEMA v6.0
 -- =====================================================
 -- Consolidated schema for the entire database.
+-- ✅ **v6.0 Schema** (March 2025): Added AI Trends (Patterns, Distributions) and fixed RLS for Practice & Learn tabs (Resolves 403 Forbidden on upserts)
+--   • Modified 'FOR ALL' policies for important tables that use upsert (topic_resources, practice_sessions) to include an explicit 'WITH CHECK' clause to ensure reliability across all Supabase client versions.
 -- v5.6 changes vs v5.5:
---   • Added: Full UPDATE/DELETE policies for scans and questions (Fixes Admin Publish)
--- v5.5 changes vs v5.4:
 --   • Added: RLS policies for topic_sketches (needed for AdminScanApproval counts)
 -- v5.4 changes vs v5.3:
 --   • Fixed: KCET weightage for Math topics (all Math topics now have KCET support)
@@ -526,7 +526,47 @@ CREATE TABLE IF NOT EXISTS public.vidya_sessions (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 7. FUNCTIONS & RECURSION FIXES
+-- 7. AI GEN & TRENDS TABLES
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS public.exam_historical_patterns (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  year INTEGER NOT NULL,
+  exam_context TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  total_marks INTEGER NOT NULL,
+  difficulty_easy_pct INTEGER,
+  difficulty_moderate_pct INTEGER,
+  difficulty_hard_pct INTEGER,
+  evolution_note TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(year, exam_context, subject)
+);
+
+CREATE TABLE IF NOT EXISTS public.exam_topic_distributions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  historical_pattern_id UUID REFERENCES public.exam_historical_patterns(id) ON DELETE CASCADE,
+  topic_id TEXT NOT NULL,
+  question_count INTEGER NOT NULL,
+  average_marks NUMERIC,
+  difficulty_easy_count INTEGER DEFAULT 0,
+  difficulty_moderate_count INTEGER DEFAULT 0,
+  difficulty_hard_count INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.topic_metadata (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  topic_id TEXT UNIQUE NOT NULL,
+  topic_name TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  exam_context TEXT NOT NULL,
+  syllabus TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 8. FUNCTIONS & RECURSION FIXES
 -- =====================================================
 
 CREATE OR REPLACE FUNCTION public.is_admin()
@@ -568,7 +608,7 @@ DO $$
 DECLARE
     t text;
 BEGIN
-    FOR t IN SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('users', 'profiles', 'scans', 'topic_resources', 'test_templates', 'sketch_progress', 'vidya_sessions', 'practice_answers', 'pricing_plans', 'flashcards', 'question_banks')
+    FOR t IN SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('users', 'profiles', 'scans', 'topic_resources', 'test_templates', 'sketch_progress', 'vidya_sessions', 'practice_answers', 'pricing_plans', 'flashcards', 'question_banks', 'topic_metadata')
     LOOP
         EXECUTE format('DROP TRIGGER IF EXISTS tr_update_%I_updated_at ON public.%I', t, t);
         EXECUTE format('CREATE TRIGGER tr_update_%I_updated_at BEFORE UPDATE ON public.%I FOR EACH ROW EXECUTE FUNCTION update_updated_at_column()', t, t);
@@ -668,23 +708,61 @@ CREATE POLICY "Allow delete topic mappings" ON public.topic_question_mapping
   USING (public.is_admin());
 
 DROP POLICY IF EXISTS "Resources access" ON public.topic_resources;
-CREATE POLICY "Resources access" ON public.topic_resources FOR ALL USING (auth.uid() = user_id OR public.is_admin());
+CREATE POLICY "Resources access" ON public.topic_resources 
+  FOR ALL 
+  USING (auth.uid() = user_id OR public.is_admin())
+  WITH CHECK (auth.uid() = user_id OR public.is_admin());
 
 DROP POLICY IF EXISTS "Quiz access" ON public.quiz_attempts;
-CREATE POLICY "Quiz access" ON public.quiz_attempts FOR ALL USING (auth.uid() = user_id OR public.is_admin());
+CREATE POLICY "Quiz access" ON public.quiz_attempts 
+  FOR ALL 
+  USING (auth.uid() = user_id OR public.is_admin())
+  WITH CHECK (auth.uid() = user_id OR public.is_admin());
 
 DROP POLICY IF EXISTS "Test attempts access" ON public.test_attempts;
-CREATE POLICY "Test attempts access" ON public.test_attempts FOR ALL USING (auth.uid() = user_id OR public.is_admin());
+CREATE POLICY "Test attempts access" ON public.test_attempts 
+  FOR ALL 
+  USING (auth.uid() = user_id OR public.is_admin())
+  WITH CHECK (auth.uid() = user_id OR public.is_admin());
 
 DROP POLICY IF EXISTS "Test responses access" ON public.test_responses;
 CREATE POLICY "Test responses access" ON public.test_responses FOR ALL USING (EXISTS (SELECT 1 FROM test_attempts ta WHERE ta.id = attempt_id AND ta.user_id = auth.uid()) OR public.is_admin());
 
 DROP POLICY IF EXISTS "Practice access" ON public.practice_answers;
-CREATE POLICY "Practice access" ON public.practice_answers FOR ALL USING (auth.uid() = user_id OR public.is_admin());
+CREATE POLICY "Practice access" ON public.practice_answers 
+  FOR ALL 
+  USING (auth.uid() = user_id OR public.is_admin())
+  WITH CHECK (auth.uid() = user_id OR public.is_admin());
+
+DROP POLICY IF EXISTS "Practice session access" ON public.practice_sessions;
+CREATE POLICY "Practice session access" ON public.practice_sessions 
+  FOR ALL 
+  USING (auth.uid() = user_id OR public.is_admin())
+  WITH CHECK (auth.uid() = user_id OR public.is_admin());
+
+DROP POLICY IF EXISTS "Users can manage own sketch progress" ON public.sketch_progress;
+CREATE POLICY "Users can manage own sketch progress" ON public.sketch_progress 
+  FOR ALL 
+  USING (auth.uid() = user_id OR public.is_admin())
+  WITH CHECK (auth.uid() = user_id OR public.is_admin());
+
+-- AI Trends Policies (Public Viewable)
+DROP POLICY IF EXISTS "Trends viewable by everyone" ON public.exam_historical_patterns;
+CREATE POLICY "Trends viewable by everyone" ON public.exam_historical_patterns FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Distributions viewable by everyone" ON public.exam_topic_distributions;
+CREATE POLICY "Distributions viewable by everyone" ON public.exam_topic_distributions FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Metadata viewable by everyone" ON public.topic_metadata;
+CREATE POLICY "Metadata viewable by everyone" ON public.topic_metadata FOR SELECT USING (true);
+
 
 -- Tools & AI
 DROP POLICY IF EXISTS "Vidya access" ON public.vidya_sessions;
-CREATE POLICY "Vidya access" ON public.vidya_sessions FOR ALL USING (auth.uid() = user_id OR public.is_admin());
+CREATE POLICY "Vidya access" ON public.vidya_sessions 
+  FOR ALL 
+  USING (auth.uid() = user_id OR public.is_admin())
+  WITH CHECK (auth.uid() = user_id OR public.is_admin());
 
 -- Visual Notes (Study Guides)
 DROP POLICY IF EXISTS "Users can view topic sketches" ON public.topic_sketches;
@@ -786,4 +864,4 @@ CREATE INDEX IF NOT EXISTS idx_flashcards_expires   ON public.flashcards(expires
 
 COMMENT ON TABLE public.flashcards IS 'Rapid Recall flashcard cache (30-day TTL). Each row holds all AI-generated cards for one scan as a JSONB array.';
 
--- ✅ CONSOLIDATED CLEAN SETUP v5.6 COMPLETE
+-- ✅ CONSOLIDATED CLEAN SETUP v6.0 COMPLETE

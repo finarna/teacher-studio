@@ -145,10 +145,10 @@ export const RenderWithMath: React.FC<{
   className?: string;
   showOptions?: boolean;
   serif?: boolean;
-}> = ({ text, className = '' }) => {
+}> = ({ text, className = '', serif = false }) => {
   if (!text) return null;
 
-  return <MathRenderer text={text} className={className} />;
+  return <MathRenderer text={text} className={`${className} ${serif ? 'font-serif' : ''}`} />;
 };
 
 /**

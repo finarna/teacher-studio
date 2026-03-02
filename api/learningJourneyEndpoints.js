@@ -381,21 +381,106 @@ REQUIREMENTS:
 1. Topic(s): "${topicNames}"
 2. QUALITY: ZERO "Definition" questions. Every question must be a Scenario or Application problem.
 3. STRUCTURE: 4 options, exactly 1 correct.
-4. SOLUTIONS: Include masterclass analytical steps.
+4. SOLUTIONS: Include masterclass analytical steps with detailed "solutionSteps", "examTip", "keyFormulas", and "pitfalls".
+5. DEEP INSIGHTS: Include "masteryMaterial" with AI reasoning, exam patterns, and conceptual foundations.
+
+🚨 CRITICAL QUALITY STANDARDS - NO GENERIC CONTENT ALLOWED:
+
+A) SOLUTION STEPS (4-6 steps minimum):
+   - Each step must show actual mathematical reasoning with specific calculations
+   - Include intermediate results, not just "solve this"
+   - Show WHY each step follows from the previous one
+   - Use proper LaTeX for all mathematical expressions
+   - Example: "Step 1: Identify domain restriction ::: For $f(x) = \\\\frac{x}{1-|x|}$, the denominator cannot be zero. Set $1-|x|=0 \\\\Rightarrow |x|=1 \\\\Rightarrow x = \\\\pm 1$. These are the excluded values."
+
+B) PITFALLS (3-5 specific mistakes):
+   - State the EXACT mistake students make
+   - Explain WHY they make it (misconception/rushed thinking)
+   - Show HOW to avoid it with a concrete technique
+   - Example: "PITFALL: Confusing 'domain is $\\\\mathbb{R} - [-1,1]$' with '$\\\\mathbb{R} - \\\\{-1,1\\\\}$'. WHY: Students forget that $|x|=1$ gives discrete points, not an interval. The interval $[-1,1]$ includes all values from -1 to 1, which is incorrect. HOW TO AVOID: Always solve the restriction equation completely to find exact excluded points, then use set notation with curly braces for discrete values."
+
+C) KEY FORMULAS (3-5 formulas):
+   - Include all formulas needed to solve the question
+   - Add context: when to use each formula
+   - Example: "$\\\\text{Domain of } \\\\frac{f(x)}{g(x)}: \\\\text{Dom}(f) \\\\cap \\\\{x : g(x) \\\\neq 0\\\\}$ - Always check both numerator domain AND denominator ≠ 0"
+
+D) EXAM TIP:
+   - Give a SPECIFIC time-saving strategy for this question type
+   - Mention common exam traps
+   - Example: "In ${examContext} exams, domain questions often test absolute value cases. ALWAYS split $|x|$ into $x \\\\geq 0$ and $x < 0$ cases separately, then combine. This avoids missing edge cases that cost marks."
+
+E) MASTERY MATERIAL (DEEP INSIGHTS):
+
+   - aiReasoning (2-3 sentences):
+     Explain the EXACT conceptual skill being tested. NOT generic placeholders.
+     Example: "This question combines three concepts: (1) domain restrictions from denominators, (2) absolute value properties creating piecewise conditions, and (3) set theory notation. It specifically tests whether students can identify that $|x|=1$ yields two discrete points, not a continuous interval—a common ${examContext} trap."
+
+   - whyItMatters (2-3 sentences):
+     Explain how this concept connects to other topics and real applications.
+     Example: "Domain mastery is foundational for limits, continuity, and integration in calculus. Understanding absolute value restrictions appears in optimization problems, and the set notation distinction ($\\\\{-1,1\\\\}$ vs $[-1,1]$) is critical for advanced topics like measure theory and database query ranges in computer science."
+
+   - historicalPattern (specific data):
+     Give actual exam frequency and patterns, not vague percentages.
+     Example: "Domain problems appear in 85-90% of ${examContext} ${subject} papers (2018-2024). Absolute value in denominators specifically appeared in 2024, 2022, 2020, and 2019 papers. The trend shows increasing complexity: recent exams combine domain with composition of functions."
+
+   - predictiveInsight (trend analysis):
+     Based on actual exam evolution, predict what's coming.
+     Example: "Given the 2023-2024 shift toward multi-layered function problems, expect ${examContext} 2025 to combine domain restrictions with inverse functions or parametric forms. Probability: 75-80% based on syllabus rotation patterns and examiner emphasis on composite reasoning."
+
+   - keyConcepts (3-5 foundational concepts):
+     Each concept must include: definition, key theorem/formula, worked mini-example, and connection to question.
+     Example format:
+     {
+       "name": "Absolute Value Properties",
+       "explanation": "$|x| = a$ means $x = \\\\pm a$ (for $a > 0$). This creates TWO solutions, not an interval. Geometrically: distance from origin equals $a$ at exactly two points on the number line. In this question: $|x|=1$ gives $x \\\\in \\\\{-1, 1\\\\}$ (2 discrete points), NOT $x \\\\in [-1,1]$ (interval with infinitely many points). Connection: This distinction is why the domain excludes exactly 2 values, making the answer $\\\\mathbb{R} - \\\\{-1,1\\\\}$."
+     }
 
 Return ONLY a valid JSON array:
 [
-  { 
-    "id": "q1", 
-    "text": "The rigorous question with $Proper \\\\LaTeX$...", 
-    "options": ["...", "...", "...", "..."], 
-    "correctOptionIndex": 0, 
-    "solutionSteps": ["Step 1", "Step 2"],
-    "examTip": "Strategical insight",
-    "keyFormulas": ["$formula$"],
-    "pitfalls": ["The conceptual trap set here"],
-    "topic": "${topicNames}", 
-    "difficulty": "Easy|Moderate|Hard" 
+  {
+    "id": "q1",
+    "text": "The rigorous question with $Proper \\\\LaTeX$...",
+    "options": ["...", "...", "...", "..."],
+    "correctOptionIndex": 0,
+    "solutionSteps": [
+      "Step 1: Title ::: Detailed mathematical reasoning with intermediate calculations and LaTeX",
+      "Step 2: Title ::: Show exactly what to do, with actual numbers/expressions",
+      "Step 3: Title ::: Continue with complete working",
+      "Step 4: Title ::: Final step with answer derivation"
+    ],
+    "examTip": "Specific time-saving technique for this question type in ${examContext} exams, mentioning common traps",
+    "keyFormulas": [
+      "$formula_1$ - context on when to use",
+      "$formula_2$ - context on when to use",
+      "$formula_3$ - context on when to use"
+    ],
+    "pitfalls": [
+      "EXACT mistake ::: WHY students make it ::: HOW to avoid with specific technique",
+      "EXACT mistake ::: WHY students make it ::: HOW to avoid with specific technique",
+      "EXACT mistake ::: WHY students make it ::: HOW to avoid with specific technique"
+    ],
+    "masteryMaterial": {
+      "aiReasoning": "2-3 sentences explaining the EXACT conceptual skills being tested, with specific reference to what makes this question challenging for ${examContext} students",
+      "whyItMatters": "2-3 sentences on how this concept connects to other ${subject} topics, higher mathematics, and real-world applications. Be specific with topic names.",
+      "historicalPattern": "Specific exam frequency data (e.g., '85% of 2018-2024 papers'), mention actual years where this appeared, describe how difficulty evolved",
+      "predictiveInsight": "Based on 2023-2024 trends, predict what variation will appear in 2025-2026 ${examContext} with probability estimate and reasoning",
+      "keyConcepts": [
+        {
+          "name": "Concept Name (e.g., Absolute Value Properties)",
+          "explanation": "Complete explanation: (1) Definition with LaTeX, (2) Key theorem/formula, (3) Worked mini-example with numbers, (4) Direct connection to how it's used in THIS question. Minimum 3-4 sentences with actual mathematical content."
+        },
+        {
+          "name": "Second Core Concept",
+          "explanation": "Complete explanation with definition, theorem, example, and question connection"
+        },
+        {
+          "name": "Third Core Concept",
+          "explanation": "Complete explanation with definition, theorem, example, and question connection"
+        }
+      ]
+    },
+    "topic": "${topicNames}",
+    "difficulty": "Easy|Moderate|Hard"
   }
 ]`;
 
@@ -415,6 +500,7 @@ Return ONLY a valid JSON array:
             examTip: q.examTip || '',
             keyFormulas: q.keyFormulas || [],
             pitfalls: q.pitfalls || [],
+            masteryMaterial: q.masteryMaterial || null,
             topic: q.topic || topicNames,
             difficulty: q.difficulty || 'Moderate',
             marks: 1,
@@ -1623,25 +1709,110 @@ ${rigorDirective}
 QUALITY MANDATE:
 1. ZERO "Definition" questions. Every question must be a Scenario or Application problem.
 2. Focus on "The Prediction Gap": Create questions that pre-empt how real exams evolve each year.
-3. MANDATORY SOLUTIONS: Every single question MUST include detailed "solutionSteps", an "examTip", and "pitfalls". NEVER leave these empty.
-4. STRUCTURE: 4 options, exactly 1 correct.
-5. Topic(s): "${topicNamesForPrompt}"
-6. Difficulty: ~${difficultyMix.easy}% Easy, ~${difficultyMix.moderate}% Moderate, ~${difficultyMix.hard}% Hard.
-7. Use PROPER LaTeX for all expressions.
+3. MANDATORY SOLUTIONS: Every single question MUST include detailed "solutionSteps", "examTip", "keyFormulas", and "pitfalls". NEVER leave these empty.
+4. MANDATORY INSIGHTS: Every question MUST include "masteryMaterial" object with "aiReasoning", "whyItMatters", "historicalPattern", "predictiveInsight", and "keyConcepts" array.
+5. STRUCTURE: 4 options, exactly 1 correct.
+6. Topic(s): "${topicNamesForPrompt}"
+7. Difficulty: ~${difficultyMix.easy}% Easy, ~${difficultyMix.moderate}% Moderate, ~${difficultyMix.hard}% Hard.
+8. Use PROPER LaTeX for all expressions.
+
+🚨 CRITICAL QUALITY STANDARDS - NO GENERIC CONTENT ALLOWED:
+
+A) SOLUTION STEPS (4-6 steps minimum):
+   - Each step must show actual mathematical reasoning with specific calculations
+   - Include intermediate results, not just "solve this"
+   - Show WHY each step follows from the previous one
+   - Use proper LaTeX for all mathematical expressions
+   - Example: "Step 1: Identify domain restriction ::: For $f(x) = \\\\frac{x}{1-|x|}$, the denominator cannot be zero. Set $1-|x|=0 \\\\Rightarrow |x|=1 \\\\Rightarrow x = \\\\pm 1$. These are the excluded values."
+
+B) PITFALLS (3-5 specific mistakes):
+   - State the EXACT mistake students make
+   - Explain WHY they make it (misconception/rushed thinking)
+   - Show HOW to avoid it with a concrete technique
+   - Example: "PITFALL: Confusing 'domain is $\\\\mathbb{R} - [-1,1]$' with '$\\\\mathbb{R} - \\\\{-1,1\\\\}$'. WHY: Students forget that $|x|=1$ gives discrete points, not an interval. The interval $[-1,1]$ includes all values from -1 to 1, which is incorrect. HOW TO AVOID: Always solve the restriction equation completely to find exact excluded points, then use set notation with curly braces for discrete values."
+
+C) KEY FORMULAS (3-5 formulas):
+   - Include all formulas needed to solve the question
+   - Add context: when to use each formula
+   - Example: "$\\\\text{Domain of } \\\\frac{f(x)}{g(x)}: \\\\text{Dom}(f) \\\\cap \\\\{x : g(x) \\\\neq 0\\\\}$ - Always check both numerator domain AND denominator ≠ 0"
+
+D) EXAM TIP:
+   - Give a SPECIFIC time-saving strategy for this question type
+   - Mention common exam traps
+   - Example: "In ${examContext} exams, domain questions often test absolute value cases. ALWAYS split $|x|$ into $x \\\\geq 0$ and $x < 0$ cases separately, then combine. This avoids missing edge cases that cost marks."
+
+E) MASTERY MATERIAL (DEEP INSIGHTS):
+
+   - aiReasoning (2-3 sentences):
+     Explain the EXACT conceptual skill being tested. NOT generic placeholders.
+     Example: "This question combines three concepts: (1) domain restrictions from denominators, (2) absolute value properties creating piecewise conditions, and (3) set theory notation. It specifically tests whether students can identify that $|x|=1$ yields two discrete points, not a continuous interval—a common ${examContext} trap."
+
+   - whyItMatters (2-3 sentences):
+     Explain how this concept connects to other topics and real applications.
+     Example: "Domain mastery is foundational for limits, continuity, and integration in calculus. Understanding absolute value restrictions appears in optimization problems, and the set notation distinction ($\\\\{-1,1\\\\}$ vs $[-1,1]$) is critical for advanced topics like measure theory and database query ranges in computer science."
+
+   - historicalPattern (specific data):
+     Give actual exam frequency and patterns, not vague percentages.
+     Example: "Domain problems appear in 85-90% of ${examContext} ${subject} papers (2018-2024). Absolute value in denominators specifically appeared in 2024, 2022, 2020, and 2019 papers. The trend shows increasing complexity: recent exams combine domain with composition of functions."
+
+   - predictiveInsight (trend analysis):
+     Based on actual exam evolution, predict what's coming.
+     Example: "Given the 2023-2024 shift toward multi-layered function problems, expect ${examContext} 2025 to combine domain restrictions with inverse functions or parametric forms. Probability: 75-80% based on syllabus rotation patterns and examiner emphasis on composite reasoning."
+
+   - keyConcepts (3-5 foundational concepts):
+     Each concept must include: definition, key theorem/formula, worked mini-example, and connection to question.
+     Example format:
+     {
+       "name": "Absolute Value Properties",
+       "explanation": "$|x| = a$ means $x = \\\\pm a$ (for $a > 0$). This creates TWO solutions, not an interval. Geometrically: distance from origin equals $a$ at exactly two points on the number line. In this question: $|x|=1$ gives $x \\\\in \\\\{-1, 1\\\\}$ (2 discrete points), NOT $x \\\\in [-1,1]$ (interval with infinitely many points). Connection: This distinction is why the domain excludes exactly 2 values, making the answer $\\\\mathbb{R} - \\\\{-1,1\\\\}$."
+     }
 
 Return ONLY a valid JSON array:
 [
-  { 
-    "id": "q1", 
-    "text": "The rigorous question with $Proper \\\\LaTeX$...", 
-    "options": ["...", "...", "...", "..."], 
-    "correctOptionIndex": 0, 
-    "solutionSteps": ["Step 1", "Step 2"],
-    "examTip": "Strategical insight",
-    "keyFormulas": ["$formula$"],
-    "pitfalls": ["The conceptual trap"],
-    "topic": "${topicNamesForPrompt}", 
-    "difficulty": "Moderate" 
+  {
+    "id": "q1",
+    "text": "The rigorous question with $Proper \\\\LaTeX$...",
+    "options": ["...", "...", "...", "..."],
+    "correctOptionIndex": 0,
+    "solutionSteps": [
+      "Step 1: Title ::: Detailed mathematical reasoning with intermediate calculations and LaTeX",
+      "Step 2: Title ::: Show exactly what to do, with actual numbers/expressions",
+      "Step 3: Title ::: Continue with complete working",
+      "Step 4: Title ::: Final step with answer derivation"
+    ],
+    "examTip": "Specific time-saving technique for this question type in ${examContext} exams, mentioning common traps",
+    "keyFormulas": [
+      "$formula_1$ - context on when to use",
+      "$formula_2$ - context on when to use",
+      "$formula_3$ - context on when to use"
+    ],
+    "pitfalls": [
+      "EXACT mistake ::: WHY students make it ::: HOW to avoid with specific technique",
+      "EXACT mistake ::: WHY students make it ::: HOW to avoid with specific technique",
+      "EXACT mistake ::: WHY students make it ::: HOW to avoid with specific technique"
+    ],
+    "masteryMaterial": {
+      "aiReasoning": "2-3 sentences explaining the EXACT conceptual skills being tested, with specific reference to what makes this question challenging for ${examContext} students",
+      "whyItMatters": "2-3 sentences on how this concept connects to other ${subject} topics, higher mathematics, and real-world applications. Be specific with topic names.",
+      "historicalPattern": "Specific exam frequency data (e.g., '85% of 2018-2024 papers'), mention actual years where this appeared, describe how difficulty evolved",
+      "predictiveInsight": "Based on 2023-2024 trends, predict what variation will appear in 2025-2026 ${examContext} with probability estimate and reasoning",
+      "keyConcepts": [
+        {
+          "name": "Concept Name (e.g., Absolute Value Properties)",
+          "explanation": "Complete explanation: (1) Definition with LaTeX, (2) Key theorem/formula, (3) Worked mini-example with numbers, (4) Direct connection to how it's used in THIS question. Minimum 3-4 sentences with actual mathematical content."
+        },
+        {
+          "name": "Second Core Concept",
+          "explanation": "Complete explanation with definition, theorem, example, and question connection"
+        },
+        {
+          "name": "Third Core Concept",
+          "explanation": "Complete explanation with definition, theorem, example, and question connection"
+        }
+      ]
+    },
+    "topic": "${topicNamesForPrompt}",
+    "difficulty": "Easy|Moderate|Hard"
   }
 ]`;
 
@@ -1662,6 +1833,7 @@ Return ONLY a valid JSON array:
               examTip: q.examTip || q.exam_tip || '',
               keyFormulas: q.keyFormulas || q.key_formulas || [],
               pitfalls: q.pitfalls || q.pit_falls || [],
+              masteryMaterial: q.masteryMaterial || q.mastery_material || null,
               topic: q.topic || topicNamesForPrompt,
               difficulty: q.difficulty || 'Moderate',
               marks: 1,

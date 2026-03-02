@@ -62,6 +62,7 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
     const [showSolution, setShowSolution] = useState(false);
     const [showInsights, setShowInsights] = useState(false);
     const [showQuestNavigator, setShowQuestNavigator] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
     const { user } = useAuth();
 
     const {
@@ -121,6 +122,134 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
     const prevQuestion = () => {
         if (currentIndex > 0) {
             setCurrentIndex(prev => prev - 1);
+        }
+    };
+
+    const generateAISolution = async () => {
+        if (!currentQuestion || isGenerating) return;
+
+        setIsGenerating(true);
+        try {
+            const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+            if (!GEMINI_KEY) {
+                alert('AI generation not configured. Please contact admin.');
+                return;
+            }
+
+            const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+            const model = genAI.getGenerativeModel({
+                model: 'gemini-3-flash-preview',
+                generationConfig: {
+                    responseMimeType: 'application/json',
+                    temperature: 0.7,
+                    maxOutputTokens: 20000
+                }
+            });
+
+            const prompt = `You are an expert educator. Generate a COMPLETE solution and deep insights for this ${subject} question from ${examContext} exam.
+
+Question: ${currentQuestion.text}
+
+Options:
+${currentQuestion.options?.map((opt, i) => `${String.fromCharCode(65 + i)}. ${opt}`).join('\n')}
+
+Correct Answer: ${currentQuestion.options?.[currentQuestion.correctOptionIndex]}
+
+🚨 CRITICAL: Generate COMPLETE, IN-DEPTH educational content. NO generic placeholders!
+
+Return ONLY valid JSON with this EXACT structure:
+{
+  "solutionSteps": [
+    "Step 1: Title ::: Detailed mathematical reasoning with calculations and LaTeX",
+    "Step 2: Title ::: Show exact working with formulas",
+    "Step 3: Title ::: Continue with complete explanation",
+    "Step 4: Title ::: Final answer derivation"
+  ],
+  "examTip": "Specific time-saving strategy for this question type in ${examContext} exams, mentioning common traps",
+  "keyFormulas": [
+    "$formula_1$ - context on when to use this formula",
+    "$formula_2$ - context on when to use this formula",
+    "$formula_3$ - context on when to use this formula"
+  ],
+  "pitfalls": [
+    "EXACT mistake students make ::: WHY they make it ::: HOW to avoid with specific technique",
+    "EXACT mistake students make ::: WHY they make it ::: HOW to avoid with specific technique",
+    "EXACT mistake students make ::: WHY they make it ::: HOW to avoid with specific technique"
+  ],
+  "masteryMaterial": {
+    "aiReasoning": "2-3 sentences explaining the EXACT conceptual skills being tested in this question",
+    "whyItMatters": "2-3 sentences on how this concept connects to other ${subject} topics and real applications",
+    "historicalPattern": "Specific exam frequency data with actual years where this pattern appeared",
+    "predictiveInsight": "Based on recent trends, predict what variation will appear in upcoming ${examContext} exams with probability",
+    "keyConcepts": [
+      {
+        "name": "Core Concept Name",
+        "explanation": "Complete explanation: (1) Definition with LaTeX, (2) Key theorem, (3) Worked example, (4) Connection to THIS question. Minimum 3-4 sentences."
+      },
+      {
+        "name": "Second Concept",
+        "explanation": "Complete explanation with definition, theorem, example, and question connection"
+      },
+      {
+        "name": "Third Concept",
+        "explanation": "Complete explanation with definition, theorem, example, and question connection"
+      }
+    ]
+  }
+}`;
+
+            const result = await model.generateContent(prompt);
+            const raw = result.response.text().trim();
+            const jsonStr = raw.includes('```json')
+                ? raw.match(/```json\n([\s\S]*?)\n```/)?.[1] || raw
+                : raw;
+            const generated = JSON.parse(jsonStr);
+
+            // Update question in database
+            const { error: updateError } = await supabase
+                .from('questions')
+                .update({
+                    solution_steps: generated.solutionSteps || [],
+                    exam_tip: generated.examTip || null,
+                    key_formulas: generated.keyFormulas || [],
+                    pitfalls: generated.pitfalls || [],
+                    mastery_material: generated.masteryMaterial || null
+                })
+                .eq('id', currentQuestion.id);
+
+            if (updateError) {
+                console.error('Failed to save generated solution:', updateError);
+                alert('Generated solution but failed to save. Please try again.');
+                return;
+            }
+
+            // Update local state
+            const updatedQuestion = {
+                ...currentQuestion,
+                solutionSteps: generated.solutionSteps || [],
+                examTip: generated.examTip || null,
+                keyFormulas: generated.keyFormulas || [],
+                pitfalls: generated.pitfalls || [],
+                commonMistakes: (generated.pitfalls || []).map((p: string) => {
+                    const [mistake, ...rest] = p.split(':::');
+                    return {
+                        mistake: mistake?.trim() || p,
+                        why: rest.join(':::').split('HOW TO AVOID')[0]?.replace('WHY:', '')?.trim() || '',
+                        howToAvoid: rest.join(':::').split('HOW TO AVOID')[1]?.trim() || ''
+                    };
+                }),
+                masteryMaterial: generated.masteryMaterial || null
+            };
+
+            setQuestions(prev => prev.map(q => q.id === currentQuestion.id ? updatedQuestion : q));
+            setSharedQuestions(prev => prev.map(q => q.id === currentQuestion.id ? updatedQuestion : q));
+
+            console.log('✅ AI solution generated and saved successfully');
+        } catch (error) {
+            console.error('Error generating AI solution:', error);
+            alert('Failed to generate solution. Please try again.');
+        } finally {
+            setIsGenerating(false);
         }
     };
 
@@ -297,20 +426,74 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
                                     </div>
                                     <h3 className="text-lg font-black text-slate-900 font-outfit uppercase tracking-tighter">Solution Blueprint</h3>
                                 </div>
-                                <div className="space-y-6 relative ml-4 border-l-2 border-slate-50 pl-6 py-2">
-                                    {currentQuestion.solutionSteps?.map((step, idx) => (
-                                        <div key={idx} className="relative">
-                                            <div className="absolute top-0 left-[-31px] w-4 h-4 rounded-full bg-white border-4 border-indigo-500 z-10" />
-                                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 block">Phase {idx + 1}</span>
-                                                <div className="text-xs font-bold text-slate-800 leading-relaxed">
-                                                    <RenderWithMath text={step} showOptions={false} compact={true} />
-                                                </div>
+                                <div className="space-y-6">
+                                    {/* Key Formulas (if available) */}
+                                    {currentQuestion.keyFormulas && currentQuestion.keyFormulas.length > 0 && (
+                                        <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
+                                            <h4 className="text-[8px] font-black text-amber-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-1">
+                                                <span className="text-amber-500">⚡</span> Key Formulas
+                                            </h4>
+                                            <div className="space-y-2">
+                                                {currentQuestion.keyFormulas.map((formula, idx) => (
+                                                    <div key={idx} className="text-xs font-bold text-slate-800 bg-white rounded-lg p-2 border border-amber-100">
+                                                        <RenderWithMath text={formula} showOptions={false} compact={true} />
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-                                    ))}
-                                    {!currentQuestion.solutionSteps?.length && (
-                                        <div className="text-slate-400 italic text-sm">Step-by-step reasoning is being synthesized for this node.</div>
+                                    )}
+
+                                    {/* Solution Steps */}
+                                    <div className="relative ml-4 border-l-2 border-slate-50 pl-6 py-2 space-y-6">
+                                        {currentQuestion.solutionSteps?.map((step, idx) => (
+                                            <div key={idx} className="relative">
+                                                <div className="absolute top-0 left-[-31px] w-4 h-4 rounded-full bg-white border-4 border-indigo-500 z-10" />
+                                                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 block">Step {idx + 1}</span>
+                                                    <div className="text-xs font-bold text-slate-800 leading-relaxed">
+                                                        <RenderWithMath text={step} showOptions={false} compact={true} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {!currentQuestion.solutionSteps?.length && (
+                                            <div className="text-slate-400 italic text-sm">Step-by-step reasoning is being synthesized for this node.</div>
+                                        )}
+                                    </div>
+
+                                    {/* Marking Scheme (if available) */}
+                                    {currentQuestion.markingScheme && currentQuestion.markingScheme.length > 0 && (
+                                        <div className="bg-green-50 rounded-2xl p-4 border border-green-200">
+                                            <h4 className="text-[8px] font-black text-green-600 uppercase tracking-[0.2em] mb-2">
+                                                📝 Marking Scheme
+                                            </h4>
+                                            <div className="space-y-2">
+                                                {currentQuestion.markingScheme.map((item, idx) => (
+                                                    <div key={idx} className="flex items-start gap-2 text-xs">
+                                                        <span className="font-black text-green-600 min-w-[2rem]">{item.mark}</span>
+                                                        <span className="text-slate-700">{item.step}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Common Mistakes (if available) */}
+                                    {currentQuestion.commonMistakes && currentQuestion.commonMistakes.length > 0 && (
+                                        <div className="bg-rose-50 rounded-2xl p-4 border border-rose-200">
+                                            <h4 className="text-[8px] font-black text-rose-600 uppercase tracking-[0.2em] mb-3">
+                                                ⚠️ Common Mistakes to Avoid
+                                            </h4>
+                                            <div className="space-y-3">
+                                                {currentQuestion.commonMistakes.map((mistake, idx) => (
+                                                    <div key={idx} className="bg-white rounded-lg p-3 border border-rose-100">
+                                                        <div className="text-[10px] font-black text-rose-600 mb-1">{mistake.mistake}</div>
+                                                        <div className="text-[9px] text-slate-600 mb-1"><strong>Why:</strong> {mistake.why}</div>
+                                                        <div className="text-[9px] text-green-600"><strong>How to Avoid:</strong> {mistake.howToAvoid}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
                             </motion.div>

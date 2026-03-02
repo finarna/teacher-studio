@@ -1,0 +1,14 @@
+components/TopicDetailPage.tsx(1076,24): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', or 'nodenext'.
+components/TopicDetailPage.tsx(1076,36): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+components/TopicDetailPage.tsx(2146,46): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', or 'nodenext'.
+components/TopicDetailPage.tsx(2146,58): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+components/TopicDetailPage.tsx(3088,44): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', or 'nodenext'.
+components/TopicDetailPage.tsx(3088,56): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+components/TopicDetailPage.tsx(3169,94): error TS2322: Type '{ text: string; showOptions: false; dark: boolean; }' is not assignable to type 'IntrinsicAttributes & { text: string; className?: string; showOptions?: boolean; serif?: boolean; }'.
+  Property 'dark' does not exist on type 'IntrinsicAttributes & { text: string; className?: string; showOptions?: boolean; serif?: boolean; }'.
+lib/api.ts(7,29): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', or 'nodenext'.
+lib/api.ts(7,41): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+lib/supabase.ts(17,21): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', or 'nodenext'.
+lib/supabase.ts(17,33): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+lib/supabase.ts(18,25): error TS1343: The 'import.meta' meta-property is only allowed when the '--module' option is 'es2020', 'es2022', 'esnext', 'system', 'node16', 'node18', or 'nodenext'.
+lib/supabase.ts(18,37): error TS2339: Property 'env' does not exist on type 'ImportMeta'.

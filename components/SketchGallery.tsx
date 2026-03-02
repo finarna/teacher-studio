@@ -1205,12 +1205,12 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
                   setActiveTab('Exam Specific');
                 }
               }}
-              className="bg-slate-50 border border-slate-200 text-slate-700 rounded px-2 py-1 text-[9px] font-semibold outline-none cursor-pointer hover:border-slate-300"
+              className="bg-slate-50 border border-slate-200 text-slate-700 rounded px-2 py-1 text-[9px] font-semibold outline-none cursor-pointer hover:border-slate-300 w-48 sm:w-64 truncate"
               disabled={!filteredScans || filteredScans.length === 0}
             >
               <option value="">{!filteredScans || filteredScans.length === 0 ? `No ${subjectConfig.name} Papers` : `${subjectConfig.name} Paper...`}</option>
               {filteredScans?.map(s => (
-                <option key={s.id} value={s.id}>{s.name.substring(0, 25)}</option>
+                <option key={s.id} value={s.id} className="truncate">{s.name}</option>
               ))}
             </select>
 

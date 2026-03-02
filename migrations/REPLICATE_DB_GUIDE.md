@@ -3,7 +3,8 @@
 This guide will help you move your database to a fresh, healthy Supabase project with optimized schema and "Clean Data" (Official 2026 Syllabi).
 
 **Latest Updates:**
-- ✅ **v5.4 Schema** (March 2025): Fixed KCET weightage for Math topics
+- ✅ **v6.0 Schema** (March 2025): Added AI Trends (historical patterns, distributions) and fixed Practice RLS
+- ✅ **v5.5 Schema** (March 2025): Added RLS for Visual Notes (topic_sketches)
 - ✅ **Auto-Mapping**: Questions automatically link to official syllabus topics
 - ✅ **Complete RLS**: All tables secured with Row Level Security policies
 - ✅ **54 Official Topics**: Physics (14), Chemistry (14), Biology (13), Math (13)
@@ -23,18 +24,21 @@ This guide will help you move your database to a fresh, healthy Supabase project
 3. Once the project is ready, open the **SQL Editor**.
 
 ### Step 2: Apply the Consolidated Schema
-1. Open the file `CLEAN_START_SCHEMA_v5.sql` in this repository.
+1. Open the file `CLEAN_START_SCHEMA_v6.0.sql` in this repository.
 2. Copy the **entire contents**.
 3. Paste it into the SQL Editor and click **Run**.
 4. ✅ This creates all 35+ tables (including Razorpay, Learning Journey, and AI Content), RLS policies for every table, and the Unified Auth Trigger.
-   * *Note: This version (v5.4) consolidates all migrations and includes KCET weightage fixes.*
+   * *Note: This version (v5.6) consolidates all migrations and includes all previous fixes.*
 
-**Schema Version History:**
-- **v5.4** (Latest): Fixed KCET weightage for Math topics, includes all previous fixes
-- v5.3: Added RLS policies for topic_question_mapping
-- v5.2: Added missing questions table columns (domain, subject, exam_context, pedagogy)
-- v5.1: Added flashcards table
-- v5.0: Initial consolidated schema
+- **v6.0** (Latest): Added AI Trends tables & fixed practice_sessions RLS (Fixes 403 Forbidden in Solve tab)
+- **v5.6**: Full Admin UPDATE/DELETE permissions (Fixes Publish), includes all previous fixes
+- **v5.5**: Added RLS policies for topic_sketches (needed for AdminScanApproval counts)
+- **v5.4**: Fixed KCET weightage for Math topics, includes all previous fixes
+- **v5.3**: Added RLS policies for topic_question_mapping
+- **v5.2**: Added missing questions table columns (domain, subject, exam_context, pedagogy)
+- **v5.1**: Added flashcards table
+- **v5.0**: Initial consolidated schema
+- **v4.0**: Previous stable schema
 
 ### 👑 Step 2.1: Grant Admin Access (After Signup)
 Once you've signed up, run this in the SQL Editor to gain full access (or edit the email at the bottom of the v5.4 script before running):
@@ -68,12 +72,16 @@ Run the following commands in your terminal to populate official topics and setu
 # 1. Create Storage Buckets (Images/Sketches)
 npx tsx scripts/setup-supabase-storage.ts
 
-# 2. Seed Official 2026 Topics (NEET, JEE, KCET, CBSE)
+# 3. Seed Official 2026 Topics (NEET, JEE, KCET, CBSE)
 npx tsx scripts/seedRealTopics.ts
 # ✅ This creates 50+ topics with proper KCET weightage for all subjects
 # Topics include: Physics (14), Chemistry (14), Biology (13), Math (13)
 
-# 3. Create a New User Account
+# 4. Seed Historical Trends Data (Real 2021 KCET Math)
+npx tsx seedTrendsData.ts
+# ✅ This syncs actual 2021 Math scans to the AI Trends tables (Patterns & Distributions)
+
+# 5. Create a New User Account
 # Simply go to the app (http://localhost:9000/) and Sign Up.
 # The database will automatically create your profile.
 ```
@@ -145,7 +153,7 @@ Located in project root:
 - `FIX_KCET_WEIGHTAGE.sql` - Adds KCET weightage to Math topics
 - `FIX_MISSING_COLUMNS.sql` - Adds missing questions table columns and RLS policies
 
-**Note:** Running `CLEAN_START_SCHEMA_v5.sql` includes all these fixes automatically.
+**Note:** Running `CLEAN_START_SCHEMA_v6.0.sql` includes all these fixes automatically.
 
 ---
 

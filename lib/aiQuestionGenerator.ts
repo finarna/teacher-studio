@@ -213,13 +213,35 @@ export async function generateTestQuestions(
   let questionsInBatch = 0;
 
   for (const alloc of activeAllocations) {
-    if (questionsInBatch + alloc.questionCount > MAX_QUESTIONS_PER_BATCH && currentBatch.length > 0) {
-      batches.push(currentBatch);
-      currentBatch = [alloc];
-      questionsInBatch = alloc.questionCount;
-    } else {
-      currentBatch.push(alloc);
-      questionsInBatch += alloc.questionCount;
+    let remaining = alloc.questionCount;
+
+    // If a single topic or group of topics is too large, split it into sub-batches
+    while (remaining > 0) {
+      const availableInBatch = MAX_QUESTIONS_PER_BATCH - questionsInBatch;
+
+      if (availableInBatch <= 0) {
+        // Current batch is full, start a new one
+        batches.push(currentBatch);
+        currentBatch = [];
+        questionsInBatch = 0;
+        continue;
+      }
+
+      const countToTake = Math.min(remaining, availableInBatch);
+
+      currentBatch.push({
+        ...alloc,
+        questionCount: countToTake
+      });
+
+      questionsInBatch += countToTake;
+      remaining -= countToTake;
+
+      if (questionsInBatch >= MAX_QUESTIONS_PER_BATCH) {
+        batches.push(currentBatch);
+        currentBatch = [];
+        questionsInBatch = 0;
+      }
     }
   }
   if (currentBatch.length > 0) batches.push(currentBatch);
@@ -227,7 +249,7 @@ export async function generateTestQuestions(
   console.log(`⚡ Optimized into ${batches.length} generation batches (Batch size limit: ${MAX_QUESTIONS_PER_BATCH})`);
 
   const generationPromises = batches.map(async (batch, idx) => {
-    console.log(`🎯 Batch ${idx + 1}: Generating ${batch.reduce((sum, b) => sum + b.questionCount, 0)} questions across ${batch.length} topics...`);
+    console.log(`🎯 Batch ${idx + 1}: Generating ${batch.reduce((sum, b) => sum + b.questionCount, 0)} questions across ${batch.length} topic segments...`);
 
     return generateTopicQuestionsBatch({
       batchAllocations: batch,

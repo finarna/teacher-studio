@@ -58,6 +58,24 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({ question,
               </div>
             </div>
 
+            {/* Key Formulas Section (if available) */}
+            {question.keyFormulas && question.keyFormulas.length > 0 && (
+              <div className="mb-8 p-6 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl shadow-sm">
+                <h3 className="text-xs font-black text-amber-700 uppercase tracking-[0.25em] mb-4 flex items-center gap-2 font-outfit">
+                  <span className="text-lg">⚡</span> Key Formulas
+                </h3>
+                <div className="space-y-3">
+                  {question.keyFormulas.map((formula, idx) => (
+                    <div key={idx} className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
+                      <div className="text-lg font-bold text-slate-900">
+                        <RenderWithMath text={formula} showOptions={false} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Steps Track */}
             {(question.markingScheme && question.markingScheme.length > 0) || (question.solutionSteps && question.solutionSteps.length > 0) ? (
               <div className="space-y-8 relative">
@@ -121,6 +139,32 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({ question,
                     </motion.div>
                   );
                 })}
+
+                {/* Common Mistakes Section (if available) */}
+                {question.commonMistakes && question.commonMistakes.length > 0 && (
+                  <div className="mt-8 bg-gradient-to-br from-rose-50 to-red-50 border border-rose-200 rounded-3xl p-8 shadow-sm">
+                    <h3 className="text-xs font-black text-rose-700 uppercase tracking-[0.25em] mb-6 flex items-center gap-2 font-outfit">
+                      <span className="text-lg">⚠️</span> Common Mistakes to Avoid
+                    </h3>
+                    <div className="space-y-4">
+                      {question.commonMistakes.map((mistake, idx) => (
+                        <div key={idx} className="bg-white border border-rose-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="text-base font-black text-rose-700 mb-3">{mistake.mistake}</div>
+                          <div className="space-y-2">
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-black text-slate-500 uppercase mt-1">Why:</span>
+                              <p className="text-sm text-slate-700 flex-1">{mistake.why}</p>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <span className="text-xs font-black text-emerald-600 uppercase mt-1">How to Avoid:</span>
+                              <p className="text-sm text-emerald-700 flex-1 font-medium">{mistake.howToAvoid}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Diagrams Section */}
                 {question.extractedImages && question.extractedImages.length > 0 && (

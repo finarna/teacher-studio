@@ -742,7 +742,18 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                               return (
                                 <button
                                   key={s.id}
-                                  onClick={() => { setStrategyMode(s.id as StrategyMode); setOracleModeEnabled(false); }}
+                                  onClick={() => {
+                                    setStrategyMode(s.id as StrategyMode);
+                                    setOracleModeEnabled(false);
+                                    // AUTOMATIC SYNC: If entering Simulation mode, lock to official pattern immediately
+                                    if (s.id === 'predictive_mock') {
+                                      const config = EXAM_CONFIGS[examContext];
+                                      if (config) {
+                                        setQuestionCount(config.pattern.totalQuestions);
+                                        setDurationMinutes(examContext === 'KCET' ? 80 : examContext === 'JEE' ? 60 : examContext === 'NEET' ? 65 : config.pattern.duration);
+                                      }
+                                    }
+                                  }}
                                   className={`relative group p-5 rounded-3xl border-2 transition-all text-left flex flex-col gap-4 overflow-hidden ${isSelected ? 'bg-white border-slate-900 shadow-[0_20px_40px_rgba(0,0,0,0.08)] ring-4 ring-slate-900/5' : 'bg-white border-slate-100 hover:border-slate-300'}`}
                                 >
                                   {/* AI Badge */}

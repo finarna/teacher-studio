@@ -341,6 +341,19 @@ export const usePracticeSession = ({
             (isNotesDone ? 10 : 0)
           ));
 
+          console.log('📊 [usePracticeSession] Mastery Calculation:', {
+            topicId,
+            totalAttempted,
+            totalCorrect,
+            absoluteAccuracy,
+            coverageWeight,
+            poolSize,
+            saturationTarget,
+            quizzesTaken,
+            isNotesDone,
+            calculatedMastery
+          });
+
           let nextStage = currentStats?.study_stage || 'not_started';
           if (nextStage === 'not_started' || nextStage === 'studying_notes') nextStage = 'practicing';
           if (calculatedMastery >= 90 && quizzesTaken >= 2) nextStage = 'mastered';
@@ -379,7 +392,7 @@ export const usePracticeSession = ({
               isCorrect,
               timeSpent: state.timeSpentPerQuestion.get(questionId) || 0
             })
-          });
+          }).catch(err => console.error('❌ Activity recording failed:', err));
 
           onProgressUpdate?.(true);
         } catch (e) {

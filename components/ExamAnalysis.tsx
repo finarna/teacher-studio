@@ -1127,8 +1127,8 @@ Schema: {
                           <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
                             <div className="flex-1 space-y-4">
                               <h4 className="text-[11px] font-black text-accent-400 uppercase tracking-[0.3em]">Longitudinal Cognitive Drift</h4>
-                              <div className="h-40 w-full">
-                                <ResponsiveContainer width="100%" height="100%">
+                              <div className="h-40 w-full min-h-0">
+                                <ResponsiveContainer width="100%" height="100%" minHeight={150}>
                                   <AreaChart data={portfolioStats}>
                                     <defs>
                                       <linearGradient id="colorMathExec" x1="0" y1="0" x2="0" y2="1">
@@ -1165,8 +1165,8 @@ Schema: {
                                 <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-indigo-500" /> <span className="text-[9px] font-bold text-slate-500 uppercase">Bloom</span></div>
                               </div>
                             </div>
-                            <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30">
-                              <ResponsiveContainer width="100%" height="100%">
+                            <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30 min-h-0">
+                              <ResponsiveContainer width="100%" height="100%" minHeight={180}>
                                 <LineChart data={portfolioStats}>
                                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                   <XAxis dataKey="source" hide />
@@ -1181,9 +1181,9 @@ Schema: {
 
                           <div className="space-y-4">
                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Rigor Segmentation (Y-o-Y)</h4>
-                            <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30">
+                            <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30 min-h-0">
                               {portfolioStats && (portfolioStats as any[]).length > 0 && (
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minHeight={180}>
                                   <BarChart data={portfolioStats} layout="vertical" margin={{ left: 10, right: 30, top: 0, bottom: 0 }}>
                                     <XAxis type="number" hide domain={[0, 100]} />
                                     <YAxis dataKey="source" type="category" hide />

@@ -731,7 +731,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                       lastLoadedScanIdRef.current = null; // Reset to trigger reload
                       setSelectedAnalysisId(e.target.value);
                     }}
-                    className="bg-white border-2 border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-300 focus:border-slate-400 outline-none cursor-pointer min-w-[200px] hover:border-slate-300 transition-all"
+                    className="bg-white border-2 border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-slate-300 focus:border-slate-400 outline-none cursor-pointer w-64 sm:w-80 md:w-96 hover:border-slate-300 transition-all truncate"
                     style={{
                       borderColor: selectedAnalysisId ? theme.color + '60' : undefined,
                       color: selectedAnalysisId ? theme.colorDark : undefined
@@ -739,7 +739,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                   >
                     <option value="">Fresh Generation</option>
                     {filteredVault.map(s => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
+                      <option key={s.id} value={s.id} className="truncate">{s.name}</option>
                     ))}
                   </select>
                   {selectedAnalysis && (

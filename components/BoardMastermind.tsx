@@ -1102,7 +1102,8 @@ CRITICAL RULES:
         if (imageMapping && imageMapping.size > 0) {
           const questionNumbersWithImages = Array.from(imageMapping.keys());
           const sampleQuestionsWithImages = extractionData.questions.filter((q: any) => {
-            const numMatch = q.id?.match(/Q(\d+)/i);
+            const rawId = q.id?.toString() || "";
+            const numMatch = rawId.match(/(\d+)/);
             if (numMatch) {
               const num = parseInt(numMatch[1]);
               return questionNumbersWithImages.includes(num);
@@ -1110,12 +1111,14 @@ CRITICAL RULES:
             return false;
           });
 
-          console.log(`🔍 [POST-MERGE DEBUG] Questions ${questionNumbersWithImages.join(', ')} after merge:`, sampleQuestionsWithImages.map((q: any) => ({
-            id: q.id,
-            hasExtractedImages: !!q.extractedImages,
-            extractedImagesCount: q.extractedImages?.length || 0,
-            extractedImagesPreview: q.extractedImages?.[0]?.substring(0, 50)
-          })));
+          if (sampleQuestionsWithImages.length > 0) {
+            console.log(`🔍 [POST-MERGE DEBUG] Questions ${questionNumbersWithImages.join(', ')} after merge:`, sampleQuestionsWithImages.map((q: any) => ({
+              id: q.id,
+              hasExtractedImages: !!q.extractedImages,
+              extractedImagesCount: q.extractedImages?.length || 0,
+              extractedImagesPreview: q.extractedImages?.[0]?.substring(0, 50)
+            })));
+          }
         }
       }
 
