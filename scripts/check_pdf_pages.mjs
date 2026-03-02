@@ -24,8 +24,8 @@ async function checkPDFPages() {
 
   console.log(`📄 Total pages: ${pdf.numPages}\n`);
 
-  // Check pages 3 and 5
-  for (const pageNum of [3, 5]) {
+  // Check pages 1, 2, 3, 4
+  for (const pageNum of [1, 2, 3, 4]) {
     console.log(`\n${'='.repeat(60)}`);
     console.log(`📄 PAGE ${pageNum}`);
     console.log('='.repeat(60));

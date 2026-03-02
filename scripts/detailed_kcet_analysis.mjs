@@ -42,22 +42,49 @@ async function analyzeLatestScan() {
   console.log(`📝 Total Questions: ${questions.length}\n`);
 
   // Analyze question IDs/numbers
-  console.log('🔢 Question IDs (first 20):');
-  questions.slice(0, 20).forEach((q, idx) => {
+  console.log('🔢 Question IDs (first 60):');
+  questions.slice(0, 60).forEach((q, idx) => {
     const qNum = q.metadata?.questionNumber || q.metadata?.id || 'N/A';
+    const page = q.metadata?.sourcePage || 'N/A';
     const text = q.text?.substring(0, 50).replace(/\n/g, ' ');
-    console.log(`   [${idx}] ID: ${qNum} - ${text}...`);
+    console.log(`   [${idx}] Page: ${page} | ID: ${qNum} - ${text}...`);
   });
+
+  // Analyze duplicates
+  console.log('\n👯 Checking for actual text duplicates:');
+  const textMap = new Map();
+  questions.forEach((q) => {
+    const text = q.text?.trim();
+    if (!textMap.has(text)) {
+      textMap.set(text, []);
+    }
+    textMap.get(text).push(q.id);
+  });
+
+  let duplicatesFound = 0;
+  for (const [text, ids] of textMap.entries()) {
+    if (ids.length > 1) {
+      duplicatesFound++;
+      if (duplicatesFound <= 10) {
+        console.log(`   ⚠️  Found ${ids.length} copies of question: "${text.substring(0, 50)}..."`);
+        console.log(`       IDs: ${ids.join(', ')}`);
+      }
+    }
+  }
+  if (duplicatesFound > 10) {
+    console.log(`   ... and ${duplicatesFound - 10} more duplicate questions.`);
+  }
+  console.log(`\n📊 Unique questions by text: ${textMap.size}`);
 
   // Check analysis_data in scan
   if (scan.analysis_data && scan.analysis_data.questions) {
+    const totalAnalysis = scan.analysis_data.questions.length;
     console.log(`\n📊 Analysis Data:`);
-    console.log(`   Questions in analysis_data: ${scan.analysis_data.questions.length}`);
+    console.log(`   Questions in analysis_data: ${totalAnalysis}`);
 
-    console.log('\n📝 First 10 from analysis_data:');
-    scan.analysis_data.questions.slice(0, 10).forEach((q, idx) => {
-      const text = q.text?.substring(0, 50).replace(/\n/g, ' ');
-      console.log(`   Q${q.id || idx + 1}: ${text}...`);
+    console.log(`\n📝 Last 10 from analysis_data:`);
+    scan.analysis_data.questions.slice(-10).forEach((q, idx) => {
+      console.log(`   Q${totalAnalysis - 9 + idx}: ${q.text?.substring(0, 50).replace(/\n/g, ' ')}...`);
     });
   }
 

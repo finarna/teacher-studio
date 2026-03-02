@@ -411,16 +411,33 @@ Extract ALL questions visible on this page.
           await sleep(2000);
           continue;
         }
+        console.error(`❌ [BIOLOGY_PAGE_FAILED] Page ${i + 1} FAILED after all retries - returning empty!`);
         return []; // All retries exhausted
       }
     } // end attempt loop
+    console.error(`❌ [BIOLOGY_PAGE_FAILED] Page ${i + 1} exhausted all attempts - no questions extracted!`);
     return [];
   }, 2); // 2 concurrent workers (rate-limit safe)
 
 
   // Step 3: Flatten + deduplicate + sort + fidelity pass
   const allQuestions = allQuestionsArray.flat();
+
+  // Log which pages succeeded and which failed
+  const pagesWithQuestions = new Set<number>();
+  allQuestionsArray.forEach((pageQuestions, idx) => {
+    if (pageQuestions && pageQuestions.length > 0) {
+      pagesWithQuestions.add(idx + 1);
+    }
+  });
+  const failedPages = Array.from({ length: totalPages }, (_, i) => i + 1)
+    .filter(pageNum => !pagesWithQuestions.has(pageNum));
+
   console.log(`✅ [BIOLOGY] Raw extracted: ${allQuestions.length} questions across ${totalPages} pages`);
+  if (failedPages.length > 0) {
+    console.error(`⚠️  [BIOLOGY_WARNING] Failed to extract from pages: ${failedPages.join(', ')}`);
+  }
+  console.log(`📊 [BIOLOGY] Successful pages: ${Array.from(pagesWithQuestions).sort((a, b) => a - b).join(', ')}`);
 
   // Deduplicate by question ID — keep version with more options (most complete)
   const seenIds = new Map<string, any>();

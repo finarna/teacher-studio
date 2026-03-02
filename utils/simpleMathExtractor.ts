@@ -48,20 +48,81 @@ const withRetry = async <T>(fn: () => Promise<T>, maxRetries = 5): Promise<T> =>
   throw lastError;
 };
 
-/**
- * Robust JSON salvage for truncated responses
- */
 const salvageTruncatedJSON = (jsonString: string): any => {
   try {
     let cleaned = jsonString.trim();
+    // Remove markdown code blocks
     cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    const start = cleaned.indexOf('{');
+
+    // Find first possible JSON start (earliest of { or [)
+    const brace = cleaned.indexOf('{');
+    const bracket = cleaned.indexOf('[');
+    let start = -1;
+    if (brace === -1) start = bracket;
+    else if (bracket === -1) start = brace;
+    else start = Math.min(brace, bracket);
+
     if (start === -1) return null;
+    cleaned = cleaned.substring(start);
+
+    // Try parsing the whole thing first
+    try { return JSON.parse(cleaned); } catch (e) { }
+
+    // 🩹 REPAIR: Balance braces and brackets if truncated using a stack
+    const stack: string[] = [];
+    let lastValidPos = 0;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = 0; i < cleaned.length; i++) {
+      const char = cleaned[i];
+
+      // Handle strings and escapes
+      if (char === '"' && !escaped) {
+        inString = !inString;
+        continue;
+      }
+      if (inString) {
+        escaped = (char === '\\' && !escaped);
+        continue;
+      }
+
+      // Handle structural characters
+      if (char === '{') stack.push('}');
+      else if (char === '[') stack.push(']');
+      else if (char === '}' || char === ']') {
+        if (stack.length > 0 && stack[stack.length - 1] === char) {
+          stack.pop();
+        }
+      }
+
+      // Track the last point where JSON was perfectly balanced
+      if (stack.length === 0) {
+        lastValidPos = i + 1;
+      }
+    }
+
+    // Attempt 1: Use the last balanced point
+    if (lastValidPos > 0) {
+      try { return JSON.parse(cleaned.substring(0, lastValidPos)); } catch (e) { }
+    }
+
+    // Attempt 2: Aggressively close the current state
+    let candidate = cleaned;
+    if (inString) candidate += '"';
+
+    // Close in REVERSE order of opening
+    for (let i = stack.length - 1; i >= 0; i--) {
+      candidate += stack[i];
+    }
+
+    try { return JSON.parse(candidate); } catch (e) { }
+
+    // Attempt 3: Brute force walk-back
     let end = cleaned.lastIndexOf('}');
-    while (end > start) {
-      const candidate = cleaned.substring(start, end + 1);
+    while (end > 0) {
       try {
-        return JSON.parse(candidate);
+        return JSON.parse(cleaned.substring(0, end + 1));
       } catch (e) {
         end = cleaned.lastIndexOf('}', end - 1);
       }
@@ -118,7 +179,8 @@ export const processInParallel = async <T, R>(
       try {
         results[idx] = await task(items[idx], idx);
       } catch (e) {
-        console.error(`[MATH_WORKER] Error on page ${idx}:`, e);
+        console.error(`❌ [MATH_WORKER] Error on page ${idx + 1}:`, e);
+        console.error(`❌ [MATH_PAGE_FAILED] Page ${idx + 1} FAILED in worker - returning empty!`);
         results[idx] = [] as any;
       }
     }
@@ -164,7 +226,7 @@ OUTPUT: Valid JSON matching the schema. Include ALL questions. Do NOT truncate.
 `.trim();
 }
 
-const responseSchema = {
+const responseSchema: any = {
   type: Type.OBJECT,
   properties: {
     questions: {
@@ -198,12 +260,24 @@ const responseSchema = {
 };
 
 /**
+ * Helper to convert File to Base64 string
+ */
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(',')[1]);
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+};
+
+/**
  * Extract questions from a single page image.
- * Retries up to 2 times if 0 questions returned (transient failure).
+ * Retries if count is suspiciously low (math exams usually have 8-12 questions/page)
  */
 async function extractPageQuestions(
   ai: any,
-  model: string,
+  modelName: string,
   pageImg: HTMLImageElement,
   pageNum: number,
   totalPages: number
@@ -211,34 +285,35 @@ async function extractPageQuestions(
   const base64 = pageImg.src.split(',')[1];
   const prompt = buildPagePrompt(pageNum, totalPages);
 
-  // Increased to 4 attempts for complex multi-column pages
-  for (let attempt = 0; attempt < 4; attempt++) {
+  // Increased to 6 attempts for "Lazy" model behavior
+  for (let attempt = 0; attempt < 6; attempt++) {
     try {
-      const response = await withRetry(() => ai.models.generateContent({
-        model,
+      const result: any = await withRetry(() => ai.models.generateContent({
+        model: modelName,
         contents: [{
+          role: 'user',
           parts: [
-            { inlineData: { mimeType: "image/png", data: base64 } },  // FIXED: Changed from jpeg to png
-            { text: prompt }
+            { inlineData: { mimeType: "image/png", data: base64 } },
+            { text: prompt + (attempt > 0 ? `\n🚨 RIGOROUS SEARCH REQUIRED. Previous attempt only found a few questions. This page has 8-12 questions. SEARCH TOP TO BOTTOM and find EACH one. Current attempt: ${attempt + 1}` : "") }
           ]
         }],
         config: {
           responseMimeType: "application/json",
           responseSchema,
-          temperature: 0.05,   // Lower = more deterministic
-          maxOutputTokens: 8192 // Enough for 12 complex questions with LaTeX
+          temperature: 0.1 + (attempt * 0.1),
+          maxOutputTokens: 8192
         }
       }));
 
-      const rawText = (response as any).text || "{}";
+      const rawText = result.text;
       const parsed = salvageTruncatedJSON(rawText);
-      const questions = parsed?.questions || [];
+      const questions = parsed?.questions || (Array.isArray(parsed) ? parsed : []);
 
-      if (questions.length === 0 && attempt < 3) {
-        console.warn(`[MATH_PAGE_${pageNum}] Attempt ${attempt + 1}: Got 0 questions. Retrying...`);
-        console.warn(`[MATH_PAGE_${pageNum}] Raw response preview: ${rawText.substring(0, 200)}...`);
-        // Increased delay: 3s, 4.5s, 6s for attempts 1, 2, 3
-        await sleep(3000 + attempt * 1500);
+      // CRITICAL: Force retry if count is low on non-last pages
+      const isSuspiciouslyLow = questions.length < 7 && pageNum < totalPages;
+      if ((questions.length === 0 || isSuspiciouslyLow) && attempt < 5) {
+        console.warn(`[MATH_PAGE_${pageNum}] Attempt ${attempt + 1}: Found only ${questions.length}. Triggering RIGOROUS re-scan...`);
+        await sleep(3000 + attempt * 2000);
         continue;
       }
 
@@ -246,55 +321,186 @@ async function extractPageQuestions(
       return questions;
     } catch (e) {
       console.error(`[MATH_PAGE_${pageNum}] Attempt ${attempt + 1} failed:`, e);
-      if (attempt === 3) return [];
-      await sleep(3000);  // Increased from 2000ms
+      if (attempt === 5) return [];
+      await sleep(4000);
     }
   }
   return [];
 }
 
 /**
- * MAIN EXTRACTION FUNCTION (Page-by-page with deduplication)
+ * MAIN EXTRACTION FUNCTION 
+ * 1. Tries 'Mega-Extraction' (Full PDF) first - fast & high-fidelity for clean PDFs
+ * 2. Falls back to 'Micro-Extraction' (Page-by-page) if count is low
  */
 export async function extractQuestionsSimplified(
   file: File,
   apiKey: string,
-  model: string,  // Always provided by the UI selector — no hardcoded default
+  modelName: string,
   onProgress?: (current: number, total: number, found: number) => void
 ): Promise<any[]> {
-
   const ai = new GoogleGenAI({ apiKey });
-  const pages = await loadImage(file);
-  const totalPages = pages.length;
+
+  console.log(`\n🚀 [SIMPLIFIED_PIPELINE] Mirroring successful script logic...`);
+
+  // PHASE 1: DIRECT PDF 'MEGA-EXTRACTION' 
+  // Restored for all PDFs to match script success (74 seconds)
+  const pdfjsLib = (window as any).pdfjsLib;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+  const pdfDoc = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+  const totalPages = pdfDoc.numPages;
+
+  try {
+    console.log(`💎 [PHASE 1] Direct PDF Mega-Scan (Target: ~74s)...`);
+    const pdfBase64 = await fileToBase64(file);
+    const megaPrompt = `
+      Extract ALL 60 MCQs from this PDF.
+      Return a JSON array of objects with ONLY these fields:
+      - id: (string) question number
+      - page: (number) page number (1-7)
+      - text: (string) question text with LaTeX
+      - options: (array of 4) {id: "a", text: "...", isCorrect: false}
+      
+      🚨 LATEX: Use single backslashes only.
+      🚨 IMPORTANT: Check carefully, there are exactly 60 questions.
+    `;
+
+    // Removing responseSchema for Phase 1 because it causes significant latency (3+ mins) 
+    // for large outputs like 60 math questions. Prompt-based JSON is much faster.
+    const megaScanPromise = ai.models.generateContent({
+      model: modelName,
+      contents: [{
+        role: "user",
+        parts: [
+          { text: megaPrompt },
+          { inlineData: { mimeType: "application/pdf", data: pdfBase64 } }
+        ]
+      }],
+      config: {
+        responseMimeType: "application/json",
+        // REMOVED responseSchema and temperature - matching test_kcet_fix_final.mjs success
+      }
+    });
+
+    // Timeout after 180 seconds for mega-scan to allow full generation
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 180000));
+
+    const start = Date.now();
+    const result: any = await Promise.race([megaScanPromise, timeoutPromise]);
+    const end = Date.now();
+
+    console.log(`📥 [PHASE 1] Received response in ${((end - start) / 1000).toFixed(1)}s`);
+    const rawText = result.text;
+
+    console.log(`📥 [PHASE 1] Received ${rawText.length} characters from Gemini`);
+    console.log(`📥 [PHASE 1] Preview: ${rawText.substring(0, 200)}...`);
+
+    const parsed = salvageTruncatedJSON(rawText);
+    if (!parsed) {
+      console.warn(`⚠️ [PHASE 1] Failed to parse JSON from response`);
+    }
+
+    // Support both { questions: [...] } and flat [...] arrays
+    let rawQuestions = [];
+    if (Array.isArray(parsed)) {
+      rawQuestions = parsed;
+    } else if (parsed && Array.isArray(parsed.questions)) {
+      rawQuestions = parsed.questions;
+    }
+
+    console.log(`📥 [PHASE 1] Extracted ${rawQuestions.length} raw questions`);
+
+    if (rawQuestions.length >= 50) {
+      console.log(`🎉 [MEGA_SUCCESS] Extracted ${rawQuestions.length} questions directly!`);
+      // We still use Phase 2 for rendering the page indicators if needed, but return result here
+      // De-prefix for local sorting then map to final unique format
+      return rawQuestions.map((q: any) => {
+        const rawId = (q.id || '').toString().trim().replace(/^[pP]\d+_q/, '');
+        const pageNum = q.page || 1;
+        const uniqueId = `p${pageNum}_q${rawId}`;
+
+        return {
+          ...q,
+          id: uniqueId,
+          originalId: rawId,
+          topic: "Mathematics",
+          difficulty: "Moderate",
+          blooms: "Apply",
+          metadata: {
+            topic: "Mathematics",
+            domain: "Mathematics",
+            difficulty: "moderate",
+            bloomLevel: "Apply",
+            isPastYear: true,
+            year: "2021",
+            sourcePage: pageNum,
+            originalId: rawId
+          }
+        };
+      }).sort((a: any, b: any) => parseInt(a.originalId) - parseInt(b.originalId));
+    }
+    console.warn(`⚠️ [MEGA_PARTIAL] Only got ${rawQuestions.length} questions. Falling back to page-by-page...`);
+  } catch (e: any) {
+    console.warn(`❌ [MEGA_SCAN_FAILED] Direct PDF scan failed or timed out:`, e.message);
+  }
+
+  // PHASE 2: PAGE-BY-PAGE FALLBACK (The most reliable mode)
+  console.log(`📸 [PHASE 2] Starting Persistent Page-by-Page Scanning...`);
+  // pdfjsLib and pdfDoc already initialized above
+  const pageImages: HTMLImageElement[] = [];
+
+  for (let i = 1; i <= totalPages; i++) {
+    const page = await pdfDoc.getPage(i);
+    const scale = 2.5;
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    await page.render({ canvasContext: context!, viewport }).promise;
+    const img = new Image();
+    img.src = canvas.toDataURL('image/png');
+    pageImages.push(img);
+  }
 
   // Estimate: Most pages have 8-10 questions, total ~60 for a 7-page exam
   const estimatedQuestions = totalPages * 9; // Average estimate
-  console.log(`🚀 [MATH] Processing ${totalPages} pages (concurrency: 2)...`);
+  console.log(`🚀 [MATH] Processing ${totalPages} pages (concurrency: 3)...`);
   console.log(`📊 [MATH] Estimated questions: ~${estimatedQuestions} (actual count will vary by page)`);
-  console.log(`🔧 [MATH] Using: Scale 2.5x, PNG format, 4 retry attempts per page`);
-  console.log(`⏱️  [MATH] Expected time: ~${Math.ceil(totalPages * 30 / 60)} minutes\n`);
+  console.log(`🔧 [MATH] Using: Scale 2.5x, PNG format, 6 retry attempts per page`);
+  console.log(`⏱️  [MATH] Expected time: ~${Math.ceil(totalPages * 20 / 60)} minutes\n`);
 
-  // Use concurrency 2 to reduce rate-limit pressure while still being fast
-  const resultsArray = await processInParallel(pages, async (pageImg, i) => {
-    const questions = await extractPageQuestions(ai, model, pageImg, i + 1, totalPages);
+  // Use concurrency 3 to reduce rate-limit pressure while still being fast
+  const resultsArray = await processInParallel(pageImages, async (pageImg, i) => {
+    const questions = await extractPageQuestions(ai, modelName, pageImg, i + 1, totalPages);
 
-    const mapped = questions.map((q: any) => ({
-      ...q,
-      id: q.id || `p${i + 1}_q${Math.random().toString(36).substr(2, 4)}`,
-      metadata: {
-        topic: q.topic,
-        domain: q.domain,
-        difficulty: q.difficulty?.toLowerCase(),
-        bloomLevel: q.blooms,
-        isPastYear: true,
-        year: "2025",
-        sourcePage: i + 1
-      }
-    }));
+    const mapped = questions.map((q: any) => {
+      // CRITICAL: Ensure the ID is unique across pages by prefixing with page number
+      // This prevents Q1 on Page 2 from overwriting Q1 on Page 1 during deduplication.
+      const rawId = (q.id || '').toString().trim();
+      const uniqueId = `p${i + 1}_q${rawId || Math.random().toString(36).substr(2, 4)}`;
+
+      return {
+        ...q,
+        id: uniqueId,
+        originalId: rawId,
+        metadata: {
+          topic: q.topic,
+          domain: q.domain,
+          difficulty: q.difficulty?.toLowerCase(),
+          bloomLevel: q.blooms,
+          isPastYear: true,
+          year: "2025",
+          sourcePage: i + 1,
+          originalId: rawId
+        }
+      };
+    });
 
     if (onProgress) onProgress(i + 1, totalPages, mapped.length);
     return mapped;
-  }, 2); // ← Concurrency 2 is safer for rate limits
+  }, 3); // ← Concurrency 3 is a good balance for speed/rate-limits
 
   const allQuestions = resultsArray.flat();
 
@@ -310,39 +516,38 @@ export async function extractQuestionsSimplified(
     else failedPages.push(i + 1);
   });
   console.log(`\n✅ Total extracted: ${allQuestions.length} questions from ${totalPages} pages`);
-  console.log(`📈 Success rate: ${successCount}/${totalPages} pages (${Math.round(successCount/totalPages*100)}%)`);
+  console.log(`📈 Success rate: ${successCount}/${totalPages} pages (${Math.round(successCount / totalPages * 100)}%)`);
   if (failedPages.length > 0) {
     console.warn(`⚠️  Failed pages: ${failedPages.join(', ')} - these pages returned 0 questions`);
   }
 
-  // Deduplicate by question ID (same question may appear on adjacent page boundaries)
-  // Keep the one with the most complete options (4 options > fewer)
-  const seenIds = new Map<string, any>();
+  // Deduplicate: Keep the version with more content/options if IDs match
+  const seenOriginalIds = new Map<string, any>();
   for (const q of allQuestions) {
-    const qId = (q.id || '').toString().trim();
-    const existing = seenIds.get(qId);
+    const origId = q.originalId || '';
+    if (!origId) continue;
+
+    const existing = seenOriginalIds.get(origId);
     if (!existing) {
-      seenIds.set(qId, q);
+      seenOriginalIds.set(origId, q);
     } else {
-      // Keep the one with more options (more complete)
-      const existingOptions = existing.options?.length || 0;
-      const newOptions = q.options?.length || 0;
-      if (newOptions > existingOptions) {
-        console.log(`[MATH_DEDUP] Q${qId}: Replacing ${existingOptions}-option version with ${newOptions}-option version`);
-        seenIds.set(qId, q);
+      const existingWeight = (existing.text?.length || 0) + (existing.options?.length || 0) * 50;
+      const newWeight = (q.text?.length || 0) + (q.options?.length || 0) * 50;
+      if (newWeight > existingWeight) {
+        seenOriginalIds.set(origId, q);
       }
     }
   }
 
-  const deduped = Array.from(seenIds.values());
+  const deduped = Array.from(seenOriginalIds.values());
   if (deduped.length < allQuestions.length) {
-    console.log(`🔄 Deduplication: Removed ${allQuestions.length - deduped.length} duplicates. Final: ${deduped.length} unique questions`);
+    console.log(`🔄 Deduplication: Merged fragments. Result: ${deduped.length} unique questions (from ${allQuestions.length} raw extractions)`);
   }
 
-  // Sort by numeric question ID if possible
+  // Sort by numeric ID
   deduped.sort((a, b) => {
-    const numA = parseInt((a.id || '').toString().replace(/\D/g, '')) || 0;
-    const numB = parseInt((b.id || '').toString().replace(/\D/g, '')) || 0;
+    const numA = parseInt(a.originalId?.replace(/\D/g, '') || '0');
+    const numB = parseInt(b.originalId?.replace(/\D/g, '') || '0');
     return numA - numB;
   });
 

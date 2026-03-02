@@ -216,7 +216,7 @@ export async function extractQuestionLocations(file: File, pageFilter?: number[]
   for (const pageNum of pagesToProcess) {
     const page = await pdf.getPage(pageNum);
     const textContent = await page.getTextContent();
-    const viewport = page.getViewport({ scale: 1.0 });
+    const viewport = page.getViewport({ scale: 2.0 });
 
     let currentText = '';
     let currentY = 0;

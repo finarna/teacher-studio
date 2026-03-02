@@ -242,6 +242,10 @@ RULES:
 7. JSON: Output valid JSON.
 
 Schema: {
+  "topic": "Specific chapter name",
+  "domain": "Subject domain (e.g. Algebra, Mechanics)",
+  "difficulty": "Easy/Moderate/Hard",
+  "bloomsTaxonomy": "Apply/Analyze/Understand",
   "solutionSteps": ["Step Title ::: Explanation with $$Formula$$ blocks"],
   ${question.options && question.options.length > 0 ? `"correctOptionIndex": 0-3 (Identify correct option A=0, B=1, C=2, D=3),` : ''}
   "masteryMaterial": {
@@ -273,6 +277,10 @@ Schema: {
         const finalQuestions = clonedQuestions.map((q: any) =>
           q.id === qId ? {
             ...q,
+            topic: qData.topic || q.topic,
+            domain: qData.domain || q.domain,
+            difficulty: qData.difficulty || q.difficulty,
+            blooms: qData.bloomsTaxonomy || q.blooms,
             solutionSteps: qData.solutionSteps,
             masteryMaterial: qData.masteryMaterial,
             // Update correctOptionIndex if AI provided it (for MCQs)
@@ -352,6 +360,10 @@ RULES:
 7. JSON: Output valid JSON.
 
 Schema: {
+  "topic": "Specific chapter name",
+  "domain": "Subject domain",
+  "difficulty": "Easy/Moderate/Hard",
+  "bloomsTaxonomy": "Apply/Analyze/Understand",
   "solutionSteps": ["Step Title ::: Explanation with $$Formula$$ blocks"],
   ${q.options && q.options.length > 0 ? `"correctOptionIndex": 0-3 (Identify correct option A=0, B=1, C=2, D=3),` : ''}
   "masteryMaterial": {
@@ -376,6 +388,10 @@ Schema: {
           const result = results.find(r => r.id === q.id && r.data);
           return result ? {
             ...q,
+            topic: result.data.topic || q.topic,
+            domain: result.data.domain || q.domain,
+            difficulty: result.data.difficulty || q.difficulty,
+            blooms: result.data.bloomsTaxonomy || q.blooms,
             solutionSteps: result.data.solutionSteps,
             masteryMaterial: result.data.masteryMaterial,
             ...(result.data.correctOptionIndex !== undefined && { correctOptionIndex: result.data.correctOptionIndex })
