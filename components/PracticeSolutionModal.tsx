@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, PenTool, Lightbulb } from 'lucide-react';
+import { X, PenTool, Lightbulb, Sparkles, BookOpen, Zap } from 'lucide-react';
 import { RenderWithMath } from './MathRenderer';
 import type { AnalyzedQuestion } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,9 +7,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface PracticeSolutionModalProps {
   question: AnalyzedQuestion;
   onClose: () => void;
+  onRefine?: () => void;
+  isRefining?: boolean;
 }
 
-const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({ question, onClose }) => {
+const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({
+  question,
+  onClose,
+  onRefine,
+  isRefining
+}) => {
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[9999] flex items-center justify-center p-0 md:p-4">
       <motion.div
@@ -51,9 +58,12 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({ question,
         <div className="flex-1 overflow-y-auto bg-slate-50/50">
           <div className="p-6 md:p-10">
             {/* Solution Header Info */}
-            <div className="mb-8 p-6 bg-white border border-slate-200 rounded-2xl shadow-sm border-l-4 border-l-emerald-500">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.25em] mb-4 font-outfit">The Challenge</h3>
-              <div className="text-xl md:text-4xl font-bold text-slate-900 leading-tight tracking-tight">
+            <div className="mb-8 p-6 bg-white border border-slate-200 rounded-3xl shadow-sm border-l-8 border-l-emerald-500 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
+                <PenTool size={120} />
+              </div>
+              <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 font-mono">PROBLEM_STATEMENT</h3>
+              <div className="text-lg md:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
                 <RenderWithMath text={question.text} showOptions={false} />
               </div>
             </div>
@@ -76,6 +86,26 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({ question,
               </div>
             )}
 
+            {/* Key Formulas Section */}
+            {question.keyFormulas && question.keyFormulas.length > 0 && (
+              <div className="mb-10 p-8 bg-white border border-slate-200 rounded-[2.5rem] shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><BookOpen size={64} /></div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg">
+                    <Zap size={16} />
+                  </div>
+                  <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono">FORMULA_BANK</h4>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {question.keyFormulas.map((formula, idx) => (
+                    <div key={idx} className="bg-slate-50 px-5 py-3 rounded-2xl border border-slate-100 shadow-sm text-lg font-bold text-slate-900 serif border-l-4 border-l-emerald-500 transition-shadow">
+                      <RenderWithMath text={formula} showOptions={false} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Steps Track */}
             {(question.markingScheme && question.markingScheme.length > 0) || (question.solutionSteps && question.solutionSteps.length > 0) ? (
               <div className="space-y-8 relative">
@@ -83,32 +113,15 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({ question,
                 <div className="absolute left-[22px] top-4 bottom-4 w-0.5 bg-slate-200 hidden md:block" />
 
                 {(question.markingScheme && question.markingScheme.length > 0
-                  ? question.markingScheme
+                  ? (question.markingScheme as any[]).map((m, i) => ({ ...m, title: `Marking Step ${i + 1}` }))
                   : question.solutionSteps?.map((step, idx) => {
-                    const [title, content] = step.includes(':::') ? step.split(':::') : [`Step ${idx + 1}`, step];
-                    return { step: content.trim(), mark: '1' };
+                    const [title, content] = step.includes(':::') ? step.split(':::') : [null, step];
+                    return { step: content.trim(), mark: '1', title: title?.trim() };
                   }) || []
-                ).map((item, idx, arr) => {
-                  const stepText = item.step;
-                  let stepTitle = `Conceptual Step ${idx + 1}`;
-                  let stepContent = stepText;
-
-                  if (stepText.includes(':::')) {
-                    const [titlePart, contentPart] = stepText.split(':::');
-                    stepTitle = titlePart.trim();
-                    stepContent = contentPart.trim();
-                  } else {
-                    const colonIndex = stepText.indexOf(':');
-                    if (colonIndex !== -1 && colonIndex < 100) {
-                      const potentialTitle = stepText.substring(0, colonIndex);
-                      if (potentialTitle.toLowerCase().startsWith('step ')) {
-                        stepTitle = potentialTitle.trim();
-                        stepContent = stepText.substring(colonIndex + 1).trim();
-                      }
-                    }
-                  }
-
+                ).map((item: any, idx, arr) => {
                   const isLast = idx === arr.length - 1;
+                  const stepTitle = item.title || `Conceptual Step ${idx + 1}`;
+                  const stepContent = item.step;
 
                   return (
                     <motion.div
@@ -116,22 +129,27 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({ question,
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.1 }}
-                      className="relative flex gap-6"
+                      className="relative flex gap-8 items-start"
                     >
                       {/* Step Number Dot */}
-                      <div className="hidden md:flex flex-shrink-0 w-12 h-12 bg-white border-4 border-slate-50 rounded-full items-center justify-center z-10 shadow-sm outline outline-1 outline-slate-200">
-                        <span className="text-lg font-black text-slate-900">{idx + 1}</span>
+                      <div className="flex-shrink-0 w-12 h-12 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center z-10 shadow-sm relative mt-1 transition-transform group-hover:scale-110">
+                        <span className="text-sm font-black text-slate-900 font-outfit">{idx + 1}</span>
                       </div>
 
                       {/* Step Card */}
-                      <div className={`flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden transition-all hover:shadow-md ${isLast ? 'ring-2 ring-emerald-500/20 border-emerald-200' : ''}`}>
-                        <div className={`px-6 py-4 border-b border-slate-100 flex items-center justify-between ${isLast ? 'bg-emerald-50/50' : 'bg-slate-50/30'}`}>
-                          <h4 className={`text-xs uppercase tracking-[0.2em] font-bold ${isLast ? 'text-emerald-700' : 'text-slate-500'} font-outfit`}>
-                            {isLast ? 'Final Outcome' : stepTitle}
+                      <div className={`flex-1 transition-all hover:shadow-xl ${isLast ? 'bg-emerald-50/50 border-2 border-emerald-500 rounded-[2.5rem] shadow-[0_20px_40px_-15px_rgba(16,185,129,0.15)]' : 'bg-white border border-slate-200 rounded-3xl shadow-sm'}`}>
+                        <div className={`px-8 py-5 border-b rounded-t-[2.5rem] ${isLast ? 'border-emerald-200 bg-emerald-100/30' : 'border-slate-50 bg-slate-50/30'} flex items-center justify-between`}>
+                          <h4 className={`text-[10px] uppercase tracking-[0.3em] font-black ${isLast ? 'text-emerald-700' : 'text-slate-400'} font-outfit`}>
+                            {isLast ? '🎯 FINAL OUTCOME' : stepTitle}
                           </h4>
+                          {isLast && (
+                            <div className="flex items-center gap-2">
+                              <span className="px-3 py-1 bg-emerald-500 text-white text-[9px] font-black rounded-full shadow-lg shadow-emerald-500/20">VERIFIED LOGIC</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="p-8">
-                          <div className={`text-lg md:text-2xl leading-[1.8] text-slate-900 ${isLast ? 'font-black' : 'font-medium'} tracking-normal`}>
+                        <div className="p-7 md:p-8">
+                          <div className={`text-base md:text-xl leading-relaxed text-slate-800 ${isLast ? 'font-black text-slate-900 tracking-tight' : 'font-medium tracking-tight'} serif`}>
                             <RenderWithMath text={stepContent} showOptions={false} serif={true} />
                           </div>
                         </div>
@@ -139,32 +157,6 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({ question,
                     </motion.div>
                   );
                 })}
-
-                {/* Common Mistakes Section (if available) */}
-                {question.commonMistakes && question.commonMistakes.length > 0 && (
-                  <div className="mt-8 bg-gradient-to-br from-rose-50 to-red-50 border border-rose-200 rounded-3xl p-8 shadow-sm">
-                    <h3 className="text-xs font-black text-rose-700 uppercase tracking-[0.25em] mb-6 flex items-center gap-2 font-outfit">
-                      <span className="text-lg">⚠️</span> Common Mistakes to Avoid
-                    </h3>
-                    <div className="space-y-4">
-                      {question.commonMistakes.map((mistake, idx) => (
-                        <div key={idx} className="bg-white border border-rose-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                          <div className="text-base font-black text-rose-700 mb-3">{mistake.mistake}</div>
-                          <div className="space-y-2">
-                            <div className="flex items-start gap-2">
-                              <span className="text-xs font-black text-slate-500 uppercase mt-1">Why:</span>
-                              <p className="text-sm text-slate-700 flex-1">{mistake.why}</p>
-                            </div>
-                            <div className="flex items-start gap-2">
-                              <span className="text-xs font-black text-emerald-600 uppercase mt-1">How to Avoid:</span>
-                              <p className="text-sm text-emerald-700 flex-1 font-medium">{mistake.howToAvoid}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 {/* Diagrams Section */}
                 {question.extractedImages && question.extractedImages.length > 0 && (
@@ -197,9 +189,17 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({ question,
                   <PenTool size={32} className="text-slate-300" />
                 </div>
                 <h3 className="font-black text-xl text-slate-900 mb-2">Thinking in Progress...</h3>
-                <p className="text-sm text-slate-500 max-w-xs mx-auto">
+                <p className="text-sm text-slate-500 max-w-xs mx-auto mb-6">
                   Our AI is currently synthesizing the perfect step-by-step breakdown for this problem.
                 </p>
+                <button
+                  onClick={onRefine}
+                  disabled={isRefining}
+                  className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center gap-2 mx-auto disabled:opacity-50"
+                >
+                  {isRefining ? <span className="animate-spin text-lg">⚙️</span> : <Sparkles size={16} />}
+                  {isRefining ? 'Synthesizing...' : 'Trigger AI Synthesis'}
+                </button>
               </div>
             )}
           </div>

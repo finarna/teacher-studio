@@ -31,12 +31,17 @@ import {
 } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RenderWithMath } from './MathRenderer';
 import { usePracticeSession } from '../hooks/usePracticeSession';
 import { useAuth } from './AuthProvider';
 import { supabase } from '../lib/supabase';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
+import { AI_CONFIG } from '../config/aiConfigs';
+import { EXAM_CONFIGS } from '../config/exams';
+import ComplexityMatrix from './ComplexityMatrix';
 import type { TopicResource, Subject, ExamContext, AnalyzedQuestion } from '../types';
+import { SUBJECT_CONFIGS } from '../config/subjects';
+import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
+import { RenderWithMath } from './MathRenderer';
 
 interface MobilePracticeTabProps {
     topicResource: TopicResource;
@@ -138,7 +143,7 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
 
             const genAI = new GoogleGenerativeAI(GEMINI_KEY);
             const model = genAI.getGenerativeModel({
-                model: 'gemini-3-flash-preview',
+                model: AI_CONFIG.defaultModel,
                 generationConfig: {
                     responseMimeType: 'application/json',
                     temperature: 0.7,
@@ -224,7 +229,7 @@ Return ONLY valid JSON with this EXACT structure:
             }
 
             // Update local state
-            const updatedQuestion = {
+            const updatedQuestion: AnalyzedQuestion = {
                 ...currentQuestion,
                 solutionSteps: generated.solutionSteps || [],
                 examTip: generated.examTip || null,
@@ -238,7 +243,13 @@ Return ONLY valid JSON with this EXACT structure:
                         howToAvoid: rest.join(':::').split('HOW TO AVOID')[1]?.trim() || ''
                     };
                 }),
-                masteryMaterial: generated.masteryMaterial || null
+                masteryMaterial: generated.masteryMaterial || null,
+                // Flatten AI insights for immediate UI consumption
+                aiReasoning: generated.masteryMaterial?.aiReasoning || generated.aiReasoning,
+                historicalPattern: generated.masteryMaterial?.historicalPattern || generated.historicalPattern,
+                predictiveInsight: generated.masteryMaterial?.predictiveInsight || generated.predictiveInsight,
+                whyItMatters: generated.masteryMaterial?.whyItMatters || generated.whyItMatters,
+                studyTip: generated.examTip || generated.studyTip
             };
 
             setQuestions(prev => prev.map(q => q.id === currentQuestion.id ? updatedQuestion : q));
@@ -260,7 +271,14 @@ Return ONLY valid JSON with this EXACT structure:
     const isValidated = validatedAnswers.has(currentQuestion.id);
     const isCorrect = isValidated && savedAnswers.get(currentQuestion.id) === currentQuestion.correctOptionIndex;
 
-    const mastery = currentQuestion.masteryMaterial;
+    // Robust AI insight resolver
+    const insights = {
+        aiReasoning: currentQuestion.aiReasoning || currentQuestion.masteryMaterial?.aiReasoning,
+        historicalPattern: currentQuestion.historicalPattern || currentQuestion.masteryMaterial?.historicalPattern,
+        predictiveInsight: currentQuestion.predictiveInsight || currentQuestion.masteryMaterial?.predictiveInsight,
+        whyItMatters: currentQuestion.whyItMatters || currentQuestion.masteryMaterial?.whyItMatters,
+        studyTip: currentQuestion.studyTip || currentQuestion.examTip
+    };
 
     return (
         <div className="flex flex-col h-full space-y-3 pb-24">
@@ -310,8 +328,8 @@ Return ONLY valid JSON with this EXACT structure:
                     </button>
                 </div>
 
-                <div className="text-xl font-bold text-slate-900 leading-relaxed mb-4 font-instrument">
-                    <RenderWithMath text={currentQuestion.text} showOptions={false} />
+                <div className="text-[1.15rem] md:text-2xl font-bold text-slate-900 leading-snug mb-4 font-instrument">
+                    <RenderWithMath text={currentQuestion.text} />
                 </div>
 
                 <div className="space-y-2">
@@ -334,12 +352,9 @@ Return ONLY valid JSON with this EXACT structure:
                                 <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 font-black text-xs transition-colors ${isSelected || isCorrectOption || isWrongSelection ? 'border-transparent bg-white/20' : 'border-slate-100 text-slate-300'}`}>
                                     {String.fromCharCode(65 + idx)}
                                 </div>
-                                <div className="flex-1 font-bold text-sm">
+                                <div className="flex-1 font-semibold text-[0.95rem] leading-snug">
                                     <RenderWithMath
                                         text={option.replace(/^\s*([A-D1-4][\.\)]|\([A-D1-4]\))\s*/i, '')}
-                                        showOptions={false}
-                                        compact={true}
-                                        dark={isSelected && !isValidated}
                                     />
                                 </div>
                                 {isCorrectOption && <CheckCircle size={18} className="text-emerald-500" />}
@@ -378,21 +393,9 @@ Return ONLY valid JSON with this EXACT structure:
                             </div>
 
                             <div className="space-y-4">
-                                <div>
-                                    <div className="text-sm font-bold text-slate-800 leading-relaxed italic">
-                                        <RenderWithMath text={currentQuestion.studyTip || mastery?.aiReasoning || "Master this concept by reviewing the core principles in the Learn tab."} showOptions={false} compact={true} />
-                                    </div>
+                                <div className="text-sm font-bold text-slate-800 leading-relaxed italic">
+                                    <RenderWithMath text={insights.studyTip || insights.aiReasoning || "Master this concept by reviewing the core principles in the Learn tab."} />
                                 </div>
-
-                                {mastery?.commonTrap && (
-                                    <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-4 border border-rose-200">
-                                        <div className="flex items-center gap-2 mb-1 text-rose-600">
-                                            <Zap size={14} className="fill-rose-600" />
-                                            <span className="text-[9px] font-black uppercase tracking-widest">The Trap</span>
-                                        </div>
-                                        <p className="text-xs font-bold text-red-900/80">{mastery.commonTrap}</p>
-                                    </div>
-                                )}
 
                                 <div className="flex gap-2">
                                     <button
@@ -436,7 +439,7 @@ Return ONLY valid JSON with this EXACT structure:
                                             <div className="space-y-2">
                                                 {currentQuestion.keyFormulas.map((formula, idx) => (
                                                     <div key={idx} className="text-xs font-bold text-slate-800 bg-white rounded-lg p-2 border border-amber-100">
-                                                        <RenderWithMath text={formula} showOptions={false} compact={true} />
+                                                        <RenderWithMath text={formula} />
                                                     </div>
                                                 ))}
                                             </div>
@@ -451,7 +454,7 @@ Return ONLY valid JSON with this EXACT structure:
                                                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                                                     <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 block">Step {idx + 1}</span>
                                                     <div className="text-xs font-bold text-slate-800 leading-relaxed">
-                                                        <RenderWithMath text={step} showOptions={false} compact={true} />
+                                                        <RenderWithMath text={step} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -461,23 +464,6 @@ Return ONLY valid JSON with this EXACT structure:
                                         )}
                                     </div>
 
-                                    {/* Marking Scheme (if available) */}
-                                    {currentQuestion.markingScheme && currentQuestion.markingScheme.length > 0 && (
-                                        <div className="bg-green-50 rounded-2xl p-4 border border-green-200">
-                                            <h4 className="text-[8px] font-black text-green-600 uppercase tracking-[0.2em] mb-2">
-                                                📝 Marking Scheme
-                                            </h4>
-                                            <div className="space-y-2">
-                                                {currentQuestion.markingScheme.map((item, idx) => (
-                                                    <div key={idx} className="flex items-start gap-2 text-xs">
-                                                        <span className="font-black text-green-600 min-w-[2rem]">{item.mark}</span>
-                                                        <span className="text-slate-700">{item.step}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
                                     {/* Common Mistakes (if available) */}
                                     {currentQuestion.commonMistakes && currentQuestion.commonMistakes.length > 0 && (
                                         <div className="bg-rose-50 rounded-2xl p-4 border border-rose-200">
@@ -486,10 +472,11 @@ Return ONLY valid JSON with this EXACT structure:
                                             </h4>
                                             <div className="space-y-3">
                                                 {currentQuestion.commonMistakes.map((mistake, idx) => (
-                                                    <div key={idx} className="bg-white rounded-lg p-3 border border-rose-100">
+                                                    <div key={idx} className="bg-white rounded-lg p-3 border border-rose-100 shadow-sm relative overflow-hidden">
+                                                        <div className="absolute top-0 left-0 w-1 h-full bg-rose-400" />
                                                         <div className="text-[10px] font-black text-rose-600 mb-1">{mistake.mistake}</div>
                                                         <div className="text-[9px] text-slate-600 mb-1"><strong>Why:</strong> {mistake.why}</div>
-                                                        <div className="text-[9px] text-green-600"><strong>How to Avoid:</strong> {mistake.howToAvoid}</div>
+                                                        <div className="text-[9px] text-emerald-600"><strong>How to Avoid:</strong> {mistake.howToAvoid}</div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -514,33 +501,43 @@ Return ONLY valid JSON with this EXACT structure:
                                 </div>
 
                                 <div className="space-y-6">
-                                    {mastery?.logic && (
+                                    {insights.aiReasoning && (
                                         <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
                                             <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                                                 <Brain size={12} /> The Logic Model
                                             </h4>
                                             <p className="text-sm font-medium leading-relaxed text-white/80">
-                                                <RenderWithMath text={mastery.logic} showOptions={false} dark={true} compact={true} />
+                                                <RenderWithMath text={insights.aiReasoning} />
                                             </p>
                                         </div>
                                     )}
-                                    {mastery?.memoryTrigger && (
+                                    {insights.historicalPattern && (
                                         <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
                                             <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                                <Zap size={12} className="fill-amber-400" /> Memory Trigger
+                                                <History size={12} className="text-amber-400" /> Historical Context
                                             </h4>
                                             <p className="text-sm font-bold italic leading-relaxed text-amber-50">
-                                                <RenderWithMath text={mastery.memoryTrigger} showOptions={false} dark={true} compact={true} />
+                                                <RenderWithMath text={insights.historicalPattern} />
                                             </p>
                                         </div>
                                     )}
-                                    {mastery?.whyItMatters && (
+                                    {insights.predictiveInsight && (
+                                        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                                            <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                <TrendingUp size={12} className="text-emerald-400" /> Exam Predictor
+                                            </h4>
+                                            <p className="text-sm font-medium leading-relaxed text-emerald-50/80">
+                                                <RenderWithMath text={insights.predictiveInsight} />
+                                            </p>
+                                        </div>
+                                    )}
+                                    {insights.whyItMatters && (
                                         <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
                                             <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                                                 <Target size={12} /> Strategic Relevance
                                             </h4>
                                             <p className="text-sm font-medium leading-relaxed text-indigo-50/80">
-                                                <RenderWithMath text={mastery.whyItMatters} showOptions={false} dark={true} compact={true} />
+                                                <RenderWithMath text={insights.whyItMatters} />
                                             </p>
                                         </div>
                                     )}
@@ -787,7 +784,7 @@ export const MobileLearnTab: React.FC<{
                                                 <Zap size={10} className="text-amber-500" /> Core Equation
                                             </p>
                                             <div className="text-xs font-bold text-slate-900 leading-none">
-                                                <RenderWithMath text={insight.importantFormulas[0]} showOptions={false} compact={true} />
+                                                <RenderWithMath text={insight.importantFormulas[0]} />
                                             </div>
                                         </div>
                                     )}
@@ -823,7 +820,13 @@ export const MobileLearnTab: React.FC<{
                             className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm aspect-[4/5] flex flex-col active:scale-95 transition-all text-left group"
                         >
                             <div className="flex-1 bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden font-instrument transition-all">
-                                <img src={sketch.imageUrl} className="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform" />
+                                {sketch.imageUrl && sketch.imageUrl.trim() !== '' ? (
+                                    <img src={sketch.imageUrl} className="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform" />
+                                ) : (
+                                    <div className="text-slate-300 flex items-center justify-center">
+                                        <BookOpen size={32} />
+                                    </div>
+                                )}
                                 <div className="absolute inset-0 bg-slate-900/0 active:bg-slate-900/10 transition-colors" />
                             </div>
                             <div className="p-4 bg-white">
@@ -859,10 +862,16 @@ export const MobileLearnTab: React.FC<{
                         </div>
 
                         <div className="flex-1 bg-white rounded-[3rem] p-8 flex items-center justify-center shadow-2xl relative overflow-hidden">
-                            <img
-                                src={topicResource.sketchPages?.[viewingSketchIndex].imageUrl}
-                                className="max-w-full max-h-full object-contain"
-                            />
+                            {topicResource.sketchPages?.[viewingSketchIndex].imageUrl ? (
+                                <img
+                                    src={topicResource.sketchPages[viewingSketchIndex].imageUrl}
+                                    className="max-w-full max-h-full object-contain"
+                                />
+                            ) : (
+                                <div className="text-slate-200">
+                                    <BookOpen size={64} />
+                                </div>
+                            )}
                         </div>
 
                         <div className="mt-8 space-y-6">
@@ -912,6 +921,7 @@ interface MobileQuizTabProps {
     sharedQuestions: AnalyzedQuestion[];
     setSharedQuestions: React.Dispatch<React.SetStateAction<AnalyzedQuestion[]>>;
     onProgressUpdate?: (silent?: boolean) => void;
+    setReviewQuiz?: (quiz: any) => void;
 }
 
 export const MobileQuizTab: React.FC<MobileQuizTabProps> = ({
@@ -921,48 +931,136 @@ export const MobileQuizTab: React.FC<MobileQuizTabProps> = ({
     onStartQuiz,
     sharedQuestions,
     setSharedQuestions,
-    onProgressUpdate
+    onProgressUpdate,
+    setReviewQuiz
 }) => {
     const [questionCount, setQuestionCount] = useState(10);
     const { isLoading } = useLearningJourney();
     const { user } = useAuth();
+    const [strategy, setStrategy] = useState<'adaptive' | 'simulation'>('adaptive');
 
     const steps = ['Analysing syllabus…', 'Predicting exam patterns…', 'Generating questions…', 'Calibrating difficulty…'];
     const [stepIndex, setStepIndex] = useState(0);
+
+    // Difficulty Distribution State
+    const [easy, setEasy] = useState(70);
+    const [moderate, setModerate] = useState(25);
+    const [hard, setHard] = useState(5);
+    const [isAutoComplexity, setIsAutoComplexity] = useState(true);
 
     // Past quizzes
     const [pastQuizzes, setPastQuizzes] = useState<any[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
 
-    // Fetch past quizzes from test_attempts on mount
+    // Fetch forecast for simulation mode
+    const [topicForecast, setTopicForecast] = useState<any>(null);
     React.useEffect(() => {
-        if (!user || !topicResource.topicId) return;
+        if (strategy === 'simulation') {
+            const config = EXAM_CONFIGS[examContext];
+            if (config) {
+                const drift = 1 + (topicResource.masteryLevel / 100) * 0.2;
+                setTopicForecast({
+                    name: 'REI Oracle v3',
+                    rigor: (drift).toFixed(2),
+                    distribution: {
+                        easy: Math.max(0, config.difficultyProfile.easy - 10),
+                        moderate: config.difficultyProfile.moderate,
+                        hard: config.difficultyProfile.hard + 10
+                    }
+                });
+            }
+        }
+    }, [strategy, examContext, topicResource.masteryLevel]);
+
+    // Derived Stats for Complexity Matrix
+    const matrixStats = React.useMemo(() => {
+        const learning = topicResource.notesCompleted ? 100 : 20;
+        const solve = topicResource.averageAccuracy || 0;
+        const master = topicResource.masteryLevel || 0;
+        const recall = Math.min(100, (topicResource.quizzesTaken * 20) + (master * 0.5));
+        return { learning, solve, master, recall };
+    }, [topicResource]);
+
+    // Auto-adjust complexity based on stats
+    React.useEffect(() => {
+        if (isAutoComplexity) {
+            const mastery = topicResource.masteryLevel || 0;
+            if (mastery < 30) {
+                setEasy(70); setModerate(25); setHard(5);
+            } else if (mastery < 60) {
+                setEasy(40); setModerate(40); setHard(20);
+            } else if (mastery < 85) {
+                setEasy(20); setModerate(40); setHard(40);
+            } else {
+                setEasy(10); setModerate(30); setHard(60);
+            }
+        }
+    }, [isAutoComplexity, topicResource.masteryLevel]);
+
+    // Fetch past quizzes from quiz_attempts on mount
+    React.useEffect(() => {
+        if (!user || !topicResource.topicName) return;
         const fetchHistory = async () => {
             setLoadingHistory(true);
             try {
-                const { data } = await supabase
-                    .from('test_attempts')
-                    .select('id, created_at, percentage, raw_score, total_questions, duration_minutes, status')
+                const { data, error } = await supabase
+                    .from('quiz_attempts')
+                    .select('*')
                     .eq('user_id', user.id)
-                    .eq('topic_id', topicResource.topicId)
-                    .eq('test_type', 'topic_quiz')
-                    .eq('status', 'completed')
+                    .eq('topic_name', topicResource.topicName)
+                    .eq('exam_context', examContext)
                     .order('created_at', { ascending: false })
                     .limit(5);
-                setPastQuizzes((data || []).map(q => ({
-                    id: q.id,
-                    createdAt: q.created_at,
-                    percentage: q.percentage ?? 0,
-                    score: q.raw_score ?? 0,
-                    totalQuestions: q.total_questions ?? 0,
-                    durationMinutes: q.duration_minutes ?? 0,
-                })));
+
+                if (error) {
+                    console.warn('quiz_attempts fetch error (mobile):', error.message);
+                    // Fallback to topic_resource_id if topic_name fails
+                    const { data: fallbackData } = await supabase
+                        .from('quiz_attempts')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .eq('topic_resource_id', topicResource.id)
+                        .order('created_at', { ascending: false })
+                        .limit(5);
+                    if (fallbackData) {
+                        setPastQuizzes(fallbackData.map(q => mapQuizRow(q)));
+                    }
+                    return;
+                }
+
+                if (data) {
+                    setPastQuizzes(data.map(q => mapQuizRow(q)));
+                }
+            } catch (err: any) {
+                console.warn('quiz_attempts history unavailable:', err?.message || err);
+                setPastQuizzes([]);
             } finally {
                 setLoadingHistory(false);
             }
         };
+
+        const mapQuizRow = (q: any) => {
+            const rawQData = q.questions_data || [];
+            const qData = typeof rawQData === 'string' ? JSON.parse(rawQData) : rawQData;
+            return {
+                ...q,
+                id: q.id,
+                createdAt: q.created_at,
+                percentage: q.accuracy_percentage ?? q.percentage ?? 0,
+                accuracyPercentage: q.accuracy_percentage ?? 0,
+                score: q.correct_count ?? q.score ?? 0,
+                correctCount: q.correct_count ?? 0,
+                wrongCount: q.wrong_count ?? 0,
+                totalQuestions: q.question_count ?? q.total_questions ?? 0,
+                questionCount: q.question_count ?? 0,
+                durationMinutes: Math.floor((q.time_spent_seconds ?? 0) / 60),
+                timeSpentSeconds: q.time_spent_seconds ?? 0,
+                questionsData: qData
+            };
+        };
+
         fetchHistory();
-    }, [user, topicResource.topicId]);
+    }, [user, topicResource.topicName, topicResource.id, examContext]);
 
 
     // Cycle through generation steps while loading
@@ -975,163 +1073,227 @@ export const MobileQuizTab: React.FC<MobileQuizTabProps> = ({
     }, [isLoading]);
 
     return (
-        <div className="flex flex-col items-center justify-center space-y-8 py-8 px-2 text-center">
-            <div className={`w-20 h-20 rounded-[2rem] shadow-2xl flex items-center justify-center relative overflow-hidden transition-all duration-500 ${isLoading ? 'bg-primary-600' : 'bg-slate-900'}`}>
-                <div className="absolute top-0 right-0 w-10 h-10 bg-white/20 rounded-full blur-xl -mr-5 -mt-5" />
-                {isLoading
-                    ? <Loader2 size={36} className="text-white relative z-10 animate-spin" />
-                    : <Target size={40} className="text-white relative z-10" />
-                }
+        <div className="flex flex-col space-y-6 py-2 px-1">
+            {/* Strategy Selector - Compact for mobile */}
+            <div className="grid grid-cols-2 gap-3">
+                <button
+                    onClick={() => setStrategy('adaptive')}
+                    className={`p-4 rounded-3xl border-2 transition-all text-left flex flex-col gap-2 relative overflow-hidden ${strategy === 'adaptive' ? 'bg-white border-primary-600 shadow-lg' : 'bg-slate-50 border-slate-100'}`}
+                >
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${strategy === 'adaptive' ? 'bg-primary-600 text-white' : 'bg-white text-slate-400 border border-slate-100'}`}>
+                        <Brain size={16} />
+                    </div>
+                    <div>
+                        <span className={`text-[8px] font-black uppercase tracking-widest block ${strategy === 'adaptive' ? 'text-primary-600' : 'text-slate-400'}`}>Learning</span>
+                        <span className={`text-xs font-black block leading-tight font-outfit ${strategy === 'adaptive' ? 'text-slate-900' : 'text-slate-600'}`}>Adaptive</span>
+                    </div>
+                </button>
+
+                <button
+                    onClick={() => setStrategy('simulation')}
+                    className={`p-4 rounded-3xl border-2 transition-all text-left flex flex-col gap-2 relative overflow-hidden ${strategy === 'simulation' ? 'bg-slate-900 border-slate-900 shadow-lg text-white' : 'bg-slate-50 border-slate-100'}`}
+                >
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${strategy === 'simulation' ? 'bg-white text-slate-900' : 'bg-white text-slate-400 border border-slate-100'}`}>
+                        <Target size={16} />
+                    </div>
+                    <div>
+                        <span className={`text-[8px] font-black uppercase tracking-widest block ${strategy === 'simulation' ? 'text-primary-400' : 'text-slate-400'}`}>Official</span>
+                        <span className={`text-xs font-black block leading-tight font-outfit ${strategy === 'simulation' ? 'text-white' : 'text-slate-600'}`}>Simulation</span>
+                    </div>
+                </button>
             </div>
 
-            <div className="space-y-2">
-                <h2 className="text-xl font-black text-slate-900 font-outfit uppercase tracking-tighter italic leading-none">Exam Protocol</h2>
-                {isLoading ? (
-                    <p className="text-xs text-primary-600 font-bold max-w-[260px] mx-auto leading-relaxed animate-pulse">
-                        {steps[stepIndex]}
-                    </p>
-                ) : (
-                    <p className="text-xs text-slate-500 font-bold max-w-[260px] mx-auto leading-relaxed">
-                        AI-proctored simulation module. No instant validation. Full-spectrum performance analysis.
-                    </p>
-                )}
-            </div>
+            <AnimatePresence mode="wait">
+                {strategy === 'simulation' ? (
+                    <motion.div
+                        key="simulation"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden text-white relative p-6"
+                    >
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-primary-600/10 rounded-full blur-[60px] -mr-24 -mt-24" />
+                        <div className="relative z-10 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-primary-400">REI Oracle v3 active</span>
+                                    </div>
+                                    <h3 className="text-lg font-black font-outfit uppercase italic tracking-tighter">Exam Protocol</h3>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">Rigor Velocity</span>
+                                    <span className="text-xs font-black text-white">{topicForecast?.rigor}x</span>
+                                </div>
+                            </div>
 
-            {/* Question Count Selector — hidden while loading */}
-            {!isLoading && (
-                <div className="w-full max-w-sm bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm space-y-4">
-                    <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">
-                        <span className="flex items-center gap-1.5"><Brain size={12} className="text-primary-500" /> Volume</span>
-                        <span className="text-slate-900 bg-slate-100 px-3 py-1 rounded-full">{questionCount} Qs</span>
-                    </div>
+                            <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
+                                AI-proctored simulation module. No instant validation. Full-spectrum {examContext} analysis.
+                            </p>
 
-                    <input
-                        type="range"
-                        min="5"
-                        max="20"
-                        step="5"
-                        value={questionCount}
-                        onChange={(e) => setQuestionCount(parseInt(e.target.value))}
-                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-slate-900"
-                    />
-
-                    <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">
-                        <span>5</span>
-                        <span>10</span>
-                        <span>15</span>
-                        <span>20</span>
-                    </div>
-                </div>
-            )}
-
-            {!isLoading && (
-                <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-                    <div className="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm flex flex-col items-center justify-center">
-                        <Clock size={16} className="text-slate-400 mb-2" />
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Timer</span>
-                        <span className="text-sm font-black text-slate-900 italic">{Math.max(15, questionCount * 1.5)} MIN</span>
-                    </div>
-                    <div className="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm flex flex-col items-center justify-center">
-                        <Zap size={16} className="text-slate-400 mb-2" />
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Mode</span>
-                        <span className="text-sm font-black text-slate-900 italic">ADAPTIVE</span>
-                    </div>
-                </div>
-            )}
-
-            {/* AI Generation Progress Bar */}
-            {isLoading && (
-                <div className="w-full max-w-sm space-y-3">
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary-500 rounded-full animate-pulse" style={{ width: `${((stepIndex + 1) / steps.length) * 100}%`, transition: 'width 1.8s ease' }} />
-                    </div>
-                    <div className="flex justify-between">
-                        {steps.map((s, i) => (
-                            <div key={i} className={`w-2 h-2 rounded-full transition-all duration-500 ${i <= stepIndex ? 'bg-primary-500' : 'bg-slate-200'}`} />
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            <button
-                onClick={() => !isLoading && onStartQuiz?.(topicResource.topicId, questionCount)}
-                disabled={isLoading}
-                className={`w-full h-16 rounded-[2.5rem] font-black uppercase tracking-widest text-xs shadow-2xl flex items-center justify-center gap-3 transition-all duration-300 ${isLoading
-                    ? 'bg-primary-600/90 text-white cursor-not-allowed scale-[0.98]'
-                    : 'bg-slate-900 text-white active:scale-95'
-                    }`}
-            >
-                {isLoading ? (
-                    <>
-                        <Loader2 size={16} className="animate-spin" />
-                        AI Generating Questions…
-                    </>
-                ) : (
-                    <>
-                        <Play size={18} fill="currentColor" />
-                        Initialize Simulation
-                    </>
-                )}
-            </button>
-
-            {!isLoading && (
-                <div className="p-4 bg-primary-50 rounded-2xl border border-primary-100 flex gap-3 text-left">
-                    <Info size={18} className="text-primary-600 shrink-0" />
-                    <p className="text-[10px] font-bold text-primary-900/60 leading-normal italic">
-                        Note: Your Mastery Level will be recalibrated based on this simulation's performance matrix.
-                    </p>
-                </div>
-            )}
-
-            {/* ── Past Quiz History ─────────────────────────────── */}
-            {!isLoading && (
-                <div className="w-full max-w-sm">
-                    <div className="flex items-center gap-2 mb-3 px-1">
-                        <History size={14} className="text-slate-400" />
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Past Simulations</span>
-                    </div>
-
-                    {loadingHistory ? (
-                        <div className="flex justify-center py-4">
-                            <Loader2 size={20} className="text-slate-300 animate-spin" />
-                        </div>
-                    ) : pastQuizzes.length === 0 ? (
-                        <div className="text-center py-5 bg-slate-50 rounded-3xl border border-slate-100">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No history yet</p>
-                            <p className="text-[9px] text-slate-300 mt-1">Complete a simulation to see it here</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-2">
-                            {pastQuizzes.map((quiz) => {
-                                const pct = quiz.percentage ?? 0;
-                                const scoreColor = pct >= 80 ? 'bg-emerald-100 text-emerald-700' : pct >= 60 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700';
-                                return (
-                                    <div key={quiz.id} className="flex items-center gap-3 bg-white border border-slate-100 rounded-2xl px-4 py-3 shadow-sm">
-                                        {/* Score badge */}
-                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 ${scoreColor}`}>
-                                            {pct}%
+                            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-3">
+                                {[
+                                    { label: 'Easy', val: topicForecast?.distribution?.easy, color: 'bg-emerald-400' },
+                                    { label: 'Med', val: topicForecast?.distribution?.moderate, color: 'bg-amber-400' },
+                                    { label: 'Hard', val: topicForecast?.distribution?.hard, color: 'bg-rose-400' }
+                                ].map(item => (
+                                    <div key={item.label} className="flex-1 space-y-1">
+                                        <div className="flex items-center justify-between px-0.5">
+                                            <span className="text-[7px] font-black uppercase text-slate-400">{item.label}</span>
+                                            <span className="text-[8px] font-black text-white">{item.val}%</span>
                                         </div>
-                                        {/* Details */}
-                                        <div className="flex-1 text-left">
-                                            <div className="text-xs font-black text-slate-900">
-                                                {quiz.score}/{quiz.totalQuestions} correct
-                                            </div>
-                                            <div className="text-[9px] text-slate-400 font-bold mt-0.5">
-                                                {new Date(quiz.createdAt).toLocaleDateString('en-IN', {
-                                                    day: 'numeric', month: 'short', year: 'numeric'
-                                                })}
-                                            </div>
-                                        </div>
-                                        {/* Duration */}
-                                        <div className="flex items-center gap-1 text-[9px] font-black text-slate-400 shrink-0">
-                                            <Clock size={10} />
-                                            {quiz.durationMinutes}m
+                                        <div className="h-0.5 bg-white/10 rounded-full overflow-hidden">
+                                            <div className={`h-full ${item.color}`} style={{ width: `${item.val}%` }} />
                                         </div>
                                     </div>
-                                );
-                            })}
+                                ))}
+                            </div>
+
+                            <button
+                                onClick={() => !isLoading && onStartQuiz?.(topicResource.topicId)}
+                                disabled={isLoading}
+                                className="w-full h-14 bg-white text-slate-900 rounded-3xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl"
+                            >
+                                {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="currentColor" />}
+                                {isLoading ? 'Calibrating...' : 'Initialize Simulation'}
+                            </button>
+
+                            <div className="pt-2 flex items-center justify-between border-t border-white/5">
+                                <div className="flex gap-4">
+                                    {[
+                                        { label: 'Lrn', val: matrixStats.learning, color: 'text-indigo-400' },
+                                        { label: 'Slv', val: matrixStats.solve, color: 'text-emerald-400' },
+                                        { label: 'Mst', val: matrixStats.master, color: 'text-amber-400' }
+                                    ].map(stat => (
+                                        <div key={stat.label} className="flex flex-col">
+                                            <span className="text-[6px] font-black uppercase tracking-widest text-slate-500">{stat.label}</span>
+                                            <span className={`text-[9px] font-black font-mono ${stat.color}`}>{Math.round(stat.val)}%</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex items-center gap-1.5 bg-blue-500/10 px-2 py-1 rounded-lg border border-blue-500/20">
+                                    <Sparkles size={10} className="text-blue-400" />
+                                    <span className="text-[7px] font-bold text-blue-100 uppercase tracking-tighter">Personalized REI Synthesis</span>
+                                </div>
+                            </div>
                         </div>
-                    )}
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="adaptive"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm p-6 space-y-6"
+                    >
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center px-1">
+                                <div className="space-y-0.5">
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Adaptive Mode</span>
+                                    <h3 className="text-lg font-black text-slate-900 font-outfit uppercase tracking-tighter">Growth Session</h3>
+                                </div>
+                                <div className="bg-primary-50 px-3 py-1.5 rounded-2xl border border-primary-100 flex items-center gap-2">
+                                    <Brain size={14} className="text-primary-600" />
+                                    <span className="text-sm font-black text-primary-900">{questionCount} Qs</span>
+                                </div>
+                            </div>
+
+                            <input
+                                type="range"
+                                min="5"
+                                max="20"
+                                step="5"
+                                value={questionCount}
+                                onChange={(e) => setQuestionCount(parseInt(e.target.value))}
+                                className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                            />
+
+                            <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">
+                                <span>5 Units</span>
+                                <span>10 Units</span>
+                                <span>15 Units</span>
+                                <span>20 Units</span>
+                            </div>
+
+                            <button
+                                onClick={() => !isLoading && onStartQuiz?.(topicResource.topicId, questionCount)}
+                                disabled={isLoading}
+                                className="w-full h-14 bg-slate-900 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl"
+                            >
+                                {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
+                                {isLoading ? 'Synthesizing...' : 'Initialize Growth'}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Complexity Matrix on Mobile - Only shown in Adaptive mode */}
+            {strategy === 'adaptive' && (
+                <div className="bg-white border border-slate-100 rounded-3xl p-4 shadow-sm">
+                    <ComplexityMatrix
+                        easy={easy}
+                        moderate={moderate}
+                        hard={hard}
+                        isAuto={isAutoComplexity}
+                        locked={false}
+                        onAdjust={(e, m, h) => {
+                            setEasy(e);
+                            setModerate(m);
+                            setHard(h);
+                        }}
+                        onToggleAuto={setIsAutoComplexity}
+                        stats={matrixStats}
+                    />
+                </div>
+            )}
+
+            {/* Compact Past Quiz Preview */}
+            {!loadingHistory && pastQuizzes.length > 0 && (
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between px-1">
+                        <div className="flex items-center gap-2">
+                            <History size={14} className="text-slate-900" />
+                            <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">History</span>
+                        </div>
+                        <span className="text-[9px] font-bold text-slate-400">{pastQuizzes.length} Sessions</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                        {pastQuizzes.map((quiz) => {
+                            const pct = quiz.percentage ?? 0;
+                            const scoreColor = pct >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : pct >= 60 ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-rose-50 text-rose-700 border-rose-100';
+                            return (
+                                <button
+                                    key={quiz.id}
+                                    onClick={() => (quiz.questionsData || quiz.questions_data) && setReviewQuiz?.(quiz)}
+                                    className="flex items-center gap-3 bg-white border border-slate-100 rounded-2xl p-3 shadow-xs active:scale-[0.98] transition-all text-left"
+                                >
+                                    <div className={`w-11 h-11 rounded-xl border flex flex-col items-center justify-center shrink-0 ${scoreColor}`}>
+                                        <span className="text-[12px] font-black font-mono leading-none">{pct}%</span>
+                                        <span className="text-[6px] uppercase font-black tracking-tighter mt-0.5">Acc</span>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[11px] font-black text-slate-900 truncate">
+                                                {quiz.score}/{quiz.totalQuestions} Correct
+                                            </span>
+                                            <div className="flex items-center gap-1 text-[8px] font-bold text-slate-400">
+                                                <Clock size={8} />
+                                                <span>{quiz.durationMinutes}m</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-1">
+                                            <span className="text-[9px] font-bold text-slate-300">
+                                                {new Date(quiz.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                                            </span>
+                                            <span className="text-[9px] font-black text-blue-500 uppercase tracking-[0.05em]">Analyze →</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             )}
         </div>
@@ -1147,41 +1309,239 @@ export const MobileFlashcardsTab: React.FC<{
     const [currentCard, setCurrentCard] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [cards, setCards] = useState<any[]>(topicResource.flashcards || []);
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
     const hasCards = cards.length > 0;
+
+    // Swipe detection - minimum swipe distance
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe) {
+            // Swipe left - next card
+            setIsFlipped(false);
+            setCurrentCard(prev => (prev + 1) % cards.length);
+        } else if (isRightSwipe) {
+            // Swipe right - previous card
+            setIsFlipped(false);
+            setCurrentCard(prev => (prev - 1 + cards.length) % cards.length);
+        }
+    };
+
+    // Load saved flashcards from database on mount
+    useEffect(() => {
+        const loadSavedFlashcards = async () => {
+            if (!user || cards.length > 0) return; // Skip if already have cards from topicResource
+
+            setIsLoading(true);
+            try {
+                const cacheKey = `topic_${topicResource.topicId}_${topicResource.examContext}`;
+                const { data, error } = await supabase
+                    .from('flashcards')
+                    .select('data')
+                    .eq('cache_key', cacheKey)
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+
+                if (!error && data?.data) {
+                    // Transform back to display format
+                    const loadedCards = data.data.map((card: any) => ({
+                        term: card.term,
+                        definition: card.def,
+                        context: card.extra
+                    }));
+                    setCards(loadedCards);
+                    console.log('✅ Loaded', loadedCards.length, 'saved flashcards');
+                }
+            } catch (err) {
+                console.error('Error loading saved flashcards:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadSavedFlashcards();
+    }, [user, topicResource.topicId, topicResource.examContext]);
 
     const generateFlashcards = async () => {
         if (!user) return;
         setIsGenerating(true);
         try {
             const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-            const prompt = `Create 12-15 comprehensive flashcards for ${topicResource.topicName} (${topicResource.subject}). 
-            Return a JSON array of objects with keys: "term", "definition", "context". 
-            Include mathematical expressions in $ $ if needed. 
-            Focus on core definitions, formulas, and conceptual relationships.`;
+            const model = genAI.getGenerativeModel({
+                model: 'gemini-2.0-flash',
+                generationConfig: {
+                    responseMimeType: 'application/json',
+                    temperature: 0.7,
+                    maxOutputTokens: 8000
+                }
+            });
+
+            const examCtx = topicResource.examContext;
+            const subjectName = topicResource.subject;
+            const prompt = `You are an elite ${examCtx} exam coach. Create 12-15 HIGH-YIELD FLASHCARDS for ${topicResource.topicName} in ${subjectName}.
+
+🎯 FLASHCARD FORMAT (NOT theory notes):
+- SHORT, punchy explanations
+- Bullet points for steps
+- Quick recall triggers
+- One clear example
+
+Return ONLY valid JSON array:
+[
+  {
+    "term": "Concept/Formula (use $ $ for math)",
+    "definition": "**FORMULA:** $formula$ where $x$ = variable\\n\\n**WHEN TO USE:** One sentence\\n\\n**QUICK EXAMPLE:** $input$ → $output$ (1 line)\\n\\n**KEY STEPS:**\\n• Step 1\\n• Step 2\\n• Step 3",
+    "context": "⚠️ **COMMON MISTAKE:** What students mess up\\n\\n🎯 **MEMORY TRICK:** Simple mnemonic\\n\\n📝 **EXAM TIP:** How it appears in ${examCtx}"
+  }
+]
+
+EXAMPLE:
+
+{
+  "term": "Domain of $f(x) = \\\\frac{1}{x-2}$",
+  "definition": "**FORMULA:** Domain = all real numbers except where denominator = 0\\n\\n**WHEN TO USE:** For rational functions, find where bottom ≠ 0\\n\\n**QUICK EXAMPLE:** $x - 2 = 0$ → $x = 2$ → Domain: $\\\\mathbb{R} - \\\\{2\\\\}$\\n\\n**KEY STEPS:**\\n• Set denominator ≠ 0\\n• Solve for x\\n• Exclude those values",
+  "context": "⚠️ **COMMON MISTAKE:** Forgetting denominator can't be zero\\n\\n🎯 **MEMORY TRICK:** 'Bottom can't be ZERO' → B.C.B.Z\\n\\n📝 **EXAM TIP:** Quick 1-mark questions - always check denominators!"
+}
+
+CRITICAL RULES:
+- Use \\n\\n for line breaks between sections
+- Use $...$ for math (NOT $$...$$)
+- Escape backslashes: \\\\frac not \\frac
+- Keep definition to 4-5 bullet points MAX
+- Context: 3 short points with emojis
+- NO long paragraphs - this is a FLASHCARD not notes
+- Return ONLY the JSON array`;
 
             const result = await model.generateContent(prompt);
             const response = await result.response;
             let text = response.text().trim();
+
+            // Log for debugging
+            console.log('Raw AI Response:', text.substring(0, 200) + '...');
+
+            // Extract JSON from markdown code blocks if present
             if (text.includes('```json')) {
-                text = text.match(/```json\n([\s\S]*?)\n```/)?.[1] || text;
+                const match = text.match(/```json\s*\n([\s\S]*?)\n```/);
+                text = match?.[1]?.trim() || text;
+            } else if (text.includes('```')) {
+                const match = text.match(/```\s*\n([\s\S]*?)\n```/);
+                text = match?.[1]?.trim() || text;
             }
-            const parsed = JSON.parse(text);
-            if (Array.isArray(parsed)) {
+
+            let parsed;
+            try {
+                // First attempt: direct parsing
+                parsed = JSON.parse(text);
+            } catch (firstError) {
+                console.log('First parse failed, attempting sanitization...');
+
+                // Robust sanitization strategy
+                let sanitized = text
+                    // Remove any BOM or invisible characters
+                    .replace(/^\uFEFF/, '')
+                    // Remove markdown backticks if they are still there
+                    .replace(/^```json\s*/, '').replace(/```$/, '')
+                    // Fix unescaped control characters in string values (like raw newlines)
+                    .replace(/:\s*"([\s\S]*?)"(?=\s*[,\]\}])/g, (match, p1) => {
+                        // In each string value, replace raw newlines with \n and escape unescaped backslashes
+                        const cleaned = p1
+                            .replace(/\n/g, '\\n')
+                            .replace(/\r/g, '\\r')
+                            // Escape backslashes that aren't already part of a valid escape sequence
+                            .replace(/\\(?!["\\/bfnrtu]|u[0-9a-fA-F]{4})/g, '\\\\');
+                        return `: "${cleaned}"`;
+                    });
+
+                console.log('Sanitized text:', sanitized.substring(0, 200) + '...');
+
+                try {
+                    parsed = JSON.parse(sanitized);
+                } catch (secondError) {
+                    // One final attempt: try to find the first [ and last ]
+                    try {
+                        const start = sanitized.indexOf('[');
+                        const end = sanitized.lastIndexOf(']');
+                        if (start !== -1 && end !== -1) {
+                            parsed = JSON.parse(sanitized.substring(start, end + 1));
+                        } else {
+                            throw secondError;
+                        }
+                    } catch (thirdError) {
+                        console.error('JSON Parse Error Details:', {
+                            originalError: firstError,
+                            sanitizedError: secondError,
+                            finalError: thirdError,
+                            rawText: text.substring(0, 500)
+                        });
+                        throw new Error('Failed to parse AI response as JSON. Please try again.');
+                    }
+                }
+            }
+
+            if (Array.isArray(parsed) && parsed.length > 0) {
                 setCards(parsed);
                 setCurrentCard(0);
                 setIsFlipped(false);
 
-                // Save to DB
-                await supabase
-                    .from('topic_resources')
-                    .update({ flashcards: parsed })
-                    .eq('id', topicResource.id);
+                // Save to flashcards table (single source of truth)
+                // Use cache_key for topic-based flashcards (not scan_id)
+                const cacheKey = `topic_${topicResource.topicId}_${topicResource.examContext}`;
+
+                // Format cards with topic for consistency with scan-based flashcards
+                const formattedCards = parsed.map(card => ({
+                    term: card.term,
+                    def: card.definition,
+                    extra: card.context,
+                    topic: topicResource.topicName
+                }));
+
+                try {
+                    const { error: saveError } = await supabase
+                        .from('flashcards')
+                        .upsert({
+                            user_id: user.id,
+                            cache_key: cacheKey,
+                            data: formattedCards,
+                            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                            last_accessed: new Date().toISOString(),
+                            access_count: 1
+                        }, {
+                            onConflict: 'cache_key'
+                        });
+
+                    if (saveError) {
+                        console.error('❌ Failed to save flashcards to DB:', saveError);
+                        console.log('Flashcards generated but not saved. You can still use them this session.');
+                    } else {
+                        console.log('✅ Successfully generated and saved', parsed.length, 'flashcards');
+                    }
+                } catch (saveErr) {
+                    console.error('Error saving flashcards:', saveErr);
+                }
+            } else {
+                throw new Error('Invalid flashcard data structure');
             }
         } catch (e) {
-            console.error('Flashcard Error:', e);
+            console.error('Flashcard Generation Error:', e);
+            alert(e instanceof Error ? e.message : 'Failed to generate flashcards. Please try again.');
         } finally {
             setIsGenerating(false);
         }
@@ -1215,87 +1575,184 @@ export const MobileFlashcardsTab: React.FC<{
     return (
         <div className="space-y-8 pb-24">
             {/* Header */}
-            <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white relative overflow-hidden shadow-xl">
+            <div className="bg-slate-900 rounded-[2.5rem] p-5 text-white relative overflow-hidden shadow-xl">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl -mr-16 -mt-16" />
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
                             <Zap size={20} className="text-amber-400 fill-amber-400" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-black font-outfit uppercase italic tracking-tighter">Recall Engine</h3>
-                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{cards.length} Active Nodes</p>
+                            <h3 className="text-base font-black font-outfit uppercase italic tracking-tighter">Recall Engine</h3>
+                            <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">{cards.length} Active Nodes</p>
                         </div>
                     </div>
+                    <button
+                        onClick={generateFlashcards}
+                        disabled={isGenerating}
+                        className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-xl text-[10px] font-black text-white flex items-center gap-2 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                    >
+                        {isGenerating ? (
+                            <>
+                                <Loader2 size={12} className="animate-spin" />
+                                <span className="hidden sm:inline">GENERATING...</span>
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles size={12} />
+                                <span className="hidden sm:inline">GENERATE</span>
+                            </>
+                        )}
+                    </button>
                 </div>
             </div>
 
             {/* 3D Flip Card */}
-            <div
-                className="perspective-1000 relative w-full h-[400px]"
-                onClick={() => setIsFlipped(!isFlipped)}
-            >
-                <motion.div
-                    className="w-full h-full relative preserve-3d"
-                    animate={{ rotateY: isFlipped ? 180 : 0 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                >
-                    {/* Front */}
-                    <div className="absolute inset-0 backface-hidden bg-white rounded-[3rem] p-8 border-2 border-slate-100 shadow-2xl flex flex-col items-center justify-center text-center">
-                        <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-400 to-orange-500" />
-                        <span className="text-[12px] font-black text-amber-500 uppercase tracking-[0.2em] mb-8 px-4 py-1.5 bg-amber-50 rounded-full border border-amber-100">Node {currentCard + 1}</span>
-                        <div className="text-2xl font-black text-slate-900 font-instrument leading-tight">
-                            <RenderWithMath text={cards[currentCard].term} showOptions={false} compact={true} />
-                        </div>
-                        <div className="mt-auto flex items-center gap-2 text-slate-400">
-                            <Eye size={14} />
-                            <span className="text-[9px] font-black uppercase tracking-widest">Tap to reveal depth</span>
-                        </div>
-                    </div>
-
-                    {/* Back */}
+            {hasCards ? (
+                <div className="space-y-6 pb-32">
                     <div
-                        className="absolute inset-0 backface-hidden bg-slate-900 rounded-[3rem] p-8 border-2 border-slate-800 shadow-2xl flex flex-col items-center justify-center text-center"
-                        style={{ transform: 'rotateY(180deg)' }}
+                        className="perspective-1000 relative w-full h-[480px]"
+                        onClick={() => setIsFlipped(!isFlipped)}
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onTouchEnd}
                     >
-                        <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-emerald-400 to-cyan-500" />
-                        <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-8 px-4 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">Synthesis</span>
-                        <div className="flex-1 overflow-y-auto w-full px-2 scroller-hide flex flex-col items-center justify-center">
-                            <div className="text-lg font-bold text-white leading-relaxed">
-                                <RenderWithMath text={cards[currentCard].definition} showOptions={false} dark={true} compact={true} />
-                            </div>
-                            {cards[currentCard].context && (
-                                <div className="mt-6 p-4 bg-white/5 rounded-2xl border border-white/10 w-full text-left">
-                                    <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mb-1">Contextual Bridge</p>
-                                    <p className="text-[11px] font-bold text-emerald-100 italic leading-relaxed">{cards[currentCard].context}</p>
+                        <motion.div
+                            className="w-full h-full relative transform-style-3d"
+                            animate={{ rotateY: isFlipped ? 180 : 0 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 260,
+                                damping: 20
+                            }}
+                        >
+                            {/* Front Side */}
+                            <div
+                                className="absolute inset-0 bg-white rounded-[2.5rem] p-8 border border-slate-200 shadow-xl flex flex-col items-center justify-center text-center"
+                                style={{
+                                    backfaceVisibility: 'hidden',
+                                    WebkitBackfaceVisibility: 'hidden'
+                                }}
+                            >
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-slate-900"><Zap size={140} /></div>
+
+                                <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 rounded-full border border-amber-100 mb-6 font-outfit">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                    <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">Active Node {currentCard + 1}</span>
                                 </div>
-                            )}
-                        </div>
+
+                                <div className="text-xl md:text-2xl font-black text-slate-900 leading-tight tracking-tight px-4 break-words font-outfit">
+                                    <RenderWithMath text={cards[currentCard].term} />
+                                </div>
+
+                                <div className="mt-12 flex items-center gap-2 text-slate-400 bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
+                                    <Eye size={12} />
+                                    <span className="text-[8px] font-black uppercase tracking-[0.2em] font-outfit">Tap to reveal Synthesis</span>
+                                </div>
+                            </div>
+
+                            {/* Back Side */}
+                            <div
+                                className="absolute inset-0 bg-[#0A0F1D] rounded-[2.5rem] p-8 border border-slate-800 shadow-2xl flex flex-col"
+                                style={{
+                                    transform: 'rotateY(180deg)',
+                                    backfaceVisibility: 'hidden',
+                                    WebkitBackfaceVisibility: 'hidden'
+                                }}
+                            >
+                                <div className="absolute top-0 right-0 p-6 opacity-[0.05] text-white"><Brain size={120} /></div>
+
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20 font-outfit">
+                                        <Sparkles size={10} className="text-emerald-400" />
+                                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Intelligence Synopsis</span>
+                                    </div>
+                                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest font-mono">RapidRecall v3.0</span>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto scroller-hide space-y-4 pr-2">
+                                    {/* Main Explanation */}
+                                    <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <Brain size={12} className="text-blue-400" />
+                                            <span className="text-[10px] font-black text-blue-300 uppercase tracking-wider">Formula & Steps</span>
+                                        </div>
+                                        <div className="text-[14px] font-medium text-slate-50 leading-[1.8] whitespace-pre-line">
+                                            <RenderWithMath text={cards[currentCard].definition} />
+                                        </div>
+                                    </div>
+
+                                    {/* Exam Strategy */}
+                                    {cards[currentCard].context && (
+                                        <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/20">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <Trophy size={12} className="text-amber-400" />
+                                                <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider">Exam Tips</span>
+                                            </div>
+                                            <div className="text-[13px] font-medium text-amber-50 leading-[1.8] whitespace-pre-line">
+                                                <RenderWithMath text={cards[currentCard].context} />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
-                </motion.div>
-            </div>
 
-            {/* Controls */}
-            <div className="flex items-center justify-between gap-6 px-4">
-                <button
-                    onClick={(e) => { e.stopPropagation(); setIsFlipped(false); setCurrentCard(prev => (prev - 1 + cards.length) % cards.length); }}
-                    className="w-16 h-16 rounded-[2rem] bg-white border border-slate-100 shadow-lg flex items-center justify-center text-slate-400 active:scale-90 transition-transform"
-                >
-                    <ChevronLeft size={28} />
-                </button>
+                    {/* Navigation Controls */}
+                    <div className="flex items-center justify-center gap-4">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsFlipped(false);
+                                setCurrentCard(prev => (prev - 1 + cards.length) % cards.length);
+                            }}
+                            className="w-14 h-14 rounded-2xl bg-white border-2 border-slate-200 shadow-lg flex items-center justify-center text-slate-600 active:scale-90 active:bg-slate-50 transition-all"
+                        >
+                            <ChevronLeft size={24} strokeWidth={3} />
+                        </button>
 
-                <div className="text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Syllabus Index</p>
-                    <p className="text-xl font-black text-slate-900">{currentCard + 1}<span className="text-slate-200"> / {cards.length}</span></p>
+                        <div className="text-center font-outfit px-4">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Card</p>
+                            <p className="text-2xl font-black text-slate-900">
+                                {currentCard + 1}
+                                <span className="text-slate-300 text-lg"> / {cards.length}</span>
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsFlipped(false);
+                                setCurrentCard(prev => (prev + 1) % cards.length);
+                            }}
+                            className="w-14 h-14 rounded-2xl bg-slate-900 shadow-xl flex items-center justify-center text-white active:scale-90 active:bg-slate-800 transition-all"
+                        >
+                            <ChevronRight size={24} strokeWidth={3} />
+                        </button>
+                    </div>
                 </div>
-
-                <button
-                    onClick={(e) => { e.stopPropagation(); setIsFlipped(false); setCurrentCard(prev => (prev + 1) % cards.length); }}
-                    className="w-16 h-16 rounded-[2rem] bg-slate-900 shadow-xl flex items-center justify-center text-white active:scale-90 transition-transform"
-                >
-                    <ChevronRight size={28} />
-                </button>
-            </div>
+            ) : (
+                <div className="bg-white border border-slate-100 rounded-[3rem] p-10 text-center space-y-6 shadow-sm">
+                    <div className="w-20 h-20 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mx-auto text-slate-200">
+                        <Zap size={40} />
+                    </div>
+                    <div className="space-y-2 font-outfit">
+                        <h4 className="text-xl font-black text-slate-900 uppercase tracking-tighter italic">Recall Engine Offline</h4>
+                        <p className="text-xs text-slate-400 font-bold leading-relaxed px-4">
+                            The Neural Recall System requires conceptual seeds to initialize mapping. Synthesize intelligence from this topic to begin.
+                        </p>
+                    </div>
+                    <button
+                        onClick={generateFlashcards}
+                        disabled={isGenerating}
+                        className="w-full h-14 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg disabled:opacity-50 font-outfit"
+                    >
+                        {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                        {isGenerating ? 'Synthesizing Knowledge...' : 'Generate Recall Nodes'}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
@@ -1304,8 +1761,9 @@ export const MobileFlashcardsTab: React.FC<{
 export const MobileProgressTab: React.FC<{
     topicResource: TopicResource,
     pastQuizzes?: any[],
-    isLoadingQuizzes?: boolean
-}> = ({ topicResource, pastQuizzes = [], isLoadingQuizzes = false }) => {
+    isLoadingQuizzes?: boolean,
+    setReviewQuiz?: (quiz: any) => void
+}> = ({ topicResource, pastQuizzes = [], isLoadingQuizzes = false, setReviewQuiz }) => {
     return (
         <div className="space-y-6 pb-24">
             {/* Header */}
@@ -1393,29 +1851,42 @@ export const MobileProgressTab: React.FC<{
                     </div>
                 ) : pastQuizzes.length > 0 ? (
                     <div className="space-y-3">
-                        {pastQuizzes.slice(0, 5).map((quiz, idx) => (
-                            <div key={quiz.id || idx} className="bg-white border border-slate-100 rounded-3xl p-4 flex items-center justify-between shadow-sm">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm ${quiz.accuracy_percentage >= 80 ? 'bg-emerald-50 text-emerald-600' :
-                                        quiz.accuracy_percentage >= 50 ? 'bg-amber-50 text-amber-600' :
-                                            'bg-rose-50 text-rose-600'
-                                        }`}>
-                                        {quiz.accuracy_percentage}%
+                        {pastQuizzes.slice(0, 5).map((quiz, idx) => {
+                            const accuracy = Math.round(quiz.accuracy_percentage ?? quiz.percentage ?? 0);
+                            const correct = quiz.correct_count ?? quiz.raw_score ?? 0;
+                            const total = quiz.question_count ?? quiz.total_questions ?? 0;
+                            const timeSeconds = quiz.time_spent_seconds ?? 0;
+
+                            console.log('[MobileProgressTab] Rendering quiz:', { idx, accuracy, correct, total, timeSeconds, quiz });
+
+                            return (
+                                <div
+                                    key={quiz.id || idx}
+                                    className="bg-white border border-slate-100 rounded-3xl p-4 flex items-center justify-between shadow-sm hover:border-blue-200 hover:shadow-lg transition-all cursor-pointer active:scale-[0.98]"
+                                    onClick={() => setReviewQuiz?.(quiz)}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm ${accuracy >= 80 ? 'bg-emerald-50 text-emerald-600' :
+                                            accuracy >= 50 ? 'bg-amber-50 text-amber-600' :
+                                                'bg-rose-50 text-rose-600'
+                                            }`}>
+                                            {accuracy}%
+                                        </div>
+                                        <div>
+                                            <div className="text-xs font-black text-slate-900 uppercase tracking-tight">
+                                                {correct} / {total} Correct
+                                            </div>
+                                            <div className="text-[10px] font-bold text-slate-400">
+                                                {new Date(quiz.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {Math.floor(timeSeconds / 60)}m {timeSeconds % 60}s
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div className="text-xs font-black text-slate-900 uppercase tracking-tight">
-                                            {quiz.correct_count} / {quiz.question_count} Correct
-                                        </div>
-                                        <div className="text-[10px] font-bold text-slate-400">
-                                            {new Date(quiz.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {Math.floor(quiz.time_spent_seconds / 60)}m {quiz.time_spent_seconds % 60}s
-                                        </div>
+                                    <div className="p-2 rounded-xl bg-slate-50 text-slate-400 group-hover:text-blue-500 transition-colors">
+                                        <ChevronRight size={16} />
                                     </div>
                                 </div>
-                                <div className="p-2 rounded-xl bg-slate-50 text-slate-400">
-                                    <ChevronRight size={16} />
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         {pastQuizzes.length > 5 && (
                             <button className="w-full py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all">
                                 Load Full Archive

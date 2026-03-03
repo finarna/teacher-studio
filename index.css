@@ -201,6 +201,7 @@
 
 .backface-hidden {
     backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .rotate-y-180 {
@@ -357,8 +358,19 @@
 
 /* Better spacing and sizing for mathematical formulas */
 .katex {
-    font-size: 1.1em !important;
-    line-height: 1.5 !important;
+    font-size: 1.15em !important;
+    line-height: 1.6 !important;
+}
+
+/* Quiz question text - larger math */
+.math-text .katex {
+    font-size: 1.05em !important;
+}
+
+/* Instrument Sans context (question cards) - ensure katex aligns well */
+.font-instrument .katex,
+.font-instrument .katex-html {
+    vertical-align: middle;
 }
 
 /* Display mode (block equations) - centered and prominent */
@@ -508,6 +520,53 @@
     border: none;
     padding: 0;
     margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   QUIZ REVIEW - ENHANCED MATH RENDERING
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Quiz question text math - larger for better readability */
+.quiz-question-text .katex {
+    font-size: 1.3em !important;
+    line-height: 1.7 !important;
+    font-weight: 500 !important;
+}
+
+/* Quiz options math - even larger and more readable */
+.quiz-option-math .katex {
+    font-size: 1.4em !important;
+    line-height: 1.8 !important;
+}
+
+/* Quiz solution steps math - clear and readable */
+.quiz-solution-step .katex {
+    font-size: 1.3em !important;
+    line-height: 1.7 !important;
+    font-weight: 500 !important;
+}
+
+/* Display mode in quiz options */
+.quiz-option-math .katex-display {
+    margin: 0.75rem 0 !important;
+    padding: 0.5rem 0 !important;
+}
+
+/* Better spacing for fractions in options */
+.quiz-option-math .katex .frac-line {
+    border-bottom-width: 0.08em !important;
+}
+
+/* Clearer subscripts and superscripts in options */
+.quiz-option-math .katex .msupsub {
+    font-size: 0.75em !important;
+}
+
+/* Better visibility for symbols */
+.quiz-option-math .katex .mord,
+.quiz-option-math .katex .mbin,
+.quiz-option-math .katex .mrel {
+    font-weight: 500 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════

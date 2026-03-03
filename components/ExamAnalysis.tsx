@@ -47,6 +47,7 @@ import { useFilteredScans } from '../hooks/useFilteredScans';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import PredictiveTrendsTab from './PredictiveTrendsTab';
 import { getApiUrl } from '../lib/api';
+import { AI_CONFIG } from '../config/aiConfigs';
 
 interface MetricCardProps {
   title: string;
@@ -92,7 +93,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
   const [intelligenceBreakdownTab, setIntelligenceBreakdownTab] = useState<'logic' | 'visual'>('logic');
   const [isGeneratingVisual, setIsGeneratingVisual] = useState<string | null>(null);
   // Use best default model for visual generation
-  const selectedImageModel = 'gemini-2.0-flash-exp-image-01';
+  const selectedImageModel = AI_CONFIG.visionModel;
   const [enlargedVisualNote, setEnlargedVisualNote] = useState<{ imageUrl: string, questionId: string } | null>(null);
   const [isGroupedView, setIsGroupedView] = useState(false);
   const [mobileVaultView, setMobileVaultView] = useState<'list' | 'detail'>('list');
@@ -214,7 +215,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
       if (!question) return;
 
       // Get model from Settings
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
+      const selectedModel = localStorage.getItem('gemini_model') || AI_CONFIG.defaultModel;
 
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
       const model = genAI.getGenerativeModel({
@@ -312,7 +313,7 @@ Schema: {
     setIsSynthesizingAll(true);
     try {
       // Get model from Settings
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
+      const selectedModel = localStorage.getItem('gemini_model') || AI_CONFIG.defaultModel;
 
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
       const model = genAI.getGenerativeModel({

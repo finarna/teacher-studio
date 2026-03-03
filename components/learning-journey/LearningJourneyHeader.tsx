@@ -79,8 +79,8 @@ const LearningJourneyHeader: React.FC<LearningJourneyHeaderProps> = ({
           style={headerStyles.accentLine}
         />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
-          <div className="flex flex-col md:flex-row md:items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 md:py-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
 
             {/* Universal Adaptive Header Content */}
             <div className="flex items-center justify-between w-full gap-2">

@@ -34,9 +34,23 @@ const MathRenderer: React.FC<MathRendererProps> = ({
   const [katexReady, setKatexReady] = useState(false);
 
   // Support both single expression mode and full text mode
-  const rawExpression = expression || content || '';
-  const fullText = text || rawExpression;
+  // Ensure we have strings to avoid React render errors if objects are passed
+  const getSafeString = (val: any): string => {
+    if (typeof val === 'string') return val;
+    if (!val) return '';
+    try {
+      return JSON.stringify(val);
+    } catch (e) {
+      return String(val);
+    }
+  };
+
+  const rawExpression = getSafeString(expression || content);
+  const fullText = getSafeString(text || rawExpression);
   const isDisplayMode = displayMode !== undefined ? displayMode : !inline;
+
+  // Also normalize the 'text' prop for the useMemo
+  const safeText = getSafeString(text);
 
   // Check if KaTeX is loaded
   useEffect(() => {
@@ -77,16 +91,14 @@ const MathRenderer: React.FC<MathRendererProps> = ({
 
   // Render full text mode (with $ delimiters)
   const renderedContent = useMemo(() => {
-    if (!text || !katexReady) {
+    if (!safeText || !katexReady) {
       return <span className="opacity-70">{fullText}</span>;
     }
-
-    if (typeof text !== 'string') return null;
 
     // Regex to match $$...$$ (display) or $...$ (inline)
     // Updated to handle spaced LaTeX like "$ X $" from Gemini extractions
     const regex = /(\$\$[\s\S]*?\$\$|\$[^\$]+?\$)/g;
-    const parts = text.split(regex);
+    const parts = safeText.split(regex);
 
     return parts.map((part, index) => {
       if (!part) return null;
@@ -116,7 +128,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({
       }
       return <span key={index} className="whitespace-pre-wrap">{part}</span>;
     });
-  }, [text, katexReady]);
+  }, [safeText, fullText, katexReady]);
 
   // If in text mode, return the rendered content
   if (text) {
@@ -141,12 +153,12 @@ const MathRenderer: React.FC<MathRendererProps> = ({
  * Just renders text with math delimiters
  */
 export const RenderWithMath: React.FC<{
-  text: string;
+  text: any; // Allow anything for robustness
   className?: string;
   showOptions?: boolean;
   serif?: boolean;
 }> = ({ text, className = '', serif = false }) => {
-  if (!text) return null;
+  if (text === null || text === undefined) return null;
 
   return <MathRenderer text={text} className={`${className} ${serif ? 'font-serif' : ''}`} />;
 };

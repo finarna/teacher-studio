@@ -1,42 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
-  Zap,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
   ChevronDown,
   ChevronUp,
-  Save,
-  Play,
-  Target,
-  Clock,
-  FileQuestion,
   Sparkles,
-  TrendingDown,
-  X,
+  Zap,
+  Target,
+  Brain,
   History,
-  Trophy,
   TrendingUp,
-  BarChart2,
-  CheckCircle,
-  XCircle,
-  MinusCircle,
+  TrendingDown,
+  Clock,
+  Layout,
   BookOpen,
-  Signal,
+  Filter,
+  CheckCircle2,
+  CheckCircle,
   Check,
+  AlertCircle,
+  PlayCircle,
+  Play,
+  Loader2,
+  PieChart as PieChartIcon,
+  Crown,
+  Lock,
   ArrowRight,
-  Settings,
-  Activity,
-  Cpu,
   ShieldCheck,
+  Shield,
+  Search,
+  Plus,
+  Trash2,
+  AlertTriangle,
+  FileQuestion,
+  Info,
+  ExternalLink,
+  Save,
+  Rocket,
+  ArrowUpRight,
+  Calendar,
+  Layers,
+  HelpCircle,
+  Cpu,
   Dna,
+  X,
+  XCircle,
+  Activity,
+  Trophy,
+  BarChart2,
+  Signal,
+  Settings,
   Database,
   Compass,
   Hash,
-  Shield,
-  Plus
+  MinusCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ComplexityMatrix from './ComplexityMatrix';
@@ -44,6 +61,8 @@ import type { Subject, ExamContext, TopicResource, TestAttempt, AnalyzedQuestion
 import { supabase } from '../lib/supabase';
 import { cache } from '../utils/cache';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
+import { AI_CONFIG } from '../config/aiConfigs';
+import ExplainForecastModal from './ExplainForecastModal';
 import { SUBJECT_CONFIGS } from '../config/subjects';
 import { getApiUrl } from '../lib/api';
 import { EXAM_CONFIGS } from '../config/exams';
@@ -180,6 +199,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const [isCreatingTest, setIsCreatingTest] = useState(false);
   const [progressMessage, setProgressMessage] = useState<string>('Creating test...');
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
+  const [showForecastExplanation, setShowForecastExplanation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [testHistory, setTestHistory] = useState<PastTestAttempt[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
@@ -428,16 +448,24 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
   // Sync Syllabus for Simulation/Oracle protocol
   useEffect(() => {
+    let newTopicIds: string[] = [];
     if (strategyMode === 'predictive_mock' || oracleModeEnabled) {
-      setSelectedTopicIds(topics.map(t => t.topicId));
+      newTopicIds = topics.map(t => t.topicId);
     } else if (strategyMode === 'hybrid' && weakTopics.length > 0) {
       // Balanced: Auto-select top 5 weak topics for student
-      const recommended = weakTopics.slice(0, 5).map(wt => wt.topicId);
-      setSelectedTopicIds(recommended);
+      newTopicIds = weakTopics.slice(0, 5).map(wt => wt.topicId);
     } else if (strategyMode === 'adaptive_growth' && weakTopics.length > 0) {
       // Recovery: Auto-select top 3 most critical weak topics
-      const recommended = weakTopics.slice(0, 3).map(wt => wt.topicId);
-      setSelectedTopicIds(recommended);
+      newTopicIds = weakTopics.slice(0, 3).map(wt => wt.topicId);
+    }
+
+    // ONLY update if the selection actually changed to avoid infinite re-render loops
+    if (newTopicIds.length > 0) {
+      const currentIdsStr = [...selectedTopicIds].sort().join(',');
+      const newIdsStr = [...newTopicIds].sort().join(',');
+      if (currentIdsStr !== newIdsStr) {
+        setSelectedTopicIds(newTopicIds);
+      }
     }
   }, [strategyMode, oracleModeEnabled, topics, weakTopics]);
 
@@ -594,6 +622,15 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const bestScore = completed.length > 0
     ? Math.max(...completed.map(a => a.percentage ?? 0))
     : null;
+
+  // Memoize sorted history to avoid in-render mutation and improve performance
+  const sortedHistory = React.useMemo(() => {
+    return [...testHistory].sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+  }, [testHistory]);
 
   return (
     <div className="min-h-screen bg-[#fafbfc] font-inter pb-20 relative overflow-hidden">
@@ -998,11 +1035,11 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                 <div className="relative z-10 space-y-6">
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                      <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                                      <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 cursor-pointer hover:bg-indigo-500/30 transition-all" onClick={() => setShowForecastExplanation(true)}>
                                         <Cpu size={20} />
                                       </div>
-                                      <div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">REI-v3 Forecast</span>
+                                      <div className="cursor-pointer" onClick={() => setShowForecastExplanation(true)}>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-1.5">REI-v3 Forecast <Info size={10} /></span>
                                         <h3 className="text-sm font-bold font-outfit">Predictive Analytics</h3>
                                       </div>
                                     </div>
@@ -1014,14 +1051,14 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
                                   <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Rigor Velocity</span>
+                                      <span className="text-[9px] font-black text-indigo-300/80 uppercase tracking-wider block mb-1">Rigor Velocity</span>
                                       <div className="flex items-center gap-2">
                                         <span className="text-xl font-black font-mono text-white italic">{forecast?.rigorVelocity || '1.02'}x</span>
                                         <TrendingUp size={14} className="text-emerald-400" />
                                       </div>
                                     </div>
                                     <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Score Accuracy</span>
+                                      <span className="text-[9px] font-black text-indigo-300/80 uppercase tracking-wider block mb-1">Score Accuracy</span>
                                       <div className="flex items-center gap-2">
                                         <span className="text-xl font-black font-mono text-white italic">ULTRA-HIGH</span>
                                         <ShieldCheck size={14} className="text-indigo-400" />
@@ -1031,7 +1068,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
                                   <div className="space-y-4">
                                     <div className="flex items-center justify-between mb-1">
-                                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Neural Intent Signatures</span>
+                                      <span className="text-[10px] font-black text-indigo-300/80 uppercase tracking-widest">Neural Intent Signatures</span>
                                       <Dna size={14} className="text-indigo-400 opacity-50" />
                                     </div>
                                     <div className="space-y-3">
@@ -1042,7 +1079,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                       ].map(sig => (
                                         <div key={sig.label} className="space-y-1">
                                           <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-tight">
-                                            <span className="text-slate-400">{sig.label}</span>
+                                            <span className="text-indigo-200/70">{sig.label}</span>
                                             <span className="text-white">{Math.round(sig.value * 100)}%</span>
                                           </div>
                                           <div className="h-1 bg-white/5 rounded-full overflow-hidden">
@@ -1057,11 +1094,9 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                     </div>
                                   </div>
 
-                                  <div className="pt-2 border-t border-white/5">
-                                    <p className="text-[10px] font-medium text-slate-400 italic leading-relaxed">
-                                      Generated questions will target linguistic traps and multivariable logic gaps based on latest {examContext} trends.
-                                    </p>
-                                  </div>
+                                  <p className="text-[11px] font-bold text-slate-200 leading-relaxed">
+                                    Generated questions will target linguistic traps and multivariable logic gaps based on latest {examContext} trends.
+                                  </p>
                                 </div>
                               </motion.div>
                             )}
@@ -1266,9 +1301,9 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                         <Loader2 size={32} className="animate-spin text-indigo-600" />
                         <span className="text-sm font-bold text-slate-400">Loading Assessment History...</span>
                       </div>
-                    ) : testHistory.length > 0 ? (
+                    ) : sortedHistory.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {testHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((attempt) => {
+                        {sortedHistory.map((attempt) => {
                           const isCompleted = attempt.status === 'completed';
                           const pct = attempt.percentage ?? 0;
                           const scoreColor = pct >= 80 ? 'emerald' : pct >= 50 ? 'amber' : 'rose';
@@ -1348,6 +1383,11 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
           )}
         </div>
       </div>
+      <AnimatePresence>
+        {showForecastExplanation && (
+          <ExplainForecastModal onClose={() => setShowForecastExplanation(false)} examContext={examContext} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

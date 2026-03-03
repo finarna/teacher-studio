@@ -53,6 +53,7 @@ import {
 } from './api/trendsEndpoints.js';
 import { loadGenerationContext } from './lib/examDataLoader.ts';
 import { generateTestQuestions } from './lib/aiQuestionGenerator.ts';
+import { AI_CONFIG } from './config/aiConfigs';
 
 const app = express();
 const port = process.env.PORT || 9001;
@@ -798,6 +799,28 @@ app.post('/api/scans', async (req, res) => {
     // Invalidate cache
     if (redis && redis.status === 'ready') {
       await redis.del(`scan:${apiScan.id}`);
+    }
+
+    // ✨ INTELLIGENCE SYNTHESIS (NEW!)
+    // Automatically generate missing solutions, insights, tips for pushed questions
+    // This handles the "Intelligence Discovery" requirement for new scans
+    if (apiScan.analysisData?.questions && apiScan.analysisData.questions.length > 0) {
+      (async () => {
+        try {
+          console.log(`🧠 [AutoIntel] Starting background intelligence synthesis for scan ${apiScan.id}...`);
+          const { synthesizeScanIntelligence } = await import('./lib/intelligenceSynthesis.ts');
+          const apiKey = process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+          if (apiKey) {
+            const intelResult = await synthesizeScanIntelligence(supabaseAdmin, apiScan.id, apiKey);
+            console.log(`✅ [AutoIntel] Background synthesis complete for scan ${apiScan.id}: ${intelResult.success}/${intelResult.processed} success`);
+          } else {
+            console.warn(`⚠️  [AutoIntel] Skipping intelligence synthesis: Missing Gemini API Key`);
+          }
+        } catch (intelErr) {
+          console.error(`❌ [AutoIntel] Background synthesis failed for scan ${apiScan.id}:`, intelErr);
+        }
+      })();
     }
 
     res.json({ status: 'success', synced: true });
@@ -2109,7 +2132,7 @@ app.post('/api/learning-journey/ai-summary', async (req, res) => {
     const genAI = new GoogleGenerativeAI(GEMINI_KEY);
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3-flash-preview',
+      model: AI_CONFIG.defaultModel,
       generationConfig: { responseMimeType: 'application/json' }
     });
 

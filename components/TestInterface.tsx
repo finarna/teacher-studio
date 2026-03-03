@@ -634,10 +634,33 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                     {currentQuestion.pitfalls && currentQuestion.pitfalls.length > 0 && (
                       <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded">
                         <div className="text-xs font-black text-red-800 mb-2">Common Pitfalls</div>
-                        <ul className="space-y-1 list-disc list-inside">
-                          {currentQuestion.pitfalls.map((pitfall: string, idx: number) => (
-                            <li key={idx} className="text-sm text-red-900">
-                              <RenderWithMath text={pitfall} showOptions={false} />
+                        <ul className="space-y-3 list-disc list-inside">
+                          {currentQuestion.pitfalls.map((pitfall: any, idx: number) => (
+                            <li key={idx} className="text-sm text-red-900 border-b border-red-100/50 pb-2 last:border-0 last:pb-0">
+                              {typeof pitfall === 'string' ? (
+                                <RenderWithMath text={pitfall} showOptions={false} />
+                              ) : (
+                                <div className="inline-block align-top space-y-1 ml-1 w-[calc(100%-1.5rem)]">
+                                  {pitfall.mistake && (
+                                    <div className="flex gap-2">
+                                      <span className="font-black text-[9px] uppercase bg-red-100 px-1 rounded h-fit mt-0.5">Mistake</span>
+                                      <RenderWithMath text={pitfall.mistake} />
+                                    </div>
+                                  )}
+                                  {pitfall.why && (
+                                    <div className="flex gap-2 text-red-800/70">
+                                      <span className="font-black text-[9px] uppercase bg-slate-100 px-1 rounded h-fit mt-0.5">Why</span>
+                                      <RenderWithMath text={pitfall.why} />
+                                    </div>
+                                  )}
+                                  {pitfall.howToAvoid && (
+                                    <div className="flex gap-2 text-emerald-700">
+                                      <span className="font-black text-[9px] uppercase bg-emerald-50 px-1 rounded h-fit mt-0.5">Avoid</span>
+                                      <RenderWithMath text={pitfall.howToAvoid} />
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </li>
                           ))}
                         </ul>

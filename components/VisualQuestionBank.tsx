@@ -41,6 +41,7 @@ import { cache } from '../utils/cache';
 import { useAppContext } from '../contexts/AppContext';
 import { useFilteredScans } from '../hooks/useFilteredScans';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
+import { AI_CONFIG } from '../config/aiConfigs';
 
 interface Question {
   id: string;
@@ -440,7 +441,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
       if (!apiKey) throw new Error("API Key Missing");
 
       // Get model and temperature from Settings
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
+      const selectedModel = localStorage.getItem('gemini_model') || AI_CONFIG.defaultModel;
       const temperature = parseFloat(localStorage.getItem('ai_temperature') || '0.7');
 
       const genAI = new GoogleGenerativeAI(apiKey);

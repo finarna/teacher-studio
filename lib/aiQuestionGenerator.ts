@@ -10,6 +10,7 @@
  */
 
 import type { ExamContext, Subject, AnalyzedQuestion } from '../types';
+import { AI_CONFIG } from '../config/aiConfigs';
 
 // ============================================
 // INTERFACES - Generic and extensible
@@ -363,7 +364,7 @@ Return ONLY valid JSON:
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3-flash-preview',
+      model: AI_CONFIG.defaultModel,
       generationConfig: {
         temperature: 0.2,
         topK: 1,
@@ -499,6 +500,25 @@ function calculateTopicAllocation(
 
   if (totalAllocated !== examConfig.totalQuestions) {
     // Scale proportionally
+    // If totalAllocated is 0, we can't scale. Fallback to even distribution.
+    if (totalAllocated === 0) {
+      console.warn('⚠️  totalAllocated is 0. Falling back to even distribution.');
+      if (allocations.length === 0) {
+        console.error('❌ No topics available for allocation!');
+        return [];
+      }
+      const evenCount = Math.floor(examConfig.totalQuestions / allocations.length);
+      for (let a of allocations) {
+        a.questionCount = evenCount;
+      }
+      // Fill remainder
+      const remainder = examConfig.totalQuestions - (evenCount * allocations.length);
+      for (let i = 0; i < remainder; i++) {
+        allocations[i].questionCount++;
+      }
+      return allocations;
+    }
+
     const scale = examConfig.totalQuestions / totalAllocated;
     const scaled = allocations.map(a => ({
       ...a,
@@ -625,7 +645,7 @@ ${syllabusText}
 QUALITY MANDATE:
 1. ZERO "Definition" questions. Use Scenario-based applications.
 2. Focus on "The Prediction Gap": Create questions that pre-empt trends for ${new Date().getFullYear() + 1}.
-3. MANDATORY SOLUTIONS: Every question MUST have "solutionSteps" (min 2 steps), "examTip", and "pitfalls".
+3. MANDATORY SOLUTIONS: Every question MUST have "solutionSteps" (min 2 steps), "studyTip", and "commonMistakes".
 4. LATEX: Use PROPER LaTeX ($...$ inline, $$...$$ display). Ensure ALL braces and dollar signs are balanced.
 5. NO direct Theory questions. Focus on speed-tricks and analytical synthesis.
 
@@ -639,14 +659,15 @@ Return ONLY a valid JSON array:
     "difficulty": "Easy|Moderate|Hard",
     "topic": "Must match one of the topic names above",
     "blooms": "Understand|Apply|Analyze|Evaluate",
-    "solutionSteps": ["Step 1", "Step 2"],
-    "examTip": "Strategical shortcut for this problem",
+    "solutionSteps": ["Title ::: Detailed reasoning with $math$"],
+    "aiReasoning": "Technical mindset/trap explanation",
+    "historicalPattern": "Exam frequency context (e.g. KCET 2021 style)",
+    "predictiveInsight": "Variation likely to see in future",
+    "whyItMatters": "Engineering/Medical application",
+    "studyTip": "Mastery shortcut or visualization ritual",
+    "commonMistakes": [{"mistake": "...", "why": "...", "howToAvoid": "..."}],
     "keyFormulas": ["$formula$"],
-    "pitfalls": ["Conceptual trap"],
-    "masteryMaterial": { 
-      "coreConcept": "...", 
-      "logic": "Detailed RWC/IDS Logic" 
-    }
+    "keyConcepts": [{"name": "...", "explanation": "..."}]
   }
 ]`;
 
@@ -654,7 +675,7 @@ Return ONLY a valid JSON array:
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3-flash-preview',
+      model: AI_CONFIG.defaultModel,
       generationConfig: {
         temperature: isOracle ? 0.3 : 0.7, // Lower temperature for deterministic precision in Oracle Mode
         topK: 40,
@@ -682,10 +703,17 @@ Return ONLY a valid JSON array:
       topic: q.topic,
       blooms: q.blooms || 'Apply',
       solutionSteps: q.solutionSteps || q.solution_steps || [],
-      examTip: q.examTip || q.exam_tip || '',
+      examTip: q.studyTip || q.examTip || q.exam_tip || '',
+      studyTip: q.studyTip || q.study_tip || '',
       keyFormulas: q.keyFormulas || q.key_formulas || [],
-      pitfalls: q.pitfalls || q.pit_falls || [],
-      masteryMaterial: q.masteryMaterial || q.mastery_material,
+      commonMistakes: q.commonMistakes || q.common_mistakes || [],
+      pitfalls: (q.commonMistakes || q.pitfalls || []).map((m: any) => typeof m === 'object' ? m.mistake : m),
+      aiReasoning: q.aiReasoning || q.ai_reasoning || '',
+      historicalPattern: q.historicalPattern || q.historical_pattern || '',
+      predictiveInsight: q.predictiveInsight || q.predictive_insight || '',
+      whyItMatters: q.whyItMatters || q.why_it_matters || '',
+      keyConcepts: q.keyConcepts || q.key_concepts || [],
+      masteryMaterial: q.masteryMaterial || q.mastery_material || q,
       correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? 0,
       source: `AI-Generated (Smart-Batch ${examConfig.examContext})`
     }));
@@ -829,35 +857,36 @@ TECHNICAL REQUIREMENTS:
 6. Each question must have EXACTLY 4 options.
 7. Mark correct answer clearly with correctOptionIndex (0-3).
 
-Return ONLY valid JSON array:
-[
-  {
-    "text": "Clear question with $proper \\\\LaTeX$ formatting",
-    "options": ["Option A with $math$", "Option B", "Option C", "Option D"],
-    "correctOptionIndex": 0,
-    "marks": ${examConfig.marksPerQuestion === 'variable' ? '1' : examConfig.marksPerQuestion},
-    "difficulty": "Easy|Moderate|Hard",
-    "topic": "${topicMetadata.topicName}",
-    "blooms": "Remember|Understand|Apply|Analyze|Evaluate|Create",
-    "solutionSteps": ["Analytical Step 1 with $LaTeX$", "Step 2", "Step 3"],
-    "examTip": "Strategical shortcut or focus area",
-    "keyFormulas": ["$formula_1$", "$formula_2$"],
-    "pitfalls": ["Common conceptual trap to avoid"],
-    "masteryMaterial": {
-      "coreConcept": "Explain the foundational theorem used",
-      "logic": "Why this specific solving path was chosen"
-    }
-  }
-]
+GENERATE EACH QUESTION WITH THE FOLLOWING SCHEMA:
+{
+  "text": "Clear question with $proper \\\\LaTeX$ formatting",
+  "options": ["A", "B", "C", "D"],
+  "correctOptionIndex": 0,
+  "difficulty": "Easy|Moderate|Hard",
+  "solutionSteps": ["Title ::: Detailed reasoning with $math$"],
+  "aiReasoning": "Technical mindset/trap explanation",
+  "historicalPattern": "Exam frequency context (e.g. KCET 2021 style)",
+  "predictiveInsight": "Variation likely to see in future",
+  "whyItMatters": "Engineering/Medical application",
+  "studyTip": "Mastery shortcut or visualization ritual",
+  "markingSteps": [{"step": "logic point", "mark": "1"}],
+  "commonMistakes": [{"mistake": "...", "why": "...", "howToAvoid": "..."}],
+  "keyFormulas": ["$formula$"],
+  "keyConcepts": [{"name": "...", "explanation": "..."}]
+}
 
-CRITICAL: YOU MUST PROVIDE DETAILED solutionSteps (min 2 steps) AND examTip FOR EVERY SINGLE QUESTION. NEVER RETURN EMPTY ARRAYS FOR THESE FIELDS.
-CRITICAL: Output MUST be valid JSON with NO markdown, NO extra text, JUST the array.`;
+CRITICAL RIGOR MANDATE:
+- NO generic "Check work" filler.
+- Be specific about syllabus patterns.
+- Use DOUBLE-BACKSLASH for internal LaTeX commands in JSON.
+- Never return empty arrays for solutionSteps or commonMistakes.
+CRITICAL: Output MUST be valid JSON with NO markdown, NO extra text, JUST THE ARRAY.`;
 
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3-flash-preview',
+      model: AI_CONFIG.defaultModel,
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -878,21 +907,29 @@ CRITICAL: Output MUST be valid JSON with NO markdown, NO extra text, JUST the ar
 
     // Transform to AnalyzedQuestion format
     const { randomUUID } = await import('crypto');
-    return questions.map((q: any, idx: number) => ({
-      id: randomUUID(), // Generate valid UUID for AI questions
+    return questions.map((q: any) => ({
+      id: randomUUID(),
       text: q.text,
       options: q.options || [],
       marks: q.marks || examConfig.marksPerQuestion,
       difficulty: q.difficulty,
       topic: topicMetadata.topicName,
-      blooms: q.blooms || q.blooms_level || q.bloomsLevel || 'Apply',
-      solutionSteps: q.solutionSteps || q.solution_steps || (q.explanation ? [q.explanation] : []),
-      examTip: q.examTip || q.exam_tip || '',
+      blooms: q.blooms || 'Apply',
+      solutionSteps: q.solutionSteps || q.solution_steps || [],
+      examTip: q.studyTip || q.examTip || q.exam_tip || '',
+      studyTip: q.studyTip || q.study_tip || '',
       keyFormulas: q.keyFormulas || q.key_formulas || [],
-      pitfalls: q.pitfalls || q.pit_falls || [],
-      masteryMaterial: q.masteryMaterial || q.mastery_material,
+      commonMistakes: q.commonMistakes || q.common_mistakes || [],
+      pitfalls: (q.commonMistakes || q.pitfalls || []).map((m: any) => typeof m === 'object' ? m.mistake : m),
+      aiReasoning: q.aiReasoning || q.ai_reasoning || '',
+      historicalPattern: q.historicalPattern || q.historical_pattern || '',
+      predictiveInsight: q.predictiveInsight || q.predictive_insight || '',
+      whyItMatters: q.whyItMatters || q.why_it_matters || '',
+      keyConcepts: q.keyConcepts || q.key_concepts || [],
+      markingSteps: q.markingSteps || q.marking_steps || [],
+      masteryMaterial: q.masteryMaterial || q.mastery_material || q,
       correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? 0,
-      source: `AI-Generated (High-Rigor ${examConfig.examContext})`
+      source: `AI-Generated (${examConfig.examContext})`
     }));
 
   } catch (error) {

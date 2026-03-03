@@ -75,21 +75,22 @@ const ComplexityMatrix: React.FC<ComplexityMatrixProps> = ({
     };
 
     return (
-        <div className="bg-white rounded-[2rem] border border-slate-200 shadow-[0_15px_30px_rgba(0,0,0,0.02)] p-5 relative overflow-hidden group">
+        <div className="bg-white rounded-[2.5rem] border-2 border-slate-900/5 shadow-sm p-6 md:p-8 relative overflow-hidden group">
             <div className="relative z-10">
                 {/* Clean Professional Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm">
-                            <Signal size={18} />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 shadow-inner group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                            <Signal size={22} />
                         </div>
                         <div>
-                            <span className="text-[8px] font-black text-indigo-600 uppercase tracking-[0.2em] leading-none mb-0.5 block">Efficiency Level</span>
-                            <h3 className="text-base font-black text-slate-900 font-outfit leading-none flex items-center gap-2">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1 block">Efficiency Level</span>
+                            <h3 className="text-xl font-black text-slate-900 font-outfit leading-none flex items-center gap-3">
                                 Difficulty & Distribution
                                 {locked && (
-                                    <span className="flex items-center gap-1 px-1.5 py-0.5 bg-indigo-600 text-white rounded-md text-[7px] font-black uppercase tracking-tight">
-                                        REI Sync
+                                    <span className="flex items-center gap-1.5 px-2 py-1 bg-slate-900 text-white rounded-lg text-[8px] font-black uppercase tracking-wider">
+                                        <ShieldCheck size={10} />
+                                        Locked: Simulation Fidelity
                                     </span>
                                 )}
                             </h3>
@@ -97,16 +98,16 @@ const ComplexityMatrix: React.FC<ComplexityMatrixProps> = ({
                     </div>
 
                     {!locked && (
-                        <div className="flex items-center p-0.5 bg-slate-50 rounded-lg border border-slate-100">
+                        <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200">
                             <button
                                 onClick={() => onToggleAuto(true)}
-                                className={`px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest transition-all ${isAuto ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${isAuto ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 AI Pilot
                             </button>
                             <button
                                 onClick={() => onToggleAuto(false)}
-                                className={`px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest transition-all ${!isAuto ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${!isAuto ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 Manual
                             </button>
@@ -114,24 +115,24 @@ const ComplexityMatrix: React.FC<ComplexityMatrixProps> = ({
                     )}
                 </div>
 
-                {/* Refined Sliders Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {/* Refined Sliders Grid - Matches MockTest style */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {[
-                        { id: 'easy', label: 'Foundation', val: easy, color: '#10b981' },
-                        { id: 'moderate', label: 'Standard', val: moderate, color: '#f59e0b' },
-                        { id: 'hard', label: 'Advanced', val: hard, color: '#6366f1' }
+                        { id: 'easy', label: 'Foundation', val: easy, color: '#10b981', light: '#ecfdf5' },
+                        { id: 'moderate', label: 'Standard', val: moderate, color: '#f59e0b', light: '#fffbeb' },
+                        { id: 'hard', label: 'Advanced', val: hard, color: '#6366f1', light: '#f5f3ff' }
                     ].map(item => (
-                        <div key={item.id} className="space-y-2 bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
-                            <div className="flex justify-between items-end">
-                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{item.label}</label>
-                                <span className="text-xs font-black text-slate-900 font-mono">{item.val}%</span>
+                        <div key={item.id} className="space-y-3">
+                            <div className="flex justify-between items-end px-1">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{item.label}</label>
+                                <span className="text-sm font-black text-slate-900 font-mono tracking-tighter">{item.val}%</span>
                             </div>
-                            <div className="relative h-1.5 bg-slate-200/50 rounded-full overflow-hidden">
+                            <div className="relative h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${item.val}%` }}
                                     transition={{ duration: 1, ease: "circOut" }}
-                                    className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500`}
+                                    className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 shadow-sm`}
                                     style={{ backgroundColor: item.color }}
                                 />
                                 <input
@@ -145,19 +146,19 @@ const ComplexityMatrix: React.FC<ComplexityMatrixProps> = ({
                     ))}
                 </div>
 
-                {/* Calibration Logic Footer */}
-                <div className="pt-4 border-t border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-                    <div className="flex-1 flex gap-3 items-start bg-indigo-50/30 p-2.5 rounded-xl border border-indigo-100/50">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
-                            <Sparkles size={14} />
+                {/* Calibration Logic Footer - Integrated Style */}
+                <div className="pt-6 border-t border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div className="flex-1 flex gap-4 items-center bg-slate-50/80 p-4 rounded-[1.5rem] border border-slate-100">
+                        <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0 shadow-sm">
+                            <Sparkles size={18} />
                         </div>
-                        <div>
-                            <span className="text-[8px] font-black uppercase tracking-widest text-indigo-600/60 block mb-0.5">Calibration Insight</span>
-                            <p className="text-[10px] font-bold text-slate-600 leading-tight line-clamp-2">"{getReasonNote()}"</p>
+                        <div className="flex-1">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-0.5">Calibration Insight</span>
+                            <p className="text-xs font-bold text-slate-900 leading-tight">"{getReasonNote()}"</p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
                         {Object.entries(stats).map(([key, val]) => {
                             const colors: Record<string, string> = {
                                 learning: 'bg-indigo-50 text-indigo-600 border-indigo-100',
@@ -166,9 +167,9 @@ const ComplexityMatrix: React.FC<ComplexityMatrixProps> = ({
                                 recall: 'bg-rose-50 text-rose-600 border-rose-100'
                             };
                             return (
-                                <div key={key} className={`flex flex-col items-center px-2 py-1.5 rounded-lg border ${colors[key] || 'bg-slate-50 text-slate-600 border-slate-100'}`}>
-                                    <span className="text-[7px] font-black uppercase tracking-tighter mb-0.5 opacity-70">{key}</span>
-                                    <span className="text-[10px] font-black font-mono">{val}%</span>
+                                <div key={key} className={`flex items-center gap-3 px-3 py-2 rounded-xl border ${colors[key] || 'bg-slate-50 text-slate-600 border-slate-100'}`}>
+                                    <span className="text-[9px] font-black uppercase tracking-widest opacity-70">{key}</span>
+                                    <span className="text-sm font-black font-mono leading-none">{val}%</span>
                                 </div>
                             );
                         })}

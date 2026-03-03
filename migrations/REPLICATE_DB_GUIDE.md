@@ -3,7 +3,7 @@
 This guide will help you move your database to a fresh, healthy Supabase project with optimized schema and "Clean Data" (Official 2026 Syllabi).
 
 **Latest Updates:**
-- ✅ **v6.0 Schema** (March 2025): Added AI Trends (historical patterns, distributions) and fixed Practice RLS
+- ✅ **v6.0 Schema** (March 2025): **REI v3.0 Enhanced**. Added Oracle Forecasting columns, generation rules, and 60-question limit support.
 - ✅ **v5.5 Schema** (March 2025): Added RLS for Visual Notes (topic_sketches)
 - ✅ **Auto-Mapping**: Questions automatically link to official syllabus topics
 - ✅ **Complete RLS**: All tables secured with Row Level Security policies
@@ -13,7 +13,8 @@ This guide will help you move your database to a fresh, healthy Supabase project
 - [Step 1: Create Project](#step-1-create-a-new-supabase-project)
 - [Step 2: Apply Schema](#step-2-apply-the-consolidated-schema)
 - [Step 3: Environment Variables](#-step-3-update-environment-variables)
-- [Step 4: Seed Data](#-step-4-initialize-clean-data)
+- [Step 4: Seed Core Data](#-step-4-initialize-clean-data)
+- [Step 5: Restore REI Intelligence](#-step-5-restore-rei-v30-intelligence)
 - [Troubleshooting](#-troubleshooting--fixes)
 
 ---
@@ -30,7 +31,7 @@ This guide will help you move your database to a fresh, healthy Supabase project
 4. ✅ This creates all 35+ tables (including Razorpay, Learning Journey, and AI Content), RLS policies for every table, and the Unified Auth Trigger.
    * *Note: This version (v5.6) consolidates all migrations and includes all previous fixes.*
 
-- **v6.0** (Latest): Added AI Trends tables & fixed practice_sessions RLS (Fixes 403 Forbidden in Solve tab)
+- **v6.0** (Latest): **REI v3.0 RESTORATION**. Added missing Oracle columns and `generation_rules` table. Fixes 30-question limit (now sets 60 for KCET).
 - **v5.6**: Full Admin UPDATE/DELETE permissions (Fixes Publish), includes all previous fixes
 - **v5.5**: Added RLS policies for topic_sketches (needed for AdminScanApproval counts)
 - **v5.4**: Fixed KCET weightage for Math topics, includes all previous fixes
@@ -81,7 +82,11 @@ npx tsx scripts/seedRealTopics.ts
 npx tsx seedTrendsData.ts
 # ✅ This syncs actual 2021 Math scans to the AI Trends tables (Patterns & Distributions)
 
-# 5. Create a New User Account
+# 5. Restore REI v3.0 Intelligence (60/90-Question Fix & Official Syllabus)
+npx tsx migrations/seed_rei_v3.ts
+# ✅ This populates global exam configs, 213 official topics, and predictive rules.
+
+# 6. Create a New User Account
 # Simply go to the app (http://localhost:9000/) and Sign Up.
 # The database will automatically create your profile.
 ```

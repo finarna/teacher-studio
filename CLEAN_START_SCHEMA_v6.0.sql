@@ -1,12 +1,11 @@
 -- 🛡️ EDUJOURNEY CATEGORICAL CLEAN START SCHEMA v6.0 (REI v3.0 ENHANCED)
 -- =====================================================
 -- Consolidated schema for the entire database.
--- ✅ **v6.0 Schema** (March 2025): Added AI Trends, REI v3.0 Oracle Support.
---   • REI v3.0 Upgrade: Added direct columns for mathematical forecasting.
---   • Seed Baseline with: npx tsx migrations/seed_rei_v3.ts
+-- ✅ **v6.0 Schema** (March 2025): Added AI Trends, REI v3.0 Oracle Support, and fixed RLS for Practice & Learn tabs.
+--   • REI v3.0 Upgrade: Added direct columns to exam_configurations and ai_universal_calibration for mathematical forecasting.
+--   • Added: generation_rules table for predictive AI strategy control.
 --   • Fix: Restore 60-question limit functionality for KCET/NEET predictive mocks.
 --   • Fixed: 'FOR ALL' policies for important tables that use upsert (topic_resources, practice_sessions) with explicit 'WITH CHECK'.
---   • Integrated migration 027: Fixed quiz_attempts schema with proper defaults, dual RLS policies, and performance indexes.
 -- v5.6 changes vs v5.5:
 --   • Added: RLS policies for topic_sketches (needed for AdminScanApproval counts)
 -- v5.4 changes vs v5.3:
@@ -202,7 +201,12 @@ CREATE TABLE IF NOT EXISTS public.questions (
   options JSONB, -- Array of strings
   correct_option_index INTEGER,
   solution_steps JSONB DEFAULT '[]'::jsonb,
-  exam_tip TEXT,
+  exam_tip TEXT, -- Deprecated, use study_tip
+  study_tip TEXT,
+  ai_reasoning TEXT,
+  historical_pattern TEXT,
+  predictive_insight TEXT,
+  why_it_matters TEXT,
   visual_concept TEXT,
   key_formulas JSONB DEFAULT '[]'::jsonb,
   pitfalls JSONB DEFAULT '[]'::jsonb,
@@ -425,16 +429,16 @@ CREATE TABLE IF NOT EXISTS public.test_templates (
 CREATE TABLE IF NOT EXISTS public.quiz_attempts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  topic_resource_id UUID REFERENCES public.topic_resources(id) ON DELETE CASCADE,
-  topic_name TEXT NOT NULL DEFAULT 'Unknown Topic',
-  subject TEXT NOT NULL DEFAULT 'Math',
-  exam_context TEXT NOT NULL DEFAULT 'KCET',
-  question_count INTEGER NOT NULL DEFAULT 0,
-  questions_data JSONB NOT NULL DEFAULT '[]'::jsonb,
-  correct_count INTEGER NOT NULL DEFAULT 0,
-  wrong_count INTEGER NOT NULL DEFAULT 0,
-  accuracy_percentage INTEGER NOT NULL DEFAULT 0,
-  time_spent_seconds INTEGER NOT NULL DEFAULT 0,
+  topic_resource_id UUID NOT NULL REFERENCES public.topic_resources(id) ON DELETE CASCADE,
+  subject TEXT NOT NULL,
+  exam_context TEXT NOT NULL,
+  topic_name TEXT NOT NULL,
+  question_count INTEGER NOT NULL,
+  questions_data JSONB NOT NULL,
+  correct_count INTEGER NOT NULL,
+  wrong_count INTEGER NOT NULL,
+  accuracy_percentage INTEGER NOT NULL,
+  time_spent_seconds INTEGER NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   completed_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -755,15 +759,10 @@ CREATE POLICY "Resources access" ON public.topic_resources
   WITH CHECK (auth.uid() = user_id OR public.is_admin());
 
 DROP POLICY IF EXISTS "Quiz access" ON public.quiz_attempts;
-CREATE POLICY "Quiz access" ON public.quiz_attempts
-  FOR ALL
+CREATE POLICY "Quiz access" ON public.quiz_attempts 
+  FOR ALL 
   USING (auth.uid() = user_id OR public.is_admin())
   WITH CHECK (auth.uid() = user_id OR public.is_admin());
-
-DROP POLICY IF EXISTS "Users can insert quiz attempts" ON public.quiz_attempts;
-CREATE POLICY "Users can insert quiz attempts" ON public.quiz_attempts
-  FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Test attempts access" ON public.test_attempts;
 CREATE POLICY "Test attempts access" ON public.test_attempts 
@@ -892,10 +891,6 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO authenticated;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
 
--- Specific grants for quiz_attempts (from migration 027)
-GRANT ALL ON public.quiz_attempts TO authenticated;
-GRANT ALL ON public.quiz_attempts TO service_role;
-
 NOTIFY pgrst, 'reload schema';
 
 -- 12. ADMIN GRANT
@@ -926,10 +921,5 @@ CREATE INDEX IF NOT EXISTS idx_flashcards_scan_id   ON public.flashcards(scan_id
 CREATE INDEX IF NOT EXISTS idx_flashcards_expires   ON public.flashcards(expires_at);
 
 COMMENT ON TABLE public.flashcards IS 'Rapid Recall flashcard cache (30-day TTL). Each row holds all AI-generated cards for one scan as a JSONB array.';
-
--- Add indexes for quiz_attempts performance (from migration 027)
-CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user_id ON public.quiz_attempts(user_id);
-CREATE INDEX IF NOT EXISTS idx_quiz_attempts_topic_resource ON public.quiz_attempts(topic_resource_id);
-CREATE INDEX IF NOT EXISTS idx_quiz_attempts_created_at ON public.quiz_attempts(created_at DESC);
 
 -- ✅ CONSOLIDATED CLEAN SETUP v6.0 COMPLETE

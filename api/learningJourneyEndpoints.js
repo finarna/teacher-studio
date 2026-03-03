@@ -18,6 +18,7 @@ import {
 } from '../lib/questionSelector.ts';
 import { loadGenerationContext } from '../lib/examDataLoader.ts';
 import { generateTestQuestions } from '../lib/aiQuestionGenerator.ts';
+import { AI_CONFIG } from '../config/aiConfigs';
 
 // =====================================================
 // PROGRESS TRACKING FOR AI GENERATION
@@ -336,7 +337,7 @@ export async function generateTest(req, res) {
         const { GoogleGenerativeAI } = await import('@google/generative-ai');
         const genAI = new GoogleGenerativeAI(GEMINI_KEY);
         const model = genAI.getGenerativeModel({
-          model: 'gemini-3-flash-preview',
+          model: AI_CONFIG.defaultModel,
           generationConfig: {
             responseMimeType: 'application/json',
             temperature: 0.7,
@@ -1675,7 +1676,7 @@ async function generateTestInBackground({ userId, testName, subject, examContext
           const { GoogleGenerativeAI } = await import('@google/generative-ai');
           const genAI = new GoogleGenerativeAI(GEMINI_KEY);
           const model = genAI.getGenerativeModel({
-            model: 'gemini-3-flash-preview',
+            model: AI_CONFIG.defaultModel,
             generationConfig: {
               responseMimeType: 'application/json',
               temperature: 0.7,

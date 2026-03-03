@@ -171,12 +171,12 @@ export async function aggregateTopicsForUser(
     });
 
     // 7. Group insights by topic (store with lowercase key for fuzzy matching)
-    const insightsByTopicLower = new Map<string, {originalTopic: string, insights: ChapterInsight[]}>();
+    const insightsByTopicLower = new Map<string, { originalTopic: string, insights: ChapterInsight[] }>();
     (insights || []).forEach(i => {
       const topic = i.topic || 'Uncategorized';
       const topicLower = topic.toLowerCase();
       if (!insightsByTopicLower.has(topicLower)) {
-        insightsByTopicLower.set(topicLower, {originalTopic: topic, insights: []});
+        insightsByTopicLower.set(topicLower, { originalTopic: topic, insights: [] });
       }
       insightsByTopicLower.get(topicLower)!.insights.push(transformInsight(i));
     });
@@ -571,12 +571,26 @@ export async function recordTopicActivity(
         nextStage = 'mastered';
       }
 
+      let quizzesTaken = currentRes.quizzes_taken || 0;
+      let averageQuizScore = currentRes.average_quiz_score || 0;
+
+      if (activityType === 'completed_quiz') {
+        quizzesTaken += 1;
+        // In this simplified upstream sync, we use the current accuracy of the quiz activity.
+        // For more precision, we'd pass the specific quiz score, but recordTopicActivity usually
+        // processes per-question. However, completed_quiz is called once at the end of the batch in submitTest.
+        // We'll update the average quiz score using the current overall accuracy as a proxy if it was a focused quiz.
+        averageQuizScore = Math.round(((averageQuizScore * (quizzesTaken - 1)) + accuracy) / quizzesTaken);
+      }
+
       await supabase
         .from('topic_resources')
         .update({
           questions_attempted: totalAttempted,
           questions_correct: totalCorrect,
           average_accuracy: Math.round(accuracy),
+          quizzes_taken: quizzesTaken,
+          average_quiz_score: averageQuizScore,
           mastery_level: newMastery,
           study_stage: nextStage,
           last_practiced: new Date().toISOString()
@@ -679,7 +693,7 @@ function transformInsight(dbInsight: any): ChapterInsight {
  */
 function fuzzyMatchInsights(
   topicName: string,
-  insightsByTopicLower: Map<string, {originalTopic: string, insights: ChapterInsight[]}>
+  insightsByTopicLower: Map<string, { originalTopic: string, insights: ChapterInsight[] }>
 ): ChapterInsight[] {
   const topicNameLower = topicName.toLowerCase();
   const allInsights: ChapterInsight[] = [];

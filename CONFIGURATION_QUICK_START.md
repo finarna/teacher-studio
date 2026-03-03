@@ -129,9 +129,9 @@ This guide walks you through configuring all external services needed for EduJou
      - `http://localhost:9000`
      - `https://your-production-domain.com` (add later)
    - Authorized redirect URIs:
-     - `https://<your-project>.supabase.co/auth/v1/callback`
+     - `https://ozrkewbrwgtcunoerzka.supabase.co/auth/v1/callback`
      - To find this: Go to Supabase → Settings → API → Project URL
-     - Format: `https://abcdefghijk.supabase.co/auth/v1/callback`
+     - Format: `https://<your-id>.supabase.co/auth/v1/callback`
    - Click "Create"
    - Copy:
      - **Client ID**: `123456789.apps.googleusercontent.com`

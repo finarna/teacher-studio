@@ -195,7 +195,12 @@ CREATE TABLE IF NOT EXISTS public.questions (
   options JSONB, -- Array of strings
   correct_option_index INTEGER,
   solution_steps JSONB DEFAULT '[]'::jsonb,
-  exam_tip TEXT,
+  exam_tip TEXT, -- Deprecated, use study_tip
+  study_tip TEXT,
+  ai_reasoning TEXT,
+  historical_pattern TEXT,
+  predictive_insight TEXT,
+  why_it_matters TEXT,
   visual_concept TEXT,
   key_formulas JSONB DEFAULT '[]'::jsonb,
   pitfalls JSONB DEFAULT '[]'::jsonb,

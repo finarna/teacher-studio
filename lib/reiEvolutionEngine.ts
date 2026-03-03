@@ -49,7 +49,8 @@ export async function getForecastedCalibration(
     // Fallback to static "Blueprint" if no historical data exists
     const baseline = getBaselineProfile(examContext);
 
-    if (!historicalData || historicalData.length < 2) {
+    // If NO data at all, return flat fallback
+    if (!historicalData || historicalData.length === 0) {
         return {
             examContext,
             subject,
@@ -57,15 +58,31 @@ export async function getForecastedCalibration(
             rigorVelocity: 1.0,
             difficultyProfile: baseline.profile,
             intentSignature: baseline.signature,
-            directives: ["Standard Blueprint Alignment"],
+            directives: ["Universal Anchor Baseline"],
             boardSignature: baseline.boardSignature
         };
     }
 
     // 2. Perform Recursive Rigor Gradient Analysis
-    // Compare most recent year with previous years to detect "Drift"
-    const recent = historicalData[0];
-    const previous = historicalData[1];
+    // If length >= 2, we use real gradients. If length == 1, we use a "System Anchor" (Theoretical 2020)
+    let recent = historicalData[0];
+    let previous;
+    let effectiveHistory = [...historicalData];
+
+    if (historicalData.length >= 2) {
+        previous = historicalData[1];
+    } else {
+        // SYSTEM ANCHOR: Compare the single available scan (e.g. 2021) against the theoretical norm
+        previous = {
+            year: recent.year - 1,
+            difficulty_hard_pct: baseline.profile.hard,
+            difficulty_moderate_pct: baseline.profile.moderate,
+            difficulty_easy_pct: baseline.profile.easy,
+            evolution_note: `Universal ${examContext} Anchor Specification`
+        };
+        effectiveHistory.push(previous);
+        console.log(`📡 [REI v3.0] Bootstrapping gradient from System Anchor for ${recent.year}`);
+    }
 
     // DRIFT CALCULATION: Delta in "Extreme Rigor" (Hard %)
     const rigorDrift = (recent.difficulty_hard_pct || 20) - (previous.difficulty_hard_pct || 20);
@@ -82,8 +99,8 @@ export async function getForecastedCalibration(
     const forecastedModerate = 100 - forecastedHard - forecastedEasy;
 
     // 4. Extract Evolution Intent from Data
-    // This is the "Auditor" chain: PYQ Audit -> Evolution Notes -> Calibration Directives
-    const directives = extractDirectivesFromNotes(historicalData, examContext, subject, rigorDrift);
+    // Use effectiveHistory to include anchor if necessary
+    const directives = extractDirectivesFromNotes(effectiveHistory, examContext, subject, rigorDrift);
 
     const calibration = {
         examContext,
@@ -105,7 +122,7 @@ export async function getForecastedCalibration(
         boardSignature: baseline.boardSignature
     };
 
-    // 5. [NEW] Persist the "Processed Intelligence" for auditing and rapid retrieval
+    // 5. Persist the "Processed Intelligence"
     await saveForecastedCalibration(calibration);
 
     return calibration;

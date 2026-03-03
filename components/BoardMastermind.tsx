@@ -32,6 +32,7 @@ import { extractPhysicsQuestionsSimplified } from '../utils/simplePhysicsExtract
 import { extractBiologyQuestionsSimplified } from '../utils/simpleBiologyExtractor';
 import { extractChemistryQuestionsSimplified } from '../utils/simpleChemistryExtractor'; // NEW: Simplified Chemistry
 import { matchToOfficialTopic } from '../utils/officialTopics'; // NEW: Official Topic Mapping
+import { AI_CONFIG } from '../config/aiConfigs';
 
 import { mapTopicsFast } from '../utils/topicMapper'; // NEW: Instant keyword-based topic mapping
 import { useAppContext } from '../contexts/AppContext';
@@ -56,7 +57,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
   const subj: any = selectedSubject;
   const selectedGrade = 'Class 12'; // Can be derived from examConfig if needed
 
-  const [selectedModel, setSelectedModel] = useState('gemini-3-flash-preview');
+  const [selectedModel, setSelectedModel] = useState(AI_CONFIG.defaultModel);
   const [useSimplifiedExtraction, setUseSimplifiedExtraction] = useState(true); // NEW: Toggle for simplified extraction
   const [enableVisionExtraction, setEnableVisionExtraction] = useState(false); // NEW: Toggle for vision-guided image extraction (slow)
   const [isProcessing, setIsProcessing] = useState(false);
@@ -1197,13 +1198,9 @@ CRITICAL RULES:
           <div className="h-6 w-px bg-slate-200" />
           <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}
             className="bg-white border border-slate-200 text-slate-900 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-4 focus:ring-accent-500/10 shadow-sm outline-none cursor-pointer hover:border-accent-300 transition-colors">
-            <option value="gemini-3-flash-preview">GEMINI 3 FLASH PREVIEW ⚡</option>
-            <option value="gemini-2.0-flash-lite">GEMINI 2.0 FLASH LITE (FAST)</option>
-            <option value="gemini-2.5-flash-latest">GEMINI 2.5 FLASH</option>
-            <option value="gemini-2.0-flash-exp">GEMINI 2.0 FLASH EXP</option>
-            <option value="gemini-1.5-pro">GEMINI 1.5 PRO</option>
-            <option value="gemini-2.0-pro-exp">GEMINI 2.0 PRO EXP</option>
-            <option value="gemini-3-pro">GEMINI 3 PRO</option>
+            {AI_CONFIG.displayModels.map(m => (
+              <option key={m.id} value={m.id}>{m.label}</option>
+            ))}
           </select>
           <div className="h-6 w-px bg-slate-200" />
           <button

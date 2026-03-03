@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -32,6 +32,7 @@ import {
   X,
   Info,
   PlayCircle,
+  Activity,
   Signal,
   Settings,
   Monitor
@@ -46,13 +47,16 @@ import { RenderWithMath } from './MathRenderer';
 import PracticeSolutionModal from './PracticeSolutionModal';
 import PracticeInsightsModal from './PracticeInsightsModal';
 import { usePracticeSession } from '../hooks/usePracticeSession';
+import { synthesizeQuestionIntelligence } from '../lib/intelligenceSynthesis';
 import { motion, AnimatePresence } from 'framer-motion';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import { supabase } from '../lib/supabase';
 import { cache } from '../utils/cache';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
-import { useMemo } from 'react';
+
 import ComplexityMatrix from './ComplexityMatrix';
+import { AI_CONFIG } from '../config/aiConfigs';
+import { EXAM_CONFIGS } from '../config/exams';
 
 interface TopicDetailPageProps {
   topicResource: TopicResource;
@@ -64,6 +68,43 @@ interface TopicDetailPageProps {
 }
 
 type TabType = 'learn' | 'practice' | 'quiz' | 'flashcards' | 'progress';
+
+/**
+ * CORE DATA MAPPING: Normalizes question data from various sources (DB columns, JSONB meta, old schemas)
+ */
+const formatAnalyzedQuestion = (q: any): AnalyzedQuestion => {
+  const meta = q.mastery_material || q.masteryMaterial || {};
+
+  const formatted: AnalyzedQuestion = {
+    ...q,
+    id: q.id || q.question_id || q.questionId,
+    text: q.text || q.question_text || '',
+    options: q.options || [],
+    difficulty: (q.difficulty || q.diff || 'Moderate') as 'Easy' | 'Moderate' | 'Hard',
+    correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? (q.correctIndex !== undefined ? q.correctIndex : 0),
+
+    // Intelligence Retrieval (Column-first, Meta fallback)
+    aiReasoning: q.ai_reasoning || q.aiReasoning || meta.aiReasoning || meta.ai_reasoning || '',
+    historicalPattern: q.historical_pattern || q.historicalPattern || meta.historicalPattern || meta.historical_pattern || '',
+    predictiveInsight: q.predictive_insight || q.predictiveInsight || meta.predictiveInsight || meta.predictive_insight || '',
+    whyItMatters: q.why_it_matters || q.whyItMatters || meta.whyItMatters || meta.why_it_matters || '',
+    studyTip: q.study_tip || q.studyTip || q.exam_tip || q.examTip || meta.studyTip || meta.examTip || '',
+
+    // Structural Data
+    solutionSteps: (q.solution_steps || q.solutionSteps || meta.solutionSteps || meta.solution_steps || (q.explanation ? [q.explanation] : [])),
+    markingScheme: (q.marking_scheme || q.marking_steps || q.markingScheme || meta.markingSteps || meta.marking_steps || []),
+    keyConcepts: (q.key_concepts || q.keyConcepts || meta.keyConcepts || []),
+    commonMistakes: (q.pitfalls || q.common_mistakes || q.commonMistakes || meta.commonMistakes || []),
+    keyFormulas: (q.key_formulas || q.keyFormulas || meta.keyFormulas || []),
+
+    // Visuals
+    visualConcept: q.visual_concept || q.visualConcept || meta.visualConcept || '',
+    diagramUrl: q.diagram_url || q.diagramUrl || meta.diagramUrl || '',
+    extractedImages: q.extractedImages || q.extracted_images || (q.diagram_url ? [q.diagram_url] : (meta.diagramUrl ? [meta.diagramUrl] : []))
+  };
+
+  return formatted;
+};
 
 const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
   topicResource,
@@ -94,9 +135,15 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
   };
 
   const refreshStats = (silent: boolean = true) => {
+    // Only increment local trigger to fetch stats without triggering a full parent re-render
+    // through onRefreshData if it's a silent update (like an answer save)
     setStatsRefreshTrigger(prev => prev + 1);
-    onRefreshData?.(silent);
-    handleRefresh(silent); // Trigger refresh of subject progress as well
+
+    // If not silent, we do a full refresh
+    if (!silent) {
+      onRefreshData?.(false);
+      handleRefresh(false);
+    }
   };
 
   const [localStats, setLocalStats] = useState({
@@ -112,77 +159,163 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
     setTotalQuestionsIncludingAI(topicResource.totalQuestions);
   }, [topicResource.totalQuestions]);
 
-  useEffect(() => {
-    const fetchLatestStats = async () => {
-      if (!user) return;
-      try {
-        console.log('📡 [TopicDetailPage] Fetching latest stats from DB...');
-        const { data, error } = await supabase
-          .from('topic_resources')
-          .select('mastery_level, average_accuracy, quizzes_taken, study_stage, notes_completed, questions_attempted, questions_correct')
-          .eq('user_id', user.id)
-          .eq('topic_id', topicResource.topicId)
-          .eq('exam_context', examContext)
-          .maybeSingle();
-
-        if (error) {
-          console.error('❌ [TopicDetailPage] Stats fetch error:', error);
-          return;
-        }
-
-        if (data) {
-          console.log('📡 [TopicDetailPage] Stats received:', data);
-          setLocalStats({
-            masteryLevel: data.mastery_level || 0,
-            averageAccuracy: data.average_accuracy || 0,
-            quizzesTaken: data.quizzes_taken || 0,
-            studyStage: data.study_stage || 'not_started',
-            notesCompleted: data.notes_completed || false
-          });
-        } else {
-          console.warn('📡 [TopicDetailPage] No stats found for this resource');
-        }
-      } catch (err) {
-        console.error('❌ [TopicDetailPage] Unexpected stats error:', err);
-      }
-    };
-    fetchLatestStats();
-  }, [user, activeTab, topicResource.topicId, examContext, statsRefreshTrigger]);
-
-  // Shared questions state that persists across tab switches
-  const formatAnalyzedQuestion = (q: any): AnalyzedQuestion => {
-    return {
-      ...q,
-      id: q.id,
-      text: q.text || q.question_text || '',
-      options: q.options || [],
-      difficulty: (q.difficulty || q.diff || 'Moderate') as 'Easy' | 'Moderate' | 'Hard',
-      correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? (q.correctIndex !== undefined ? q.correctIndex : 0),
-      solutionSteps: q.solutionSteps || q.solution_steps || q.mastery_material?.solutionSteps || q.mastery_material?.steps || (q.explanation ? [q.explanation] : []),
-      markingScheme: q.markingScheme || q.marking_scheme || q.mastery_material?.markingSteps || q.mastery_material?.markingScheme || [],
-      markingSteps: q.markingSteps || q.marking_steps || q.mastery_material?.markingSteps || q.mastery_material?.markingScheme || [],
-      studyTip: q.studyTip || q.study_tip || q.exam_tip || q.examTip || q.mastery_material?.examTip || '',
-      examTip: q.examTip || q.exam_tip || q.mastery_material?.examTip || '',
-      bloomsTaxonomy: q.bloomsTaxonomy || q.blooms_taxonomy || q.blooms || '',
-      keyConcepts: q.keyConcepts || q.key_concepts || q.mastery_material?.keyConcepts || [],
-      commonMistakes: q.commonMistakes || q.common_mistakes || q.pitfalls || q.mastery_material?.commonMistakes || [],
-      keyFormulas: q.keyFormulas || q.key_formulas || q.mastery_material?.keyFormulas || [],
-      thingsToRemember: q.thingsToRemember || q.things_to_remember || q.key_formulas || [],
-      aiReasoning: q.aiReasoning || q.ai_reasoning || q.mastery_material?.aiReasoning || `This ${q.topic || topicResource.topicName} question targets core patterns frequently seen in ${examContext} documentation.`,
-      historicalPattern: q.historicalPattern || q.historical_pattern || q.mastery_material?.historicalPattern || `Analysis identifies this concept as a stable pillar in ${examContext} subject distributions.`,
-      predictiveInsight: q.predictiveInsight || q.predictive_insight || q.mastery_material?.predictiveInsight || 'Probability of appearance is calculated at 70%+ based on previous patterns.',
-      whyItMatters: q.whyItMatters || q.why_it_matters || q.mastery_material?.whyItMatters || `Mastering this specific node unlocks adjacent concepts across the ${subject} syllabus.`,
-      relevanceScore: q.relevanceScore || q.relevance_score || q.mastery_material?.relevanceScore || 70,
-      visualConcept: q.visualConcept || q.visual_concept || q.mastery_material?.visualConcept || '',
-      diagramUrl: q.diagramUrl || q.diagram_url || q.mastery_material?.diagramUrl || '',
-      extractedImages: q.extractedImages || q.extracted_images || (q.diagram_url ? [q.diagram_url] : (q.mastery_material?.diagramUrl ? [q.mastery_material.diagramUrl] : []))
-    };
-  };
-
   const [sharedQuestions, setSharedQuestions] = useState<AnalyzedQuestion[]>((topicResource.questions || []).map(formatAnalyzedQuestion));
   const [focusedQuestionId, setFocusedQuestionId] = useState<string | null>(null);
   const [isNavigatorOpen, setIsNavigatorOpen] = useState(false);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+
+  // Past quizzes state (moved up from QuizTab for visibility in Progress tab)
+  const [pastQuizzes, setPastQuizzes] = useState<any[]>([]);
+  const [loadingPastQuizzes, setLoadingPastQuizzes] = useState(false);
+  const [reviewQuiz, setReviewQuiz] = useState<any | null>(null);
+
+  // Helper function to fetch test_responses for a test_attempt
+  const fetchTestResponses = async (attemptId: string) => {
+    try {
+      const { data: responses, error } = await supabase
+        .from('test_responses')
+        .select(`
+          *,
+          questions (
+            id,
+            text,
+            options,
+            correct_option_index,
+            difficulty,
+            solution_steps,
+            exam_tip,
+            study_tip
+          )
+        `)
+        .eq('attempt_id', attemptId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Failed to fetch test_responses:', error);
+        return null;
+      }
+
+      // Transform to match quiz_attempts format
+      return responses?.map((r: any) => {
+        const q = r.questions;
+        return {
+          question: q?.text || '',
+          options: q?.options || [],
+          correctIndex: q?.correct_option_index ?? 0,
+          userAnswer: r.selected_option,
+          isCorrect: r.is_correct,
+          difficulty: q?.difficulty || 'Moderate',
+          solutionSteps: q?.solution_steps || [],
+          examTip: q?.study_tip || q?.exam_tip || ''
+        };
+      });
+    } catch (err) {
+      console.error('Error fetching test responses:', err);
+      return null;
+    }
+  };
+
+  const loadPastQuizzes = useCallback(async () => {
+    if (!user) return;
+    setLoadingPastQuizzes(true);
+    try {
+      // Fetch from BOTH quiz_attempts AND test_attempts, then merge
+      const [quizAttemptsResult, testAttemptsResult] = await Promise.all([
+        // 1. Query quiz_attempts table (desktop inline quizzes)
+        supabase
+          .from('quiz_attempts')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('topic_name', topicResource.topicName)
+          .eq('exam_context', examContext)
+          .order('created_at', { ascending: false })
+          .limit(10),
+
+        // 2. Query test_attempts table (API-based quizzes from mobile/TestInterface)
+        supabase
+          .from('test_attempts')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('test_type', 'topic_quiz')
+          .eq('topic_id', topicResource.topicId)
+          .eq('exam_context', examContext)
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
+          .limit(10)
+      ]);
+
+      const allQuizzes: any[] = [];
+
+      // Process quiz_attempts
+      if (quizAttemptsResult.data) {
+        const mapped = quizAttemptsResult.data.map(q => ({
+          ...q,
+          id: q.id,
+          createdAt: q.created_at,
+          accuracyPercentage: q.accuracy_percentage,
+          correctCount: q.correct_count,
+          wrongCount: q.wrong_count,
+          questionCount: q.question_count,
+          timeSpentSeconds: q.time_spent_seconds,
+          percentage: q.accuracy_percentage,
+          score: q.correct_count,
+          totalQuestions: q.question_count,
+          durationMinutes: Math.floor(q.time_spent_seconds / 60),
+          status: 'completed',
+          questionsData: typeof q.questions_data === 'string' ? JSON.parse(q.questions_data) : q.questions_data,
+          source: 'quiz_attempts'
+        }));
+        allQuizzes.push(...mapped);
+      }
+
+      // Process test_attempts - FETCH QUESTIONS TOO
+      if (testAttemptsResult.data && testAttemptsResult.data.length > 0) {
+        // Fetch test_responses for each test_attempt to get questions
+        const testAttemptsWithQuestions = await Promise.all(
+          testAttemptsResult.data.map(async (q) => {
+            const questionsData = await fetchTestResponses(q.id);
+            return {
+              ...q,
+              id: q.id,
+              createdAt: q.created_at,
+              percentage: q.percentage || 0,
+              accuracyPercentage: q.percentage || 0,
+              score: q.raw_score || 0,
+              correctCount: q.raw_score || 0,
+              totalQuestions: q.total_questions || 0,
+              questionCount: q.total_questions || 0,
+              durationMinutes: q.duration_minutes || 0,
+              timeSpentSeconds: (q.duration_minutes || 0) * 60,
+              status: q.status,
+              source: 'test_attempts',
+              questionsData: questionsData,
+              questions_data: questionsData
+            };
+          })
+        );
+        allQuizzes.push(...testAttemptsWithQuestions);
+      }
+
+      // Sort all quizzes by creation date (most recent first)
+      allQuizzes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      console.log(`📊 [TopicDetailPage] History loaded: ${allQuizzes.length} attempts (${quizAttemptsResult.data?.length || 0} from quiz_attempts, ${testAttemptsResult.data?.length || 0} from test_attempts)`);
+
+      setPastQuizzes(allQuizzes.slice(0, 10)); // Limit to 10 total
+    } catch (err) {
+      console.error('❌ [TopicDetailPage] Failed to load history:', err);
+      setPastQuizzes([]);
+    } finally {
+      setLoadingPastQuizzes(false);
+    }
+  }, [user?.id, topicResource.topicName, topicResource.topicId, examContext]);
+
+  // Load history on mount or topic change
+  useEffect(() => {
+    if (user) {
+      loadPastQuizzes();
+    }
+  }, [user?.id, topicResource.topicId, loadPastQuizzes]);
 
   // Unified question loading in parent to ensure availability across all tabs
   useEffect(() => {
@@ -190,73 +323,68 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
       if (!user?.id || !topicResource.topicName) return;
       setIsLoadingQuestions(true);
       try {
-        console.log(`🔍 [TopicDetailPage] Loading questions for topic: ${topicResource.topicName}`);
+        console.log(`🔍 [TopicDetailPage] Syncing questions for: ${topicResource.topicName}`);
 
-        // Step 1: Find placeholder scans for AI practice
-        const { data: scans, error: scansError } = await supabase
-          .from('scans')
-          .select('id')
-          .eq('user_id', user.id)
-          .filter('metadata->>is_ai_practice_placeholder', 'eq', 'true')
-          .eq('subject', subject);
+        // Fetch ALL questions for this topic with all columns (*)
+        const { data: dbQuestions, error } = await supabase
+          .from('questions')
+          .select('*')
+          .eq('subject', subject)
+          .eq('exam_context', examContext)
+          .eq('topic', topicResource.topicName);
 
-        if (scansError) throw scansError;
-        const scanIds = scans?.map(s => s.id) || [];
+        if (error) throw error;
 
-        // Step 2: Fetch questions belonging to these scans and this topic
-        let allLoadedQuestions = (topicResource.questions || []).map(formatAnalyzedQuestion);
-
-        if (scanIds.length > 0) {
-          const { data: aiQuestions, error } = await supabase
-            .from('questions')
-            .select('*')
-            .eq('subject', subject)
-            .eq('exam_context', examContext)
-            .eq('topic', topicResource.topicName)
-            .in('scan_id', scanIds);
-
-          if (error) throw error;
-
-          if (aiQuestions && aiQuestions.length > 0) {
-            const formattedAIQuestions: AnalyzedQuestion[] = aiQuestions.map(formatAnalyzedQuestion);
-
-            // Merge with existing
-            const existingIds = new Set(allLoadedQuestions.map(q => q.id));
-            const uniqueNew = formattedAIQuestions.filter(q => !existingIds.has(q.id));
-            allLoadedQuestions = [...allLoadedQuestions, ...uniqueNew];
-          }
-        }
-
-        setSharedQuestions(allLoadedQuestions);
-        setTotalQuestionsIncludingAI(allLoadedQuestions.length);
-
-        // Detailed debug of one AI question if available
-        const aiSample = allLoadedQuestions.find(q => q.id.includes('-') || q.source?.includes('ai'));
-        if (aiSample) {
-          console.log('🧪 [DEBUG] AI Question Sample Data:', {
-            id: aiSample.id,
-            text: aiSample.text?.slice(0, 30),
-            solutionStepsCount: aiSample.solutionSteps?.length,
-            markingSchemeCount: aiSample.markingScheme?.length,
-            raw: aiSample
-          });
+        if (dbQuestions && dbQuestions.length > 0) {
+          const formattedQuestions: AnalyzedQuestion[] = dbQuestions.map(formatAnalyzedQuestion);
+          setSharedQuestions(formattedQuestions);
+          setTotalQuestionsIncludingAI(formattedQuestions.length);
         }
       } catch (err) {
-        console.error('❌ [TopicDetailPage] Failed to load questions:', err);
+        console.error('❌ [TopicDetailPage] Failed to sync questions:', err);
       } finally {
         setIsLoadingQuestions(false);
       }
     };
 
     loadQuestionsFromDB();
-  }, [user?.id, topicResource.topicId, topicResource.questions, subject, examContext]);
+  }, [user?.id, topicResource.topicName, subject, examContext]);
+
+  // Sync stats when activeTab or refresh trigger changes
+  useEffect(() => {
+    const fetchLatestStats = async () => {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase
+          .from('topic_resources')
+          .select('mastery_level, average_accuracy, quizzes_taken, study_stage, notes_completed')
+          .eq('user_id', user.id)
+          .eq('topic_id', topicResource.topicId)
+          .eq('exam_context', examContext)
+          .maybeSingle();
+
+        if (data && !error) {
+          setLocalStats({
+            masteryLevel: data.mastery_level || 0,
+            averageAccuracy: data.average_accuracy || 0,
+            quizzesTaken: data.quizzes_taken || 0,
+            studyStage: data.study_stage || 'not_started',
+            notesCompleted: data.notes_completed || false
+          });
+        }
+      } catch (err) {
+        console.error('Stats fetch error:', err);
+      }
+    };
+    fetchLatestStats();
+  }, [user, activeTab, topicResource.topicId, examContext, statsRefreshTrigger]);
 
   const tabs = [
     { id: 'learn' as TabType, label: 'Learn', icon: BookOpen, accent: 'text-blue-500', bg: 'bg-blue-50' },
     { id: 'practice' as TabType, label: 'Solve', icon: Zap, accent: 'text-amber-500', bg: 'bg-amber-50' },
     { id: 'quiz' as TabType, label: 'Mastery', icon: Target, accent: 'text-emerald-500', bg: 'bg-emerald-50' },
     { id: 'flashcards' as TabType, label: 'Recall', icon: Brain, accent: 'text-purple-500', bg: 'bg-purple-50' },
-    { id: 'progress' as TabType, label: 'Stats', icon: BarChart3, accent: 'text-indigo-500', bg: 'bg-indigo-50' }
+    { id: 'progress' as TabType, label: 'History', icon: BarChart3, accent: 'text-indigo-500', bg: 'bg-indigo-50' }
   ];
 
   const swipeConfidenceThreshold = 10000;
@@ -290,10 +418,10 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
         actions={null}
       >
         {/* UNIFIED SINGLE BAR: Tabs + Metrics */}
-        <div className="flex flex-col items-start w-full bg-white backdrop-blur-md rounded-[1.5rem] p-4 border border-slate-200/60 shadow-sm gap-4 mt-4">
+        <div className="flex flex-col items-start w-full bg-white backdrop-blur-md rounded-[1.5rem] p-3 md:p-4 border border-slate-200/60 shadow-sm gap-3 md:gap-4 mt-2 md:mt-4">
 
           {/* Top: Tab Selector */}
-          <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/50 w-full overflow-x-auto scroller-hide">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-[1.25rem] border border-slate-200/50 w-full overflow-x-auto scroller-hide">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -320,7 +448,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
           </div>
 
           {/* Bottom: Compact Metrics */}
-          <div className="flex items-center justify-between w-full overflow-x-auto scroller-hide gap-6 md:gap-8 px-2">
+          <div className="flex items-center justify-between w-full overflow-x-auto scroller-hide gap-4 md:gap-8 px-1 md:px-2">
             {[
               {
                 label: 'Mastery',
@@ -333,26 +461,16 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
               { label: 'Questions', val: totalQuestionsIncludingAI, icon: FileQuestion, color: 'text-purple-600' },
               { label: 'Quizzes', val: localStats.quizzesTaken, icon: Brain, color: 'text-amber-600' }
             ].map((s, i) => (
-              <div key={i} className="flex items-center gap-3 shrink-0">
+              <div key={i} className="flex items-center gap-2 md:gap-3 shrink-0">
                 <div className="flex flex-col">
-                  <span className="text-xl font-black text-slate-900 font-outfit leading-none mb-1">{s.val}</span>
-                  <div className="flex items-center gap-1.5">
-                    <s.icon size={14} className={s.color} />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{s.label}</span>
-                    {s.tooltip && (
-                      <div className="group relative">
-                        <Info size={12} className="text-slate-300 hover:text-slate-500 transition-colors cursor-help" />
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-[10px] font-medium leading-relaxed rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-[100] shadow-2xl border border-white/10 backdrop-blur-xl">
-                          <div className="relative z-10">
-                            {s.tooltip}
-                          </div>
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-slate-900" />
-                        </div>
-                      </div>
-                    )}
+                  <span className="text-lg md:text-xl font-black text-slate-900 font-outfit leading-none mb-0.5 md:mb-1">{s.val}</span>
+                  <div className="flex items-center gap-1 md:gap-1.5">
+                    <s.icon size={12} className={s.color} />
+                    <span className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] md:tracking-widest">{s.label}</span>
+                    {i < 3 && <div className="h-4 w-px bg-slate-100 ml-2 md:hidden" />}
                   </div>
                 </div>
-                {i < 3 && <div className="h-8 w-px bg-slate-200 ml-4 md:ml-6 hidden sm:block" />}
+                {i < 3 && <div className="h-8 w-px bg-slate-200 ml-4 md:ml-6 hidden md:block" />}
               </div>
             ))}
           </div>
@@ -375,7 +493,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
           >
             {activeTab === 'learn' && (
               <LearnTab
-                topicResource={topicResource}
+                topicResource={{ ...topicResource, ...localStats }}
                 subject={subject}
                 examContext={examContext}
                 onProgressUpdate={refreshStats}
@@ -384,7 +502,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
             )}
             {activeTab === 'practice' && (
               <PracticeTab
-                topicResource={topicResource}
+                topicResource={{ ...topicResource, ...localStats }}
                 subject={subject}
                 examContext={examContext}
                 onQuestionCountChange={setTotalQuestionsIncludingAI}
@@ -399,7 +517,7 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
             )}
             {activeTab === 'quiz' && (
               <QuizTab
-                topicResource={topicResource}
+                topicResource={{ ...topicResource, ...localStats }}
                 subject={subject}
                 examContext={examContext}
                 sharedQuestions={sharedQuestions}
@@ -407,15 +525,25 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
                 onProgressUpdate={refreshStats}
                 poolCount={totalQuestionsIncludingAI}
                 onStartQuiz={onStartQuiz}
+                pastQuizzes={pastQuizzes}
+                loadingPastQuizzes={loadingPastQuizzes}
+                refreshHistory={loadPastQuizzes}
               />
             )}
             {activeTab === 'flashcards' && (
               <FlashcardsTab
-                topicResource={topicResource}
+                topicResource={{ ...topicResource, ...localStats }}
                 sharedQuestions={sharedQuestions}
               />
             )}
-            {activeTab === 'progress' && <ProgressTab topicResource={{ ...topicResource, ...localStats }} />}
+            {activeTab === 'progress' && (
+              <ProgressTab
+                topicResource={{ ...topicResource, ...localStats }}
+                pastQuizzes={pastQuizzes}
+                isLoading={loadingPastQuizzes}
+                setReviewQuiz={setReviewQuiz}
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -441,6 +569,7 @@ const LearnTab: React.FC<{
   const [completedSketches, setCompletedSketches] = useState<Set<string>>(new Set());
   const [sketchStartTime, setSketchStartTime] = useState<number | null>(null);
   const [totalDurations, setTotalDurations] = useState<Map<string, number>>(new Map());
+
 
   // Load visual sketch notes for this topic from user's scans
   useEffect(() => {
@@ -1113,7 +1242,7 @@ const PracticeTab: React.FC<{
         const genAI = new GoogleGenerativeAI(apiKey);
 
         // Get model from Settings or force gemini-1.5-flash
-        const selectedModel = 'gemini-3-flash-preview';
+        const selectedModel = AI_CONFIG.defaultModel;
         const model = genAI.getGenerativeModel({
           model: selectedModel,
           generationConfig: { responseMimeType: "application/json" }
@@ -1125,22 +1254,30 @@ const PracticeTab: React.FC<{
         // HIGH-RIGOR PROMPT
         const prompt = `Generate ${generateCount} HIGH-RIGOR ${subject} MCQ questions for ${examContext} syllabus on "${topicResource.topicName}".
         
-        CRITICAL: Each question MUST include a detailed step-by-step solution.
+        CRITICAL: Each question MUST include a detailed step-by-step solution and deep intelligence fields.
         
-        Return ONLY valid JSON with a "questions" array containing:
-        - id: a unique string
+        Return ONLY valid JSON with a "questions" array containing items with these exact keys:
+        - id: string
         - text: the question text (use $ $ for math)
         - options: array of 4 strings (use $ $ for math)
         - correctOptionIndex: 0-3
-        - solutionSteps: array of 3-5 strings explaining the step-by-step solution
-        - markingScheme: array of {step, mark} for the solution
+        - solutionSteps: array of 3-5 strings explaining the step-by-step solution (Format: "Title ::: Reasoning")
+        - markingScheme: array of {step, mark}
         - topic: "${topicResource.topicName}"
         - difficulty: "Easy", "Moderate", or "Hard"
-        - bloomsTaxonomy: "Remember", "Understand", "Apply", "Analyze", "Evaluate", or "Create"
-        - pedagogy: "Conceptual", "Problem-Solving", or "Application"
-        - aiReasoning: 1 sentence on why this specific pattern is high-vield
-        - whyItMatters: why this concept is vital for ${examContext}
-        - studyTip: a strategic advice for this specific question`;
+        - aiReasoning: Explain the TECHNICAL mindset and trap analysis for THIS specific problem.
+        - historicalPattern: Historical context or syllabus shift frequency.
+        - predictiveInsight: Prediction of future question variants for this concept.
+        - whyItMatters: Practical/Engineering application for this specific concept.
+        - studyTip: A strategic mastery shortcut, mnemonic, or visualization ritual.
+        - keyConcepts: array of {name, explanation}
+        - commonMistakes: array of {mistake, why, howToAvoid}
+        
+        CRITICAL RULES:
+        1. Use $ for inline math and $$ for display math.
+        2. In JSON, use double backslashes for all LaTeX commands: "\\\\frac{1}{2}" or "\\\\log".
+        3. Generic advice like "Check calculations" is strictly FORBIDDEN.
+        4. Focus exclusively on "${topicResource.topicName}" syllabus for ${examContext}.`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
@@ -1289,28 +1426,35 @@ const PracticeTab: React.FC<{
             blooms: q.bloomsTaxonomy, // Column is 'blooms', not 'blooms_taxonomy'
             domain: q.domain,
             year: yearValue,
-          subject: subject,
-          exam_context: examContext,
-          pedagogy: q.pedagogy,
-          // Map AI fields to existing columns
-          solution_steps: q.solutionSteps,
-          exam_tip: q.studyTip,
-          visual_concept: q.visualConcept,
-          key_formulas: q.thingsToRemember,
-          pitfalls: q.commonMistakes,
-          has_visual_element: q.hasVisualElement || false,
-          visual_element_description: q.visualElementDescription,
-          // Store remaining AI data in mastery_material JSONB column
-          mastery_material: {
-            keyConcepts: q.keyConcepts,
-            aiReasoning: q.aiReasoning,
-            historicalPattern: q.historicalPattern,
-            predictiveInsight: q.predictiveInsight,
-            whyItMatters: q.whyItMatters,
-            relevanceScore: q.relevanceScore,
-            markingSteps: q.markingSteps // Keep original steps in JSONB just in case
-          }
-        };
+            subject: subject,
+            exam_context: examContext,
+            pedagogy: q.pedagogy,
+            // Map AI fields to existing and new columns
+            solution_steps: q.solutionSteps,
+            study_tip: q.studyTip,
+            exam_tip: q.studyTip, // Maintain backward compatibility
+            ai_reasoning: q.aiReasoning,
+            historical_pattern: q.historicalPattern,
+            predictive_insight: q.predictiveInsight,
+            why_it_matters: q.whyItMatters,
+            visual_concept: q.visualConcept,
+            key_formulas: Array.isArray(q.keyFormulas) ? q.keyFormulas : (q.thingsToRemember || []),
+            pitfalls: q.commonMistakes?.map((m: any) => ({
+              mistake: m.mistake || m.pitfall || '',
+              why: m.why || '',
+              howToAvoid: m.howToAvoid || ''
+            })) || [],
+            // Store remaining AI data in mastery_material JSONB column for backward compatibility
+            mastery_material: {
+              ...((q as any).mastery_material || q.masteryMaterial || {}),
+              keyConcepts: q.keyConcepts,
+              aiReasoning: q.aiReasoning,
+              historicalPattern: q.historicalPattern,
+              predictiveInsight: q.predictiveInsight,
+              whyItMatters: q.whyItMatters,
+              markingSteps: q.markingSteps
+            }
+          };
         });
 
         const { error: dbError } = await supabase
@@ -1396,6 +1540,40 @@ const PracticeTab: React.FC<{
         console.error('❌ Generation error:', error);
         setGenerateError(`Failed to generate questions: ${error.message || 'Unknown error'}. Please try again.`);
         setIsGenerating(false);
+      }
+    };
+
+    const [isRefining, setIsRefining] = useState<string | null>(null);
+
+    const handleRefineIntelligence = async (question: AnalyzedQuestion) => {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        alert("API Key missing. Please check your environment.");
+        return;
+      }
+
+      setIsRefining(question.id);
+      try {
+        const refined = await synthesizeQuestionIntelligence(
+          question,
+          topicResource.topicName,
+          subject,
+          examContext,
+          supabase,
+          apiKey
+        );
+        if (refined) {
+          const formattedRefined = formatAnalyzedQuestion(refined);
+          setQuestions(prev => prev.map(q => q.id === question.id ? formattedRefined : q));
+          // If modal is open, update it
+          if (solutionModalQuestion?.id === question.id) setSolutionModalQuestion(formattedRefined);
+          if (insightsModalQuestion?.id === question.id) setInsightsModalQuestion(formattedRefined);
+        }
+      } catch (err) {
+        console.error('Refinement failed', err);
+        alert("Failed to synthesize intelligence. Please try again.");
+      } finally {
+        setIsRefining(null);
       }
     };
 
@@ -1902,6 +2080,14 @@ const PracticeTab: React.FC<{
                             >
                               <Sparkles size={18} className="text-amber-500" /> AI Deep Insights
                             </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleRefineIntelligence(q); }}
+                              disabled={isRefining === q.id}
+                              title="Synthesize AI Solution/Insights"
+                              className="w-12 h-12 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 rounded-[1.25rem] flex items-center justify-center transition-all hover:border-blue-200 shadow-sm disabled:opacity-50"
+                            >
+                              <RefreshCw size={18} className={isRefining === q.id ? 'animate-spin' : ''} />
+                            </button>
                           </div>
                         )}
                       </div>
@@ -1973,6 +2159,8 @@ const PracticeTab: React.FC<{
             <PracticeSolutionModal
               question={solutionModalQuestion}
               onClose={() => setSolutionModalQuestion(null)}
+              onRefine={() => handleRefineIntelligence(solutionModalQuestion)}
+              isRefining={isRefining === solutionModalQuestion.id}
             />
           )
         }
@@ -1982,6 +2170,8 @@ const PracticeTab: React.FC<{
             <PracticeInsightsModal
               question={insightsModalQuestion}
               onClose={() => setInsightsModalQuestion(null)}
+              onRefine={() => handleRefineIntelligence(insightsModalQuestion)}
+              isRefining={isRefining === insightsModalQuestion.id}
             />
           )
         }
@@ -2077,6 +2267,9 @@ const QuizTab: React.FC<{
   onProgressUpdate?: (silent?: boolean) => void;
   poolCount: number;
   onStartQuiz: (topicId: string, totalQuestions?: number) => void;
+  pastQuizzes: any[];
+  loadingPastQuizzes: boolean;
+  refreshHistory: () => void;
 }> = ({
   topicResource,
   subject,
@@ -2085,13 +2278,17 @@ const QuizTab: React.FC<{
   setSharedQuestions,
   onProgressUpdate,
   poolCount,
-  onStartQuiz
+  onStartQuiz,
+  pastQuizzes,
+  loadingPastQuizzes,
+  refreshHistory
 }) => {
     const { user } = useAuth();
     const { isLoading: isTestGenerating } = useLearningJourney();
     const [isGenerating, setIsGenerating] = useState(false);
     const [quizQuestions, setQuizQuestions] = useState<any[]>([]);
     const [questionCount, setQuestionCount] = useState<number>(10);
+    const [strategy, setStrategy] = useState<'adaptive' | 'simulation'>('adaptive');
 
     // Quiz state
     const [isQuizActive, setIsQuizActive] = useState(false);
@@ -2102,6 +2299,13 @@ const QuizTab: React.FC<{
     const [timeElapsed, setTimeElapsed] = useState(0);
     const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
     const [quizSaved, setQuizSaved] = useState(false);
+    const [reviewQuiz, setReviewQuiz] = useState<any | null>(null);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+    // Reset question index when opening a new review
+    useEffect(() => {
+        setCurrentQuestionIndex(0);
+    }, [reviewQuiz]);
 
     // Difficulty Distribution State
     const [easy, setEasy] = useState(70);
@@ -2109,10 +2313,28 @@ const QuizTab: React.FC<{
     const [hard, setHard] = useState(5);
     const [isAutoComplexity, setIsAutoComplexity] = useState(true);
 
-    // Past quizzes
-    const [pastQuizzes, setPastQuizzes] = useState<any[]>([]);
     const [showPastQuizzes, setShowPastQuizzes] = useState(false);
-    const [loadingPastQuizzes, setLoadingPastQuizzes] = useState(false);
+
+    // Fetch forecast for simulation mode
+    const [topicForecast, setTopicForecast] = useState<any>(null);
+    useEffect(() => {
+      if (strategy === 'simulation') {
+        const config = EXAM_CONFIGS[examContext];
+        if (config) {
+          // Topic specific drift calculation
+          const drift = 1 + (topicResource.masteryLevel / 100) * 0.2;
+          setTopicForecast({
+            name: 'REI Oracle v3',
+            rigor: (drift).toFixed(2),
+            distribution: {
+              easy: Math.max(0, config.difficultyProfile.easy - 10),
+              moderate: config.difficultyProfile.moderate,
+              hard: config.difficultyProfile.hard + 10
+            }
+          });
+        }
+      }
+    }, [strategy, examContext, topicResource.masteryLevel]);
 
     // Derived Stats for Complexity Matrix
     const matrixStats = useMemo(() => {
@@ -2195,7 +2417,7 @@ const QuizTab: React.FC<{
           .map(q => q.concept || q.topic)
           .filter(Boolean);
 
-        const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
+        const selectedModel = localStorage.getItem('gemini_model') || AI_CONFIG.defaultModel;
         const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({
           model: selectedModel,
@@ -2341,7 +2563,7 @@ const QuizTab: React.FC<{
           pitfalls: q.pitfalls || []
         }));
 
-        await supabase.from('quiz_attempts').insert({
+        const { error: insertError } = await supabase.from('quiz_attempts').insert({
           user_id: user.id,
           topic_resource_id: topicResource.id,
           subject,
@@ -2354,6 +2576,13 @@ const QuizTab: React.FC<{
           accuracy_percentage: accuracy,
           time_spent_seconds: timeElapsed
         });
+
+        if (insertError) {
+          console.error('❌ [saveQuizAttempt] Failed to save quiz attempt:', insertError.message, insertError.code, insertError.details);
+          // Don't return — still update stats even if save fails
+        } else {
+          console.log('✅ [saveQuizAttempt] Quiz attempt saved successfully');
+        }
 
         // Update topic_resources stats overall
         const { data: currentStats } = await supabase
@@ -2433,38 +2662,7 @@ const QuizTab: React.FC<{
       }
     };
 
-    const loadPastQuizzes = async () => {
-      if (!user) return;
-      setLoadingPastQuizzes(true);
-      try {
-        // New quiz flow saves to test_attempts (not the old quiz_attempts table)
-        const { data, error } = await supabase
-          .from('test_attempts')
-          .select('id, created_at, percentage, raw_score, total_questions, duration_minutes, status, topic_id, subject, exam_context')
-          .eq('user_id', user.id)
-          .eq('topic_id', topicResource.topicId)
-          .eq('test_type', 'topic_quiz')
-          .eq('status', 'completed')
-          .order('created_at', { ascending: false })
-          .limit(10);
 
-        if (error) throw error;
-        // Map snake_case → camelCase for UI consistency
-        setPastQuizzes((data || []).map(q => ({
-          id: q.id,
-          createdAt: q.created_at,
-          percentage: q.percentage,
-          score: q.raw_score,
-          totalQuestions: q.total_questions,
-          durationMinutes: q.duration_minutes,
-          status: q.status,
-        })));
-      } catch (err) {
-        console.error('Error loading quizzes:', err);
-      } finally {
-        setLoadingPastQuizzes(false);
-      }
-    };
 
     // Save quiz when results are shown
     useEffect(() => {
@@ -2472,6 +2670,243 @@ const QuizTab: React.FC<{
         saveQuizAttempt();
       }
     }, [showResults, isQuizActive, quizSaved]);
+
+    // ========== REVIEW MODE SCREEN ==========
+    if (reviewQuiz) {
+      const rawQData = reviewQuiz.questionsData || reviewQuiz.questions_data || [];
+      const qData = typeof rawQData === 'string' ? JSON.parse(rawQData) : rawQData;
+
+      console.log('📊 [Desktop Review] Quiz data:', { rawQData: typeof rawQData, qDataLength: qData?.length, reviewQuiz });
+
+      const sessionCorrect = reviewQuiz.correctCount ?? reviewQuiz.correct_count ?? (qData.filter((q: any) => q.isCorrect).length) ?? 0;
+      const sessionTotal = reviewQuiz.questionCount ?? reviewQuiz.question_count ?? qData.length ?? 0;
+      const sessionTime = reviewQuiz.timeSpentSeconds ?? reviewQuiz.time_spent_seconds ?? 0;
+      const sessionAccuracy = reviewQuiz.accuracyPercentage ?? reviewQuiz.accuracy_percentage ?? (sessionTotal > 0 ? Math.round((sessionCorrect / sessionTotal) * 100) : 0);
+
+      const currentQ = qData[currentQuestionIndex];
+
+      return (
+        <div className="min-h-[600px] bg-white rounded-[2.5rem] border-2 border-slate-900/5 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Header */}
+          <div className="bg-slate-900 p-6 md:p-8 text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setReviewQuiz(null)}
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              >
+                <ChevronLeft size={24} />
+              </button>
+              <div>
+                <h3 className="text-xl font-black font-outfit uppercase italic tracking-tighter">Retroactive Analysis</h3>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-none mt-1">
+                  Session: {new Date(reviewQuiz.createdAt || reviewQuiz.created_at).toLocaleDateString()} • {reviewQuiz.accuracyPercentage || reviewQuiz.accuracy_percentage || 0}% Mastery
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-black font-mono leading-none">{sessionCorrect}/{sessionTotal}</span>
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Accuracy</span>
+              </div>
+              <div className="h-8 w-px bg-white/10" />
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-black font-mono leading-none">{formatTime(sessionTime)}</span>
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Duration</span>
+              </div>
+              <button
+                onClick={() => setReviewQuiz(null)}
+                className="px-6 py-3 bg-white text-slate-900 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-lg"
+              >
+                Close Review
+              </button>
+            </div>
+          </div>
+
+          {/* Question Navigator Grid */}
+          {qData.length > 0 && (
+            <div className="px-8 pt-6 pb-4 bg-white border-b border-slate-100">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Question Navigator</h4>
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-emerald-500"/><span className="text-slate-600">Correct</span></div>
+                  <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-rose-500"/><span className="text-slate-600">Incorrect</span></div>
+                </div>
+              </div>
+              <div className="grid grid-cols-10 md:grid-cols-15 lg:grid-cols-20 gap-2">
+                {qData.map((q: any, idx: number) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentQuestionIndex(idx)}
+                  className={`aspect-square rounded-lg font-black text-xs transition-all ${
+                    currentQuestionIndex === idx
+                      ? 'bg-blue-600 text-white ring-2 ring-blue-300'
+                      : q.isCorrect
+                      ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                      : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+                  }`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+              </div>
+            </div>
+          )}
+
+          {/* Analysis Grid */}
+          <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 bg-slate-50/50">
+            {/* Current Question Display */}
+            <div className="lg:col-span-8 space-y-6">
+              {currentQ && (
+                <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-6 md:p-8 space-y-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="px-3 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest font-outfit">Question {currentQuestionIndex + 1}</span>
+                          <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest font-outfit border ${currentQ.difficulty === 'Hard' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                            currentQ.difficulty === 'Moderate' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                              'bg-emerald-50 text-emerald-600 border-emerald-100'
+                            }`}>
+                            {currentQ.difficulty}
+                          </span>
+                          {currentQ.isCorrect ? (
+                            <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                              <CheckCircle2 size={12} /> Correct
+                            </span>
+                          ) : (
+                            <span className="px-3 py-1 bg-rose-100 text-rose-700 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                              <XCircle size={12} /> Missed
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-lg md:text-2xl font-bold text-slate-800 leading-snug font-outfit quiz-question-text">
+                          <RenderWithMath text={currentQ.question} />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {currentQ.options.map((opt: string, optIdx: number) => {
+                        const isCorrect = optIdx === currentQ.correctIndex;
+                        const isUserAnswer = optIdx === currentQ.userAnswer;
+                        return (
+                          <div
+                            key={optIdx}
+                            className={`p-4 rounded-2xl border-2 flex items-center gap-3 transition-all ${isCorrect ? 'bg-emerald-50 border-emerald-500 shadow-sm' :
+                              isUserAnswer && !isCorrect ? 'bg-rose-50 border-rose-500 shadow-sm' :
+                                'bg-white border-slate-100 opacity-60'
+                              }`}
+                          >
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${isCorrect ? 'bg-emerald-600 text-white' :
+                              isUserAnswer && !isCorrect ? 'bg-rose-600 text-white' :
+                                'bg-slate-100 text-slate-400'
+                              }`}>
+                              {String.fromCharCode(65 + optIdx)}
+                            </div>
+                            <div className={`text-base md:text-lg font-semibold tracking-tight leading-relaxed ${isCorrect ? 'text-emerald-900' : isUserAnswer ? 'text-rose-900' : 'text-slate-500'}`} style={{ fontSize: '1.125rem' }}>
+                              <div className="quiz-option-math">
+                                <RenderWithMath text={opt} />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Integrated Solution Section */}
+                    {(!currentQ.isCorrect || true) && (
+                      <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
+                        <div className="flex items-center gap-2 text-blue-600 mb-2">
+                          <Brain size={18} />
+                          <span className="text-xs font-black uppercase tracking-[0.2em] font-outfit">Engine Insights</span>
+                        </div>
+                        <div className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100 space-y-4">
+                          {currentQ.solutionSteps && (
+                            <div className="space-y-3">
+                              <span className="text-[10px] font-black text-blue-700 uppercase tracking-widest flex items-center gap-2">
+                                <Activity size={14} /> Solution Protocol
+                              </span>
+                              <div className="space-y-3">
+                                {currentQ.solutionSteps.map((step: string, sIdx: number) => (
+                                  <div key={sIdx} className="flex gap-3 items-start group/step">
+                                    <span className="w-6 h-6 rounded bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black shrink-0 mt-1">{sIdx + 1}</span>
+                                    <div className="text-base md:text-lg font-semibold text-slate-700 leading-relaxed quiz-solution-step">
+                                      <RenderWithMath text={step} />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {currentQ.examTip && (
+                            <div className="flex gap-4 bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-2xl border-2 border-amber-200 shadow-md">
+                              <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                                <Zap size={22} className="text-white" />
+                              </div>
+                              <div className="space-y-2 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-black text-amber-700 uppercase tracking-widest">Simulation Strategy</span>
+                                  <div className="h-1 flex-1 bg-amber-200 rounded-full"></div>
+                                </div>
+                                <p className="text-base md:text-lg font-semibold text-slate-900 leading-relaxed">"{currentQ.examTip}"</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              {!currentQ && (
+                <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-12 flex flex-col items-center justify-center text-center space-y-4">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center">
+                    <Brain size={32} className="text-slate-300" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-slate-900 uppercase mb-2">No Question Data</p>
+                    <p className="text-xs text-slate-400 max-w-[300px]">Question details are not available for this quiz attempt.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sticky Sidebar for Overall Analysis */}
+            <div className="lg:col-span-4 space-y-6">
+              <div className="sticky top-24 space-y-6">
+                <div className="bg-white rounded-[2rem] border-2 border-slate-900/5 p-8 shadow-sm space-y-6">
+                  <h4 className="text-sm font-black font-outfit uppercase tracking-widest text-[#0B1528] flex items-center gap-2">
+                    <TrendingUp size={18} className="text-blue-600" />
+                    Topic Pulse
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-500">Correct Calibration</span>
+                      <span className="text-sm font-black text-emerald-600">{sessionCorrect} QS</span>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-500">Gaps Detected</span>
+                      <span className="text-sm font-black text-rose-600">{sessionTotal - sessionCorrect} QS</span>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-500">Average Velocity</span>
+                      <span className="text-sm font-black text-blue-600">{sessionTotal > 0 ? Math.round(sessionTime / sessionTotal) : 0} s/q</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setReviewQuiz(null)}
+                    className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all font-outfit"
+                  >
+                    Exit Review
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     // Results Screen - Expert Side-by-Side Design
     if (showResults && isQuizActive) {
@@ -2888,228 +3323,319 @@ const QuizTab: React.FC<{
       );
     }
 
-    // Main Quiz Setup Screen
+    // ========== MAIN SETUP SCREEN ==========
     return (
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* Adaptive Complexity Matrix (Student Progress Stats) */}
-        <ComplexityMatrix
-          easy={easy}
-          moderate={moderate}
-          hard={hard}
-          isAuto={isAutoComplexity}
-          onAdjust={(e, m, h) => {
-            setEasy(e);
-            setModerate(m);
-            setHard(h);
-          }}
-          onToggleAuto={setIsAutoComplexity}
-          stats={matrixStats}
-        />
-
-        {/* Inline Quiz Stats - Single Line */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl px-6 py-4 shadow-sm gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
-              <Brain size={20} className="text-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base font-black text-blue-900 uppercase tracking-tight font-outfit">Adaptive Quiz</span>
-              <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider mt-0.5">Focus Mode</span>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-bold text-blue-700 bg-blue-100 border border-blue-200 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">
-              {topicResource.masteryLevel}% mastery
-            </span>
-            <span className="text-[11px] font-bold text-slate-700 bg-white border border-slate-200 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">✓ {topicResource.masteryLevel < 30 ? '70% Easy' : topicResource.masteryLevel < 60 ? '50% Med' : '50% Hard'}</span>
-            <span className="text-[11px] font-bold text-slate-700 bg-white border border-slate-200 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm">✓ Weak areas</span>
-            <span className="text-[11px] font-bold text-slate-700 bg-white border border-slate-200 px-3 py-1 rounded-full uppercase tracking-wider font-outfit shadow-sm hidden md:inline-flex">✓ Tips</span>
-          </div>
-        </div>
-
-        {/* Compact Quiz Controls */}
-        <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm p-2 md:p-2.5 md:pl-8 w-full">
-          <div className="flex flex-col md:flex-row md:items-center justify-between w-full gap-4 md:gap-6 xl:gap-8">
-            {/* Label */}
-            <div className="text-sm font-black text-[#0B1528] whitespace-nowrap font-outfit self-start md:self-auto px-2 md:px-0 pt-2 md:pt-0 shrink-0">
-              Questions: <span className="text-blue-600">{questionCount}</span>
-            </div>
-
-            {/* Slider Track */}
-            <div className="flex-1 flex items-center gap-4 md:gap-6 w-full md:w-auto pr-2 md:pr-0">
-              <input
-                type="range"
-                min="5"
-                max="20"
-                step="5"
-                value={questionCount}
-                onChange={(e) => setQuestionCount(Number(e.target.value))}
-                className="flex-1 accent-[#0B1528] h-[5px] bg-slate-200 rounded-lg cursor-pointer appearance-auto"
-              />
-              <div className="flex gap-2 md:gap-3 text-[10px] text-slate-400 font-bold whitespace-nowrap tracking-wider hidden sm:flex shrink-0">
-                <span>5</span>
-                <span className="text-slate-200">•</span>
-                <span>10</span>
-                <span className="text-slate-200">•</span>
-                <span>15</span>
-                <span className="text-slate-200">•</span>
-                <span>20</span>
-              </div>
-            </div>
-
-            {/* Generate Button */}
-            <button
-              onClick={generateQuiz}
-              disabled={isGenerating}
-              className="px-6 py-2.5 bg-[#0B1528] text-white rounded-[2rem] font-black hover:bg-[#15233D] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md text-xs uppercase tracking-wider font-outfit shrink-0 w-full md:w-auto"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <Zap size={16} className="fill-transparent" />
-                  <span>Generate</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Start Quiz Card - Compact */}
-        {quizQuestions.length > 0 && (
-          <div className="bg-[#0B1528] rounded-[2.5rem] p-4 md:p-4 md:pl-6 flex flex-col md:flex-row items-center justify-between shadow-2xl gap-4 border border-white/10 ring-4 ring-slate-900/5">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20 shrink-0 shadow-inner">
-                <Play size={20} className="text-emerald-400 fill-emerald-400 ml-1" />
-              </div>
-              <div className="flex flex-col justify-center">
-                <div className="text-lg font-black text-white font-outfit uppercase tracking-wider leading-tight mb-0.5">
-                  {quizQuestions.length} Questions Ready
-                </div>
-                <div className="text-xs text-white/40 font-black uppercase tracking-widest leading-none">
-                  ADAPTIVE SYNAPSE ACTIVE
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={startQuiz}
-              className="px-10 py-4 bg-emerald-500 text-white rounded-full font-black hover:bg-emerald-600 hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-emerald-500/20 text-xs uppercase tracking-widest font-outfit w-full md:w-auto shrink-0 md:mr-2"
-            >
-              <Zap size={14} className="fill-white" />
-              <span>Launch Session</span>
-            </button>
-          </div>
-        )}
-
-        {/* Exam Protocol Simulation Mode (Matching Mobile) */}
-        <div className="bg-white border-2 border-slate-900/5 rounded-[2.5rem] p-6 md:p-8 relative overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-slate-900 rounded-xl">
-                <Target size={20} className="text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-black text-slate-900 font-outfit uppercase italic tracking-tighter">Exam Protocol</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Standard Simulation Mode</p>
-              </div>
-            </div>
-            <p className="text-sm text-slate-500 font-bold max-w-md leading-relaxed">
-              Full-spectrum simulation proctored for performance calibration. Fixed duration, no hints, absolute evaluation.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
-            onClick={() => !isTestGenerating && onStartQuiz?.(topicResource.topicId)}
-            disabled={isTestGenerating}
-            className={`px-10 py-5 rounded-full font-black uppercase tracking-[0.15em] text-[10px] transition-all flex items-center justify-center gap-3 shadow-2xl shrink-0 w-full md:w-auto ${isTestGenerating
-              ? 'bg-primary-600 text-white cursor-not-allowed opacity-80 scale-[0.98]'
-              : 'bg-slate-900 text-white hover:bg-slate-800 active:scale-95'
-              }`}
+            onClick={() => setStrategy('adaptive')}
+            className={`p-6 rounded-[2rem] border-2 transition-all text-left flex gap-4 group relative overflow-hidden ${strategy === 'adaptive' ? 'bg-white border-blue-600 shadow-xl shadow-blue-500/10' : 'bg-slate-50 border-slate-100 hover:border-slate-200 hover:bg-white'}`}
           >
-            {isTestGenerating ? (
-              <><Loader2 size={18} className="animate-spin" /> AI Generating…</>
-            ) : (
-              <><PlayCircle size={20} /> Initialize Simulation</>
-            )}
+            {strategy === 'adaptive' && <div className="absolute top-0 right-0 p-3 opacity-5 text-blue-600"><Zap size={80} /></div>}
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${strategy === 'adaptive' ? 'bg-blue-600 text-white' : 'bg-white text-slate-400 border border-slate-100'}`}>
+              <Brain size={24} />
+            </div>
+            <div className="space-y-0.5 relative z-10">
+              <div className="flex flex-col">
+                <span className={`text-[9px] font-black uppercase tracking-[0.15em] mb-0.5 ${strategy === 'adaptive' ? 'text-blue-600' : 'text-slate-400'}`}>Engine Mode</span>
+                <span className={`text-lg font-black block leading-none font-outfit tracking-tight ${strategy === 'adaptive' ? 'text-slate-900' : 'text-slate-600'}`}>Adaptive Growth</span>
+              </div>
+              <p className="text-[12px] font-medium text-slate-400 leading-tight max-w-[180px]">AI calibration for gap-filling & mastery.</p>
+              {strategy === 'adaptive' && (
+                <div className="mt-2 flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 w-fit">
+                  <div className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                  <span className="text-[8px] font-black uppercase tracking-widest">Active Intelligence</span>
+                </div>
+              )}
+            </div>
+          </button>
+
+          <button
+            onClick={() => setStrategy('simulation')}
+            className={`p-6 rounded-[2rem] border-2 transition-all text-left flex gap-4 group relative overflow-hidden ${strategy === 'simulation' ? 'bg-slate-900 border-slate-900 shadow-xl shadow-slate-900/30 text-white' : 'bg-slate-50 border-slate-100 hover:border-slate-200 hover:bg-white'}`}
+          >
+            {strategy === 'simulation' && <div className="absolute top-0 right-0 p-3 opacity-5 text-white"><Target size={80} /></div>}
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${strategy === 'simulation' ? 'bg-white text-slate-900' : 'bg-white text-slate-400 border border-slate-100'}`}>
+              <Monitor size={24} />
+            </div>
+            <div className="space-y-0.5 relative z-10">
+              <div className="flex flex-col">
+                <span className={`text-[9px] font-black uppercase tracking-[0.15em] mb-0.5 ${strategy === 'simulation' ? 'text-blue-400' : 'text-slate-400'}`}>Protocol Mode</span>
+                <span className={`text-lg font-black block leading-none font-outfit tracking-tight ${strategy === 'simulation' ? 'text-white' : 'text-slate-600'}`}>Exam Protocol</span>
+              </div>
+              <p className={`text-[12px] font-medium leading-tight max-w-[180px] ${strategy === 'simulation' ? 'text-slate-400' : 'text-slate-400'}`}>Official test replication & scoring.</p>
+              {strategy === 'simulation' && (
+                <div className="mt-2 flex items-center gap-1.5 px-2.5 py-0.5 bg-white/10 text-white rounded-full border border-white/10 w-fit">
+                  <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[8px] font-black uppercase tracking-widest">Oracle Enabled</span>
+                </div>
+              )}
+            </div>
           </button>
         </div>
 
+        {/* Dynamic Controls based on Strategy */}
+        <AnimatePresence mode="wait">
+          {strategy === 'adaptive' ? (
+            <motion.div
+              key="adaptive"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-white border border-slate-100 rounded-[2.5rem] shadow-xl shadow-slate-200/40 overflow-hidden"
+            >
+              <div className="p-8 space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-12">
+                  <div className="flex-1 space-y-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Session Intensity</label>
+                        <h4 className="text-lg font-black text-slate-900 font-outfit tracking-tight leading-none">Questions Configuration</h4>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-3xl font-black text-blue-600 font-mono italic tracking-tighter">{questionCount}</span>
+                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1.5">Units</span>
+                      </div>
+                    </div>
+                    <div className="relative py-2">
+                      <input
+                        type="range"
+                        min="5"
+                        max="20"
+                        step="5"
+                        value={questionCount}
+                        onChange={(e) => setQuestionCount(Number(e.target.value))}
+                        className="w-full h-2.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-blue-600"
+                      />
+                      <div className="flex justify-between mt-3 px-1">
+                        {[5, 10, 15, 20].map(v => (
+                          <div key={v} className="flex flex-col items-center gap-1">
+                            <div className={`w-1 h-1 rounded-full ${questionCount >= v ? 'bg-blue-600' : 'bg-slate-200'}`} />
+                            <span className={`text-[9px] font-black tracking-tight ${questionCount === v ? 'text-blue-600' : 'text-slate-300'}`}>{v} Units</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={generateQuiz}
+                    disabled={isGenerating}
+                    className="px-12 py-6 bg-slate-900 text-white rounded-[1.5rem] font-black hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-xl hover:shadow-blue-500/20 text-[11px] uppercase tracking-[0.22em] font-outfit shrink-0 group active:scale-[0.98]"
+                  >
+                    {isGenerating ? (
+                      <><Loader2 size={20} className="animate-spin text-blue-400" /><span>Syncing Neural Nodes...</span></>
+                    ) : (
+                      <><Zap size={20} className="group-hover:fill-yellow-400 transition-all" /><span>Initialize Session</span></>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="simulation"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden text-white relative"
+            >
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] -mr-40 -mt-40 pointer-events-none" />
+
+              <div className="p-8 md:p-10 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+                <div className="flex-1 space-y-6">
+                  <div className="space-y-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5">
+                      <div className="flex items-center gap-2 px-2.5 py-0.5 bg-blue-600/20 border border-blue-500/30 rounded-lg">
+                        <span className="text-[9px] font-black uppercase tracking-[0.15em] text-blue-300">REI Oracle active</span>
+                      </div>
+                      <div className="flex items-center gap-2 ml-1 sm:ml-0 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-400">Rigor: {topicForecast?.rigor}x</span>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-black font-outfit uppercase italic tracking-tighter leading-none">Simulation Fidelity</h3>
+                    <p className="text-xs md:text-sm text-slate-400 font-medium leading-relaxed max-w-lg">
+                      Official {examContext} protocol synthesis for <span className="text-white font-bold border-b border-blue-600/50">{topicResource.topicName}</span>.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4 bg-white/[0.03] border border-white/10 rounded-2xl p-5">
+                    {[
+                      { label: 'Foundation', val: topicForecast?.distribution?.easy, color: 'bg-emerald-400' },
+                      { label: 'Standard', val: topicForecast?.distribution?.moderate, color: 'bg-amber-400' },
+                      { label: 'Advanced', val: topicForecast?.distribution?.hard, color: 'bg-rose-400' }
+                    ].map(item => (
+                      <div key={item.label} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{item.label}</span>
+                          <span className="text-xs font-black text-white">{item.val}%</span>
+                        </div>
+                        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${item.val}%` }}
+                            className={`h-full ${item.color}`}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="shrink-0 flex flex-col items-center gap-3">
+                  <button
+                    onClick={() => !isTestGenerating && onStartQuiz?.(topicResource.topicId)}
+                    disabled={isTestGenerating}
+                    className="px-12 py-7 bg-white text-slate-900 rounded-[2rem] font-black hover:bg-slate-50 transition-all shadow-2xl flex flex-col items-center justify-center gap-1.5 font-outfit group active:scale-[0.96]"
+                  >
+                    {isTestGenerating ? (
+                      <><Loader2 size={24} className="animate-spin text-blue-600" /><span className="text-[10px] uppercase tracking-widest">Calibrating...</span></>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2.5">
+                          <Target size={24} className="group-hover:scale-110 transition-all text-blue-600" />
+                          <span className="text-base uppercase tracking-wider">Start Protocol</span>
+                        </div>
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest opacity-60">Fidelity Assurance</span>
+                      </>
+                    )}
+                  </button>
+                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">Official Duration Apply</span>
+                </div>
+              </div>
+
+              <div className="bg-white/[0.03] border-t border-white/10 px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-6 backdrop-blur-md">
+                <div className="flex gap-10">
+                  {[
+                    { label: 'Learning', val: matrixStats.learning, color: 'text-indigo-400' },
+                    { label: 'Solve', val: matrixStats.solve, color: 'text-emerald-400' },
+                    { label: 'Master', val: matrixStats.master, color: 'text-amber-400' },
+                    { label: 'Recall', val: matrixStats.recall, color: 'text-rose-400' }
+                  ].map(stat => (
+                    <div key={stat.label} className="flex flex-col">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{stat.label}</span>
+                      <span className={`text-base font-black font-mono tracking-tighter ${stat.color}`}>{Math.round(stat.val)}%</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-3 bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl max-w-sm">
+                  <Sparkles size={16} className="text-blue-400 shrink-0" />
+                  <p className="text-[10px] font-bold text-blue-100/90 leading-tight">
+                    Questions are synthesized to target your performance gaps while maintaining strict blueprint fidelity.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Complexity Matrix - Strategic Distribution Control - Only shown in Adaptive mode */}
+        {strategy === 'adaptive' && (
+          <ComplexityMatrix
+            easy={easy}
+            moderate={moderate}
+            hard={hard}
+            isAuto={isAutoComplexity}
+            locked={false}
+            onAdjust={(e, m, h) => {
+              setEasy(e);
+              setModerate(m);
+              setHard(h);
+            }}
+            onToggleAuto={setIsAutoComplexity}
+            stats={matrixStats}
+          />
+        )}
+
 
         {/* Past Quizzes Section */}
-        <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-sm p-4 md:p-5 md:px-8 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-sm text-[#0B1528] flex items-center gap-2 font-outfit tracking-wide">
-              <History size={16} />
-              Past Quizzes
-            </h3>
+        <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-xl shadow-slate-200/30 overflow-hidden">
+          <div className="bg-slate-50/50 px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center">
+                <History size={18} className="text-slate-900" />
+              </div>
+              <div className="flex flex-col">
+                <h3 className="text-lg font-black text-slate-900 font-outfit tracking-tight">Session History</h3>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Analytical performance timeline</p>
+              </div>
+            </div>
             <button
               onClick={() => {
                 setShowPastQuizzes(!showPastQuizzes);
                 if (!showPastQuizzes && pastQuizzes.length === 0) {
-                  loadPastQuizzes();
+                  refreshHistory();
                 }
               }}
-              className="text-xs font-bold text-slate-500 hover:text-slate-900 bg-slate-100/80 hover:bg-slate-200 px-6 py-2.5 rounded-full transition-colors uppercase tracking-wider font-outfit"
+              className={`px-6 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest transition-all ${showPastQuizzes ? 'bg-slate-200 text-slate-900' : 'bg-slate-900 text-white shadow-lg'}`}
             >
-              {showPastQuizzes ? 'Hide' : 'View All'}
+              {showPastQuizzes ? 'Collapse' : 'Explore History'}
             </button>
           </div>
 
-          {showPastQuizzes && (
-            <>
-              {loadingPastQuizzes ? (
-                <div className="text-center py-4">
-                  <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-                </div>
-              ) : pastQuizzes.length > 0 ? (
-                <div className="space-y-1.5">
-                  {pastQuizzes.map((quiz) => (
-                    <div
-                      key={quiz.id}
-                      className="p-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-8 h-8 rounded flex items-center justify-center font-black text-xs ${(quiz.percentage ?? 0) >= 80
-                            ? 'bg-green-100 text-green-700'
-                            : (quiz.percentage ?? 0) >= 60
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-red-100 text-red-700'
-                            }`}>
-                            {quiz.percentage ?? 0}%
-                          </div>
-                          <div>
-                            <div className="text-[11px] font-bold text-slate-900">
-                              {quiz.score ?? '?'}/{quiz.totalQuestions ?? '?'} correct
-                            </div>
-                            <div className="text-[9px] text-slate-500">
-                              {new Date(quiz.createdAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 text-[10px] text-slate-500">
-                          <Clock size={10} />
-                          {quiz.durationMinutes ?? '?'} min
-                        </div>
-                      </div>
+          <AnimatePresence>
+            {showPastQuizzes && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="p-8">
+                  {loadingPastQuizzes ? (
+                    <div className="flex flex-col items-center justify-center py-12 gap-3">
+                      <div className="w-8 h-8 border-3 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Syncing Logs...</span>
                     </div>
-                  ))}
+                  ) : pastQuizzes.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {pastQuizzes.map((quiz) => {
+                        const scorePct = quiz.percentage ?? 0;
+                        const scoreTheme = scorePct >= 80 ? 'emerald' : scorePct >= 60 ? 'amber' : 'rose';
+                        return (
+                          <div
+                            key={quiz.id}
+                            onClick={() => setReviewQuiz(quiz)}
+                            className="group p-4 bg-white border border-slate-100 rounded-[1.5rem] hover:border-blue-200 hover:shadow-lg transition-all cursor-pointer relative overflow-hidden active:scale-[0.98]"
+                          >
+                            <div className="flex items-center gap-4 relative z-10">
+                              <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center font-black shrink-0 ${scorePct >= 80 ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : scorePct >= 60 ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+                                <span className="text-lg font-mono leading-none">{scorePct}%</span>
+                                <span className="text-[7px] uppercase tracking-widest mt-1">Acc</span>
+                              </div>
+
+                              <div className="flex-1 space-y-0.5">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="text-[13px] font-black text-slate-900 font-outfit">{quiz.score}/{quiz.totalQuestions} Correct</h4>
+                                  <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400">
+                                    <Clock size={10} />
+                                    <span>{quiz.durationMinutes}M</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-between pt-0.5 border-t border-slate-50 mt-1">
+                                  <span className="text-[10px] font-bold text-slate-300">
+                                    {new Date(quiz.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                  </span>
+                                  <span className="text-[9px] font-black text-blue-500 uppercase tracking-tight group-hover:translate-x-1 transition-transform">Analyze →</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                      <History size={32} className="mx-auto text-slate-200 mb-3" />
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Timeline empty</p>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="text-center py-4 text-[11px] text-slate-500">
-                  No past quizzes yet. Complete a quiz to see your history here.
-                </div>
-              )}
-            </>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     );
@@ -3124,9 +3650,45 @@ const FlashcardsTab: React.FC<{
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [cards, setCards] = useState(topicResource.flashcards || []);
 
   const hasCards = cards.length > 0;
+
+  // Load saved flashcards from database on mount (single source of truth)
+  React.useEffect(() => {
+    const loadSavedFlashcards = async () => {
+      if (!user || cards.length > 0) return; // Skip if already have cards from topicResource
+
+      setIsLoading(true);
+      try {
+        const cacheKey = `topic_${topicResource.topicId}_${topicResource.examContext}`;
+        const { data, error } = await supabase
+          .from('flashcards')
+          .select('data')
+          .eq('cache_key', cacheKey)
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (!error && data?.data) {
+          // Transform back to display format
+          const loadedCards = data.data.map((card: any) => ({
+            term: card.term,
+            definition: card.def,
+            context: card.extra
+          }));
+          setCards(loadedCards);
+          console.log('✅ Loaded', loadedCards.length, 'saved flashcards');
+        }
+      } catch (err) {
+        console.error('Error loading saved flashcards:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSavedFlashcards();
+  }, [user, topicResource.topicId, topicResource.examContext]);
 
   const handleNext = () => {
     setIsFlipped(false);
@@ -3146,21 +3708,106 @@ const FlashcardsTab: React.FC<{
     try {
       const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: selectedModel });
-      const prompt = `Create 12-15 comprehensive flashcards for ${topicResource.topicName} (${topicResource.subject}). Return JSON array with term, definition, context. Use $ $ for math.`;
+      const model = genAI.getGenerativeModel({
+        model: selectedModel,
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.7,
+          maxOutputTokens: 8000
+        }
+      });
+      const prompt = `You are an elite ${topicResource.examContext} exam coach. Create 12-15 HIGH-YIELD FLASHCARDS for ${topicResource.topicName} in ${topicResource.subject}.
+
+🎯 FLASHCARD FORMAT (NOT theory notes):
+- SHORT, punchy explanations
+- Bullet points for steps
+- Quick recall triggers
+- One clear example
+
+Return ONLY valid JSON array:
+[
+  {
+    "term": "Concept/Formula (use $ $ for math)",
+    "definition": "**FORMULA:** $formula$ where $x$ = variable\\n\\n**WHEN TO USE:** One sentence\\n\\n**QUICK EXAMPLE:** $input$ → $output$ (1 line)\\n\\n**KEY STEPS:**\\n• Step 1\\n• Step 2\\n• Step 3",
+    "context": "⚠️ **COMMON MISTAKE:** What students mess up\\n\\n🎯 **MEMORY TRICK:** Simple mnemonic\\n\\n📝 **EXAM TIP:** How it appears in ${topicResource.examContext}"
+  }
+]
+
+EXAMPLE:
+
+{
+  "term": "Domain of $f(x) = \\\\frac{1}{x-2}$",
+  "definition": "**FORMULA:** Domain = all real numbers except where denominator = 0\\n\\n**WHEN TO USE:** For rational functions, find where bottom ≠ 0\\n\\n**QUICK EXAMPLE:** $x - 2 = 0$ → $x = 2$ → Domain: $\\\\mathbb{R} - \\\\{2\\\\}$\\n\\n**KEY STEPS:**\\n• Set denominator ≠ 0\\n• Solve for x\\n• Exclude those values",
+  "context": "⚠️ **COMMON MISTAKE:** Forgetting denominator can't be zero\\n\\n🎯 **MEMORY TRICK:** 'Bottom can't be ZERO' → B.C.B.Z\\n\\n📝 **EXAM TIP:** Quick 1-mark questions - always check denominators!"
+}
+
+CRITICAL RULES:
+- Use \\n\\n for line breaks between sections
+- Use $...$ for math (NOT $$...$$)
+- Escape backslashes: \\\\frac not \\frac
+- Keep definition to 4-5 bullet points MAX
+- Context: 3 short points with emojis
+- NO long paragraphs - this is a FLASHCARD not notes
+- Return ONLY the JSON array`;
       const result = await model.generateContent(prompt);
       const response = await result.response;
       let text = response.text().trim();
-      if (text.startsWith('```json')) text = text.replace(/```json\s*/, '').replace(/```\s*$/, '');
-      const parsed = JSON.parse(text);
-      if (Array.isArray(parsed)) {
+
+      // Extract JSON from markdown code blocks if present
+      if (text.includes('```json')) {
+        const match = text.match(/```json\s*\n([\s\S]*?)\n```/);
+        text = match?.[1]?.trim() || text;
+      } else if (text.includes('```')) {
+        const match = text.match(/```\s*\n([\s\S]*?)\n```/);
+        text = match?.[1]?.trim() || text;
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch (firstError) {
+        // Sanitization fallback
+        let sanitized = text
+          .replace(/^\uFEFF/, '')
+          .replace(/\\(?!["\\/bfnrtu]|u[0-9a-fA-F]{4})/g, '\\\\');
+        parsed = JSON.parse(sanitized);
+      }
+
+      if (Array.isArray(parsed) && parsed.length > 0) {
         setCards(parsed);
         setCurrentCard(0);
         setIsFlipped(false);
+
+        // Save to flashcards table (single source of truth)
+        const cacheKey = `topic_${topicResource.topicId}_${topicResource.examContext}`;
+        const formattedCards = parsed.map(card => ({
+          term: card.term,
+          def: card.definition,
+          extra: card.context,
+          topic: topicResource.topicName
+        }));
+
+        try {
+          await supabase
+            .from('flashcards')
+            .upsert({
+              user_id: user.id,
+              cache_key: cacheKey,
+              data: formattedCards,
+              expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+              last_accessed: new Date().toISOString(),
+              access_count: 1
+            }, {
+              onConflict: 'cache_key'
+            });
+          console.log('✅ Successfully generated and saved', parsed.length, 'flashcards');
+        } catch (saveErr) {
+          console.error('Error saving flashcards:', saveErr);
+        }
       }
     } catch (e) {
       console.error(e);
-      alert('Failed to generate.');
+      alert('Failed to generate flashcards.');
     } finally {
       setIsGenerating(false);
     }
@@ -3220,22 +3867,36 @@ const FlashcardsTab: React.FC<{
                 </div>
               </div>
 
-              {/* Card Back - Dark, Tech-Focused Analysis */}
-              <div className="absolute inset-0 backface-hidden bg-slate-900 rounded-3xl p-8 shadow-2xl flex flex-col border-2 border-slate-700 overflow-hidden rotate-y-180">
+              {/* Card Back - Comprehensive Breakdown */}
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 shadow-2xl flex flex-col border-2 border-slate-700 overflow-hidden rotate-y-180">
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 to-cyan-400" />
-                <div className="flex-1 flex flex-col items-center justify-center overflow-y-auto px-4 scroller-hide">
-                  <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-6 bg-emerald-500/10 px-4 py-1.5 rounded-full border border-emerald-500/20 shadow-sm font-outfit">INTELLIGENCE SYNOPSIS</div>
-                  <div className="text-sm md:text-base font-bold text-slate-100 leading-relaxed text-center">
-                    <RenderWithMath text={cards[currentCard].definition} showOptions={false} />
+                <div className="flex-1 overflow-y-auto px-4 scroller-hide space-y-4 pt-4">
+                  {/* Core Concept Section */}
+                  <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Brain size={16} className="text-blue-400" />
+                      <span className="text-[11px] font-black text-blue-300 uppercase tracking-wider">Formula & Steps</span>
+                    </div>
+                    <div className="text-base font-medium text-slate-100 leading-[1.8] text-left whitespace-pre-line">
+                      <RenderWithMath text={cards[currentCard].definition} showOptions={false} />
+                    </div>
                   </div>
+
+                  {/* Exam Strategy Section */}
                   {cards[currentCard].context && (
-                    <div className="mt-6 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                      Context: <span className="text-emerald-400">{cards[currentCard].context}</span>
+                    <div className="bg-amber-500/10 rounded-2xl p-5 border border-amber-500/20">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Trophy size={16} className="text-amber-400" />
+                        <span className="text-[11px] font-black text-amber-300 uppercase tracking-wider">Exam Tips</span>
+                      </div>
+                      <div className="text-sm font-medium text-amber-50 leading-[1.8] text-left whitespace-pre-line">
+                        <RenderWithMath text={cards[currentCard].context} showOptions={false} />
+                      </div>
                     </div>
                   )}
                 </div>
-                <div className="mt-4 text-center">
-                  <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">RapidRecall System v2.0</div>
+                <div className="mt-4 pt-4 border-t border-white/5 text-center">
+                  <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">RapidRecall System v3.0 • {topicResource.subject}</div>
                 </div>
               </div>
             </div>
@@ -3272,7 +3933,12 @@ const FlashcardsTab: React.FC<{
 };
 
 // ========== TAB 5: PROGRESS ==========
-const ProgressTab: React.FC<{ topicResource: TopicResource }> = ({ topicResource }) => {
+const ProgressTab: React.FC<{
+  topicResource: TopicResource;
+  pastQuizzes?: any[];
+  isLoading?: boolean;
+  setReviewQuiz?: (quiz: any) => void;
+}> = ({ topicResource, pastQuizzes = [], isLoading = false, setReviewQuiz }) => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
@@ -3289,7 +3955,7 @@ const ProgressTab: React.FC<{ topicResource: TopicResource }> = ({ topicResource
                 <mod.icon size={20} />
               </div>
               <div className="text-right">
-                <div className="text-sm font-black text-slate-900">{mod.val}%</div>
+                <div className="text-sm font-black text-slate-900">{mod.val.toFixed(0)}%</div>
                 <div className={`text-[8px] font-black px-1.5 py-0.5 rounded-full border ${mod.color.replace('text-', 'border-').replace('-500', '-200')} ${mod.bg}`}>
                   {mod.status}
                 </div>
@@ -3336,28 +4002,67 @@ const ProgressTab: React.FC<{ topicResource: TopicResource }> = ({ topicResource
           </div>
         </div>
 
-        {/* Middle/Right: Deep Insights & Recommendations */}
+        {/* Middle/Right: History & Recommendations */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Strategic Intelligence</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { label: 'Precision Rating', val: `${topicResource.averageAccuracy.toFixed(0)}%`, icon: Target, color: 'text-rose-500', bg: 'bg-rose-50', desc: 'Accuracy on first attempts across all papers' },
-                { label: 'Latency Score', val: 'Low', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'Average response time per intelligence node' },
-                { label: 'Consistency', val: 'High', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50', desc: 'Sustained performance over previous 5 sessions' },
-                { label: 'Last Sync', val: topicResource.lastPracticed ? new Date(topicResource.lastPracticed).toLocaleDateString() : 'Never', icon: Calendar, color: 'text-blue-500', bg: 'bg-blue-50', desc: 'Time elapsed since last syllabus interaction' }
-              ].map((insight, i) => (
-                <div key={i} className="flex gap-4 p-4 rounded-2xl border border-slate-100 hover:border-slate-200 transition-all">
-                  <div className={`w-12 h-12 ${insight.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                    <insight.icon size={20} className={insight.color} />
+          {/* Detailed History List */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <History size={14} className="text-slate-900" />
+                Mission History
+              </h3>
+              <div className="px-2 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                Latest 10 Attempts
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-2">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center h-48 space-y-3">
+                  <Loader2 className="animate-spin text-slate-200" size={32} />
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Syncing Archive...</p>
+                </div>
+              ) : pastQuizzes.length > 0 ? (
+                <div className="overflow-y-auto max-h-[400px] pr-2 scroller-hide space-y-2">
+                  {pastQuizzes.map((quiz, idx) => (
+                    <div
+                      key={quiz.id || idx}
+                      className="group p-4 bg-slate-50 hover:bg-white border border-slate-100 hover:border-blue-200 rounded-2xl transition-all duration-300 flex items-center justify-between shadow-sm hover:shadow-md cursor-pointer active:scale-[0.98]"
+                      onClick={() => setReviewQuiz?.(quiz)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center font-black transition-colors ${quiz.percentage >= 80 ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                          quiz.percentage >= 50 ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                            'bg-rose-50 text-rose-600 border border-rose-100'
+                          }`}>
+                          <span className="text-sm">{quiz.percentage}%</span>
+                        </div>
+                        <div>
+                          <div className="text-xs font-black text-slate-900 flex items-center gap-2 mb-1">
+                            {quiz.score}/{quiz.totalQuestions} Questions Correct
+                            {quiz.percentage >= 80 && <Trophy size={10} className="text-amber-500 fill-amber-500" />}
+                          </div>
+                          <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                            <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(quiz.createdAt).toLocaleDateString()}</span>
+                            <span className="flex items-center gap-1"><Clock size={10} /> {quiz.durationMinutes || 0} min</span>
+                          </div>
+                        </div>
+                      </div>
+                      <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full py-12 text-center space-y-4">
+                  <div className="w-16 h-16 bg-slate-50 rounded-23xl flex items-center justify-center">
+                    <History size={32} className="text-slate-200" />
                   </div>
-                  <div>
-                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{insight.label}</div>
-                    <div className="text-lg font-black text-slate-900 mb-1">{insight.val}</div>
-                    <div className="text-[9px] text-slate-500 font-medium leading-tight">{insight.desc}</div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-black text-slate-900 uppercase italic">Empty Sector</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest max-w-[200px]">Complete your first simulation to initialize your progress log.</p>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 

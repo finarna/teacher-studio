@@ -86,7 +86,7 @@ const VidyaV3: React.FC<VidyaV3Props> = ({ appContext }) => {
   };
 
   return createPortal(
-    <div className="fixed bottom-5 right-5 z-[2147483647]" style={{ transform: 'translateZ(9999px)' }}>
+    <div className="fixed bottom-24 md:bottom-5 right-5 z-[2147483647]" style={{ transform: 'translateZ(9999px)' }}>
       {/* Chat Window */}
       {isOpen && (
         <div className="w-[420px] h-[650px] max-h-[calc(100vh-100px)] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">

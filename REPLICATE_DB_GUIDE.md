@@ -3,8 +3,8 @@
 This guide will help you move your database to a fresh, healthy Supabase project with optimized schema and "Clean Data" (Official 2026 Syllabi).
 
 **Latest Updates:**
-- ✅ **v6.0 Schema** (March 2025): Added AI Trends tables & Fixed Practice RLS (Resolves 403 Forbidden)
-- ✅ **v5.6 Schema** (March 2025): Full Admin UPDATE/DELETE permissions (Fixes Publish)
+- ✅ **v6.0 Schema** (March 2025): **REI v3.0 Enhanced**. Added Oracle Forecasting columns, generation rules, and 60-question limit support.
+- ✅ **v5.5 Schema** (March 2025): Added RLS for Visual Notes (topic_sketches)
 - ✅ **Auto-Mapping**: Questions automatically link to official syllabus topics
 - ✅ **Complete RLS**: All tables secured with Row Level Security policies
 - ✅ **54 Official Topics**: Physics (14), Chemistry (14), Biology (13), Math (13)
@@ -13,7 +13,8 @@ This guide will help you move your database to a fresh, healthy Supabase project
 - [Step 1: Create Project](#step-1-create-a-new-supabase-project)
 - [Step 2: Apply Schema](#step-2-apply-the-consolidated-schema)
 - [Step 3: Environment Variables](#-step-3-update-environment-variables)
-- [Step 4: Seed Data](#-step-4-initialize-clean-data)
+- [Step 4: Seed Core Data](#-step-4-initialize-clean-data)
+- [Step 5: Restore REI Intelligence](#-step-5-restore-rei-v30-intelligence)
 - [Troubleshooting](#-troubleshooting--fixes)
 
 ---
@@ -24,16 +25,16 @@ This guide will help you move your database to a fresh, healthy Supabase project
 3. Once the project is ready, open the **SQL Editor**.
 
 ### Step 2: Apply the Consolidated Schema
-1. Open the file `migrations/CLEAN_START_SCHEMA_v6.0.sql` in this repository.
+1. Open the file `CLEAN_START_SCHEMA_v6.0.sql` in this repository.
 2. Copy the **entire contents**.
 3. Paste it into the SQL Editor and click **Run**.
 4. ✅ This creates all 35+ tables (including Razorpay, Learning Journey, and AI Content), RLS policies for every table, and the Unified Auth Trigger.
-   * *Note: This version (v5.4) consolidates all migrations and includes KCET weightage fixes.*
+   * *Note: This version (v5.6) consolidates all migrations and includes all previous fixes.*
 
-**Schema Version History:**
-- **v6.0** (Latest): Added AI Trends tables & fixed practice_sessions RLS (Fixes 403 Forbidden in Solve tab)
-- **v5.6**: Full Admin UPDATE/DELETE permissions (Fixes Publish)
+- **v6.0** (Latest): **REI v3.0 RESTORATION**. Added missing Oracle columns and `generation_rules` table. Fixes 30-question limit (now sets 60 for KCET).
+- **v5.6**: Full Admin UPDATE/DELETE permissions (Fixes Publish), includes all previous fixes
 - **v5.5**: Added RLS policies for topic_sketches (needed for AdminScanApproval counts)
+- **v5.4**: Fixed KCET weightage for Math topics, includes all previous fixes
 - **v5.3**: Added RLS policies for topic_question_mapping
 - **v5.2**: Added missing questions table columns (domain, subject, exam_context, pedagogy)
 - **v5.1**: Added flashcards table
@@ -81,7 +82,11 @@ npx tsx scripts/seedRealTopics.ts
 npx tsx seedTrendsData.ts
 # ✅ This syncs actual 2021 Math scans to the AI Trends tables (Patterns & Distributions)
 
-# 5. Create a New User Account
+# 5. Restore REI v3.0 Intelligence (60-Question Limit Fix)
+npx tsx scripts/restoreFullREI.ts
+# ✅ This populates predictive patterns (2021-2024) and sets the 60-question target for mocks.
+
+# 6. Create a New User Account
 # Simply go to the app (http://localhost:9000/) and Sign Up.
 # The database will automatically create your profile.
 ```
@@ -153,7 +158,7 @@ Located in project root:
 - `FIX_KCET_WEIGHTAGE.sql` - Adds KCET weightage to Math topics
 - `FIX_MISSING_COLUMNS.sql` - Adds missing questions table columns and RLS policies
 
-**Note:** Running `migrations/CLEAN_START_SCHEMA_v6.0.sql` includes all these fixes automatically.
+**Note:** Running `CLEAN_START_SCHEMA_v6.0.sql` includes all these fixes automatically.
 
 ---
 
