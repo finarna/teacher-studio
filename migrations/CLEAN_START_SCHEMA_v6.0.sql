@@ -1,6 +1,10 @@
 -- 🛡️ EDUJOURNEY CATEGORICAL CLEAN START SCHEMA v6.0 (REI v3.0 ENHANCED)
 -- =====================================================
 -- Consolidated schema for the entire database.
+-- ✅ **v6.0.1 Schema** (March 2026): Confirmed complete payments/subscriptions columns.
+--   • payments: currency, method, receipt, invoice_url, error_code, error_description, metadata, razorpay_signature
+--   • subscriptions: razorpay_subscription_id, cancel_at_period_end, cancelled_at, metadata
+--   • Migration 028: patches existing DBs missing these columns (see 028_fix_payments_subscriptions_columns.sql)
 -- ✅ **v6.0 Schema** (March 2025): Added AI Trends, REI v3.0 Oracle Support.
 --   • REI v3.0 Upgrade: Added direct columns for mathematical forecasting.
 --   • Seed Baseline with: npx tsx migrations/seed_rei_v3.ts
