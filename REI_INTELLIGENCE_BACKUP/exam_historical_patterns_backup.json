@@ -1,0 +1,76 @@
+[
+  {
+    "id": "de50b7d3-c1c0-44a0-a435-f44cb2ba2cda",
+    "year": 2021,
+    "exam_context": "KCET",
+    "subject": "Math",
+    "total_marks": 60,
+    "difficulty_easy_pct": 38,
+    "difficulty_moderate_pct": 57,
+    "difficulty_hard_pct": 5,
+    "evolution_note": null,
+    "created_at": "2026-03-03T00:52:42.665651",
+    "board_signature": null,
+    "intent_signature": null,
+    "rigor_velocity": null,
+    "ids_actual": null
+  },
+  {
+    "id": "2494786e-b6b8-4de1-96ca-b603d9ce412a",
+    "year": 2022,
+    "exam_context": "KCET",
+    "subject": "Math",
+    "total_marks": 60,
+    "difficulty_easy_pct": 50,
+    "difficulty_moderate_pct": 50,
+    "difficulty_hard_pct": 0,
+    "evolution_note": null,
+    "created_at": "2026-03-03T00:52:42.845335",
+    "board_signature": null,
+    "intent_signature": null,
+    "rigor_velocity": null,
+    "ids_actual": null
+  },
+  {
+    "id": "fd9599c9-3e06-41dc-a74f-51f9aedb8aaf",
+    "year": 2023,
+    "exam_context": "KCET",
+    "subject": "Math",
+    "total_marks": 60,
+    "difficulty_easy_pct": 30,
+    "difficulty_moderate_pct": 45,
+    "difficulty_hard_pct": 25,
+    "evolution_note": "Increased emphasis on trigonometric identities and their application in calculus problems, requiring quick manipulation and recognition. Shift away from pure memorization to application of concepts in novel ways. Vector algebra problems require stronger visualization skills.",
+    "created_at": "2026-03-05T02:11:18.583987",
+    "board_signature": "SYNTHESIZER",
+    "intent_signature": {
+      "synthesis": 0.8,
+      "trapDensity": 0.5,
+      "linguisticLoad": 0.3,
+      "speedRequirement": 0.95
+    },
+    "rigor_velocity": null,
+    "ids_actual": 0.82
+  },
+  {
+    "id": "3e6cad08-9517-4601-bb83-74ddd99b0d43",
+    "year": 2024,
+    "exam_context": "KCET",
+    "subject": "Math",
+    "total_marks": 60,
+    "difficulty_easy_pct": 35,
+    "difficulty_moderate_pct": 45,
+    "difficulty_hard_pct": 20,
+    "evolution_note": "KCET 2024 Mathematics paper emphasizes speed and efficient problem-solving techniques over purely conceptual depth. There is increased focus on recognizing patterns and applying shortcuts within standard syllabus topics, particularly in calculus and coordinate geometry. The paper incorporates slightly more questions where time can be dramatically reduced by recognizing properties, compared to formulaic application.",
+    "created_at": "2026-03-05T02:35:29.481465",
+    "board_signature": "SYNTHESIZER",
+    "intent_signature": {
+      "synthesis": 0.8,
+      "trapDensity": 0.5,
+      "linguisticLoad": 0.3,
+      "speedRequirement": 0.95
+    },
+    "rigor_velocity": null,
+    "ids_actual": 0.82
+  }
+]

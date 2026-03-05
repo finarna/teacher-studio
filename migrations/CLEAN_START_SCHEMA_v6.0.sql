@@ -509,6 +509,23 @@ CREATE TABLE IF NOT EXISTS public.generation_rules (
   UNIQUE(exam_context, subject)
 );
 
+-- 6b. REI Evolution Constants Store
+-- This replaces hardcoded magic numbers (like 1.8x multiplier)
+CREATE TABLE IF NOT EXISTS public.rei_evolution_configs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    exam_context TEXT NOT NULL,
+    subject TEXT,
+    rigor_drift_multiplier NUMERIC DEFAULT 1.8,
+    ids_baseline NUMERIC DEFAULT 0.95,
+    synthesis_weight NUMERIC DEFAULT 0.7,
+    trap_density_weight NUMERIC DEFAULT 0.8,
+    linguistic_load_weight NUMERIC DEFAULT 0.5,
+    speed_requirement_weight NUMERIC DEFAULT 0.9,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(exam_context, subject)
+);
+
 CREATE TABLE IF NOT EXISTS public.ai_universal_calibration (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     exam_type TEXT NOT NULL,
@@ -583,6 +600,10 @@ CREATE TABLE IF NOT EXISTS public.exam_historical_patterns (
   difficulty_moderate_pct INTEGER,
   difficulty_hard_pct INTEGER,
   evolution_note TEXT,
+  board_signature TEXT, -- e.g. 'SYNTHESIZER'
+  intent_signature JSONB, -- { synthesis: 0.8, speed: 0.9 }
+  rigor_velocity NUMERIC, -- The 'acceleration' detected in this specific year
+  ids_actual NUMERIC, -- Measured Item Difficulty Score of the real paper
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(year, exam_context, subject)
 );
@@ -812,6 +833,9 @@ CREATE POLICY "Exam configs viewable by everyone" ON public.exam_configurations 
 DROP POLICY IF EXISTS "Generation rules viewable by everyone" ON public.generation_rules;
 CREATE POLICY "Generation rules viewable by everyone" ON public.generation_rules FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Configs viewable by everyone" ON public.rei_evolution_configs;
+CREATE POLICY "Configs viewable by everyone" ON public.rei_evolution_configs FOR SELECT USING (true);
+
 
 -- Tools & AI
 DROP POLICY IF EXISTS "Vidya access" ON public.vidya_sessions;
@@ -935,5 +959,12 @@ COMMENT ON TABLE public.flashcards IS 'Rapid Recall flashcard cache (30-day TTL)
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user_id ON public.quiz_attempts(user_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_topic_resource ON public.quiz_attempts(topic_resource_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_created_at ON public.quiz_attempts(created_at DESC);
+
+-- Initial Seed for KCET/JEE (Learned from 2023 Analysis) - from Migration 028
+INSERT INTO public.rei_evolution_configs (exam_context, subject, rigor_drift_multiplier, ids_baseline, speed_requirement_weight)
+VALUES 
+('KCET', 'Math', 1.8, 0.98, 0.95),
+('JEE', 'Math', 2.0, 0.99, 0.6)
+ON CONFLICT (exam_context, subject) DO NOTHING;
 
 -- ✅ CONSOLIDATED CLEAN SETUP v6.0 COMPLETE

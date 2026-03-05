@@ -134,6 +134,7 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 disabled={loading}
                 required
               />
@@ -155,6 +156,7 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 placeholder="••••••••"
+                autoComplete="new-password"
                 disabled={loading}
                 required
               />

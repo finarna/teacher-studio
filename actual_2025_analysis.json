@@ -1,0 +1,422 @@
+[
+  {
+    "index": 1,
+    "topic": "Algebra",
+    "concept": "Linear Inequalities",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 2,
+    "topic": "Algebra",
+    "concept": "Permutations and Combinations",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 3,
+    "topic": "Algebra",
+    "concept": "Permutations and Combinations",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 4,
+    "topic": "Algebra",
+    "concept": "Binomial Theorem",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 5,
+    "topic": "Algebra",
+    "concept": "Geometric Progression",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 6,
+    "topic": "Algebra",
+    "concept": "Matrices",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 7,
+    "topic": "Algebra",
+    "concept": "Matrices",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 8,
+    "topic": "Algebra",
+    "concept": "Matrices",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 9,
+    "topic": "Algebra",
+    "concept": "Matrices",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 10,
+    "topic": "Algebra",
+    "concept": "Determinants",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 11,
+    "topic": "Algebra",
+    "concept": "Matrices - Inverse",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 12,
+    "topic": "Algebra",
+    "concept": "Determinants",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 13,
+    "topic": "Algebra",
+    "concept": "Matrices - Adjoint",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 14,
+    "topic": "Algebra",
+    "concept": "Linear Equations",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 15,
+    "topic": "Vectors",
+    "concept": "Dot Product",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 16,
+    "topic": "Vectors",
+    "concept": "Cross Product",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 17,
+    "topic": "Vectors",
+    "concept": "Dot and Cross Product Properties",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 18,
+    "topic": "3D Geometry",
+    "concept": "Direction Cosines",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 19,
+    "topic": "3D Geometry",
+    "concept": "Lines in Space",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 20,
+    "topic": "2D Geometry",
+    "concept": "Straight Lines",
+    "difficulty": "Easy",
+    "style": "Multi-step"
+  },
+  {
+    "index": 21,
+    "topic": "2D Geometry",
+    "concept": "Conic Sections (Ellipse)",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 22,
+    "topic": "Calculus",
+    "concept": "Limits",
+    "difficulty": "Moderate",
+    "style": "L'Hopital's"
+  },
+  {
+    "index": 23,
+    "topic": "Calculus",
+    "concept": "Differentiation",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 24,
+    "topic": "Calculus",
+    "concept": "Greatest Integer Function",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 25,
+    "topic": "Calculus",
+    "concept": "Differentiability",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 26,
+    "topic": "Calculus",
+    "concept": "Continuity and Differentiability",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 27,
+    "topic": "Calculus",
+    "concept": "Differentiation - Parametric Functions",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 28,
+    "topic": "Calculus",
+    "concept": "Differentiation",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 29,
+    "topic": "Calculus",
+    "concept": "Applications of Derivatives",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 30,
+    "topic": "Calculus",
+    "concept": "Applications of Derivatives - Increasing/Decreasing Functions",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 31,
+    "topic": "Calculus",
+    "concept": "Integration",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 32,
+    "topic": "Calculus",
+    "concept": "Definite Integrals",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 33,
+    "topic": "Calculus",
+    "concept": "Definite Integrals",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 34,
+    "topic": "Calculus",
+    "concept": "Integration",
+    "difficulty": "Hard",
+    "style": "Multi-step"
+  },
+  {
+    "index": 35,
+    "topic": "Calculus",
+    "concept": "Definite Integrals",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 36,
+    "topic": "Calculus",
+    "concept": "Applications of Integrals - Area",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 37,
+    "topic": "Calculus",
+    "concept": "Applications of Integrals - Area",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 38,
+    "topic": "Calculus",
+    "concept": "Differential Equations",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 39,
+    "topic": "Calculus",
+    "concept": "Differential Equations - Order and Degree",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 40,
+    "topic": "3D Geometry",
+    "concept": "Distance from a Plane",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 41,
+    "topic": "Sets",
+    "concept": "Set Operations",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 42,
+    "topic": "Sets",
+    "concept": "Set Operations",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 43,
+    "topic": "Functions",
+    "concept": "Domain of a Function",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 44,
+    "topic": "Functions",
+    "concept": "Greatest Integer Function",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 45,
+    "topic": "Trigonometry",
+    "concept": "Trigonometric Functions",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 46,
+    "topic": "Trigonometry",
+    "concept": "Trigonometric Identities",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 47,
+    "topic": "Statistics",
+    "concept": "Mean Deviation",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 48,
+    "topic": "Probability",
+    "concept": "Basic Probability",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 49,
+    "topic": "Probability",
+    "concept": "Basic Probability",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 50,
+    "topic": "Relations and Functions",
+    "concept": "Equivalence Relations",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 51,
+    "topic": "Relations and Functions",
+    "concept": "One-to-one Functions",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 52,
+    "topic": "Inverse Trigonometry",
+    "concept": "Inverse Trigonometric Functions",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 53,
+    "topic": "Inverse Trigonometry",
+    "concept": "Inverse Trigonometric Functions",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 54,
+    "topic": "Linear Programming",
+    "concept": "LPP Terminology",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  },
+  {
+    "index": 55,
+    "topic": "Linear Programming",
+    "concept": "LPP - Maximization",
+    "difficulty": "Moderate",
+    "style": "Multi-step"
+  },
+  {
+    "index": 56,
+    "topic": "Probability",
+    "concept": "Independent Events",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 57,
+    "topic": "Probability",
+    "concept": "Conditional Probability",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 58,
+    "topic": "Probability",
+    "concept": "Conditional Probability",
+    "difficulty": "Moderate",
+    "style": "Direct Property"
+  },
+  {
+    "index": 59,
+    "topic": "Probability",
+    "concept": "Bayes' Theorem",
+    "difficulty": "Hard",
+    "style": "Multi-step"
+  },
+  {
+    "index": 60,
+    "topic": "Complex Numbers",
+    "concept": "Properties of Complex Numbers",
+    "difficulty": "Easy",
+    "style": "Direct Property"
+  }
+]

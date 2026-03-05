@@ -1,0 +1,28 @@
+[
+  {
+    "id": "b58e99cb-ce33-4bd9-a967-c4a2814a7510",
+    "exam_context": "KCET",
+    "subject": "Math",
+    "rigor_drift_multiplier": 1.8,
+    "ids_baseline": 0.98,
+    "synthesis_weight": 0.7,
+    "trap_density_weight": 0.8,
+    "linguistic_load_weight": 0.5,
+    "speed_requirement_weight": 0.95,
+    "created_at": "2026-03-05T02:23:44.757048+00:00",
+    "updated_at": "2026-03-05T02:23:44.757048+00:00"
+  },
+  {
+    "id": "d4263e03-c1cd-4fa7-9c0c-a665e562774e",
+    "exam_context": "JEE",
+    "subject": "Math",
+    "rigor_drift_multiplier": 2,
+    "ids_baseline": 0.99,
+    "synthesis_weight": 0.7,
+    "trap_density_weight": 0.8,
+    "linguistic_load_weight": 0.5,
+    "speed_requirement_weight": 0.6,
+    "created_at": "2026-03-05T02:23:44.757048+00:00",
+    "updated_at": "2026-03-05T02:23:44.757048+00:00"
+  }
+]

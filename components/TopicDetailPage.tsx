@@ -38,6 +38,7 @@ import {
   Monitor
 } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { cleanJsonResponse } from '../lib/aiParserUtils';
 import { safeAiParse } from '../utils/aiParser';
 import type { TopicResource, Subject, ExamContext, AnalyzedQuestion } from '../types';
 import { SUBJECT_CONFIGS } from '../config/subjects';
@@ -2304,7 +2305,7 @@ const QuizTab: React.FC<{
 
     // Reset question index when opening a new review
     useEffect(() => {
-        setCurrentQuestionIndex(0);
+      setCurrentQuestionIndex(0);
     }, [reviewQuiz]);
 
     // Difficulty Distribution State
@@ -2385,13 +2386,8 @@ const QuizTab: React.FC<{
     // Parse JSON helper
     const parseGeminiJSON = (responseText: string) => {
       try {
-        let jsonText = responseText.trim();
-        if (jsonText.startsWith('```json')) {
-          jsonText = jsonText.replace(/```json\s*/, '').replace(/```\s*$/, '');
-        } else if (jsonText.startsWith('```')) {
-          jsonText = jsonText.replace(/```\s*/, '').replace(/```\s*$/, '');
-        }
-        return JSON.parse(jsonText.trim());
+        const cleaned = cleanJsonResponse(responseText);
+        return JSON.parse(cleaned);
       } catch (error) {
         console.error('Failed to parse JSON:', error);
         throw new Error('Invalid JSON response from AI');
@@ -2424,37 +2420,41 @@ const QuizTab: React.FC<{
           generationConfig: { responseMimeType: "application/json" }
         });
 
-        const prompt = `You are an expert ${subject} teacher creating an ADAPTIVE MCQ quiz for ${examContext} students on "${topicResource.topicName}".
-            The quiz should strictly follow the ${examContext} syllabus and overall topic guidelines.
-            
-            CONTEXT FROM EXISTING PRACTICE QUESTIONS:
-            ${topicQuestions.slice(0, 5).map(q => `- ${q.text}`).join('\n')}
-            
-            Generate ${questionCount} high-quality MCQ questions with this difficulty distribution: ${difficultyDistribution}.
-            - Ensure questions are distinct but complementary to the practice questions listed above.
-            - Cover latent concepts within the syllabus of ${topicResource.topicName} that might be missing in basic practice.
-            - Provide detailed solution steps and pedagogical insights for each question.
-            - Return ONLY a valid JSON array. Each object must have:
-            {
-              "id": "q1",
-              "question": "...",
-              "options": ["A", "B", "C", "D"],
-              "correctIndex": 0,
-              "solutionSteps": ["Step 1", "Step 2", ...],
-              "examTip": "...",
-              "keyFormulas": ["..."],
-              "pitfalls": ["..."],
-              "concept": "...",
-              "topic": "...",
-              "difficulty": "Easy|Moderate|Hard"
-            }
-            `;
+        const prompt = `You are a World-Class Entrance Exam Architect for ${examContext}. 
+        Create an ADAPTIVE MCQ quiz for "${topicResource.topicName}" focus on ${subject}.
+        
+        DIFFICULTY TARGET: ${difficultyDistribution}.
+        
+        TECHNICAL RULES:
+        1. Use PROPER LaTeX for ALL math expressions ($...$ for inline, $$...$$ for block).
+        2. MANDATORY: Double all backslashes in LaTeX inside JSON strings (e.g., \\\\frac, \\\\theta).
+        3. NO "Definition" questions. Use "Twists" and "Scenarios" aligned with current ${examContext} trends.
+        4. Return ONLY a valid JSON array of ${questionCount} objects:
+        {
+          "id": "q1",
+          "question": "The question text with $math$",
+          "options": ["...", "...", "...", "..."],
+          "correctIndex": 0,
+          "solutionSteps": ["Step-wise logic with $math$ and insights"],
+          "examTip": "A property/shortcut or trap warning",
+          "keyFormulas": ["$formula$"],
+          "pitfalls": ["Common student error"],
+          "concept": "Sub-concept name",
+          "topic": "${topicResource.topicName}",
+          "difficulty": "Easy|Moderate|Hard"
+        }`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        const parsed = parseGeminiJSON(response.text() || "[]");
+        const textToParse = response.text() || "[]";
 
-        if (Array.isArray(parsed)) {
+        console.log('🔮 Raw AI Response:', textToParse);
+
+        // Use the robust safeAiParse which handles normalization and repairs
+        const data = safeAiParse<any>(textToParse, { questions: [] }, true);
+        const parsed = data.questions || [];
+
+        if (Array.isArray(parsed) && parsed.length > 0) {
           // Mix with some existing questions from Solve tab for reinforcement (if any)
           let finalPool = [...parsed];
           if (sharedQuestions && sharedQuestions.length > 0) {
@@ -2477,13 +2477,38 @@ const QuizTab: React.FC<{
               finalPool.sort(() => 0.5 - Math.random());
             }
           }
+
           setQuizQuestions(finalPool);
+
+          // AUTO-START THE QUIZ!
+          setIsQuizActive(true);
+          setCurrentQuestion(0);
+          setSelectedAnswer(null);
+          setAnsweredQuestions(new Map());
+          setShowResults(false);
+          setQuizStartTime(Date.now());
+          setTimeElapsed(0);
+
+          console.log(`✅ Quiz generated and started with ${finalPool.length} questions`);
+        } else {
+          throw new Error('No valid questions generated');
         }
       } catch (error) {
         console.error('Quiz generation error:', error);
-        alert('Failed to generate quiz. Fallback: using practice questions.');
+        // Fallback or alert
         if (sharedQuestions && sharedQuestions.length > 0) {
-          setQuizQuestions(sharedQuestions.slice(0, questionCount));
+          const fallback = sharedQuestions.slice(0, questionCount);
+          setQuizQuestions(fallback);
+          setIsQuizActive(true);
+          setCurrentQuestion(0);
+          setSelectedAnswer(null);
+          setAnsweredQuestions(new Map());
+          setShowResults(false);
+          setQuizStartTime(Date.now());
+          setTimeElapsed(0);
+          console.log('⚠️ Fallback to practice questions successful');
+        } else {
+          alert('Failed to generate quiz and no practice questions available.');
         }
       } finally {
         setIsGenerating(false);
@@ -2729,26 +2754,25 @@ const QuizTab: React.FC<{
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Question Navigator</h4>
                 <div className="flex items-center gap-2 text-xs">
-                  <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-emerald-500"/><span className="text-slate-600">Correct</span></div>
-                  <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-rose-500"/><span className="text-slate-600">Incorrect</span></div>
+                  <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-emerald-500" /><span className="text-slate-600">Correct</span></div>
+                  <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-rose-500" /><span className="text-slate-600">Incorrect</span></div>
                 </div>
               </div>
               <div className="grid grid-cols-10 md:grid-cols-15 lg:grid-cols-20 gap-2">
                 {qData.map((q: any, idx: number) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentQuestionIndex(idx)}
-                  className={`aspect-square rounded-lg font-black text-xs transition-all ${
-                    currentQuestionIndex === idx
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentQuestionIndex(idx)}
+                    className={`aspect-square rounded-lg font-black text-xs transition-all ${currentQuestionIndex === idx
                       ? 'bg-blue-600 text-white ring-2 ring-blue-300'
                       : q.isCorrect
-                      ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                      : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
-                  }`}
-                >
-                  {idx + 1}
-                </button>
-              ))}
+                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                        : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+                      }`}
+                  >
+                    {idx + 1}
+                  </button>
+                ))}
               </div>
             </div>
           )}

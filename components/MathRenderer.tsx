@@ -157,6 +157,9 @@ export const RenderWithMath: React.FC<{
   className?: string;
   showOptions?: boolean;
   serif?: boolean;
+  autoSteps?: boolean;
+  dark?: boolean;
+  compact?: boolean;
 }> = ({ text, className = '', serif = false }) => {
   if (text === null || text === undefined) return null;
 
@@ -232,7 +235,7 @@ export const DerivationStep: React.FC<{
                 )}
               </button>
             </div>
-            <div className="relative z-10 pr-12">
+            <div className="relative z-10 pr-12 solution-step-content">
               <RenderWithMath text={content} className="text-lg md:text-xl font-serif text-slate-800 leading-[1.85]" />
             </div>
           </div>

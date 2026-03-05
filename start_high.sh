@@ -16,7 +16,7 @@ fuser -k $FRONTEND_PORT/tcp 2>/dev/null
 fuser -k $BACKEND_PORT/tcp 2>/dev/null
 
 # Start Backend in background
-PORT=$BACKEND_PORT node server.js &
+PORT=$BACKEND_PORT npx tsx server-supabase.js &
 BACKEND_PID=$!
 
 # Start Frontend

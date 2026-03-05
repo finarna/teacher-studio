@@ -33,7 +33,8 @@ import {
   HelpCircle,
   Share2,
   Download,
-  TrendingUp
+  TrendingUp,
+  Trash2
 } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Scan, AnalyzedQuestion, Subject, ExamContext, ExamAnalysisData } from '../types';
@@ -1877,11 +1878,34 @@ Schema: {
                                   <div className="mb-4 space-y-2">
                                     {selectedQ.extractedImages.map((imgData: string, idx: number) => (
                                       <div key={idx} className="rounded-xl overflow-hidden border border-blue-200 shadow-sm">
-                                        <div className="bg-blue-50 px-3 py-1.5 border-b border-blue-100 flex items-center gap-2">
-                                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                                          <span className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide">
-                                            Figure {selectedQ.extractedImages.length > 1 ? idx + 1 : ''}
-                                          </span>
+                                        <div className="bg-blue-50 px-3 py-1.5 border-b border-blue-100 flex items-center justify-between gap-2">
+                                          <div className="flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                            <span className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide">
+                                              Figure {selectedQ.extractedImages.length > 1 ? idx + 1 : ''}
+                                            </span>
+                                          </div>
+                                          <button
+                                            onClick={() => {
+                                              if (confirm('Are you sure you want to remove this diagram?')) {
+                                                const newImages = [...selectedQ.extractedImages!];
+                                                newImages.splice(idx, 1);
+                                                onUpdateScan({
+                                                  ...scan!,
+                                                  analysisData: {
+                                                    ...scan!.analysisData!,
+                                                    questions: scan!.analysisData!.questions.map(q =>
+                                                      q.id === selectedQ.id ? { ...q, extractedImages: newImages } : q
+                                                    )
+                                                  }
+                                                });
+                                              }
+                                            }}
+                                            className="p-1 text-blue-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                                            title="Delete diagram"
+                                          >
+                                            <Trash2 size={12} />
+                                          </button>
                                         </div>
                                         <img
                                           src={imgData}

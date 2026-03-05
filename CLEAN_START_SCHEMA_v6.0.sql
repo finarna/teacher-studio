@@ -399,7 +399,7 @@ CREATE TABLE IF NOT EXISTS public.test_attempts (
 CREATE TABLE IF NOT EXISTS public.test_responses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   attempt_id UUID NOT NULL REFERENCES public.test_attempts(id) ON DELETE CASCADE,
-  question_id UUID NOT NULL REFERENCES public.questions(id),
+  question_id UUID NOT NULL REFERENCES public.questions(id) ON DELETE CASCADE,
   selected_option INTEGER,
   is_correct BOOLEAN,
   time_spent INTEGER,

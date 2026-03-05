@@ -358,8 +358,31 @@
 
 /* Better spacing and sizing for mathematical formulas */
 .katex {
-    font-size: 1.15em !important;
+    font-size: 1.3em !important;
     line-height: 1.6 !important;
+    /* Soft highlight for all math */
+    background: rgba(241, 245, 249, 0.6);
+    padding: 0.15em 0.4em;
+    border-radius: 6px;
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    color: #1e293b;
+}
+
+/* Make symbols and operators clearer */
+.katex .mord,
+.katex .mbin,
+.katex .mrel,
+.katex .mopen,
+.katex .mclose {
+    font-weight: 500 !important;
+}
+
+/* Inline math - ensure it doesn't break line height too much */
+.katex:not(.katex-display .katex) {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0.1em 0.2em;
 }
 
 /* Quiz question text - larger math */
@@ -463,14 +486,25 @@
 
 /* Inline formulas in solution steps - larger and highlighted */
 .solution-step-content .katex {
-    font-size: 1.25em !important;
-    padding: 0.15em 0.35em;
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    font-size: 1.35em !important;
+    padding: 0.15em 0.45em;
+    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+    /* Yellow highlight */
+    color: #854d0e !important;
+    /* Darker brown/yellow for contrast */
     border-radius: 6px;
-    border: 1px solid #cbd5e1;
-    margin: 0 0.15em;
+    border: 1px solid #fde047;
+    margin: 0 0.25em;
     display: inline-block;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(234, 179, 8, 0.1);
+}
+
+.solution-step-content .katex:hover {
+    background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+    border-color: #eab308;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2);
 }
 
 .solution-step-content .katex:hover {
@@ -528,22 +562,31 @@
 
 /* Quiz question text math - larger for better readability */
 .quiz-question-text .katex {
-    font-size: 1.3em !important;
-    line-height: 1.7 !important;
+    font-size: 1.5em !important;
+    line-height: 1.8 !important;
     font-weight: 500 !important;
+    color: #0f172a !important;
 }
 
-/* Quiz options math - even larger and more readable */
+/* Quiz options math - significantly larger and highlighted */
 .quiz-option-math .katex {
-    font-size: 1.4em !important;
-    line-height: 1.8 !important;
+    font-size: 1.6em !important;
+    line-height: 2 !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    padding: 0.1em 0.4em !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Quiz solution steps math - clear and readable */
 .quiz-solution-step .katex {
-    font-size: 1.3em !important;
-    line-height: 1.7 !important;
+    font-size: 1.4em !important;
+    line-height: 1.8 !important;
     font-weight: 500 !important;
+    background: rgba(241, 245, 249, 0.4) !important;
+    padding: 0.1em 0.3em !important;
+    border-radius: 4px !important;
 }
 
 /* Display mode in quiz options */

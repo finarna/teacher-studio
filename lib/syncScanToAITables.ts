@@ -108,7 +108,7 @@ export async function syncScanToAITables(
     const difficultyHardPct = Math.round((difficultyDist.hard / totalMapped) * 100);
 
     // 1. Update exam_historical_patterns
-    const patternData = {
+    const patternData: any = {
       exam_context,
       subject,
       year: parseInt(year),
@@ -118,6 +118,34 @@ export async function syncScanToAITables(
       difficulty_hard_pct: difficultyHardPct,
       evolution_note: analysis_data?.evolutionNote || analysis_data?.evolutionInsight || null
     };
+
+    // [NEW] Run the AI Paper Auditor if text is available
+    // This populates the "Signature" columns captured DURING THE SCAN
+    try {
+      const fullText = mappedQuestions.map(q => q.text).join('\n\n');
+      const { auditPaperHistoricalContext } = await import('./aiPaperAuditor');
+      const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+
+      if (apiKey) {
+        const audit = await auditPaperHistoricalContext(
+          fullText,
+          exam_context,
+          subject,
+          parseInt(year),
+          apiKey
+        );
+
+        if (audit) {
+          console.log(`🧠 [Auditor] Captured Board Signature: ${audit.boardSignature}`);
+          patternData.board_signature = audit.boardSignature;
+          patternData.intent_signature = audit.intentSignature;
+          patternData.ids_actual = audit.idsActual;
+          if (!patternData.evolution_note) patternData.evolution_note = audit.evolutionNote;
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ Auditor failed, skipping deep signatures:', e);
+    }
 
     const { data: upsertedPattern, error: patternError } = await supabase
       .from('exam_historical_patterns')

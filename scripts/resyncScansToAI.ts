@@ -9,8 +9,8 @@ import { syncScanToAITables } from '../lib/syncScanToAITables';
 dotenv.config({ path: '.env.local' });
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL)!,
+  (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY)!
 );
 
 async function resyncAll() {
@@ -44,11 +44,10 @@ async function resyncAll() {
 
       if (result.success) {
         console.log(`✅ Success!`);
-        console.log(`   Pattern: ${result.patternId}`);
-        console.log(`   Topics: ${result.topicsProcessed}`);
-        console.log(`   Distributions: ${result.distributionsCreated}`);
+        console.log(`   Patterns Updated: ${result.patternsUpdated}`);
+        console.log(`   Distributions Updated: ${result.distributionsUpdated}`);
       } else {
-        console.log(`❌ Failed: ${result.error}`);
+        console.log(`❌ Failed: ${result.message}`);
       }
     } catch (error: any) {
       console.error(`❌ Error: ${error.message}`);

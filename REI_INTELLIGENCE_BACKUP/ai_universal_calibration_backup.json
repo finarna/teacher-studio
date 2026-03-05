@@ -1,0 +1,23 @@
+[
+  {
+    "id": "239c5256-281d-40e9-bdbd-fa0201006a75",
+    "exam_type": "KCET",
+    "subject": "Math",
+    "target_year": 2026,
+    "created_at": "2026-03-03T08:18:43.236315+00:00",
+    "updated_at": "2026-03-04T06:15:10.357+00:00",
+    "rigor_velocity": 0.85,
+    "intent_signature": {
+      "synthesis": 0.4,
+      "trapDensity": 0.5,
+      "linguisticLoad": 0.3,
+      "speedRequirement": 0.95
+    },
+    "calibration_directives": [
+      "Heuristic Shortcut Mapping",
+      "Property-based matrix mechanics",
+      "2021 Higher Rigor"
+    ],
+    "board_signature": "SYNTHESIZER"
+  }
+]

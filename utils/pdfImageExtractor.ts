@@ -105,11 +105,16 @@ export async function extractImagesFromPDF(file: File, pageFilter?: number[] | n
               imgCtx?.putImageData(imageData, 0, 0);
             }
 
-            // 🚨 80px MINIMUM SIZE RULE
-            // Filters out arrows (Q33-37) but keeps diagrams (Q56)
-            if (imgCanvas.width < 80 || imgCanvas.height < 80) {
-              console.log(`⏩ [PDF EXTRACTOR] Skipping small element (${imgCanvas.width}x${imgCanvas.height})`);
-              continue;
+            // 🚨 IMPROVED FILTER: 100px MINIMUM + ASPECT RATIO RULE
+            // This prevents small arrows, lines, and math ornaments from being detected as diagrams
+            const aspectRatio = imgCanvas.width / imgCanvas.height;
+            const isVeryThin = aspectRatio > 5 || aspectRatio < 0.2;
+
+            if (imgCanvas.width < 100 || imgCanvas.height < 100) {
+              if (isVeryThin || (imgCanvas.width < 60 || imgCanvas.height < 60)) {
+                console.log(`⏩ [PDF EXTRACTOR] Skipping noise/arrow (${imgCanvas.width}x${imgCanvas.height})`);
+                continue;
+              }
             }
 
             const x = currentCTM[4] || 0;
@@ -127,10 +132,12 @@ export async function extractImagesFromPDF(file: File, pageFilter?: number[] | n
         }
       }
 
-      // --- PHASE 2: CAPTURE VECTOR DIAGRAMS (For Q56) ---
-      // If we didn't find large images on a page with questions, or specifically on Page 6
-      if (pageNum === 6 || (pageNum === 5)) {
-        console.log(`🎨 [PDF EXTRACTOR] P${pageNum}: Checking for vector diagrams (like Q56 graph)...`);
+      // --- PHASE 2: CAPTURE VECTOR DIAGRAMS (Legacy Fallback) ---
+      // 💡 ONLY do this if explicitly requested or on specific high-value pages
+      // This used to cause 'wrong detections' on common pages by capturing empty regions
+      const enableRegionCapture = (window as any).EXTRACT_VECTOR_REGIONS === true;
+      if (enableRegionCapture && (pageNum === 6)) {
+        console.log(`🎨 [PDF EXTRACTOR] P${pageNum}: Checking for vector diagrams (Manual Region Capture)...`);
 
         // Take a snapshot of the 'Graph Zone' (middle-right section)
         const cropCanvas = document.createElement('canvas');

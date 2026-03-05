@@ -11,6 +11,7 @@
 
 import type { ExamContext, Subject, AnalyzedQuestion } from '../types';
 import { AI_CONFIG } from '../config/aiConfigs';
+import { cleanJsonResponse } from './aiParserUtils';
 
 // ============================================
 // INTERFACES - Generic and extensible
@@ -28,6 +29,13 @@ export interface ExamConfiguration {
     deduction: number; // -0.25, -1, etc.
   };
 }
+
+/**
+ * Clean and fix common JSON errors from LLM responses
+ * Especially handles unescaped backslashes in LaTeX and trailing commas
+ */
+
+// REI Shield is now imported from aiParserUtils
 
 export interface TopicMetadata {
   topicId: string;
@@ -208,7 +216,8 @@ export async function generateTestQuestions(
 
   // OPTIMIZATION: Combine multiple topics into fewer LLM calls.
   // Each LLM trip has ~15-20s overhead; batching topics cuts this by 80%+.
-  const MAX_QUESTIONS_PER_BATCH = 15;
+  // Each LLM trip has ~15-20s overhead; smaller batches are more robust for complex Math.
+  const MAX_QUESTIONS_PER_BATCH = 5;
   const batches: (typeof activeAllocations)[] = [];
   let currentBatch: typeof activeAllocations = [];
   let questionsInBatch = 0;
@@ -378,18 +387,25 @@ Return ONLY valid JSON:
     const response = await result.response;
     const text = response.text() || '{}';
 
-    // Extract JSON from response
-    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/```\s*([\s\S]*?)\s*```/) || text.match(/\{[\s\S]*\}/);
-    const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : text;
+    const jsonStr = cleanJsonResponse(text);
     const prediction = JSON.parse(jsonStr);
+
+    if (!prediction || (!prediction.topics && !Array.isArray(prediction))) {
+      throw new Error('AI response missing topics');
+    }
+
+    // Hande if AI returns array instead of object
+    const topicsArr = Array.isArray(prediction) ? prediction : (prediction.topics || []);
 
     return {
       year: nextYear,
-      ...prediction
+      topics: topicsArr,
+      difficultyDistribution: prediction.difficultyDistribution || { easy: 30, moderate: 50, hard: 20 },
+      overallConfidence: prediction.overallConfidence || 0.5
     };
 
   } catch (error) {
-    console.error('❌ AI prediction failed, using statistical fallback:', error);
+    console.warn('⚠️ AI prediction phase failed, using statistical fallback:', (error as any).message);
     return generateStatisticalPrediction(context, nextYear);
   }
 }
@@ -438,12 +454,12 @@ function calculateTopicAllocation(
 
     if (isOracle || mode === 'predictive_mock') {
       // MODE 1: PREDICTIVE/ORACLE (Simulate the real exam 1:1)
-      // Ignore student mastery entirely. 100% weight on pattern.
-      allocationScore = predictedTopic.probability;
+      // Use the AI's predicted count as the primary driver for allocation
+      // Baseline the score against a standard 60-question paper to maintain weightage
+      allocationScore = predictedTopic.expectedQuestionCount / 60;
       reasons.push(isOracle ? `🔮 Oracle Mode: IDS 1.0 Deterministic Calibration` : `🦅 Predictive Mode: Forced Exam Weightage`);
     } else if (mode === 'adaptive_growth') {
       // MODE 2: ADAPTIVE GROWTH (Surgical fix for student weaknesses)
-      // 70% weight on student weakness, 30% on exam importance
       const inverseMastery = (100 - studentMastery) / 100;
       allocationScore = (inverseMastery * 0.7) + (predictedTopic.probability * 0.3);
       reasons.push(`🎯 Adaptive Mode: Vulnerability Focus (${studentMastery}% accuracy)`);
@@ -459,8 +475,8 @@ function calculateTopicAllocation(
       allocationScore += (weights.curriculumBalance * 0.5);
     }
 
-    // Calculate question count
-    const questionCount = Math.round(allocationScore * examConfig.totalQuestions);
+    // Calculate question count (initial estimate)
+    const questionCount = Math.max(0, Math.round(allocationScore * examConfig.totalQuestions));
 
     console.log(`   ${predictedTopic.topicName}: score=${allocationScore.toFixed(2)} → ${questionCount} questions`);
 
@@ -646,7 +662,7 @@ QUALITY MANDATE:
 1. ZERO "Definition" questions. Use Scenario-based applications.
 2. Focus on "The Prediction Gap": Create questions that pre-empt trends for ${new Date().getFullYear() + 1}.
 3. MANDATORY SOLUTIONS: Every question MUST have "solutionSteps" (min 2 steps), "studyTip", and "commonMistakes".
-4. LATEX: Use PROPER LaTeX ($...$ inline, $$...$$ display). Ensure ALL braces and dollar signs are balanced.
+4. LATEX: Use PROPER LaTeX ($...$ inline, $$...$$ display). IMPORTANT: You MUST use DOUBLE BACKSLASHES (e.g., \\\\sum, \\\\sqrt) for all LaTeX commands. THIS IS THE ONLY WAY TO ENSURE VALID JSON. WE WILL REJECT ANY SINGLE BACKSLASHES.
 5. NO direct Theory questions. Focus on speed-tricks and analytical synthesis.
 
 Return ONLY a valid JSON array:
@@ -685,39 +701,62 @@ Return ONLY a valid JSON array:
       }
     });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text() || '[]';
+    const MAX_BATCH_RETRIES = 3;
+    let attempt = 0;
 
-    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\[[\s\S]*\]/);
-    const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : text;
-    const questions = JSON.parse(jsonStr);
+    while (attempt <= MAX_BATCH_RETRIES) {
+      let text = '';
+      try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        text = response.text() || '[]';
 
-    const { randomUUID } = await import('crypto');
-    return questions.map((q: any) => ({
-      id: randomUUID(),
-      text: q.text,
-      options: q.options || [],
-      marks: q.marks || examConfig.marksPerQuestion,
-      difficulty: q.difficulty,
-      topic: q.topic,
-      blooms: q.blooms || 'Apply',
-      solutionSteps: q.solutionSteps || q.solution_steps || [],
-      examTip: q.studyTip || q.examTip || q.exam_tip || '',
-      studyTip: q.studyTip || q.study_tip || '',
-      keyFormulas: q.keyFormulas || q.key_formulas || [],
-      commonMistakes: q.commonMistakes || q.common_mistakes || [],
-      pitfalls: (q.commonMistakes || q.pitfalls || []).map((m: any) => typeof m === 'object' ? m.mistake : m),
-      aiReasoning: q.aiReasoning || q.ai_reasoning || '',
-      historicalPattern: q.historicalPattern || q.historical_pattern || '',
-      predictiveInsight: q.predictiveInsight || q.predictive_insight || '',
-      whyItMatters: q.whyItMatters || q.why_it_matters || '',
-      keyConcepts: q.keyConcepts || q.key_concepts || [],
-      masteryMaterial: q.masteryMaterial || q.mastery_material || q,
-      correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? 0,
-      source: `AI-Generated (Smart-Batch ${examConfig.examContext})`
-    }));
+        const jsonStr = cleanJsonResponse(text);
+        const questions = JSON.parse(jsonStr);
 
+        const { randomUUID } = await import('crypto');
+        return questions.map((q: any) => ({
+          id: randomUUID(),
+          text: q.text,
+          options: q.options || [],
+          marks: q.marks || examConfig.marksPerQuestion,
+          difficulty: q.difficulty,
+          topic: q.topic,
+          blooms: q.blooms || 'Apply',
+          solutionSteps: q.solutionSteps || q.solution_steps || [],
+          examTip: q.studyTip || q.examTip || q.exam_tip || '',
+          studyTip: q.studyTip || q.study_tip || '',
+          keyFormulas: q.keyFormulas || q.key_formulas || [],
+          commonMistakes: q.commonMistakes || q.common_mistakes || [],
+          pitfalls: (q.commonMistakes || q.pitfalls || []).map((m: any) => typeof m === 'object' ? m.mistake : m),
+          aiReasoning: q.aiReasoning || q.ai_reasoning || '',
+          historicalPattern: q.historicalPattern || q.historical_pattern || '',
+          predictiveInsight: q.predictiveInsight || q.predictive_insight || '',
+          whyItMatters: q.whyItMatters || q.why_it_matters || '',
+          keyConcepts: q.keyConcepts || q.key_concepts || [],
+          masteryMaterial: q.masteryMaterial || q.mastery_material || q,
+          correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? 0,
+          source: `AI-Generated (Smart-Batch ${examConfig.examContext})`
+        }));
+      } catch (parseError) {
+        attempt++;
+        console.warn(`⚠️ Batch ${boardSignature} parse fail (attempt ${attempt}):`, (parseError as any).message);
+
+        // Log failed JSON for debugging
+        try {
+          const fs = await import('fs');
+          const logContent = `\n--- ATTEMPT ${attempt} ---\nERROR: ${parseError}\nRAW:\n${text}\nCLEANED:\n${cleanJsonResponse(text)}\n`;
+          fs.appendFileSync('failed_json.txt', logContent);
+        } catch (logErr) {
+          console.error('Failed to log JSON:', logErr);
+        }
+
+        if (attempt > MAX_BATCH_RETRIES) throw parseError;
+        // Exponential backoff
+        await new Promise(r => setTimeout(r, 1000 * attempt));
+      }
+    }
+    return [];
   } catch (error) {
     console.error('❌ Batch generation failed:', error);
     return [];

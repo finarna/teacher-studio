@@ -92,6 +92,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
           .select('id, name, created_at, status, subject, grade, exam_context, year, analysis_data')
           .eq('subject', subject)
           .eq('exam_context', examContext)
+          .eq('is_system_scan', true) // ✅ Only show officially published system papers
           .not('year', 'is', null); // Only scans with year field
 
         console.log(`📊 [PAST YEAR] Query result: ${scansData?.length || 0} scans, error:`, scansError?.message || 'none');

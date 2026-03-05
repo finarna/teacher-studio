@@ -166,23 +166,30 @@ export async function loadStudentProfile(
   subject: Subject
 ): Promise<StudentProfile> {
   // Load topic mastery from test responses
-  const { data: responses, error } = await supabase
-    .from('test_responses')
-    .select(`
-      *,
-      test_attempts!inner(
-        user_id,
-        exam_context,
-        subject,
-        created_at
-      )
-    `)
-    .eq('test_attempts.user_id', userId)
-    .eq('test_attempts.exam_context', examContext)
-    .eq('test_attempts.subject', subject);
+  // Skip DB query if userId is not a UUID (for Oracle/System agents)
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId);
 
-  if (error) {
-    console.error('Error loading student profile:', error);
+  let responses = [];
+  if (isUuid) {
+    const { data, error } = await supabase
+      .from('test_responses')
+      .select(`
+        *,
+        test_attempts!inner(
+          user_id,
+          exam_context,
+          subject,
+          created_at
+        )
+      `)
+      .eq('test_attempts.user_id', userId)
+      .eq('test_attempts.exam_context', examContext)
+      .eq('test_attempts.subject', subject);
+
+    if (error) {
+      console.error('Error loading student profile:', error);
+    }
+    responses = data || [];
   }
 
   // Aggregate by topic
@@ -323,7 +330,7 @@ export async function loadGenerationContext(
     // Provide the forecast metadata, but don't force 'enabled' unless already set or requested
     generationRules.oracleMode = {
       enabled: generationRules.oracleMode?.enabled || false,
-      idsTarget: 0.95,
+      idsTarget: oracleCalibration.idsTarget || 0.95,
       directives: oracleCalibration.directives,
       boardSignature: oracleCalibration.boardSignature
     };

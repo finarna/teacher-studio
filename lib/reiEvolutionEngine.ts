@@ -25,6 +25,7 @@ export interface ForecastedCalibration {
         linguisticLoad: number;
         speedRequirement: number;
     };
+    idsTarget: number;
     directives: string[];
     boardSignature: 'SYNTHESIZER' | 'LOGICIAN' | 'INTIMIDATOR' | 'ANCHOR' | 'DEFAULT';
 }
@@ -58,6 +59,7 @@ export async function getForecastedCalibration(
             rigorVelocity: 1.0,
             difficultyProfile: baseline.profile,
             intentSignature: baseline.signature,
+            idsTarget: 0.9,
             directives: ["Universal Anchor Baseline"],
             boardSignature: baseline.boardSignature
         };
@@ -91,16 +93,36 @@ export async function getForecastedCalibration(
     // Acceleration Factor: If hard Qs are increasing, forecast predicts a "Rigor Spike"
     const rigorVelocity = 1.0 + (rigorDrift / 100);
 
-    // 3. Chain to Mock Test Params (Complexity Matrix)
+    // 4. Fetch REI Dynamic Intelligence Config
+    const { data: config } = await supabase
+        .from('rei_evolution_configs')
+        .select('*')
+        .eq('exam_context', examContext)
+        .eq('subject', subject || null)
+        .single();
+
+    const driftMultiplier = config?.rigor_drift_multiplier || 1.8;
+    // @ts-ignore - Added ids_baseline in migration
+    const idsBaseline = config?.ids_baseline || 0.95;
+
+    // 5. Chain to Mock Test Params (Complexity Matrix)
     // Dynamic forecast for 2026 based on the 2-year gradient
-    const forecastedHard = Math.min(65, Math.max(15, (recent.difficulty_hard_pct || 20) + (rigorDrift * 1.8)));
+    const forecastedHard = Math.min(65, Math.max(15, (recent.difficulty_hard_pct || 20) + (rigorDrift * driftMultiplier)));
     const remaining = 100 - forecastedHard;
     const forecastedEasy = Math.round(remaining * (baseline.profile.easy / (baseline.profile.easy + baseline.profile.moderate)));
     const forecastedModerate = 100 - forecastedHard - forecastedEasy;
 
-    // 4. Extract Evolution Intent from Data
+    // 6. Extract Evolution Intent from Data
     // Use effectiveHistory to include anchor if necessary
     const directives = extractDirectivesFromNotes(effectiveHistory, examContext, subject, rigorDrift);
+
+    // 7. Resolve Intent Signature (Inherit from latest scan or fallback to baseline)
+    const intentSignature = recent.intent_signature || {
+        synthesis: config?.synthesis_weight || baseline.signature.synthesis,
+        trapDensity: config?.trap_density_weight || baseline.signature.trapDensity,
+        linguisticLoad: config?.linguistic_load_weight || baseline.signature.linguisticLoad,
+        speedRequirement: config?.speed_requirement_weight || baseline.signature.speedRequirement
+    };
 
     const calibration = {
         examContext,
@@ -112,20 +134,47 @@ export async function getForecastedCalibration(
             moderate: forecastedModerate,
             hard: Math.round(forecastedHard)
         },
-        intentSignature: {
-            synthesis: examContext === 'JEE' ? 0.92 : 0.4,
-            trapDensity: examContext === 'NEET' ? 0.85 : 0.5,
-            linguisticLoad: examContext === 'NEET' ? 0.80 : 0.3,
-            speedRequirement: examContext === 'KCET' ? 0.95 : 0.6
-        },
+        intentSignature,
+        idsTarget: idsBaseline,
         directives,
-        boardSignature: baseline.boardSignature
+        boardSignature: recent.board_signature || baseline.boardSignature
     };
 
-    // 5. Persist the "Processed Intelligence"
+    // 8. Persist the "Processed Intelligence"
     await saveForecastedCalibration(calibration);
 
     return calibration;
+}
+
+/**
+ * Fetch the latest Processed Intelligence for the UI Briefing
+ */
+export async function getStrategicBriefing(
+    examContext: ExamContext,
+    subject: Subject
+): Promise<ForecastedCalibration | null> {
+    const { data, error } = await supabase
+        .from('ai_universal_calibration')
+        .select('*')
+        .eq('exam_type', examContext)
+        .eq('subject', subject)
+        .order('target_year', { ascending: false })
+        .limit(1)
+        .single();
+
+    if (!data || error) return null;
+
+    return {
+        examContext: data.exam_type as ExamContext,
+        subject: data.subject as Subject,
+        targetYear: data.target_year,
+        rigorVelocity: data.rigor_velocity,
+        intentSignature: data.intent_signature,
+        directives: data.calibration_directives || [],
+        boardSignature: data.board_signature as any,
+        idsTarget: data.intent_signature?.synthesis || 0.9, // Approximation if not stored separately
+        difficultyProfile: { easy: 0, moderate: 0, hard: 0 } // Not stored in this table currently
+    };
 }
 
 /**
@@ -175,7 +224,15 @@ function extractDirectivesFromNotes(
     const baseDirectives = {
         JEE: ["Cross-Chapter conceptual fusion", "Nonlinear Logic Jumps"],
         NEET: ["A-R Logic Trap Resonance", "NCERT-Plus Calibration"],
-        KCET: ["Heuristic Shortcut Mapping", "Property-based matrix mechanics"],
+        KCET: [
+            "Heuristic Shortcut Mapping",
+            "Property-based matrix mechanics",
+            "TRAP: Formula-Baiting in Calculus. The board is shifting to questions where standard formulas fail without domain verification.",
+            "TRAP: Geometric Seam Obfuscation. 3D geometry parallel equations will look orthogonal at first glance.",
+            "TRAP: Algebra Logic Loops. Multi-step series questions that trap students in recursive loops without convergence.",
+            "TRAP: Synthetic Matrix Shifts. Evaluators are using non-commutative matrix multiplication specifically to bait standard expansions.",
+            "TRAP: Probability Overlap Seams. Conditional probability framing that intentionally masks mutually exclusive events."
+        ],
         CBSE: ["Step-Wise Blueprint fidelity", "PYQ Anchor resonance"]
     }[exam] || ["Standard pattern resonance"];
 

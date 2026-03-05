@@ -315,53 +315,53 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
         }
       />
 
-      <main className="flex-1 overflow-hidden p-4 md:p-6 lg:p-8 flex flex-col">
-        <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0 space-y-4 md:space-y-6">
+      <main className="flex-1 overflow-hidden p-3 md:p-4 lg:p-6 flex flex-col">
+        <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0 space-y-3 md:space-y-4">
 
-          {/* 3. HERO AI COACH MESSAGE */}
+          {/* 3. HERO AI COACH MESSAGE - COMPACT */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative bg-slate-900 rounded-[2rem] p-4 md:p-6 overflow-hidden shadow-2xl border border-white/5 shrink-0"
+            className="relative bg-slate-900 rounded-2xl p-3 md:p-4 overflow-hidden shadow-xl border border-white/5 shrink-0"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-[80px] -mr-32 -mt-32" />
-            <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-              <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-primary-400 to-indigo-500 flex items-center justify-center text-slate-900 shadow-2xl shrink-0 animate-pulse">
-                <Brain size={40} strokeWidth={2.5} />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500/10 rounded-full blur-[60px] -mr-24 -mt-24" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-3 md:gap-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br from-primary-400 to-indigo-500 flex items-center justify-center text-slate-900 shadow-xl shrink-0 animate-pulse">
+                <Brain size={24} strokeWidth={2.5} />
               </div>
               <div className="flex-1 text-center md:text-left">
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                  <span className="px-2 py-0.5 bg-primary-500/20 text-primary-400 rounded text-[10px] font-bold tracking-wide border border-primary-500/30">Active Coach</span>
-                  <div className="flex gap-1.5 overflow-hidden">
-                    {aiInsights?.tags.map(tag => (
-                      <span key={tag} className="text-[9px] font-bold text-slate-500 bg-white/5 px-2 py-0.5 rounded border border-white/5 whitespace-nowrap">{tag}</span>
+                <div className="flex items-center justify-center md:justify-start gap-1.5 mb-1">
+                  <span className="px-1.5 py-0.5 bg-primary-500/20 text-primary-400 rounded text-[9px] font-bold tracking-wide border border-primary-500/30">Active Coach</span>
+                  <div className="flex gap-1 overflow-hidden">
+                    {aiInsights?.tags.slice(0, 2).map(tag => (
+                      <span key={tag} className="text-[8px] font-bold text-slate-500 bg-white/5 px-1.5 py-0.5 rounded border border-white/5 whitespace-nowrap">{tag}</span>
                     ))}
                   </div>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-2">
+                <h2 className="text-base md:text-xl font-extrabold text-white tracking-tight mb-1">
                   {aiInsights ? aiInsights.title : "Calibrating Performance Matrix"}
                 </h2>
-                <p className="text-slate-400 font-medium text-base md:text-lg leading-snug max-w-2xl">
+                <p className="text-slate-400 font-medium text-xs md:text-sm leading-snug max-w-2xl line-clamp-2">
                   {aiInsights ? aiInsights.description : "Reviewing your latest test responses to generate strategic blueprints."}
                 </p>
               </div>
-              <div className="shrink-0 flex gap-4">
-                <div className="text-center px-6 py-3 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
-                  <div className="text-3xl font-bold text-white leading-none mb-1">{Math.round(averageMastery)}%</div>
-                  <div className="text-[10px] font-bold text-slate-500">Avg Mastery</div>
+              <div className="shrink-0 flex gap-2">
+                <div className="text-center px-3 md:px-4 py-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md">
+                  <div className="text-xl md:text-2xl font-bold text-white leading-none mb-0.5">{Math.round(averageMastery)}%</div>
+                  <div className="text-[9px] font-bold text-slate-500">Avg Mastery</div>
                 </div>
               </div>
             </div>
           </motion.section>
 
-          {/* 4. THE SUBJECT GRID (Levelled Up & Clean) */}
-          <section className="space-y-4 flex-1 min-h-0 flex flex-col">
-            <div className="flex items-center justify-between px-2 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-6 bg-slate-900 rounded-full" />
-                <h2 className="text-sm font-bold text-slate-900 tracking-wide">Arena Selection</h2>
+          {/* 4. THE SUBJECT GRID - COMPACT */}
+          <section className="space-y-2 md:space-y-3 flex-1 min-h-0 flex flex-col">
+            <div className="flex items-center justify-between px-1 shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-5 bg-slate-900 rounded-full" />
+                <h2 className="text-xs md:text-sm font-bold text-slate-900 tracking-wide">Arena Selection</h2>
               </div>
-              <div className="text-[10px] font-bold text-slate-400 tracking-wide">
+              <div className="text-[9px] font-bold text-slate-400 tracking-wide">
                 {availableSubjects.length} Subjects Active
               </div>
             </div>
@@ -370,7 +370,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 flex-1 min-h-0 overflow-y-auto pr-1 custom-scrollbar pb-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 flex-1 min-h-0 overflow-y-auto pr-1 custom-scrollbar pb-6"
             >
               {availableSubjects.map((subject) => {
                 const config = SUBJECT_CONFIGS[subject];
@@ -397,55 +397,54 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                     key={subject}
                     variants={cardVariants}
                     onClick={() => onSelectSubject(subject)}
-                    className="group relative bg-white rounded-[2rem] p-4 md:p-6 border border-slate-200 shadow-sm hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] hover:border-primary-200 transition-all duration-500 text-left flex flex-col gap-6 overflow-hidden cursor-pointer"
+                    className="group relative bg-white rounded-2xl p-3 md:p-4 border border-slate-200 shadow-sm hover:shadow-xl hover:border-primary-200 transition-all duration-300 text-left flex flex-col gap-3 overflow-hidden cursor-pointer"
                   >
                     {/* Visual Highlights */}
-                    <div className="absolute top-0 left-0 w-full h-2 bg-slate-100" />
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-slate-100" />
                     <div
-                      className="absolute top-0 left-0 h-2 transition-all duration-700 ease-out"
+                      className="absolute top-0 left-0 h-1.5 transition-all duration-700 ease-out"
                       style={{ width: `${mastery}%`, backgroundColor: config.color }}
                     />
 
-                    <div className="relative z-10 flex flex-col gap-6 w-full">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-6">
+                    <div className="relative z-10 flex flex-col gap-3 w-full">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-3">
                           <div
-                            className="w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] md:rounded-[1.5rem] flex items-center justify-center text-white shadow-xl transition-all group-hover:rotate-6 group-hover:scale-110 duration-500"
+                            className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-105 duration-300 shrink-0"
                             style={{ background: `linear-gradient(135deg, ${config.color}, ${config.colorDark})` }}
                           >
-                            <Icon size={28} strokeWidth={2.5} />
+                            <Icon size={20} strokeWidth={2.5} />
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-[10px] font-bold text-slate-400">Subject</span>
-                              <div className="w-1 h-3 bg-slate-200 rounded-full" />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-[9px] font-bold text-slate-400">Subject</span>
                             </div>
-                            <h4 className="text-2xl md:text-3xl font-extrabold text-slate-900 font-outfit leading-none tracking-tight">
+                            <h4 className="text-lg md:text-xl font-extrabold text-slate-900 font-outfit leading-none tracking-tight truncate">
                               {config.displayName}
                             </h4>
                           </div>
                         </div>
-                        <div className="text-right flex flex-col items-end">
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-3xl md:text-4xl font-bold text-slate-900 font-outfit leading-none tracking-tighter">{Math.round(mastery)}%</span>
+                        <div className="text-right flex flex-col items-end shrink-0">
+                          <div className="flex items-baseline gap-0.5">
+                            <span className="text-2xl font-bold text-slate-900 font-outfit leading-none tracking-tighter">{Math.round(mastery)}%</span>
                           </div>
-                          <div className="text-[10px] font-bold text-slate-400 mt-1">Global Mastery</div>
+                          <div className="text-[9px] font-bold text-slate-400 mt-0.5 whitespace-nowrap">Global Mastery</div>
                         </div>
                       </div>
 
-                      {/* AI COACH MICRO-TIP */}
-                      <div className="bg-slate-50/80 rounded-2xl p-4 border border-slate-100 group-hover:bg-white group-hover:border-slate-200 transition-all">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Sparkles size={12} className="text-primary-500" />
-                          <span className="text-[9px] font-bold text-primary-600 tracking-wide">AI Coach Recommendation</span>
+                      {/* AI COACH MICRO-TIP - COMPACT */}
+                      <div className="bg-slate-50/80 rounded-xl p-2.5 border border-slate-100 group-hover:bg-white group-hover:border-slate-200 transition-all">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <Sparkles size={10} className="text-primary-500 shrink-0" />
+                          <span className="text-[8px] font-bold text-primary-600 tracking-wide">AI Coach</span>
                         </div>
-                        <p className="text-xs font-semibold text-slate-600 leading-snug">
+                        <p className="text-[10px] font-semibold text-slate-600 leading-snug line-clamp-2">
                           "{getCoachTip(subject, mastery, accuracy, stats.questions || volume)}"
                         </p>
                       </div>
 
-                      {/* INTEGRATED STATS (Pills) */}
-                      <div className="grid grid-cols-4 gap-3">
+                      {/* INTEGRATED STATS (Pills) - COMPACT */}
+                      <div className="grid grid-cols-4 gap-1.5">
                         {[
                           { l: 'Topics', v: stats.topics, c: config.color, i: BookOpen },
                           { l: 'Qns', v: stats.questions, c: '#8B5CF6', i: FileQuestion },
@@ -454,58 +453,58 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         ].map((s, idx) => {
                           const StatIcon = s.i;
                           return (
-                            <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-2 md:p-3 flex flex-col items-center shadow-sm group-hover:bg-white group-hover:border-slate-200 transition-all">
-                              <div className="mb-1" style={{ color: s.c }}>
-                                <StatIcon size={18} strokeWidth={2.5} />
+                            <div key={idx} className="bg-slate-50 border border-slate-100 rounded-lg p-1.5 md:p-2 flex flex-col items-center shadow-sm group-hover:bg-white group-hover:border-slate-200 transition-all">
+                              <div className="mb-0.5" style={{ color: s.c }}>
+                                <StatIcon size={14} strokeWidth={2.5} />
                               </div>
-                              <div className="text-lg md:text-xl font-bold text-slate-900 leading-none mb-0.5">{s.v || 0}</div>
-                              <div className="text-[9px] font-bold text-slate-500 leading-none">{s.l}</div>
+                              <div className="text-sm md:text-base font-bold text-slate-900 leading-none mb-0.5">{s.v || 0}</div>
+                              <div className="text-[8px] font-bold text-slate-500 leading-none">{s.l}</div>
                             </div>
                           );
                         })}
                       </div>
 
-                      {/* PERFORMANCE PERFORMANCE PERFORMANCE */}
-                      <div className="space-y-4 pt-4 border-t border-slate-100 mt-auto">
-                        <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                          <span>Accuracy Benchmarking</span>
+                      {/* PERFORMANCE - COMPACT */}
+                      <div className="space-y-2 pt-2 border-t border-slate-100 mt-auto">
+                        <div className="flex items-center justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wide">
+                          <span>Accuracy</span>
                           <span className="text-slate-900">{Math.round(accuracy)}%</span>
                         </div>
-                        <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
+                        <div className="w-full h-1.5 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${accuracy}%` }}
-                            className="h-full bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.5)]"
+                            className="h-full bg-emerald-400 rounded-full shadow-[0_0_6px_rgba(52,211,153,0.4)]"
                           />
                         </div>
 
-                        <div className="flex items-center justify-between mt-6">
-                          <div className="flex items-center gap-1.5 text-emerald-500 italic font-black uppercase text-[10px] tracking-widest">
-                            <TrendingUp size={12} />
-                            Potential +{getPotentialGain(mastery, accuracy)}%
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1 text-emerald-500 italic font-bold uppercase text-[8px] tracking-wide">
+                            <TrendingUp size={10} />
+                            +{getPotentialGain(mastery, accuracy)}%
                           </div>
                         </div>
 
-                        {/* REFINED ACTIONS - INLINE TO REDUCE DEPTH */}
-                        <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
-                          <div className="grid grid-cols-2 gap-2">
+                        {/* ACTIONS - COMPACT */}
+                        <div className="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                          <div className="grid grid-cols-2 gap-1.5">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onSelectOption?.(subject, 'topicwise');
                               }}
-                              className="flex items-center justify-center gap-2 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-bold tracking-wide hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100"
+                              className="flex items-center justify-center gap-1 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-[9px] font-bold hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100"
                             >
-                              <BookOpen size={14} /> Explore Syllabus
+                              <BookOpen size={12} /> <span className="hidden md:inline">Syllabus</span>
                             </button>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onSelectOption?.(subject, 'past_exams');
                               }}
-                              className="flex items-center justify-center gap-2 py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-bold tracking-wide hover:bg-amber-600 hover:text-white transition-all border border-amber-100"
+                              className="flex items-center justify-center gap-1 py-2 bg-amber-50 text-amber-700 rounded-lg text-[9px] font-bold hover:bg-amber-600 hover:text-white transition-all border border-amber-100"
                             >
-                              <Target size={14} /> Exam Vault
+                              <Target size={12} /> <span className="hidden md:inline">Vault</span>
                             </button>
                           </div>
 
@@ -514,19 +513,9 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                               e.stopPropagation();
                               onSelectOption?.(subject, 'mock_builder');
                             }}
-                            className="w-full flex items-center justify-center gap-2 py-3 bg-slate-900 text-white rounded-xl text-[11px] font-bold tracking-wide hover:bg-primary-600 transition-all shadow-lg"
+                            className="w-full flex items-center justify-center gap-1.5 py-2 bg-slate-900 text-white rounded-lg text-[9px] font-bold hover:bg-primary-600 transition-all shadow-md"
                           >
-                            <Zap size={16} /> Enter Mock Mission
-                          </button>
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onSelectSubject(subject);
-                            }}
-                            className="w-full py-1 text-[9px] font-bold text-slate-400 text-center hover:text-slate-600 transition-colors"
-                          >
-                            View Full Subject Analysis
+                            <Zap size={12} /> Mock Test
                           </button>
                         </div>
                       </div>

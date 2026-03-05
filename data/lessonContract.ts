@@ -199,7 +199,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
   overallDifficulty: 'Moderate',
   difficultyDistribution: [
     { name: 'Easy', percentage: 20, color: '#10b981' },
-    { name: 'Medium', percentage: 50, color: '#f59e0b' },
+    { name: 'Moderate', percentage: 50, color: '#f59e0b' },
     { name: 'Hard', percentage: 30, color: '#ef4444' }
   ],
   bloomsTaxonomy: [
@@ -234,7 +234,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
     {
       topic: 'Current Electricity',
       totalMarks: 12,
-      difficulty: 'Medium',
+      difficulty: 'Moderate',
       description: 'High scoring if Kirchhoff laws are applied correctly. Wheatstone bridge sensitivity and Potentiometer conceptual questions are frequent.',
       keyConcepts: ['Drift Velocity', 'Kirchhoff Rules (KVL/KCL)', 'Wheatstone Bridge', 'Potentiometer', 'Internal Resistance'],
       importantFormulas: ['V = E - Ir', 'ΣI = 0', 'ΣV = 0', 'R = ρl/A'],
@@ -249,7 +249,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
     {
       topic: 'Moving Charges & Magnetism',
       totalMarks: 13,
-      difficulty: 'Medium',
+      difficulty: 'Moderate',
       description: 'Heavily conceptual. Direction of forces (Right Hand Rule) and path of particles in B-fields are standard question types.',
       keyConcepts: ['Biot-Savart Law', 'Ampere Circuital Law', 'Cyclotron Frequency', 'Force between Parallel Wires', 'Galvanometer Conversion'],
       importantFormulas: ['F = q(v × B)', 'B = μ₀nI', 'F/l = (μ₀ I₁ I₂) / 2πd'],
@@ -264,7 +264,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
     {
       topic: 'Electrostatics',
       totalMarks: 10,
-      difficulty: 'Medium',
+      difficulty: 'Moderate',
       description: 'Foundation chapter. Gauss Law applications (Shell, Sheet, Line) are guaranteed 3-5 mark derivation questions.',
       keyConcepts: ['Electric Field Lines', 'Gauss Law Applications', 'Electric Dipole', 'Capacitance with Dielectric', 'Equipotential Surfaces'],
       importantFormulas: ['E = λ / 2πε₀r', 'V = kq/r', 'C = Kε₀A/d', 'τ = p × E'],
@@ -322,7 +322,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
     {
       id: "Q2",
       text: "A prism of angle 60° produces a minimum deviation of 30°. Calculate the refractive index of the prism material.",
-      marks: 3, difficulty: "Medium", topic: "Ray Optics & Instruments", blooms: "Applying",
+      marks: 3, difficulty: "Moderate", topic: "Ray Optics & Instruments", blooms: "Applying",
       solutionSteps: ["Use prism formula: μ = sin((A+δm)/2) / sin(A/2)", "Substitute A=60, δm=30", "Calculate result."],
       keyFormulas: ["μ = sin((A+δm)/2) / sin(A/2)"],
       visualConcept: "Prism Deviation",
@@ -353,7 +353,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
     {
       id: "Q5",
       text: "Use Kirchhoff's rules to determine the potential difference between points A and B in the given network.",
-      marks: 3, difficulty: "Medium", topic: "Current Electricity", blooms: "Applying",
+      marks: 3, difficulty: "Moderate", topic: "Current Electricity", blooms: "Applying",
       solutionSteps: ["Identify loops.", "Apply KVL (Loop Rule).", "Solve simultaneous equations."],
       keyFormulas: ["ΣV = 0"],
       pitfalls: ["Sign errors when moving across batteries against current."],
@@ -364,7 +364,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
     {
       id: "Q6",
       text: "Explain the principle of a Potentiometer. Why is it preferred over a voltmeter?",
-      marks: 3, difficulty: "Medium", topic: "Current Electricity", blooms: "Understanding",
+      marks: 3, difficulty: "Moderate", topic: "Current Electricity", blooms: "Understanding",
       solutionSteps: ["Principle: V ∝ l (constant current).", "Null deflection method means no current drawn from source.", "Measures EMF accurately."],
       keyFormulas: ["E1/E2 = l1/l2"],
       visualConcept: "Potentiometer Setup",
@@ -416,7 +416,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
     {
       id: "Q11",
       text: "State Biot-Savart Law in vector form.",
-      marks: 2, difficulty: "Medium", topic: "Moving Charges & Magnetism", blooms: "Remembering",
+      marks: 2, difficulty: "Moderate", topic: "Moving Charges & Magnetism", blooms: "Remembering",
       solutionSteps: ["dB = (μ₀/4π) (Idl x r)/r³"],
       visualConcept: "Current Element",
       examTip: "Vector notation is mandatory.",
@@ -425,7 +425,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
     {
       id: "Q12",
       text: "An electron enters a magnetic field at right angles with velocity v. Describe its path.",
-      marks: 2, difficulty: "Medium", topic: "Moving Charges & Magnetism", blooms: "Understanding",
+      marks: 2, difficulty: "Moderate", topic: "Moving Charges & Magnetism", blooms: "Understanding",
       solutionSteps: ["Force is perpendicular to velocity.", "Centripetal force provided by magnetic force.", "Path is circular."],
       keyFormulas: ["qvB = mv²/r"],
       visualConcept: "Cyclotron Motion",
@@ -470,7 +470,7 @@ export const MOCK_EXAM_ANALYSIS: ExamAnalysisData = {
     {
       id: "Q16",
       text: "Plot a graph showing variation of stopping potential with frequency of incident radiation for two photosensitive materials having work functions W1 > W2.",
-      marks: 3, difficulty: "Medium", topic: "Modern Physics", blooms: "Analyzing",
+      marks: 3, difficulty: "Moderate", topic: "Modern Physics", blooms: "Analyzing",
       solutionSteps: ["Einstein eq: V₀ = (h/e)ν - W/e", "Straight line with slope h/e.", "Intercept depends on W."],
       keyFormulas: ["V₀ = (h/e)ν - φ/e"],
       visualConcept: "Photoelectric Graph",

@@ -1731,7 +1731,7 @@ CRITICAL RULES:
                             <ChevronRight size={24} strokeWidth={3} />
                         </button>
                     </div>
-                </div>
+                </div >
             ) : (
                 <div className="bg-white border border-slate-100 rounded-[3rem] p-10 text-center space-y-6 shadow-sm">
                     <div className="w-20 h-20 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mx-auto text-slate-200">
@@ -1753,7 +1753,7 @@ CRITICAL RULES:
                     </button>
                 </div>
             )}
-        </div>
+        </div >
     );
 };
 
