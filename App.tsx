@@ -372,10 +372,14 @@ const AppContent: React.FC = () => {
           ...scan.analysisData,
           topicBasedSketches: undefined, // Strip the large SVG bundles
           // Strip base64 sketchSvg to avoid 413 — visuals are persisted separately via /api/scan-visuals
-          questions: scan.analysisData.questions.map(q => ({
-            ...q,
-            sketchSvg: undefined
-          }))
+          questions: scan.analysisData.questions.map(q => {
+            const isHttp = typeof q.sketchSvg === 'string' && q.sketchSvg.startsWith('http');
+            return {
+              ...q,
+              sketchSvgUrl: isHttp ? q.sketchSvg : q.sketchSvgUrl,
+              sketchSvg: isHttp ? q.sketchSvg : undefined
+            };
+          })
         } : undefined
       };
 

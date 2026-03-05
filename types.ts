@@ -233,6 +233,7 @@ export interface AnalyzedQuestion {
   exam_year?: string;
   correctOptionIndex?: number;
   sketchSvg?: string;
+  sketchSvgUrl?: string;
   hasVisualElement?: boolean;
   visualElementType?:
   | 'diagram'

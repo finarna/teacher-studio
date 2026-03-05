@@ -580,7 +580,8 @@ app.post('/api/scan-visuals/:scanId', async (req, res) => {
                 subject: scanRow.subject,
                 exam_context: scanRow.exam_context,
                 year: scanRow.year,
-                is_system_question: false // It's a draft
+                is_system_question: false, // It's a draft
+                sketchSvgUrl: typeof q.sketchSvg === 'string' && q.sketchSvg.startsWith('http') ? q.sketchSvg : q.sketchSvgUrl
               }));
               await createQuestions(scanId, questionsToCreate);
 
@@ -761,11 +762,11 @@ app.post('/api/scans', async (req, res) => {
         // Upload sketch SVGs to storage and get URLs
         const questionsWithMetadata = await Promise.all(
           apiScan.analysisData.questions.map(async (q, index) => {
-            // Priority: 1. appId match, 2. order match
-            let sketchSvgUrl = sketchUrlMap[q.id] || orderUrlMap[index] || null;
+            // Priority: 1. appId match, 2. order match, 3. payload url
+            let sketchSvgUrl = sketchUrlMap[q.id] || orderUrlMap[index] || q.sketchSvgUrl || null;
 
-            // If question has sketch SVG data, upload to storage
-            if (q.sketchSvg) {
+            // If question has sketch SVG data (base64 or raw XML, not HTTP URL), upload to storage
+            if (q.sketchSvg && !q.sketchSvg.startsWith('http')) {
               try {
                 const fileName = `sketches/${apiScan.id}/${q.id || `q${index}`}.svg`;
 
@@ -802,6 +803,8 @@ app.post('/api/scans', async (req, res) => {
               } catch (uploadErr) {
                 console.error(`❌ Error uploading sketch:`, uploadErr);
               }
+            } else if (q.sketchSvg && q.sketchSvg.startsWith('http')) {
+              sketchSvgUrl = q.sketchSvg;
             }
 
             return {
@@ -810,7 +813,7 @@ app.post('/api/scans', async (req, res) => {
               exam_context: dbData.exam_context,
               year: dbData.year,
               sketchSvgUrl, // Add the storage URL
-              sketchSvg: undefined // Remove base64 data to save space
+              sketchSvg: undefined // Remove data to save space
             };
           })
         );
