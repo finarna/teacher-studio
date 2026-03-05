@@ -107,7 +107,9 @@ const MathRenderer: React.FC<MathRendererProps> = ({
       const isInline = !isDisplay && part.startsWith('$') && part.endsWith('$');
 
       if (isDisplay || isInline) {
-        const latex = isDisplay ? part.slice(2, -2).trim() : part.slice(1, -1).trim();
+        const rawLatex = isDisplay ? part.slice(2, -2).trim() : part.slice(1, -1).trim();
+        // Normalize double backslashes to single (AI questions stored with \\cmd instead of \cmd)
+        const latex = rawLatex.replace(/\\\\/g, '\\');
         try {
           const html = window.katex.renderToString(latex, {
             throwOnError: false,

@@ -486,13 +486,21 @@ const AdminScanApproval: React.FC = () => {
           domain: q.domain || '',
           blooms: q.blooms || 'Understanding',
           options: q.options || [],
+          correct_option_index: q.correctOptionIndex ?? q.correct_option_index ?? 0,
           solution_steps: q.solutionSteps || q.solution_steps || [],
           exam_tip: q.examTip || q.exam_tip || null,
+          study_tip: q.studyTip || q.study_tip || null,
+          ai_reasoning: q.aiReasoning || q.ai_reasoning || (q.masteryMaterial?.logic) || null,
+          historical_pattern: q.historicalPattern || q.historical_pattern || null,
+          predictive_insight: q.predictiveInsight || q.predictive_insight || null,
+          why_it_matters: q.whyItMatters || q.why_it_matters || null,
+          key_formulas: q.keyFormulas || q.key_formulas || [],
+          mastery_material: q.masteryMaterial || q.mastery_material || null,
           question_order: index,
           subject: scan.subject,
           exam_context: scan.exam_context,
-          year: extractedYear || null,
-          is_system_question: true,  // ✅ Mark as system question (bypasses RLS user ownership)
+          year: extractedYear ? parseInt(extractedYear) : null,
+          is_system_question: true,
         }));
 
         // Insert questions into questions table

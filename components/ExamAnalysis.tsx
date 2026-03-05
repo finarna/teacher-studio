@@ -49,6 +49,7 @@ import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import PredictiveTrendsTab from './PredictiveTrendsTab';
 import { getApiUrl } from '../lib/api';
 import { AI_CONFIG } from '../config/aiConfigs';
+import { supabase } from '../lib/supabase';
 
 interface MetricCardProps {
   title: string;
@@ -416,6 +417,20 @@ Schema: {
     }
   };
 
+  const uploadVisualToStorage = async (scanId: string, qId: string, dataUrl: string): Promise<string> => {
+    const [header, base64] = dataUrl.split(',');
+    const mimeType = header.match(/:(.*?);/)?.[1] || 'image/png';
+    const ext = mimeType.split('/')[1] || 'png';
+    const binaryStr = atob(base64);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+    const fileName = `visuals/${scanId}/${qId}.${ext}`;
+    const { error } = await supabase.storage.from('edujourney-images').upload(fileName, bytes, { upsert: true, contentType: mimeType });
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from('edujourney-images').getPublicUrl(fileName);
+    return urlData.publicUrl;
+  };
+
   const handleGenerateVisual = async (qId: string) => {
     if (!onUpdateScan || !scan || !scan.analysisData) return;
 
@@ -444,19 +459,25 @@ Schema: {
 
       console.log(`✓ Generated visual note for ${qId}`);
 
+      // Upload to Supabase Storage directly (avoids 413 — no large payload over network)
+      let visualUrl = result.imageData;
+      try {
+        visualUrl = await uploadVisualToStorage(scan.id, qId, result.imageData);
+        console.log(`☁️ Uploaded visual for ${qId}`);
+      } catch (uploadErr) {
+        console.error('Storage upload failed, using base64 fallback:', uploadErr);
+      }
+
       // Local update for immediate UI feedback
-      const updatedQuestionSketches = {
-        ...questionSketches,
-        [qId]: result.imageData
-      };
+      const updatedQuestionSketches = { ...questionSketches, [qId]: visualUrl };
       setQuestionSketches(updatedQuestionSketches);
 
-      // SAVE to dedicated visuals endpoint (to avoid 413 on scans sync)
+      // SAVE only this single sketch to server (never send all accumulated sketches)
       try {
         fetch(getApiUrl(`/api/scan-visuals/${scan.id}`), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ questionSketches: updatedQuestionSketches })
+          body: JSON.stringify({ questionSketches: { [qId]: visualUrl } })
         });
       } catch (sErr) {
         console.error('Failed to sync question visual:', sErr);
@@ -464,7 +485,7 @@ Schema: {
 
       // Update the scan with the new visual note (metadata only sync now)
       const updatedQuestions = scan.analysisData.questions.map(q =>
-        q.id === qId ? { ...q, sketchSvg: result.imageData } : q
+        q.id === qId ? { ...q, sketchSvg: visualUrl } : q
       );
 
       const updatedScan: Scan = {
@@ -521,23 +542,23 @@ Schema: {
 
         console.log(`✓ Generated visual note for ${question.id}`);
 
-        // Local update for immediate UI feedback
-        const updatedQuestionSketchesAccumulated = {
-          ...questionSketches,
-          [question.id]: result.imageData
-        };
-        // Note: In rapid loop, closure might be stale, but React will batch it.
-        // Better to use functional update
-        setQuestionSketches(prev => ({ ...prev, [question.id]: result.imageData }));
+        // Upload to Supabase Storage directly (avoids 413)
+        let visualUrl = result.imageData;
+        try {
+          visualUrl = await uploadVisualToStorage(scan.id, question.id, result.imageData);
+          console.log(`☁️ Uploaded visual for ${question.id}`);
+        } catch (uploadErr) {
+          console.error('Storage upload failed, using base64 fallback:', uploadErr);
+        }
 
-        // SAVE to dedicated visuals endpoint
+        setQuestionSketches(prev => ({ ...prev, [question.id]: visualUrl }));
+
+        // SAVE to dedicated visuals endpoint (tiny URL payload now)
         try {
           fetch(getApiUrl(`/api/scan-visuals/${scan.id}`), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              questionSketches: { ...questionSketches, [question.id]: result.imageData }
-            })
+            body: JSON.stringify({ questionSketches: { [question.id]: visualUrl } })
           });
         } catch (sErr) {
           console.error('Failed to sync question visual:', sErr);
@@ -545,7 +566,7 @@ Schema: {
 
         // Update scan incrementally for each question (App.tsx strips huge SVGs)
         const updatedQuestions = scan.analysisData.questions.map(q =>
-          q.id === question.id ? { ...q, sketchSvg: result.imageData } : q
+          q.id === question.id ? { ...q, sketchSvg: visualUrl } : q
         );
 
         const updatedScan: Scan = {

@@ -68,25 +68,7 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({
               </div>
             </div>
 
-            {/* Key Formulas Section (if available) */}
-            {question.keyFormulas && question.keyFormulas.length > 0 && (
-              <div className="mb-8 p-6 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl shadow-sm">
-                <h3 className="text-xs font-black text-amber-700 uppercase tracking-[0.25em] mb-4 flex items-center gap-2 font-outfit">
-                  <span className="text-lg">⚡</span> Key Formulas
-                </h3>
-                <div className="space-y-3">
-                  {question.keyFormulas.map((formula, idx) => (
-                    <div key={idx} className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
-                      <div className="text-lg font-bold text-slate-900">
-                        <RenderWithMath text={formula} showOptions={false} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Key Formulas Section */}
+            {/* Formula Bank */}
             {question.keyFormulas && question.keyFormulas.length > 0 && (
               <div className="mb-10 p-8 bg-white border border-slate-200 rounded-[2.5rem] shadow-sm relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><BookOpen size={64} /></div>

@@ -2386,8 +2386,9 @@ const QuizTab: React.FC<{
     // Parse JSON helper
     const parseGeminiJSON = (responseText: string) => {
       try {
-        const cleaned = cleanJsonResponse(responseText);
-        return JSON.parse(cleaned);
+        // responseMimeType: 'application/json' guarantees valid JSON from Gemini.
+        // cleanJsonResponse doubles backslashes on already-valid JSON, breaking LaTeX.
+        return JSON.parse(responseText);
       } catch (error) {
         console.error('Failed to parse JSON:', error);
         throw new Error('Invalid JSON response from AI');

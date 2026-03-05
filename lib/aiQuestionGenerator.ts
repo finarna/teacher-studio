@@ -711,8 +711,9 @@ Return ONLY a valid JSON array:
         const response = await result.response;
         text = response.text() || '[]';
 
-        const jsonStr = cleanJsonResponse(text);
-        const questions = JSON.parse(jsonStr);
+        // responseMimeType: 'application/json' guarantees valid JSON from Gemini.
+        // cleanJsonResponse doubles backslashes on already-valid JSON, breaking LaTeX.
+        const questions = JSON.parse(text);
 
         const { randomUUID } = await import('crypto');
         return questions.map((q: any) => ({

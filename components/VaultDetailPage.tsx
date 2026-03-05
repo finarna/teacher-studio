@@ -59,7 +59,7 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => 
         .eq('scan_id', scanId)
         .not('year', 'is', null)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (questionData?.year) {
         setYear(questionData.year);

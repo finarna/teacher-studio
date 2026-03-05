@@ -53,7 +53,7 @@ import {
 } from './api/trendsEndpoints.js';
 import { loadGenerationContext } from './lib/examDataLoader.ts';
 import { generateTestQuestions } from './lib/aiQuestionGenerator.ts';
-import { AI_CONFIG } from './config/aiConfigs';
+import { AI_CONFIG } from './config/aiConfigs.ts';
 
 const app = express();
 const port = process.env.PORT || 9001;
@@ -400,7 +400,21 @@ app.get('/api/scan-visuals/:scanId', async (req, res) => {
       return res.json({ data: scanVisualsCache.get(scanId), cached: true });
     }
 
-    res.json({ data: { topicSketches: null, questionSketches: null }, cached: false });
+    // Cache miss — load question sketches from DB (sketch_svg_url) and rebuild keyed by analysis_data question ID
+    const { data: scanRow } = await supabaseAdmin.from('scans').select('analysis_data').eq('id', scanId).maybeSingle();
+    const { data: publishedQs } = await supabaseAdmin.from('questions').select('question_order, sketch_svg_url').eq('scan_id', scanId).not('sketch_svg_url', 'is', null);
+
+    let questionSketches = null;
+    if (publishedQs && publishedQs.length > 0 && scanRow?.analysis_data?.questions) {
+      const adQuestions = scanRow.analysis_data.questions;
+      questionSketches = {};
+      for (const pq of publishedQs) {
+        const adQ = adQuestions[pq.question_order];
+        if (adQ) questionSketches[adQ.id] = pq.sketch_svg_url;
+      }
+    }
+
+    res.json({ data: { topicSketches: null, questionSketches }, cached: false });
   } catch (err) {
     console.error('Failed to fetch scan visuals:', err);
     res.status(500).json({ error: 'Failed to fetch scan visuals' });
@@ -477,14 +491,61 @@ app.post('/api/scan-visuals/:scanId', async (req, res) => {
       }
     }
 
-    // Sync Question Sketches
+    // Sync Question Sketches — upload to Storage, update questions by question_order
     if (questionSketches && Object.keys(questionSketches).length > 0) {
+      // Load analysis_data to map analysis-question-ID → index (question_order)
+      const { data: scanRow } = await supabaseAdmin.from('scans').select('analysis_data').eq('id', scanId).maybeSingle();
+      const adQuestions = scanRow?.analysis_data?.questions || [];
+
       for (const [qId, svg] of Object.entries(questionSketches)) {
-        const { error } = await supabaseAdmin
-          .from('questions')
-          .update({ sketch_svg_url: svg })
-          .eq('id', qId);
-        if (error) console.error(`❌ Q-Update failed for ${qId}:`, error);
+        try {
+          const qIndex = adQuestions.findIndex(q => q.id === qId);
+          if (qIndex < 0) {
+            console.warn(`⚠️ Q-sketch: no analysis_data match for qId ${qId}, skipping DB persist`);
+            continue;
+          }
+
+          // If already a public URL (client uploaded directly), skip re-upload
+          let publicUrl;
+          if (typeof svg === 'string' && svg.startsWith('https://')) {
+            publicUrl = svg;
+          } else {
+            // Upload image to Supabase Storage
+            const fileName = `question-sketches/${scanId}/${qId}.png`;
+            let uploadBuffer;
+            if (typeof svg === 'string' && svg.startsWith('data:')) {
+              const base64Data = svg.replace(/^data:[^;]+;base64,/, '');
+              uploadBuffer = Buffer.from(base64Data, 'base64');
+            } else {
+              uploadBuffer = Buffer.from(svg, 'utf-8');
+            }
+
+            const contentType = typeof svg === 'string' && svg.includes('svg') ? 'image/svg+xml' : 'image/png';
+            const { error: uploadError } = await supabaseAdmin.storage
+              .from('edujourney-images')
+              .upload(fileName, uploadBuffer, { upsert: true, contentType });
+
+            if (uploadError) {
+              console.error(`❌ Storage upload failed for ${qId}:`, uploadError);
+              continue;
+            }
+
+            const { data: urlData } = supabaseAdmin.storage.from('edujourney-images').getPublicUrl(fileName);
+            publicUrl = urlData.publicUrl;
+          }
+
+          // Update the published question row by scan_id + question_order
+          const { error: updateError } = await supabaseAdmin
+            .from('questions')
+            .update({ sketch_svg_url: publicUrl })
+            .eq('scan_id', scanId)
+            .eq('question_order', qIndex);
+
+          if (updateError) console.error(`❌ Q-Update failed for order=${qIndex}:`, updateError);
+          else console.log(`✅ Saved sketch for Q${qIndex + 1} → ${publicUrl}`);
+        } catch (qErr) {
+          console.error(`❌ Sketch save error for ${qId}:`, qErr);
+        }
       }
     }
 
@@ -2012,8 +2073,31 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
       return res.status(400).json({ error: 'userId is required' });
     }
 
-    console.log(`📚 Fetching mock test history for user ${userId}, subject: ${subject}, exam: ${examContext}`);
+    console.log('='.repeat(60));
+    console.log('[mock-history] REQUEST PARAMS:', { userId, subject, examContext, limit });
+    console.log('[mock-history] Auth header present:', !!req.headers.authorization);
 
+    // ── DEBUG STEP 1: All attempts for this user (no type filter) ──
+    const { data: allAttempts, error: allErr } = await supabaseAdmin
+      .from('test_attempts')
+      .select('id, test_type, subject, exam_context, status, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    console.log('[mock-history] STEP1 — all attempts (no filter) → count:', allAttempts?.length ?? 0, '| err:', allErr?.message ?? 'none');
+    if (allAttempts?.length > 0) {
+      const typeGroups = {};
+      allAttempts.forEach(a => { typeGroups[a.test_type] = (typeGroups[a.test_type] || 0) + 1; });
+      console.log('[mock-history] STEP1 — test_type breakdown:', typeGroups);
+      allAttempts.slice(0, 10).forEach((a, i) => {
+        console.log(`  [${i}] type=${a.test_type} | subj=${a.subject} | exam=${a.exam_context} | status=${a.status} | ${a.created_at?.slice(0, 10)}`);
+      });
+    } else {
+      console.warn('[mock-history] STEP1 — ⚠️  ZERO attempts for userId:', userId, '— is this the correct UUID?');
+    }
+
+    // ── DEBUG STEP 2: Filter by custom_mock only ──
     let query = supabaseAdmin
       .from('test_attempts')
       .select('id, test_name, subject, exam_context, percentage, raw_score, marks_obtained, marks_total, total_questions, questions_attempted, status, created_at, completed_at, duration_minutes, total_duration, topic_analysis, time_analysis')
@@ -2025,10 +2109,22 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
     if (subject) query = query.eq('subject', subject);
     if (examContext) query = query.eq('exam_context', examContext);
 
-    const { data: attempts, error } = await query;
-    if (error) throw error;
+    console.log('[mock-history] STEP2 — querying with test_type=custom_mock, subject=', subject || '(all)', ', examContext=', examContext || '(all)');
 
-    console.log(`✅ Found ${attempts?.length || 0} mock test attempts`);
+    const { data: attempts, error } = await query;
+    if (error) {
+      console.error('[mock-history] STEP2 — ❌ Supabase error:', error);
+      throw error;
+    }
+
+    console.log('[mock-history] STEP2 — custom_mock results:', attempts?.length ?? 0);
+
+    if ((attempts?.length ?? 0) === 0 && (allAttempts?.length ?? 0) > 0) {
+      const distinctTypes = [...new Set(allAttempts.map(a => a.test_type))];
+      console.warn('[mock-history] ⚠️  MISMATCH: user has', allAttempts.length, 'attempts but NONE are custom_mock');
+      console.warn('[mock-history] ⚠️  Actual test_types in DB:', distinctTypes);
+      console.warn('[mock-history] ⚠️  FIX: change .eq("test_type", "custom_mock") to .in("test_type", ["custom_mock", ...distinctTypes])');
+    }
 
     const mappedAttempts = (attempts || []).map(a => ({
       id: a.id,
@@ -2050,9 +2146,12 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
       timeAnalysis: a.time_analysis,
     }));
 
+    console.log('[mock-history] STEP3 — sending', mappedAttempts.length, 'attempts to client');
+    console.log('='.repeat(60));
+
     res.json({ success: true, data: { attempts: mappedAttempts } });
   } catch (error) {
-    console.error('Error in /api/learning-journey/mock-history:', error);
+    console.error('[mock-history] ❌ EXCEPTION:', error);
     res.status(500).json({ success: false, error: error instanceof Error ? error.message : 'Internal server error' });
   }
 });

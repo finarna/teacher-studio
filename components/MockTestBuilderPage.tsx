@@ -214,6 +214,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const [durationMinutes, setDurationMinutes] = useState(45);
   const [availableQuestionCount, setAvailableQuestionCount] = useState(0);
   const [strategyMode, setStrategyMode] = useState<StrategyMode>('predictive_mock');
+  const [activeTab, setActiveTab] = useState<'builder' | 'history'>('builder');
   const [oracleModeEnabled, setOracleModeEnabled] = useState(false);
   const [oracleDirectives, setOracleDirectives] = useState<string[]>([]);
   const [boardSignature, setBoardSignature] = useState<'SYNTHESIZER' | 'LOGICIAN' | 'INTIMIDATOR' | 'DEFAULT'>('DEFAULT');
@@ -235,6 +236,10 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     fetchForecast();
     fetchUserRole();
   }, [subject, examContext, userId]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
 
   useEffect(() => {
     if (selectedTopicIds.length > 0) {
@@ -308,18 +313,17 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
       const token = session?.access_token;
       const url = getApiUrl(`/api/learning-journey/mock-history?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(examContext)}&limit=50`);
       const response = await fetch(url, {
-        headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        }
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
       });
       if (response.ok) {
         const result = await response.json();
         setTestHistory(result.data?.attempts || []);
       } else {
-        console.error('❌ Failed to fetch test history:', response.status);
+        setTestHistory([]);
       }
     } catch (error) {
       console.error('Error fetching test history:', error);
+      setTestHistory([]);
     } finally {
       setIsLoadingHistory(false);
     }
@@ -612,8 +616,6 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
       }, 600);
     }
   };
-
-  const [activeTab, setActiveTab] = useState<'builder' | 'history'>('builder');
 
   const completed = testHistory.filter(a => a.status === 'completed' && a.percentage != null);
   const avgScore = completed.length > 0
@@ -1256,7 +1258,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
               </div>
             </section>
           </div>
-          <div className={activeTab === 'history' ? 'block' : 'hidden'}>
+          <div className={`${activeTab === 'history' ? 'block' : 'hidden'} relative z-10`}>
             <section id="history-section" className="scroll-mt-32 pt-4">
               <div className="container mx-auto max-w-7xl px-4">
                 <div className="space-y-10">

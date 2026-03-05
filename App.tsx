@@ -371,7 +371,7 @@ const AppContent: React.FC = () => {
         analysisData: scan.analysisData ? {
           ...scan.analysisData,
           topicBasedSketches: undefined, // Strip the large SVG bundles
-          // CRITICAL: Also strip individual question sketches to avoid 413 Content Too Large
+          // Strip base64 sketchSvg to avoid 413 — visuals are persisted separately via /api/scan-visuals
           questions: scan.analysisData.questions.map(q => ({
             ...q,
             sketchSvg: undefined
