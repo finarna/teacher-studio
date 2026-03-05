@@ -442,12 +442,27 @@ const AdminScanApproval: React.FC = () => {
       }
 
       // NEW STEP: Cleanup existing questions/mappings for this scan before re-inserting
-      // This prevents doubling if publish is clicked multiple times
-      console.log('🧹 Cleaning up existing data for this scan...');
+      // CRITICAL: Preserve existing sketches/visuals!
+      console.log('🧹 Cleaning up existing data for this scan while preserving visuals...');
       const { data: existingQs } = await supabase
         .from('questions')
-        .select('id')
+        .select('id, sketch_svg_url, has_visual_element, visual_element_type, visual_element_description, diagram_url, question_order')
         .eq('scan_id', scanId);
+
+      const visualMetadataMap = new Map();
+      if (existingQs) {
+        existingQs.forEach(eq => {
+          if (eq.sketch_svg_url || eq.diagram_url || eq.has_visual_element) {
+            visualMetadataMap.set(eq.question_order, {
+              sketch_svg_url: eq.sketch_svg_url,
+              has_visual_element: eq.has_visual_element,
+              visual_element_type: eq.visual_element_type,
+              visual_element_description: eq.visual_element_description,
+              diagram_url: eq.diagram_url
+            });
+          }
+        });
+      }
 
       if (existingQs && existingQs.length > 0) {
         const qIds = existingQs.map(q => q.id);
@@ -477,31 +492,40 @@ const AdminScanApproval: React.FC = () => {
         };
 
         // Transform analysis_data questions to match questions table schema
-        const questionsData = questionsToInsert.map((q: any, index: number) => ({
-          scan_id: scanId,
-          text: q.text || q.question || '',
-          marks: parseInt(q.marks) || 1,
-          difficulty: normalizeDifficulty(q.difficulty),
-          topic: q.topic || '',
-          domain: q.domain || '',
-          blooms: q.blooms || 'Understanding',
-          options: q.options || [],
-          correct_option_index: q.correctOptionIndex ?? q.correct_option_index ?? 0,
-          solution_steps: q.solutionSteps || q.solution_steps || [],
-          exam_tip: q.examTip || q.exam_tip || null,
-          study_tip: q.studyTip || q.study_tip || null,
-          ai_reasoning: q.aiReasoning || q.ai_reasoning || (q.masteryMaterial?.logic) || null,
-          historical_pattern: q.historicalPattern || q.historical_pattern || null,
-          predictive_insight: q.predictiveInsight || q.predictive_insight || null,
-          why_it_matters: q.whyItMatters || q.why_it_matters || null,
-          key_formulas: q.keyFormulas || q.key_formulas || [],
-          mastery_material: q.masteryMaterial || q.mastery_material || null,
-          question_order: index,
-          subject: scan.subject,
-          exam_context: scan.exam_context,
-          year: extractedYear ? parseInt(extractedYear) : null,
-          is_system_question: true,
-        }));
+        const questionsData = questionsToInsert.map((q: any, index: number) => {
+          const vData = visualMetadataMap.get(index) || {};
+          return {
+            scan_id: scanId,
+            text: q.text || q.question || '',
+            marks: parseInt(q.marks) || 1,
+            difficulty: normalizeDifficulty(q.difficulty),
+            topic: q.topic || '',
+            domain: q.domain || '',
+            blooms: q.blooms || 'Understanding',
+            options: q.options || [],
+            correct_option_index: q.correctOptionIndex ?? q.correct_option_index ?? 0,
+            solution_steps: q.solutionSteps || q.solution_steps || [],
+            exam_tip: q.examTip || q.exam_tip || null,
+            study_tip: q.studyTip || q.study_tip || null,
+            ai_reasoning: q.aiReasoning || q.ai_reasoning || (q.masteryMaterial?.logic) || null,
+            historical_pattern: q.historicalPattern || q.historical_pattern || null,
+            predictive_insight: q.predictiveInsight || q.predictive_insight || null,
+            why_it_matters: q.whyItMatters || q.why_it_matters || null,
+            key_formulas: q.keyFormulas || q.key_formulas || [],
+            mastery_material: q.masteryMaterial || q.mastery_material || null,
+            question_order: index,
+            subject: scan.subject,
+            exam_context: scan.exam_context,
+            year: extractedYear ? parseInt(extractedYear) : null,
+            is_system_question: true,
+            // Restore visual metadata if it existed
+            sketch_svg_url: vData.sketch_svg_url || null,
+            has_visual_element: vData.has_visual_element || false,
+            visual_element_type: vData.visual_element_type || null,
+            visual_element_description: vData.visual_element_description || null,
+            diagram_url: vData.diagram_url || null
+          };
+        });
 
         // Insert questions into questions table
         const { data: insertedQuestions, error: insertError } = await supabase
