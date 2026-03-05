@@ -104,14 +104,14 @@ export async function selectQuestionsForTest(
       const { data: userScans, error: scanError } = await supabase
         .from('scans')
         .select('id')
-        .eq('user_id', criteria.userId)
+        .or(`user_id.eq.${criteria.userId},is_system_scan.eq.true`)
         .eq('subject', criteria.subject);
 
       if (scanError) {
-        console.warn('⚠️ Error fetching user scans:', scanError.message);
+        console.warn('⚠️ Error fetching scans:', scanError.message);
       } else if (userScans && userScans.length > 0) {
         scanIds = userScans.map(s => s.id);
-        console.log(`🔍 Found ${scanIds.length} scans for user ${criteria.userId} in ${criteria.subject}`);
+        console.log(`🔍 Found ${scanIds.length} accessible scans (user + system) for ${criteria.userId} in ${criteria.subject}`);
       } else {
         console.warn(`⚠️ No scans found for user ${criteria.userId} in subject ${criteria.subject}. Proceeding with general questions...`);
       }

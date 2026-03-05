@@ -241,6 +241,8 @@ export async function createQuestions(scanId: string, questions: any[]) {
     question_order: index,
     metadata: {
       ...(q.metadata || {}),
+      // Store app-level ID for sketch_svg_url lookup (questions table uses UUID primary keys)
+      appId: q.id,
       // Also store chapter, domain at metadata level for downstream consumers
       chapter: q.chapter || q.topic,
       domain: q.domain,

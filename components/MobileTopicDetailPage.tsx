@@ -219,6 +219,127 @@ const MobileTopicDetailPage: React.FC<TopicDetailPageProps> = ({
         fetchLatestStats();
     }, [user, activeTab, topicResource.topicId, examContext, statsRefreshTrigger]);
 
+    const formatAnalyzedQuestion = (q: any): AnalyzedQuestion => {
+        const meta = q.mastery_material || q.masteryMaterial || {};
+        return {
+            ...q,
+            id: q.id || q.question_id || q.questionId,
+            text: q.text || q.question_text || '',
+            options: q.options || [],
+            difficulty: (q.difficulty || q.diff || 'Moderate') as 'Easy' | 'Moderate' | 'Hard',
+            correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? (q.correctIndex !== undefined ? q.correctIndex : 0),
+            aiReasoning: q.ai_reasoning || q.aiReasoning || meta.aiReasoning || meta.ai_reasoning || '',
+            historicalPattern: q.historical_pattern || q.historicalPattern || meta.historicalPattern || meta.historical_pattern || '',
+            predictiveInsight: q.predictive_insight || q.predictiveInsight || meta.predictiveInsight || meta.predictive_insight || '',
+            whyItMatters: q.why_it_matters || q.whyItMatters || meta.whyItMatters || meta.why_it_matters || '',
+            studyTip: q.study_tip || q.studyTip || q.exam_tip || q.examTip || meta.studyTip || meta.examTip || '',
+            marks: q.marks ?? meta.marks ?? 1,
+            year: q.year ? String(q.year) : (q.exam_year || meta.year || ''),
+            solutionSteps: (q.solution_steps || q.solutionSteps || meta.solutionSteps || meta.solution_steps || (q.explanation ? [q.explanation] : [])),
+            markingScheme: (q.marking_scheme || q.marking_steps || q.markingScheme || meta.markingSteps || meta.marking_steps || []),
+            keyConcepts: (q.key_concepts || q.keyConcepts || meta.keyConcepts || []),
+            commonMistakes: (q.pitfalls || q.common_mistakes || q.commonMistakes || meta.commonMistakes || []),
+            keyFormulas: (q.key_formulas || q.keyFormulas || meta.keyFormulas || []),
+            visualConcept: q.visual_concept || q.visualConcept || meta.visualConcept || '',
+            diagramUrl: q.diagram_url || q.diagramUrl || meta.diagramUrl || '',
+            extractedImages: q.extractedImages || q.extracted_images || (q.diagram_url ? [q.diagram_url] : (meta.diagramUrl ? [meta.diagramUrl] : []))
+        };
+    };
+
+    // Unified question loading for mobile
+    useEffect(() => {
+        const loadQuestionsFromDB = async () => {
+            if (!user?.id || !topicResource.topicName) return;
+            try {
+                console.log(`📱 [Mobile] Syncing questions for: ${topicResource.topicName}`);
+                const [mappingRes, nameRes] = await Promise.all([
+                    supabase
+                        .from('topic_question_mapping')
+                        .select('questions!inner (*)')
+                        .eq('topic_id', topicResource.topicId),
+                    supabase
+                        .from('questions')
+                        .select('*')
+                        .eq('subject', subject)
+                        .eq('exam_context', examContext)
+                        .eq('topic', topicResource.topicName)
+                ]);
+
+                const allQuestionsMap = new Map<string, any>();
+                if (mappingRes.data) mappingRes.data.forEach((m: any) => {
+                    if (m.questions) allQuestionsMap.set(m.questions.id, m.questions);
+                });
+                if (nameRes.data) nameRes.data.forEach((q: any) => {
+                    allQuestionsMap.set(q.id, q);
+                });
+
+                const finalArray = Array.from(allQuestionsMap.values());
+                if (finalArray.length > 0) {
+                    console.log(`📱 [Mobile] Synced ${finalArray.length} total questions`);
+                    const formatted = finalArray.map(formatAnalyzedQuestion);
+                    setSharedQuestions(formatted);
+                    setTotalQuestionsIncludingAI(formatted.length);
+                }
+            } catch (err) {
+                console.error('📱 [Mobile] Question sync failed:', err);
+            }
+        };
+        loadQuestionsFromDB();
+    }, [user?.id, topicResource.topicName, subject, examContext]);
+
+    const [visualSketches, setVisualSketches] = useState<any[]>([]);
+    const [loadingSketches, setLoadingSketches] = useState(true);
+
+    // Load visual sketch notes for mobile
+    useEffect(() => {
+        const loadVisualSketches = async () => {
+            if (!user) {
+                setLoadingSketches(false);
+                return;
+            }
+            try {
+                const { data: scanRecords } = await supabase
+                    .from('scans')
+                    .select('id')
+                    .or(`user_id.eq.${user.id},is_system_scan.eq.true`)
+                    .eq('subject', subject)
+                    .eq('exam_context', examContext);
+
+                const scanIds = scanRecords?.map(s => s.id) || [];
+                if (scanIds.length === 0) {
+                    setLoadingSketches(false);
+                    return;
+                }
+
+                const sketches: Array<{ questionId: string; sketchSvg: string; questionText: string }> = [];
+
+                const [tkRes, qRes] = await Promise.all([
+                    supabase.from('topic_sketches').select('*').in('scan_id', scanIds),
+                    supabase.from('questions').select('id, topic, text, sketch_svg_url, diagram_url').in('scan_id', scanIds).or('sketch_svg_url.not.is.null,diagram_url.not.is.null')
+                ]);
+
+                if (tkRes.data) {
+                    const topicNameLower = topicResource.topicName.toLowerCase();
+                    tkRes.data.filter(s => (s.topic || '').toLowerCase().includes(topicNameLower) || topicNameLower.includes((s.topic || '').toLowerCase())).forEach(s => {
+                        (s.pages || []).forEach((p: any, i: number) => {
+                            const img = p.imageData || p.imageUrl;
+                            if (img) sketches.push({ questionId: `${s.scan_id}-db-${i}`, sketchSvg: img, questionText: p.title || `${s.topic} - P${i + 1}` });
+                        });
+                    });
+                }
+                if (qRes.data) {
+                    const topicNameLower = topicResource.topicName.toLowerCase();
+                    qRes.data.filter(q => (q.topic || '').toLowerCase().includes(topicNameLower) || topicNameLower.includes((q.topic || '').toLowerCase())).forEach(q => {
+                        const img = q.sketch_svg_url || q.diagram_url;
+                        if (img) sketches.push({ questionId: q.id, sketchSvg: img, questionText: q.text?.substring(0, 100) || 'Concept Sketch' });
+                    });
+                }
+                setVisualSketches(sketches);
+            } catch (err) { } finally { setLoadingSketches(false); }
+        };
+        loadVisualSketches();
+    }, [user, subject, examContext, topicResource.topicName]);
+
     const refreshStats = (silent: boolean = true) => {
         setStatsRefreshTrigger(prev => prev + 1);
         onRefreshData?.(silent);
@@ -419,10 +540,10 @@ const MobileTopicDetailPage: React.FC<TopicDetailPageProps> = ({
 
             {/* Content Area - Scrollable */}
             <div className="flex-1 overflow-y-auto scroller-hide pb-24">
-                <div className="px-6 py-4">
+                <div className="px-4 py-3">
                     {/* Quick Metrics Bar Mobile */}
-                    <div className="grid grid-cols-3 gap-3 mb-6">
-                        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 text-center">
+                    <div className="grid grid-cols-3 gap-2 mb-5">
+                        <div className="bg-white rounded-2xl p-3 shadow-sm border border-slate-100 text-center">
                             <p className="text-[20px] font-black text-slate-900 leading-none">{localStats.averageAccuracy.toFixed(0)}%</p>
                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1.5">Accuracy</p>
                         </div>
@@ -451,7 +572,8 @@ const MobileTopicDetailPage: React.FC<TopicDetailPageProps> = ({
                                     subject={subject}
                                     examContext={examContext}
                                     onProgressUpdate={refreshStats}
-                                    poolCount={totalQuestionsIncludingAI}
+                                    visualSketches={visualSketches}
+                                    loadingSketches={loadingSketches}
                                 />
                             )}
                             {activeTab === 'practice' && (
@@ -459,9 +581,9 @@ const MobileTopicDetailPage: React.FC<TopicDetailPageProps> = ({
                                     topicResource={topicResource}
                                     subject={subject}
                                     examContext={examContext}
-                                    onQuestionCountChange={setTotalQuestionsIncludingAI}
                                     sharedQuestions={sharedQuestions}
                                     setSharedQuestions={setSharedQuestions}
+                                    onQuestionCountChange={setTotalQuestionsIncludingAI}
                                     onProgressUpdate={refreshStats}
                                 />
                             )}

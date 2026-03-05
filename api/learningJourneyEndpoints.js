@@ -286,51 +286,89 @@ export async function generateTest(req, res) {
     const useAIGeneration = !!GEMINI_KEY;
     let questionSet;
 
-    // ─── Strategy 1: Full AI generation via exam config + historical data ───
-    if (useAIGeneration) {
-      console.log('🤖 Using AI Question Generator (full context)…');
+    // ─── Strategy 1: Database question pool (Real PYQ questions preferred) ───
+    console.log('📦 Checking database question pool for real PYQ questions...');
+    try {
+      const previouslyAttempted = await getPreviouslyAttemptedQuestions(
+        supabaseAdmin, userId, testType, subject
+      );
+
+      const dbQuestionSet = await selectQuestionsForTest(supabaseAdmin, {
+        userId, testType, subject, examContext, topics,
+        totalQuestions: qCount, masteryLevel,
+        excludeQuestionIds: previouslyAttempted
+      });
+
+      if (dbQuestionSet && dbQuestionSet.questions.length >= qCount * 0.5) {
+        console.log(`✅ Strategy 1 (DB) found ${dbQuestionSet.questions.length} real questions. Using them.`);
+        questionSet = dbQuestionSet;
+      } else {
+        console.log(`⚠️  Strategy 1 (DB) found only ${dbQuestionSet?.questions.length || 0} questions. Will augment with AI.`);
+        // Keep these questions to potentially merge later
+        if (dbQuestionSet && dbQuestionSet.questions.length > 0) {
+          questionSet = dbQuestionSet;
+        }
+      }
+    } catch (dbErr) {
+      console.warn('⚠️ Strategy 1 (DB) failed or too few questions:', dbErr.message);
+    }
+
+    // ─── Strategy 2: AI Generation (Full context) ───────────────────────────
+    // Only run if we don't have enough questions yet
+    if ((!questionSet || questionSet.questions.length < qCount) && useAIGeneration) {
+      console.log('🤖 Using AI Question Generator to fulfill/augment request...');
       try {
         const context = await loadGenerationContext(
           supabaseAdmin, userId, examContext, subject, topics
         );
-        const questions = await generateTestQuestions(
+
+        // Calculate how many more we need
+        const needed = qCount - (questionSet?.questions.length || 0);
+
+        const aiQuestions = await generateTestQuestions(
           context,
           GEMINI_KEY,
-          qCount
+          needed
         );
-        // Only accept if we actually got questions — empty result falls through to Strategy 2
-        if (Array.isArray(questions) && questions.length > 0) {
-          const difficultyBreakdown = { easy: 0, moderate: 0, hard: 0 };
-          const topicBreakdown = {};
-          let totalDifficulty = 0;
-          questions.forEach(q => {
-            if (q.difficulty) {
-              difficultyBreakdown[q.difficulty] = (difficultyBreakdown[q.difficulty] || 0) + 1;
-              totalDifficulty += q.difficulty === 'easy' ? 1 : q.difficulty === 'moderate' ? 2 : 3;
-            }
-            if (q.topic) topicBreakdown[q.topic] = (topicBreakdown[q.topic] || 0) + 1;
-          });
-          questionSet = {
-            questions,
-            metadata: {
-              totalQuestions: questions.length,
-              difficultyBreakdown,
-              topicBreakdown,
-              averageDifficulty: questions.length > 0 ? totalDifficulty / questions.length : 0,
-              generatedWithAI: true
-            }
-          };
-          console.log(`✅ Strategy 1: Generated ${questions.length} questions (full context)`);
-        } else {
-          console.warn('⚠️  Strategy 1 returned 0 questions (no historical data?) — falling through to Strategy 2');
+
+        if (Array.isArray(aiQuestions) && aiQuestions.length > 0) {
+          if (!questionSet) {
+            const difficultyBreakdown = { easy: 0, moderate: 0, hard: 0 };
+            const topicBreakdown = {};
+            let totalDifficulty = 0;
+            aiQuestions.forEach(q => {
+              if (q.difficulty) {
+                difficultyBreakdown[q.difficulty.toLowerCase()] = (difficultyBreakdown[q.difficulty.toLowerCase()] || 0) + 1;
+                totalDifficulty += q.difficulty.toLowerCase() === 'easy' ? 1 : q.difficulty.toLowerCase() === 'moderate' ? 2 : 3;
+              }
+              if (q.topic) topicBreakdown[q.topic] = (topicBreakdown[q.topic] || 0) + 1;
+            });
+
+            questionSet = {
+              questions: aiQuestions,
+              metadata: {
+                totalQuestions: aiQuestions.length,
+                difficultyBreakdown,
+                topicBreakdown,
+                averageDifficulty: aiQuestions.length > 0 ? totalDifficulty / aiQuestions.length : 0,
+                generatedWithAI: true
+              }
+            };
+          } else {
+            // MERGE AI questions into existing set
+            questionSet.questions = [...questionSet.questions, ...aiQuestions];
+            questionSet.metadata.totalQuestions = questionSet.questions.length;
+            questionSet.metadata.generatedWithAI = true;
+            // Update other metadata if needed, but for now this is enough for the UI
+          }
+          console.log(`✅ Strategy 2: Augmented with ${aiQuestions.length} AI questions`);
         }
       } catch (aiError) {
-        console.error('⚠️  Strategy 1 failed:', aiError.message);
-        // Falls through to Strategy 2
+        console.error('⚠️ Strategy 2 failed:', aiError.message);
       }
     }
 
-    // ─── Strategy 2: Direct Gemini prompt (no DB config required) ───────────
+    // ─── Strategy 3: Direct Gemini prompt (no DB config required) ───────────
     if (!questionSet && GEMINI_KEY) {
       console.log('🤖 Falling back to direct Gemini generation (no DB context)…');
       try {
@@ -369,7 +407,7 @@ export async function generateTest(req, res) {
           topicNames = resolvedNames.length > 0 ? resolvedNames.join(', ') : subject;
         }
 
-        console.log(`🎯 Strategy 2: topic names resolved to: "${topicNames}"`);
+        console.log(`🎯 Strategy 3: topic names resolved to: "${topicNames}"`);
 
         const prompt = `You are a World-Class Question Architect for the ${examContext} entrance exam in ${subject}.
 Your goal is to generate ${qCount} questions that match the RIGOR and STYLE of real Past Year Papers (2021-2024).
@@ -525,22 +563,7 @@ Return ONLY a valid JSON array:
     }
 
 
-    // ─── Strategy 3: Database question pool (legacy fallback) ───────────────
-    if (!questionSet) {
-      console.log('📦 Falling back to database question selection…');
-      try {
-        const previouslyAttempted = await getPreviouslyAttemptedQuestions(
-          supabaseAdmin, userId, testType, subject
-        );
-        questionSet = await selectQuestionsForTest(supabaseAdmin, {
-          userId, testType, subject, examContext, topics,
-          totalQuestions: qCount, masteryLevel,
-          excludeQuestionIds: previouslyAttempted
-        });
-      } catch (dbErr) {
-        console.error('⚠️  Strategy 3 (DB) failed:', dbErr.message);
-      }
-    }
+
 
     // Final guard — all 3 strategies exhausted with no questions
     if (!questionSet || !Array.isArray(questionSet.questions) || questionSet.questions.length === 0) {

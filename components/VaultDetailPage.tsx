@@ -51,6 +51,7 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => 
       };
 
       setScan(mappedScan);
+      console.log('🏛️ [VaultDetailPage] Scan data loaded:', mappedScan.id);
 
       // Extract year from questions for this scan
       const { data: questionData } = await supabase
@@ -118,6 +119,7 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => 
       recentScans={[scan]}
       showOnlyVault={true}
       year={year || undefined}
+      onUpdateScan={(updatedScan) => setScan(updatedScan)}
     />
   );
 };

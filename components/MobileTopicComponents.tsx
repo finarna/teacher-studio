@@ -62,7 +62,16 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
     setSharedQuestions,
     onProgressUpdate
 }) => {
+    // Sync state with shared questions
     const [questions, setQuestions] = useState<AnalyzedQuestion[]>(sharedQuestions.length > 0 ? sharedQuestions : (topicResource.questions || []));
+
+    // EFFECT: Sync local questions when sharedQuestions update from parent
+    useEffect(() => {
+        if (sharedQuestions.length > 0) {
+            setQuestions(sharedQuestions);
+        }
+    }, [sharedQuestions]);
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showSolution, setShowSolution] = useState(false);
     const [showInsights, setShowInsights] = useState(false);
@@ -130,148 +139,13 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
         }
     };
 
-    const generateAISolution = async () => {
-        if (!currentQuestion || isGenerating) return;
-
-        setIsGenerating(true);
-        try {
-            const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-            if (!GEMINI_KEY) {
-                alert('AI generation not configured. Please contact admin.');
-                return;
-            }
-
-            const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-            const model = genAI.getGenerativeModel({
-                model: AI_CONFIG.defaultModel,
-                generationConfig: {
-                    responseMimeType: 'application/json',
-                    temperature: 0.7,
-                    maxOutputTokens: 20000
-                }
-            });
-
-            const prompt = `You are an expert educator. Generate a COMPLETE solution and deep insights for this ${subject} question from ${examContext} exam.
-
-Question: ${currentQuestion.text}
-
-Options:
-${currentQuestion.options?.map((opt, i) => `${String.fromCharCode(65 + i)}. ${opt}`).join('\n')}
-
-Correct Answer: ${currentQuestion.options?.[currentQuestion.correctOptionIndex]}
-
-🚨 CRITICAL: Generate COMPLETE, IN-DEPTH educational content. NO generic placeholders!
-
-Return ONLY valid JSON with this EXACT structure:
-{
-  "solutionSteps": [
-    "Step 1: Title ::: Detailed mathematical reasoning with calculations and LaTeX",
-    "Step 2: Title ::: Show exact working with formulas",
-    "Step 3: Title ::: Continue with complete explanation",
-    "Step 4: Title ::: Final answer derivation"
-  ],
-  "examTip": "Specific time-saving strategy for this question type in ${examContext} exams, mentioning common traps",
-  "keyFormulas": [
-    "$formula_1$ - context on when to use this formula",
-    "$formula_2$ - context on when to use this formula",
-    "$formula_3$ - context on when to use this formula"
-  ],
-  "pitfalls": [
-    "EXACT mistake students make ::: WHY they make it ::: HOW to avoid with specific technique",
-    "EXACT mistake students make ::: WHY they make it ::: HOW to avoid with specific technique",
-    "EXACT mistake students make ::: WHY they make it ::: HOW to avoid with specific technique"
-  ],
-  "masteryMaterial": {
-    "aiReasoning": "2-3 sentences explaining the EXACT conceptual skills being tested in this question",
-    "whyItMatters": "2-3 sentences on how this concept connects to other ${subject} topics and real applications",
-    "historicalPattern": "Specific exam frequency data with actual years where this pattern appeared",
-    "predictiveInsight": "Based on recent trends, predict what variation will appear in upcoming ${examContext} exams with probability",
-    "keyConcepts": [
-      {
-        "name": "Core Concept Name",
-        "explanation": "Complete explanation: (1) Definition with LaTeX, (2) Key theorem, (3) Worked example, (4) Connection to THIS question. Minimum 3-4 sentences."
-      },
-      {
-        "name": "Second Concept",
-        "explanation": "Complete explanation with definition, theorem, example, and question connection"
-      },
-      {
-        "name": "Third Concept",
-        "explanation": "Complete explanation with definition, theorem, example, and question connection"
-      }
-    ]
-  }
-}`;
-
-            const result = await model.generateContent(prompt);
-            const raw = result.response.text().trim();
-            const jsonStr = raw.includes('```json')
-                ? raw.match(/```json\n([\s\S]*?)\n```/)?.[1] || raw
-                : raw;
-            const generated = JSON.parse(jsonStr);
-
-            // Update question in database
-            const { error: updateError } = await supabase
-                .from('questions')
-                .update({
-                    solution_steps: generated.solutionSteps || [],
-                    exam_tip: generated.examTip || null,
-                    key_formulas: generated.keyFormulas || [],
-                    pitfalls: generated.pitfalls || [],
-                    mastery_material: generated.masteryMaterial || null
-                })
-                .eq('id', currentQuestion.id);
-
-            if (updateError) {
-                console.error('Failed to save generated solution:', updateError);
-                alert('Generated solution but failed to save. Please try again.');
-                return;
-            }
-
-            // Update local state
-            const updatedQuestion: AnalyzedQuestion = {
-                ...currentQuestion,
-                solutionSteps: generated.solutionSteps || [],
-                examTip: generated.examTip || null,
-                keyFormulas: generated.keyFormulas || [],
-                pitfalls: generated.pitfalls || [],
-                commonMistakes: (generated.pitfalls || []).map((p: string) => {
-                    const [mistake, ...rest] = p.split(':::');
-                    return {
-                        mistake: mistake?.trim() || p,
-                        why: rest.join(':::').split('HOW TO AVOID')[0]?.replace('WHY:', '')?.trim() || '',
-                        howToAvoid: rest.join(':::').split('HOW TO AVOID')[1]?.trim() || ''
-                    };
-                }),
-                masteryMaterial: generated.masteryMaterial || null,
-                // Flatten AI insights for immediate UI consumption
-                aiReasoning: generated.masteryMaterial?.aiReasoning || generated.aiReasoning,
-                historicalPattern: generated.masteryMaterial?.historicalPattern || generated.historicalPattern,
-                predictiveInsight: generated.masteryMaterial?.predictiveInsight || generated.predictiveInsight,
-                whyItMatters: generated.masteryMaterial?.whyItMatters || generated.whyItMatters,
-                studyTip: generated.examTip || generated.studyTip
-            };
-
-            setQuestions(prev => prev.map(q => q.id === currentQuestion.id ? updatedQuestion : q));
-            setSharedQuestions(prev => prev.map(q => q.id === currentQuestion.id ? updatedQuestion : q));
-
-            console.log('✅ AI solution generated and saved successfully');
-        } catch (error) {
-            console.error('Error generating AI solution:', error);
-            alert('Failed to generate solution. Please try again.');
-        } finally {
-            setIsGenerating(false);
-        }
-    };
-
     if (sessionLoading || !currentQuestion) {
-        return <div className="p-12 text-center text-slate-400">Initializing Session...</div>;
+        return <div className="p-12 text-center text-slate-400 font-black uppercase tracking-widest animate-pulse">Initializing Session...</div>;
     }
 
     const isValidated = validatedAnswers.has(currentQuestion.id);
     const isCorrect = isValidated && savedAnswers.get(currentQuestion.id) === currentQuestion.correctOptionIndex;
 
-    // Robust AI insight resolver
     const insights = {
         aiReasoning: currentQuestion.aiReasoning || currentQuestion.masteryMaterial?.aiReasoning,
         historicalPattern: currentQuestion.historicalPattern || currentQuestion.masteryMaterial?.historicalPattern,
@@ -281,58 +155,64 @@ Return ONLY valid JSON with this EXACT structure:
     };
 
     return (
-        <div className="flex flex-col h-full space-y-3 pb-24">
-            {/* Redesigned Minimal Progress Indicator (Clickable to open navigator) */}
+        <div className="flex flex-col h-full space-y-2.5 pb-24">
+            {/* COMPACT Progress Bar */}
             <button
                 onClick={() => setShowQuestNavigator(true)}
-                className="w-full flex items-center justify-between bg-white/60 backdrop-blur-xl py-2.5 px-6 rounded-full border border-slate-100 shadow-sm active:scale-[0.98] transition-all"
+                className="w-full flex items-center justify-between bg-white py-1.5 px-4 rounded-xl border border-slate-100 shadow-sm active:scale-[0.98] transition-all"
             >
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[11px] font-black uppercase text-slate-900 tracking-wider">Quest Progress</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider font-outfit">Node {currentIndex + 1}/{questions.length}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    {questions.slice(0, 12).map((q, i) => (
+                    {questions.slice(0, 10).map((q, i) => (
                         <div
                             key={q.id}
-                            className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? 'bg-slate-900 w-3' :
+                            className={`w-1 h-1 rounded-full transition-all ${i === currentIndex ? 'bg-slate-900 w-2' :
                                 validatedAnswers.has(q.id) ? (savedAnswers.get(q.id) === q.correctOptionIndex ? 'bg-emerald-400' : 'bg-rose-400') :
-                                    'bg-slate-200'
+                                    'bg-slate-100'
                                 }`}
                         />
                     ))}
-                    {questions.length > 12 && <span className="text-[8px] font-bold text-slate-400 ml-1">+{questions.length - 12}</span>}
                 </div>
-                <ChevronRight size={14} className="text-slate-400" />
+                <ChevronDown size={10} className="text-slate-200" />
             </button>
 
-            {/* Question Card */}
+            {/* Premium Quest Card - COMPACT */}
             <motion.div
                 key={currentQuestion.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-[2.5rem] p-5 shadow-xl border border-slate-100 flex flex-col"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-[1.5rem] p-4 shadow-sm border border-slate-50 flex flex-col relative overflow-hidden"
             >
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-black uppercase text-slate-500 tracking-tighter">NODE {currentIndex + 1}</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter ${currentQuestion.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600' : currentQuestion.difficulty === 'Hard' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'}`}>
+                {/* ID & Metadata Tags - Redesigned */}
+                <div className="flex items-center justify-between mb-3.5">
+                    <div className="flex flex-wrap gap-1">
+                        <span className="px-1.5 py-0.5 bg-slate-900 text-white rounded-[0.4rem] text-[7px] font-black uppercase tracking-tighter">{currentQuestion.year || '24 Prediction'}</span>
+                        <span className={`px-1.5 py-0.5 rounded-[0.4rem] text-[7px] font-black uppercase tracking-tighter ${currentQuestion.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600' : currentQuestion.difficulty === 'Hard' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'}`}>
                             {currentQuestion.difficulty}
                         </span>
+                        {currentQuestion.marks && <span className="px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-[0.4rem] text-[7px] font-black uppercase tracking-tighter border border-indigo-100">{currentQuestion.marks}M</span>}
                     </div>
                     <button
                         onClick={() => toggleBookmark(currentQuestion.id)}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${Array.isArray(bookmarkedIds) && bookmarkedIds.includes(currentQuestion.id) ? 'bg-amber-100 text-amber-600' : 'bg-slate-50 text-slate-400'}`}
+                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${Array.isArray(bookmarkedIds) && bookmarkedIds.includes(currentQuestion.id) ? 'bg-amber-50 text-amber-500' : 'text-slate-300'}`}
                     >
-                        <Bookmark size={16} fill={(Array.isArray(bookmarkedIds) && bookmarkedIds.includes(currentQuestion.id)) ? 'currentColor' : 'none'} />
+                        <Bookmark size={12} fill={(Array.isArray(bookmarkedIds) && bookmarkedIds.includes(currentQuestion.id)) ? 'currentColor' : 'none'} />
                     </button>
                 </div>
 
-                <div className="text-[1.15rem] md:text-2xl font-bold text-slate-900 leading-snug mb-4 font-instrument">
-                    <RenderWithMath text={currentQuestion.text} />
+                {/* Problem Statement Block */}
+                <div className="relative pl-3 border-l-2 border-emerald-500 mb-4">
+                    <div className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em] mb-0.5 font-mono">PROBLEM_STATEMENT</div>
+                    <div className="text-base font-bold text-slate-900 leading-snug font-outfit">
+                        <RenderWithMath text={currentQuestion.text} />
+                    </div>
                 </div>
 
-                <div className="space-y-2">
+                {/* Options Grid - High Contrast */}
+                <div className="space-y-1.5">
                     {(currentQuestion.options || []).map((option, idx) => {
                         const isSelected = selectedOption === idx;
                         const isCorrectOption = isValidated && idx === Number(currentQuestion.correctOptionIndex);
@@ -343,102 +223,86 @@ Return ONLY valid JSON with this EXACT structure:
                                 key={idx}
                                 onClick={() => handleOptionSelect(idx)}
                                 disabled={isValidated}
-                                className={`w-full text-left p-4 rounded-2xl border-2 transition-all flex items-center gap-4 ${isCorrectOption ? 'bg-emerald-50 border-emerald-500 text-emerald-900 shadow-[0_8px_20px_-10px_rgba(16,185,129,0.3)]' :
+                                className={`w-full text-left p-3 rounded-xl border-2 transition-all flex items-center gap-3 ${isCorrectOption ? 'bg-emerald-50 border-emerald-500 text-emerald-900 shadow-sm' :
                                     isWrongSelection ? 'bg-rose-50 border-rose-500 text-rose-900' :
-                                        isSelected ? 'bg-slate-900 border-slate-900 text-white shadow-xl translate-y-[-2px]' :
-                                            'bg-white border-slate-100 text-slate-700 active:bg-slate-50'
+                                        isSelected ? 'bg-slate-900 border-slate-900 text-white shadow-md' :
+                                            'bg-white border-slate-50 text-slate-600 active:bg-slate-50'
                                     }`}
                             >
-                                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 font-black text-xs transition-colors ${isSelected || isCorrectOption || isWrongSelection ? 'border-transparent bg-white/20' : 'border-slate-100 text-slate-300'}`}>
-                                    {String.fromCharCode(65 + idx)}
+                                <div className={`w-6 h-6 rounded-md border flex items-center justify-center shrink-0 font-black text-[9px] transition-colors ${isSelected || isCorrectOption || isWrongSelection ? 'border-transparent bg-white/20' : 'border-slate-100 text-slate-300'}`}>
+                                    {String.fromCharCode(64 + (idx + 1))}
                                 </div>
-                                <div className="flex-1 font-semibold text-[0.95rem] leading-snug">
-                                    <RenderWithMath
-                                        text={option.replace(/^\s*([A-D1-4][\.\)]|\([A-D1-4]\))\s*/i, '')}
-                                    />
+                                <div className="flex-1 font-bold text-[0.8rem] leading-snug">
+                                    <RenderWithMath text={option.replace(/^\s*([A-D1-4][\.\)]|\([A-D1-4]\))\s*/i, '')} />
                                 </div>
-                                {isCorrectOption && <CheckCircle size={18} className="text-emerald-500" />}
-                                {isWrongSelection && <AlertTriangle size={18} className="text-rose-500" />}
+                                {isCorrectOption && <CheckCircle size={14} className="text-emerald-500" />}
+                                {isWrongSelection && <AlertTriangle size={14} className="text-rose-500" />}
                             </button>
                         );
                     })}
                 </div>
             </motion.div>
 
-            {/* Post-Validation AI & Solution Layers */}
+            {/* Post-Validation AI Strategy Pill */}
             <AnimatePresence>
                 {isValidated && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-4"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="space-y-3"
                     >
-                        {/* AI Strategy Pill */}
-                        <div className={`p-4 rounded-[2.5rem] border-2 shadow-lg relative overflow-hidden ${isCorrect ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
-                            <div className="absolute top-0 right-0 p-4 opacity-10">
-                                {isCorrect ? <Sparkles size={64} /> : <AlertTriangle size={64} />}
-                            </div>
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCorrect ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
-                                    {isCorrect ? <Trophy size={20} /> : <Brain size={20} />}
+                        <div className={`p-5 rounded-[2rem] border-t-4 shadow-xl relative overflow-hidden ${isCorrect ? 'bg-white border-emerald-500' : 'bg-white border-rose-500'}`}>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isCorrect ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                                    {isCorrect ? <Sparkles size={18} /> : <Brain size={18} />}
                                 </div>
                                 <div>
-                                    <h4 className={`text-[10px] font-black uppercase tracking-widest leading-none mb-1 ${isCorrect ? 'text-emerald-700' : 'text-rose-700'}`}>
-                                        {isCorrect ? 'Strategic Alignment' : 'Diagnostic Pivot'}
-                                    </h4>
-                                    <h3 className="text-lg font-black text-slate-900 font-outfit uppercase tracking-tighter leading-none italic">
-                                        {isCorrect ? 'Elite Execution' : 'Refine the Logic'}
+                                    <h3 className="text-[13px] font-black text-slate-900 font-outfit uppercase tracking-tighter leading-none italic">
+                                        {isCorrect ? 'Elegantly Executed' : 'Strategic Diagnostic'}
                                     </h3>
+                                    <div className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 mt-0.5">AI_INSIGHT_SYNCHRNOIZED</div>
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="text-sm font-bold text-slate-800 leading-relaxed italic">
-                                    <RenderWithMath text={insights.studyTip || insights.aiReasoning || "Master this concept by reviewing the core principles in the Learn tab."} />
-                                </div>
+                            <p className="text-xs font-bold text-slate-700 leading-relaxed italic mb-5 pr-4 line-clamp-3">
+                                <RenderWithMath text={insights.studyTip || insights.aiReasoning || "Conceptual mastery required for this node. View solution for protocol analysis."} />
+                            </p>
 
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setShowSolution(!showSolution)}
-                                        className="flex-1 h-12 bg-white rounded-2xl border border-slate-200 text-[10px] font-black uppercase tracking-widest text-slate-600 flex items-center justify-center gap-2 transition-all active:scale-95"
-                                    >
-                                        <HelpCircle size={16} />
-                                        {showSolution ? 'Hide Solution' : 'View Solution'}
-                                    </button>
-                                    <button
-                                        onClick={() => setShowInsights(!showInsights)}
-                                        className="flex-1 h-12 bg-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg"
-                                    >
-                                        <Sparkles size={16} />
-                                        AI Deep Dive
-                                    </button>
-                                </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={() => setShowSolution(!showSolution)}
+                                    className="h-11 bg-slate-50 rounded-[1rem] text-[9px] font-black uppercase tracking-widest text-slate-600 flex items-center justify-center gap-2 border border-slate-100"
+                                >
+                                    <HelpCircle size={14} />
+                                    {showSolution ? 'Hide Protocol' : 'View Protocol'}
+                                </button>
+                                <button
+                                    onClick={() => setShowInsights(!showInsights)}
+                                    className="h-11 bg-slate-900 rounded-[1rem] text-[9px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
+                                >
+                                    <Sparkles size={14} className="text-amber-300" />
+                                    Deep pattern
+                                </button>
                             </div>
                         </div>
 
-                        {/* Expandable Solution Section */}
+                        {/* Expandable Protocol Solution - COMPACT */}
                         {showSolution && (
                             <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
-                                className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-xl overflow-hidden"
+                                className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-lg overflow-hidden"
                             >
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                        <BookOpen size={20} />
-                                    </div>
-                                    <h3 className="text-lg font-black text-slate-900 font-outfit uppercase tracking-tighter">Solution Blueprint</h3>
-                                </div>
-                                <div className="space-y-6">
-                                    {/* Key Formulas (if available) */}
+                                <div className="space-y-5">
+                                    {/* Key Formulas - Amber Block */}
                                     {currentQuestion.keyFormulas && currentQuestion.keyFormulas.length > 0 && (
-                                        <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
-                                            <h4 className="text-[8px] font-black text-amber-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-1">
-                                                <span className="text-amber-500">⚡</span> Key Formulas
-                                            </h4>
-                                            <div className="space-y-2">
+                                        <div className="bg-amber-50 rounded-[1.25rem] p-4 border border-amber-100">
+                                            <div className="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-2 flex items-center gap-1">
+                                                <Zap size={10} fill="currentColor" /> Logic Core
+                                            </div>
+                                            <div className="space-y-1.5">
                                                 {currentQuestion.keyFormulas.map((formula, idx) => (
-                                                    <div key={idx} className="text-xs font-bold text-slate-800 bg-white rounded-lg p-2 border border-amber-100">
+                                                    <div key={idx} className="text-xs font-bold text-slate-800 bg-white/50 rounded-lg p-2">
                                                         <RenderWithMath text={formula} />
                                                     </div>
                                                 ))}
@@ -446,101 +310,66 @@ Return ONLY valid JSON with this EXACT structure:
                                         </div>
                                     )}
 
-                                    {/* Solution Steps */}
-                                    <div className="relative ml-4 border-l-2 border-slate-50 pl-6 py-2 space-y-6">
-                                        {currentQuestion.solutionSteps?.map((step, idx) => (
-                                            <div key={idx} className="relative">
-                                                <div className="absolute top-0 left-[-31px] w-4 h-4 rounded-full bg-white border-4 border-indigo-500 z-10" />
-                                                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 block">Step {idx + 1}</span>
-                                                    <div className="text-xs font-bold text-slate-800 leading-relaxed">
+                                    {/* Steps - Minimal Vertical Line */}
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center">
+                                                <TrendingUp size={12} className="text-slate-400" />
+                                            </div>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Protocol Sequence</span>
+                                        </div>
+                                        <div className="relative ml-2 border-l border-slate-100 pl-5 space-y-5">
+                                            {currentQuestion.solutionSteps?.map((step: string, idx: number) => (
+                                                <div key={idx} className="relative">
+                                                    <div className="absolute top-1.5 left-[-25.5px] w-3 h-3 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center">
+                                                        <div className="w-1 h-1 rounded-full bg-slate-900" />
+                                                    </div>
+                                                    <div className="text-[12px] font-bold text-slate-700 leading-relaxed font-instrument">
                                                         <RenderWithMath text={step} />
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                        {!currentQuestion.solutionSteps?.length && (
-                                            <div className="text-slate-400 italic text-sm">Step-by-step reasoning is being synthesized for this node.</div>
-                                        )}
-                                    </div>
-
-                                    {/* Common Mistakes (if available) */}
-                                    {currentQuestion.commonMistakes && currentQuestion.commonMistakes.length > 0 && (
-                                        <div className="bg-rose-50 rounded-2xl p-4 border border-rose-200">
-                                            <h4 className="text-[8px] font-black text-rose-600 uppercase tracking-[0.2em] mb-3">
-                                                ⚠️ Common Mistakes to Avoid
-                                            </h4>
-                                            <div className="space-y-3">
-                                                {currentQuestion.commonMistakes.map((mistake, idx) => (
-                                                    <div key={idx} className="bg-white rounded-lg p-3 border border-rose-100 shadow-sm relative overflow-hidden">
-                                                        <div className="absolute top-0 left-0 w-1 h-full bg-rose-400" />
-                                                        <div className="text-[10px] font-black text-rose-600 mb-1">{mistake.mistake}</div>
-                                                        <div className="text-[9px] text-slate-600 mb-1"><strong>Why:</strong> {mistake.why}</div>
-                                                        <div className="text-[9px] text-emerald-600"><strong>How to Avoid:</strong> {mistake.howToAvoid}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                            ))}
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
 
-                        {/* Expandable AI Insights Section */}
+                        {/* Expandable Deep Pattern Insights */}
                         {showInsights && (
                             <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
-                                className="bg-slate-900 rounded-[2.5rem] p-6 text-white shadow-2xl overflow-hidden"
+                                className="bg-slate-900 rounded-[2rem] p-5 shadow-2xl overflow-hidden border border-white/10"
                             >
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-xl bg-primary-500 text-white flex items-center justify-center">
-                                        <Sparkles size={20} />
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                            <Sparkles size={14} className="text-blue-400" />
+                                        </div>
+                                        <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Deep Pattern Analysis</h4>
                                     </div>
-                                    <h3 className="text-lg font-black text-white font-outfit uppercase tracking-tighter">AI Knowledge Pivot</h3>
-                                </div>
 
-                                <div className="space-y-6">
-                                    {insights.aiReasoning && (
-                                        <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                                            <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                                <Brain size={12} /> The Logic Model
-                                            </h4>
-                                            <p className="text-sm font-medium leading-relaxed text-white/80">
-                                                <RenderWithMath text={insights.aiReasoning} />
-                                            </p>
-                                        </div>
-                                    )}
-                                    {insights.historicalPattern && (
-                                        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
-                                            <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                                <History size={12} className="text-amber-400" /> Historical Context
-                                            </h4>
-                                            <p className="text-sm font-bold italic leading-relaxed text-amber-50">
-                                                <RenderWithMath text={insights.historicalPattern} />
-                                            </p>
-                                        </div>
-                                    )}
-                                    {insights.predictiveInsight && (
-                                        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                                            <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                                <TrendingUp size={12} className="text-emerald-400" /> Exam Predictor
-                                            </h4>
-                                            <p className="text-sm font-medium leading-relaxed text-emerald-50/80">
-                                                <RenderWithMath text={insights.predictiveInsight} />
-                                            </p>
-                                        </div>
-                                    )}
-                                    {insights.whyItMatters && (
-                                        <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                                            <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                                <Target size={12} /> Strategic Relevance
-                                            </h4>
-                                            <p className="text-sm font-medium leading-relaxed text-indigo-50/80">
-                                                <RenderWithMath text={insights.whyItMatters} />
-                                            </p>
-                                        </div>
-                                    )}
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {insights.historicalPattern && (
+                                            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                                                <p className="text-[8px] font-black text-blue-400 uppercase tracking-widest mb-1.5">Historical Trend</p>
+                                                <p className="text-[11px] font-medium text-slate-300 leading-relaxed">{insights.historicalPattern}</p>
+                                            </div>
+                                        )}
+                                        {insights.predictiveInsight && (
+                                            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                                                <p className="text-[8px] font-black text-amber-400 uppercase tracking-widest mb-1.5">Oracle Prediction</p>
+                                                <p className="text-[11px] font-medium text-slate-300 leading-relaxed">{insights.predictiveInsight}</p>
+                                            </div>
+                                        )}
+                                        {insights.whyItMatters && (
+                                            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                                                <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-1.5">Strategic Value</p>
+                                                <p className="text-[11px] font-medium text-slate-300 leading-relaxed">{insights.whyItMatters}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
@@ -548,44 +377,38 @@ Return ONLY valid JSON with this EXACT structure:
                 )}
             </AnimatePresence>
 
-            {/* Footer Selection & Navigation Control (Redesigned) */}
-            <div className="fixed bottom-[84px] left-0 right-0 px-6 flex flex-col items-center gap-4 z-40 pb-safe">
-
-
-                {/* Logic Control Dock (Floating Action Pill) */}
-                <div className="flex items-center gap-3 w-full max-w-[360px]">
+            {/* PERSISTENT ACTION FOOTER */}
+            <div className="fixed bottom-[88px] left-0 right-0 px-5 z-40">
+                <div className="max-w-[360px] mx-auto flex items-center justify-center gap-2">
                     <button
                         onClick={prevQuestion}
                         disabled={currentIndex === 0}
-                        className="w-14 h-14 rounded-[1.75rem] bg-white shadow-xl border border-slate-100 flex items-center justify-center text-slate-400 active:scale-90 transition-transform disabled:opacity-30 shrink-0"
+                        className="w-12 h-12 rounded-[1.25rem] bg-white shadow-xl border border-slate-50 flex items-center justify-center text-slate-400 active:scale-90 transition-all disabled:opacity-20 shrink-0"
                     >
-                        <ChevronLeft size={24} />
+                        <ChevronLeft size={20} />
                     </button>
 
                     <button
                         onClick={!isValidated ? handleValidate : nextQuestion}
                         disabled={!isValidated && selectedOption === null}
-                        className={`flex-1 h-14 rounded-full shadow-2xl flex items-center justify-center gap-3 active:scale-[0.96] transition-all px-6 relative overflow-hidden ${!isValidated ? 'bg-slate-950 text-white' :
+                        className={`flex-1 h-12 rounded-full shadow-2xl flex items-center justify-center gap-3 active:scale-[0.96] transition-all px-4 ${!isValidated ? 'bg-slate-900 text-white' :
                             (isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white')
                             }`}
                     >
-                        <div className={`w-2 h-2 rounded-full ${!isValidated ? (selectedOption !== null ? 'bg-primary-400 animate-pulse' : 'bg-slate-700') :
-                            (isCorrect ? 'bg-emerald-300 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]' : 'bg-rose-300')
-                            }`} />
-                        <span className="text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap">
-                            {isValidated
-                                ? `${validatedAnswers.size}/${questions.length} SOLVED`
-                                : selectedOption !== null ? 'Secure Path' : 'Select Logic'}
+                        <span className="text-[9px] font-black uppercase tracking-[0.15em] whitespace-nowrap">
+                            {!isValidated
+                                ? (selectedOption !== null ? 'Secure Resolution' : 'Locked Input')
+                                : (currentIndex === questions.length - 1 ? 'Quest Finalized' : 'Advance to Next Node')
+                            }
                         </span>
-                        <ChevronRight size={14} className={`transition-transform ${isValidated ? 'translate-x-0' : 'translate-x-4 opacity-0'}`} />
                     </button>
 
                     <button
                         onClick={nextQuestion}
                         disabled={currentIndex === questions.length - 1}
-                        className="w-14 h-14 rounded-[1.75rem] bg-white shadow-xl border border-slate-100 flex items-center justify-center text-slate-400 active:scale-90 transition-transform disabled:opacity-30 shrink-0"
+                        className="w-12 h-12 rounded-[1.25rem] bg-white shadow-xl border border-slate-50 flex items-center justify-center text-slate-300 active:scale-90 transition-all disabled:opacity-20 shrink-0"
                     >
-                        <ChevronRight size={24} />
+                        <ChevronRight size={20} />
                     </button>
                 </div>
             </div>
@@ -601,73 +424,32 @@ Return ONLY valid JSON with this EXACT structure:
                         onClick={() => setShowQuestNavigator(false)}
                     >
                         <motion.div
-                            initial={{ y: 100, opacity: 0, scale: 0.95 }}
-                            animate={{ y: 0, opacity: 1, scale: 1 }}
-                            exit={{ y: 100, opacity: 0, scale: 0.95 }}
-                            className="w-full max-w-[400px] bg-[#0F172A] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden flex flex-col"
-                            onClick={(e) => e.stopPropagation()}
+                            initial={{ y: 50, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 50, opacity: 0 }}
+                            className="w-full max-w-[360px] bg-slate-900 rounded-[2.5rem] p-6 shadow-2xl border border-white/10"
+                            onClick={e => e.stopPropagation()}
                         >
-                            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-slate-900/50">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <h3 className="text-sm font-black text-white uppercase tracking-[0.2em]">Quest Progress</h3>
-                                </div>
-                                <button
-                                    onClick={() => setShowQuestNavigator(false)}
-                                    className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 active:scale-90"
-                                >
-                                    <ChevronDown size={20} />
-                                </button>
+                            <div className="flex items-center justify-between mb-8">
+                                <h3 className="text-[10px] font-black text-white uppercase tracking-[0.4em]">Quest Sequence</h3>
+                                <button onClick={() => setShowQuestNavigator(false)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40"><ChevronDown size={18} /></button>
                             </div>
-
-                            <div className="p-6 flex-1 overflow-y-auto max-h-[60vh] scroller-hide">
-                                <div className="grid grid-cols-6 gap-3">
-                                    {questions.map((q, i) => {
-                                        const isSolved = validatedAnswers.has(q.id);
-                                        const isCorrectAns = isSolved && savedAnswers.get(q.id) === q.correctOptionIndex;
-                                        const isCurrent = i === currentIndex;
-
-                                        return (
-                                            <button
-                                                key={q.id}
-                                                onClick={() => {
-                                                    setCurrentIndex(i);
-                                                    setShowQuestNavigator(false);
-                                                }}
-                                                className={`aspect-square rounded-2xl flex items-center justify-center text-[10px] font-black transition-all border-2 ${isCurrent ? 'bg-white text-slate-900 border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' :
-                                                    isSolved ? (isCorrectAns ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : 'bg-rose-500/20 border-rose-500/50 text-rose-400') :
-                                                        'bg-white/5 border-white/10 text-white/40 hover:bg-white/10'
-                                                    }`}
-                                            >
-                                                {i + 1}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            <div className="p-6 bg-slate-900/80 border-t border-white/5">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Accuracy</p>
-                                        <p className="text-xl font-black text-white">
-                                            {validatedAnswers.size > 0
-                                                ? Math.round((Array.from(validatedAnswers.values()).filter(v => v).length / validatedAnswers.size) * 100)
-                                                : 0}%
-                                        </p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-1">Remaining</p>
-                                        <p className="text-xl font-black text-white">{questions.length - validatedAnswers.size}</p>
-                                    </div>
-                                </div>
-                                <div className="mt-6 w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                    <motion.div
-                                        className="h-full bg-emerald-500"
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${(validatedAnswers.size / questions.length) * 100}%` }}
-                                    />
-                                </div>
+                            <div className="grid grid-cols-5 gap-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                                {questions.map((q, i) => {
+                                    const isCurrent = i === currentIndex;
+                                    const solved = validatedAnswers.has(q.id);
+                                    const correct = solved && savedAnswers.get(q.id) === q.correctOptionIndex;
+                                    return (
+                                        <button
+                                            key={q.id}
+                                            onClick={() => { setCurrentIndex(i); setShowQuestNavigator(false); }}
+                                            className={`aspect-square rounded-xl flex items-center justify-center text-[10px] font-black transition-all ${isCurrent ? 'bg-white text-slate-900 shadow-[0_0_20px_rgba(255,255,255,0.2)]' :
+                                                solved ? (correct ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white') : 'bg-white/5 text-white/30 border border-white/10'}`}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </motion.div>
                     </motion.div>
@@ -682,8 +464,9 @@ export const MobileLearnTab: React.FC<{
     subject: Subject;
     examContext: ExamContext;
     onProgressUpdate?: (silent?: boolean) => void;
-    poolCount: number;
-}> = ({ topicResource, subject, examContext, onProgressUpdate, poolCount }) => {
+    visualSketches: any[];
+    loadingSketches: boolean;
+}> = ({ topicResource, subject, examContext, onProgressUpdate, visualSketches, loadingSketches }) => {
     const { user } = useAuth();
     const [viewingSketchIndex, setViewingSketchIndex] = useState<number | null>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -692,22 +475,6 @@ export const MobileLearnTab: React.FC<{
         if (!user) return;
         setIsSaving(true);
         try {
-            // Standard Mastery Formula Recalculation (Simplified for mobile)
-            const quizzesTaken = topicResource.quizzesTaken || 0;
-            const totalAttempted = topicResource.questionsAttempted || 0;
-            const accuracy = topicResource.averageAccuracy || 0;
-
-            const accuracyWeight = 0.60;
-            const coverageTarget = Math.min(poolCount, 20);
-            const coverageWeight = Math.min(1, totalAttempted / Math.max(1, coverageTarget));
-
-            const newMastery = Math.min(100, Math.round(
-                (accuracy * accuracyWeight * coverageWeight) +
-                Math.min(20, quizzesTaken * 10) +
-                Math.min(10, Math.floor(totalAttempted / 10) * 5) +
-                (completed ? 10 : 0)
-            ));
-
             await supabase
                 .from('topic_resources')
                 .upsert({
@@ -717,7 +484,6 @@ export const MobileLearnTab: React.FC<{
                     exam_context: examContext,
                     study_stage: completed ? 'practicing' : 'studying_notes',
                     notes_completed: completed,
-                    mastery_level: newMastery,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'user_id,topic_id,exam_context' });
 
@@ -764,6 +530,41 @@ export const MobileLearnTab: React.FC<{
                 </p>
             </div>
 
+            {loadingSketches ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-2">
+                    <Loader2 size={24} className="text-slate-300 animate-spin" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Vault...</span>
+                </div>
+            ) : visualSketches.length > 0 ? (
+                <div className="space-y-4">
+                    <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Visual DNA Units</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        {visualSketches.map((sketch, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setViewingSketchIndex(idx)}
+                                className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm aspect-[4/5] flex flex-col active:scale-95 transition-all text-left group"
+                            >
+                                <div className="flex-1 bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden font-instrument transition-all">
+                                    {sketch.sketchSvg ? (
+                                        <img src={sketch.sketchSvg} className="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform" />
+                                    ) : (
+                                        <div className="text-slate-300 flex items-center justify-center">
+                                            <BookOpen size={32} />
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-slate-900/0 active:bg-slate-900/10 transition-colors" />
+                                </div>
+                                <div className="p-4 bg-white">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Schema {idx + 1}</span>
+                                    <span className="text-xs font-bold text-slate-900 truncate block">{sketch.questionText}</span>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            ) : null}
+
             {topicResource.chapterInsights?.length > 0 && (
                 <div className="space-y-3">
                     <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Core Insights</h3>
@@ -775,30 +576,6 @@ export const MobileLearnTab: React.FC<{
                                 <ChevronRight size={16} className="text-slate-300" />
                             </h4>
                             <p className="text-sm text-slate-500 leading-relaxed mb-4">{insight.description}</p>
-
-                            {(insight.importantFormulas?.length > 0 || insight.preparationChecklist?.length > 0) && (
-                                <div className="space-y-3 mb-4">
-                                    {insight.importantFormulas?.length > 0 && (
-                                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                                                <Zap size={10} className="text-amber-500" /> Core Equation
-                                            </p>
-                                            <div className="text-xs font-bold text-slate-900 leading-none">
-                                                <RenderWithMath text={insight.importantFormulas[0]} />
-                                            </div>
-                                        </div>
-                                    )}
-                                    {insight.preparationChecklist?.length > 0 && (
-                                        <div className="bg-emerald-50/50 rounded-xl p-3 border border-emerald-100/50">
-                                            <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                                                <Target size={10} /> Preparation Target
-                                            </p>
-                                            <p className="text-xs font-bold text-slate-700 leading-tight">{insight.preparationChecklist[0]}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
                             <div className="flex flex-wrap gap-2">
                                 {insight.keyConcepts?.map((c, i) => (
                                     <span key={i} className="px-3 py-1 bg-slate-50 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-widest border border-slate-100">{c}</span>
@@ -809,43 +586,13 @@ export const MobileLearnTab: React.FC<{
                 </div>
             )}
 
-            {/* Mobile Sketch Grid */}
-            <div className="space-y-4">
-                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Visual DNA Units</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    {topicResource.sketchPages?.map((sketch, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => setViewingSketchIndex(idx)}
-                            className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm aspect-[4/5] flex flex-col active:scale-95 transition-all text-left group"
-                        >
-                            <div className="flex-1 bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden font-instrument transition-all">
-                                {sketch.imageUrl && sketch.imageUrl.trim() !== '' ? (
-                                    <img src={sketch.imageUrl} className="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform" />
-                                ) : (
-                                    <div className="text-slate-300 flex items-center justify-center">
-                                        <BookOpen size={32} />
-                                    </div>
-                                )}
-                                <div className="absolute inset-0 bg-slate-900/0 active:bg-slate-900/10 transition-colors" />
-                            </div>
-                            <div className="p-4 bg-white">
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Schema {idx + 1}</span>
-                                <span className="text-xs font-bold text-slate-900 truncate block">{sketch.title}</span>
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Sketch Viewer Overlay */}
             <AnimatePresence>
                 {viewingSketchIndex !== null && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-xl flex flex-col p-6"
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 50 }}
+                        className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-xl flex flex-col p-6 overflow-y-auto"
                     >
                         <div className="flex items-center justify-between mb-8">
                             <button
@@ -856,54 +603,47 @@ export const MobileLearnTab: React.FC<{
                             </button>
                             <div className="text-center">
                                 <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Schema {viewingSketchIndex + 1}</p>
-                                <p className="text-lg font-black text-white font-outfit uppercase tracking-tighter italic">{topicResource.sketchPages?.[viewingSketchIndex].title}</p>
+                                <p className="text-lg font-black text-white font-outfit uppercase tracking-tighter italic">{visualSketches[viewingSketchIndex].questionText}</p>
                             </div>
                             <div className="w-12" />
                         </div>
 
-                        <div className="flex-1 bg-white rounded-[3rem] p-8 flex items-center justify-center shadow-2xl relative overflow-hidden">
-                            {topicResource.sketchPages?.[viewingSketchIndex].imageUrl ? (
-                                <img
-                                    src={topicResource.sketchPages[viewingSketchIndex].imageUrl}
-                                    className="max-w-full max-h-full object-contain"
-                                />
-                            ) : (
-                                <div className="text-slate-200">
-                                    <BookOpen size={64} />
-                                </div>
-                            )}
+                        <div className="flex-1 bg-white rounded-2xl overflow-hidden shadow-2xl relative min-h-[350px] flex flex-col">
+                            <div className="flex-1 flex items-center justify-center p-2 bg-slate-50/50">
+                                {visualSketches[viewingSketchIndex].sketchSvg ? (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <img
+                                            src={visualSketches[viewingSketchIndex].sketchSvg}
+                                            className="w-full h-full object-contain"
+                                            style={{ minHeight: '300px' }}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="text-slate-200">
+                                        <BookOpen size={64} />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="bg-slate-900/5 px-4 py-2 flex items-center justify-center gap-2">
+                                <div className="w-1 h-1 rounded-full bg-slate-300" />
+                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Pinch to Focus // High Fidelity Schema</span>
+                                <div className="w-1 h-1 rounded-full bg-slate-300" />
+                            </div>
                         </div>
 
                         <div className="mt-8 space-y-6">
                             <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-6">
                                 <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-3">Conceptual Synthesis</h4>
                                 <p className="text-sm font-medium text-white/80 leading-relaxed italic">
-                                    {topicResource.sketchPages?.[viewingSketchIndex].content || "This visual schema represents the core structural logic of the concept. Study the relationships between components for deep recall."}
+                                    This visual schema represents the core structural logic of the concept. Study the relationships between components for deep recall.
                                 </p>
                             </div>
-
-                            <div className="flex gap-4">
-                                <button
-                                    disabled={viewingSketchIndex === 0}
-                                    onClick={() => setViewingSketchIndex(prev => prev! - 1)}
-                                    className="w-16 h-16 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center text-white disabled:opacity-30"
-                                >
-                                    <ChevronLeft size={24} />
-                                </button>
-                                <button
-                                    onClick={() => setViewingSketchIndex(null)}
-                                    className="flex-1 h-16 bg-white text-slate-900 rounded-[2rem] font-black uppercase tracking-widest text-xs"
-                                >
-                                    Finish Review
-                                </button>
-                                <button
-                                    disabled={viewingSketchIndex === (topicResource.sketchPages?.length || 0) - 1}
-                                    onClick={() => setViewingSketchIndex(prev => prev! + 1)}
-                                    className="w-16 h-16 rounded-[2rem] bg-white/5 border border-white/10 flex items-center justify-center text-white disabled:opacity-30"
-                                >
-                                    <ChevronRight size={24} />
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => setViewingSketchIndex(null)}
+                                className="w-full h-16 bg-white text-slate-900 rounded-[2rem] font-black uppercase tracking-widest text-xs"
+                            >
+                                Finish Review
+                            </button>
                         </div>
                     </motion.div>
                 )}

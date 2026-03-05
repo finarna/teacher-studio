@@ -229,6 +229,8 @@ export interface AnalyzedQuestion {
   whyItMatters?: string;
   relevanceScore?: number;
   source?: string;
+  exam_context?: string;
+  exam_year?: string;
   correctOptionIndex?: number;
   sketchSvg?: string;
   hasVisualElement?: boolean;

@@ -92,6 +92,8 @@ const formatAnalyzedQuestion = (q: any): AnalyzedQuestion => {
     studyTip: q.study_tip || q.studyTip || q.exam_tip || q.examTip || meta.studyTip || meta.examTip || '',
 
     // Structural Data
+    marks: q.marks ?? meta.marks ?? 1,
+    year: q.year ? String(q.year) : (q.exam_year || meta.year || ''),
     solutionSteps: (q.solution_steps || q.solutionSteps || meta.solutionSteps || meta.solution_steps || (q.explanation ? [q.explanation] : [])),
     markingScheme: (q.marking_scheme || q.marking_steps || q.markingScheme || meta.markingSteps || meta.marking_steps || []),
     keyConcepts: (q.key_concepts || q.keyConcepts || meta.keyConcepts || []),
@@ -326,18 +328,43 @@ const TopicDetailPage: React.FC<TopicDetailPageProps> = ({
       try {
         console.log(`🔍 [TopicDetailPage] Syncing questions for: ${topicResource.topicName}`);
 
-        // Fetch ALL questions for this topic with all columns (*)
-        const { data: dbQuestions, error } = await supabase
-          .from('questions')
-          .select('*')
-          .eq('subject', subject)
-          .eq('exam_context', examContext)
-          .eq('topic', topicResource.topicName);
+        // Robust fetch: Get questions via TWO paths simultaneously
+        // 1. Explicit ID mapping (new standard)
+        // 2. Name-based match (legacy/AI generated fallback)
+        const [mappingRes, nameRes] = await Promise.all([
+          supabase
+            .from('topic_question_mapping')
+            .select('questions!inner (*)')
+            .eq('topic_id', topicResource.topicId),
+          supabase
+            .from('questions')
+            .select('*')
+            .eq('subject', subject)
+            .eq('exam_context', examContext)
+            .eq('topic', topicResource.topicName)
+        ]);
 
-        if (error) throw error;
+        const allQuestionsMap = new Map<string, any>();
 
-        if (dbQuestions && dbQuestions.length > 0) {
-          const formattedQuestions: AnalyzedQuestion[] = dbQuestions.map(formatAnalyzedQuestion);
+        // Add from mappings
+        if (mappingRes.data) {
+          mappingRes.data.forEach((m: any) => {
+            if (m.questions) allQuestionsMap.set(m.questions.id, m.questions);
+          });
+        }
+
+        // Add from name-based search (fill gaps)
+        if (nameRes.data) {
+          nameRes.data.forEach((q: any) => {
+            allQuestionsMap.set(q.id, q);
+          });
+        }
+
+        const finalQuestionsArray = Array.from(allQuestionsMap.values());
+
+        if (finalQuestionsArray.length > 0) {
+          console.log(`✅ [TopicDetailPage] Synced ${finalQuestionsArray.length} total questions (Merged Mapped + Named)`);
+          const formattedQuestions: AnalyzedQuestion[] = finalQuestionsArray.map(formatAnalyzedQuestion);
           setSharedQuestions(formattedQuestions);
           setTotalQuestionsIncludingAI(formattedQuestions.length);
         }
@@ -1955,14 +1982,36 @@ const PracticeTab: React.FC<{
                           </div>
 
                           <div className="flex flex-wrap gap-1.5 items-center">
-                            {q.diff && (
-                              <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-[0.15em] px-1.5 md:px-2 py-0.5 rounded-md border ${q.diff === 'Hard' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                q.diff === 'Moderate' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                  'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                } font-outfit shadow-sm whitespace-nowrap`}>{q.diff}</span>
+                            {/* Difficulty Tag */}
+                            <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-[0.15em] px-1.5 md:px-2 py-0.5 rounded-md border ${q.difficulty === 'Hard' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                              q.difficulty === 'Moderate' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                'bg-emerald-50 text-emerald-600 border-emerald-100'
+                              } font-outfit shadow-sm whitespace-nowrap`}>
+                              {q.difficulty}
+                            </span>
+
+                            {/* Year Tag */}
+                            {q.year && (
+                              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.15em] px-1.5 md:px-2 py-0.5 rounded-md border bg-slate-100 text-slate-600 border-slate-200 font-outfit shadow-sm whitespace-nowrap">
+                                {String(q.year).includes('Prediction') ? q.year : `PYQ ${q.year}`}
+                              </span>
                             )}
+
+                            {/* Marks Tag */}
+                            {q.marks && (
+                              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.15em] px-1.5 md:px-2 py-0.5 rounded-md border bg-blue-50 text-blue-600 border-blue-100 font-outfit shadow-sm whitespace-nowrap">
+                                {q.marks} {Number(q.marks) === 1 ? 'Mark' : 'Marks'}
+                              </span>
+                            )}
+
+                            {/* Exam Context Tag */}
+                            {(q.exam_context || examContext) && (
+                              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.15em] px-1.5 md:px-2 py-0.5 rounded-md border bg-indigo-50 text-indigo-600 border-indigo-100 font-outfit shadow-sm whitespace-nowrap">
+                                {q.exam_context || examContext}
+                              </span>
+                            )}
+
                             <div className="hidden md:flex items-center gap-1.5">
-                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-outfit px-1 whitespace-nowrap">Sync</span>
                               {q.blooms && (
                                 <>
                                   <span className="w-1 h-1 rounded-full bg-slate-300"></span>

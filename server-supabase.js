@@ -387,6 +387,7 @@ app.get('/api/scan-visuals/:scanId', async (req, res) => {
   try {
     const { scanId } = req.params;
 
+    // 1. Try Redis cache first
     if (redis && redis.status === 'ready') {
       const cached = await redis.get(`scan_visuals:${scanId}`);
       if (cached) {
@@ -396,6 +397,7 @@ app.get('/api/scan-visuals/:scanId', async (req, res) => {
       }
     }
 
+    // 2. Try in-memory cache (survives within a session, lost on restart)
     if (scanVisualsCache.has(scanId)) {
       return res.json({ data: scanVisualsCache.get(scanId), cached: true });
     }
@@ -676,6 +678,29 @@ app.post('/api/scans', async (req, res) => {
 
       // Update questions if provided
       if (apiScan.analysisData?.questions && apiScan.analysisData.questions.length > 0) {
+        // PRESERVE EXISTING SKETCHES: Fetch existing sketch URLs first
+        // This prevents metadata syncs from wiping out generated diagrams
+        const { data: existingQuestions } = await supabaseAdmin
+          .from('questions')
+          .select('id, sketch_svg_url, metadata')
+          .eq('scan_id', apiScan.id);
+
+        const sketchUrlMap = {};
+        const orderUrlMap = {}; // Fallback for legacy questions without appId
+
+        if (existingQuestions) {
+          existingQuestions.forEach(eq => {
+            const appId = eq.metadata?.appId;
+            if (eq.sketch_svg_url) {
+              if (appId) sketchUrlMap[appId] = eq.sketch_svg_url;
+              // Always store by order as a reliable secondary match
+              if (eq.question_order !== null && eq.question_order !== undefined) {
+                orderUrlMap[eq.question_order] = eq.sketch_svg_url;
+              }
+            }
+          });
+        }
+
         // Delete existing questions first (cascade)
         await supabaseAdmin.from('questions').delete().eq('scan_id', apiScan.id);
 
@@ -685,7 +710,8 @@ app.post('/api/scans', async (req, res) => {
         // Upload sketch SVGs to storage and get URLs
         const questionsWithMetadata = await Promise.all(
           apiScan.analysisData.questions.map(async (q, index) => {
-            let sketchSvgUrl = null;
+            // Priority: 1. appId match, 2. order match
+            let sketchSvgUrl = sketchUrlMap[q.id] || orderUrlMap[index] || null;
 
             // If question has sketch SVG data, upload to storage
             if (q.sketchSvg) {

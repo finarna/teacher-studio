@@ -152,16 +152,31 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
     }
 
     const loadVisuals = async () => {
+      console.log('🖼️ [loadVisuals] Starting for scan:', scan.id);
       try {
-        const response = await fetch(getApiUrl(`/api/scan-visuals/${scan.id}`));
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+
+        const url = getApiUrl(`/api/scan-visuals/${scan.id}`);
+        console.log('🖼️ [loadVisuals] Fetching from:', url);
+
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
+
         if (response.ok) {
           const result = await response.json();
+          console.log('🖼️ [loadVisuals] Success:', result.data?.questionSketches ? Object.keys(result.data.questionSketches).length : 0, 'sketches found');
           if (result.data?.questionSketches) {
             setQuestionSketches(result.data.questionSketches);
           }
+        } else {
+          console.error('🖼️ [loadVisuals] Server error:', response.status);
         }
       } catch (err) {
-        console.error('Failed to load visuals:', err);
+        console.error('🖼️ [loadVisuals] Error:', err);
       }
     };
 
@@ -1723,8 +1738,8 @@ Schema: {
                         id: selectedQ.id,
                         hasExtractedImages: !!selectedQ.extractedImages,
                         extractedImagesCount: selectedQ.extractedImages?.length || 0,
-                        extractedImagesType: typeof selectedQ.extractedImages,
                         hasVisualElement: selectedQ.hasVisualElement,
+                        hasSketch: !!selectedQ.sketchSvg, // New: track AI sketch
                         questionKeys: Object.keys(selectedQ)
                       });
 
@@ -1981,6 +1996,24 @@ Schema: {
                                         </div>
                                       );
                                     })}
+
+                                    {/* Also show AI Sketch at the bottom of Logic if present */}
+                                    {selectedQ.sketchSvg && (
+                                      <div className="mt-4 pt-4 border-t border-slate-100">
+                                        <div className="flex items-center gap-2 mb-3">
+                                          <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
+                                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Interactive Sketch</span>
+                                        </div>
+                                        <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
+                                          <img
+                                            src={selectedQ.sketchSvg}
+                                            alt="Visual aid"
+                                            className="w-full h-auto cursor-zoom-in"
+                                            onClick={() => setEnlargedVisualNote({ imageUrl: selectedQ.sketchSvg!, questionId: selectedQ.id })}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
                                 ) : (
                                   <div className="flex flex-col items-center justify-center py-8">
@@ -2089,7 +2122,7 @@ Schema: {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 
