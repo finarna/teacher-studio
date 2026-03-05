@@ -518,12 +518,17 @@ const AdminScanApproval: React.FC = () => {
             exam_context: scan.exam_context,
             year: extractedYear ? parseInt(extractedYear) : null,
             is_system_question: true,
-            // Restore visual metadata if it existed
-            sketch_svg_url: vData.sketch_svg_url || null,
-            has_visual_element: vData.has_visual_element || false,
-            visual_element_type: vData.visual_element_type || null,
-            visual_element_description: vData.visual_element_description || null,
-            diagram_url: vData.diagram_url || null
+            // Restore visual metadata if it existed in previous draft or current vault
+            sketch_svg_url: vData.sketch_svg_url || q.sketch_svg_url || null,
+            has_visual_element: vData.has_visual_element || q.has_visual_element || false,
+            visual_element_type: vData.visual_element_type || q.visual_element_type || null,
+            visual_element_description: vData.visual_element_description || q.visual_element_description || null,
+            diagram_url: vData.diagram_url || q.diagram_url || null,
+            metadata: {
+              ...(q.metadata || {}),
+              appId: q.id || `${scanId}-${index}`,
+              published_at: new Date().toISOString()
+            }
           };
         });
 

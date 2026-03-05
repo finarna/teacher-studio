@@ -537,14 +537,44 @@ app.post('/api/scan-visuals/:scanId', async (req, res) => {
           }
 
           // Update the published question row by scan_id + question_order
-          const { error: updateError } = await supabaseAdmin
+          // RESILIENT UPDATE: Try update, if 0 rows affected, the scan isn't "published" yet,
+          // so we should create the draft questions in the DB so visuals have a place to live.
+          const { data: updatedRows, error: updateError } = await supabaseAdmin
             .from('questions')
             .update({ sketch_svg_url: publicUrl })
             .eq('scan_id', scanId)
-            .eq('question_order', qIndex);
+            .eq('question_order', qIndex)
+            .select('id');
 
-          if (updateError) console.error(`❌ Q-Update failed for order=${qIndex}:`, updateError);
-          else console.log(`✅ Saved sketch for Q${qIndex + 1} → ${publicUrl}`);
+          if (!updateError && (!updatedRows || updatedRows.length === 0)) {
+            console.log(`📝 [DRAFT_PERSIST] No question row for scan ${scanId} order ${qIndex}. Initializing draft questions table...`);
+            // This is likely an unpublished scan. We should create draft rows for ALL its questions
+            // so that EVERY question in this scan has a place to store its visuals permanently.
+            if (scanRow && adQuestions.length > 0) {
+              // We use createQuestions from lib/supabaseServer.ts
+              const questionsToCreate = adQuestions.map((q, idx) => ({
+                ...q,
+                subject: scanRow.subject,
+                exam_context: scanRow.exam_context,
+                year: scanRow.year,
+                is_system_question: false // It's a draft
+              }));
+              await createQuestions(scanId, questionsToCreate);
+
+              // Now try the update again for THIS specific question
+              await supabaseAdmin
+                .from('questions')
+                .update({ sketch_svg_url: publicUrl })
+                .eq('scan_id', scanId)
+                .eq('question_order', qIndex);
+
+              console.log(`✅ Persisted sketch to fresh draft row for Q${qIndex + 1}`);
+            }
+          } else if (updateError) {
+            console.error(`❌ Q-Update failed for order=${qIndex}:`, updateError);
+          } else {
+            console.log(`✅ Saved sketch for Q${qIndex + 1} → ${publicUrl}`);
+          }
         } catch (qErr) {
           console.error(`❌ Sketch save error for ${qId}:`, qErr);
         }
