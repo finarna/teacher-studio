@@ -11,6 +11,7 @@ import { AI_CONFIG } from '../config/aiConfigs';
  */
 
 export interface SynthesisResult {
+    subtopic: string;
     solutionSteps: string[];
     markingSteps: { step: string; mark: string }[];
     aiReasoning: string;
@@ -21,7 +22,9 @@ export interface SynthesisResult {
     keyConcepts: { name: string; explanation: string }[];
     difficulty: 'Easy' | 'Moderate' | 'Hard';
     historicalPattern?: string;
+    historical_pattern?: string;
     predictiveInsight?: string;
+    predictive_insight?: string;
 }
 
 /**
@@ -65,6 +68,7 @@ Provide a rigorous, structured analysis. Generic advice like "check your calcula
 5. whyItMatters: Connect this specific concept to higher-level engineering/medical application (e.g., "Log domain checks are critical in filter stability analysis").
 6. studyTip: A professional "Mastery" shortcut, mnemonic or visualization ritual (The 'Base-Check Ritual').
 7. pitfalls: EXACT conceptual traps in this specific problem. Generic "Calculation errors" or "Rush through" advice is FORBIDDEN and will be rejected. Identify a real mathematical pitfall.
+8. subtopic: A specific, granular subtopic name (3-5 words max) that falls under the main topic "${topicName}".
 
 Return ONLY valid JSON:
 {
@@ -155,14 +159,22 @@ CRITICAL:
                 exam_tip: synthesis.studyTip, // Maintain backward compatibility
                 key_formulas: synthesis.keyFormulas,
                 ai_reasoning: synthesis.aiReasoning,
-                historical_pattern: synthesis.historicalPattern,
-                predictive_insight: synthesis.predictiveInsight,
+                historical_pattern: synthesis.historicalPattern || synthesis.historical_pattern,
+                predictive_insight: synthesis.predictiveInsight || synthesis.predictive_insight,
                 why_it_matters: synthesis.whyItMatters,
                 pitfalls: synthesis.commonMistakes?.map(m => ({
                     mistake: m.mistake || (m as any).pitfall,
                     why: (m as any).why || '',
                     howToAvoid: (m as any).howToAvoid || ''
                 })) || [],
+                metadata: {
+                    ...(question.metadata || {}),
+                    subtopic: synthesis.subtopic,
+                    complexity_matrix: {
+                        blooms: synthesis.difficulty === 'Easy' ? 'Apply' : synthesis.difficulty === 'Hard' ? 'Evaluate' : 'Analyze',
+                        relevancy: 'High'
+                    }
+                },
                 mastery_material: {
                     ...existingMastery,
                     ...synthesis

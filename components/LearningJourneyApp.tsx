@@ -125,7 +125,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
 
   // Full-screen loading only for major view transitions (NOT when generating a test
   // from within topic_detail — those use inline button loading state instead)
-  if (isLoading && currentView !== 'test' && currentView !== 'topic_detail') {
+  if (isLoading && !['test', 'topic_detail', 'mock_builder'].includes(currentView)) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
@@ -427,7 +427,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
         exit="out"
         variants={pageVariants}
         transition={pageTransition}
-        drag={currentView !== 'trajectory' && currentView !== 'test' ? "x" : false}
+        drag={!['trajectory', 'test', 'mock_builder'].includes(currentView) ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.2}
         onDragEnd={(e, { offset, velocity }) => {

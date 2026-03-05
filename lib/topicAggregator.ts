@@ -56,7 +56,8 @@ export async function aggregateTopicsForUser(
       .from('scans')
       .select('id, subject, exam_context, year')
       .or(`user_id.eq.${userId},is_system_scan.eq.true`)
-      .eq('subject', subject);
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
 
     if (scansError) throw scansError;
 

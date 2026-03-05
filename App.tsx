@@ -379,8 +379,9 @@ const AppContent: React.FC = () => {
         } : undefined
       };
 
-      // Use session from useAuth hook
-      const token = session?.access_token;
+      // Use latest session to prevent stale closures over long operations
+      const { data: authData } = await supabase.auth.getSession();
+      const token = authData?.session?.access_token || session?.access_token;
 
       const headers: HeadersInit = {
         'Content-Type': 'application/json',

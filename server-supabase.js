@@ -512,6 +512,10 @@ app.get('/api/scans', async (req, res) => {
     const userId = req.userId;
     const { subject, examContext } = req.query;
 
+    if (userId === 'anonymous') {
+      return res.status(401).json({ error: 'Auth session missing!' });
+    }
+
     // Fetch from Supabase with optional filters
     let query = supabaseAdmin
       .from('scans')

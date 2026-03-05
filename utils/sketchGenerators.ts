@@ -216,6 +216,7 @@ export const generateGemini3ProImage = async (
 === CRITICAL SYLLABUS BOUNDARY ===
 You MUST strictly follow ONLY the content covered in: ${syllabusScope}
 DO NOT include any content beyond this official prescribed scope.
+EXCEPTION: Since this question appeared in a previous exam/context, you MUST fully explain the concepts required to solve this specific question, EVEN IF it normally belongs to a different class/grade. NEVER generate an "Out of Syllabus" or "Wrong Class" warning. Construct the full pedagogical learning guide.
 
 TOPIC: "${topic}"
 QUESTION CONTEXT: ${questionText}
@@ -256,6 +257,7 @@ SUBJECT: ${subject} (Class 12 ${examKey} Exam)
 TOPIC: ${blueprint.visualConcept}
 
 ⚠️ STRICT CONTENT RULE: Only include content that is EXPLICITLY part of the ${examKey} ${subject} syllabus for "${topic}".
+EXCEPTION: If the question itself contains or requires concepts slightly outside this boundary, EXPLICITLY INCLUDE them to provide a complete answer. DO NOT output error messages about wrong class.
 
 VISUAL CONTENT TO INCLUDE:
 ${blueprint.imageDescription}
@@ -370,6 +372,7 @@ export const generateGemini25FlashImage = async (
 === CRITICAL SYLLABUS BOUNDARY ===
 You MUST strictly follow ONLY the content covered in: ${syllabusScope}
 DO NOT include any content beyond this official prescribed scope.
+EXCEPTION: Since this question appeared in a previous exam/context, you MUST fully explain the concepts required to solve this specific question, EVEN IF it normally belongs to a different class/grade. NEVER generate an "Out of Syllabus" or "Wrong Class" warning. Construct the full pedagogical learning guide.
 
 TOPIC: "${topic}"
 CONTEXT QUESTION: ${questionText}
@@ -414,6 +417,7 @@ Generate a complete learning blueprint grounded STRICTLY in ${examKey} syllabus:
   const imagePrompt = `Create an ARTISTIC, VIBRANT hand-drawn sketchnote for Class 12 ${subject} [${examKey}].
 
 ⚠️ STRICT CONTENT RULE: Only include content that is EXPLICITLY part of the ${examKey} ${subject} syllabus for "${topic}".
+EXCEPTION: If the question itself contains or requires concepts slightly outside this boundary, EXPLICITLY INCLUDE them to provide a complete answer. DO NOT output error messages about wrong class.
 
 TOPIC: "${blueprint.visualConcept}"
 
@@ -822,7 +826,8 @@ Be STRICT but FAIR. This content will be used by students preparing for board ex
       };
     }
 
-    const validation: ValidationResult = JSON.parse(jsonMatch[0]);
+    const sanitizedJson = jsonMatch[0].replace(/(?<!\\)\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})/g, '\\\\');
+    const validation: ValidationResult = JSON.parse(sanitizedJson);
 
     if (validation.approved) {
       onStatusUpdate?.(`✅ ${pageTitle} validated - Quality approved`);
@@ -1286,6 +1291,7 @@ const generateUnifiedSketch = async (
 === CRITICAL SYLLABUS BOUNDARY ===
 You MUST strictly follow ONLY the content covered in: ${syllabusScope}
 DO NOT include any content beyond this official prescribed scope.
+EXCEPTION: Since this question appeared in a previous exam/context, you MUST fully explain the concepts required to solve this specific question, EVEN IF it normally belongs to a different class/grade. NEVER generate an "Out of Syllabus" or "Wrong Class" warning. Construct the full pedagogical learning guide.
 
 Topic: "${topic}"
 Question Context: ${questionText}

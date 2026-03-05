@@ -221,7 +221,8 @@ const AdminScanApproval: React.FC = () => {
         .select(`
           id, name, subject, exam_context, status, is_system_scan, created_at, year, analysis_data,
           questions:questions(count),
-          visual_notes:topic_sketches(count)
+          visual_notes:topic_sketches(count),
+          flashcards:flashcards(data)
         `)
         .order('created_at', { ascending: false })
         .limit(20); // LIMIT: only fetch top 20 to keep stats fetch efficient
@@ -308,8 +309,9 @@ const AdminScanApproval: React.FC = () => {
 
         const visualNotesCount = dbVisualNotesCount > 0 ? dbVisualNotesCount : legacyVisualNotesCount;
 
-        // Calculate flashcards count (TODO: implement when flashcards are added)
-        const flashcardsCount = 0;
+        // Calculate flashcards count from the batch data
+        const flashcardsBatch = (scan as any).flashcards?.[0];
+        const flashcardsCount = flashcardsBatch?.data ? (Array.isArray(flashcardsBatch.data) ? flashcardsBatch.data.length : 0) : 0;
 
         return {
           id: scan.id,
