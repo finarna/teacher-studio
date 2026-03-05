@@ -404,15 +404,28 @@ app.get('/api/scan-visuals/:scanId', async (req, res) => {
 
     // Cache miss — load question sketches from DB (sketch_svg_url) and rebuild keyed by analysis_data question ID
     const { data: scanRow } = await supabaseAdmin.from('scans').select('analysis_data').eq('id', scanId).maybeSingle();
-    const { data: publishedQs } = await supabaseAdmin.from('questions').select('question_order, sketch_svg_url').eq('scan_id', scanId).not('sketch_svg_url', 'is', null);
+    const { data: publishedQs } = await supabaseAdmin
+      .from('questions')
+      .select('question_order, sketch_svg_url, metadata')
+      .eq('scan_id', scanId)
+      .not('sketch_svg_url', 'is', null);
 
     let questionSketches = null;
     if (publishedQs && publishedQs.length > 0 && scanRow?.analysis_data?.questions) {
       const adQuestions = scanRow.analysis_data.questions;
       questionSketches = {};
       for (const pq of publishedQs) {
-        const adQ = adQuestions[pq.question_order];
-        if (adQ) questionSketches[adQ.id] = pq.sketch_svg_url;
+        // Priority 1: Match by appId in metadata (most robust)
+        const appId = pq.metadata?.appId;
+        const matchingAdQ = appId ? adQuestions.find(q => q.id === appId) : null;
+
+        if (matchingAdQ) {
+          questionSketches[matchingAdQ.id] = pq.sketch_svg_url;
+        } else {
+          // Priority 2: Match by question_order (legacy/fallback)
+          const adQ = adQuestions[pq.question_order];
+          if (adQ) questionSketches[adQ.id] = pq.sketch_svg_url;
+        }
       }
     }
 
@@ -536,22 +549,32 @@ app.post('/api/scan-visuals/:scanId', async (req, res) => {
             publicUrl = urlData.publicUrl;
           }
 
-          // Update the published question row by scan_id + question_order
-          // RESILIENT UPDATE: Try update, if 0 rows affected, the scan isn't "published" yet,
-          // so we should create the draft questions in the DB so visuals have a place to live.
-          const { data: updatedRows, error: updateError } = await supabaseAdmin
+          // Update the published question row using DUAL MATCHING (appId or order)
+          // RESILIENT UPDATE: Try appId match first, then order, then create if missing.
+          const { data: updatedByAppId, error: appErr } = await supabaseAdmin
             .from('questions')
             .update({ sketch_svg_url: publicUrl })
             .eq('scan_id', scanId)
-            .eq('question_order', qIndex)
+            .contains('metadata', { appId: qId })
             .select('id');
 
-          if (!updateError && (!updatedRows || updatedRows.length === 0)) {
-            console.log(`📝 [DRAFT_PERSIST] No question row for scan ${scanId} order ${qIndex}. Initializing draft questions table...`);
+          let updatedRows = updatedByAppId;
+
+          if (!appErr && (!updatedRows || updatedRows.length === 0)) {
+            const { data: updatedByOrder, error: orderErr } = await supabaseAdmin
+              .from('questions')
+              .update({ sketch_svg_url: publicUrl })
+              .eq('scan_id', scanId)
+              .eq('question_order', qIndex)
+              .select('id');
+            updatedRows = updatedByOrder;
+          }
+
+          if ((!updatedRows || updatedRows.length === 0)) {
+            console.log(`📝 [DRAFT_PERSIST] No question row for scan ${scanId} (Id:${qId}/Order:${qIndex}). Initializing draft questions table...`);
             // This is likely an unpublished scan. We should create draft rows for ALL its questions
             // so that EVERY question in this scan has a place to store its visuals permanently.
             if (scanRow && adQuestions.length > 0) {
-              // We use createQuestions from lib/supabaseServer.ts
               const questionsToCreate = adQuestions.map((q, idx) => ({
                 ...q,
                 subject: scanRow.subject,
@@ -561,7 +584,7 @@ app.post('/api/scan-visuals/:scanId', async (req, res) => {
               }));
               await createQuestions(scanId, questionsToCreate);
 
-              // Now try the update again for THIS specific question
+              // Now try the update again for THIS specific question (by order as appId map is fresher)
               await supabaseAdmin
                 .from('questions')
                 .update({ sketch_svg_url: publicUrl })
@@ -570,10 +593,8 @@ app.post('/api/scan-visuals/:scanId', async (req, res) => {
 
               console.log(`✅ Persisted sketch to fresh draft row for Q${qIndex + 1}`);
             }
-          } else if (updateError) {
-            console.error(`❌ Q-Update failed for order=${qIndex}:`, updateError);
           } else {
-            console.log(`✅ Saved sketch for Q${qIndex + 1} → ${publicUrl}`);
+            console.log(`✅ Saved sketch for Q${qIndex + 1} (${qId}) → ${publicUrl}`);
           }
         } catch (qErr) {
           console.error(`❌ Sketch save error for ${qId}:`, qErr);

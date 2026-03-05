@@ -446,20 +446,27 @@ const AdminScanApproval: React.FC = () => {
       console.log('🧹 Cleaning up existing data for this scan while preserving visuals...');
       const { data: existingQs } = await supabase
         .from('questions')
-        .select('id, sketch_svg_url, has_visual_element, visual_element_type, visual_element_description, diagram_url, question_order')
+        .select('id, sketch_svg_url, has_visual_element, visual_element_type, visual_element_description, diagram_url, question_order, metadata')
         .eq('scan_id', scanId);
 
       const visualMetadataMap = new Map();
       if (existingQs) {
         existingQs.forEach(eq => {
           if (eq.sketch_svg_url || eq.diagram_url || eq.has_visual_element) {
-            visualMetadataMap.set(eq.question_order, {
+            const visualData = {
               sketch_svg_url: eq.sketch_svg_url,
               has_visual_element: eq.has_visual_element,
               visual_element_type: eq.visual_element_type,
               visual_element_description: eq.visual_element_description,
               diagram_url: eq.diagram_url
-            });
+            };
+
+            // Priority: appId in metadata
+            if (eq.metadata?.appId) {
+              visualMetadataMap.set(eq.metadata.appId, visualData);
+            }
+            // Fallback: question_order
+            visualMetadataMap.set(`order-${eq.question_order}`, visualData);
           }
         });
       }
@@ -493,7 +500,7 @@ const AdminScanApproval: React.FC = () => {
 
         // Transform analysis_data questions to match questions table schema
         const questionsData = questionsToInsert.map((q: any, index: number) => {
-          const vData = visualMetadataMap.get(index) || {};
+          const vData = visualMetadataMap.get(q.id) || visualMetadataMap.get(`order-${index}`) || {};
           return {
             scan_id: scanId,
             text: q.text || q.question || '',
