@@ -98,19 +98,31 @@ const MathRenderer: React.FC<MathRendererProps> = ({
     // Normalized text to handle common AI extraction quirks
     let processedText = safeText
       .replace(/\\\\n/g, '\n')
-      .replace(/\\\\/g, '\\'); // Normalizing double backslashes which are common in AI output
+      .replace(/\\\\/g, '\\');
 
-    // Heuristic: If there are NO math delimiters but there are CLEAR LaTeX commands or markers, 
-    // treat the entire string as one math block. This fixes "raw" LaTeX options like "2^{10}A - I".
     const hasMathDelimiters = /\$|\\\[|\\\(/.test(processedText);
 
-    // Detection markers: backslash, powers, subscripts, braces, or math operators in short strings
-    const containsLatexCmd = /\\|[\^_]|\{|\}/.test(processedText);
+    // HEURISTIC FIX: Only auto-wrap if the string is short (likely a math option) 
+    // or contains high-confidence LaTeX commands.
+    // Do NOT wrap long blocks of text (paragraphs) because KaTeX will strip all spaces.
+    const containsHighConfLatex = /\\(frac|sqrt|int|sum|begin|lambda|alpha|beta|gamma|theta|omega|sigma|pi|delta|phi|psi|mu|nu|xi|tau|vec|hat|bar|tilde|int)/.test(processedText);
+    const containsMathMarkers = /[\^_]|\{|\}/.test(processedText);
     const containsOperators = /[\+\-\=\/\*x<\>\(\)\[\]]/.test(processedText);
     const looksLikeMathVar = /[0-9][A-Z]|[A-Z][0-9]/.test(processedText);
-    const isShortMath = processedText.length < 50 && containsOperators && /[A-Z0-9]/.test(processedText);
 
-    if (!hasMathDelimiters && (containsLatexCmd || looksLikeMathVar || isShortMath)) {
+    const isShort = processedText.length < 100;
+    const hasManySpaces = (processedText.match(/\s/g) || []).length > 5;
+
+    // Auto-wrap if no delimiters AND:
+    // 1. It contains explicit LaTeX commands
+    // 2. It's a short string that looks like math (markers + operators) and NOT a plain sentence
+    const shouldAutoWrap = !hasMathDelimiters && (
+      containsHighConfLatex ||
+      (isShort && (containsMathMarkers || looksLikeMathVar) && !hasManySpaces) ||
+      (isShort && containsMathMarkers && containsOperators)
+    );
+
+    if (shouldAutoWrap) {
       processedText = `$${processedText}$`;
     }
 

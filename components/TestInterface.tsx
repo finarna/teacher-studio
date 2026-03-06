@@ -146,6 +146,14 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
     };
   }, [currentQuestionIndex, isReviewMode]);
 
+  // Auto-scroll navigator to current question
+  useEffect(() => {
+    const activeBtn = document.getElementById(`nav-q-${currentQuestionIndex}`);
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [currentQuestionIndex]);
+
   const updateResponse = useCallback((questionId: string, updates: Partial<QuestionResponse>) => {
     setResponses(prev => {
       const newResponses = new Map(prev);
@@ -229,9 +237,26 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   };
 
   // Calculate stats
-  const answeredCount = Array.from(responses.values()).filter(r => r.selectedOption !== undefined).length;
+  const responseArray = Array.from(responses.values());
+  const answeredCount = responseArray.filter(r => r.selectedOption !== undefined).length;
   const unansweredCount = questions.length - answeredCount;
-  const markedCount = Array.from(responses.values()).filter(r => r.markedForReview).length;
+  const markedCount = responseArray.filter(r => r.markedForReview).length;
+
+  // Review mode stats
+  const correctCount = isReviewMode ? questions.filter(q => {
+    const r = responses.get(q.id);
+    return r?.selectedOption !== undefined && r.selectedOption === q.correctOptionIndex;
+  }).length : 0;
+
+  const incorrectCount = isReviewMode ? questions.filter(q => {
+    const r = responses.get(q.id);
+    return r?.selectedOption !== undefined && r.selectedOption !== q.correctOptionIndex;
+  }).length : 0;
+
+  const skippedCount = isReviewMode ? questions.filter(q => {
+    const r = responses.get(q.id);
+    return !r || r.selectedOption === undefined;
+  }).length : 0;
 
   // Format time
   const formatTime = (seconds: number): string => {
@@ -755,94 +780,119 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
           {/* Premium Question Navigator Sidebar - Hidden on Mobile */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] px-6 py-7 sticky top-24 shadow-xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 blur-[60px] rounded-full pointer-events-none" />
-              <h3 className="font-extrabold text-[11px] text-slate-400 mb-6 uppercase tracking-[0.2em] flex items-center gap-2">
-                <Grid3x3 size={16} className="text-primary-500" />
-                Question Navigator
-              </h3>
+            <div className="bg-[#f8fafc]/80 backdrop-blur-xl border-2 border-slate-200/50 rounded-[2.5rem] p-5 sm:p-7 sticky top-20 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] flex flex-col max-h-[calc(100vh-100px)] overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-primary-500/[0.03] blur-[80px] rounded-full pointer-events-none" />
 
-              {/* Sophisticated Legend */}
-              <div className="mb-6 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+              {/* Header with Stats Tracking */}
+              <div className="flex items-center justify-between mb-6 px-1 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/20">
+                    <Grid3x3 size={18} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-sm text-slate-900 tracking-tight leading-none">Navigator</h3>
+                    <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{questions.length} Pathmarks</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-lg font-black text-slate-900 leading-none">{answeredCount}</span>
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Done</span>
+                </div>
+              </div>
+
+              {/* Progress Track */}
+              <div className="mb-8 px-1 shrink-0">
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mastery Progress</span>
+                  <span className="text-[10px] font-black text-primary-600">{Math.round((answeredCount / questions.length) * 100)}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary-500 to-indigo-600 transition-all duration-700 ease-out"
+                    style={{ width: `${(answeredCount / questions.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Sophisticated Status Bar (Legend) */}
+              <div className="mb-8 grid grid-cols-3 gap-2 shrink-0">
                 {isReviewMode ? (
-                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 bg-emerald-500 rounded-md shadow-sm shadow-emerald-200" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-emerald-700">Correct</span>
+                  <>
+                    <div className="flex flex-col items-center p-2 rounded-2xl bg-emerald-50 border border-emerald-100/50">
+                      <span className="text-[10px] font-black text-emerald-600 leading-none mb-1">{correctCount}</span>
+                      <span className="text-[7px] font-black uppercase text-emerald-400 tracking-widest">Correct</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 bg-rose-500 rounded-md shadow-sm shadow-rose-200" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-rose-700">Incorrect</span>
+                    <div className="flex flex-col items-center p-2 rounded-2xl bg-rose-50 border border-rose-100/50">
+                      <span className="text-[10px] font-black text-rose-600 leading-none mb-1">{incorrectCount}</span>
+                      <span className="text-[7px] font-black uppercase text-rose-400 tracking-widest">Wrong</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 bg-slate-300 rounded-md" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Unattempted</span>
+                    <div className="flex flex-col items-center p-2 rounded-2xl bg-slate-50 border border-slate-200/50">
+                      <span className="text-[10px] font-black text-slate-600 leading-none mb-1">{skippedCount}</span>
+                      <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest">Null</span>
                     </div>
-                  </div>
+                  </>
                 ) : (
-                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 rounded-md shadow-sm border border-white/10" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Answered</span>
+                  <>
+                    <div className="flex flex-col items-center p-2 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm">
+                      <span className="text-[10px] font-black text-white leading-none mb-1">{answeredCount}</span>
+                      <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest">Done</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 border-2 border-amber-500 rounded-md bg-white flex items-center justify-center">
-                        <Flag size={8} strokeWidth={4} className="text-amber-500" />
-                      </div>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-amber-600">Review</span>
+                    <div className="flex flex-col items-center p-2 rounded-2xl bg-white border border-amber-200 shadow-sm">
+                      <span className="text-[10px] font-black text-amber-600 leading-none mb-1">{markedCount}</span>
+                      <span className="text-[7px] font-black uppercase text-amber-500 tracking-widest">Flag</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 bg-slate-100 rounded-md border border-slate-200" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Not Visited</span>
+                    <div className="flex flex-col items-center p-2 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                      <span className="text-[10px] font-black text-slate-400 leading-none mb-1">{questions.length - answeredCount}</span>
+                      <span className="text-[7px] font-black uppercase text-slate-300 tracking-widest">Idle</span>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
 
-              {/* Grid with Premium Styling */}
-              <div className="grid grid-cols-5 gap-3 mb-6">
-                {questions.map((q, idx) => {
-                  const status = getQuestionStatus(q.id);
-                  const isCurrent = idx === currentQuestionIndex;
+              {/* Grid with Premium Styling - Scrollable for long tests */}
+              <div className="flex-1 overflow-y-auto pr-1 -mr-2 no-scrollbar custom-scrollbar">
+                <div className="grid grid-cols-5 gap-3 pb-4 px-1">
+                  {questions.map((q, idx) => {
+                    const status = getQuestionStatus(q.id);
+                    const isCurrent = idx === currentQuestionIndex;
 
-                  const getBaseStyles = () => {
-                    switch (status) {
-                      case 'correct': return 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 border-emerald-500';
-                      case 'incorrect': return 'bg-rose-500 text-white shadow-lg shadow-rose-500/20 border-rose-500';
-                      case 'answered': return 'bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 text-indigo-50 shadow-lg border-white/10';
-                      case 'skipped': return 'bg-slate-300 text-slate-700 border-slate-300';
-                      case 'marked': return 'bg-white border-amber-500 text-amber-600 hover:bg-amber-50 shadow-sm shadow-amber-200/50';
-                      default: return 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100';
-                    }
-                  };
+                    const getBaseStyles = () => {
+                      switch (status) {
+                        case 'correct': return 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/10 border-emerald-400/30';
+                        case 'incorrect': return 'bg-rose-500 text-white shadow-lg shadow-rose-500/10 border-rose-400/30';
+                        case 'answered': return 'bg-slate-900 text-white shadow-lg border-white/5';
+                        case 'marked': return 'bg-white border-2 border-amber-500 text-amber-600 hover:bg-amber-50 shadow-sm shadow-amber-200/50';
+                        default: return 'bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:shadow-sm';
+                      }
+                    };
 
-                  return (
-                    <button
-                      key={q.id}
-                      onClick={() => handleQuestionJump(idx)}
-                      className={`aspect-square rounded-2xl text-[13px] font-black transition-all relative flex items-center justify-center border-2 group
-                        ${getBaseStyles()}
-                        ${isCurrent
-                          ? 'ring-[5px] ring-indigo-500/20 ring-offset-0 scale-110 z-10 shadow-xl shadow-indigo-500/20 animate-in fade-in zoom-in duration-300 border-white/20'
-                          : 'active:scale-90 hover:brightness-110'
-                        }`}
-                    >
-                      {isCurrent && (
-                        <div className="absolute inset-0 rounded-[0.8rem] border-[3px] border-white/40 pointer-events-none" />
-                      )}
+                    return (
+                      <button
+                        key={q.id}
+                        id={`nav-q-${idx}`}
+                        onClick={() => handleQuestionJump(idx)}
+                        className={`aspect-square rounded-[1.2rem] text-[13px] font-black transition-all relative flex items-center justify-center border-2 group
+                          ${getBaseStyles()}
+                          ${isCurrent
+                            ? 'scale-110 z-10 shadow-[0_0_25px_-5px_rgba(79,70,229,0.5)] border-primary-500 ring-[6px] ring-primary-500/15'
+                            : 'active:scale-95 hover:scale-105'
+                          }`}
+                      >
+                        {isCurrent && (
+                          <div className="absolute inset-x-0 -bottom-1 h-1 bg-primary-500 rounded-full w-1/2 mx-auto shadow-[0_0_10px_rgba(79,70,229,0.8)]" />
+                        )}
 
-                      {status === 'marked' && (
-                        <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center text-white border-2 border-white shadow-md transition-transform group-hover:scale-110">
-                          <Flag size={9} strokeWidth={4} fill="currentColor" />
-                        </div>
-                      )}
-                      {idx + 1}
-                    </button>
-                  );
-                })}
+                        {status === 'marked' && (
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center text-white border-2 border-white shadow-md">
+                            <Flag size={8} strokeWidth={4} fill="currentColor" />
+                          </div>
+                        )}
+                        {idx + 1}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-
-              {/* Global Final Action safely moved to Header */}
             </div>
           </div>
         </div>
@@ -1081,89 +1131,101 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
       {/* Mobile Navigator Overlay */}
       {showNavigator && (
         <div className="lg:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] animate-in fade-in duration-300 flex items-end">
-          <div className="bg-white w-full rounded-t-[3rem] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500 max-h-[85vh] overflow-auto no-scrollbar border-t border-white/20">
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-8" />
+          <div className="bg-white w-full rounded-t-[3rem] shadow-2xl animate-in slide-in-from-bottom duration-500 h-[94vh] flex flex-col border-t border-white/20">
+            {/* Grab Handle */}
+            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4 shrink-0" />
 
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="font-black text-2xl text-slate-900 tracking-tight">Question Navigator</h3>
-                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                  Jump to any question
-                </p>
+            <div className="px-8 pb-4 shrink-0">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="font-black text-2xl text-slate-900 tracking-tight">Questions</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                    <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">{questions.length} Total Pathmarks</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowNavigator(false)}
+                  className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-900 active:scale-90 transition-all shadow-sm"
+                >
+                  <X size={18} />
+                </button>
               </div>
+
+              {/* Legend - Micro Style for Mobile */}
+              <div className="bg-slate-50/80 p-3 rounded-[1.5rem] border border-slate-100 flex flex-wrap gap-4 justify-center">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 bg-slate-900 rounded-sm" />
+                  <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Done</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 border-2 border-amber-500 bg-white rounded-sm" />
+                  <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Review</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 bg-white border border-slate-200 rounded-sm" />
+                  <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Idle</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Scrollable Question Grid */}
+            <div className="flex-1 overflow-y-auto px-8 pb-20 no-scrollbar">
+              <div className="grid grid-cols-5 xs:grid-cols-6 gap-3 pt-2">
+                {questions.map((q, idx) => {
+                  const status = getQuestionStatus(q.id);
+                  const isCurrent = idx === currentQuestionIndex;
+
+                  const getBaseStyles = () => {
+                    switch (status) {
+                      case 'correct': return 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/10 border-emerald-500';
+                      case 'incorrect': return 'bg-rose-500 text-white shadow-lg shadow-rose-500/10 border-rose-500';
+                      case 'answered': return 'bg-slate-900 text-white shadow-lg border-white/10';
+                      case 'skipped': return 'bg-slate-300 text-slate-700 border-slate-300';
+                      case 'marked': return 'bg-white border-2 border-amber-500 text-amber-600';
+                      default: return 'bg-slate-50 text-slate-400 border border-slate-100';
+                    }
+                  };
+
+                  return (
+                    <button
+                      key={q.id}
+                      onClick={() => {
+                        handleQuestionJump(idx);
+                        setShowNavigator(false);
+                      }}
+                      className={`aspect-square rounded-2xl text-sm font-black transition-all relative flex items-center justify-center border-2
+                        ${getBaseStyles()}
+                        ${isCurrent
+                          ? 'ring-[6px] ring-primary-500/20 scale-110 z-10 !bg-white !text-primary-600 border-primary-500'
+                          : 'active:scale-90'}
+                      `}
+                    >
+                      {isCurrent && (
+                        <div className="absolute inset-0 rounded-[0.8rem] border-[3.5px] border-primary-500/15 animate-pulse pointer-events-none" />
+                      )}
+                      {status === 'marked' && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm">
+                          <Flag size={8} strokeWidth={4} fill="currentColor" />
+                        </div>
+                      )}
+                      {idx + 1}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Sticky Action */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-transparent pt-10 pointer-events-none">
               <button
                 onClick={() => setShowNavigator(false)}
-                className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-900 active:scale-90 transition-all"
+                className="pointer-events-auto w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-slate-900/40 active:scale-95 transition-all flex items-center justify-center gap-2"
               >
-                <X size={20} />
+                Resume Experience
+                <ChevronRight size={14} />
               </button>
             </div>
-
-            {/* Legend in Overlay */}
-            <div className="mb-8 bg-slate-50/50 p-5 rounded-[2rem] border border-slate-100">
-              {isReviewMode ? (
-                <div className="grid grid-cols-2 gap-y-4 gap-x-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-emerald-500 rounded-md shadow-sm shadow-emerald-200" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Correct</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-rose-500 rounded-md shadow-sm shadow-rose-200" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-rose-700">Incorrect</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-slate-300 rounded-md" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Unattempted</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-y-4 gap-x-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 rounded-md shadow-sm border border-white/10" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Answered</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 border-2 border-amber-500 rounded-md bg-white flex items-center justify-center">
-                      <Flag size={10} strokeWidth={4} className="text-amber-500" />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-600">Review</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 bg-slate-100 rounded-md border border-slate-200" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Not Visited</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-5 gap-3 mb-10">
-              {questions.map((q, idx) => {
-                const status = getQuestionStatus(q.id);
-                const isCurrent = idx === currentQuestionIndex;
-                return (
-                  <button
-                    key={q.id}
-                    onClick={() => handleQuestionJump(idx)}
-                    className={`aspect-square rounded-2xl text-[15px] font-black transition-all flex items-center justify-center border-2
-                      ${status === 'answered'
-                        ? 'bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 text-white shadow-lg shadow-indigo-900/20 border-white/10'
-                        : 'bg-slate-50 text-slate-400 border-slate-100'}
-                      ${isCurrent ? 'ring-4 ring-indigo-500/20 ring-offset-4 scale-110 z-10' : ''}
-                    `}
-                  >
-                    {idx + 1}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={() => setShowNavigator(false)}
-              className="w-full py-5 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 text-indigo-50 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-indigo-900/40 border border-white/10 active:scale-95 transition-all"
-            >
-              Resume Experience
-            </button>
           </div>
         </div>
       )}
