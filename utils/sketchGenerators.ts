@@ -268,16 +268,27 @@ ${blueprint.detailedNotes.substring(0, 500)}
 FORMULAS TO DISPLAY (Write EXACTLY as shown):
 ${displayFormulas.join('\n')}
 
+/* Original Blackboard Style (kept for reference):
 STYLE REQUIREMENTS:
-- CAPTIVATING hand-drawn sketchnote masterpiece with artistic flair
-- VIBRANT and PREMIUM COLOR PALETTE: 
-  - Deep Indigo (#1e1b4b) for primary structures
-  - Electric Teal (#14b8a6) or Vivid Violet (#8b5cf6) for formula highlight zones
-  - Vibrant Emerald for success/tips, and Bright Coral for warnings
-- Clean white background with artistic-yet-organized hand-drawn layout
-- Whimsical visual hierarchy with creative headers and hand-lettered annotations
-- Labeled diagrams with creative, hand-drawn arrows showing relationships
-- Whimsical visual icons and metaphors (hand-illustrated style)
+- Hand-drawn aesthetic with clean, confident white/bright chalk lines
+- Blackboard aesthetic with chalk-drawn style
+- Rich, dark chalkboard background
+- Vibrant, bright chalk colors (white, yellow, neon green, bright pink, cyan) for high contrast
+- Clear visual hierarchy with bold chalk headers and readable subheaders
+- Labeled diagrams with arrows showing relationships
+- Visual icons and metaphors to represent concepts
+- Mathematical formulas clearly displayed
+*/
+
+STYLE REQUIREMENTS:
+- Hand-drawn aesthetic with clean, confident black ink lines
+- Professional educational sketchnote style
+- Cream or white paper background
+- Vibrant accent colors (teal, coral, emerald, violet, amber) for highlights to make it eye-catching
+- Clear visual hierarchy with bold headers and readable subheaders
+- Labeled diagrams with arrows showing relationships
+- Visual icons and metaphors to represent concepts
+- Mathematical formulas clearly displayed
 ${subject === 'Math' ? `
 CRITICAL MATHEMATICAL NOTATION REQUIREMENTS:
 1. FRACTIONS: Use horizontal fraction bar with numerator above, denominator below (e.g., dy/dx or dy over dx)
@@ -1056,6 +1067,19 @@ Using ONLY the content that falls within the official ${examKey} ${subject} syll
   const displayFormulas = blueprint.keyFormulas.map(f => latexToImageNotation(f));
 
   // PAGE 1 PROMPT: Theory + Formulas + Pattern Recognition
+  /* Original Blackboard Style Reference for Page 1:
+  VISUAL DESIGN REQUIREMENTS:
+  ✨ Use a BLACKBOARD aesthetic with vivid high-contrast CHALK COLORS: 
+     - Bright white for primary text/headers
+     - Neon Cyan or Bright Pink for formula highlight zones
+     - Vibrant Neon Green for patterns and tips
+     - Bright Yellow for key anchors
+  📦 Use elegant hand-drawn chalk boxes with artistic borders and whimsical connectors.
+  🎨 Add beautiful, chalk-drawn doodles and minimalist-yet-creative icons.
+  📊 Include artistic-yet-precise chalk diagrams or graphs with a human, hand-drawn touch.
+  🔢 Use expressive, clear, hand-lettered chalk style for important formulas.
+  💡 Add captivating visual memory anchors that make the page feel like an artistic blackboard study guide.
+  */
   const page1Prompt = `Create a VIBRANT, CAPTIVATING hand-drawn sketchnote masterpiece for Class 12 ${subject} [${examKey}].
 
 ⚠️ STRICT CONTENT RULE: Only include content that is EXPLICITLY part of the ${examKey} ${subject} textbook for "${topic}". Do NOT add content from other chapters, higher education, or other exam boards.
@@ -1079,15 +1103,15 @@ ${blueprint.patterns.map((p, i) => `✓ ${p}`).join('\n')}
 ⚡ TEXTBOOK ANCHOR: One key insight from the ${examKey} prescribed textbook for ${topic}.
 
 VISUAL DESIGN REQUIREMENTS:
-✨ Use a PREMIUM, VIBRANT, and CAPTIVATING COLOR PALETTE: 
-   - Deep Indigo or Charcoal for primary headers
-   - Electric Teal (#2dd4bf) or Bright Violet (#8b5cf6) for formula highlight zones
-   - Vibrant Emerald (#10b981) for patterns and high-score tips
-   - Sun-Kissed Amber (#f59e0b) for key anchors
+✨ Use an EYE-CATCHING hand-drawn aesthetic on a CREAM/WHITE paper background: 
+   - Clean, confident black ink lines for primary text/headers
+   - Electric Teal or Bright Violet for formula highlight zones
+   - Vibrant Emerald for patterns and tips
+   - Sun-Kissed Amber for key anchors
 📦 Use elegant hand-drawn boxes with artistic borders and whimsical connectors.
 🎨 Add beautiful, hand-drawn doodles and minimalist-yet-creative icons.
 📊 Include artistic-yet-precise diagrams or graphs with a human, hand-drawn touch.
-🔢 Use expressive, clear, hand-lettered style for important formulas.
+🔢 Use expressive, clear, hand-lettered style with black ink and vibrant accents for important formulas.
 💡 Add captivating visual memory anchors that make the page feel like an artistic study guide.
 
 CRITICAL MATHEMATICAL ACCURACY:
@@ -1101,6 +1125,14 @@ CRITICAL MATHEMATICAL ACCURACY:
 MAKE IT CAPTIVATING: Create an artistic sketchnote that is a visual feast, perfectly organized, and makes learning feel like an adventure!`;
 
   // PAGE 2 PROMPT: Solved Examples
+  /* Original Blackboard Style Reference for Page 2:
+  VISUAL REQUIREMENTS:
+  🎨 Vibrant-yet-premium hand-drawn blackboard chalk aesthetics.
+  📦 Creative, hand-sketched boxes with artistic borders on a dark background.
+  ➡️ Whimsical-yet-clear chalk-drawn arrows for logical flow.
+  ✨ Artistic highlighting for key steps using neon chalk tones.
+  📐 Diagrams drawn with a rich, hand-illustrated chalk look.
+  */
   const examEx = blueprint.solvedExamples.slice(0, 2).map((ex: any, i: number) =>
     `EXAMPLE ${i + 1} [${ex.difficulty}]:\nQ: ${latexToImageNotation(ex.question)}\nSolution: ${latexToImageNotation(ex.solution.substring(0, 250))}`
   ).join('\n\n');
@@ -1122,15 +1154,23 @@ Difficulty badge using vibrant-yet-readable tones (Emerald for Easy, Gold for Mo
 ⚡ ${examKey} APPROVED SHORTCUT: Only using ${examKey} syllabus knowledge.
 
 VISUAL REQUIREMENTS:
-🎨 Vibrant-yet-premium hand-drawn aesthetics.
-📦 Creative, hand-sketched boxes with artistic borders.
+🎨 Vibrant-yet-premium hand-drawn aesthetics on a cream/white paper background.
+📦 Creative, hand-sketched boxes with artistic borders using black ink and colorful accents.
 ➡️ Whimsical-yet-clear hand-drawn arrows for logical flow.
-✨ Artistic highlighting for key steps using neon-pastel tones.
+✨ Artistic highlighting for key steps using vibrant pastel tones.
 📐 Diagrams drawn with a rich, hand-illustrated look.
 
 STRICT RULE: Content must be 100% within ${examKey} syllabus scope.`;
 
   // PAGE 3 PROMPT: Variations, Mistakes, Strategies
+  /* Original Blackboard Style Reference for Page 3:
+  VISUAL REQUIREMENTS:
+  🔴 Vibrant-yet-professional neon pink/red chalk for mistakes.
+  ✅ CORRECT vs INCORRECT side-by-side in creative, chalk-drawn panels.
+  🟡 Bright Yellow chalk for variations.
+  🟢 Vivid Neon Green chalk for winning strategies.
+  📐 Energetic, organized, chalk-drawn layout on a blackboard — exciting and crystal clear.
+  */
   const page3Prompt = `Create an EXCITING, SYLLABUS-STRICT exam tactics sketchnote for Class 12 ${subject} [${examKey}] on "${topic}".
 
 ⚠️ STRICT CONTENT RULE: All content MUST be within the ${examKey} prescribed syllabus for ${subject}. No deleted topics or out-of-scope material.
@@ -1150,13 +1190,21 @@ ${blueprint.examStrategies.map((s: string, i: number) => `• ${s}`).join('\n')}
 How many questions, marks weightage, and time to allocate in the actual exam.
 
 VISUAL REQUIREMENTS:
-🔴 Vibrant-yet-professional coral for mistakes.
+🔴 Vibrant-yet-professional coral/red ink for mistakes.
 ✅ CORRECT vs INCORRECT side-by-side in creative, hand-drawn panels.
-🟡 Bright Amber for variations.
-🟢 Vivid Emerald for winning strategies.
-📐 Energetic, organized, hand-drawn layout — exciting and crystal clear.`;
+🟡 Bright Amber ink/highlighter for variations.
+🟢 Vivid Emerald ink for winning strategies.
+📐 Energetic, organized, hand-drawn layout on a cream/white background — exciting and crystal clear.`;
 
   // PAGE 4 PROMPT: Quick Reference Cheat Sheet  
+  /* Original Blackboard Style Reference for Page 4:
+  VISUAL REQUIREMENTS:
+  ⭐ High information density, ARTISTIC MASTERPIECE CHALKBOARD ORGANIZATION.
+  📦 Each item in its own chalk-drawn vivid box (Cyan, Yellow, or Neon Green).
+  🎨 Creative chalk-drawn line icons for every section.
+  💡 CAPTIVATING, rich blackboard palette — exciting to look at.
+  ✨ Premium, artistic revision feel — strictly \${examKey} syllabus scope only.
+  */
   const page4Prompt = `Create a VIBRANT, SYLLABUS-LOCKED hand-drawn cheat sheet for Class 12 ${subject} [${examKey}] on "${topic}".
 
 ⚠️ STRICT CONTENT RULE: Include ONLY facts and formulas from the official ${examKey} ${subject} prescribed textbook for "${topic}". Nothing beyond that scope.
@@ -1179,10 +1227,10 @@ Provide 2-3 creative memory aids grounded in prescribed textbook concepts only.
 Marks weightage and typical question frequency in ${examKey}.
 
 VISUAL REQUIREMENTS:
-⭐ High information density, ARTISTIC MASTERPIECE ORGANIZATION.
-📦 Each item in its own hand-drawn vibrant box (Slate, Vivid Indigo, or Emerald).
-🎨 Creative hand-drawn line icons for every section.
-💡 CAPTIVATING, rich palette — exciting to look at.
+⭐ High information density, ARTISTIC MASTERPIECE ORGANIZATION on a cream/white paper background.
+📦 Each item in its own hand-drawn vibrant box (Slate, Vivid Indigo, or Emerald highlights).
+🎨 Creative hand-drawn black ink line icons for every section.
+💡 CAPTIVATING, rich blackboard palette — exciting to look at.
 ✨ Premium, artistic revision feel — strictly ${examKey} syllabus scope only.`;
 
   // DEFINE PARALLEL TASKS
@@ -1314,6 +1362,32 @@ Focus on clarity, visual hierarchy, and educational value.`;
   // STEP 2: Generate image using the same image model
   onStatusUpdate?.('Generating visual sketchnote...');
 
+  /* Original Vibrant Premium Style Reference for Unified Sketch:
+  **Style Requirements**:
+  - CAPTIVATING hand-drawn sketchnote masterpiece with artistic flair
+  - VIBRANT and PREMIUM COLOR PALETTE: 
+    - Deep Navy (#0f172a) for primary structures
+    - Vivid Teal (#0d9488) or Electric Indigo (#4f46e5) for highlights
+    - Vibrant Emerald for success, Bright Coral for warnings
+  - Creative hand-drawn boxes with whimsical-yet-organized borders
+  - Artistic, clear hand-lettering for all text
+  - Artistic visual metaphors and illustrated icons
+  - Rhythmic hand-drawn connectors and arrows
+  - Perfect visual balance that feels artistic-yet-educational
+  - High-end educational Sketchnote aesthetic (Human, Hand-drawn, Captivating).
+  */
+
+  /* Original Blackboard Style Reference for Unified Sketch:
+  **Style Requirements**:
+  - Must look like it was drawn on a blackboard with chalk
+  - Use high contrast colors (bright yellow, neon green, cyan, bright pink, white) against a dark rich chalk-board background
+  - Professional hand-drawn educational sketchnote aesthetic with clean lines
+  - Clear and mind-blowing eye-catching images
+  - Use bullet points, arrows, boxes, and visual hierarchy
+  - Include formulas and equations prominently
+  - Add small icons and visual anchors
+  - Use different text sizes for hierarchy
+  */
   const imagePrompt = `Create an ARTISTIC, CAPTIVATING hand-drawn sketchnote for Class 12 ${subject} [${examKey}]:
 
 ⚠️ STRICT CONTENT RULE: Only include content that is EXPLICITLY part of the ${examKey} ${subject} syllabus for "${topic}".
@@ -1333,17 +1407,14 @@ ${blueprint.keyPoints.map((p: string, i: number) => `${i + 1}. ${p}`).join('\n')
 **Quick Reference**: ${blueprint.quickReference}
 
 **Style Requirements**:
-- CAPTIVATING hand-drawn sketchnote masterpiece with artistic flair
-- VIBRANT and PREMIUM COLOR PALETTE: 
-  - Deep Navy (#0f172a) for primary structures
-  - Vivid Teal (#0d9488) or Electric Indigo (#4f46e5) for highlights
-  - Vibrant Emerald for success, Bright Coral for warnings
-- Creative hand-drawn boxes with whimsical-yet-organized borders
-- Artistic, clear hand-lettering for all text
-- Artistic visual metaphors and illustrated icons
-- Rhythmic hand-drawn connectors and arrows
-- Perfect visual balance that feels artistic-yet-educational
-- High-end educational Sketchnote aesthetic (Human, Hand-drawn, Captivating).`;
+- Must look like a premium hand-drawn educational sketchnote on a cream or white paper background
+- Use confident, clean black ink lines for core structure, text, and outlines
+- Use vibrant, eye-catching accent colors (teal, coral, emerald, violet, amber) for highlights and emphasis
+- Professional, clear visual hierarchy with bold headers and readable subheaders
+- Labeled diagrams with arrows showing relationships
+- Visual icons and metaphors to represent concepts
+- Mathematical formulas clearly displayed
+- Use bullet points, boxes, and varying text sizes for organization`;
 
   const imageModel = genAI.getGenerativeModel({
     model: actualImageModel

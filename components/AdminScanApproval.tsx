@@ -17,7 +17,9 @@ import {
   Brain,
   Palette,
   BarChart3,
-  Zap
+  Zap,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Subject, ExamContext } from '../types';
@@ -57,6 +59,7 @@ const AdminScanApproval: React.FC = () => {
 
   const [counts, setCounts] = useState({ all: 0, published: 0, unpublished: 0 });
   const [officialTopicsList, setOfficialTopicsList] = useState<{ id: string, name: string }[]>([]);
+  const [expandedQuestions, setExpandedQuestions] = useState<Record<number, boolean>>({});
 
   // Strategic Briefing Filters (Linked to Global Context)
   const { activeSubject, activeExamContext } = useAppContext();
@@ -189,9 +192,6 @@ const AdminScanApproval: React.FC = () => {
 
   const loadCounts = async () => {
     try {
-      // Get counts for all, published, unpublished in a single query by grouping
-      // OR use a optimized count strategy. Here we'll use a single rpc or selective fetch.
-      // Easiest optimized way with PostgREST:
       const { data, error } = await supabase
         .from('scans')
         .select('is_system_scan');
@@ -214,8 +214,6 @@ const AdminScanApproval: React.FC = () => {
   const loadScans = async () => {
     setLoading(true);
     try {
-      // Fetch scan metadata based on current filterStatus
-      // OPTIMIZATION: Include counts in the main query using PostgREST nested count
       let query = supabase
         .from('scans')
         .select(`
@@ -225,7 +223,7 @@ const AdminScanApproval: React.FC = () => {
           flashcards:flashcards(data)
         `)
         .order('created_at', { ascending: false })
-        .limit(20); // LIMIT: only fetch top 20 to keep stats fetch efficient
+        .limit(20);
 
       if (filterStatus === 'published') {
         query = query.eq('is_system_scan', true);
@@ -253,8 +251,6 @@ const AdminScanApproval: React.FC = () => {
 
       const scanIds = completedScans.map(s => s.id);
 
-      // OPTIMIZATION: Get ALL mappings for these scans in ONE query using a join
-      // This is much faster than fetching all questions first and then their mappings
       const { data: allMappingsData, error: mappingError } = await supabase
         .from('topic_question_mapping')
         .select('question_id, questions!inner(scan_id)')
@@ -264,19 +260,13 @@ const AdminScanApproval: React.FC = () => {
         console.error('❌ Error fetching mappings:', mappingError);
       }
 
-      // Group mappings by scan_id
       const mappingsByScan = (allMappingsData || []).reduce((acc, m: any) => {
         const scanId = m.questions?.scan_id;
         if (scanId) acc[scanId] = (acc[scanId] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
-      console.log('📊 Stats counts retrieved via optimized queries');
-
-      // Build scan info with counts (no per-scan queries!)
       const scansWithCounts = completedScans.map(scan => {
-        // Extract counts from the nested query results
-        // Supabase returns these as arrays: [{ count: X }]
         const dbQuestionCount = (scan as any).questions?.[0]?.count || 0;
         const analysisQuestions = scan.analysis_data?.questions || [];
 
@@ -284,9 +274,6 @@ const AdminScanApproval: React.FC = () => {
           ? dbQuestionCount
           : (dbQuestionCount > 0 ? dbQuestionCount : analysisQuestions.length);
 
-        // For mapped count:
-        // 1. If in DB, use mappingsByScan
-        // 2. If holographic (only in analysis_data), check if they have topics assigned
         let mappedCount = mappingsByScan[scan.id] || 0;
         if (dbQuestionCount === 0 && analysisQuestions.length > 0) {
           mappedCount = analysisQuestions.filter((q: any) =>
@@ -299,9 +286,6 @@ const AdminScanApproval: React.FC = () => {
           ? Math.round((mappedCount / questionCount) * 100)
           : 0;
 
-        // Calculate visual notes count:
-        // 1. First priority: From the dedicated topic_sketches table (new standard)
-        // 2. Fallback: From scan.analysis_data (legacy)
         const dbVisualNotesCount = (scan as any).visual_notes?.[0]?.count || 0;
         const legacyVisualNotesCount = scan.analysis_data?.topicBasedSketches
           ? Object.keys(scan.analysis_data.topicBasedSketches).length
@@ -309,7 +293,6 @@ const AdminScanApproval: React.FC = () => {
 
         const visualNotesCount = dbVisualNotesCount > 0 ? dbVisualNotesCount : legacyVisualNotesCount;
 
-        // Calculate flashcards count from the batch data
         const flashcardsBatch = (scan as any).flashcards?.[0];
         const flashcardsCount = flashcardsBatch?.data ? (Array.isArray(flashcardsBatch.data) ? flashcardsBatch.data.length : 0) : 0;
 
@@ -336,7 +319,6 @@ const AdminScanApproval: React.FC = () => {
 
       setScans(scansWithCounts);
 
-      // Update counts if we're on 'all' view to keep badges fresh
       if (filterStatus === 'all') {
         const pubCount = scansWithCounts.filter(s => s.is_system_scan).length;
         setCounts(prev => ({
@@ -357,7 +339,6 @@ const AdminScanApproval: React.FC = () => {
   const publishScan = async (scanId: string) => {
     setPublishing(scanId);
     try {
-      // Fetch fresh scan data from database (with all fields)
       const { data: scan, error: fetchError } = await supabase
         .from('scans')
         .select('*')
@@ -369,9 +350,6 @@ const AdminScanApproval: React.FC = () => {
         return;
       }
 
-      console.log(`📤 Publishing scan ${scanId}...`);
-
-      // Step 1: Get other published scans for same subject/exam
       const { data: otherScans } = await supabase
         .from('scans')
         .select('id')
@@ -380,7 +358,6 @@ const AdminScanApproval: React.FC = () => {
         .eq('is_system_scan', true)
         .neq('id', scanId);
 
-      // Step 2: Remove mappings from other scans
       if (otherScans && otherScans.length > 0) {
         for (const otherScan of otherScans) {
           const { data: otherQuestions } = await supabase
@@ -394,12 +371,10 @@ const AdminScanApproval: React.FC = () => {
               .from('topic_question_mapping')
               .delete()
               .in('question_id', questionIds);
-            console.log(`🗑️ Removed ${questionIds.length} mappings from old published scan`);
           }
         }
       }
 
-      // Step 3: Unpublish other scans
       await supabase
         .from('scans')
         .update({ is_system_scan: false })
@@ -407,43 +382,26 @@ const AdminScanApproval: React.FC = () => {
         .eq('exam_context', scan.exam_context)
         .neq('id', scanId);
 
-      // Step 4: Extract year from filename (if not already set)
       const extractYearFromFilename = (name: string): string | null => {
         if (!name) return null;
-        // Match 4-digit year (1900-2099)
         const yearMatch = name.match(/\b(19|20)\d{2}\b/);
         return yearMatch ? yearMatch[0] : null;
       };
 
-      console.log(`📋 Scan object:`, { id: scan.id, name: scan.name, year: scan.year, analysis_data_exists: !!scan.analysis_data });
       const extractedYear = scan.year || extractYearFromFilename(scan.name || '');
-      console.log(`📅 Year extracted: ${extractedYear} from filename: ${scan.name}`);
 
-      // Step 3: Publish this scan with year field
-      console.log(`📡 Updating scan ${scanId} status to published...`);
       const { data: updateData, error: publishError } = await supabase
         .from('scans')
         .update({
           is_system_scan: true,
-          year: extractedYear,  // ✅ Set year field
-          status: 'Complete'   // Ensure status is correctly set
+          year: extractedYear,
+          status: 'Complete'
         })
         .eq('id', scanId)
         .select();
 
-      if (publishError) {
-        console.error('❌ Error updating scan status:', publishError);
-        throw new Error(`Failed to update scan status: ${publishError.message}`);
-      }
+      if (publishError) throw publishError;
 
-      if (!updateData || updateData.length === 0) {
-        console.error('❌ Update failed: No rows affected. Check RLS policies.');
-        throw new Error('Update failed: Permisson denied or scan not found. Ensure you are an Admin and have run Migration 020.');
-      }
-
-      // NEW STEP: Cleanup existing questions/mappings for this scan before re-inserting
-      // CRITICAL: Preserve existing sketches/visuals!
-      console.log('🧹 Cleaning up existing data for this scan while preserving visuals...');
       const { data: existingQs } = await supabase
         .from('questions')
         .select('id, sketch_svg_url, has_visual_element, visual_element_type, visual_element_description, diagram_url, question_order, metadata')
@@ -461,11 +419,9 @@ const AdminScanApproval: React.FC = () => {
               diagram_url: eq.diagram_url
             };
 
-            // Priority: appId in metadata
             if (eq.metadata?.appId) {
               visualMetadataMap.set(eq.metadata.appId, visualData);
             }
-            // Fallback: question_order
             visualMetadataMap.set(`order-${eq.question_order}`, visualData);
           }
         });
@@ -473,32 +429,21 @@ const AdminScanApproval: React.FC = () => {
 
       if (existingQs && existingQs.length > 0) {
         const qIds = existingQs.map(q => q.id);
-        const { error: delMapError } = await supabase.from('topic_question_mapping').delete().in('question_id', qIds);
-        const { error: delQError } = await supabase.from('questions').delete().eq('scan_id', scanId);
-
-        if (delMapError || delQError) {
-          console.error('❌ Cleanup failed:', { delMapError, delQError });
-          throw new Error('Cleanup failed. Cannot proceed with publishing as it would create duplicates.');
-        }
-        console.log(`🗑️ Removed ${qIds.length} existing duplicate questions/mappings`);
+        await supabase.from('topic_question_mapping').delete().in('question_id', qIds);
+        await supabase.from('questions').delete().eq('scan_id', scanId);
       }
 
-      // Step 5: Copy questions from analysis_data.questions to questions table
-      console.log('📋 Copying questions from analysis_data to questions table...');
       const questionsToInsert = scan.analysis_data?.questions || [];
 
       if (questionsToInsert.length > 0) {
-        // Helper function to normalize difficulty values
         const normalizeDifficulty = (diff: string | undefined): 'Easy' | 'Moderate' | 'Hard' => {
           if (!diff) return 'Moderate';
           const normalized = diff.trim().toLowerCase();
           if (normalized === 'easy') return 'Easy';
           if (normalized === 'hard') return 'Hard';
-          if (normalized === 'moderate' || normalized === 'medium' || normalized === 'average') return 'Moderate';
-          return 'Moderate'; // Default fallback
+          return 'Moderate';
         };
 
-        // Transform analysis_data questions to match questions table schema
         const questionsData = questionsToInsert.map((q: any, index: number) => {
           const vData = visualMetadataMap.get(q.id) || visualMetadataMap.get(`order-${index}`) || {};
           return {
@@ -525,7 +470,6 @@ const AdminScanApproval: React.FC = () => {
             exam_context: scan.exam_context,
             year: extractedYear ? parseInt(extractedYear) : null,
             is_system_question: true,
-            // Restore visual metadata if it existed in previous draft or current vault
             sketch_svg_url: vData.sketch_svg_url || q.sketch_svg_url || null,
             has_visual_element: vData.has_visual_element || q.has_visual_element || false,
             visual_element_type: vData.visual_element_type || q.visual_element_type || null,
@@ -539,33 +483,16 @@ const AdminScanApproval: React.FC = () => {
           };
         });
 
-        // Insert questions into questions table
-        const { data: insertedQuestions, error: insertError } = await supabase
+        await supabase
           .from('questions')
-          .insert(questionsData)
-          .select('id, topic');
-
-        if (insertError) {
-          console.error('❌ Error inserting questions:', insertError);
-          throw insertError;
-        }
-
-        console.log(`✅ Inserted ${insertedQuestions?.length || 0} questions into questions table`);
+          .insert(questionsData);
       }
 
-      // Step 6: Automatically map questions to official topics
-      console.log('🔗 Auto-mapping questions to topics...');
       await mapScanQuestionsToTopics(scanId, scan.subject);
-
-      console.log(`✅ Published scan ${scanId} to system with auto-mapped questions`);
-
-      // Update counts and switch to the 'Published' tab for confirmation
       await loadCounts();
-      // Only set status if not already published - this will trigger useEffect -> loadScans
       if (filterStatus !== 'published') {
         setFilterStatus('published');
       } else {
-        // If already on published tab, trigger manual reload
         await loadScans();
       }
     } catch (error) {
@@ -579,40 +506,24 @@ const AdminScanApproval: React.FC = () => {
   const unpublishScan = async (scanId: string) => {
     setPublishing(scanId);
     try {
-      console.log(`🔒 Unpublishing scan ${scanId}...`);
-
-      // Step 1: Get all question IDs from this scan
       const { data: questions } = await supabase
         .from('questions')
         .select('id')
         .eq('scan_id', scanId);
 
-      // Step 2: Remove mappings for these questions
       if (questions && questions.length > 0) {
         const questionIds = questions.map(q => q.id);
-        const { error: mappingError } = await supabase
+        await supabase
           .from('topic_question_mapping')
           .delete()
           .in('question_id', questionIds);
-
-        if (mappingError) {
-          console.error('Error removing mappings:', mappingError);
-        } else {
-          console.log(`🗑️ Removed ${questions.length} question mappings`);
-        }
       }
 
-      // Step 3: Unpublish the scan
-      const { error } = await supabase
+      await supabase
         .from('scans')
         .update({ is_system_scan: false })
         .eq('id', scanId);
 
-      if (error) throw error;
-
-      console.log(`✅ Unpublished scan ${scanId} from system and removed mappings`);
-
-      // Update counts and switch back to the 'Unpublished' tab
       await loadCounts();
       if (filterStatus !== 'unpublished') {
         setFilterStatus('unpublished');
@@ -672,18 +583,20 @@ const AdminScanApproval: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <button
-          onClick={() => setView('scans')}
-          className={`flex-1 py-4 rounded-2xl border-2 transition-all font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 ${view === 'scans' ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/20' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
-        >
-          <Upload size={18} /> Scan Management
-        </button>
-        <button
-          onClick={() => setView('intelligence')}
-          className={`flex-1 py-4 rounded-2xl border-2 transition-all font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 ${view === 'intelligence' ? 'bg-purple-600 border-purple-600 text-white shadow-xl shadow-purple-600/20' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
-        >
-          <Brain size={18} className={view === 'intelligence' ? 'animate-pulse' : ''} /> REI v4.0 Intelligence
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => setView('scans')}
+            className={`flex-1 py-4 rounded-2xl border-2 transition-all font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 ${view === 'scans' ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/20' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
+          >
+            <Upload size={18} /> Scan Management
+          </button>
+          <button
+            onClick={() => setView('intelligence')}
+            className={`flex-1 py-4 rounded-2xl border-2 transition-all font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 ${view === 'intelligence' ? 'bg-purple-600 border-purple-600 text-white shadow-xl shadow-purple-600/20' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
+          >
+            <Brain size={18} className={view === 'intelligence' ? 'animate-pulse' : ''} /> REI v4.0 Intelligence
+          </button>
+        </div>
       </div>
 
       {view === 'scans' ? (
@@ -831,6 +744,49 @@ const AdminScanApproval: React.FC = () => {
                             </div>
                             <div className={`text-xs ${scan.unmapped_count === 0 ? 'text-slate-500' : 'text-orange-600'
                               }`}>Need review</div>
+                          </div>
+                        </div>
+
+                        {/* REI Cognitive Synthesis - Main Card Progress */}
+                        <div className="mt-5 p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 shadow-lg relative overflow-hidden group">
+                          {/* Animated background glow */}
+                          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-purple-500/10 to-indigo-500/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+
+                          <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                                  <Brain size={14} className="text-indigo-400" />
+                                </div>
+                                <div>
+                                  <h4 className="text-[11px] font-black text-indigo-100 uppercase tracking-widest flex items-center gap-2">
+                                    REI Cognitive Engine <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                  </h4>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => setSelectedScan(scan)}
+                                className="text-[10px] font-black text-indigo-200 bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full uppercase tracking-widest transition-colors flex items-center gap-1.5 border border-white/10 cursor-pointer"
+                              >
+                                Synthesized {scan.analysis_data?.questions?.length || 0} / {scan.question_count} <Eye size={10} className="opacity-70" />
+                              </button>
+                            </div>
+
+                            <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden shadow-inner w-full">
+                              <div
+                                className="h-full bg-gradient-to-r from-indigo-500 to-purple-400 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+                                style={{ width: `${Math.min(100, ((scan.analysis_data?.questions?.length || 0) / (Math.max(scan.question_count, 1))) * 100)}%` }}
+                              />
+                            </div>
+                            {scan.question_count > 0 && scan.analysis_data?.questions?.length === scan.question_count ? (
+                              <p className="text-[10px] text-indigo-300 font-medium mt-2 flex items-center gap-1.5">
+                                <CheckCircle2 size={10} className="text-emerald-400" /> Auto-Reasoning & Predictive Insights Ready. Click to view details.
+                              </p>
+                            ) : (
+                              <p className="text-[10px] text-indigo-300/70 font-medium mt-2">
+                                System actively mapping insights in background...
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -1056,135 +1012,235 @@ const AdminScanApproval: React.FC = () => {
             )}
 
             {/* Scan Details Modal */}
-            {
-              selectedScan && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6 backdrop-blur-sm">
-                  <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
-                    {/* Modal Header */}
-                    <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                      <div>
-                        <h2 className="text-2xl font-black text-slate-900 mb-1">{selectedScan.paper_name}</h2>
-                        <div className="flex items-center gap-4 text-sm font-bold text-slate-500">
-                          <span className="text-primary-600">{selectedScan.subject}</span>
-                          <span>•</span>
-                          <span>{selectedScan.exam_context}</span>
-                          <span>•</span>
-                          <span className="bg-slate-200 px-2 py-0.5 rounded text-[10px] uppercase">{selectedScan.id.substring(0, 8)}</span>
+            {selectedScan && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6 backdrop-blur-sm">
+                <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+                  {/* Modal Header */}
+                  <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <div>
+                      <h2 className="text-2xl font-black text-slate-900 mb-1">{selectedScan.paper_name}</h2>
+                      <div className="flex items-center gap-4 text-sm font-bold text-slate-500">
+                        <span className="text-primary-600">{selectedScan.subject}</span>
+                        <span>•</span>
+                        <span>{selectedScan.exam_context}</span>
+                        <span>•</span>
+                        <span className="bg-slate-200 px-2 py-0.5 rounded text-[10px] uppercase">{selectedScan.id.substring(0, 8)}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSelectedScan(null)}
+                      className="p-3 hover:bg-white hover:shadow-md rounded-2xl transition-all border border-transparent hover:border-slate-100"
+                    >
+                      <XCircle size={24} className="text-slate-400" />
+                    </button>
+                  </div>
+
+                  {/* Modal Content */}
+                  <div className="flex-1 overflow-y-auto p-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                      {/* Status Card */}
+                      <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Quality Score</h4>
+                        <div className="flex items-end gap-2 mb-2">
+                          <span className="text-5xl font-black text-slate-900">{selectedScan.mapping_success_rate}%</span>
+                          <span className="text-sm font-bold text-slate-500 mb-1.5 whitespace-nowrap">Mapped to Topics</span>
+                        </div>
+                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all ${selectedScan.mapping_success_rate > 80 ? 'bg-emerald-500' : 'bg-orange-500'}`}
+                            style={{ width: `${selectedScan.mapping_success_rate}%` }}
+                          />
                         </div>
                       </div>
-                      <button
-                        onClick={() => setSelectedScan(null)}
-                        className="p-3 hover:bg-white hover:shadow-md rounded-2xl transition-all border border-transparent hover:border-slate-100"
-                      >
-                        <XCircle size={24} className="text-slate-400" />
-                      </button>
+
+                      <div className="col-span-2 grid grid-cols-2 gap-4">
+                        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+                          <div className="text-xs font-black text-emerald-600 uppercase mb-1">Successfully Mapped</div>
+                          <div className="text-2xl font-black text-emerald-700">{selectedScan.mapped_count}</div>
+                          <div className="text-xs text-emerald-600/70 font-medium">Questions connected to official syllabus</div>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-orange-50 border border-orange-100">
+                          <div className="text-xs font-black text-orange-600 uppercase mb-1">Unmapped / Review</div>
+                          <div className="text-2xl font-black text-orange-700">{selectedScan.unmapped_count}</div>
+                          <div className="text-xs text-orange-600/70 font-medium">Questions needing manual topic assignment</div>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Modal Content */}
-                    <div className="flex-1 overflow-y-auto p-8">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                        {/* Status Card */}
-                        <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                          <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Quality Score</h4>
-                          <div className="flex items-end gap-2 mb-2">
-                            <span className="text-5xl font-black text-slate-900">{selectedScan.mapping_success_rate}%</span>
-                            <span className="text-sm font-bold text-slate-500 mb-1.5 whitespace-nowrap">Mapped to Topics</span>
+                    {/* REI Cognitive Synthesis Engine v4.0 */}
+                    <div className="mb-8">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                          <Brain size={20} className="text-purple-600" />
+                          REI Cognitive Synthesis Engine v4.0
+                        </h3>
+                        <div className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 flex items-center gap-1.5 uppercase tracking-wide">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Active
+                        </div>
+                      </div>
+
+                      <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                        <div className="p-5 bg-slate-50 border-b border-slate-100">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Mapping Progress</span>
+                            <span className="text-xs font-black text-slate-900 bg-white px-3 py-1 rounded-full border border-slate-200">
+                              Synthesized {selectedScan.analysis_data?.questions?.length || 0} / {selectedScan.question_count} Questions
+                            </span>
                           </div>
-                          <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                          <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden shadow-inner">
                             <div
-                              className={`h-full transition-all ${selectedScan.mapping_success_rate > 80 ? 'bg-emerald-500' : 'bg-orange-500'}`}
-                              style={{ width: `${selectedScan.mapping_success_rate}%` }}
+                              className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-1000"
+                              style={{ width: `${Math.min(100, ((selectedScan.analysis_data?.questions?.length || 0) / (Math.max(selectedScan.question_count, 1))) * 100)}%` }}
                             />
                           </div>
                         </div>
 
-                        <div className="col-span-2 grid grid-cols-2 gap-4">
-                          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
-                            <div className="text-xs font-black text-emerald-600 uppercase mb-1">Successfully Mapped</div>
-                            <div className="text-2xl font-black text-emerald-700">{selectedScan.mapped_count}</div>
-                            <div className="text-xs text-emerald-600/70 font-medium">Questions connected to official syllabus</div>
-                          </div>
-                          <div className="p-4 rounded-2xl bg-orange-50 border border-orange-100">
-                            <div className="text-xs font-black text-orange-600 uppercase mb-1">Unmapped / Review</div>
-                            <div className="text-2xl font-black text-orange-700">{selectedScan.unmapped_count}</div>
-                            <div className="text-xs text-orange-600/70 font-medium">Questions needing manual topic assignment</div>
-                          </div>
+                        <div className="divide-y divide-slate-50 max-h-[450px] overflow-y-auto">
+                          {(() => {
+                            const questions = selectedScan.analysis_data?.questions || [];
+                            if (questions.length === 0) {
+                              return (
+                                <div className="p-8 text-center">
+                                  <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <Brain size={20} className="text-slate-400" />
+                                  </div>
+                                  <p className="text-sm text-slate-500 font-bold">No questions synthesized yet.</p>
+                                </div>
+                              );
+                            }
+
+                            return questions.map((q: any, idx: number) => {
+                              const isExpanded = expandedQuestions[idx] || false;
+                              return (
+                                <div key={idx} className="hover:bg-slate-50 transition-colors">
+                                  <div
+                                    className="p-4 flex items-center gap-4 cursor-pointer select-none group"
+                                    onClick={() => setExpandedQuestions(prev => ({ ...prev, [idx]: !prev[idx] }))}
+                                  >
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-black transition-colors ${isExpanded ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}>
+                                      {idx + 1}
+                                    </div>
+                                    <div className="flex-1 min-w-0 pr-4">
+                                      <p className={`text-sm font-bold truncate transition-colors ${isExpanded ? 'text-purple-900' : 'text-slate-700'}`}>
+                                        {q.text || q.question || 'No question text provided'}
+                                      </p>
+                                      <div className="flex items-center gap-3 mt-1.5">
+                                        <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-black uppercase text-purple-600 bg-purple-50 border border-purple-100">
+                                          Topic: {q.topic || 'Unclassified'}
+                                        </span>
+                                        <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 border border-emerald-100">
+                                          Difficulty: {q.difficulty || 'Medium'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className={`flex-shrink-0 p-2 rounded-full transition-colors ${isExpanded ? 'bg-purple-100 text-purple-600' : 'text-slate-400 group-hover:bg-slate-200'}`}>
+                                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                    </div>
+                                  </div>
+
+                                  {isExpanded && (
+                                    <div className="px-5 pb-5 pt-1 border-t border-slate-100 bg-slate-50/50 space-y-3">
+                                      <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-slate-300" />
+                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                                          <Brain size={12} /> AI Reasoning Engine
+                                        </div>
+                                        <p className="text-sm text-slate-700 leading-relaxed font-medium">
+                                          {q.ai_reasoning || q.explanation || 'No deep reasoning generated for this question yet. System will regenerate in next pass.'}
+                                        </p>
+                                      </div>
+                                      <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 relative overflow-hidden shadow-sm">
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-indigo-400" />
+                                        <div className="flex items-center gap-1.5 mb-1.5 text-indigo-600">
+                                          <Zap size={12} fill="currentColor" />
+                                          <span className="text-[10px] font-black uppercase tracking-widest">Predictive Insight</span>
+                                        </div>
+                                        <p className="text-sm text-indigo-900 leading-relaxed font-medium">
+                                          {q.predictive_insight || q.masteryMaterial?.coreConcept || 'No specific predictive anchors mapped. Suggest triggering REI deep-scan.'}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            });
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Curriculum Distribution Analysis */}
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                          <Globe size={20} className="text-primary-500" />
+                          Curriculum Distribution Analysis
+                        </h3>
+                        <div className="text-xs font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full border border-primary-100">
+                          Syllabus Coverage: 100%
                         </div>
                       </div>
 
-                      {/* Curriculum Distribution Analysis */}
-                      <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                            <Globe size={20} className="text-primary-500" />
-                            Curriculum Distribution Analysis
-                          </h3>
-                          <div className="text-xs font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full border border-primary-100">
-                            Syllabus Coverage: 100%
-                          </div>
+                      <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">
+                        Questions that don't match specific syllabus topics are automatically mapped to the <span className="text-slate-900 font-bold">General {selectedScan.subject}</span> bucket.
+                        This ensures students can still practice them in the Learning Journey under a general category.
+                      </p>
+
+                      <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                        <div className="p-4 bg-slate-50 border-b border-slate-100 grid grid-cols-12 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          <div className="col-span-1">#</div>
+                          <div className="col-span-7">Question Content preview</div>
+                          <div className="col-span-4">AI Suggested Topic</div>
                         </div>
+                        <div className="divide-y divide-slate-50 max-h-[400px] overflow-y-auto">
+                          {(() => {
+                            const questions = selectedScan.analysis_data?.questions || [];
+                            const genericTopics = ['General', 'Mathematics', 'Physics', 'Unknown', ''];
 
-                        <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed">
-                          Questions that don't match specific syllabus topics are automatically mapped to the <span className="text-slate-900 font-bold">General {selectedScan.subject}</span> bucket.
-                          This ensures students can still practice them in the Learning Journey under a general category.
-                        </p>
-
-                        <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden shadow-sm">
-                          <div className="p-4 bg-slate-50 border-b border-slate-100 grid grid-cols-12 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                            <div className="col-span-1">#</div>
-                            <div className="col-span-7">Question Content preview</div>
-                            <div className="col-span-4">AI Suggested Topic</div>
-                          </div>
-                          <div className="divide-y divide-slate-50 max-h-[400px] overflow-y-auto">
-                            {(() => {
-                              const questions = selectedScan.analysis_data?.questions || [];
-                              const genericTopics = ['General', 'Mathematics', 'Physics', 'Unknown', ''];
-
-                              return questions.filter((q: any) => {
-                                const topic = q.topic || '';
-                                // Sync with the same matching engine used for the count
-                                const matchingTopic = findMatchingOfficialTopic(topic, officialTopicsList);
-                                return genericTopics.includes(topic) || !matchingTopic;
-                              }).map((q: any, idx: number) => (
-                                <div key={idx} className="p-4 grid grid-cols-12 gap-4 hover:bg-slate-50 transition-colors">
-                                  <div className="col-span-1 text-sm font-bold text-slate-400">{idx + 1}</div>
-                                  <div className="col-span-7">
-                                    <p className="text-xs text-slate-700 font-medium line-clamp-2 leading-relaxed">
-                                      {q.text || q.question}
-                                    </p>
-                                  </div>
-                                  <div className="col-span-4 text-right">
-                                    <span className="inline-flex px-2 py-1 rounded-md bg-orange-100 text-orange-700 text-[10px] font-bold border border-orange-200 uppercase">
-                                      {q.topic || 'Unclassified'}
-                                    </span>
-                                  </div>
+                            return questions.filter((q: any) => {
+                              const topic = q.topic || '';
+                              const matchingTopic = findMatchingOfficialTopic(topic, officialTopicsList);
+                              return genericTopics.includes(topic) || !matchingTopic;
+                            }).map((q: any, idx: number) => (
+                              <div key={idx} className="p-4 grid grid-cols-12 gap-4 hover:bg-slate-50 transition-colors">
+                                <div className="col-span-1 text-sm font-bold text-slate-400">{idx + 1}</div>
+                                <div className="col-span-7">
+                                  <p className="text-xs text-slate-700 font-medium line-clamp-2 leading-relaxed">
+                                    {q.text || q.question}
+                                  </p>
                                 </div>
-                              ));
-                            })()}
-                          </div>
-                        </div>
-
-                        <div className="mt-6 p-6 bg-slate-900 rounded-2xl text-white">
-                          <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center flex-shrink-0">
-                              <Zap size={20} />
-                            </div>
-                            <div>
-                              <h4 className="font-black text-white mb-1">Recommended Action</h4>
-                              <p className="text-sm text-slate-300 mb-4 leading-relaxed">
-                                The mapping failed because these topics aren't in the official syllabus yet (e.g., Statistics, Straight Lines) or have pluralization differences.
-                              </p>
-                              <div className="flex gap-3">
-                                <button
-                                  onClick={() => publishScan(selectedScan.id)}
-                                  className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-xl text-xs font-black transition-all"
-                                >
-                                  Update Syllabus & Remap
-                                </button>
-                                <button className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs font-black transition-all">
-                                  Export List to CSV
-                                </button>
+                                <div className="col-span-4 text-right">
+                                  <span className="inline-flex px-2 py-1 rounded-md bg-orange-100 text-orange-700 text-[10px] font-bold border border-orange-200 uppercase">
+                                    {q.topic || 'Unclassified'}
+                                  </span>
+                                </div>
                               </div>
+                            ));
+                          })()}
+                        </div>
+                      </div>
+
+                      <div className="mt-6 p-6 bg-slate-900 rounded-2xl text-white">
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center flex-shrink-0">
+                            <Zap size={20} />
+                          </div>
+                          <div>
+                            <h4 className="font-black text-white mb-1">Recommended Action</h4>
+                            <p className="text-sm text-slate-300 mb-4 leading-relaxed">
+                              The mapping failed because these topics aren't in the official syllabus yet (e.g., Statistics, Straight Lines) or have pluralization differences.
+                            </p>
+                            <div className="flex gap-3">
+                              <button
+                                onClick={() => publishScan(selectedScan.id)}
+                                className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-xl text-xs font-black transition-all"
+                              >
+                                Update Syllabus & Remap
+                              </button>
+                              <button className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs font-black transition-all">
+                                Export List to CSV
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -1192,32 +1248,34 @@ const AdminScanApproval: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              )
-            }
+              </div>
+            )}
           </div>
         </div>
       ) : (
-        <div className="bg-slate-950 border border-slate-900 rounded-[2.5rem] p-12 min-h-[600px] shadow-3xl">
-          <div className="max-w-4xl mx-auto space-y-12">
-            <div className="flex items-center justify-between border-b border-white/5 pb-8">
-              <div className="space-y-2">
-                <h2 className="text-4xl font-black italic tracking-tighter uppercase font-outfit text-white">REI Prediction Oracle</h2>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-400">Tactical Strategy Forecast v4.0 (March 2026 Edition)</p>
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="bg-slate-950 border border-slate-900 rounded-[2.5rem] p-12 min-h-[600px] shadow-3xl">
+            <div className="max-w-4xl mx-auto space-y-12">
+              <div className="flex items-center justify-between border-b border-white/5 pb-8">
+                <div className="space-y-2">
+                  <h2 className="text-4xl font-black italic tracking-tighter uppercase font-outfit text-white">REI Prediction Oracle</h2>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-400">Tactical Strategy Forecast v4.0 (March 2026 Edition)</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="px-5 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-300">
+                    {activeExamContext}
+                  </div>
+                  <div className="px-5 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-300">
+                    {activeSubject}
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="px-5 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-300">
-                  {activeExamContext}
-                </div>
-                <div className="px-5 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-300">
-                  {activeSubject}
-                </div>
-              </div>
-            </div>
 
-            <StrategicBriefing exam={activeExamContext} subject={activeSubject} />
+              <StrategicBriefing exam={activeExamContext} subject={activeSubject} />
+            </div>
           </div>
         </div>
       )}

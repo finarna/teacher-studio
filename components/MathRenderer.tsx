@@ -95,21 +95,44 @@ const MathRenderer: React.FC<MathRendererProps> = ({
       return <span className="opacity-70">{fullText}</span>;
     }
 
-    // Regex to match $$...$$ (display) or $...$ (inline)
-    // Updated to handle spaced LaTeX like "$ X $" from Gemini extractions
-    const regex = /(\$\$[\s\S]*?\$\$|\$[^\$]+?\$)/g;
-    const parts = safeText.split(regex);
+    // Normalized text to handle common AI extraction quirks
+    let processedText = safeText
+      .replace(/\\\\n/g, '\n')
+      .replace(/\\\\/g, '\\'); // Normalizing double backslashes which are common in AI output
+
+    // Heuristic: If there are NO math delimiters but there are CLEAR LaTeX commands or markers, 
+    // treat the entire string as one math block. This fixes "raw" LaTeX options like "2^{10}A - I".
+    const hasMathDelimiters = /\$|\\\[|\\\(/.test(processedText);
+
+    // Detection markers: backslash, powers, subscripts, braces, or math operators in short strings
+    const containsLatexCmd = /\\|[\^_]|\{|\}/.test(processedText);
+    const containsOperators = /[\+\-\=\/\*x<\>\(\)\[\]]/.test(processedText);
+    const looksLikeMathVar = /[0-9][A-Z]|[A-Z][0-9]/.test(processedText);
+    const isShortMath = processedText.length < 50 && containsOperators && /[A-Z0-9]/.test(processedText);
+
+    if (!hasMathDelimiters && (containsLatexCmd || looksLikeMathVar || isShortMath)) {
+      processedText = `$${processedText}$`;
+    }
+
+    // Regex to match $$...$$ (display), $...$ (inline), \[...\] (display), \(...\) (inline)
+    const regex = /(\$\$[\s\S]*?\$\$|\$[^\$]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g;
+    const parts = processedText.split(regex);
 
     return parts.map((part, index) => {
       if (!part) return null;
 
-      const isDisplay = part.startsWith('$$') && part.endsWith('$$');
-      const isInline = !isDisplay && part.startsWith('$') && part.endsWith('$');
+      const isDisplay = (part.startsWith('$$') && part.endsWith('$$')) || (part.startsWith('\\\[') && part.endsWith('\\\]'));
+      const isInline = !isDisplay && ((part.startsWith('$') && part.endsWith('$')) || (part.startsWith('\\\(') && part.endsWith('\\\)')));
 
       if (isDisplay || isInline) {
-        const rawLatex = isDisplay ? part.slice(2, -2).trim() : part.slice(1, -1).trim();
-        // Normalize double backslashes to single (AI questions stored with \\cmd instead of \cmd)
-        const latex = rawLatex.replace(/\\\\/g, '\\');
+        let latex = '';
+        if (part.startsWith('$$')) latex = part.slice(2, -2);
+        else if (part.startsWith('\\\[')) latex = part.slice(2, -2);
+        else if (part.startsWith('$')) latex = part.slice(1, -1);
+        else if (part.startsWith('\\\(')) latex = part.slice(2, -2);
+
+        latex = latex.trim();
+
         try {
           const html = window.katex.renderToString(latex, {
             throwOnError: false,

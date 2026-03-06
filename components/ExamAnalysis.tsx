@@ -455,7 +455,8 @@ Schema: {
         question.text,
         scan.subject,
         apiKey,
-        (status) => console.log(`📊 ${status}`)
+        (status) => console.log(`📊 ${status}`),
+        scan.examContext
       );
 
       console.log(`✓ Generated visual note for ${qId}`);
@@ -523,7 +524,7 @@ Schema: {
       return;
     }
 
-    const confirmed = confirm(`Generate visual notes for ${questionsWithoutVisuals.length} questions ? This may take several minutes.`);
+    const confirmed = confirm(`Generate visual notes for ${questionsWithoutVisuals.length} questions ? This will be batched to avoid timeouts.`);
     if (!confirmed) return;
 
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -533,31 +534,43 @@ Schema: {
     }
 
     console.log(`🎨 Starting bulk visual note generation for ${questionsWithoutVisuals.length} questions...`);
+    setIsGeneratingVisual('bulk');
 
-    for (const question of questionsWithoutVisuals) {
-      try {
-        setIsGeneratingVisual(question.id);
-        console.log(`🎨 Generating visual note for ${question.id}...`);
+    const BATCH_SIZE = 5;
+    const DELAY_MS = 2500;
+    let currentQuestions = [...scan.analysisData.questions];
 
-        const result = await generateSketch(
-          selectedImageModel,
-          question.visualConcept || question.topic,
-          question.text,
-          scan.subject,
-          apiKey,
-          (status) => console.log(`📊 ${status} `)
-        );
+    for (let i = 0; i < questionsWithoutVisuals.length; i += BATCH_SIZE) {
+      const batch = questionsWithoutVisuals.slice(i, i + BATCH_SIZE);
+      console.log(`\n🔨 Processing batch ${Math.floor(i / BATCH_SIZE) + 1} of ${Math.ceil(questionsWithoutVisuals.length / BATCH_SIZE)}`);
 
-        console.log(`✓ Generated visual note for ${question.id}`);
+      const batchUrls: Record<string, string> = {};
 
-        // Upload to Supabase Storage directly (avoids 413)
-        let visualUrl = result.imageData;
+      // 1. Generate images in parallel using Promise.allSettled
+      await Promise.allSettled(batch.map(async (question) => {
+        try {
+          console.log(`🎨 Generating visual note for ${question.id}...`);
+          const result = await generateSketch(
+            selectedImageModel,
+            question.visualConcept || question.topic,
+            question.text,
+            scan.subject,
+            apiKey,
+            (status) => console.log(`📊 ${question.id}: ${status}`),
+            scan.examContext
+          );
+          batchUrls[question.id] = result.imageData;
+          setQuestionSketches(prev => ({ ...prev, [question.id]: result.imageData }));
+        } catch (err: any) {
+          console.error(`Failed to generate visual for ${question.id}: `, err);
+        }
+      }));
 
-        setQuestionSketches(prev => ({ ...prev, [question.id]: visualUrl }));
+      // 2. Sync to backend (S3 & metadata) once per batch to avoid HTTP 413 and excessive network loads
+      const generatedIds = Object.keys(batchUrls);
+      if (generatedIds.length > 0) {
+        let definitiveUrls = { ...batchUrls };
 
-        let definitiveUrl = visualUrl;
-
-        // SAVE to dedicated visuals endpoint (tiny URL payload now)
         try {
           const { data: { session } } = await supabase.auth.getSession();
           const token = session?.access_token;
@@ -567,41 +580,42 @@ Schema: {
               'Content-Type': 'application/json',
               ...(token ? { 'Authorization': `Bearer ${token}` } : {})
             },
-            body: JSON.stringify({ questionSketches: { [question.id]: visualUrl } })
+            body: JSON.stringify({ questionSketches: batchUrls })
           });
           const resData = await res.json();
-          if (resData.uploadedUrls && resData.uploadedUrls[question.id]) {
-            definitiveUrl = resData.uploadedUrls[question.id];
+          if (resData.uploadedUrls) {
+            definitiveUrls = { ...definitiveUrls, ...resData.uploadedUrls };
           }
         } catch (sErr) {
-          console.error('Failed to sync question visual:', sErr);
+          console.error('Failed to sync batch to S3:', sErr);
         }
 
-        // Update scan incrementally for each question (App.tsx strips huge SVGs)
-        const updatedQuestions = scan.analysisData.questions.map(q =>
-          q.id === question.id ? { ...q, sketchSvg: definitiveUrl, sketchSvgUrl: definitiveUrl } : q
+        // 3. Update active state & database representation
+        currentQuestions = currentQuestions.map(q =>
+          definitiveUrls[q.id] ? { ...q, sketchSvg: definitiveUrls[q.id], sketchSvgUrl: definitiveUrls[q.id] } : q
         );
 
         const updatedScan: Scan = {
           ...scan,
           analysisData: {
             ...scan.analysisData,
-            questions: updatedQuestions
+            questions: currentQuestions
           }
         };
 
         onUpdateScan(updatedScan);
+        console.log(`✓ Batch sync complete. Saved ${generatedIds.length} sketches permanently.`);
+      }
 
-        // Small delay to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      } catch (err: any) {
-        console.error(`Failed to generate visual for ${question.id}: `, err);
-        // Continue with next question even if one fails
+      // 4. Rate-limit delay between batches
+      if (i + BATCH_SIZE < questionsWithoutVisuals.length) {
+        console.log(`⏸️ Waiting ${DELAY_MS}ms before next batch to respect rate limits...`);
+        await new Promise(resolve => setTimeout(resolve, DELAY_MS));
       }
     }
 
     setIsGeneratingVisual(null);
-    alert(`✓ Bulk generation complete! Generated ${questionsWithoutVisuals.length} visual notes.`);
+    alert(`✓ Bulk generation complete! Evaluated ${questionsWithoutVisuals.length} missing visuals.`);
   };
 
   const SUBJECT_DOMAIN_MAPS: Record<string, Record<string, { domain: string, chapters: string[], friction: string }>> = {

@@ -28,6 +28,7 @@ import { supabase } from '../lib/supabase';
 import type { TestAttempt, TestResponse, AnalyzedQuestion } from '../types';
 import { RenderWithMath } from './MathRenderer';
 import { getApiUrl } from '../lib/api';
+import { useLearningJourney } from '../contexts/LearningJourneyContext';
 
 interface PerformanceAnalysisProps {
   attempt: TestAttempt;
@@ -53,8 +54,9 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
   onRetakeTest,
   onBackToDashboard
 }) => {
+  const { updateCurrentTest } = useLearningJourney();
   const [aiSummary, setAiSummary] = useState<AISummary | null>(null);
-  const [isLoadingAI, setIsLoadingAI] = useState(true);
+  const [isLoadingAI, setIsLoadingAI] = useState(!attempt.aiReport);
   const [aiError, setAiError] = useState(false);
   const [showReview, setShowReview] = useState(false);
 
@@ -176,6 +178,8 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
         const result = await response.json();
         if (result.success && result.data) {
           setAiSummary(result.data);
+          // Sync back to context so it persists on navigation
+          updateCurrentTest({ aiReport: result.data });
         } else {
           setAiError(true);
         }
@@ -228,78 +232,94 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
           <div className="flex flex-col gap-4 lg:sticky lg:top-24">
 
             {/* Score & Analytics Engine Box */}
-            <div className="bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-2xl relative overflow-hidden shrink-0">
-              <div className={`absolute top-0 right-0 w-44 h-44 blur-[80px] rounded-full -mr-16 -mt-16 ${percentage >= 75 ? 'bg-emerald-500/40' : percentage >= 50 ? 'bg-amber-500/30' : 'bg-red-500/30'
+            <div className="bg-slate-950 rounded-[2.5rem] p-6 border border-white/5 shadow-2xl relative overflow-hidden shrink-0">
+              <div className={`absolute top-0 right-0 w-64 h-64 blur-[120px] rounded-full -mr-32 -mt-32 transition-all duration-1000 ${percentage >= 75 ? 'bg-emerald-500/30' : percentage >= 50 ? 'bg-amber-500/20' : 'bg-rose-500/20'
                 }`} />
-              <div className="relative z-10 text-center pb-6 border-b border-white/10">
-                <div className="flex items-center justify-center gap-2 text-slate-400 mb-2">
-                  <Target size={14} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Global Score</span>
+              <div className="relative z-10 text-center pb-5 border-b border-white/5">
+                <div className="flex items-center justify-center gap-2 text-slate-500 mb-4">
+                  <Activity size={12} className="text-primary-400" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Final Score</span>
                 </div>
                 <div className="text-7xl font-black text-white font-outfit leading-none tracking-tighter">
-                  {percentage}<span className="text-4xl text-white/50">%</span>
+                  {percentage}<span className="text-2xl text-white/30 ml-1">%</span>
                 </div>
-                <div className={`text-xs font-bold uppercase tracking-widest ${percentage >= 75 ? 'text-emerald-400' : percentage >= 50 ? 'text-amber-400' : 'text-red-400'
-                  } mt-2`}>
+                <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mt-4 border ${percentage >= 75 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                  percentage >= 50 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                    'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                  }`}>
+                  <Sparkles size={10} />
                   {performance.label}
                 </div>
               </div>
 
               {/* Condensed Stats Array */}
-              <div className="relative z-10 pt-6 grid grid-cols-3 gap-3">
-                <div className="flex flex-col items-center p-3 rounded-2xl bg-white/5 border border-white/10">
-                  <CheckCircle2 size={16} className="text-emerald-400 mb-1" />
-                  <span className="text-xl font-black text-white">{correctAnswers}</span>
+              <div className="relative z-10 pt-5 grid grid-cols-3 gap-4">
+                <div className="flex flex-col items-center p-3 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                  <CheckCircle2 size={18} className="text-emerald-400 mb-2" />
+                  <span className="text-2xl font-black text-white">{correctAnswers}</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Correct</span>
                 </div>
-                <div className="flex flex-col items-center p-3 rounded-2xl bg-white/5 border border-white/10">
-                  <XCircle size={16} className="text-red-400 mb-1" />
-                  <span className="text-xl font-black text-white">{incorrectAnswers}</span>
+                <div className="flex flex-col items-center p-3 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                  <XCircle size={18} className="text-rose-400 mb-2" />
+                  <span className="text-2xl font-black text-white">{incorrectAnswers}</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Incorrect</span>
                 </div>
-                <div className="flex flex-col items-center p-3 rounded-2xl bg-white/5 border border-white/10 opacity-70">
-                  <MinusCircle size={16} className="text-slate-400 mb-1" />
-                  <span className="text-xl font-black text-white">{skippedAnswers}</span>
+                <div className="flex flex-col items-center p-3 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors opacity-60">
+                  <MinusCircle size={18} className="text-slate-400 mb-2" />
+                  <span className="text-2xl font-black text-white">{skippedAnswers}</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Skipped</span>
                 </div>
               </div>
 
               {/* Time Metrics */}
-              <div className="relative z-10 mt-4 rounded-xl bg-slate-800/50 p-4 border border-slate-700/50 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-slate-700/50 flex items-center justify-center text-slate-400">
-                    <Clock size={16} />
+              <div className="relative z-10 mt-4 rounded-2xl bg-white/5 p-4 border border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-primary-500/20 flex items-center justify-center text-primary-400">
+                    <Clock size={20} />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Total Time</span>
-                    <span className="text-sm font-bold text-white leading-none">{formatTime(totalTime)}</span>
+                  <div>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Time Taken</span>
+                    <span className="text-base font-black text-white leading-none tracking-tight">{formatTime(totalTime)}</span>
                   </div>
                 </div>
-                <div className="text-right flex flex-col items-end">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">P/Q</span>
-                  <span className="text-sm font-bold text-white leading-none">{avgTimePerQuestion}s</span>
+                <div className="text-right">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Speed (sec/q)</span>
+                  <span className="text-base font-black text-white leading-none tracking-tight">{avgTimePerQuestion}s</span>
                 </div>
               </div>
             </div>
 
             {/* Quick Action Dock */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               <button
                 onClick={onReviewQuestions}
-                className="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl transition-all shadow-sm group"
+                className="w-full flex items-center justify-between px-6 py-5 bg-white hover:bg-slate-50 border-2 border-slate-100 rounded-3xl transition-all shadow-sm group active:scale-[0.98]"
               >
-                <div className="flex items-center gap-3">
-                  <BookOpen size={18} className="text-slate-500 group-hover:text-primary-600 transition-colors" />
-                  <span className="text-sm font-black text-slate-900 tracking-tight">Post-Game Review</span>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <BookOpen size={20} className="stroke-[2.5]" />
+                  </div>
+                  <div className="text-left">
+                    <span className="block text-sm font-black text-slate-900 tracking-tight">Review Results</span>
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Analyze your errors</span>
+                  </div>
                 </div>
-                <ArrowRight size={16} className="text-slate-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                <ArrowRight size={18} className="text-slate-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
               </button>
               <button
                 onClick={onRetakeTest}
-                className="w-full flex items-center justify-between px-5 py-4 bg-slate-900 hover:bg-slate-800 rounded-2xl transition-all shadow-md group"
+                className="w-full flex items-center justify-between px-6 py-5 bg-slate-900 hover:bg-slate-800 rounded-3xl transition-all shadow-xl shadow-slate-900/10 group active:scale-[0.98]"
               >
-                <div className="flex items-center gap-3">
-                  <Zap size={18} className="text-white opacity-80 group-hover:opacity-100" />
-                  <span className="text-sm font-black text-white tracking-tight">Re-engage Mission</span>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-white/10 text-white flex items-center justify-center group-hover:rotate-12 transition-transform">
+                    <Zap size={20} className="stroke-[2.5]" />
+                  </div>
+                  <div className="text-left">
+                    <span className="block text-sm font-black text-white tracking-tight">Retake Test</span>
+                    <span className="block text-[10px] font-bold text-white/40 uppercase tracking-wider">Start Fresh</span>
+                  </div>
                 </div>
-                <ArrowRight size={16} className="text-white opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                <ArrowRight size={18} className="text-white/30 group-hover:text-white group-hover:translate-x-1 transition-all" />
               </button>
             </div>
 
@@ -309,7 +329,7 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
               {/* Topic Performance List */}
               <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
                 <h3 className="text-sm font-black text-slate-900 font-outfit mb-4 flex items-center gap-2">
-                  <BookOpen size={16} className="text-slate-400" /> Syllabus Mapping
+                  <BookOpen size={16} className="text-slate-400" /> Topic Breakdown
                 </h3>
                 <div className="space-y-4">
                   {topicArray.length === 0 ? <span className="text-xs text-slate-400">Empty logic</span> :
@@ -331,7 +351,7 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
               {/* Complexity Split */}
               <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
                 <h3 className="text-sm font-black text-slate-900 font-outfit mb-4 flex items-center gap-2">
-                  <Signal size={16} className="text-slate-400" /> Complexity Distribution
+                  <Signal size={16} className="text-slate-400" /> Difficulty Summary
                 </h3>
                 <div className="flex flex-col gap-3">
                   {Object.entries(difficultyStats).map(([diff, stats]) => {
@@ -368,59 +388,71 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
           <div className="flex flex-col gap-6">
 
             {/* AI Mastermind Box */}
-            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[100px] rounded-full pointer-events-none" />
+            <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500/5 blur-[120px] rounded-full pointer-events-none" />
               <div className="relative z-10">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center">
-                      <Sparkles size={18} className="text-white" />
+                <div className="flex items-center justify-between pb-6 border-b border-slate-100 mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center shadow-xl">
+                      <Sparkles size={24} className="text-white animate-pulse" />
                     </div>
                     <div>
-                      <h2 className="text-base font-black text-slate-900 font-outfit tracking-tight">Personal Coaching & Analysis</h2>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Professor's Insight Report</p>
+                      <h2 className="text-xl font-black text-slate-900 font-outfit tracking-tight">AI Learning Report</h2>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Mentor's AI Analysis Engine</p>
+                      </div>
                     </div>
                   </div>
                   <button
                     onClick={fetchAISummary}
                     disabled={isLoadingAI}
-                    className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-black text-slate-700 transition"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-black text-slate-700 transition-all active:scale-95 shadow-sm"
                   >
-                    {isLoadingAI ? <Loader2 size={12} className="animate-spin inline mr-1" /> : <RefreshCcw size={12} className="inline mr-1" />}
-                    Recalibrate
+                    {isLoadingAI ? <Loader2 size={14} className="animate-spin" /> : <RefreshCcw size={14} />}
+                    Refresh Analysis
                   </button>
                 </div>
 
                 {isLoadingAI ? (
-                  <div className="py-8 flex flex-col items-center text-center">
-                    <Loader2 size={24} className="text-slate-400 animate-spin mb-3" />
-                    <span className="text-sm font-bold text-slate-500">Synthesizing neurological insights...</span>
+                  <div className="py-20 flex flex-col items-center text-center">
+                    <div className="relative w-16 h-16 mb-6">
+                      <div className="absolute inset-0 border-4 border-primary-500/10 rounded-full" />
+                      <div className="absolute inset-0 border-4 border-transparent border-t-primary-500 rounded-full animate-spin" />
+                      <Brain size={32} className="absolute inset-x-4 inset-y-4 text-primary-500 opacity-40" />
+                    </div>
+                    <span className="text-lg font-black text-slate-900 font-outfit">Building your report...</span>
+                    <span className="text-sm font-bold text-slate-400 mt-2">Connecting to expert feedback matrix</span>
                   </div>
                 ) : aiError ? (
-                  <div className="py-8 text-center flex flex-col items-center">
-                    <AlertCircle size={24} className="text-red-400 mb-2" />
-                    <span className="text-sm font-medium text-slate-600">Cognitive analysis unavailable at this time.</span>
+                  <div className="py-20 text-center flex flex-col items-center">
+                    <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-6">
+                      <AlertCircle size={32} className="text-rose-400" />
+                    </div>
+                    <span className="text-lg font-black text-slate-900 font-outfit">Analysis Offline</span>
+                    <span className="text-sm font-bold text-slate-400 mt-2">Unable to load AI insights.</span>
                   </div>
                 ) : aiSummary && (
-                  <div className="space-y-4">
-                    <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div className="text-sm font-medium text-slate-800 leading-relaxed">
-                        <strong className="font-black">Coach's Verdict:</strong> <RenderWithMath text={aiSummary.verdict} showOptions={false} serif={false} />
+                  <div className="space-y-8">
+                    <div className="p-6 bg-slate-50 border-2 border-slate-100/50 rounded-[2rem] relative group">
+                      <div className="absolute -top-3 left-6 px-3 py-1 bg-slate-900 text-white rounded-full text-[9px] font-black uppercase tracking-widest">Final Verdict</div>
+                      <div className="text-base md:text-lg font-serif italic text-slate-800 leading-relaxed pr-4">
+                        <RenderWithMath text={aiSummary.verdict} showOptions={false} serif={true} />
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid md:grid-cols-2 gap-6">
                       {/* Strengths Board */}
-                      <div className="bg-emerald-50/50 border border-emerald-100/50 rounded-2xl p-4">
-                        <h3 className="text-xs font-black text-emerald-700 uppercase tracking-widest flex items-center gap-1.5 mb-3"><Check size={14} /> Your Strengths</h3>
-                        <div className="space-y-3">
+                      <div className="bg-emerald-50/20 border-2 border-emerald-100/40 rounded-[2rem] p-6 group hover:bg-emerald-50/40 transition-colors">
+                        <h3 className="text-[10px] font-black text-emerald-700 uppercase tracking-[0.2em] flex items-center gap-2 mb-6"><div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center"><Check size={12} /></div> Key Strengths</h3>
+                        <div className="space-y-6">
                           {aiSummary.strengths.map((s, i) => (
-                            <div key={i} className="flex gap-3">
-                              <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5"><Check size={12} className="font-bold" /></div>
+                            <div key={i} className="flex gap-4">
+                              <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-1.5 shadow-lg shadow-emerald-500/40" />
                               <div>
-                                <h4 className="text-sm font-bold text-slate-900">{s.title}</h4>
-                                <div className="text-xs text-slate-600 mt-0.5 leading-relaxed">
-                                  <RenderWithMath text={s.detail} showOptions={false} serif={false} />
+                                <h4 className="text-sm font-black text-slate-900 mb-1">{s.title}</h4>
+                                <div className="text-xs text-slate-600 leading-relaxed font-medium">
+                                  <RenderWithMath text={s.detail} showOptions={false} />
                                 </div>
                               </div>
                             </div>
@@ -428,16 +460,16 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                         </div>
                       </div>
                       {/* Weakness Board */}
-                      <div className="bg-red-50/50 border border-red-100/50 rounded-2xl p-4">
-                        <h3 className="text-xs font-black text-red-700 uppercase tracking-widest flex items-center gap-1.5 mb-3"><X size={14} /> Areas to Improve & Focus</h3>
-                        <div className="space-y-3">
+                      <div className="bg-rose-50/20 border-2 border-rose-100/40 rounded-[2rem] p-6 group hover:bg-rose-50/40 transition-colors">
+                        <h3 className="text-[10px] font-black text-rose-700 uppercase tracking-[0.2em] flex items-center gap-2 mb-6"><div className="w-6 h-6 rounded-lg bg-rose-500/10 flex items-center justify-center"><X size={12} /></div> Topics to Improve</h3>
+                        <div className="space-y-6">
                           {aiSummary.weaknesses.map((w, i) => (
-                            <div key={i} className="flex gap-3">
-                              <div className="w-5 h-5 rounded-full bg-red-500/20 text-red-600 flex items-center justify-center shrink-0 mt-0.5"><X size={12} className="font-bold" /></div>
+                            <div key={i} className="flex gap-4">
+                              <div className="w-2 h-2 rounded-full bg-rose-500 shrink-0 mt-1.5 shadow-lg shadow-rose-500/40" />
                               <div>
-                                <h4 className="text-sm font-bold text-slate-900">{w.title}</h4>
-                                <div className="text-xs text-slate-600 mt-0.5 leading-relaxed">
-                                  <RenderWithMath text={w.detail} showOptions={false} serif={false} />
+                                <h4 className="text-sm font-black text-slate-900 mb-1">{w.title}</h4>
+                                <div className="text-xs text-slate-600 leading-relaxed font-medium">
+                                  <RenderWithMath text={w.detail} showOptions={false} />
                                 </div>
                               </div>
                             </div>
@@ -446,12 +478,15 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                       </div>
                     </div>
 
-                    <div className="bg-slate-900 text-white rounded-2xl p-4 flex items-start gap-4">
-                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0"><Lightbulb size={14} /></div>
-                      <div>
-                        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Your 7-Day Action Plan</h3>
-                        <div className="text-sm font-medium leading-relaxed">
-                          <RenderWithMath text={aiSummary.studyPlan} showOptions={false} dark={true} serif={false} />
+                    <div className="bg-slate-950 text-white rounded-[2rem] p-8 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 blur-[80px] rounded-full pointer-events-none" />
+                      <div className="relative z-10 flex items-start gap-6">
+                        <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><Lightbulb size={24} className="text-primary-400" /></div>
+                        <div>
+                          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-400 mb-3">Your Personalized Study Plan</h3>
+                          <div className="text-base font-medium leading-relaxed text-slate-200 font-outfit">
+                            <RenderWithMath text={aiSummary.studyPlan} showOptions={false} dark={true} />
+                          </div>
                         </div>
                       </div>
                     </div>

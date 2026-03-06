@@ -18,16 +18,16 @@
 
 4. **Parallel Batch Modes** (In Progress)
    - [x] Sample batch of 5 visuals successfully generated and saved to DB.
-   - [ ] SCALE: Run full batch generation for all 60 questions.
+   - [x] SCALE: Run full batch generation for all 60 questions.
 
 ---
 
 ## 🛠️ Remaining Pipeline & Status Fixes
 
 1. **Admin Scan Publish Screen - Status Visibility**
-   - [ ] Update the **Admin Scan Publish** UI layout to clearly display the active status of the REI Cognitive Synthesis engine.
-   - [ ] Display an explicit mapping progress bar (e.g. `Synthesized X / 60 Questions`).
-   - [ ] Expose insights from the deepest REI variables like `ai_reasoning` and `predictive_insight` directly on the admin preview. 
+   - [x] Update the **Admin Scan Publish** UI layout to clearly display the active status of the REI Cognitive Synthesis engine.
+   - [x] Display an explicit mapping progress bar (e.g. `Synthesized X / 60 Questions`).
+   - [x] Expose insights from the deepest REI variables like `ai_reasoning` and `predictive_insight` directly on the admin preview. 
 
 2. **Parallel Batch Scaling**
-   - [ ] Finalize the "Generate All Visuals" performance for 60+ question batches to handle long-running timeouts.
+   - [x] Finalize the "Generate All Visuals" performance for 60+ question batches to handle long-running timeouts.

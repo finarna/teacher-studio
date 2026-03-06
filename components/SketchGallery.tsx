@@ -27,6 +27,7 @@ import { safeAiParse } from '../utils/aiParser';
 import { RenderWithMath } from './MathRenderer';
 import { cache } from '../utils/cache';
 import { generateSketch, GenerationMethod, generateTopicBasedSketch, TopicBasedSketchResult } from '../utils/sketchGenerators';
+import { supabase } from '../lib/supabase';
 import { useFilteredScans } from '../hooks/useFilteredScans';
 import { useAppContext } from '../contexts/AppContext';
 import { useSubjectTheme } from '../hooks/useSubjectTheme';
@@ -828,57 +829,133 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
       return;
     }
 
-    // Generate all topics
+    // Generate for all topics that don't have sketches yet
     const allTopics = Object.keys(topicGroups);
+    const ungeneratedTopics = allTopics.filter(topic => !topicBasedSketches[topic]);
 
-    if (allTopics.length === 0) {
-      setGenError('No topics found in the current view. Please adjust filters or scan a paper first.');
+    if (ungeneratedTopics.length === 0) {
+      setGenError('All topics in the current view already have study guides generated!');
       return;
     }
 
-    console.log(`Starting batch generation for ${allTopics.length} topics`);
-    console.log(`⚠️ Note: Each topic generates 4 pages. Processing with delays to respect rate limits.`);
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (window as any).process?.env?.GEMINI_API_KEY;
+    if (!apiKey) {
+      setGenError("API Key Missing - Add VITE_GEMINI_API_KEY to .env.local");
+      return;
+    }
 
-    const DELAY_BETWEEN_TOPICS = 5000; // 5 seconds between topics (each topic makes 5 API calls)
+    console.log(`Starting batch generation for ${ungeneratedTopics.length} missing topic guides`);
+    console.log(`⚠️ Note: Each topic generates 4 pages internally. Batched to avoid rate limits.`);
+
+    const BATCH_SIZE = 2; // Generate 2 topics (8 pages) in parallel to respect Gemini rate limits safely
+    const DELAY_BETWEEN_BATCHES = 4000;
 
     let totalFailed = 0;
+    setBatchProgress({ current: 0, total: ungeneratedTopics.length, failed: 0 });
+    setGeneratingId('bulk');
 
-    setBatchProgress({ current: 0, total: allTopics.length, failed: 0 });
+    let currentTopicSketches = { ...topicBasedSketches };
 
-    for (let i = 0; i < allTopics.length; i++) {
-      const topic = allTopics[i];
+    for (let i = 0; i < ungeneratedTopics.length; i += BATCH_SIZE) {
+      const batch = ungeneratedTopics.slice(i, i + BATCH_SIZE);
+      console.log(`\n🔨 Processing topic batch ${Math.floor(i / BATCH_SIZE) + 1} of ${Math.ceil(ungeneratedTopics.length / BATCH_SIZE)}`);
 
-      try {
-        await handleGenerateTopic(topic);
-        console.log(`✓ Successfully generated ${topicBasedSketches[topic]?.pages.length || 4} pages for ${topic}`);
-      } catch (error: any) {
-        console.error(`✗ Failed to generate sketch for ${topic}:`, error.message);
-        totalFailed++;
+      const batchResults: Record<string, any> = {};
+
+      await Promise.allSettled(batch.map(async (topic) => {
+        const topicGroup = topicGroups[topic];
+        try {
+          const mappedQuestions = topicGroup.questions.map(q => ({
+            id: q.id,
+            text: q.text,
+            difficulty: q.difficulty,
+            marks: Number(q.marks) || 1
+          }));
+
+          const result = await generateTopicBasedSketch(
+            topic,
+            mappedQuestions,
+            selectedVaultScan.subject,
+            apiKey,
+            (status) => console.log(`📊 ${topic}: ${status}`),
+            selectedVaultScan.examContext
+          );
+
+          batchResults[topic] = result;
+
+          // Initial page selection
+          setSelectedTopicPage(prev => ({ ...prev, [topic]: 0 }));
+          console.log(`✓ Successfully generated ${result.pages.length} pages for ${topic}`);
+        } catch (error: any) {
+          console.error(`✗ Failed to generate sketch for ${topic}:`, error.message);
+        }
+      }));
+
+      // Merge and Sync the successful batch to state and Database
+      const successfullyGeneratedTopics = Object.keys(batchResults);
+      if (successfullyGeneratedTopics.length > 0) {
+        currentTopicSketches = { ...currentTopicSketches, ...batchResults };
+        setTopicBasedSketches(currentTopicSketches);
+
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          const token = session?.access_token;
+
+          await fetch(getApiUrl(`/api/scan-visuals/${selectedVaultScan.id}`), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({ topicSketches: batchResults })
+          });
+          console.log(`✅ Synced batch of ${successfullyGeneratedTopics.length} topic sketches to dedicated endpoint`);
+        } catch (syncErr) {
+          console.error('Failed to sync batch to dedicated endpoint:', syncErr);
+        }
+
+        const updatedScan = {
+          ...selectedVaultScan,
+          analysisData: {
+            ...selectedVaultScan.analysisData!,
+            topicBasedSketches: currentTopicSketches
+          }
+        };
+        onUpdateScan(updatedScan);
+
+        // Cache to localStorage for offline access
+        successfullyGeneratedTopics.forEach(topic => {
+          cache.save(`topic_sketch_${selectedVaultScan.id}_${topic}`, batchResults[topic], selectedVaultScan.id, 'topic-sketch');
+        });
+
+        setForceRender(prev => prev + 1);
+      } else {
+        totalFailed += batch.length;
       }
 
-      // Update progress after each topic
-      const completed = i + 1;
+      const completed = Math.min(i + BATCH_SIZE, ungeneratedTopics.length);
       setBatchProgress({
         current: completed,
-        total: allTopics.length,
+        total: ungeneratedTopics.length,
         failed: totalFailed
       });
 
-      // Wait between topics to respect rate limits (except for last topic)
-      if (i < allTopics.length - 1) {
-        console.log(`⏱️ Waiting ${DELAY_BETWEEN_TOPICS / 1000}s before next topic...`);
-        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_TOPICS));
+      // Wait between batches to respect rate limits
+      if (i + BATCH_SIZE < ungeneratedTopics.length) {
+        console.log(`⏱️ Waiting ${DELAY_BETWEEN_BATCHES / 1000}s before next batch to respect rate limits...`);
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
     }
 
-    console.log(`🎉 Batch generation complete. Success: ${allTopics.length - totalFailed}, Failed: ${totalFailed}`);
+    console.log(`🎉 Batch generation complete. Success: ${ungeneratedTopics.length - totalFailed}, Failed: ${totalFailed}`);
 
     if (totalFailed > 0) {
-      setGenError(`Generated ${allTopics.length - totalFailed}/${allTopics.length} topic guides. ${totalFailed} failed - check console for details.`);
+      setGenError(`Generated ${ungeneratedTopics.length - totalFailed}/${ungeneratedTopics.length} topic guides. ${totalFailed} topics failed - check console for details.`);
     } else {
       setGenError(null);
     }
 
+    setGeneratingId(null);
     setBatchProgress(null);
   };
 

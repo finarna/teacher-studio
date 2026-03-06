@@ -62,6 +62,7 @@ interface LearningJourneyContextType extends LearningJourneyState {
   loadSubjectProgress: () => Promise<void>;
   loadStudyStreak: () => Promise<void>;
   refreshData: (silent?: boolean) => Promise<void>;
+  updateCurrentTest: (updates: Partial<TestAttempt>) => void;
   clearError: () => void;
   reportError: (errorMessage: string) => Promise<void>;
 
@@ -341,6 +342,16 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     }
   };
 
+  const updateCurrentTest = (updates: Partial<TestAttempt>) => {
+    setState(prev => {
+      if (!prev.currentTest) return prev;
+      return {
+        ...prev,
+        currentTest: { ...prev.currentTest, ...updates }
+      };
+    });
+  };
+
   const exitTest = () => {
     setState(prev => ({
       ...prev,
@@ -519,6 +530,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     loadSubjectProgress,
     loadStudyStreak,
     refreshData,
+    updateCurrentTest,
     clearError,
     reportError,
     isFocusMode: state.currentView === 'test',
