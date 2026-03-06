@@ -463,24 +463,37 @@ Schema: {
       // Upload to Supabase Storage directly (avoids 413 — no large payload over network)
       let visualUrl = result.imageData;
 
-      // Local update for immediate UI feedback
-      const updatedQuestionSketches = { ...questionSketches, [qId]: visualUrl };
-      setQuestionSketches(updatedQuestionSketches);
+      // Local update for immediate UI feedback (optimistic update with base64)
+      setQuestionSketches({ ...questionSketches, [qId]: visualUrl });
 
-      // SAVE only this single sketch to server (never send all accumulated sketches)
+      let definitiveUrl = visualUrl;
+
+      // SAVE only this single sketch to server (this uploads to S3 + saves to DB immediately!)
       try {
-        await fetch(getApiUrl(`/api/scan-visuals/${scan.id}`), {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        const response = await fetch(getApiUrl(`/api/scan-visuals/${scan.id}`), {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
           body: JSON.stringify({ questionSketches: { [qId]: visualUrl } })
         });
+        const resData = await response.json();
+
+        if (resData.uploadedUrls && resData.uploadedUrls[qId]) {
+          // Yay! Server successfully uploaded and returned a lightweight HTTP URL!
+          definitiveUrl = resData.uploadedUrls[qId];
+          console.log(`✅ Switched to definitive storage URL: ${definitiveUrl}`);
+        }
       } catch (sErr) {
         console.error('Failed to sync question visual:', sErr);
       }
 
-      // Update the scan with the new visual note (metadata only sync now)
+      // Update the scan with the ACTUAL storage URL so App.tsx can sync lightweight!
       const updatedQuestions = scan.analysisData.questions.map(q =>
-        q.id === qId ? { ...q, sketchSvg: visualUrl, sketchSvgUrl: visualUrl } : q
+        q.id === qId ? { ...q, sketchSvg: definitiveUrl, sketchSvgUrl: definitiveUrl } : q
       );
 
       const updatedScan: Scan = {
@@ -542,20 +555,31 @@ Schema: {
 
         setQuestionSketches(prev => ({ ...prev, [question.id]: visualUrl }));
 
+        let definitiveUrl = visualUrl;
+
         // SAVE to dedicated visuals endpoint (tiny URL payload now)
         try {
-          await fetch(getApiUrl(`/api/scan-visuals/${scan.id}`), {
+          const { data: { session } } = await supabase.auth.getSession();
+          const token = session?.access_token;
+          const res = await fetch(getApiUrl(`/api/scan-visuals/${scan.id}`), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
             body: JSON.stringify({ questionSketches: { [question.id]: visualUrl } })
           });
+          const resData = await res.json();
+          if (resData.uploadedUrls && resData.uploadedUrls[question.id]) {
+            definitiveUrl = resData.uploadedUrls[question.id];
+          }
         } catch (sErr) {
           console.error('Failed to sync question visual:', sErr);
         }
 
         // Update scan incrementally for each question (App.tsx strips huge SVGs)
         const updatedQuestions = scan.analysisData.questions.map(q =>
-          q.id === question.id ? { ...q, sketchSvg: visualUrl, sketchSvgUrl: visualUrl } : q
+          q.id === question.id ? { ...q, sketchSvg: definitiveUrl, sketchSvgUrl: definitiveUrl } : q
         );
 
         const updatedScan: Scan = {

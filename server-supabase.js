@@ -460,6 +460,7 @@ app.post('/api/scan-visuals/:scanId', async (req, res) => {
     }
 
     let persistLogs = [];
+    let uploadedUrls = {};
 
     // 2. Persist to Postgres (Supabase) for long-term storage and Learning Journey visibility
     // Sync Topic Sketches (Flip-Books)
@@ -548,6 +549,7 @@ app.post('/api/scan-visuals/:scanId', async (req, res) => {
             const { data: urlData } = supabaseAdmin.storage.from('edujourney-images').getPublicUrl(fileName);
             publicUrl = urlData.publicUrl;
           }
+          uploadedUrls[qId] = publicUrl;
 
           // Update the published question row using DUAL MATCHING (appId or order)
           // RESILIENT UPDATE: Try appId match first, then order, then create if missing.
@@ -610,6 +612,7 @@ app.post('/api/scan-visuals/:scanId', async (req, res) => {
       synced: !!(redis && redis.status === 'ready'),
       persisted: true,
       scanId,
+      uploadedUrls,
       results: persistLogs
     });
   } catch (err) {

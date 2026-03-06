@@ -61,6 +61,7 @@ import type { Subject, ExamContext, TopicResource, TestAttempt, AnalyzedQuestion
 import { supabase } from '../lib/supabase';
 import { cache } from '../utils/cache';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
+import { useAuth } from './AuthProvider';
 import { AI_CONFIG } from '../config/aiConfigs';
 import ExplainForecastModal from './ExplainForecastModal';
 import { SUBJECT_CONFIGS } from '../config/subjects';
@@ -193,6 +194,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 }) => {
   const theme = React.useMemo(() => EXAM_UI_THEMES[examContext] || EXAM_UI_THEMES.CBSE, [examContext]);
   const { subjectProgress } = useLearningJourney();
+  const { userProfile } = useAuth();
   const [weakTopics, setWeakTopics] = useState<WeakTopic[]>([]);
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(true);
   const [showRecommendations, setShowRecommendations] = useState(false);
@@ -825,42 +827,44 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           })}
                         </div>
 
-                        <button
-                          onClick={handleTogglePeakMode}
-                          className={`w-full p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between group overflow-hidden relative ${oracleModeEnabled ? 'bg-slate-900 border-slate-900 shadow-2xl scale-[1.02]' : 'bg-white border-indigo-100 hover:border-indigo-200'}`}
-                        >
-                          {/* Oracle Mode Background Pattern */}
-                          {oracleModeEnabled && (
-                            <div className="absolute inset-0 opacity-20 pointer-events-none">
-                              <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '16px 16px' }} />
-                              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full blur-[80px] -mr-32 -mt-32" />
-                            </div>
-                          )}
-
-                          <div className="flex items-center gap-6 relative z-10 text-left">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 rotate-12 shadow-[0_0_30px_rgba(255,255,255,0.4)]' : 'bg-indigo-50 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-12'}`}>
-                              <Sparkles size={28} fill={oracleModeEnabled ? "currentColor" : "none"} />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded ${oracleModeEnabled ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-600'}`}>Ultimate Core</span>
-                                {oracleModeEnabled && <span className="animate-pulse flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]" />}
+                        {userProfile?.role === 'admin' && (
+                          <button
+                            onClick={handleTogglePeakMode}
+                            className={`w-full p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between group overflow-hidden relative ${oracleModeEnabled ? 'bg-slate-900 border-slate-900 shadow-2xl scale-[1.02]' : 'bg-white border-indigo-100 hover:border-indigo-200'}`}
+                          >
+                            {/* Oracle Mode Background Pattern */}
+                            {oracleModeEnabled && (
+                              <div className="absolute inset-0 opacity-20 pointer-events-none">
+                                <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '16px 16px' }} />
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full blur-[80px] -mr-32 -mt-32" />
                               </div>
-                              <span className={`text-xl font-black block font-outfit ${oracleModeEnabled ? 'text-white' : 'text-slate-900'}`}>Premium REI Oracle v3.0</span>
-                              <span className={`text-xs font-bold block ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-400'}`}>Full Autonomous Calibration & Score Projection</span>
-                            </div>
-                          </div>
+                            )}
 
-                          <div className="flex items-center gap-3 relative z-10">
-                            <div className={`flex flex-col items-end hidden md:flex mr-4 ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-300'}`}>
-                              <span className="text-[10px] font-bold uppercase tracking-widest">Neural Mode</span>
-                              <span className="text-xs font-bold uppercase">{oracleModeEnabled ? 'Fully Active' : 'Standby'}</span>
+                            <div className="flex items-center gap-6 relative z-10 text-left">
+                              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 rotate-12 shadow-[0_0_30px_rgba(255,255,255,0.4)]' : 'bg-indigo-50 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-12'}`}>
+                                <Sparkles size={28} fill={oracleModeEnabled ? "currentColor" : "none"} />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded ${oracleModeEnabled ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-600'}`}>Ultimate Core</span>
+                                  {oracleModeEnabled && <span className="animate-pulse flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]" />}
+                                </div>
+                                <span className={`text-xl font-black block font-outfit ${oracleModeEnabled ? 'text-white' : 'text-slate-900'}`}>Premium REI Oracle v3.0</span>
+                                <span className={`text-xs font-bold block ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-400'}`}>Full Autonomous Calibration & Score Projection</span>
+                              </div>
                             </div>
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 shadow-lg scale-110' : 'bg-slate-50 text-slate-300'}`}>
-                              {oracleModeEnabled ? <Check size={24} strokeWidth={3} /> : <div className="w-2 h-2 rounded-full bg-slate-200" />}
+
+                            <div className="flex items-center gap-3 relative z-10">
+                              <div className={`flex flex-col items-end hidden md:flex mr-4 ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-300'}`}>
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Neural Mode</span>
+                                <span className="text-xs font-bold uppercase">{oracleModeEnabled ? 'Fully Active' : 'Standby'}</span>
+                              </div>
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 shadow-lg scale-110' : 'bg-slate-50 text-slate-300'}`}>
+                                {oracleModeEnabled ? <Check size={24} strokeWidth={3} /> : <div className="w-2 h-2 rounded-full bg-slate-200" />}
+                              </div>
                             </div>
-                          </div>
-                        </button>
+                          </button>
+                        )}
 
                         <motion.div
                           key={oracleModeEnabled ? 'oracle' : strategyMode}
