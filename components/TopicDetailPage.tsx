@@ -3498,9 +3498,9 @@ const QuizTab: React.FC<{
                     className="px-12 py-6 bg-slate-900 text-white rounded-[1.5rem] font-black hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-xl hover:shadow-blue-500/20 text-[11px] uppercase tracking-[0.22em] font-outfit shrink-0 group active:scale-[0.98]"
                   >
                     {isGenerating ? (
-                      <><Loader2 size={20} className="animate-spin text-blue-400" /><span>Syncing Neural Nodes...</span></>
+                      <><div className="w-5 h-5 relative flex items-center justify-center"><div className="absolute inset-0 bg-blue-400/20 rounded-full animate-ping" /><Brain size={18} className="text-blue-400 animate-pulse relative z-10" /></div><span>Connecting the Dots...</span></>
                     ) : (
-                      <><Zap size={20} className="group-hover:fill-yellow-400 transition-all" /><span>Initialize Session</span></>
+                      <><Zap size={20} className="group-hover:fill-yellow-400 transition-all" /><span>Start Practice</span></>
                     )}
                   </button>
                 </div>
@@ -3530,7 +3530,7 @@ const QuizTab: React.FC<{
                     </div>
                     <h3 className="text-2xl md:text-3xl font-black font-outfit uppercase italic tracking-tighter leading-none">Simulation Fidelity</h3>
                     <p className="text-xs md:text-sm text-slate-400 font-medium leading-relaxed max-w-lg">
-                      Official {examContext} protocol synthesis for <span className="text-white font-bold border-b border-blue-600/50">{topicResource.topicName}</span>.
+                      Official {examContext} challenge setup for <span className="text-white font-bold border-b border-blue-600/50">{topicResource.topicName}</span>.
                     </p>
                   </div>
 
@@ -3564,14 +3564,14 @@ const QuizTab: React.FC<{
                     className="px-12 py-7 bg-white text-slate-900 rounded-[2rem] font-black hover:bg-slate-50 transition-all shadow-2xl flex flex-col items-center justify-center gap-1.5 font-outfit group active:scale-[0.96]"
                   >
                     {isTestGenerating ? (
-                      <><Loader2 size={24} className="animate-spin text-blue-600" /><span className="text-[10px] uppercase tracking-widest">Calibrating...</span></>
+                      <><div className="w-6 h-6 relative flex items-center justify-center mb-1"><div className="absolute inset-0 bg-blue-600/10 rounded-full animate-ping" /><Zap size={20} className="text-blue-600 animate-pulse relative z-10" /></div><span className="text-[10px] uppercase tracking-widest">Preparing Your Challenge...</span></>
                     ) : (
                       <>
                         <div className="flex items-center gap-2.5">
                           <Target size={24} className="group-hover:scale-110 transition-all text-blue-600" />
-                          <span className="text-base uppercase tracking-wider">Start Protocol</span>
+                          <span className="text-base uppercase tracking-wider">Begin Session</span>
                         </div>
-                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest opacity-60">Fidelity Assurance</span>
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest opacity-60">Ready to go</span>
                       </>
                     )}
                   </button>
@@ -4092,9 +4092,12 @@ const ProgressTab: React.FC<{
 
             <div className="flex-1 space-y-2">
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center h-48 space-y-3">
-                  <Loader2 className="animate-spin text-slate-200" size={32} />
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Syncing Archive...</p>
+                <div className="flex flex-col items-center justify-center h-48 space-y-4 animate-in fade-in duration-700">
+                  <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg border border-white/5 relative">
+                    <div className="absolute inset-0 bg-blue-500/20 rounded-xl animate-ping" />
+                    <History size={20} className="text-blue-400 animate-pulse relative z-10" />
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse italic">Looking at Your Progress...</p>
                 </div>
               ) : pastQuizzes.length > 0 ? (
                 <div className="overflow-y-auto max-h-[400px] pr-2 scroller-hide space-y-2">

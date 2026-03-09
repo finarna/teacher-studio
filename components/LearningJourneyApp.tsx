@@ -11,9 +11,9 @@ import TopicDetailPage from './TopicDetailPage';
 import TestInterface from './TestInterface';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import VaultDetailPage from './VaultDetailPage';
-import TestResultsPage from './TestResultsPage';
+import { TestResultsPage } from './TestResultsPage';
 import PerformanceDashboardPage from './PerformanceDashboardPage';
-import { Loader2, AlertTriangle, Send, RefreshCcw, ChevronLeft } from 'lucide-react';
+import { Loader2, AlertTriangle, Send, RefreshCcw, ChevronLeft, Target, Sparkles, Brain, TrendingUp } from 'lucide-react';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 // Mobile Versions
@@ -123,14 +123,31 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
     );
   }
 
-  // Full-screen loading only for major view transitions (NOT when generating a test
-  // from within topic_detail — those use inline button loading state instead)
+  // Full-screen loading only for major view transitions
   if (isLoading && !['test', 'topic_detail', 'mock_builder'].includes(currentView)) {
+    const isMissionStart = currentView === 'subject' || currentView === 'subject_menu';
+
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 size={48} className="text-primary-600 animate-spin mx-auto mb-4" />
-          <p className="text-sm font-medium text-slate-600">Loading...</p>
+      <div className="min-h-screen bg-white flex items-center justify-center p-6 text-center animate-in fade-in duration-500">
+        <div className="max-w-xs w-full">
+          <div className="relative w-20 h-20 mx-auto mb-8">
+            <div className="absolute inset-0 bg-primary-500/20 rounded-full animate-ping" />
+            <div className="relative bg-slate-900 rounded-[2rem] w-20 h-20 flex items-center justify-center shadow-2xl border border-white/10">
+              {isMissionStart ? (
+                <Target size={32} className="text-primary-400 animate-pulse" />
+              ) : (
+                <Sparkles size={32} className="text-indigo-400 animate-pulse" />
+              )}
+            </div>
+          </div>
+          <h2 className="text-xl font-black text-slate-900 font-outfit uppercase tracking-tighter mb-2">
+            {isMissionStart ? `Entering ${selectedSubject || 'Subject'} HQ` : 'Checking Your Progress'}
+          </h2>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">
+            {isMissionStart
+              ? 'Finding your next big challenge...'
+              : "Wait until we see what you've achieved..."}
+          </p>
         </div>
       </div>
     );
@@ -291,10 +308,16 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
         // Show loading while questions populate (async setState after API call)
         if (!currentTest || !currentTestQuestions || currentTestQuestions.length === 0) {
           return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-              <div className="text-center">
-                <Loader2 size={48} className="text-primary-600 animate-spin mx-auto mb-4" />
-                <p className="text-sm font-medium text-slate-600">Preparing your quiz…</p>
+            <div className="min-h-screen bg-white flex items-center justify-center p-6 text-center animate-in fade-in duration-500">
+              <div className="max-w-xs w-full">
+                <div className="relative w-20 h-20 mx-auto mb-8">
+                  <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-ping" />
+                  <div className="relative bg-slate-900 rounded-[2rem] w-20 h-20 flex items-center justify-center shadow-2xl border border-white/10">
+                    <Brain size={32} className="text-blue-400 animate-pulse" />
+                  </div>
+                </div>
+                <h2 className="text-xl font-black text-slate-900 font-outfit uppercase tracking-tighter mb-2">Building Your Challenge</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Picking the perfect questions for you...</p>
               </div>
             </div>
           );
@@ -311,10 +334,16 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
       case 'test_results':
         if (!currentTest || !currentTestResponses || !currentTestQuestions) {
           return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-              <div className="text-center">
-                <Loader2 size={48} className="text-primary-600 animate-spin mx-auto mb-4" />
-                <p className="text-sm font-medium text-slate-600">Loading test results...</p>
+            <div className="min-h-screen bg-white flex items-center justify-center p-6 text-center animate-in fade-in duration-500">
+              <div className="max-w-xs w-full">
+                <div className="relative w-20 h-20 mx-auto mb-8">
+                  <div className="absolute inset-0 bg-indigo-500/20 rounded-full animate-ping" />
+                  <div className="relative bg-slate-900 rounded-[2rem] w-20 h-20 flex items-center justify-center shadow-2xl border border-white/10">
+                    <TrendingUp size={32} className="text-indigo-400 animate-pulse" />
+                  </div>
+                </div>
+                <h2 className="text-xl font-black text-slate-900 font-outfit uppercase tracking-tighter mb-2">Calculating Your Impact</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Wait until you see how you did...</p>
               </div>
             </div>
           );

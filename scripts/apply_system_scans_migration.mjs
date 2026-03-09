@@ -65,12 +65,14 @@ async function applyMigration() {
     console.log(`   ✅ ${scan.subject} (${scan.exam_context}): ${scan.name}`);
   });
 
-  // Step 3: Clear all system flags first
+  // Step 3: Clear all system flags first (DISABLED TO PREVENT MASS UNPUBLISHING)
+  /*
   console.log('\n🔄 Clearing existing system scan flags...\n');
   await supabase
     .from('scans')
     .update({ is_system_scan: false })
     .neq('id', '00000000-0000-0000-0000-000000000000'); // Update all
+  */
 
   // Step 4: Mark only latest scans as system
   console.log('🔄 Marking latest scans as system scans...\n');

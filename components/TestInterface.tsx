@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Clock,
   ChevronLeft,
@@ -19,7 +19,10 @@ import {
   CircleMinus,
   Sparkles,
   CircleX,
-  RefreshCcw
+  RefreshCcw,
+  BarChart3,
+  Lightbulb,
+  Maximize2
 } from 'lucide-react';
 import type { AnalyzedQuestion, TestAttempt, TestResponse, ExamContext } from '../types';
 import { RenderWithMath } from './MathRenderer';
@@ -32,6 +35,7 @@ interface TestInterfaceProps {
   mode?: 'take' | 'review'; // 'take' for taking test, 'review' for viewing results
   completedResponses?: TestResponse[]; // For review mode
   onViewAnalysis?: () => void; // Optional callback to view detailed analysis (PerformanceAnalysis)
+  isVaultMode?: boolean; // NEW: Force vault mode UI
 }
 
 interface QuestionResponse {
@@ -48,9 +52,11 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   onExit,
   mode = 'take',
   completedResponses = [],
-  onViewAnalysis
+  onViewAnalysis,
+  isVaultMode: isVaultModeProp
 }) => {
   const isReviewMode = mode === 'review';
+  const isVaultMode = isVaultModeProp ?? ((attempt as any).isOfficialBlueprint || (attempt as any).isBlueprint || (attempt as any).aiReport?.isBlueprint || (attempt as any).isVaultPractice || false);
 
   // Initialize responses from completedResponses in review mode
   const initializeResponses = (): Map<string, QuestionResponse> => {
@@ -76,7 +82,11 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   const [showQuitConfirm, setShowQuitConfirm] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(attempt.durationMinutes * 60);
   const [showMasteryBriefing, setShowMasteryBriefing] = useState(false);
+  const [showEnlargedSketch, setShowEnlargedSketch] = useState(false);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
+
+  const mainScrollRef = useRef<HTMLDivElement>(null);
+  const modalScrollRef = useRef<HTMLDivElement>(null);
 
   const currentQuestion = questions[currentQuestionIndex];
   const testYear = currentQuestion?.year || currentQuestion?.exam_year || (attempt.createdAt ? new Date(attempt.createdAt).getFullYear().toString() : '');
@@ -154,6 +164,14 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
     }
   }, [currentQuestionIndex]);
 
+  // Scroll to top when walkthrough modal opens
+  useEffect(() => {
+    if (showMasteryBriefing) {
+      mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      modalScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [showMasteryBriefing]);
+
   const updateResponse = useCallback((questionId: string, updates: Partial<QuestionResponse>) => {
     setResponses(prev => {
       const newResponses = new Map(prev);
@@ -185,17 +203,20 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
+      setShowMasteryBriefing(false); // close solution panel when moving away
       setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
+      setShowMasteryBriefing(false); // close solution panel when moving away
       setCurrentQuestionIndex(prev => prev - 1);
     }
   };
 
   const handleQuestionJump = (index: number) => {
+    setShowMasteryBriefing(false); // close solution panel when jumping to a different question
     setCurrentQuestionIndex(index);
     setShowNavigator(false);
   };
@@ -357,7 +378,9 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               </button>
 
               <div className="flex flex-col min-w-0 flex-1">
-                <h1 className="font-bold text-[14px] sm:text-[17px] text-slate-700 tracking-tight leading-none mb-1 sm:mb-1.5 truncate">{attempt.testName}</h1>
+                <h1 className="font-bold text-[14px] sm:text-[17px] text-slate-700 tracking-tight leading-none mb-1 sm:mb-1.5 truncate">
+                  {isVaultMode && isReviewMode ? `Official Paper Walkthrough: ${attempt.testName}` : attempt.testName}
+                </h1>
                 <div className="flex items-center gap-1.5 overflow-hidden">
                   <div className="px-1.5 py-0.5 bg-slate-900 text-slate-300 rounded text-[7px] font-black uppercase tracking-widest border border-white/10 shrink-0">
                     {attempt.subject}
@@ -375,10 +398,13 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
             {/* Right Side: Timer & Global Actions */}
             <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-4 flex-shrink-0">
               {isReviewMode ? (
-                <div className="px-3 sm:px-6 py-1.5 sm:py-3 bg-slate-900 text-indigo-100 rounded-lg sm:rounded-2xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-white/10 shadow-lg shadow-indigo-900/20">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Review
-                </div>
+                <button
+                  onClick={onViewAnalysis || onExit}
+                  className="px-3 sm:px-6 py-1.5 sm:py-3 bg-slate-900 hover:bg-slate-800 text-indigo-100 rounded-lg sm:rounded-2xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border border-white/10 shadow-lg shadow-indigo-900/20 transition-all active:scale-95"
+                >
+                  <BarChart3 size={14} className="text-indigo-400" />
+                  View Analysis
+                </button>
               ) : (
                 (() => {
                   const styles = getTimerStyles();
@@ -418,7 +444,10 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
       </div>
 
       {/* Compact Main Content */}
-      <div className="flex-1 max-w-[1600px] mx-auto w-full px-3 py-3 lg:pb-3 pb-32 space-y-4 overflow-auto no-scrollbar">
+      <div
+        ref={mainScrollRef}
+        className="flex-1 max-w-[1600px] mx-auto w-full px-3 py-3 lg:pb-3 pb-32 space-y-4 overflow-auto no-scrollbar"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Question Area */}
           <div className="lg:col-span-2 space-y-4">
@@ -478,7 +507,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                     )}
 
                     {/* Status Indicator */}
-                    {isReviewMode && (
+                    {isReviewMode && (!isVaultMode || getQuestionStatus(currentQuestion.id) !== 'skipped') && (
                       <div className={`px-3 py-1.5 rounded-xl flex items-center gap-2 border shadow-sm ${getQuestionStatus(currentQuestion.id) === 'correct'
                         ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
                         : getQuestionStatus(currentQuestion.id) === 'incorrect'
@@ -505,13 +534,30 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                 </div>
 
                 {/* Diagram (if present) */}
-                {currentQuestion.hasVisualElement && currentQuestion.diagramUrl && (
-                  <div className="mb-3 p-2 bg-slate-50 rounded border border-slate-200">
-                    <img
-                      src={currentQuestion.diagramUrl}
-                      alt="Question diagram"
-                      className="max-w-full h-auto mx-auto"
-                    />
+                {currentQuestion.hasVisualElement && (currentQuestion.diagramUrl || currentQuestion.imageUrl || (currentQuestion.extractedImages && currentQuestion.extractedImages.length > 0)) && (
+                  <div className="mb-4 p-3 bg-white/50 border border-slate-200 rounded-2xl shadow-sm">
+                    {/* Primary Diagram Source */}
+                    {currentQuestion.diagramUrl || currentQuestion.imageUrl ? (
+                      <img
+                        src={currentQuestion.diagramUrl || currentQuestion.imageUrl}
+                        alt="Question diagram"
+                        className="max-w-full h-auto mx-auto rounded-lg"
+                      />
+                    ) : (
+                      /* Fallback: First extracted image */
+                      currentQuestion.extractedImages && currentQuestion.extractedImages.length > 0 && (
+                        <img
+                          src={currentQuestion.extractedImages[0]}
+                          alt="Extracted question diagram"
+                          className="max-w-full h-auto mx-auto rounded-lg"
+                        />
+                      )
+                    )}
+                    {currentQuestion.visualElementDescription && (
+                      <p className="mt-2 text-[10px] text-slate-500 italic text-center font-instrument">
+                        {currentQuestion.visualElementDescription}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -599,183 +645,242 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
                 {/* Mastery Briefing Trigger - Desktop & Mobile */}
                 {isReviewMode && (
-                  <div className="mt-8 flex justify-center">
+                  <div className="mt-8 flex flex-col items-center gap-6">
+                    {/* Visual Solution Sketch - Archive Exclusive */}
+                    {(currentQuestion.sketchSvgUrl || currentQuestion.sketchSvg) && (
+                      <div className="w-full max-w-2xl mx-auto">
+                        <div className="relative group/sketch">
+                          {/* Premium Background Glow */}
+                          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-primary-500/20 to-indigo-500/20 rounded-[2.5rem] blur-xl opacity-0 group-hover/sketch:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+                          <button
+                            onClick={() => setShowEnlargedSketch(true)}
+                            className="relative w-full bg-white/40 backdrop-blur-md border-2 border-slate-200/50 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-900/5 transition-all duration-500 group-hover/sketch:border-primary-500/30 group-hover/sketch:shadow-primary-500/10 cursor-zoom-in text-left"
+                          >
+                            {/* Sketch Header Badge */}
+                            <div className="absolute top-4 left-4 z-10 flex items-center justify-between w-[calc(100%-32px)]">
+                              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white rounded-full shadow-lg">
+                                <Sparkles size={10} className="text-amber-400 fill-amber-400" />
+                                <span className="text-[9px] font-black uppercase tracking-widest leading-none">Visual Solution</span>
+                              </div>
+
+                              <div className="w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-400 opacity-0 group-hover/sketch:opacity-100 transition-opacity shadow-sm border border-slate-100">
+                                <Maximize2 size={14} />
+                              </div>
+                            </div>
+
+                            {/* The Actual Sketch/Diagram */}
+                            <div className="p-8 pt-14 bg-gradient-to-b from-slate-50/50 to-white flex items-center justify-center min-h-[300px]">
+                              {currentQuestion.sketchSvgUrl ? (
+                                <img
+                                  src={currentQuestion.sketchSvgUrl}
+                                  alt="Solution visual logic"
+                                  className="max-w-full h-auto drop-shadow-2xl transition-transform duration-500 group-hover/sketch:scale-[1.02]"
+                                />
+                              ) : currentQuestion.sketchSvg ? (
+                                <div
+                                  dangerouslySetInnerHTML={{ __html: currentQuestion.sketchSvg }}
+                                  className="w-full h-full flex items-center justify-center [&>svg]:max-w-full [&>svg]:h-auto drop-shadow-2xl transition-transform duration-500 group-hover/sketch:scale-[1.02]"
+                                />
+                              ) : null}
+                            </div>
+
+                            {/* Contextual Insight Footer */}
+                            {(currentQuestion.visualConcept || currentQuestion.visualConcept) && (
+                              <div className="px-6 py-4 bg-slate-900/5 border-t border-slate-200/50 flex items-center gap-3 group-hover/sketch:bg-primary-500/5 transition-colors">
+                                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm shrink-0">
+                                  <Lightbulb size={14} className="text-amber-500" />
+                                </div>
+                                <p className="text-[11px] font-bold text-slate-500 leading-tight">
+                                  {currentQuestion.visualConcept || "Strategic layout of the solution's core logic."}
+                                </p>
+                              </div>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     <button
                       onClick={() => setShowMasteryBriefing(true)}
-                      className="group/trigger relative px-8 py-3 bg-slate-900 text-white rounded-full font-black text-[11px] uppercase tracking-[0.25em] flex items-center gap-3 overflow-hidden shadow-2xl shadow-slate-900/40 border border-white/10 active:scale-95 transition-all"
+                      className="group/trigger relative px-8 py-4 bg-slate-900 text-white rounded-full font-black text-[11px] uppercase tracking-[0.25em] flex items-center gap-3 overflow-hidden shadow-2xl shadow-slate-900/40 border border-white/10 active:scale-95 transition-all"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover/trigger:translate-x-full transition-transform duration-1000" />
                       <div className="relative flex animate-pulse">
                         <Brain size={14} className="text-indigo-400 relative z-10" />
                         <div className="absolute inset-0 bg-indigo-400/40 blur-md" />
                       </div>
-                      See Mentor's Walkthrough
+                      {isVaultMode ? 'View Detailed Steps' : "See Mentor's Walkthrough"}
                       <ChevronRight size={14} className="opacity-40 group-hover/trigger:translate-x-1 transition-transform" />
                     </button>
                   </div>
                 )}
               </div>
 
-              {/* Cognitive Curtain Overlay */}
+              {/* Cognitive Curtain Overlay - Strategic Briefing */}
               {isReviewMode && (
                 <div
-                  className={`absolute inset-0 bg-white z-50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] transform shadow-[0_-20px_50px_rgba(0,0,0,0.1)]
-                    ${showMasteryBriefing ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}
+                  className={`absolute inset-0 bg-white/95 backdrop-blur-xl z-[100] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] transform flex flex-col
+                    ${showMasteryBriefing ? 'translate-y-0 opacity-100' : 'translate-y-[10%] opacity-0 pointer-events-none'}
                   `}
                 >
-                  {/* Curtain Header */}
-                  <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex items-center justify-between shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
-                        <Brain size={16} className="text-indigo-400" />
+                  {/* Premium Curtain Header - Fixed */}
+                  <div className="flex-shrink-0 bg-white/50 border-b border-slate-100 px-6 py-5 flex items-center justify-between shadow-sm z-20">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-900/10">
+                        <Brain size={20} className="text-indigo-400 animate-pulse" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mb-1">Mentor's Perspective</span>
-                        <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest leading-none">Strategic Briefing</h2>
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-500 leading-none mb-1.5">Expert Walkthrough</span>
+                        <div className="flex items-center gap-3">
+                          <h2 className="text-sm sm:text-base font-black text-slate-900 uppercase tracking-widest leading-none font-outfit">Strategic Briefing</h2>
+                          <span className="px-3 py-1 bg-slate-900 rounded-lg text-xs font-black text-white tracking-widest shadow">Question {currentQuestionIndex + 1}</span>
+                        </div>
                       </div>
                     </div>
                     <button
                       onClick={() => setShowMasteryBriefing(false)}
-                      className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-900 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+                      className="group/close w-12 h-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-900 hover:bg-slate-900 hover:text-white transition-all duration-300 shadow-sm active:scale-90"
+                      title="Close Briefing"
                     >
-                      <X size={20} strokeWidth={3} />
+                      <X size={24} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-300" />
                     </button>
                   </div>
 
-                  {/* Curtain Content */}
-                  <div className="absolute inset-0 top-[64px] overflow-auto no-scrollbar p-6 sm:p-10 space-y-8 pb-32">
-                    <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-50/40 blur-[120px] rounded-full pointer-events-none" />
+                  {/* Curtain Content Area - Separately Scrollable */}
+                  <div ref={modalScrollRef} className="flex-1 overflow-y-auto no-scrollbar relative">
+                    {/* Ambient Glows */}
+                    <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-indigo-50/30 blur-[150px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/4" />
+                    <div className="absolute bottom-0 left-0 w-[30rem] h-[30rem] bg-emerald-50/20 blur-[150px] rounded-full pointer-events-none translate-y-1/2 -translate-x-1/4" />
 
-                    {/* Solution Steps - High-Contrast Timeline */}
-                    {currentQuestion.solutionSteps && currentQuestion.solutionSteps.length > 0 && (
-                      <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
-                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 flex items-center gap-2.5">
-                          <div className="w-10 h-px bg-slate-100" />
-                          The Success Blueprint
-                        </h4>
-                        <div className="space-y-1.5 sm:space-y-2">
-                          {currentQuestion.solutionSteps.map((step: any, idx: number) => (
-                            <div key={idx} className="group flex gap-3 sm:gap-5 relative">
-                              {idx < currentQuestion.solutionSteps.length - 1 && (
-                                <div className="absolute top-10 sm:top-12 bottom-[-6px] sm:bottom-[-8px] left-[17px] sm:left-[21px] w-[2px] bg-gradient-to-b from-slate-100 via-white/0 to-transparent group-hover:from-indigo-200 transition-all duration-500" />
-                              )}
-                              <div className="shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-[1rem] sm:rounded-[1.15rem] bg-white border-2 border-slate-100 flex items-center justify-center text-xs sm:text-xs font-black text-slate-900 shadow-sm group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-800 transition-all duration-500">
-                                {String(idx + 1).padStart(2, '0')}
-                              </div>
-                              <div className="flex-1 pt-1 sm:pt-1.5">
-                                {step.title && (
-                                  <div className="text-[11px] sm:text-[12px] font-black text-indigo-700/80 font-outfit uppercase tracking-widest mb-0.5 sm:mb-1 group-hover:translate-x-1 transition-transform duration-500">
-                                    {step.title}
-                                  </div>
+                    <div className="max-w-4xl mx-auto px-5 pt-4 pb-8 sm:px-8 sm:pt-5 space-y-6 relative z-10">
+                      <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-50/40 blur-[120px] rounded-full pointer-events-none" />
+
+                      {/* Solution Steps - High-Contrast Timeline */}
+                      {currentQuestion.solutionSteps && currentQuestion.solutionSteps.length > 0 && (
+                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+                          <div className="space-y-1 sm:space-y-1.5">
+                            {currentQuestion.solutionSteps.map((step: any, idx: number) => (
+                              <div key={idx} className="group flex gap-3 sm:gap-4 relative">
+                                {idx < currentQuestion.solutionSteps.length - 1 && (
+                                  <div className="absolute top-9 sm:top-10 bottom-[-4px] sm:bottom-[-6px] left-[16px] sm:left-[20px] w-[2px] bg-gradient-to-b from-slate-100 via-white/0 to-transparent group-hover:from-indigo-200 transition-all duration-500" />
                                 )}
-                                <div className="text-[14px] sm:text-[16px] text-slate-800 leading-[1.6] font-instrument font-medium bg-white p-3 sm:p-4 rounded-[1.5rem] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] group-hover:border-slate-200 group-hover:shadow-md transition-all duration-500">
-                                  <RenderWithMath text={step.content || step} showOptions={false} />
+                                <div className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-[0.85rem] sm:rounded-[1rem] bg-white border-2 border-slate-100 flex items-center justify-center text-xs font-black text-slate-900 shadow-sm group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-800 transition-all duration-500">
+                                  {String(idx + 1).padStart(2, '0')}
                                 </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* AI Intelligence Matrix - Enhanced Mastery Material */}
-                    {currentQuestion.masteryMaterial && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8 pt-8 border-t border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                        {currentQuestion.masteryMaterial.coreConcept && (
-                          <div className="relative p-5 sm:p-6 rounded-[1.75rem] bg-gradient-to-br from-emerald-50/50 to-white border border-emerald-100/50 group overflow-hidden">
-                            <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
-                              <Target size={60} />
-                            </div>
-                            <div className="flex items-center gap-2.5 mb-3 text-emerald-800">
-                              <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                <Target size={14} className="fill-emerald-500 text-emerald-600" />
-                              </div>
-                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-900/60">Core Mental Model</span>
-                            </div>
-                            <div className="text-[15px] font-black text-emerald-950 mb-1.5 font-outfit">The Teacher's Insight</div>
-                            <div className="text-[13px] text-emerald-900/70 leading-relaxed font-instrument font-medium">
-                              <RenderWithMath text={currentQuestion.masteryMaterial.coreConcept} showOptions={false} />
-                            </div>
-                          </div>
-                        )}
-                        {currentQuestion.masteryMaterial.logic && (
-                          <div className="relative p-5 sm:p-6 rounded-[1.75rem] bg-gradient-to-br from-indigo-50/50 to-white border border-indigo-100/50 group overflow-hidden">
-                            <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
-                              <Zap size={60} />
-                            </div>
-                            <div className="flex items-center gap-2.5 mb-3 text-indigo-800">
-                              <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
-                                <Zap size={14} className="fill-indigo-500 text-indigo-600" />
-                              </div>
-                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-900/60">Deductive Logic</span>
-                            </div>
-                            <div className="text-[15px] font-black text-indigo-950 mb-1.5 font-outfit">Coach's Thinking Flow</div>
-                            <div className="text-[13px] text-indigo-900/70 leading-relaxed font-instrument font-medium">
-                              <RenderWithMath text={currentQuestion.masteryMaterial.logic} showOptions={false} />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Tactical Insights Hub - Balanced Sizing */}
-                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 pb-12">
-                      {currentQuestion.examTip && (
-                        <div className="relative p-3.5 bg-gradient-to-br from-amber-50 to-white rounded-[1.25rem] border border-amber-200/40 shadow-xl shadow-amber-900/5 overflow-hidden group">
-                          <div className="absolute top-2.5 right-2.5 text-amber-500 opacity-20 group-hover:scale-125 transition-all duration-500">
-                            <Sparkles size={16} />
-                          </div>
-                          <div className="flex items-center gap-2 mb-2 text-amber-900 font-black text-[9px] uppercase tracking-[0.25em]">
-                            <div className="w-5 h-5 bg-amber-100 rounded-lg flex items-center justify-center">
-                              <TrendingUp size={10} className="text-amber-600" />
-                            </div>
-                            Pro Strategy for Exam Day
-                          </div>
-                          <div className="text-[12px] text-amber-950 font-instrument font-black leading-snug">
-                            <RenderWithMath text={currentQuestion.examTip} showOptions={false} />
-                          </div>
-                        </div>
-                      )}
-
-                      {currentQuestion.pitfalls && currentQuestion.pitfalls.length > 0 && (
-                        <div className="relative p-3.5 bg-gradient-to-br from-rose-50 to-white rounded-[1.25rem] border border-rose-200/40 shadow-xl shadow-rose-900/5 overflow-hidden group">
-                          <div className="flex items-center gap-2 mb-3 text-rose-900 font-black text-[9px] uppercase tracking-[0.25em]">
-                            <div className="w-5 h-5 bg-rose-100 rounded-lg flex items-center justify-center">
-                              <CircleAlert size={10} className="text-rose-600" />
-                            </div>
-                            Common Exam Pitfalls
-                          </div>
-                          <div className="space-y-3">
-                            {currentQuestion.pitfalls.slice(0, 2).map((pitfall: any, idx: number) => (
-                              <div key={idx} className="relative p-2.5 bg-white/50 backdrop-blur-sm rounded-xl border border-rose-100/50 group-hover:bg-white transition-colors duration-500">
-                                {typeof pitfall === 'string' ? (
-                                  <div className="text-[11px] font-bold text-rose-950 font-instrument">
-                                    <RenderWithMath text={pitfall} showOptions={false} />
-                                  </div>
-                                ) : (
-                                  <div className="space-y-2">
-                                    <div className="flex gap-2.5">
-                                      <div className="shrink-0 w-4 h-4 bg-rose-500 text-white rounded flex items-center justify-center text-[8px] font-black">X</div>
-                                      <div className="text-[11px] font-black text-rose-950 leading-tight"><RenderWithMath text={pitfall.mistake} /></div>
+                                <div className="flex-1 pt-0.5 sm:pt-1">
+                                  {step.title && (
+                                    <div className="text-[11px] sm:text-[12px] font-black text-indigo-700/80 font-outfit uppercase tracking-widest mb-0.5 group-hover:translate-x-1 transition-transform duration-500">
+                                      {step.title}
                                     </div>
-                                    <div className="pl-6 text-[9px] text-rose-900/60 font-black uppercase tracking-widest flex items-center gap-2">
-                                      <div className="w-3 h-[1px] bg-rose-200" />
-                                      Fix: {pitfall.howToAvoid}
-                                    </div>
+                                  )}
+                                  <div className="text-[14px] sm:text-[15px] text-slate-800 leading-[1.6] font-instrument font-medium bg-white p-2.5 sm:p-3 rounded-[1.25rem] border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] group-hover:border-slate-200 group-hover:shadow-md transition-all duration-500">
+                                    <RenderWithMath text={step.content || step} showOptions={false} />
                                   </div>
-                                )}
+                                </div>
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
+
+                      {/* AI Intelligence Matrix - Enhanced Mastery Material */}
+                      {currentQuestion.masteryMaterial && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8 pt-8 border-t border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                          {currentQuestion.masteryMaterial.coreConcept && (
+                            <div className="relative p-5 sm:p-6 rounded-[1.75rem] bg-gradient-to-br from-emerald-50/50 to-white border border-emerald-100/50 group overflow-hidden">
+                              <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
+                                <Target size={60} />
+                              </div>
+                              <div className="flex items-center gap-2.5 mb-3 text-emerald-800">
+                                <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                  <Target size={14} className="fill-emerald-500 text-emerald-600" />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-900/60">Core Mental Model</span>
+                              </div>
+                              <div className="text-[15px] font-black text-emerald-950 mb-1.5 font-outfit">The Teacher's Insight</div>
+                              <div className="text-[13px] text-emerald-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={currentQuestion.masteryMaterial.coreConcept} showOptions={false} />
+                              </div>
+                            </div>
+                          )}
+                          {currentQuestion.masteryMaterial.logic && (
+                            <div className="relative p-5 sm:p-6 rounded-[1.75rem] bg-gradient-to-br from-indigo-50/50 to-white border border-indigo-100/50 group overflow-hidden">
+                              <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
+                                <Zap size={60} />
+                              </div>
+                              <div className="flex items-center gap-2.5 mb-3 text-indigo-800">
+                                <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                  <Zap size={14} className="fill-indigo-500 text-indigo-600" />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-900/60">Deductive Logic</span>
+                              </div>
+                              <div className="text-[15px] font-black text-indigo-950 mb-1.5 font-outfit">Coach's Thinking Flow</div>
+                              <div className="text-[13px] text-indigo-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={currentQuestion.masteryMaterial.logic} showOptions={false} />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Tactical Insights Hub - Balanced Sizing */}
+                      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 pb-12">
+                        {currentQuestion.examTip && (
+                          <div className="relative p-3.5 bg-gradient-to-br from-amber-50 to-white rounded-[1.25rem] border border-amber-200/40 shadow-xl shadow-amber-900/5 overflow-hidden group">
+                            <div className="absolute top-2.5 right-2.5 text-amber-500 opacity-20 group-hover:scale-125 transition-all duration-500">
+                              <Sparkles size={16} />
+                            </div>
+                            <div className="flex items-center gap-2 mb-2 text-amber-900 font-black text-[9px] uppercase tracking-[0.25em]">
+                              <div className="w-5 h-5 bg-amber-100 rounded-lg flex items-center justify-center">
+                                <TrendingUp size={10} className="text-amber-600" />
+                              </div>
+                              Pro Strategy for Exam Day
+                            </div>
+                            <div className="text-[12px] text-amber-950 font-instrument font-black leading-snug">
+                              <RenderWithMath text={currentQuestion.examTip} showOptions={false} />
+                            </div>
+                          </div>
+                        )}
+
+                        {currentQuestion.pitfalls && currentQuestion.pitfalls.length > 0 && (
+                          <div className="relative p-3.5 bg-gradient-to-br from-rose-50 to-white rounded-[1.25rem] border border-rose-200/40 shadow-xl shadow-rose-900/5 overflow-hidden group">
+                            <div className="flex items-center gap-2 mb-3 text-rose-900 font-black text-[9px] uppercase tracking-[0.25em]">
+                              <div className="w-5 h-5 bg-rose-100 rounded-lg flex items-center justify-center">
+                                <CircleAlert size={10} className="text-rose-600" />
+                              </div>
+                              Common Exam Pitfalls
+                            </div>
+                            <div className="space-y-3">
+                              {currentQuestion.pitfalls.slice(0, 2).map((pitfall: any, idx: number) => (
+                                <div key={idx} className="relative p-2.5 bg-white/50 backdrop-blur-sm rounded-xl border border-rose-100/50 group-hover:bg-white transition-colors duration-500">
+                                  {typeof pitfall === 'string' ? (
+                                    <div className="text-[11px] font-bold text-rose-950 font-instrument">
+                                      <RenderWithMath text={pitfall} showOptions={false} />
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-2">
+                                      <div className="flex gap-2.5">
+                                        <div className="shrink-0 w-4 h-4 bg-rose-500 text-white rounded flex items-center justify-center text-[8px] font-black">X</div>
+                                        <div className="text-[11px] font-black text-rose-950 leading-tight"><RenderWithMath text={pitfall.mistake} /></div>
+                                      </div>
+                                      <div className="pl-6 text-[9px] text-rose-900/60 font-black uppercase tracking-widest flex items-center gap-2">
+                                        <div className="w-3 h-[1px] bg-rose-200" />
+                                        Fix: {pitfall.howToAvoid}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
-
-
           </div>
 
           {/* Premium Question Navigator Sidebar - Hidden on Mobile */}
@@ -794,60 +899,66 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                     <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{questions.length} Pathmarks</p>
                   </div>
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-lg font-black text-slate-900 leading-none">{answeredCount}</span>
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Done</span>
-                </div>
-              </div>
-
-              {/* Progress Track */}
-              <div className="mb-8 px-1 shrink-0">
-                <div className="flex justify-between items-end mb-2">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mastery Progress</span>
-                  <span className="text-[10px] font-black text-primary-600">{Math.round((answeredCount / questions.length) * 100)}%</span>
-                </div>
-                <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-primary-500 to-indigo-600 transition-all duration-700 ease-out"
-                    style={{ width: `${(answeredCount / questions.length) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Sophisticated Status Bar (Legend) */}
-              <div className="mb-8 grid grid-cols-3 gap-2 shrink-0">
-                {isReviewMode ? (
-                  <>
-                    <div className="flex flex-col items-center p-2 rounded-2xl bg-emerald-50 border border-emerald-100/50">
-                      <span className="text-[10px] font-black text-emerald-600 leading-none mb-1">{correctCount}</span>
-                      <span className="text-[7px] font-black uppercase text-emerald-400 tracking-widest">Correct</span>
-                    </div>
-                    <div className="flex flex-col items-center p-2 rounded-2xl bg-rose-50 border border-rose-100/50">
-                      <span className="text-[10px] font-black text-rose-600 leading-none mb-1">{incorrectCount}</span>
-                      <span className="text-[7px] font-black uppercase text-rose-400 tracking-widest">Wrong</span>
-                    </div>
-                    <div className="flex flex-col items-center p-2 rounded-2xl bg-slate-50 border border-slate-200/50">
-                      <span className="text-[10px] font-black text-slate-600 leading-none mb-1">{skippedCount}</span>
-                      <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest">Null</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex flex-col items-center p-2 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm">
-                      <span className="text-[10px] font-black text-white leading-none mb-1">{answeredCount}</span>
-                      <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest">Done</span>
-                    </div>
-                    <div className="flex flex-col items-center p-2 rounded-2xl bg-white border border-amber-200 shadow-sm">
-                      <span className="text-[10px] font-black text-amber-600 leading-none mb-1">{markedCount}</span>
-                      <span className="text-[7px] font-black uppercase text-amber-500 tracking-widest">Flag</span>
-                    </div>
-                    <div className="flex flex-col items-center p-2 rounded-2xl bg-white border border-slate-100 shadow-sm">
-                      <span className="text-[10px] font-black text-slate-400 leading-none mb-1">{questions.length - answeredCount}</span>
-                      <span className="text-[7px] font-black uppercase text-slate-300 tracking-widest">Idle</span>
-                    </div>
-                  </>
+                {!isVaultMode && (
+                  <div className="flex flex-col items-end">
+                    <span className="text-lg font-black text-slate-900 leading-none">{answeredCount}</span>
+                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Done</span>
+                  </div>
                 )}
               </div>
+
+              {/* Progress Track - Hidden in Vault Mode */}
+              {!isVaultMode && (
+                <div className="mb-8 px-1 shrink-0">
+                  <div className="justify-between items-end mb-2 flex">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mastery Progress</span>
+                    <span className="text-[10px] font-black text-primary-600">{Math.round((answeredCount / questions.length) * 100)}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-primary-500 to-indigo-600 transition-all duration-700 ease-out"
+                      style={{ width: `${(answeredCount / questions.length) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Sophisticated Status Bar (Legend) - Hidden in Vault Mode */}
+              {!isVaultMode && (
+                <div className="mb-8 grid grid-cols-3 gap-2 shrink-0">
+                  {isReviewMode ? (
+                    <>
+                      <div className="flex flex-col items-center p-2 rounded-2xl bg-emerald-50 border border-emerald-100/50">
+                        <span className="text-[10px] font-black text-emerald-600 leading-none mb-1">{correctCount}</span>
+                        <span className="text-[7px] font-black uppercase text-emerald-400 tracking-widest">Correct</span>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded-2xl bg-rose-50 border border-rose-100/50">
+                        <span className="text-[10px] font-black text-rose-600 leading-none mb-1">{incorrectCount}</span>
+                        <span className="text-[7px] font-black uppercase text-rose-400 tracking-widest">Wrong</span>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded-2xl bg-slate-50 border border-slate-200/50">
+                        <span className="text-[10px] font-black text-slate-600 leading-none mb-1">{skippedCount}</span>
+                        <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest">Null</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-col items-center p-2 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm">
+                        <span className="text-[10px] font-black text-white leading-none mb-1">{answeredCount}</span>
+                        <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest">Done</span>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded-2xl bg-white border border-amber-200 shadow-sm">
+                        <span className="text-[10px] font-black text-amber-600 leading-none mb-1">{markedCount}</span>
+                        <span className="text-[7px] font-black uppercase text-amber-500 tracking-widest">Flag</span>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                        <span className="text-[10px] font-black text-slate-400 leading-none mb-1">{questions.length - answeredCount}</span>
+                        <span className="text-[7px] font-black uppercase text-slate-300 tracking-widest">Idle</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Grid with Premium Styling - Scrollable for long tests */}
               <div className="flex-1 overflow-y-auto pr-1 -mr-2 no-scrollbar custom-scrollbar">
@@ -1227,6 +1338,53 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+      {/* Enlarged Sketch Viewer */}
+      {showEnlargedSketch && (currentQuestion.sketchSvgUrl || currentQuestion.sketchSvg) && (
+        <div className="fixed inset-0 z-[110] bg-slate-950/90 backdrop-blur-xl flex flex-col p-4 sm:p-10 animate-in fade-in zoom-in duration-300">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl">
+                <Sparkles size={20} className="text-amber-400 fill-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-black text-xl tracking-tight leading-none mb-1">Visual Architecture</h3>
+                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">{currentQuestion.topic} • Phase Insight</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowEnlargedSketch(false)}
+              className="w-12 h-12 bg-white/5 hover:bg-white/10 text-white rounded-full flex items-center justify-center transition-all border border-white/10 active:scale-90"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-auto flex items-center justify-center bg-white/5 rounded-[3rem] border border-white/5 p-4 sm:p-12 shadow-inner">
+            <div className="max-w-full max-h-full">
+              {currentQuestion.sketchSvgUrl ? (
+                <img
+                  src={currentQuestion.sketchSvgUrl}
+                  alt="Enlarged solution visual"
+                  className="max-w-full max-h-[70vh] w-auto h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                />
+              ) : (
+                <div
+                  dangerouslySetInnerHTML={{ __html: currentQuestion.sketchSvg! }}
+                  className="w-full h-full flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-[70vh] [&>svg]:w-auto [&>svg]:h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                />
+              )}
+            </div>
+          </div>
+
+          {currentQuestion.visualConcept && (
+            <div className="mt-8 max-w-2xl mx-auto text-center">
+              <p className="text-slate-300 text-lg font-medium leading-relaxed italic">
+                "{currentQuestion.visualConcept}"
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

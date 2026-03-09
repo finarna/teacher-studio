@@ -65,6 +65,7 @@ interface LearningJourneyContextType extends LearningJourneyState {
   updateCurrentTest: (updates: Partial<TestAttempt>) => void;
   clearError: () => void;
   reportError: (errorMessage: string) => Promise<void>;
+  startVaultPractice: (scanId: string, questions: AnalyzedQuestion[]) => Promise<void>;
 
   // Derived state for Global UI
   isFocusMode: boolean;
@@ -391,6 +392,51 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     }
   };
 
+  const startVaultPractice = async (scanId: string, questions: AnalyzedQuestion[]) => {
+    if (!state.selectedSubject || !state.selectedTrajectory) return;
+    setState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const url = getApiUrl('/api/tests/generate');
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      // Extract only essential fields for generation if needed, or simply pass the questions
+      // Actually, creating a test from existing questions is usually handled by startCustomTest
+      // but if we want it to be a server-tracked attempt, we use the generate endpoint with a special mode.
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          userId,
+          testType: 'full_mock', // Treat it as a full mock paper
+          subject: state.selectedSubject,
+          examContext: state.selectedTrajectory,
+          scanId, // Pass the scanId to let server know we're practicing a specific paper
+          isVaultPractice: true
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to initialize archive practice');
+      const result = await response.json();
+
+      setState(prev => ({
+        ...prev,
+        currentView: 'test',
+        currentTest: result.attempt,
+        currentTestQuestions: result.questions,
+        currentTestResponses: [],
+        isLoading: false
+      }));
+      setViewHistory(prev => [...prev, 'test']);
+    } catch (error) {
+      setState(prev => ({ ...prev, isLoading: false, error: (error as Error).message }));
+    }
+  };
+
   const startCustomTest = (attempt: TestAttempt, questions: AnalyzedQuestion[]) => {
     setState(prev => ({
       ...prev,
@@ -533,6 +579,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
     updateCurrentTest,
     clearError,
     reportError,
+    startVaultPractice,
     isFocusMode: state.currentView === 'test',
     isDrilledDown: state.currentView !== 'trajectory'
   };

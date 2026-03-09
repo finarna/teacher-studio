@@ -106,9 +106,13 @@ const MasteryReport: React.FC<MasteryReportProps> = ({ score, misconceptions, cu
           {showPlan && (
             <div className="p-8">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-                  <Loader2 size={48} className="animate-spin text-primary-500 mb-4" />
-                  <p>Analyzing your performance...</p>
+                <div className="flex flex-col items-center justify-center py-16 text-slate-400 animate-in fade-in duration-1000">
+                  <div className="relative w-16 h-16 mb-6">
+                    <div className="absolute inset-0 bg-primary-500/10 rounded-full animate-ping" />
+                    <Sparkles size={48} className="text-primary-500 animate-pulse" />
+                  </div>
+                  <h4 className="text-slate-900 font-black font-outfit uppercase tracking-tight mb-1">Mapping Your Growth</h4>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] animate-pulse">Your AI Mentor is picking the perfect steps for you...</p>
                 </div>
               ) : plan ? (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">

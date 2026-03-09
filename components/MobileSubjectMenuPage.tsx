@@ -150,10 +150,10 @@ const MobileSubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                         <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">AI Recommendation</p>
                         <p className="text-sm font-bold leading-snug italic">
                             {(subProg?.overallMastery || 0) < 40
-                                ? `"Focus on building core ${subject} fundamentals through Node Syllabus before attempting mocks."`
+                                ? `"Focus on building core ${subject} fundamentals through Topic Mastery Hub before attempting mocks."`
                                 : (subProg?.overallMastery || 0) < 75
-                                    ? `"Your fundamentals are stable. Shift to Exam Vault to test your application speed."`
-                                    : `"Elite performance detected. Build a Mock Mission with Hard difficulty to push the boundaries."`}
+                                    ? `"Your fundamentals are stable. Shift to Solved Paper Vault to test your application speed."`
+                                    : `"Elite performance detected. Build a session in the Exam Prediction and Simulation Test Engine with Hard difficulty to push the boundaries."`}
                         </p>
                     </div>
                 </motion.div>
@@ -169,8 +169,8 @@ const MobileSubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                                 <BookOpen size={28} />
                             </div>
                             <div className="text-left">
-                                <h3 className="text-xl font-black text-slate-900 font-outfit uppercase italic leading-none mb-1">Node Syllabus</h3>
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Master Concept by Concept</p>
+                                <h3 className="text-xl font-black text-slate-900 font-outfit uppercase italic leading-none mb-1">Topic Mastery Hub</h3>
+                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">AI-Driven Pattern Mastery</p>
                             </div>
                         </div>
                         <div className="relative z-10 text-right">
@@ -190,8 +190,8 @@ const MobileSubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                                 <History size={28} />
                             </div>
                             <div className="text-left">
-                                <h3 className="text-xl font-black text-slate-900 font-outfit uppercase italic leading-none mb-1">Exam Vault</h3>
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Real Papers, Real Timing</p>
+                                <h3 className="text-xl font-black text-slate-900 font-outfit uppercase italic leading-none mb-1">Solved Paper Vault</h3>
+                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Historical Exam Logic</p>
                             </div>
                         </div>
                         <div className="relative z-10 text-right">
@@ -211,13 +211,13 @@ const MobileSubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                                 <Zap size={28} />
                             </div>
                             <div className="text-left">
-                                <h3 className="text-xl font-black text-slate-900 font-outfit uppercase italic leading-none mb-1">Mock Missions</h3>
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">AI Performance Pivot</p>
+                                <h3 className="text-xl font-black text-slate-900 font-outfit uppercase italic leading-none mb-1 text-wrap pr-10">Exam Prediction and Simulation Engine</h3>
+                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Adaptive Hybrid • Pattern Prediction</p>
                             </div>
                         </div>
                         <div className="relative z-10 text-right">
                             <div className="bg-primary-50 px-3 py-1 rounded-full text-[10px] font-black text-primary-600 border border-primary-100">
-                                BUILD TEST
+                                AI PREDICTED
                             </div>
                         </div>
                         <div className="absolute inset-0 bg-primary-500/0 group-active:bg-primary-500/5 transition-colors" />

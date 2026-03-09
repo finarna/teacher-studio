@@ -26,6 +26,7 @@ import {
   Clock,
   Award
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface PredictiveTrendsTabProps {
   examContext: string;
@@ -123,71 +124,88 @@ const PredictiveTrendsTab: React.FC<PredictiveTrendsTabProps> = ({
     });
 
   return (
-    <div className="h-full overflow-y-auto scroller-hide p-6 space-y-6">
+    <div className="h-full overflow-y-auto scroller-hide p-8 space-y-8 bg-slate-50/50">
       {/* Header Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-              <Clock size={18} />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <motion.div
+          whileHover={{ y: -4 }}
+          className="bg-white border-2 border-slate-100 p-6 rounded-[2rem] shadow-sm hover:shadow-xl transition-all"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100 shadow-sm">
+              <Clock size={20} strokeWidth={2.5} />
             </div>
-            <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Years Analyzed</span>
+            <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Years Analyzed</span>
           </div>
-          <div className="text-2xl font-black text-slate-900">{yearsAvailable.length}</div>
-          <div className="text-xs text-slate-500 mt-1">
-            {Math.min(...yearsAvailable)} - {Math.max(...yearsAvailable)}
+          <div className="text-4xl font-black text-slate-900 font-outfit tracking-tighter">{yearsAvailable.length}</div>
+          <div className="text-xs font-bold text-slate-400 mt-2 bg-slate-50 inline-block px-2 py-1 rounded-lg">
+            {Math.min(...yearsAvailable)} — {Math.max(...yearsAvailable)} Repository
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-              <Target size={18} />
+        <motion.div
+          whileHover={{ y: -4 }}
+          className="bg-white border-2 border-slate-100 p-6 rounded-[2rem] shadow-sm hover:shadow-xl transition-all"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 shadow-sm">
+              <Target size={20} strokeWidth={2.5} />
             </div>
-            <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Topics Tracked</span>
+            <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Concepts Tracked</span>
           </div>
-          <div className="text-2xl font-black text-slate-900">{Object.keys(topicTrends).length}</div>
-          <div className="text-xs text-slate-500 mt-1">
-            Across all years
+          <div className="text-4xl font-black text-slate-900 font-outfit tracking-tighter">{Object.keys(topicTrends).length}</div>
+          <div className="text-xs font-bold text-slate-400 mt-2 bg-slate-50 inline-block px-2 py-1 rounded-lg">
+            Framework Mastery
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
-              <TrendingUp size={18} />
+        <motion.div
+          whileHover={{ y: -4 }}
+          className="bg-white border-2 border-slate-100 p-6 rounded-[2rem] shadow-sm hover:shadow-xl transition-all"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100 shadow-sm">
+              <TrendingUp size={20} strokeWidth={2.5} />
             </div>
-            <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Increasing Topics</span>
+            <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Ascending Topics</span>
           </div>
-          <div className="text-2xl font-black text-slate-900">
+          <div className="text-4xl font-black text-slate-900 font-outfit tracking-tighter">
             {Object.values(topicTrends).filter((t: any) => t.trend === 'increasing').length}
           </div>
-          <div className="text-xs text-slate-500 mt-1">
-            Growing in importance
+          <div className="text-xs font-bold text-slate-400 mt-2 bg-slate-50 inline-block px-2 py-1 rounded-lg">
+            High Growth Probability
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
-              <Award size={18} />
+        <motion.div
+          whileHover={{ y: -4 }}
+          className="bg-white border-2 border-slate-100 p-6 rounded-[2rem] shadow-sm hover:shadow-xl transition-all"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100 shadow-sm">
+              <Award size={20} strokeWidth={2.5} />
             </div>
-            <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">High Priority</span>
+            <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">High Rigor</span>
           </div>
-          <div className="text-2xl font-black text-slate-900">
+          <div className="text-4xl font-black text-slate-900 font-outfit tracking-tighter">
             {Object.values(topicTrends).filter((t: any) => t.importance === 'high').length}
           </div>
-          <div className="text-xs text-slate-500 mt-1">
-            12+ questions consistently
+          <div className="text-xs font-bold text-slate-400 mt-2 bg-slate-50 inline-block px-2 py-1 rounded-lg">
+            Critical Domain Items
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Year-over-Year Overview */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-          <TrendingUp size={16} />
-          Year-over-Year Difficulty Distribution
+      <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] p-8 shadow-sm overflow-hidden relative group">
+        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+          <TrendingUp size={120} strokeWidth={3} />
+        </div>
+        <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-8 flex items-center gap-3 font-outfit">
+          <div className="p-2 bg-slate-900 text-white rounded-xl">
+            <TrendingUp size={18} />
+          </div>
+          Difficulty Evolution Matrix
         </h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={patterns}>
@@ -206,154 +224,247 @@ const PredictiveTrendsTab: React.FC<PredictiveTrendsTabProps> = ({
       </div>
 
       {/* Topic Evolution Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-          <Target size={16} />
+      <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] p-8 shadow-sm">
+        <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight mb-8 flex items-center gap-3 font-outfit">
+          <div className="p-2 bg-indigo-600 text-white rounded-xl">
+            <Target size={18} />
+          </div>
           Topic Evolution & Predictions
         </h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b-2 border-slate-200">
-                <th className="text-left py-3 px-4 text-[11px] font-black text-slate-500 uppercase tracking-wider">Topic</th>
-                <th className="text-center py-3 px-4 text-[11px] font-black text-slate-500 uppercase tracking-wider">Trend</th>
-                <th className="text-center py-3 px-4 text-[11px] font-black text-slate-500 uppercase tracking-wider">Importance</th>
-                <th className="text-center py-3 px-4 text-[11px] font-black text-slate-500 uppercase tracking-wider">{yearsAvailable[0]}</th>
-                <th className="text-center py-3 px-4 text-[11px] font-black text-slate-500 uppercase tracking-wider">{latestYear}</th>
-                <th className="text-center py-3 px-4 text-[11px] font-black text-slate-500 uppercase tracking-wider">{latestYear + 1} Prediction</th>
-                <th className="text-center py-3 px-4 text-[11px] font-black text-slate-500 uppercase tracking-wider">Change</th>
+              <tr className="border-b-2 border-slate-100">
+                <th className="text-left py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Framework Topic</th>
+                <th className="text-center py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Trend</th>
+                <th className="text-center py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Priority</th>
+                <th className="text-center py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{yearsAvailable[0]}</th>
+                <th className="text-center py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{latestYear}</th>
+                <th className="text-center py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{latestYear + 1} EXAM</th>
+                <th className="text-center py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Δ Change</th>
               </tr>
             </thead>
             <tbody>
               {topicsByImportance.map(([topicId, trend]: [string, any]) => {
                 const prediction = predictions.topics[topicId];
                 const TrendIcon = trend.trend === 'increasing' ? TrendingUp : trend.trend === 'decreasing' ? TrendingDown : Minus;
-                const trendColor = trend.trend === 'increasing' ? 'text-green-600' : trend.trend === 'decreasing' ? 'text-red-600' : 'text-slate-400';
-                const importanceColor = trend.importance === 'high' ? 'bg-red-100 text-red-700' : trend.importance === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-600';
-                const firstYear = trend.dataPoints[0]?.questionCount || 0;
+                const trendColor = trend.trend === 'increasing' ? 'text-emerald-600' : trend.trend === 'decreasing' ? 'text-rose-600' : 'text-slate-400';
+                const trendBg = trend.trend === 'increasing' ? 'bg-emerald-50' : trend.trend === 'decreasing' ? 'bg-rose-50' : 'bg-slate-50';
+                const importanceColor = trend.importance === 'high' ? 'bg-rose-600 text-white' : trend.importance === 'medium' ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700';
 
                 return (
-                  <tr
+                  <motion.tr
                     key={topicId}
-                    className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                    whileHover={{ backgroundColor: 'rgba(248, 250, 252, 1)' }}
+                    className="border-b border-slate-50 last:border-0 cursor-pointer transition-colors"
                     onClick={() => setSelectedTopic(selectedTopic === topicId ? null : topicId)}
                   >
-                    <td className="py-3 px-4">
-                      <div className="font-semibold text-slate-900 capitalize">
+                    <td className="py-5 px-4">
+                      <div className="font-black text-slate-900 capitalize text-base tracking-tight">
                         {topicId.replace(/_/g, ' ')}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className={`inline-flex items-center gap-1 ${trendColor}`}>
-                        <TrendIcon size={16} />
-                        <span className="text-xs font-bold capitalize">{trend.trend}</span>
+                    <td className="py-5 px-4 text-center">
+                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${trendBg} ${trendColor}`}>
+                        <TrendIcon size={14} strokeWidth={3} />
+                        <span className="text-[10px] font-black uppercase tracking-wider">{trend.trend}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className={`inline-block px-2 py-1 rounded-full text-[10px] font-bold uppercase ${importanceColor}`}>
+                    <td className="py-5 px-4 text-center">
+                      <span className={`inline-block px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${importanceColor}`}>
                         {trend.importance}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center font-bold text-slate-700">
-                      {firstYear}
+                    <td className="py-5 px-4 text-center font-bold text-slate-400">
+                      {trend.dataPoints.find((d: any) => d.year === yearsAvailable[0])?.questionCount || 0}
                     </td>
-                    <td className="py-3 px-4 text-center font-bold text-slate-900">
-                      {trend.latest}
+                    <td className="py-5 px-4 text-center font-black text-slate-700 text-lg">
+                      {trend.dataPoints.find((d: any) => d.year === latestYear)?.questionCount || 0}
                     </td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="inline-flex items-center gap-1">
-                        <Zap size={14} className="text-accent-600" />
-                        <span className="font-bold text-accent-600">{prediction?.predicted || '—'}</span>
+                    <td className="py-5 px-4 text-center">
+                      <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 shadow-inner">
+                        <span className="font-black text-indigo-700 text-lg">{prediction?.predicted || '—'}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-center">
+                    <td className="py-5 px-4 text-center">
                       {trend.change > 0 && (
-                        <span className="text-green-600 font-bold">+{trend.change}</span>
+                        <span className="text-emerald-600 font-black text-sm">+{trend.change}</span>
                       )}
                       {trend.change < 0 && (
-                        <span className="text-red-600 font-bold">{trend.change}</span>
+                        <span className="text-rose-600 font-black text-sm">{trend.change}</span>
                       )}
                       {trend.change === 0 && (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-slate-300 font-bold">—</span>
                       )}
                     </td>
-                  </tr>
+                  </motion.tr>
                 );
               })}
             </tbody>
+            <tfoot className="border-t-2 border-slate-100 bg-indigo-50/30">
+              <tr>
+                <td className="py-4 px-4 font-black text-slate-900 uppercase tracking-widest text-[10px]">Total Items</td>
+                <td colSpan={2}></td>
+                <td className="py-4 px-4 text-center font-black text-slate-500">
+                  {topicsByImportance.reduce((sum, [, t]: any) => {
+                    const dp = t.dataPoints.find((d: any) => d.year === yearsAvailable[0]);
+                    return sum + (dp?.questionCount || 0);
+                  }, 0)}
+                </td>
+                <td className="py-4 px-4 text-center font-black text-slate-900 text-lg">
+                  {topicsByImportance.reduce((sum, [, t]: any) => {
+                    const dp = t.dataPoints.find((d: any) => d.year === latestYear);
+                    return sum + (dp?.questionCount || 0);
+                  }, 0)}
+                </td>
+                <td className="py-4 px-4 text-center font-black text-indigo-700 text-lg">
+                  {predictions.totalPredicted || topicsByImportance.reduce((sum, [topicId]) => {
+                    return sum + (predictions.topics[topicId]?.predicted || 0);
+                  }, 0)}
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
 
       {/* Detailed Topic Chart (if selected) */}
-      {selectedTopic && topicTrends[selectedTopic] && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-4 capitalize">
-            {selectedTopic.replace(/_/g, ' ')} - Detailed Evolution
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={topicTrends[selectedTopic].dataPoints}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="year" stroke="#64748b" style={{ fontSize: '12px' }} />
-              <YAxis stroke="#64748b" style={{ fontSize: '12px' }} label={{ value: 'Questions', angle: -90, position: 'insideLeft', style: { fontSize: '12px' } }} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '12px' }}
-              />
-              <Legend wrapperStyle={{ fontSize: '12px' }} />
-              <Line type="monotone" dataKey="questionCount" name="Total Questions" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 5 }} />
-              <Line type="monotone" dataKey="easyCount" name="Easy" stroke="#10b981" strokeWidth={2} />
-              <Line type="monotone" dataKey="moderateCount" name="Moderate" stroke="#f59e0b" strokeWidth={2} />
-              <Line type="monotone" dataKey="hardCount" name="Hard" stroke="#ef4444" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-          <div className="mt-4 p-4 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-600">
-              <strong>Prediction for {latestYear + 1}:</strong> {predictions.topics[selectedTopic]?.basis}
-            </p>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {selectedTopic && topicTrends[selectedTopic] && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="bg-slate-900 text-white rounded-[2.5rem] p-8 shadow-2xl overflow-hidden relative"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-xl font-black uppercase tracking-tight capitalize flex items-center gap-3">
+                <div className="w-2 h-8 bg-indigo-500 rounded-full" />
+                {selectedTopic.replace(/_/g, ' ')} Historical Depth
+              </h3>
+              <button
+                onClick={() => setSelectedTopic(null)}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <Minus size={24} />
+              </button>
+            </div>
+
+            <div className="bg-white/5 rounded-3xl p-6 backdrop-blur-sm border border-white/10">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={topicTrends[selectedTopic].dataPoints}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                  <XAxis dataKey="year" stroke="rgba(255,255,255,0.3)" style={{ fontSize: '10px', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis stroke="rgba(255,255,255,0.3)" style={{ fontSize: '10px', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontSize: '12px' }}
+                    itemStyle={{ fontWeight: 'bold' }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '20px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }} />
+                  <Line type="monotone" dataKey="questionCount" name="Frequency" stroke="#6366f1" strokeWidth={4} dot={{ fill: '#6366f1', r: 6, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                  <Line type="monotone" dataKey="easyCount" name="Easy" stroke="#10b981" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                  <Line type="monotone" dataKey="hardCount" name="Hard" stroke="#f43f5e" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-8 p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-start gap-4">
+              <div className="p-2 bg-indigo-500 text-white rounded-lg">
+                <Zap size={20} />
+              </div>
+              <p className="text-base font-medium text-slate-300 leading-relaxed">
+                <span className="text-white font-black uppercase text-xs tracking-widest block mb-1">AI Logic Bias</span>
+                {predictions.topics[selectedTopic]?.basis}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Study Recommendations */}
-      <div className="bg-gradient-to-br from-accent-50 to-white border border-accent-200 rounded-2xl p-6 shadow-sm">
-        <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-          <Award size={16} />
-          Smart Study Recommendations
+      <div className="bg-white border-2 border-slate-900 rounded-[2.5rem] p-10 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 opacity-50 shadow-inner" />
+        <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter mb-10 flex items-center gap-4 font-outfit relative">
+          <div className="p-3 bg-slate-900 text-white rounded-2xl shadow-lg">
+            <Award size={24} />
+          </div>
+          Strategic Command Center
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 className="text-xs font-bold text-red-700 uppercase mb-2">🔥 High Priority Topics</h4>
-            <ul className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative">
+          <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-2 h-6 bg-rose-600 rounded-full" />
+              <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest leading-none">High Rigor Targets</h4>
+            </div>
+            <ul className="space-y-4">
               {topicsByImportance
                 .filter(([, trend]: any) => trend.importance === 'high')
                 .slice(0, 3)
-                .map(([topicId, trend]: [string, any]) => (
-                  <li key={topicId} className="text-sm text-slate-700 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                    <span className="capitalize font-medium">{topicId.replace(/_/g, ' ')}</span>
-                    <span className="text-xs text-slate-500">({trend.avgQuestions}Q avg)</span>
-                  </li>
-                ))}
+                .map(([topicId, trend]: [string, any]) => {
+                  const prediction = predictions.topics[topicId];
+                  return (
+                    <motion.li
+                      whileHover={{ x: 4 }}
+                      key={topicId}
+                      className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600">
+                          <Target size={18} strokeWidth={2.5} />
+                        </div>
+                        <span className="capitalize font-black text-slate-900 text-sm tracking-tight">{topicId.replace(/_/g, ' ')}</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-black bg-slate-900 text-white px-2 py-0.5 rounded tracking-tighter mb-1 whitespace-nowrap">PREDICTED {prediction?.predicted || 0}Q</span>
+                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">High Priority</span>
+                      </div>
+                    </motion.li>
+                  );
+                })}
             </ul>
           </div>
-          <div>
-            <h4 className="text-xs font-bold text-green-700 uppercase mb-2">📈 Growing Topics</h4>
-            <ul className="space-y-2">
+          <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-2 h-6 bg-emerald-600 rounded-full" />
+              <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest leading-none">Momentum Concepts</h4>
+            </div>
+            <ul className="space-y-4">
               {topicsByImportance
                 .filter(([, trend]: any) => trend.trend === 'increasing')
                 .slice(0, 3)
-                .map(([topicId, trend]: [string, any]) => (
-                  <li key={topicId} className="text-sm text-slate-700 flex items-center gap-2">
-                    <TrendingUp size={14} className="text-green-600" />
-                    <span className="capitalize font-medium">{topicId.replace(/_/g, ' ')}</span>
-                    <span className="text-xs text-slate-500">(+{Math.abs(trend.change)} questions)</span>
-                  </li>
-                ))}
+                .map(([topicId, trend]: [string, any]) => {
+                  const latest = trend.dataPoints.find((d: any) => d.year === latestYear)?.questionCount || 0;
+                  const predicted = predictions.topics[topicId]?.predicted || 0;
+                  const diff = predicted - latest;
+
+                  return (
+                    <motion.li
+                      whileHover={{ x: 4 }}
+                      key={topicId}
+                      className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                          <TrendingUp size={18} strokeWidth={2.5} />
+                        </div>
+                        <span className="capitalize font-black text-slate-900 text-sm tracking-tight">{topicId.replace(/_/g, ' ')}</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <div className="flex items-center gap-1 text-emerald-600 mb-1">
+                          <TrendingUp size={12} strokeWidth={3} />
+                          <span className="text-[10px] font-black">Predicted Rise</span>
+                        </div>
+                        <span className="text-[11px] font-black text-slate-900">+{Math.max(0, diff)} Questions</span>
+                      </div>
+                    </motion.li>
+                  );
+                })}
             </ul>
           </div>
         </div>
       </div>
+
     </div>
   );
 };

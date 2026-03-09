@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { BarChart3, BookOpen, ChevronLeft } from 'lucide-react';
 import type { TestAttempt, AnalyzedQuestion, TestResponse } from '../types';
 import PerformanceAnalysis from './PerformanceAnalysis';
 import TestInterface from './TestInterface';
@@ -10,27 +9,33 @@ interface TestResultsPageProps {
   responses: TestResponse[];
   onBack: () => void;
   onSubmitRetake?: (responses: TestResponse[]) => void;
+  mode?: 'results' | 'vault';
+  onStartPractice?: () => void;
 }
 
-type TabType = 'analysis' | 'review' | 'retake';
+type TabType = 'analysis' | 'review' | 'retake' | 'practice';
 
-const TestResultsPage: React.FC<TestResultsPageProps> = ({
+export const TestResultsPage: React.FC<TestResultsPageProps> = ({
   attempt,
   questions,
   responses,
   onBack,
-  onSubmitRetake
+  onSubmitRetake,
+  mode = 'results',
+  onStartPractice
 }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('analysis');
+  const [activeTab, setActiveTab] = useState<TabType>(mode === 'vault' ? 'analysis' : 'analysis');
 
-  // Handler for retaking the test
   const handleRetakeTest = () => {
-    setActiveTab('retake');
+    if (mode === 'vault' && onStartPractice) {
+      onStartPractice();
+    } else {
+      setActiveTab('retake');
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 font-instrument">
-      {/* Tab Content */}
       {activeTab === 'analysis' ? (
         <PerformanceAnalysis
           attempt={attempt}
@@ -39,6 +44,7 @@ const TestResultsPage: React.FC<TestResultsPageProps> = ({
           onReviewQuestions={() => setActiveTab('review')}
           onRetakeTest={handleRetakeTest}
           onBackToDashboard={onBack}
+          mode={mode}
         />
       ) : activeTab === 'review' ? (
         <TestInterface
@@ -47,14 +53,17 @@ const TestResultsPage: React.FC<TestResultsPageProps> = ({
           completedResponses={responses}
           mode="review"
           onExit={() => setActiveTab('analysis')}
+          onViewAnalysis={() => setActiveTab('analysis')}
+          isVaultMode={mode === 'vault'}
         />
       ) : (
         <TestInterface
           attempt={attempt}
           questions={questions}
           mode="take"
-          onSubmit={onSubmitRetake}
+          onSubmit={onSubmitRetake || (onStartPractice ? (res) => { console.log('Solved in Vault:', res); onBack(); } : undefined)}
           onExit={() => setActiveTab('analysis')}
+          isVaultMode={mode === 'vault'}
         />
       )}
     </div>

@@ -1467,39 +1467,57 @@ export async function getWeakTopics(req, res) {
     if (resourcesError) throw resourcesError;
 
     // Get user's practice performance per topic
+    // 🚀 OPTIMIZATION: Use bulk queries instead of N+1 loop
+    console.log(`⚡️ [PERF] Running bulk analysis for ${topics.length} topics...`);
+
+    // 1. Fetch ALL questions for this subject/exam in one go
+    const { data: allQuestions } = await supabaseAdmin
+      .from('questions')
+      .select('id, topic')
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
+
+    // 2. Fetch ALL relevant practice answers for the user in one go
+    const allQuestionIds = (allQuestions || []).map(q => q.id);
+    const { data: allPracticeAnswers } = allQuestionIds.length > 0
+      ? await supabaseAdmin
+        .from('practice_answers')
+        .select('question_id, is_correct')
+        .in('question_id', allQuestionIds)
+        .eq('user_id', userId)
+      : { data: [] };
+
+    // 🧠 [In-Memory Indexing] Group questions and answers by topic name
+    const questionsByTopic = new Map();
+    (allQuestions || []).forEach(q => {
+      const t = q.topic;
+      if (!questionsByTopic.has(t)) questionsByTopic.set(t, []);
+      questionsByTopic.get(t).push(q.id);
+    });
+
+    const answersByQuestionId = new Map();
+    (allPracticeAnswers || []).forEach(pa => {
+      if (!answersByQuestionId.has(pa.question_id)) answersByQuestionId.set(pa.question_id, []);
+      answersByQuestionId.get(pa.question_id).push(pa.is_correct);
+    });
+
     const weakTopics = [];
 
     for (const topic of topics) {
       const topicResource = topicResources?.find(tr => tr.topic_id === topic.id);
+      const questionIds = questionsByTopic.get(topic.name) || [];
 
-      // Get practice accuracy for this topic
-      // questions table uses 'topic' (singular TEXT), NOT 'topics' (array)
-      // topics table uses 'name', NOT 'topic_name'
-      const { data: questions } = await supabaseAdmin
-        .from('questions')
-        .select('id')
-        .eq('subject', subject)
-        .eq('exam_context', examContext)
-        .eq('topic', topic.name);
-
-      const questionIds = questions?.map(q => q.id) || [];
-
-      let practiceAccuracy = 0;
       let totalPractice = 0;
       let correctPractice = 0;
 
-      if (questionIds.length > 0) {
-        const { data: practiceAnswers } = await supabaseAdmin
-          .from('practice_answers')
-          .select('is_correct')
-          .in('question_id', questionIds)
-          .eq('user_id', userId);
+      // Grouped calculation
+      questionIds.forEach(qid => {
+        const answers = answersByQuestionId.get(qid) || [];
+        totalPractice += answers.length;
+        correctPractice += answers.filter(isCorrect => isCorrect).length;
+      });
 
-        totalPractice = practiceAnswers?.length || 0;
-        correctPractice = practiceAnswers?.filter(pa => pa.is_correct).length || 0;
-        practiceAccuracy = totalPractice > 0 ? Math.round((correctPractice / totalPractice) * 100) : 0;
-      }
-
+      const practiceAccuracy = totalPractice > 0 ? Math.round((correctPractice / totalPractice) * 100) : 0;
       const masteryLevel = topicResource?.mastery_level || 0;
 
       // Calculate weakness score (higher = weaker)

@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Scan } from '../types';
-import ExamAnalysis from './ExamAnalysis';
+import { TestResultsPage } from './TestResultsPage';
+import { transformScanToAttempt } from '../utils/scanTransformers';
+import { useLearningJourney } from '../contexts/LearningJourneyContext';
 
 interface VaultDetailPageProps {
   scanId: string;
@@ -10,21 +12,31 @@ interface VaultDetailPageProps {
 }
 
 const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => {
-  const [scan, setScan] = useState<Scan | null>(null);
+  const { startVaultPractice } = useLearningJourney();
+  const [data, setData] = useState<{
+    scan: Scan;
+    attempt: any;
+    questions: any[];
+    responses: any[];
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [year, setYear] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchScanData();
+    fetchScanAndPracticeData();
   }, [scanId]);
 
-  const fetchScanData = async () => {
+  const fetchScanAndPracticeData = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Fetch the full scan with all data
+      // 1. Fetch User ID
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      if (!userId) throw new Error('User not authenticated');
+
+      // 2. Fetch the full scan with all data
       const { data: scanData, error: scanError } = await supabase
         .from('scans')
         .select('*')
@@ -32,12 +44,18 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => 
         .single();
 
       if (scanError) throw scanError;
+      if (!scanData) throw new Error('Scan not found');
 
-      if (!scanData) {
-        throw new Error('Scan not found');
-      }
+      // 3. Fetch practice answers for this scan to show solved status
+      const { data: practiceData } = await supabase
+        .from('practice_answers')
+        .select('question_id')
+        .eq('user_id', userId)
+        .eq('is_correct', true);
 
-      // Map database columns to Scan type format
+      const solvedQuestionIds = new Set(practiceData?.map(p => p.question_id) || []);
+
+      // 4. Map database columns to Scan type format
       const mappedScan: Scan = {
         id: scanData.id,
         name: scanData.name,
@@ -50,30 +68,18 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => 
         analysisData: scanData.analysis_data
       };
 
-      setScan(mappedScan);
-      console.log('🏛️ [VaultDetailPage] Scan data loaded:', mappedScan.id);
+      // 5. Transform for TestResultsPage
+      const transformed = transformScanToAttempt(mappedScan, userId, solvedQuestionIds);
 
-      // Extract year from questions for this scan
-      const { data: questionData } = await supabase
-        .from('questions')
-        .select('year')
-        .eq('scan_id', scanId)
-        .not('year', 'is', null)
-        .limit(1)
-        .maybeSingle();
+      setData({
+        scan: mappedScan,
+        ...transformed
+      });
 
-      if (questionData?.year) {
-        setYear(questionData.year);
-      } else {
-        // Fallback: try to extract year from scan name (e.g., "KCET 2023 MATH")
-        const yearMatch = scanData.name?.match(/\b(20\d{2})\b/);
-        if (yearMatch) {
-          setYear(yearMatch[1]);
-        }
-      }
+      console.log('🏛️ [VaultDetailPage] Scan & Practice data loaded:', mappedScan.id);
     } catch (err) {
-      console.error('Error fetching scan:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load scan');
+      console.error('Error fetching scan data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load vault item');
     } finally {
       setIsLoading(false);
     }
@@ -82,29 +88,33 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 size={48} className="text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-sm font-medium text-slate-600">Loading exam paper...</p>
+        <div className="text-center animate-in fade-in zoom-in duration-700">
+          <div className="w-20 h-20 bg-slate-900 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-2xl border border-white/10 relative">
+            <div className="absolute inset-0 bg-indigo-500/20 rounded-[2rem] animate-ping" />
+            <Loader2 size={32} className="text-indigo-400 animate-spin relative z-10" />
+          </div>
+          <h3 className="text-xl font-black text-slate-900 font-outfit uppercase tracking-tighter mb-1">Looking into the Vault</h3>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">Wait until you see what's hidden inside...</p>
         </div>
       </div>
     );
   }
 
-  if (error || !scan) {
+  if (error || !data) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="bg-white border-2 border-red-200 rounded-xl p-8 max-w-md w-full">
+        <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] p-10 max-w-md w-full shadow-2xl">
           <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-3xl">⚠️</span>
             </div>
-            <h2 className="font-black text-xl text-slate-900 mb-2">Failed to Load</h2>
-            <p className="text-sm text-slate-600 mb-6">{error || 'Scan not found'}</p>
+            <h2 className="font-black text-xl text-slate-900 mb-2 font-outfit uppercase tracking-tight">Access Error</h2>
+            <p className="text-sm text-slate-600 mb-8 font-instrument">{error || 'Vault item not found'}</p>
             <button
               onClick={onBack}
-              className="px-6 py-3 bg-slate-900 text-white rounded-lg text-sm font-black hover:bg-slate-800 transition-all"
+              className="w-full py-4 bg-slate-900 text-white rounded-2xl text-sm font-black hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
             >
-              Go Back
+              Back to Archive
             </button>
           </div>
         </div>
@@ -112,14 +122,20 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => 
     );
   }
 
+  const handleStartPractice = () => {
+    if (data && scanId) {
+      void startVaultPractice(scanId, data.questions);
+    }
+  };
+
   return (
-    <ExamAnalysis
+    <TestResultsPage
+      attempt={data.attempt}
+      questions={data.questions}
+      responses={data.responses}
       onBack={onBack}
-      scan={scan}
-      recentScans={[scan]}
-      showOnlyVault={true}
-      year={year || undefined}
-      onUpdateScan={(updatedScan) => setScan(updatedScan)}
+      mode="vault"
+      onStartPractice={handleStartPractice}
     />
   );
 };

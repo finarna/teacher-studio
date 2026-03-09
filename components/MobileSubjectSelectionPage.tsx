@@ -418,7 +418,7 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                                             <BookOpen size={16} />
                                                         </div>
                                                         <div className="text-left">
-                                                            <div className="text-xs font-bold text-slate-900">Node Syllabus</div>
+                                                            <div className="text-xs font-bold text-slate-900">Topic Mastery Hub</div>
                                                             <div className="text-[8px] font-bold text-slate-400 tracking-wide">Conceptual Masterclass</div>
                                                         </div>
                                                     </div>
@@ -434,7 +434,7 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                                             <HistoryIcon size={16} />
                                                         </div>
                                                         <div className="text-left">
-                                                            <div className="text-xs font-bold text-slate-900">Exam Vault</div>
+                                                            <div className="text-xs font-bold text-slate-900">Solved Paper Vault</div>
                                                             <div className="text-[8px] font-bold text-slate-400 tracking-wide">Practice Past Papers</div>
                                                         </div>
                                                     </div>
@@ -450,8 +450,8 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                                             <Zap size={16} />
                                                         </div>
                                                         <div className="text-left">
-                                                            <div className="text-xs font-bold text-slate-900">Mock Missions</div>
-                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">Custom Skill Sprint</div>
+                                                            <div className="text-xs font-bold text-slate-900">Exam Prediction and Simulation Test Engine</div>
+                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">Adaptive Hybrid • Pattern Prediction</div>
                                                         </div>
                                                     </div>
                                                     <ArrowRight size={12} className="text-slate-300" />

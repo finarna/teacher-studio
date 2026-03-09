@@ -1022,7 +1022,7 @@ Schema: {
             showBack
             onBack={onBack}
             icon={<FolderOpen size={24} className="text-white" />}
-            title="Exam Vault"
+            title="Solved Paper Vault"
             subtitle={`${scan?.subject || activeSubject} • ${scan?.examContext || examConfig.id}${year ? ` • ${year}` : ''} `}
             description="Browse and practice exam questions"
             subject={(scan?.subject || activeSubject) as Subject}
@@ -1396,7 +1396,7 @@ Schema: {
                         <th className="px-8 py-5">Category Cluster</th>
                         <th className="px-8 py-5">High-Yield Tracks</th>
                         <th className="px-8 py-5 text-center">Marks</th>
-                        <th className="px-8 py-5">Cognitive DNA</th>
+                        <th className="px-8 py-5">Skill Analysis</th>
                         <th className="px-8 py-5">Control Point</th>
                       </tr>
                     </thead>

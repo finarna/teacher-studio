@@ -753,7 +753,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                     >
                       <Sparkles size={14} style={{ color: theme.color }} />
                       <span className="text-xs font-black tracking-wide" style={{ color: theme.colorDark }}>
-                        AI ALIGNED
+                        CURATED
                       </span>
                     </div>
                   )}
@@ -774,7 +774,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                       <Sparkles size={16} className="text-purple-200 group-hover:rotate-12 transition-transform" />
                     )}
                     <span className="uppercase tracking-wider">
-                      {isGenerating ? 'Generating...' : 'Generate Questions'}
+                      {isGenerating ? 'Prepping...' : 'Generate Questions'}
                     </span>
                   </button>
 
@@ -834,8 +834,8 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
           {isLoadingQuestions ? (
             <div className="flex flex-col items-center justify-center h-full">
               <Loader2 className="w-16 h-16 animate-spin mb-4" style={{ color: theme.color }} />
-              <p className="text-lg font-bold text-slate-600">Loading questions...</p>
-              <p className="text-sm text-slate-400 mt-2">Please wait while we fetch your data</p>
+              <p className="text-lg font-bold text-slate-600">Finding your questions...</p>
+              <p className="text-sm text-slate-400 mt-2">Wait until you see what we've found for you</p>
             </div>
           ) : (
             <div className="max-w-7xl mx-auto space-y-4 pb-16">

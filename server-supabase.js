@@ -1777,26 +1777,12 @@ app.get('/api/learning-journey/subjects/:trajectory', async (req, res) => {
       });
     }
 
-    const { aggregateTopicsForUser } = await import('./lib/topicAggregator.ts');
-
+    const { getSubjectSummaryStats } = await import('./lib/topicAggregator.ts');
     const subjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
-    const subjectProgress = await Promise.all(
-      subjects.map(async (subject) => {
-        const topics = await aggregateTopicsForUser(supabaseAdmin, userId, subject, trajectory);
 
-        return {
-          subject,
-          totalTopics: topics.length,
-          topicsWithQuestions: topics.filter(t => t.totalQuestions > 0).length,
-          totalQuestions: topics.reduce((sum, t) => sum + t.totalQuestions, 0),
-          overallMastery: topics.length > 0
-            ? Math.round(topics.reduce((sum, t) => sum + t.masteryLevel, 0) / topics.length)
-            : 0,
-          overallAccuracy: topics.filter(t => t.questionsAttempted > 0).length > 0
-            ? Math.round(topics.reduce((sum, t) => sum + (t.questionsAttempted > 0 ? t.averageAccuracy : 0), 0) / topics.filter(t => t.questionsAttempted > 0).length)
-            : 0
-        };
-      })
+    // 🚀 [PERF] Use lean aggregator for subjects overview
+    const subjectProgress = await Promise.all(
+      subjects.map(subject => getSubjectSummaryStats(supabaseAdmin, userId, subject, trajectory))
     );
 
     res.json({
@@ -2186,6 +2172,8 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
       .select('id, test_name, subject, exam_context, percentage, raw_score, marks_obtained, marks_total, total_questions, questions_attempted, status, created_at, completed_at, duration_minutes, total_duration, topic_analysis, time_analysis')
       .eq('user_id', userId)
       .eq('test_type', 'custom_mock')
+      .eq('status', 'completed')   // ← only show properly submitted tests
+      .not('percentage', 'is', null) // ← must have a score
       .order('created_at', { ascending: false })
       .limit(parseInt(limit));
 
@@ -2258,7 +2246,9 @@ app.post('/api/learning-journey/ai-summary', async (req, res) => {
       topicStats,       // { topicName: { correct, total, accuracy } }
       difficultyStats,  // { Easy: { correct, total }, Moderate: { ... }, Hard: { ... } }
       avgTimePerQuestion,
-      totalTimeSeconds
+      totalTimeSeconds,
+      isBlueprint,      // Explicit flag for blueprint analysis
+      bloomStats        // Cognitive distribution
     } = req.body;
 
     if (!subject || !examContext || percentage === undefined) {
@@ -2266,45 +2256,111 @@ app.post('/api/learning-journey/ai-summary', async (req, res) => {
     }
 
     const topicLines = Object.entries(topicStats || {})
-      .map(([t, s]) => `  - ${t}: ${s.correct}/${s.total} correct (${s.accuracy}%)`)
+      .map(([t, s]) => `  - ${t}: ${s.correct}/${s.total} questions (${s.accuracy || 0}% share)`)
       .join('\n');
 
     const diffLines = Object.entries(difficultyStats || {})
-      .map(([d, s]) => `  - ${d}: ${s.correct}/${s.total} correct (${s.total > 0 ? Math.round(s.correct / s.total * 100) : 0}%)`)
+      .map(([d, s]) => `  - ${d}: ${s.total} questions (${s.total > 0 && totalQuestions > 0 ? Math.round(s.total / totalQuestions * 100) : 0}%)`)
       .join('\n');
 
-    const prompt = `You are a Senior Professor and Expert Coach for the ${examContext} exam. 
-    Analyze this dedicated student's mock test results and provide a deeply personal, authoritative, yet supportive coaching report.
-    Speak directly to the student ("You did well in...", "I noticed that you...", "Your priority must be...").
+    const bloomLines = Object.entries(bloomStats || {})
+      .map(([b, c]) => `  - ${b}: ${c} questions`)
+      .join('\n');
 
-    TEST DATA:
-    - Test Name: "${testName}"
-    - Subject: ${subject}
-    - Score: ${percentage}%
-    - Performance: ${correctAnswers} correct, ${incorrectAnswers} incorrect, ${skippedAnswers} skipped out of ${totalQuestions}
-    - Speed Analysis: Average ${avgTimePerQuestion}s per question (Total Time: ${Math.round((totalTimeSeconds || 0) / 60)} min).
+    let prompt;
+    if (isBlueprint) {
+      prompt = `You are the Lead Academic Auditor and Chief Paper Strategist for ${examContext}. 
+      Task: Perform a deep-dive forensic analysis of the "${testName}" ${subject} official paper.
 
-    TOPIC-WISE PERFORMANCE:
-    ${topicLines || '  (not available)'}
+      ### ACADEMIC CONTEXT:
+      - This is NOT a general mock test. This is an official ${examContext} PYQ.
+      - Every insight must be specific to ${examContext} standards. 
+      - (Example: If the paper is KCET, focus on 'Speed vs Precision' and 'NCERT-plus' depth. If JEE, focus on 'Multi-concept integration' and 'Numerical Rigor').
+      
+      ### QUANTITATIVE DATASET:
+      - Subject: ${subject}
+      - Total Question Volume: ${totalQuestions}
+      - Topic Weightage Peaks:
+      ${topicLines || '  (not available)'}
+      - Difficulty Distribution:
+      ${diffLines || '  (not available)'}
+      - Cognitive mapping (Bloom's Taxonomy):
+      ${bloomLines || '  (not available)'}
 
-    DIFFICULTY ANALYSIS:
-    ${diffLines || '  (not available)'}
+      ### YOUR DIRECTIVES:
+      1. **Exam Philosophy**: Define how this year deviates or confirms ${examContext} historical trends.
+      2. **The "Trap" Profile**: KCET often uses time-traps (long calculations) while JEE uses conceptual-traps. Identify which specific pattern this paper follows.
+      3. **Strategic Blueprint**: For a student aiming for a top rank in ${examContext}, what is the 'Safe Score' trajectory based on this specific difficulty?
+      4. **Detailed Action items**: Provide technical prep points (e.g., "Master 2nd order derivatives pattern" rather than "Study Calculus").
 
-    Return ONLY valid JSON in exactly this structure:
-    {
-      "verdict": "A sharp, professor-like 1-2 sentence assessment. Tell them exactly where they stand in their ${examContext} journey and the #1 breakthrough they need.",
-      "strengths": [
-        {"title": "Mastery in [Topic]", "detail": "A coaching insight about why they succeeded here, using specific accuracy % from their data."},
-        {"title": "Skill Breakthrough", "detail": "A positive observation about their performance (e.g., speed, accuracy, or difficulty handling) based on numbers."}
-      ],
-      "weaknesses": [
-        {"title": "Critical Gap: [Topic]", "detail": "Explain exactly what went wrong in this topic and why this specific weakness will cost them marks in ${examContext}."},
-        {"title": "Performance Leak", "detail": "Identify a specific pattern (e.g., time management on Hard questions or skipping behavior) and translate it into a direct area for focus."}
-      ],
-      "studyPlan": "Your 7-Day Action Plan: Provide a concrete roadmap. Mention specific hours, priority topics from their data, and study techniques (e.g., 'Spend 2 hours on Tuesday specifically on [Topic] to master [Specific Sub-concept]'). Be precise and actionable."
+      ### STRICT CONSISTENCY RULES:
+      1. **NO GENERIC ADVICE**: Avoid "Study hard" or "Practice more". Use technical terms specific to ${subject}.
+      2. **NO JEE REFERENCES IN NON-JEE PAPERS**: If the context is KCET, analyze it AS KCET. Do not compare to JEE unless highlighting a specific outlier question.
+      3. **COHERENCE**: The 'entropyScore' and 'verdict' must match. A 'High Endurance' verdict implies a high 'volatilityScore' or 'cognitiveLoad'.
+
+      Return ONLY valid JSON in this structure:
+      {
+        "verdict": "A sharp, 2-sentence technical summary of the paper's tactical objective.",
+        "strengths": [
+          {"title": "Historical Comparison", "detail": "How this specific year compares to the past 5 years of ${examContext} in ${subject}."},
+          {"title": "High Yield Anomaly", "detail": "A specific sub-topic that was unexpectedly heavy or high-reward."}
+        ],
+        "weaknesses": [
+          {"title": "The Rank-Breaker Zone", "detail": "Identify the 5-10 questions that separate the top 1% from the rest."},
+          {"title": "Tactical Blindspot", "detail": "The most common reason even good students lose marks in this specific paper's layout."}
+        ],
+        "studyPlan": "ARCHIVE STRATEGY: 3 specific technical drill points to master this paper's unique DNA. Be precise about ${subject} concepts.",
+        "paperStats": {
+          "entropyScore": 85, 
+          "entropyLabel": "Deep Logic",
+          "volatilityScore": 42,
+          "volatilityLabel": "Stable",
+          "trapProbability": 15,
+          "trapLabel": "Time-Sink Heavy",
+          "strategicFocus": "Calculation Mastery",
+          "strategicPacing": 72,
+          "cognitiveLoad": 78,
+          "cognitiveLabel": "High Endurance",
+          "topicSynergy": "Specific Concept Linkages (e.g. Vectors-3D)",
+          "preparationVelocity": "Specific Pace Recommendation"
+        }
+      }
+
+      FIELD DEFINITIONS:
+      - entropyScore (0-100): Measure of logic interconnectivity.
+      - entropyLabel: KCET style labels like "Direct Application", "Formula Intensive", "Hybrid Logic".
+      - strategicFocus: The 'Center of Gravity' of the paper.`;
+    } else {
+      prompt = `You are a Senior Professor and Expert Coach for the ${examContext} exam. 
+      Analyze this dedicated student's mock test results and provide a deeply personal, authoritative, yet supportive coaching report.
+      Speak directly to the student ("You did well in...", "I noticed that you...", "Your priority must be...").
+
+      TEST DATA:
+      - Test Name: "${testName}"
+      - Score: ${percentage}%
+      - Performance: ${correctAnswers} correct, ${incorrectAnswers} incorrect, ${skippedAnswers} skipped out of ${totalQuestions}
+      - Speed Analysis: Average ${avgTimePerQuestion}s per question.
+
+      TOPIC-WISE PERFORMANCE:
+      ${topicLines || '  (not available)'}
+
+      Return ONLY valid JSON in exactly this structure:
+      {
+        "verdict": "A sharp assessment of where they stand.",
+        "strengths": [
+          {"title": "Mastery in [Topic]", "detail": "Insight about their success using actual %."},
+          {"title": "Skill Breakthrough", "detail": "A positive numeric observation."}
+        ],
+        "weaknesses": [
+          {"title": "Critical Gap: [Topic]", "detail": "Explain why this costs marks."},
+          {"title": "Performance Leak", "detail": "Numeric pattern analysis."}
+        ],
+        "studyPlan": "Your 7-Day Action Plan: Concrete daily roadmap with hours and sub-topics."
+      }`;
     }
 
-    PROFESSOR'S DIRECTIVE: Be direct, specific, and use actual numbers from the data. Avoid generic advice at all costs. Talk to them like a mentor in a private session.`;
+    const PROFESSOR_DIRECTIVE = "Return ONLY the JSON. Be direct, authoritative and use actual numbers.";
+    prompt += `\n\n${PROFESSOR_DIRECTIVE}`;
 
     const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
     if (!GEMINI_KEY) {
@@ -2348,20 +2404,37 @@ app.post('/api/learning-journey/ai-summary', async (req, res) => {
     // Persist AI summary to database if attemptId provided
     if (attemptId) {
       try {
-        const { error: updateError } = await supabaseAdmin
-          .from('test_attempts')
-          .update({ ai_report: summary })
-          .eq('id', attemptId);
+        if (typeof attemptId === 'string' && attemptId.startsWith('scan-')) {
+          const scanId = attemptId.replace('scan-', '');
+          // Update scan's analysis_data with the persistent AI report
+          const { data: scan } = await supabaseAdmin.from('scans').select('analysis_data').eq('id', scanId).maybeSingle();
+          if (scan) {
+            const updatedAnalysis = {
+              ...(scan.analysis_data || {}),
+              ai_report: summary
+            };
+            const { error: scanErr } = await supabaseAdmin
+              .from('scans')
+              .update({ analysis_data: updatedAnalysis })
+              .eq('id', scanId);
 
-        if (updateError) {
-          console.error('Failed to persist AI summary:', updateError);
-          // Don't fail the request, just log the error
+            if (scanErr) console.error('Failed to persist AI report to scan:', scanErr);
+            else console.log(`✅ AI summary persisted to scan ${scanId}`);
+          }
         } else {
-          console.log(`✅ AI summary persisted for attempt ${attemptId}`);
+          const { error: updateError } = await supabaseAdmin
+            .from('test_attempts')
+            .update({ ai_report: summary })
+            .eq('id', attemptId);
+
+          if (updateError) {
+            console.error('Failed to persist AI summary:', updateError);
+          } else {
+            console.log(`✅ AI summary persisted for attempt ${attemptId}`);
+          }
         }
       } catch (persistErr) {
         console.error('Error persisting AI summary:', persistErr);
-        // Don't fail the request
       }
     }
 

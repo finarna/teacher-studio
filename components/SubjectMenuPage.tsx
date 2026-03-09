@@ -11,7 +11,8 @@ import {
   Play,
   Calculator,
   Atom,
-  Leaf
+  Leaf,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Subject, ExamContext } from '../types';
@@ -182,35 +183,35 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
     {
       id: 'past_exams' as const,
       icon: Calendar,
-      title: 'Exam Vault',
-      description: 'Browse and solve previous exam papers with detailed explanations',
+      title: 'Solved Paper Vault',
+      description: 'Solve real past papers with AI-powered step-by-step logic',
       gradient: 'from-blue-500 to-blue-600',
       stats: stats.totalPapers > 0
         ? `${stats.totalPapers} ${stats.totalPapers === 1 ? 'paper' : 'papers'} • ${stats.availableYears.length} ${stats.availableYears.length === 1 ? 'year' : 'years'} • ${stats.pastYearQuestionsCount} questions`
-        : 'Loading...',
+        : 'Looking into the vault...',
       badge: stats.availableYears.length > 0 ? `${stats.availableYears.length} Years` : null,
       illustration: 'blackboard' // Blackboard with years, formulas, graphs
     },
     {
       id: 'topicwise' as const,
       icon: BookOpen,
-      title: 'Node Syllabus',
-      description: 'Master topics systematically with Learn, Practice, Quiz, Flashcards',
+      title: 'Topic Mastery Hub',
+      description: 'Tailored topic mastery with historical pattern analysis',
       gradient: 'from-purple-500 to-purple-600',
       stats: stats.totalTopics > 0
         ? `${stats.totalTopics} topics available`
-        : 'Loading...',
+        : 'Checking what\'s available...',
       badge: stats.masteredTopics > 0 ? `${stats.masteredTopics} Mastered` : null,
       illustration: 'study-desk' // Study desk with books, flashcards, notes
     },
     {
       id: 'mock_builder' as const,
       icon: Zap,
-      title: 'Mock Missions',
-      description: 'Create personalized practice tests tailored to your weak areas',
+      title: 'Exam Prediction and Simulation Test Engine',
+      description: 'Adaptive hybrid tests that predict exam patterns with near-real question sets',
       gradient: 'from-amber-500 to-amber-600',
-      stats: 'AI-powered recommendations',
-      badge: stats.customTestsTaken > 0 ? `${stats.customTestsTaken} Tests Taken` : 'New!',
+      stats: 'Pattern Prediction • Adaptive • Hybrid',
+      badge: stats.customTestsTaken > 0 ? `${stats.customTestsTaken} Tests Taken` : 'AI ACTIVE',
       illustration: 'ai-brain' // AI brain analyzing performance graphs
     }
   ];
@@ -560,7 +561,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (mastery === 0) {
                         return (
                           <>
-                            "The <span className="text-white font-bold">{subject} Mission Center</span> is initialized. Since you haven't started yet, I recommend beginning with <span className="text-white font-bold">Node Syllabus</span> to establish your baseline concepts."
+                            "The <span className="text-white font-bold">{subject} Mission Center</span> is initialized. Since you haven't started yet, I recommend beginning with <span className="text-white font-bold">Topic Mastery Hub</span> to establish your baseline concepts."
                           </>
                         );
                       }
@@ -568,7 +569,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (mastery < 30) {
                         return (
                           <>
-                            "You are in the <span className="text-white font-bold">Foundation Building</span> phase. Focus on high-weightage topics in <span className="text-white font-bold">Node Syllabus</span> to quickly boost your Command metric before moving to papers."
+                            "You are in the <span className="text-white font-bold">Foundation Building</span> phase. Focus on high-weightage topics in <span className="text-white font-bold">Topic Mastery Hub</span> to quickly boost your Command metric before moving to papers."
                           </>
                         );
                       }
@@ -576,7 +577,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (accuracy < 60 && mastery > 20) {
                         return (
                           <>
-                            "Your coverage is growing, but your <span className="text-white font-bold">Accuracy</span> is under 60%. I recommend <span className="text-white font-bold">Mock Missions</span> focused on your recently practiced topics to stabilize your fundamentals."
+                            "Your coverage is growing, but your <span className="text-white font-bold">Accuracy</span> is under 60%. I recommend the <span className="text-white font-bold">Exam Prediction and Simulation Test Engine</span> focused on your recently practiced topics to stabilize your fundamentals."
                           </>
                         );
                       }
@@ -584,7 +585,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (mastery > 70) {
                         return (
                           <>
-                            "Your <span className="text-white font-bold">Concept Density</span> in high-yield topics is excellent. I recommend pivoting to <span className="text-white font-bold">Exam Vault</span> to improve your session stamina for the upcoming {examContext} cycle."
+                            "Your <span className="text-white font-bold">Concept Density</span> in high-yield topics is excellent. I recommend pivoting to <span className="text-white font-bold">Solved Paper Vault</span> to improve your session stamina for the upcoming {examContext} cycle."
                           </>
                         );
                       }
@@ -666,8 +667,8 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       <div className="text-[10px] font-bold text-slate-900 uppercase tracking-widest leading-none">
                         {isLoading ? (
                           <div className="flex items-center gap-1.5">
-                            <div className="w-1 h-1 rounded-full bg-slate-400 animate-pulse" />
-                            <span className="text-[9px] text-slate-400">Syncing...</span>
+                            <Loader2 size={10} className="text-slate-400 animate-spin" />
+                            <span className="text-[9px] text-slate-400 uppercase tracking-widest">Updating...</span>
                           </div>
                         ) : (
                           card.stats

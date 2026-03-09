@@ -383,7 +383,7 @@ const MobileTopicDetailPage: React.FC<TopicDetailPageProps> = ({
                         <ChevronLeft size={24} />
                     </button>
                     <div className="mt-6">
-                        <h3 className="text-xl font-black font-outfit uppercase italic tracking-tighter">Retroactive Analysis</h3>
+                        <h3 className="text-xl font-black font-outfit uppercase italic tracking-tighter">Your Performance Review</h3>
                         <div className="flex items-center gap-2 mt-1">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
                                 {new Date(reviewQuiz.createdAt || reviewQuiz.created_at).toLocaleDateString()}
@@ -479,7 +479,7 @@ const MobileTopicDetailPage: React.FC<TopicDetailPageProps> = ({
                                 <div className="pt-4 border-t border-slate-50 space-y-3">
                                     <div className="flex items-center gap-2 text-blue-600">
                                         <Brain size={16} />
-                                        <span className="text-[9px] font-black uppercase tracking-widest">Protocol Insight</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest">AI Pattern Insight</span>
                                     </div>
                                     <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-5">
                                         {q.solutionSteps && (
@@ -531,7 +531,7 @@ const MobileTopicDetailPage: React.FC<TopicDetailPageProps> = ({
                 showBack
                 onBack={onBack}
                 title={topicResource.topicName}
-                subtitle={`${subject} • ${activeTab === 'practice' ? 'SOLVE QUEST' : activeTab === 'quiz' ? 'SIMULATION' : 'MISSION MODE'}`}
+                subtitle={`${subject} • ${activeTab === 'practice' ? 'PRACTICE ZONE' : activeTab === 'quiz' ? 'MOCK CHALLENGE' : 'STUDY HUB'}`}
                 subject={subject}
                 trajectory={examContext}
                 mastery={localStats.masteryLevel}

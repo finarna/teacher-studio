@@ -350,37 +350,6 @@ const AdminScanApproval: React.FC = () => {
         return;
       }
 
-      const { data: otherScans } = await supabase
-        .from('scans')
-        .select('id')
-        .eq('subject', scan.subject)
-        .eq('exam_context', scan.exam_context)
-        .eq('is_system_scan', true)
-        .neq('id', scanId);
-
-      if (otherScans && otherScans.length > 0) {
-        for (const otherScan of otherScans) {
-          const { data: otherQuestions } = await supabase
-            .from('questions')
-            .select('id')
-            .eq('scan_id', otherScan.id);
-
-          if (otherQuestions && otherQuestions.length > 0) {
-            const questionIds = otherQuestions.map(q => q.id);
-            await supabase
-              .from('topic_question_mapping')
-              .delete()
-              .in('question_id', questionIds);
-          }
-        }
-      }
-
-      await supabase
-        .from('scans')
-        .update({ is_system_scan: false })
-        .eq('subject', scan.subject)
-        .eq('exam_context', scan.exam_context)
-        .neq('id', scanId);
 
       const extractYearFromFilename = (name: string): string | null => {
         if (!name) return null;

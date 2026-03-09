@@ -629,11 +629,13 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
   // Memoize sorted history to avoid in-render mutation and improve performance
   const sortedHistory = React.useMemo(() => {
-    return [...testHistory].sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return dateB - dateA;
-    });
+    return [...testHistory]
+      .filter(a => a.status === 'completed' && a.percentage != null)
+      .sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
   }, [testHistory]);
 
   return (
@@ -680,7 +682,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
         <div className="flex items-center gap-8 mb-8 border-b border-slate-200 sticky top-[72px] bg-[#F8FAFC]/80 backdrop-blur-md z-40 py-2">
           {[
             { id: 'builder', label: 'Create New Test', icon: <Target size={20} className="text-indigo-600" />, badge: null },
-            { id: 'history', label: 'My Past Tests', icon: <History size={20} className="text-emerald-600" />, badge: testHistory.length }
+            { id: 'history', label: 'My Past Tests', icon: <History size={20} className="text-emerald-600" />, badge: sortedHistory.length }
           ].map(tab => {
             const isActive = activeTab === tab.id;
             return (
@@ -849,14 +851,13 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                   <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded ${oracleModeEnabled ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-600'}`}>Ultimate Core</span>
                                   {oracleModeEnabled && <span className="animate-pulse flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]" />}
                                 </div>
-                                <span className={`text-xl font-black block font-outfit ${oracleModeEnabled ? 'text-white' : 'text-slate-900'}`}>Premium REI Oracle v3.0</span>
-                                <span className={`text-xs font-bold block ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-400'}`}>Full Autonomous Calibration & Score Projection</span>
+                                <span className={`text-xl font-black block font-outfit ${oracleModeEnabled ? 'text-white' : 'text-slate-900'}`}>Smart Exam Assistant</span>
+                                <span className={`text-xs font-bold block ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-400'}`}>Personalized Topic Balance & Score Prediction</span>
                               </div>
                             </div>
 
                             <div className="flex items-center gap-3 relative z-10">
                               <div className={`flex flex-col items-end hidden md:flex mr-4 ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-300'}`}>
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Neural Mode</span>
                                 <span className="text-xs font-bold uppercase">{oracleModeEnabled ? 'Fully Active' : 'Standby'}</span>
                               </div>
                               <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 shadow-lg scale-110' : 'bg-slate-50 text-slate-300'}`}>
@@ -879,7 +880,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-1.5">
                               <h4 className={`text-sm font-black uppercase tracking-[0.15em] ${oracleModeEnabled ? 'text-indigo-400' : 'text-indigo-600'}`}>
-                                {oracleModeEnabled ? 'Autonomous Oracle Protocol' : strategyMode === 'predictive_mock' ? 'Ultimate Simulation' : strategyMode === 'hybrid' ? 'Mastery Mix' : 'Rapid Recovery'}
+                                {oracleModeEnabled ? 'AI Performance Oracle' : strategyMode === 'predictive_mock' ? 'Scientific Simulation' : strategyMode === 'hybrid' ? 'Adaptive Hybrid' : 'Rapid Recovery'}
                               </h4>
                               <div className={`flex items-center gap-2 px-2 py-1 rounded-lg border ${oracleModeEnabled ? 'bg-indigo-500/20 border-indigo-500/30' : 'bg-white border-indigo-100'}`}>
                                 <div className={`w-1.5 h-1.5 rounded-full ${oracleModeEnabled ? 'bg-emerald-400' : 'bg-indigo-500'} shadow-[0_0_8px_rgba(99,102,241,0.6)]`} />
@@ -888,7 +889,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                             </div>
                             <p className={`text-sm font-medium leading-relaxed ${oracleModeEnabled ? 'text-indigo-100/80' : 'text-slate-500'}`}>
                               {oracleModeEnabled
-                                ? "Full autonomous synthesis enabled. The REI Oracle is now managing all topic weightages, difficulty profiling, and pattern replication for maximum score impact."
+                                ? "Our AI analyzes historical board patterns and your current progress to build the most predictive exam experience possible."
                                 : theme.strategyNote?.[strategyMode === 'predictive_mock' ? 'predictive_mock' : strategyMode === 'hybrid' ? 'hybrid' : 'adaptive_growth'] || "Your assessment is being optimized based on selected intelligence parameters."
                               }
                             </p>
@@ -908,7 +909,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           disabled={!testName.trim()}
                           className={`px-12 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-3 ${!testName.trim() ? 'bg-slate-50 text-slate-300 border border-slate-200 cursor-not-allowed' : 'bg-slate-900 text-white shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-1 active:scale-95'}`}
                         >
-                          {strategyMode === 'predictive_mock' || oracleModeEnabled ? 'Review Deployment Matrix' : 'Initialize Calibration'}
+                          {strategyMode === 'predictive_mock' || oracleModeEnabled ? 'Review Setup' : 'Start Preparing'}
                           <ArrowRight size={20} className={!testName.trim() ? '' : 'animate-pulse'} />
                         </button>
                       </div>
@@ -939,7 +940,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           <div className="flex flex-col items-end">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Strategy</span>
                             <span className="text-xs font-bold uppercase tracking-tight text-slate-900">
-                              {oracleModeEnabled ? 'Intelligence Oracle Control' : strategyMode === 'predictive_mock' ? 'Ultimate Simulation' : strategyMode === 'hybrid' ? 'Mastery Mix' : 'Rapid Recovery'}
+                              {oracleModeEnabled ? 'AI Predictive Oracle' : strategyMode === 'predictive_mock' ? 'Scientific Mock Simulation' : strategyMode === 'hybrid' ? 'Adaptive Progress Hub' : 'Rapid Recovery'}
                             </span>
                           </div>
                         </div>
@@ -1027,7 +1028,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                       </div>
 
                       <div className="space-y-4">
-                        {/* REI v3.0 Neural Forecast Panel */}
+                        {/* Performance Forecast Panel */}
                         {(oracleModeEnabled || strategyMode === 'predictive_mock') && (
                           <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -1045,7 +1046,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                     <Cpu size={20} />
                                   </div>
                                   <div className="cursor-pointer" onClick={() => setShowForecastExplanation(true)}>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-1.5">REI-v3 Forecast <Info size={10} /></span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-1.5">Your Forecast <Info size={10} /></span>
                                     <h3 className="text-sm font-bold font-outfit">Predictive Analytics</h3>
                                   </div>
                                 </div>
@@ -1074,7 +1075,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
                               <div className="space-y-4">
                                 <div className="flex items-center justify-between mb-1">
-                                  <span className="text-[10px] font-black text-indigo-300/80 uppercase tracking-widest">Neural Intent Signatures</span>
+                                  <span className="text-[10px] font-black text-indigo-300/80 uppercase tracking-widest">Growth Signatures</span>
                                   <Dna size={14} className="text-indigo-400 opacity-50" />
                                 </div>
                                 <div className="space-y-3">
@@ -1211,7 +1212,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                               <Loader2 size={24} className="animate-spin text-indigo-400" />
                               <div className="absolute inset-0 animate-ping opacity-20 bg-indigo-400 rounded-full" />
                             </div>
-                            <span className="relative z-10 uppercase tracking-widest text-sm">Synthesizing Neural Blueprint...</span>
+                            <span className="relative z-10 uppercase tracking-widest text-sm">Building Your Challenge...</span>
                           </>
                         ) : (
                           <>
@@ -1239,7 +1240,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                               <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">{progressMessage}</span>
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                <span className="text-xs font-bold text-slate-400">REI-v3 Engine Active</span>
+                                <span className="text-xs font-bold text-slate-400">Smart Engine Active</span>
                               </div>
                             </div>
                             <span className="text-2xl font-black text-white font-mono">{progressPercentage}%</span>
@@ -1301,7 +1302,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                     {isLoadingHistory ? (
                       <div className="py-24 flex flex-col items-center justify-center gap-4">
                         <Loader2 size={32} className="animate-spin text-indigo-600" />
-                        <span className="text-sm font-bold text-slate-400">Loading Assessment History...</span>
+                        <span className="text-sm font-bold text-slate-400">Finding Your Past Results...</span>
                       </div>
                     ) : sortedHistory.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

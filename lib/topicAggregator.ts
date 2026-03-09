@@ -50,108 +50,49 @@ export async function aggregateTopicsForUser(
     const topicNameToId = new Map<string, string>();
     examTopics.forEach(t => topicNameToId.set(t.name, t.id));
 
-    // 3. Get user's scans + system scans (shared question bank) WITHOUT analysis_data
-    // We no longer need to fetch analysis_data here - questions are in the questions table
-    const { data: scans, error: scansError } = await supabase
-      .from('scans')
-      .select('id, subject, exam_context, year')
-      .or(`user_id.eq.${userId},is_system_scan.eq.true`)
-      .eq('subject', subject)
-      .eq('exam_context', examContext);
+    // 🚀 [PERF] Parallel Phase 1: Basic structural data
+    const [scansResult, resourcesResult] = await Promise.all([
+      supabase.from('scans').select('id, subject, exam_context, year')
+        .or(`user_id.eq.${userId},is_system_scan.eq.true`)
+        .eq('subject', subject).eq('exam_context', examContext),
 
-    if (scansError) throw scansError;
+      supabase.from('topic_resources').select('*')
+        .eq('user_id', userId).eq('subject', subject).eq('exam_context', examContext)
+    ]);
 
-    const scanIds = (scans || []).map(s => s.id);
+    if (scansResult.error) throw scansResult.error;
+    const scanIds = (scansResult.data || []).map(s => s.id);
+    const dbResources = resourcesResult.data || [];
     const hasScans = scanIds.length > 0;
 
-    // 4. Get ALL questions from questions table (published system scans + user practice)
-    let allQuestions: any[] = [];
-    let questionTopicMap = new Map<string, string>(); // questionId -> topicId
+    // 🚀 [PERF] Parallel Phase 2: Content & Mappings (One major roundtrip)
+    let questionsData: any[] = [];
+    let insightsData: any[] = [];
+    let sketchesData: any[] = [];
+    let flashcardsData: any[] = [];
+    const questionTopicMap = new Map<string, string>();
 
     if (hasScans) {
-      // Fetch all questions from questions table for these scans
-      const { data: practiceQuestions, error: questionsError } = await supabase
-        .from('questions')
-        .select('*')
-        .in('scan_id', scanIds);
+      const [qRes, iRes, sRes, fRes, mRes] = await Promise.all([
+        supabase.from('questions').select('id, topic, marks, difficulty, blooms, scan_id, subject').in('scan_id', scanIds),
+        supabase.from('chapter_insights').select('*').in('scan_id', scanIds),
+        supabase.from('topic_sketches').select('*').in('scan_id', scanIds),
+        supabase.from('flashcards').select('*').eq('user_id', userId).in('scan_id', scanIds),
+        supabase.from('topic_question_mapping').select('question_id, topic_id')
+          .in('topic_id', Array.from(topicNameToId.values()))
+      ]);
 
-      if (!questionsError && practiceQuestions) {
-        allQuestions = practiceQuestions.map(q => ({
-          ...q,
-          source: 'practice' // All questions from table are practice/published questions
-        }));
-        console.log(`📊 [TOPIC AGGREGATOR] Loaded ${practiceQuestions.length} questions from table`);
-      }
-
-      // 4c. Get topic mappings for all questions
-      const questionIds = allQuestions.map(q => q.id);
-
-      if (questionIds.length > 0) {
-        const chunkSize = 100;
-        let allMappings: any[] = [];
-
-        for (let i = 0; i < questionIds.length; i += chunkSize) {
-          const chunk = questionIds.slice(i, i + chunkSize);
-          const { data: mappings, error: mappingsError } = await supabase
-            .from('topic_question_mapping')
-            .select('question_id, topic_id')
-            .in('question_id', chunk);
-
-          if (!mappingsError) {
-            allMappings.push(...(mappings || []));
-          }
-        }
-
-        allMappings.forEach(m => {
-          questionTopicMap.set(m.question_id, m.topic_id);
-        });
-
-        console.log(`📊 [TOPIC AGGREGATOR] Loaded ${allMappings.length} question-topic mappings`);
-      }
-
-      console.log(`🗺️  [TOPIC AGGREGATOR] Mapped ${questionTopicMap.size} questions to topics`);
+      questionsData = qRes.data || [];
+      insightsData = iRes.data || [];
+      sketchesData = sRes.data || [];
+      flashcardsData = fRes.data || [];
+      (mRes.data || []).forEach((m: any) => questionTopicMap.set(m.question_id, m.topic_id));
     }
 
-    // 5. Get all chapter insights (if scans exist)
-    let insights: any[] = [];
-    if (hasScans) {
-      const { data: insightsData, error: insightsError } = await supabase
-        .from('chapter_insights')
-        .select('*')
-        .in('scan_id', scanIds);
-
-      if (insightsError) throw insightsError;
-      insights = insightsData || [];
-    }
-
-    // 6. Get all topic sketches (if scans exist)
-    let sketches: any[] = [];
-    if (hasScans) {
-      const { data: sketchesData, error: sketchesError } = await supabase
-        .from('topic_sketches')
-        .select('*')
-        .in('scan_id', scanIds);
-
-      if (sketchesError) throw sketchesError;
-      sketches = sketchesData || [];
-    }
-
-    // 7. Get all flashcards (from cache table, if scans exist)
-    let flashcardCache: any[] = [];
-    if (hasScans) {
-      const { data: flashcardsData, error: flashcardsError } = await supabase
-        .from('flashcards')
-        .select('*')
-        .eq('user_id', userId)
-        .in('scan_id', scanIds);
-
-      if (flashcardsError) throw flashcardsError;
-      flashcardCache = flashcardsData || [];
-      console.log(`🔍 [DEBUG] Flashcard records fetched: ${flashcardCache.length}`);
-      flashcardCache.forEach(fc => {
-        console.log(`  - Scan: ${fc.scan_id?.substring(0, 8)}..., Cards in data: ${fc.data?.length || 0}`);
-      });
-    }
+    const allQuestions = questionsData.map(q => ({ ...q, source: 'practice' }));
+    const insights = insightsData;
+    const sketches = sketchesData;
+    const flashcardCache = flashcardsData;
 
     // 6. Group questions by OFFICIAL topic ID (using mappings from BOTH sources)
     const questionsByTopicId = new Map<string, AnalyzedQuestion[]>();
@@ -228,20 +169,12 @@ export async function aggregateTopicsForUser(
       console.log(`  - ${topicName}: ${cards.length} cards`);
     });
 
-    // 10. Get existing topic_resources to merge with
-    const { data: existingResources } = await supabase
-      .from('topic_resources')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('subject', subject)
-      .eq('exam_context', examContext);
-
     const existingMap = new Map(
-      (existingResources || []).map(r => [r.topic_id, r])
+      (dbResources || []).map(r => [r.topic_id, r])
     );
 
     // 11. Build TopicResource objects for ALL official topics
-    const topicResources: TopicResource[] = [];
+    const aggregatedResources: TopicResource[] = [];
 
     for (const officialTopic of examTopics) {
       const topicId = officialTopic.id;
@@ -307,10 +240,10 @@ export async function aggregateTopicsForUser(
         updatedAt: new Date()
       };
 
-      topicResources.push(resource);
+      aggregatedResources.push(resource);
     }
 
-    return topicResources;
+    return aggregatedResources;
   } catch (error) {
     console.error('Error aggregating topics:', error);
     throw error;
@@ -350,21 +283,26 @@ export async function getTopicResourceLibrary(
       .select('*')
       .in('id', questionIds);
 
-    // Fetch flashcards from cache
-    const { data: flashcardCache } = await supabase
-      .from('flashcards')
-      .select('*')
-      .eq('user_id', userId);
+    // Fetch flashcards ONLY for the scans associated with this topic
+    const sourceScanIds = topicResource.source_scan_ids || [];
+    const { data: flashcardCache } = sourceScanIds.length > 0
+      ? await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('user_id', userId)
+        .in('scan_id', sourceScanIds)
+      : { data: [] };
 
     const flashcards: Flashcard[] = [];
     (flashcardCache || []).forEach(fc => {
       const data = fc.data as any;
       if (Array.isArray(data)) {
         data.forEach((card: any) => {
+          // Use card.topic (from RapidRecall) or card.context (legacy) for grouping
+          // We filter by topicId or similar context here if applicable
           flashcards.push({
             id: card.id || crypto.randomUUID(),
             term: card.term || '',
-            // Map card.def to definition (RapidRecall uses 'def' field)
             definition: card.def || card.definition || '',
             context: card.topic || card.context
           });
@@ -656,17 +594,6 @@ function transformQuestion(dbQuestion: any): AnalyzedQuestion {
     visualBoundingBox: dbQuestion.visual_bounding_box
   };
 
-  // DEBUG: Log transformed metadata
-  console.log('✅ [transformQuestion] Transformed Metadata:', {
-    id: transformed.id?.substring(0, 8),
-    marks: transformed.marks,
-    diff: transformed.diff,
-    bloomsTaxonomy: transformed.bloomsTaxonomy,
-    year: transformed.year,
-    domain: transformed.domain,
-    pedagogy: transformed.pedagogy
-  });
-
   return transformed;
 }
 
@@ -731,4 +658,50 @@ function calculateDifficultyDistribution(questions: AnalyzedQuestion[]) {
     moderate: Math.round((moderate / total) * 100),
     hard: Math.round((hard / total) * 100)
   };
+}
+
+/**
+ * Super-fast Subject Stats Aggregator for Trajectory View
+ * Avoids loading full question/resource metadata
+ */
+export async function getSubjectSummaryStats(
+  supabase: any,
+  userId: string,
+  subject: Subject,
+  examContext: ExamContext
+) {
+  try {
+    const [topicsResult, resourcesResult] = await Promise.all([
+      supabase.from('topics').select('id, exam_weightage').eq('subject', subject),
+      supabase.from('topic_resources').select('topic_id, mastery_level, questions_attempted, average_accuracy, is_mastered').eq('user_id', userId).eq('subject', subject).eq('exam_context', examContext)
+    ]);
+
+    const topics = (topicsResult.data || []).filter(t => (t.exam_weightage?.[examContext] || 0) > 0);
+    const resources = resourcesResult.data || [];
+
+    const masteredCount = resources.filter(r => r.is_mastered || r.mastery_level >= 80).length;
+    const totalAttempted = resources.reduce((sum, r) => sum + (r.questions_attempted || 0), 0);
+
+    // Calculate average accuracy across all practiced topics
+    const practicedTopics = resources.filter(r => (r.questions_attempted || 0) > 0);
+    const avgAccuracy = practicedTopics.length > 0
+      ? Math.round(practicedTopics.reduce((sum, r) => sum + (r.average_accuracy || 0), 0) / practicedTopics.length)
+      : 0;
+
+    const overallMastery = topics.length > 0
+      ? Math.round(resources.reduce((sum, r) => sum + (r.mastery_level || 0), 0) / topics.length)
+      : 0;
+
+    return {
+      subject,
+      totalTopics: topics.length,
+      topicsMastered: masteredCount,
+      totalQuestionsAttempted: totalAttempted,
+      overallMastery,
+      overallAccuracy: avgAccuracy
+    };
+  } catch (err) {
+    console.error(`Error in getSubjectSummaryStats:`, err);
+    return { subject, totalTopics: 0, topicsMastered: 0, totalQuestionsAttempted: 0, overallMastery: 0, overallAccuracy: 0 };
+  }
 }

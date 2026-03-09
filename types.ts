@@ -291,6 +291,7 @@ export interface ExamAnalysisData {
   chapterInsights?: ChapterInsight[]; // NEW: Grouped chapter data
   questions: AnalyzedQuestion[]; // Specific questions from paper
   topicBasedSketches?: Record<string, any>; // NEW: Topic-based flip book sketches (stored as Record to avoid circular dependency)
+  ai_report?: Record<string, any>; // Persisted full report from Gemini
 }
 
 export interface Scan {
@@ -463,6 +464,12 @@ export interface TestAttempt {
   topicAnalysis?: Record<string, any>;
   timeAnalysis?: Record<string, any>;
   aiReport?: Record<string, any>;
+  analysisInsights?: {
+    totalMarks: number;
+    avgDifficulty: number;
+    bloomsDistribution: { name: string; percentage: number }[];
+    topDomains: { name: string; marks: number }[];
+  };
 
   createdAt: Date;
   completedAt?: Date;

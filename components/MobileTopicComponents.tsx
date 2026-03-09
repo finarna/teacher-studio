@@ -140,7 +140,7 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
     };
 
     if (sessionLoading || !currentQuestion) {
-        return <div className="p-12 text-center text-slate-400 font-black uppercase tracking-widest animate-pulse">Initializing Session...</div>;
+        return <div className="p-12 text-center text-slate-400 font-black uppercase tracking-widest animate-pulse font-outfit">Predicting Question Path...</div>;
     }
 
     const isValidated = validatedAnswers.has(currentQuestion.id);
@@ -260,7 +260,7 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
                                     <h3 className="text-[13px] font-black text-slate-900 font-outfit uppercase tracking-tighter leading-none italic">
                                         {isCorrect ? 'Elegantly Executed' : 'Strategic Diagnostic'}
                                     </h3>
-                                    <div className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 mt-0.5">AI_INSIGHT_SYNCHRNOIZED</div>
+                                    <div className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 mt-0.5">AI_PREDICTIVE_PATTERN_SYNC</div>
                                 </div>
                             </div>
 
@@ -281,7 +281,7 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
                                     className="h-11 bg-slate-900 rounded-[1rem] text-[9px] font-black uppercase tracking-widest text-white flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
                                 >
                                     <Sparkles size={14} className="text-amber-300" />
-                                    Deep pattern
+                                    AI Prediction
                                 </button>
                             </div>
                         </div>
@@ -298,7 +298,7 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
                                     {currentQuestion.keyFormulas && currentQuestion.keyFormulas.length > 0 && (
                                         <div className="bg-amber-50 rounded-[1.25rem] p-4 border border-amber-100">
                                             <div className="text-[8px] font-black text-amber-600 uppercase tracking-widest mb-2 flex items-center gap-1">
-                                                <Zap size={10} fill="currentColor" /> Logic Core
+                                                <Zap size={10} fill="currentColor" /> AI Logic Core
                                             </div>
                                             <div className="space-y-1.5">
                                                 {currentQuestion.keyFormulas.map((formula, idx) => (
@@ -316,7 +316,7 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
                                             <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center">
                                                 <TrendingUp size={12} className="text-slate-400" />
                                             </div>
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Protocol Sequence</span>
+                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Advanced Solving Protocol</span>
                                         </div>
                                         <div className="relative ml-2 border-l border-slate-100 pl-5 space-y-5">
                                             {currentQuestion.solutionSteps?.map((step: string, idx: number) => (
@@ -347,7 +347,7 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
                                         <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                                             <Sparkles size={14} className="text-blue-400" />
                                         </div>
-                                        <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Deep Pattern Analysis</h4>
+                                        <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Deep Pattern Analysis & Prediction</h4>
                                     </div>
 
                                     <div className="grid grid-cols-1 gap-3">
@@ -505,8 +505,8 @@ export const MobileLearnTab: React.FC<{
                             <Brain size={20} className="text-primary-400" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-black font-outfit uppercase italic tracking-tighter">Prime Concepts</h3>
-                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Neural Foundation Layer</p>
+                            <h3 className="text-lg font-black font-outfit uppercase italic tracking-tighter">AI Strategic Core</h3>
+                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Historical Pattern Analysis</p>
                         </div>
                     </div>
                     {topicResource.notesCompleted ? (
@@ -533,11 +533,11 @@ export const MobileLearnTab: React.FC<{
             {loadingSketches ? (
                 <div className="py-12 flex flex-col items-center justify-center gap-2">
                     <Loader2 size={24} className="text-slate-300 animate-spin" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Vault...</span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Analysing Historical Trends...</span>
                 </div>
             ) : visualSketches.length > 0 ? (
                 <div className="space-y-4">
-                    <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Visual DNA Units</h3>
+                    <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">AI Analytic Visuals</h3>
                     <div className="grid grid-cols-2 gap-4">
                         {visualSketches.map((sketch, idx) => (
                             <button
@@ -633,7 +633,7 @@ export const MobileLearnTab: React.FC<{
 
                         <div className="mt-8 space-y-6">
                             <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-6">
-                                <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-3">Conceptual Synthesis</h4>
+                                <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-3">Concept Breakdown</h4>
                                 <p className="text-sm font-medium text-white/80 leading-relaxed italic">
                                     This visual schema represents the core structural logic of the concept. Study the relationships between components for deep recall.
                                 </p>
@@ -679,7 +679,7 @@ export const MobileQuizTab: React.FC<MobileQuizTabProps> = ({
     const { user } = useAuth();
     const [strategy, setStrategy] = useState<'adaptive' | 'simulation'>('adaptive');
 
-    const steps = ['Analysing syllabus…', 'Predicting exam patterns…', 'Generating questions…', 'Calibrating difficulty…'];
+    const steps = ['Analysing Historical Papers...', 'Tailoring to Your Progress...', 'Applying Predictive AI...', 'Finalizing Your Blueprint...'];
     const [stepIndex, setStepIndex] = useState(0);
 
     // Difficulty Distribution State
@@ -858,7 +858,7 @@ export const MobileQuizTab: React.FC<MobileQuizTabProps> = ({
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                        <span className="text-[8px] font-black uppercase tracking-widest text-primary-400">REI Oracle v3 active</span>
+                                        <span className="text-[8px] font-black uppercase tracking-widest text-primary-400">Smart Mentor active</span>
                                     </div>
                                     <h3 className="text-lg font-black font-outfit uppercase italic tracking-tighter">Exam Protocol</h3>
                                 </div>
@@ -896,7 +896,7 @@ export const MobileQuizTab: React.FC<MobileQuizTabProps> = ({
                                 className="w-full h-14 bg-white text-slate-900 rounded-3xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl"
                             >
                                 {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="currentColor" />}
-                                {isLoading ? 'Calibrating...' : 'Initialize Simulation'}
+                                {isLoading ? 'Preparing...' : 'Start Simulation'}
                             </button>
 
                             <div className="pt-2 flex items-center justify-between border-t border-white/5">
@@ -914,7 +914,7 @@ export const MobileQuizTab: React.FC<MobileQuizTabProps> = ({
                                 </div>
                                 <div className="flex items-center gap-1.5 bg-blue-500/10 px-2 py-1 rounded-lg border border-blue-500/20">
                                     <Sparkles size={10} className="text-blue-400" />
-                                    <span className="text-[7px] font-bold text-blue-100 uppercase tracking-tighter">Personalized REI Synthesis</span>
+                                    <span className="text-[7px] font-bold text-blue-100 uppercase tracking-tighter">Personalized For You</span>
                                 </div>
                             </div>
                         </div>
@@ -962,7 +962,7 @@ export const MobileQuizTab: React.FC<MobileQuizTabProps> = ({
                                 className="w-full h-14 bg-slate-900 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl"
                             >
                                 {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
-                                {isLoading ? 'Synthesizing...' : 'Initialize Growth'}
+                                {isLoading ? 'Preparing...' : 'Start Session'}
                             </button>
                         </div>
                     </motion.div>

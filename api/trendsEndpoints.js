@@ -87,12 +87,69 @@ export async function getHistoricalTrends(req, res) {
       throw distError;
     }
 
-    // Group distributions by pattern (year)
+    // Group distributions by pattern (year) and normalize if needed
     const distributionsByPattern = {};
+    const isKCET = (examContext.toUpperCase().includes('KCET'));
+
     patterns.forEach(pattern => {
-      distributionsByPattern[pattern.year] = distributions.filter(
+      let yearDists = distributions.filter(
         d => d.historical_pattern_id === pattern.id
       );
+
+      // Normalization: Scale historical counts to 60 if it's KCET and data is incomplete
+      if (isKCET && yearDists.length > 0) {
+        const currentTotal = yearDists.reduce((sum, d) => sum + (d.question_count || 0), 0);
+        if (currentTotal !== 60 && currentTotal > 0) {
+          console.log(`⚖️ Normalizing ${pattern.year} distributions from ${currentTotal} to 60`);
+          const scale = 60 / currentTotal;
+          let runningSum = 0;
+
+          // Sort by count descending to minimize rounding error visibility
+          const sortedDists = [...yearDists].sort((a, b) => b.question_count - a.question_count);
+
+          yearDists = sortedDists.map((d, idx) => {
+            const isLast = idx === sortedDists.length - 1;
+            let newTotal;
+
+            if (isLast) {
+              newTotal = Math.max(0, 60 - runningSum);
+            } else {
+              newTotal = Math.round(d.question_count * scale);
+              if (runningSum + newTotal > 60) newTotal = Math.max(0, 60 - runningSum);
+            }
+
+            runningSum += newTotal;
+
+            // Proportional scaling for difficulties within the topic
+            const qCount = d.question_count || 1;
+            const easy = Math.round((d.difficulty_easy_count || 0) * (newTotal / qCount));
+            const moderate = Math.round((d.difficulty_moderate_count || 0) * (newTotal / qCount));
+            const hard = Math.max(0, newTotal - (easy + moderate));
+
+            return {
+              ...d,
+              question_count: newTotal,
+              difficulty_easy_count: easy,
+              difficulty_moderate_count: moderate,
+              difficulty_hard_count: hard
+            };
+          });
+        }
+
+        // 🟢 UPDATE PATTERN PERCENTAGES: Ensure the bar chart sums to 100%
+        const yearEasyCount = yearDists.reduce((sum, d) => sum + (d.difficulty_easy_count || 0), 0);
+        const yearModerateCount = yearDists.reduce((sum, d) => sum + (d.difficulty_moderate_count || 0), 0);
+        const yearHardCount = yearDists.reduce((sum, d) => sum + (d.difficulty_hard_count || 0), 0);
+        const yearTotal = yearEasyCount + yearModerateCount + yearHardCount;
+
+        if (yearTotal > 0) {
+          pattern.difficulty_easy_pct = Math.round((yearEasyCount / yearTotal) * 100);
+          pattern.difficulty_moderate_pct = Math.round((yearModerateCount / yearTotal) * 100);
+          pattern.difficulty_hard_pct = 100 - (pattern.difficulty_easy_pct + pattern.difficulty_moderate_pct);
+        }
+      }
+
+      distributionsByPattern[pattern.year] = yearDists;
     });
 
     // Calculate topic trends
@@ -156,22 +213,27 @@ function calculateTopicTrends(patterns, distributionsByPattern) {
       }
     });
 
-    if (dataPoints.length >= 2) {
-      // Calculate growth rate
-      const first = dataPoints[0];
+    if (dataPoints.length > 0) {
       const last = dataPoints[dataPoints.length - 1];
-      const yearsDiff = last.year - first.year;
-      const questionsDiff = last.questionCount - first.questionCount;
-      const growthRate = yearsDiff > 0 ? questionsDiff / yearsDiff : 0;
-
-      // Determine trend
-      let trend = 'stable';
-      if (growthRate > 0.5) trend = 'increasing';
-      else if (growthRate < -0.5) trend = 'decreasing';
-
-      // Importance level
       const avgQuestions = dataPoints.reduce((sum, d) => sum + d.questionCount, 0) / dataPoints.length;
+
+      // Default for single data point
+      let growthRate = 0;
+      let trend = 'stable';
+      let change = 0;
       let importance = 'medium';
+
+      if (dataPoints.length >= 2) {
+        const first = dataPoints[0];
+        const yearsDiff = last.year - first.year;
+        const questionsDiff = last.questionCount - first.questionCount;
+        growthRate = yearsDiff > 0 ? questionsDiff / yearsDiff : 0;
+        change = questionsDiff;
+
+        if (growthRate > 0.5) trend = 'increasing';
+        else if (growthRate < -0.5) trend = 'decreasing';
+      }
+
       if (avgQuestions >= 12) importance = 'high';
       else if (avgQuestions <= 8) importance = 'low';
 
@@ -182,7 +244,7 @@ function calculateTopicTrends(patterns, distributionsByPattern) {
         importance,
         avgQuestions: Math.round(avgQuestions),
         latest: last.questionCount,
-        change: questionsDiff
+        change
       };
     }
   });
@@ -201,26 +263,76 @@ function generatePredictions(patterns, topicTrends) {
 
   const predictions = {
     year: nextYear,
-    topics: {}
+    topics: {},
+    totalPredicted: 0
   };
 
-  // Predict for each topic
-  Object.entries(topicTrends).forEach(([topicId, trend]) => {
-    const latest = trend.dataPoints[trend.dataPoints.length - 1];
-    const predicted = Math.max(1, Math.round(latest.questionCount + trend.growthRate));
+  // Target total questions based on latest pattern
+  const firstPattern = patterns[0];
+  const examContextRaw = firstPattern?.exam_context || '';
+  const resultContext = examContextRaw.toUpperCase().trim();
 
-    predictions.topics[topicId] = {
-      predicted: predicted,
-      confidence: trend.dataPoints.length >= 3 ? 'high' : 'medium',
-      basis: trend.trend === 'increasing'
-        ? `Increasing trend (+${Math.abs(trend.change)} over ${trend.dataPoints.length} years)`
-        : trend.trend === 'decreasing'
-          ? `Decreasing trend (${trend.change} over ${trend.dataPoints.length} years)`
-          : `Stable pattern (~${trend.avgQuestions} questions)`,
-      importance: trend.importance
-    };
+  // HARD CONSTRAINT: KCET Math/Physics/Biology are always 60 questions.
+  let latestPatternTotal = 60;
+  const lp = patterns.find(p => p.year === latestYear);
+  if (lp && lp.total_marks) latestPatternTotal = Number(lp.total_marks);
+
+  // Use 60 for anything KCET-related, otherwise fallback to latest year total
+  let targetTotal = (resultContext === 'KCET' || resultContext.includes('KCET')) ? 60 : latestPatternTotal;
+
+  console.log(`🔮 [NORMALIZER] Context: ${resultContext}, Target: ${targetTotal}`);
+
+  // 1. Calculate raw predictions
+  const topicEntries = Object.entries(topicTrends).filter(([id]) => id && id !== 'null' && id !== 'undefined');
+  const rawData = topicEntries.map(([topicId, trend]) => {
+    const latest = trend.dataPoints.find(dp => dp.year === latestYear);
+    // Use last year as anchor, apply growth if multiple years exist
+    const base = latest?.questionCount || trend.avgQuestions;
+    const rawVal = Math.max(1, base + (trend.dataPoints.length >= 2 ? trend.growthRate : 0));
+    return { topicId, trend, rawVal };
   });
 
+  const rawSum = rawData.reduce((s, d) => s + d.rawVal, 0);
+
+  // 2. Perform proportional scaling with guaranteed sum
+  if (rawSum > 0) {
+    let runningSum = 0;
+    const scale = targetTotal / rawSum;
+
+    // Sort large to small to make adjustment less noticeable
+    const sortedData = [...rawData].sort((a, b) => b.rawVal - a.rawVal);
+
+    sortedData.forEach((item, index) => {
+      const isLast = index === sortedData.length - 1;
+      let predicted;
+
+      if (isLast) {
+        predicted = Math.max(0, targetTotal - runningSum);
+      } else {
+        predicted = Math.round(item.rawVal * scale);
+        // Correct for overshoot
+        if (runningSum + predicted > targetTotal) {
+          predicted = Math.max(0, targetTotal - runningSum);
+        }
+      }
+
+      runningSum += predicted;
+
+      predictions.topics[item.topicId] = {
+        predicted: predicted,
+        confidence: item.trend.dataPoints.length >= 2 ? 'high' : 'medium',
+        basis: item.trend.trend === 'increasing'
+          ? `Increasing trend (+${Math.abs(item.trend.change)} over ${item.trend.dataPoints.length} years)`
+          : item.trend.trend === 'decreasing'
+            ? `Decreasing trend (${item.trend.change} over ${item.trend.dataPoints.length} years)`
+            : `Stable pattern (~${item.trend.avgQuestions} questions)`,
+        importance: item.trend.importance
+      };
+    });
+    predictions.totalPredicted = Math.round(runningSum);
+  }
+
+  console.log(`🔮 [NORMALIZER] Final Result Sum: ${predictions.totalPredicted}`);
   return predictions;
 }
 

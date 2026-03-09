@@ -53,31 +53,34 @@ export async function syncScanToAITables(
       return { success: true, patternsUpdated: false, distributionsUpdated: 0, message: 'No analysis data' };
     }
 
-    // Get all questions for this scan with topic mappings
-    const { data: questions, error: questionsError } = await supabase
-      .from('questions')
-      .select('id, topic, difficulty, marks, blooms, text')
-      .eq('scan_id', scanId);
+    // GET SOURCE OF TRUTH (Prioritize AI Analysis over manual practiced questions)
+    let mappedQuestions: any[] = [];
+    const aiQuestions = analysis_data?.questions || [];
 
-    if (questionsError) {
-      console.error('❌ Error loading questions:', questionsError);
-      return { success: false, patternsUpdated: false, distributionsUpdated: 0, message: 'Error loading questions' };
+    if (aiQuestions.length > 0) {
+      console.log(`   Using AI Analysis data (${aiQuestions.length} questions) as Source of Truth`);
+      mappedQuestions = aiQuestions.filter((q: any) => q.topic && q.topic.trim() !== '');
+    } else {
+      // Fallback to active questions table (backward compatibility/manual adjustments)
+      console.log(`   AI Analysis questions missing, falling back to questions table...`);
+      const { data: dbQuestions, error: questionsError } = await supabase
+        .from('questions')
+        .select('id, topic, difficulty, marks, blooms, text')
+        .eq('scan_id', scanId);
+
+      if (questionsError) {
+        console.error('❌ Error loading questions:', questionsError);
+        return { success: false, patternsUpdated: false, distributionsUpdated: 0, message: 'Error loading questions' };
+      }
+      mappedQuestions = (dbQuestions || []).filter(q => q.topic && q.topic.trim() !== '');
     }
-
-    if (!questions || questions.length === 0) {
-      console.log('⚠️  No questions found for scan, skipping');
-      return { success: true, patternsUpdated: false, distributionsUpdated: 0, message: 'No questions' };
-    }
-
-    // Filter questions that have topic mapping
-    const mappedQuestions = questions.filter(q => q.topic && q.topic.trim() !== '');
 
     if (mappedQuestions.length === 0) {
       console.log('⚠️  No questions mapped to topics yet, skipping AI table sync');
       return { success: true, patternsUpdated: false, distributionsUpdated: 0, message: 'No mapped questions' };
     }
 
-    console.log(`   Found ${mappedQuestions.length}/${questions.length} questions mapped to topics`);
+    console.log(`   Data points for sync: ${mappedQuestions.length} questions mapped to topics`);
 
     // Group by topic
     const topicGroups = new Map<string, typeof mappedQuestions>();
@@ -206,7 +209,7 @@ export async function syncScanToAITables(
     // Log summary
     console.log('📊 AI Table Sync Summary:');
     console.log(`   Year: ${year}, Exam: ${exam_context} ${subject}`);
-    console.log(`   Total Questions: ${questions.length} (${mappedQuestions.length} mapped)`);
+    console.log(`   Final Sync Source Count: ${mappedQuestions.length} mapped questions`);
     console.log(`   Topics: ${topicGroups.size}`);
     console.log(`   Difficulty: Easy=${difficultyDist.easy} Moderate=${difficultyDist.moderate} Hard=${difficultyDist.hard}`);
 
