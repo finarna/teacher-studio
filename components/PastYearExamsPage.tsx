@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 import PredictiveTrendsTab from './PredictiveTrendsTab';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
+import { formatScanDisplayName } from '../utils/scanTransformers';
 
 interface PastYearExamsPageProps {
   subject: Subject;
@@ -106,14 +107,21 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
     try {
       // Fetch all scans for this subject/exam (including user scans, not just system scans)
       const scanIds = await (async () => {
-        // 🚀 OPTIMIZATION: Do NOT fetch analysis_data here as it's huge
+        // 🚀 NEET Pivot: If subject is Botany or Zoology, also search for Biology context
+        let subjectFilter = `subject.eq.${subject},subjects.cs.{${subject}}`;
+        if (examContext === 'NEET') {
+          if (subject === 'Botany' || subject === 'Zoology') {
+            subjectFilter += `,subject.eq.Biology,subjects.cs.{Biology}`;
+          }
+        }
+
         const { data: scansData, error: scansError } = await supabase
           .from('scans')
-          .select('id, name, created_at, status, subject, grade, exam_context, year')
-          .eq('subject', subject)
+          .select('id, name, created_at, status, subject, grade, exam_context, year, is_combined_paper, subjects, analysis_data')
+          .or(subjectFilter)
           .eq('exam_context', examContext)
-          .eq('is_system_scan', true)
-          .not('year', 'is', null);
+          .eq('is_system_scan', true);
+        // ⚠️ Removed: .not('year', 'is', null) to show papers even if year is missing
 
         console.log(`📊 [PAST YEAR] Query result: ${scansData?.length || 0} scans, error:`, scansError?.message || 'none');
 
@@ -124,11 +132,23 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
         }
 
         return {
-          scans: scansData.map(scan => ({
-            ...scan,
-            date: scan.created_at || '',
-            timestamp: scan.created_at ? new Date(scan.created_at).getTime() : Date.now()
-          })),
+          scans: scansData.map(scan => {
+            // Intelligent year extraction if missing
+            let year = scan.year;
+            if (!year) {
+              const yearMatch = scan.name.match(/20\d{2}/);
+              year = yearMatch ? yearMatch[0] : (examContext === 'NEET' ? '2021' : 'Recent');
+            }
+
+            return {
+              ...scan,
+              year,
+              isCombinedPaper: scan.is_combined_paper,
+              subjects: scan.subjects,
+              date: scan.created_at || '',
+              timestamp: scan.created_at ? new Date(scan.created_at).getTime() : Date.now()
+            };
+          }),
           scanIds: scansData.map(s => s.id)
         };
       })();
@@ -163,22 +183,47 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
 
       // 🚀 OPTIMIZATION: Use bare minimum processing for the grid
       const resolvedYearData = Object.entries(scansByYear).map(([year, scans]) => {
-        const scansWithAnalysis = scans.map(scan => ({
-          ...scan,
-          questionsCount: 60, // Standard for KCET, can be refined per exam
-          solvedCount: 0,     // To be populated by solvedQuestionIds if needed
-          analysisInsights: {
-            totalMarks: 60,
-            avgDifficulty: 0,
-            bloomsDist: {},
-            topDomains: {}
+        const scansWithAnalysis = scans.map(scan => {
+          let questionsCount = 0;
+          if (scan.analysis_data?.questions) {
+            const isNeetSub = examContext === 'NEET' && (subject === 'Botany' || subject === 'Zoology');
+            const neetQuestions = scan.analysis_data.questions.filter((q: any) => {
+              // Direct match
+              if (q.subject === subject) return true;
+              // Split logic for legacy Biology questions (approximate split for display)
+              if (isNeetSub && (q.subject === 'Biology' || !q.subject)) {
+                // Approximate split based on question number if available
+                const qNum = q.questionOrder ?? q.index ?? 0;
+                if (subject === 'Botany') return qNum <= 150; // Simple heuristic for paper split
+                if (subject === 'Zoology') return qNum > 150;
+              }
+              return false;
+            });
+            questionsCount = neetQuestions.length;
           }
-        }));
+
+          // Fallback for scans without direct analysis data but known to contain the subject
+          if (questionsCount === 0 && (scan.subject === subject || (scan.isCombinedPaper && (examContext === 'NEET' || scan.subjects?.includes(subject))))) {
+            questionsCount = examContext === 'NEET' ? 45 : 60; // Standard counts
+          }
+
+          return {
+            ...scan,
+            questionsCount,
+            solvedCount: 0,
+            analysisInsights: {
+              totalMarks: questionsCount,
+              avgDifficulty: 0,
+              bloomsDist: {},
+              topDomains: {}
+            }
+          };
+        });
 
         return {
           year,
           scans: scansWithAnalysis,
-          totalQuestions: scans.length * 60,
+          totalQuestions: scansWithAnalysis.reduce((sum, s) => sum + s.questionsCount, 0),
           solvedQuestions: 0,
           progress: 0
         };
@@ -368,11 +413,19 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                           }`}
                       >
                         {/* Row 1: Identity */}
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-2">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[9px] font-black text-blue-800 uppercase tracking-widest leading-none">
                               {yd.year} PYQ
                             </span>
+                            <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded text-[9px] font-black text-indigo-700 uppercase tracking-widest leading-none">
+                              {subject}
+                            </span>
+                            {scan.isCombinedPaper && (
+                              <span className="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">
+                                Combined
+                              </span>
+                            )}
                             {isCompleted && (
                               <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">
                                 DONE
@@ -380,7 +433,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                             )}
                           </div>
                           <h4 className="text-lg font-black text-slate-900 leading-tight font-outfit tracking-tight">
-                            {examContext}-{subject}-{yd.year}
+                            {formatScanDisplayName(scan.name, examContext, subject)}
                           </h4>
                         </div>
 
@@ -397,6 +450,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                           </div>
                         </div>
                       </motion.button>
+
                     );
                   })
                 )}
@@ -405,7 +459,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
           </>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 

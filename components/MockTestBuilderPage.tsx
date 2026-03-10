@@ -429,13 +429,26 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   useEffect(() => {
     const config = EXAM_CONFIGS[examContext];
     if (config) {
-      setQuestionCount(config.pattern.totalQuestions);
-
-      // Calculate per-subject duration for competitive exams
+      // Default to config values
+      let qCount = config.pattern.totalQuestions;
       let duration = config.pattern.duration;
-      if (examContext === 'JEE') duration = 60; // 180m total / 3 subjects
-      if (examContext === 'NEET') duration = 65; // 200m total / 3 subjects
 
+      // Smart Subject-Aware Scaling for Competitive exams
+      if (examContext === 'NEET') {
+        // NEET total is 200q in 200m. Per subject it is 50q in 50m.
+        qCount = 50;
+        duration = 50;
+      } else if (examContext === 'JEE') {
+        // JEE total is 90q in 180m. Per subject it is 30q in 60m.
+        qCount = 30;
+        duration = 60;
+      } else if (examContext === 'KCET') {
+        // KCET is already per-subject in config (60q in 80m).
+        qCount = 60;
+        duration = 80;
+      }
+
+      setQuestionCount(qCount);
       setDurationMinutes(duration);
     }
   }, [examContext, subject]);
@@ -791,8 +804,19 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                   if (s.id === 'predictive_mock') {
                                     const config = EXAM_CONFIGS[examContext];
                                     if (config) {
-                                      setQuestionCount(config.pattern.totalQuestions);
-                                      setDurationMinutes(examContext === 'KCET' ? 80 : examContext === 'JEE' ? 60 : examContext === 'NEET' ? 65 : config.pattern.duration);
+                                      if (examContext === 'NEET') {
+                                        setQuestionCount(50);
+                                        setDurationMinutes(50);
+                                      } else if (examContext === 'JEE') {
+                                        setQuestionCount(30);
+                                        setDurationMinutes(60);
+                                      } else if (examContext === 'KCET') {
+                                        setQuestionCount(60);
+                                        setDurationMinutes(80);
+                                      } else {
+                                        setQuestionCount(config.pattern.totalQuestions);
+                                        setDurationMinutes(config.pattern.duration);
+                                      }
                                     }
                                   }
                                 }}

@@ -62,10 +62,12 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [selectedSketch, setSelectedSketch] = useState<any | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
-  // Only use scan prop if it matches the active subject
-  const [selectedVaultScan, setSelectedVaultScan] = useState<Scan | null>(
-    scan && scan.subject === activeSubject ? scan : null
-  );
+  const [selectedVaultScan, setSelectedVaultScan] = useState<Scan | null>(() => {
+    if (!scan) return null;
+    const isSubjectMatch = scan.subject === activeSubject ||
+      (scan.isCombinedPaper && scan.subjects?.includes(activeSubject as any));
+    return isSubjectMatch ? scan : null;
+  });
   const [groupByDomain, setGroupByDomain] = useState(true);
   const [selectedDomain, setSelectedDomain] = useState<string>('All');
   const [batchProgress, setBatchProgress] = useState<{ current: number, total: number, failed: number } | null>(null);
@@ -273,12 +275,18 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
 
   // Unified scanQuestions source that merges metadata from scan and large sketches from questionSketches state
   const scanQuestions = useMemo(() => {
-    const rawQuestions = selectedVaultScan?.analysisData?.questions || [];
+    let rawQuestions = selectedVaultScan?.analysisData?.questions || [];
+
+    // NEW: Filter by subject if it's a combined paper
+    if (selectedVaultScan?.isCombinedPaper) {
+      rawQuestions = rawQuestions.filter(q => (q as any).subject === activeSubject);
+    }
+
     return rawQuestions.map(q => ({
       ...q,
       sketchSvg: questionSketches[q.id] || q.sketchSvg
     }));
-  }, [selectedVaultScan?.analysisData?.questions, questionSketches]);
+  }, [selectedVaultScan, selectedVaultScan?.analysisData?.questions, questionSketches, activeSubject]);
 
   // Removed redundant: const scanQuestions = selectedVaultScan?.analysisData?.questions || [];
 
@@ -496,20 +504,28 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
   // Calculate subject counts - only from selected vault if available
   const subjectCounts = useMemo(() => {
     const counts: Record<string, number> = { Physics: 0, Chemistry: 0, Biology: 0 };
-    if (selectedVaultScan) {
-      // Only count from selected vault
-      const subject = selectedVaultScan.subject;
-      if (counts.hasOwnProperty(subject)) {
-        counts[subject] = selectedVaultScan.analysisData?.questions?.length || 0;
-      }
-    } else if (recentScans && recentScans.length > 0) {
-      // Count from all scans
-      recentScans.forEach(scan => {
-        const subject = scan.subject;
+
+    const countScan = (s: Scan) => {
+      if (s.isCombinedPaper) {
+        // Count questions per subject
+        s.analysisData?.questions?.forEach(q => {
+          const qSubj = (q as any).subject;
+          if (qSubj && counts.hasOwnProperty(qSubj)) {
+            counts[qSubj]++;
+          }
+        });
+      } else {
+        const subject = s.subject;
         if (counts.hasOwnProperty(subject)) {
-          counts[subject] += scan.analysisData?.questions?.length || 0;
+          counts[subject] += s.analysisData?.questions?.length || 0;
         }
-      });
+      }
+    };
+
+    if (selectedVaultScan) {
+      countScan(selectedVaultScan);
+    } else if (recentScans && recentScans.length > 0) {
+      recentScans.forEach(countScan);
     }
     return counts;
   }, [recentScans, selectedVaultScan]);
@@ -585,7 +601,7 @@ const SketchGallery: React.FC<SketchGalleryProps> = ({ onBack, scan, onUpdateSca
         generationMethod,
         q.visualConcept || q.topic,
         q.text,
-        selectedVaultScan.subject,
+        (q as any).subject || selectedVaultScan.subject,
         apiKey,
         undefined, // Status update callback (optional)
         selectedVaultScan.examContext

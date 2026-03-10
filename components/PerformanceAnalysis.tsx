@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Trophy,
   TrendingUp,
@@ -37,6 +37,7 @@ import type { TestAttempt, TestResponse, AnalyzedQuestion } from '../types';
 import { RenderWithMath } from './MathRenderer';
 import { getApiUrl } from '../lib/api';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
+import { getExamConfig } from '../config/exams';
 
 interface PerformanceAnalysisProps {
   attempt: TestAttempt;
@@ -70,28 +71,33 @@ interface AISummary {
   };
 }
 
-const SUBJECT_DOMAIN_MAPS: Record<string, Record<string, { domain: string, chapters: string[], friction: string }>> = {
+const SUBJECT_DOMAIN_MAPS: Record<string, any> = {
   'Physics': {
-    'Mechanics': {
-      domain: 'Mechanics',
-      chapters: ['Circular Motion', 'Laws of Motion', 'Work Energy and Power', 'System of Particles and Rotational Motion', 'Gravitation', 'Kinematics', 'Measurement', 'Friction', 'Force', 'Newton', 'Projectile', 'Velocity', 'Acceleration', 'Mass'],
-      friction: 'Advanced calculus-based modeling and 3D rigid body constraints.'
-    },
-    'Electrodynamics': {
-      domain: 'Electrodynamics',
-      chapters: ['Current Electricity', 'Moving Charges and Magnetism', 'Electromagnetic Induction', 'Alternating Current', 'Electrostatics', 'Magnetism and Matter', 'Capacitance', 'Magnetic', 'Charge', 'EM Wave'],
-      friction: 'Multi-field interactions (Lorentz Force) and non-standard topographies.'
-    },
-    'Modern Physics': {
-      domain: 'Modern Physics',
-      chapters: ['Atoms', 'Nuclei', 'Dual Nature', 'Modern', 'Bohr', 'Nuclear', 'Photoelectric', 'Quantum', 'Radioactivity', 'X-Ray'],
-      friction: 'Numerical precision with physical constants and proportional scaling.'
-    },
-    'Optics': {
-      domain: 'Optics',
-      chapters: ['Wave Optics', 'Ray Optics', 'Lens', 'Mirror', 'Interference', 'Diffraction', 'Polarization', 'Prism', 'Refraction'],
-      friction: 'Spatial visualization of wave-fronts and geometric alignment.'
-    }
+    'Mechanics': { domain: 'Mechanics', chapters: ['Circular Motion', 'Laws of Motion', 'Work Energy and Power', 'System of Particles and Rotational Motion', 'Gravitation', 'Kinematics', 'Measurement', 'Friction', 'Force', 'Newton', 'Projectile', 'Velocity', 'Acceleration', 'Mass'], friction: 'Advanced calculus-based modeling and 3D rigid body constraints.' },
+    'Electrodynamics': { domain: 'Electrodynamics', chapters: ['Current Electricity', 'Moving Charges and Magnetism', 'Electromagnetic Induction', 'Alternating Current', 'Electrostatics', 'Magnetism and Matter', 'Capacitance', 'Magnetic', 'Charge', 'EM Wave'], friction: 'Multi-field interactions and non-standard topographies.' },
+    'Modern Physics': { domain: 'Modern Physics', chapters: ['Atoms', 'Nuclei', 'Dual Nature', 'Modern', 'Bohr', 'Nuclear', 'Photoelectric', 'Quantum', 'Radioactivity', 'X-Ray'], friction: 'Numerical precision with physical constants.' },
+    'Optics': { domain: 'Optics', chapters: ['Wave Optics', 'Ray Optics', 'Lens', 'Mirror', 'Interference', 'Diffraction', 'Polarization', 'Prism', 'Refraction'], friction: 'Spatial visualization of wave-fronts.' }
+  },
+  'Botany': {
+    'Plant Physiology': { domain: 'Plant Physiology', chapters: ['Photosynthesis', 'Respiration', 'Plant Growth', 'Transport in Plants', 'Mineral Nutrition'], friction: 'Bio-chemical pathway complexity.' },
+    'Reproduction': { domain: 'Reproduction', chapters: ['Sexual Reproduction in Flowering Plants', 'Pollination', 'Seed and Fruit Development'], friction: 'Botanical terminology density.' },
+    'Genetics & Evolution': { domain: 'Genetics', chapters: ['Principles of Inheritance', 'Molecular Basis of Inheritance', 'Mendelian Genetics', 'DNA Replication', 'Transcription', 'Translation', 'Genetic Code'], friction: 'Abstract molecular logic.' },
+    'Biology in Human Welfare': { domain: 'Welfare', chapters: ['Microbes in Human Welfare', 'Strategies for Enhancement in Food Production'], friction: 'Process flow memory.' },
+    'Ecology': { domain: 'Ecology', chapters: ['Organisms and Populations', 'Ecosystem', 'Biodiversity', 'Environmental Issues'], friction: 'Systemic interaction logic.' },
+    'Diversity of Life': { domain: 'Diversity', chapters: ['Biological Classification', 'Plant Kingdom', 'Monera', 'Protista', 'Fungi', 'Algae', 'Bryophytes', 'Pteridophytes', 'Gymnosperms', 'Angiosperms'], friction: 'Classification memory density.' }
+  },
+  'Zoology': {
+    'Human Physiology': { domain: 'Human Physiology', chapters: ['Digestion and Absorption', 'Breathing and Exchange of Gases', 'Body Fluids and Circulation', 'Excretory Products', 'Locomotion and Movement', 'Neural Control', 'Chemical Coordination'], friction: 'Complex organ system interactions.' },
+    'Animal Kingdom': { domain: 'Diversity', chapters: ['Animal Kingdom', 'Porifera', 'Coelenterata', 'Platyhelminthes', 'Aschelminthes', 'Annelida', 'Arthropoda', 'Mollusca', 'Echinodermata', 'Hemichordata', 'Chordata'], friction: 'Taxonomic diversity.' },
+    'Reproduction': { domain: 'Reproductive Biology', chapters: ['Human Reproduction', 'Reproductive Health', 'Embryonic Development', 'Gametogenesis', 'Fertilization'], friction: 'Cellular developmental stages.' },
+    'Evolution': { domain: 'Evolution', chapters: ['Evolution', 'Origin of Life', 'Natural Selection', 'Darwinism', 'Human Evolution'], friction: 'Temporal logic and evidence synthesis.' },
+    'Biotechnology': { domain: 'Biotech', chapters: ['Biotechnology: Principles and Processes', 'Biotechnology and its Applications'], friction: 'Technical methodology logic.' },
+    'Human Health & Disease': { domain: 'Pathology', chapters: ['Human Health and Disease', 'Immunity', 'Common Diseases in Humans', 'Cancer', 'AIDS'], friction: 'Pathogen-host interaction logic.' }
+  },
+  'Chemistry': {
+    'Physical Chemistry': { domain: 'Physical', chapters: ['Solid State', 'Solutions', 'Electrochemistry', 'Chemical Kinetics', 'Surface Chemistry', 'Thermodynamics', 'Equilibrium', 'Atomic Structure', 'Mole Concept', 'Redox'], friction: 'Numerical density and conceptual derivation.' },
+    'Organic Chemistry': { domain: 'Organic', chapters: ['Haloalkanes', 'Haloarenes', 'Alcohols', 'Phenols', 'Ethers', 'Aldehydes', 'Ketones', 'Carboxylic Acids', 'Amines', 'Biomolecules', 'Polymers', 'General Organic Chemistry', 'Hydrocarbons', 'Isomerism'], friction: 'Reagent path complexity and mechanism logic.' },
+    'Inorganic Chemistry': { domain: 'Inorganic', chapters: ['General Principles and Processes of Isolation of Elements', 'p-Block Elements', 'd and f Block Elements', 'Coordination Compounds', 'Periodic Classification', 'Chemical Bonding', 's-Block', 'Hydrogen'], friction: 'Memory density and periodic trends.' }
   },
   'Math': {
     'Relations and Functions': { domain: 'Algebra', chapters: ['Relations and Functions', 'Relation', 'Function', 'Binary Operation', 'Invertible'], friction: 'Abstract mapping logic.' },
@@ -127,12 +133,66 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
   const [showReview, setShowReview] = useState(false);
   const [showSyllabusModal, setShowSyllabusModal] = useState(false);
 
-  // Calculate metrics
+  const examConfig = useMemo(() => attempt.examContext ? getExamConfig(attempt.examContext as any) : null, [attempt.examContext]);
+  const isNEET = attempt.examContext === 'NEET';
+
+  // Metrics Calculation
+  const metrics = useMemo(() => {
+    let correct = 0, incorrect = 0, skipped = 0, marks = 0, totalMarks = 0;
+
+    if (isNEET && examConfig?.pattern?.sections) {
+      const subjectSections = ['Physics', 'Chemistry', 'Botany', 'Zoology'];
+      let sectionedFound = questions.some(q => q.section === 'Section A' || q.section === 'Section B');
+
+      if (sectionedFound) {
+        subjectSections.forEach(subject => {
+          const sA = questions.filter(q => q.subject === subject && q.section === 'Section A');
+          sA.forEach(q => {
+            const r = responses.find(res => res.questionId === q.id);
+            totalMarks += 4;
+            if (r?.selectedOption !== undefined) { if (r.isCorrect) { correct++; marks += 4; } else { incorrect++; marks -= 1; } }
+            else skipped++;
+          });
+          const sB = questions.filter(q => q.subject === subject && q.section === 'Section B');
+          let attB = 0;
+          sB.forEach(q => {
+            const r = responses.find(res => res.questionId === q.id);
+            if (r?.selectedOption !== undefined && attB < 10) {
+              attB++; if (r.isCorrect) { correct++; marks += 4; } else { incorrect++; marks -= 1; }
+            } else if (r?.selectedOption === undefined) skipped++;
+          });
+          totalMarks += 40;
+        });
+      } else {
+        questions.forEach(q => {
+          const r = responses.find(res => res.questionId === q.id);
+          totalMarks += 4;
+          if (r) { if (r.isCorrect) { correct++; marks += 4; } else if (r.selectedOption !== undefined) { incorrect++; marks -= 1; } else skipped++; }
+          else skipped++;
+        });
+      }
+    } else {
+      correct = responses.filter(r => r.isCorrect).length;
+      incorrect = responses.filter(r => !r.isCorrect && r.selectedOption !== undefined).length;
+      skipped = questions.length - (correct + incorrect);
+      const mPerQ = examConfig?.pattern?.marksPerQuestion || 1;
+      const hNeg = examConfig?.pattern?.negativeMarking || false;
+      const nVal = examConfig?.pattern?.negativeMarkingValue || 0;
+      responses.forEach(r => {
+        totalMarks += mPerQ;
+        if (r.isCorrect) marks += mPerQ; else if (r.selectedOption !== undefined && hNeg) marks += nVal;
+      });
+    }
+    const perc = totalMarks > 0 ? Math.round((Math.max(0, marks) / totalMarks) * 100) : 0;
+    return { correct, incorrect, skipped, marks, totalMarks, percentage: perc };
+  }, [questions, responses, isNEET, examConfig]);
+
+  // For compatibility with rest of the code that uses top-level variables
   const totalQuestions = questions.length;
-  const correctAnswers = responses.filter(r => r.isCorrect).length;
-  const incorrectAnswers = responses.filter(r => !r.isCorrect && r.selectedOption !== undefined).length;
-  const skippedAnswers = responses.filter(r => r.selectedOption === undefined).length;
-  const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+  const correctAnswers = metrics.correct;
+  const incorrectAnswers = metrics.incorrect;
+  const skippedAnswers = metrics.skipped;
+  const percentage = metrics.percentage;
 
   // Time analysis
   const totalTime = responses.reduce((sum, r) => sum + (r.timeSpent || 0), 0);
@@ -203,33 +263,36 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
         topic === 'chemistry' || topic === 'biology' ||
         /^q\d+$/i.test(topic) || /^question\s*\d+$/i.test(topic);
 
-      if (!isGeneric) {
-        for (const key in currentMap) {
-          const keywords = currentMap[key].chapters;
-          let matchScore = 0;
-          for (const keyword of keywords) {
-            const kw = keyword.toLowerCase();
-            if (topic === kw || topic.includes(kw) || kw.includes(topic)) {
-              matchScore += 10;
-            } else {
-              const topicWords = topic.split(/\s+/);
-              const kwWords = kw.split(/\s+/);
-              for (const tw of topicWords) {
-                for (const kwWord of kwWords) {
-                  if (tw.length > 3 && kwWord.length > 3) {
-                    if (tw.startsWith(kwWord) || kwWord.startsWith(tw)) {
-                      matchScore += 5;
+      if (!isGeneric && currentMap) {
+        Object.keys(currentMap).forEach(key => {
+          const entry = currentMap[key];
+          if (entry && Array.isArray(entry.chapters)) {
+            const keywords = entry.chapters;
+            let currentKeyMatchScore = 0;
+            keywords.forEach(keyword => {
+              const kw = keyword.toLowerCase();
+              if (topic === kw || topic.includes(kw) || kw.includes(topic)) {
+                currentKeyMatchScore += 10;
+              } else {
+                const topicWords = topic.split(/\s+/);
+                const kwWords = kw.split(/\s+/);
+                topicWords.forEach(tw => {
+                  kwWords.forEach(kwWord => {
+                    if (tw.length > 3 && kwWord.length > 3) {
+                      if (tw.startsWith(kwWord) || kwWord.startsWith(tw)) {
+                        currentKeyMatchScore += 5;
+                      }
                     }
-                  }
-                }
+                  });
+                });
               }
+            });
+            if (currentKeyMatchScore > maxMatchScore) {
+              maxMatchScore = currentKeyMatchScore;
+              matchedKey = key;
             }
           }
-          if (matchScore > maxMatchScore) {
-            maxMatchScore = matchScore;
-            matchedKey = key;
-          }
-        }
+        });
       }
       return { ...q, mappedKey: maxMatchScore > 0 ? matchedKey : 'General' };
     });

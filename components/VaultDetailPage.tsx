@@ -70,10 +70,21 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack, filte
         year: scanData.year, // Pass year for display name generation
       } as any;
 
-      // If this is a combined paper opened from a subject hub, filter to only that subject's questions
-      if (filterSubject && scanData.is_combined_paper && mappedScan.analysisData?.questions) {
+      if (filterSubject && mappedScan.analysisData?.questions) {
+        const isNeetSub = mappedScan.examContext === 'NEET' && (filterSubject === 'Botany' || filterSubject === 'Zoology');
+
         const filteredQuestions = mappedScan.analysisData.questions.filter(
-          (q: any) => q.subject === filterSubject
+          (q: any) => {
+            // Direct match
+            if (q.subject === filterSubject) return true;
+            // Split logic for legacy/Bio questions
+            if (isNeetSub && (q.subject === 'Biology' || !q.subject)) {
+              const qNum = q.questionOrder ?? q.index ?? 0;
+              if (filterSubject === 'Botany') return qNum > 100 && qNum <= 150;
+              if (filterSubject === 'Zoology') return qNum > 150 && qNum <= 200;
+            }
+            return false;
+          }
         );
         mappedScan.analysisData = {
           ...mappedScan.analysisData,

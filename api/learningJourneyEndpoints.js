@@ -741,27 +741,81 @@ export async function submitTest(req, res) {
     console.log(`📋 Exam Config: ${marksPerQuestion} marks/question, negative marking: ${negativeMarkingEnabled ? negativeDeduction : 'No'}`);
 
     // Calculate score using actual marking scheme
-    const correctCount = responses.filter(r => r.isCorrect).length;
-    const incorrectCount = responses.filter(r => !r.isCorrect && r.selectedOption !== undefined).length;
-    const questionsAttempted = responses.filter(r => r.selectedOption !== undefined).length;
-
-    // Calculate marks based on question marks (supports variable marks)
+    const isNEET = attempt.exam_context === 'NEET';
+    let correctCount = 0;
+    let incorrectCount = 0;
+    let questionsAttempted = 0;
     let marksObtained = 0;
     let marksTotal = 0;
 
-    responses.forEach(r => {
-      const questionMarks = r.marks || marksPerQuestion;
-      marksTotal += questionMarks;
+    // Use full questions from snapshot to get sections
+    const snapshotQs = attempt.test_config?.questions || [];
 
-      if (r.isCorrect) {
-        marksObtained += questionMarks;
-      } else if (r.selectedOption !== undefined && negativeMarkingEnabled) {
-        // Wrong answer - apply negative marking
-        marksObtained += negativeDeduction; // negativeDeduction is already negative (e.g., -1)
-      }
-    });
+    if (isNEET && snapshotQs.length > 0) {
+      console.log('🧪 Applying NEET Sectional Scoring Logic (Section A: 35, Section B: 10/15)');
+      const subjects = ['Physics', 'Chemistry', 'Botany', 'Zoology'];
 
-    const percentage = marksTotal > 0 ? Math.round((marksObtained / marksTotal) * 100) : 0;
+      subjects.forEach(subject => {
+        // 1. Process Section A (Mandatory 35 per subject)
+        const sectionAQs = snapshotQs.filter(q => q.subject === subject && q.section === 'Section A');
+        sectionAQs.forEach(q => {
+          const r = responses.find(resp => resp.questionId === q.id);
+          marksTotal += 4;
+          if (r && r.selectedOption !== undefined) {
+            questionsAttempted++;
+            if (r.isCorrect) {
+              correctCount++;
+              marksObtained += 4;
+            } else {
+              incorrectCount++;
+              marksObtained -= 1;
+            }
+          }
+        });
+
+        // 2. Process Section B (Attempt first 10 per subject)
+        const sectionBQs = snapshotQs.filter(q => q.subject === subject && q.section === 'Section B');
+        let subjectBAttempts = 0;
+        sectionBQs.forEach(q => {
+          const r = responses.find(resp => resp.questionId === q.id);
+          if (r && r.selectedOption !== undefined) {
+            if (subjectBAttempts < 10) {
+              subjectBAttempts++;
+              questionsAttempted++;
+              if (r.isCorrect) {
+                correctCount++;
+                marksObtained += 4;
+              } else {
+                incorrectCount++;
+                marksObtained -= 1;
+              }
+            }
+          }
+        });
+        marksTotal += 40; // 10 * 4
+      });
+
+      // NEET Total should always be 720 if it's a full paper
+      if (marksTotal < 720 && snapshotQs.length >= 200) marksTotal = 720;
+    } else {
+      // Standard Global Scoring
+      correctCount = responses.filter(r => r.isCorrect).length;
+      incorrectCount = responses.filter(r => !r.isCorrect && r.selectedOption !== undefined).length;
+      questionsAttempted = responses.filter(r => r.selectedOption !== undefined).length;
+
+      responses.forEach(r => {
+        const questionMarks = r.marks || marksPerQuestion;
+        marksTotal += questionMarks;
+
+        if (r.isCorrect) {
+          marksObtained += questionMarks;
+        } else if (r.selectedOption !== undefined && negativeMarkingEnabled) {
+          marksObtained += negativeDeduction;
+        }
+      });
+    }
+
+    const percentage = marksTotal > 0 ? Math.round((Math.max(0, marksObtained) / marksTotal) * 100) : 0;
 
     console.log(`📊 Score: ${correctCount}/${responses.length} correct, ${marksObtained}/${marksTotal} marks (${percentage}%), ${questionsAttempted} attempted`);
 

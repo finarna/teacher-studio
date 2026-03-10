@@ -114,7 +114,7 @@ export const SUBJECT_CONFIGS: Record<Subject, SubjectConfiguration> = {
     color: '#F97316', // Orange
     colorLight: '#FFEDD5',
     colorDark: '#C2410C',
-    icon: 'Dog',
+    icon: 'PawPrint',
     iconEmoji: '🐾',
     domains: [
       'Human Physiology',

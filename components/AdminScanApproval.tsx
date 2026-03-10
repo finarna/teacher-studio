@@ -47,6 +47,8 @@ interface ScanInfo {
   visual_notes_count: number;
   flashcards_count: number;
   analysis_data?: any;
+  is_combined_paper?: boolean;
+  subjects?: Subject[];
 }
 
 const AdminScanApproval: React.FC = () => {
@@ -60,6 +62,7 @@ const AdminScanApproval: React.FC = () => {
   const [counts, setCounts] = useState({ all: 0, published: 0, unpublished: 0 });
   const [officialTopicsList, setOfficialTopicsList] = useState<{ id: string, name: string }[]>([]);
   const [expandedQuestions, setExpandedQuestions] = useState<Record<number, boolean>>({});
+  const [showOnlyUnmapped, setShowOnlyUnmapped] = useState(false);
 
   // Strategic Briefing Filters (Linked to Global Context)
   const { activeSubject, activeExamContext } = useAppContext();
@@ -80,7 +83,23 @@ const AdminScanApproval: React.FC = () => {
       const singularQ = qTopic.replace(/s\b/g, '');
       if (singularT === singularQ || (singularQ.length > 3 && (singularT.includes(singularQ) || singularQ.includes(singularT)))) return true;
 
-      // 3. Special Cases & Common AI Aliases
+      // 3. Special Cases & Common AI Aliases (NCERT Mapping Hints)
+      const mappingHints: Record<string, string> = {
+        'electrostatics': 'Electric Charges and Fields',
+        'capacitors': 'Electrostatic Potential and Capacitance',
+        'current': 'Current Electricity',
+        'magnetism': 'Moving Charges and Magnetism',
+        'optics': 'Ray Optics and Optical Instruments',
+        'differentiation': 'Continuity and Differentiability',
+        'integration': 'Integrals',
+        'reproduction': 'Sexual Reproduction in Flowering Plants',
+        'genetics': 'Principles of Inheritance and Variation',
+        'biotechnology': 'Biotechnology Principles and Processes',
+        'ecology': 'Organisms and Populations'
+      };
+
+      if (mappingHints[qTopic] && tName === mappingHints[qTopic].toLowerCase()) return true;
+
       if (qTopic === 'differentiation' && tName.includes('differentiability')) return true;
       if (qTopic === 'integration' && tName.includes('integral')) return true;
       if (qTopic.includes('vector') && tName.includes('vector')) return true;
@@ -109,21 +128,27 @@ const AdminScanApproval: React.FC = () => {
    */
   const mapScanQuestionsToTopics = async (scanId: string, subject: Subject) => {
     try {
-      // Get all official topics for this subject
+      // 🔧 SUBJECT NORMALIZATION (Botany/Zoology -> Biology)
+      let querySubject = subject;
+      if (subject === 'Botany' || subject === 'Zoology') {
+        querySubject = 'Biology';
+      }
+
+      // Get all official topics for this normalized subject
       const { data: topics } = await supabase
         .from('topics')
         .select('id, name')
-        .eq('subject', subject);
+        .eq('subject', querySubject);
 
       if (!topics || topics.length === 0) {
-        console.warn(`No official topics found for subject ${subject}`);
+        console.warn(`No official topics found for subject ${querySubject} (Original: ${subject})`);
         return;
       }
 
       // Get all questions from this scan
       const { data: questions } = await supabase
         .from('questions')
-        .select('id, topic')
+        .select('id, topic, subject')
         .eq('scan_id', scanId);
 
       if (!questions || questions.length === 0) {
@@ -144,6 +169,10 @@ const AdminScanApproval: React.FC = () => {
       );
 
       for (const question of questions) {
+        // NEW: For combined papers, only map if question subject matches current loop subject
+        if (question.subject && question.subject !== subject) continue;
+
+        // Use the smarter matching engine
         const matchingTopic = findMatchingOfficialTopic(question.topic, topics);
 
         if (matchingTopic) {
@@ -218,6 +247,7 @@ const AdminScanApproval: React.FC = () => {
         .from('scans')
         .select(`
           id, name, subject, exam_context, status, is_system_scan, created_at, year, analysis_data,
+          is_combined_paper, subjects,
           questions:questions(count),
           visual_notes:topic_sketches(count),
           flashcards:flashcards(data)
@@ -276,14 +306,28 @@ const AdminScanApproval: React.FC = () => {
 
         let mappedCount = mappingsByScan[scan.id] || 0;
         if (dbQuestionCount === 0 && analysisQuestions.length > 0) {
-          mappedCount = analysisQuestions.filter((q: any) =>
-            q.topic && q.topic !== 'General' && q.topic !== 'Mathematics' && q.topic !== 'Physics'
-          ).length;
+          mappedCount = analysisQuestions.filter((q: any, idx: number) => {
+            // APPLY LEGACY SYNC for mapping estimate
+            let qSubj = q.subject || scan.subject;
+            if ((qSubj === 'Biology' || qSubj === 'Botany' || qSubj === 'Zoology') && scan.exam_context === 'NEET') {
+              const idParts = (q.id || '').split(/[^0-9]/).filter(Boolean);
+              const qNum = idParts.length > 0 ? parseInt(idParts[idParts.length - 1]) : (idx + 1);
+              if (qNum > 100 && qNum <= 150) qSubj = 'Botany';
+              else if (qNum > 150) qSubj = 'Zoology';
+            }
+
+            // Check if topic is non-generic AND matches an official topic
+            const isGeneric = ['General', 'Mathematics', 'Physics', 'Biology', 'Chemistry', 'Botany', 'Zoology', 'Unknown', 'Unmapped', ''].includes(q.topic || '');
+
+            // Map Botany/Zoology topics using the official topics list
+            const matchingTopic = findMatchingOfficialTopic(q.topic, officialTopicsList);
+            return !isGeneric && matchingTopic;
+          }).length;
         }
 
         const unmappedCount = Math.max(0, questionCount - mappedCount);
         const successRate = questionCount > 0
-          ? Math.round((mappedCount / questionCount) * 100)
+          ? (mappedCount === questionCount ? 100 : Number(((mappedCount / questionCount) * 100).toFixed(1)))
           : 0;
 
         const dbVisualNotesCount = (scan as any).visual_notes?.[0]?.count || 0;
@@ -313,7 +357,9 @@ const AdminScanApproval: React.FC = () => {
           has_exam_analysis: questionCount > 0,
           visual_notes_count: visualNotesCount,
           flashcards_count: flashcardsCount,
-          analysis_data: scan.analysis_data
+          analysis_data: scan.analysis_data,
+          is_combined_paper: scan.is_combined_paper,
+          subjects: scan.subjects
         };
       });
 
@@ -435,7 +481,7 @@ const AdminScanApproval: React.FC = () => {
             key_formulas: q.keyFormulas || q.key_formulas || [],
             mastery_material: q.masteryMaterial || q.mastery_material || null,
             question_order: index,
-            subject: scan.subject,
+            subject: q.subject || scan.subject,
             exam_context: scan.exam_context,
             year: extractedYear ? parseInt(extractedYear) : null,
             is_system_question: true,
@@ -457,7 +503,31 @@ const AdminScanApproval: React.FC = () => {
           .insert(questionsData);
       }
 
-      await mapScanQuestionsToTopics(scanId, scan.subject);
+      // 4. MAP QUESTIONS TO TOPICS (Required for sync)
+      if (scan.is_combined_paper && scan.subjects) {
+        for (const subj of scan.subjects) {
+          await mapScanQuestionsToTopics(scanId, subj);
+        }
+      } else {
+        await mapScanQuestionsToTopics(scanId, scan.subject);
+      }
+
+      // 5. SYNC TO AI GENERATOR TABLES (REI v3.0 INTELLIGENCE SYNC)
+      // This populates the historical patterns used for 2026 predictions
+      try {
+        if (scan.is_combined_paper && scan.subjects) {
+          for (const subj of scan.subjects) {
+            console.log(`📡 [SYNC] Starting subject fragment sync for: ${subj}`);
+            await syncScanToAITables(supabase, scanId, subj);
+          }
+        } else {
+          await syncScanToAITables(supabase, scanId, scan.subject);
+        }
+        console.log('✅ [SYNC] Integrated scan intelligence into AI forecasting models.');
+      } catch (syncError) {
+        console.warn('⚠️ [SYNC] High-level sync failed, pattern gradients might not be updated:', syncError);
+      }
+
       await loadCounts();
       if (filterStatus !== 'published') {
         setFilterStatus('published');
@@ -663,11 +733,23 @@ const AdminScanApproval: React.FC = () => {
                           })()}
                         </div>
 
-                        <h3 className="text-xl font-black text-slate-900 mb-1">
+                        <h3 className="text-xl font-black text-slate-900 mb-1 leading-tight">
                           {scan.paper_name}
                         </h3>
+                        {scan.is_combined_paper && (
+                          <div className="flex gap-2 mb-2 flex-wrap">
+                            <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-black rounded uppercase tracking-wider border border-indigo-200">
+                              Combined Paper
+                            </span>
+                            {(scan.subjects || []).map(s => (
+                              <span key={s} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-black rounded uppercase tracking-wider border border-slate-200">
+                                {s}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         <div className="flex items-center gap-4 text-sm text-slate-500 font-medium mb-4">
-                          <span className="font-bold text-slate-700">{scan.subject}</span>
+                          <span className="font-bold text-slate-700">{scan.is_combined_paper ? 'NEET Combined' : scan.subject}</span>
                           <span>•</span>
                           <span className="font-bold text-slate-700">{scan.exam_context}</span>
                           <span>•</span>
@@ -989,7 +1071,9 @@ const AdminScanApproval: React.FC = () => {
                     <div>
                       <h2 className="text-2xl font-black text-slate-900 mb-1">{selectedScan.paper_name}</h2>
                       <div className="flex items-center gap-4 text-sm font-bold text-slate-500">
-                        <span className="text-primary-600">{selectedScan.subject}</span>
+                        <span className="text-primary-600">
+                          {selectedScan.is_combined_paper && selectedScan.subjects ? selectedScan.subjects.join(', ') : selectedScan.subject}
+                        </span>
                         <span>•</span>
                         <span>{selectedScan.exam_context}</span>
                         <span>•</span>
@@ -997,7 +1081,10 @@ const AdminScanApproval: React.FC = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => setSelectedScan(null)}
+                      onClick={() => {
+                        setSelectedScan(null);
+                        setShowOnlyUnmapped(false);
+                      }}
                       className="p-3 hover:bg-white hover:shadow-md rounded-2xl transition-all border border-transparent hover:border-slate-100"
                     >
                       <XCircle size={24} className="text-slate-400" />
@@ -1012,7 +1099,9 @@ const AdminScanApproval: React.FC = () => {
                         <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Quality Score</h4>
                         <div className="flex items-end gap-2 mb-2">
                           <span className="text-5xl font-black text-slate-900">{selectedScan.mapping_success_rate}%</span>
-                          <span className="text-sm font-bold text-slate-500 mb-1.5 whitespace-nowrap">Mapped to Topics</span>
+                          <span className="text-sm font-bold text-slate-500 mb-1.5 whitespace-nowrap">
+                            {selectedScan.mapping_success_rate === 100 ? 'Mapped to Topics' : 'Partial Match'}
+                          </span>
                         </div>
                         <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
                           <div
@@ -1052,7 +1141,16 @@ const AdminScanApproval: React.FC = () => {
                       <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden shadow-sm">
                         <div className="p-5 bg-slate-50 border-b border-slate-100">
                           <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Mapping Progress</span>
+                            <div className="flex items-center gap-4">
+                              <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Mapping Progress</span>
+                              <button
+                                onClick={() => setShowOnlyUnmapped(!showOnlyUnmapped)}
+                                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border flex items-center gap-1.5 ${showOnlyUnmapped ? 'bg-orange-500 text-white border-orange-400 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}
+                              >
+                                {showOnlyUnmapped ? <CheckCircle2 size={10} /> : <AlertCircle size={10} />}
+                                {showOnlyUnmapped ? 'Showing Unmapped Only' : 'Filter Unmapped'}
+                              </button>
+                            </div>
                             <span className="text-xs font-black text-slate-900 bg-white px-3 py-1 rounded-full border border-slate-200">
                               Synthesized {selectedScan.analysis_data?.questions?.length || 0} / {selectedScan.question_count} Questions
                             </span>
@@ -1080,27 +1178,50 @@ const AdminScanApproval: React.FC = () => {
                             }
 
                             return questions.map((q: any, idx: number) => {
+                              const topic = q.topic || '';
+                              const matchingTopic = findMatchingOfficialTopic(topic, officialTopicsList);
+                              const isUnmapped = ['General', 'Mathematics', 'Physics', 'Biology', 'Chemistry', 'Botany', 'Zoology', 'Unknown', 'Unmapped', ''].includes(topic) || !matchingTopic;
+
+                              if (showOnlyUnmapped && !isUnmapped) return null;
+
                               const isExpanded = expandedQuestions[idx] || false;
                               return (
-                                <div key={idx} className="hover:bg-slate-50 transition-colors">
+                                <div key={idx} className={`hover:bg-slate-50 transition-colors border-l-4 ${isUnmapped ? 'border-orange-500 bg-orange-50/10' : 'border-transparent'}`}>
                                   <div
                                     className="p-4 flex items-center gap-4 cursor-pointer select-none group"
                                     onClick={() => setExpandedQuestions(prev => ({ ...prev, [idx]: !prev[idx] }))}
                                   >
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-black transition-colors ${isExpanded ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}>
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-black transition-colors ${isExpanded ? 'bg-purple-100 text-purple-700' : isUnmapped ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}>
                                       {idx + 1}
                                     </div>
                                     <div className="flex-1 min-w-0 pr-4">
-                                      <p className={`text-sm font-bold truncate transition-colors ${isExpanded ? 'text-purple-900' : 'text-slate-700'}`}>
+                                      <p className={`text-sm font-bold truncate transition-colors ${isExpanded ? 'text-purple-900' : isUnmapped ? 'text-orange-900' : 'text-slate-700'}`}>
                                         {q.text || q.question || 'No question text provided'}
                                       </p>
                                       <div className="flex items-center gap-3 mt-1.5">
-                                        <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-black uppercase text-purple-600 bg-purple-50 border border-purple-100">
+                                        <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-black uppercase border ${isUnmapped ? 'text-orange-600 bg-orange-50 border-orange-200' : 'text-purple-600 bg-purple-50 border-purple-100'}`}>
                                           Topic: {q.topic || 'Unclassified'}
                                         </span>
                                         <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 border border-emerald-100">
                                           Difficulty: {q.difficulty || 'Medium'}
                                         </span>
+                                        {selectedScan.is_combined_paper && (q.subject || selectedScan.subject) && (
+                                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-black uppercase border ${(q.subject === 'Botany' || (idx + 1 > 100 && idx + 1 <= 150)) ? 'text-emerald-600 bg-emerald-50 border-emerald-100' :
+                                            (q.subject === 'Zoology' || idx + 1 > 150) ? 'text-orange-600 bg-orange-50 border-orange-100' :
+                                              'text-rose-600 bg-rose-50 border-rose-100'
+                                            }`}>
+                                            Subject: {(() => {
+                                              let subj = q.subject || selectedScan.subject;
+                                              if (subj === 'Biology' && selectedScan.exam_context === 'NEET') {
+                                                const idParts = (q.id || '').split(/[^0-9]/).filter(Boolean);
+                                                const qNum = idParts.length > 0 ? parseInt(idParts[idParts.length - 1]) : (idx + 1);
+                                                if (qNum > 100 && qNum <= 150) return 'Botany';
+                                                if (qNum > 150) return 'Zoology';
+                                              }
+                                              return subj;
+                                            })()}
+                                          </span>
+                                        )}
                                       </div>
                                     </div>
                                     <div className={`flex-shrink-0 p-2 rounded-full transition-colors ${isExpanded ? 'bg-purple-100 text-purple-600' : 'text-slate-400 group-hover:bg-slate-200'}`}>
@@ -1165,7 +1286,7 @@ const AdminScanApproval: React.FC = () => {
                         <div className="divide-y divide-slate-50 max-h-[400px] overflow-y-auto">
                           {(() => {
                             const questions = selectedScan.analysis_data?.questions || [];
-                            const genericTopics = ['General', 'Mathematics', 'Physics', 'Unknown', ''];
+                            const genericTopics = ['General', 'Mathematics', 'Physics', 'Biology', 'Chemistry', 'Botany', 'Zoology', 'Unknown', ''];
 
                             return questions.filter((q: any) => {
                               const topic = q.topic || '';
@@ -1247,8 +1368,9 @@ const AdminScanApproval: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 

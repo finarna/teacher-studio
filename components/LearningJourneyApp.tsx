@@ -399,6 +399,7 @@ const LearningJourneyApp: React.FC<LearningJourneyAppProps> = ({ onBack }) => {
           <VaultDetailPage
             scanId={selectedScanId}
             onBack={goBack}
+            filterSubject={selectedSubject}
           />
         );
 

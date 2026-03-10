@@ -100,9 +100,10 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
         // 2. Scans for Past Year Questions
         supabase
           .from('scans')
-          .select('id, year, analysis_data')
-          .eq('subject', subject)
+          .select('id, year, analysis_data, is_combined_paper, subjects') // Added new fields
+          .or(`subject.eq.${subject},subjects.cs.{${subject}}`) // NEW: Fixed subject filter
           .eq('exam_context', examContext)
+          .eq('is_system_scan', true)
           .not('year', 'is', null),
 
         // 3. Mastered Topics Count
@@ -150,7 +151,13 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
       if (scansData && scansData.length > 0) {
         scansData.forEach((scan: any) => {
           const questions = scan.analysis_data?.questions || [];
-          pastYearQuestionsCount += questions.length;
+          if (scan.is_combined_paper) {
+            // Only count questions for this subject
+            const filteredCount = questions.filter((q: any) => q.subject === subject).length;
+            pastYearQuestionsCount += filteredCount;
+          } else {
+            pastYearQuestionsCount += questions.length;
+          }
           if (scan.year) availableYears.push(scan.year);
         });
         availableYears = [...new Set(availableYears)].sort((a, b) => parseInt(b) - parseInt(a));

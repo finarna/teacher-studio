@@ -17,7 +17,11 @@ import {
     Activity,
     Target,
     BarChart3,
-    History as HistoryIcon
+    History as HistoryIcon,
+    Sprout,
+    PawPrint,
+    Flower2,
+    Leaf
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Subject, ExamContext, SubjectProgress } from '../types';
@@ -37,7 +41,9 @@ const SUBJECT_ICONS: Record<Subject, React.ElementType> = {
     'Math': Calculator,
     'Physics': Atom,
     'Chemistry': FlaskConical,
-    'Biology': Dna
+    'Biology': Leaf,
+    'Botany': Sprout || Leaf,
+    'Zoology': PawPrint || Flower2
 };
 
 const getPotentialGain = (m: number, a: number) => {
@@ -78,10 +84,18 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
         tags: string[];
     } | null>(null);
 
-    const availableSubjects = useMemo(() =>
-        (Object.keys(SUBJECT_CONFIGS) as Subject[]).filter(
+    const availableSubjects = useMemo(() => {
+        let subjects = (Object.keys(SUBJECT_CONFIGS) as Subject[]).filter(
             subject => SUBJECT_CONFIGS[subject].supportedExams.includes(examContext)
-        ), [examContext]);
+        );
+
+        // NEET Pivot: Show ONLY sub-disciplines for Biology (Botany/Zoology)
+        if (examContext === 'NEET') {
+            subjects = subjects.filter(s => s !== 'Biology');
+        }
+
+        return subjects;
+    }, [examContext]);
 
 
     // LOGIC ENGINE: Dynamic Strategy Generation (Synced with Desktop)
@@ -168,7 +182,8 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
             const { data: publishedScans } = await supabase
                 .from('scans')
                 .select('id, subject, analysis_data')
-                .eq('is_system_scan', true);
+                .eq('is_system_scan', true)
+                .eq('exam_context', examContext);
 
             if (!publishedScans) return;
 
@@ -180,15 +195,38 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
             const { data: allTopics } = await supabase.from('topics').select('id, subject, domain');
 
             const subjectPromises = availableSubjects.map(async (subject) => {
-                const subjectScanIds = publishedScans.filter(s => s.subject === subject).map(s => s.id);
-                let qCount = 0;
-                if (subjectScanIds.length > 0) {
-                    const { count } = await supabase.from('questions').select('*', { count: 'exact', head: true }).in('scan_id', subjectScanIds);
-                    qCount = count || 0;
+                // NEET Pivot Logic: Map Biology questions/resources to sub-disciplines
+                const isNeetSub = examContext === 'NEET' && (subject === 'Botany' || subject === 'Zoology');
+                const isNeetMain = examContext === 'NEET' && (subject === 'Physics' || subject === 'Chemistry');
+
+                // 1. Direct Question Count
+                const { count: directCount } = await supabase
+                    .from('questions')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('subject', subject)
+                    .in('scan_id', scanIds);
+
+                let qCount = directCount || 0;
+
+                // 2. Legacy Biology Count Fallback (Split 50/50 for Botany/Zoology cards)
+                if (qCount === 0 && isNeetSub) {
+                    const { count: biologyTotal } = await supabase
+                        .from('questions')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('subject', 'Biology')
+                        .in('scan_id', scanIds);
+                    qCount = Math.floor((biologyTotal || 0) / 2);
                 }
 
+                // 3. Scan-based resources (Combined papers map to all subjects)
+                const subjectScanIds = publishedScans.filter(s =>
+                    s.subject === subject ||
+                    (examContext === 'NEET' && s.subject === 'Combined' && (isNeetSub || isNeetMain)) ||
+                    (examContext === 'NEET' && s.subject === 'Biology' && isNeetSub)
+                ).map(s => s.id);
+
                 const subjectFlashcards = flashcardRecords?.filter(f => subjectScanIds.includes(f.scan_id)).reduce((sum, f) => sum + (Array.isArray(f.data) ? f.data.length : 0), 0) || 0;
-                const subjectSketches = publishedScans.filter(s => s.subject === subject && s.analysis_data?.topicBasedSketches).reduce((sum, s) => sum + Object.keys(s.analysis_data.topicBasedSketches).length, 0);
+                const subjectSketches = publishedScans.filter(s => subjectScanIds.includes(s.id) && s.analysis_data?.topicBasedSketches).reduce((sum, s) => sum + Object.keys(s.analysis_data.topicBasedSketches).length, 0);
                 const subjectTopics = allTopics?.filter(t => t.subject === subject).length || 0;
 
                 return [subject, { questions: qCount, sketches: subjectSketches, flashcards: subjectFlashcards, topics: subjectTopics }] as [Subject, any];
@@ -339,7 +377,7 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         const mastery = subjectProgress?.[subject]?.overallMastery || 0;
                         const accuracy = subjectProgress?.[subject]?.overallAccuracy || 0;
                         const stats = comprehensiveStats.subjectStats[subject] || { questions: 0, sketches: 0, flashcards: 0, topics: 0 };
-                        const Icon = SUBJECT_ICONS[subject];
+                        const Icon = SUBJECT_ICONS[subject] || BookOpen;
 
                         const isExpanded = expandedSubjectId === subject;
 

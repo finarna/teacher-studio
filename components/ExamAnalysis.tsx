@@ -773,38 +773,36 @@ Schema: {
         /^q\d+$/i.test(topic) ||
         /^question\s*\d+$/i.test(topic);
 
-      if (!isGeneric) {
-        // Try to match against each domain's keywords
-        for (const key in currentMap) {
-          const keywords = currentMap[key].chapters;
-          let matchScore = 0;
-
-          for (const keyword of keywords) {
-            const kw = keyword.toLowerCase();
-            // Check for exact word match or partial match
-            if (topic === kw || topic.includes(kw) || kw.includes(topic)) {
-              matchScore += 10; // Strong match
-            } else {
-              // Check for word boundary matches (e.g., "electric" matches "electricity")
-              const topicWords = topic.split(/\s+/);
-              const kwWords = kw.split(/\s+/);
-              for (const tw of topicWords) {
-                for (const kwWord of kwWords) {
-                  if (tw.length > 3 && kwWord.length > 3) {
-                    if (tw.startsWith(kwWord) || kwWord.startsWith(tw)) {
-                      matchScore += 5; // Partial word match
+      if (!isGeneric && currentMap) {
+        Object.keys(currentMap).forEach(key => {
+          const entry = currentMap[key];
+          if (entry && Array.isArray(entry.chapters)) {
+            const keywords = entry.chapters;
+            let currentKeyMatchScore = 0;
+            keywords.forEach(keyword => {
+              const kw = keyword.toLowerCase();
+              if (topic === kw || topic.includes(kw) || kw.includes(topic)) {
+                currentKeyMatchScore += 10;
+              } else {
+                const topicWords = topic.split(/\s+/);
+                const kwWords = kw.split(/\s+/);
+                topicWords.forEach(tw => {
+                  kwWords.forEach(kwWord => {
+                    if (tw.length > 3 && kwWord.length > 3) {
+                      if (tw.startsWith(kwWord) || kwWord.startsWith(tw)) {
+                        currentKeyMatchScore += 5;
+                      }
                     }
-                  }
-                }
+                  });
+                });
               }
+            });
+            if (currentKeyMatchScore > maxMatchScore) {
+              maxMatchScore = currentKeyMatchScore;
+              matchedKey = key;
             }
           }
-
-          if (matchScore > maxMatchScore) {
-            maxMatchScore = matchScore;
-            matchedKey = key;
-          }
-        }
+        });
       }
 
       // Debug: Log first few classifications

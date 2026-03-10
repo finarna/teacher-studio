@@ -19,10 +19,8 @@ export const SubjectSwitcher: React.FC = () => {
   const allSubjects = getAllSubjects();
   const availableExams = getAvailableExams();
 
-  // First-time user guidance
-  const [showHints, setShowHints] = useState(() => {
-    return !localStorage.getItem('edujourney_seen_multi_subject_hints');
-  });
+  // First-time user guidance - DISABLED as it blocks the UI
+  const [showHints, setShowHints] = useState(false);
 
   const dismissHints = () => {
     setShowHints(false);
@@ -38,7 +36,7 @@ export const SubjectSwitcher: React.FC = () => {
     const handleKeyPress = (e: KeyboardEvent) => {
       // Only trigger if Ctrl (Windows/Linux) or Cmd (Mac) is pressed
       if (e.ctrlKey || e.metaKey) {
-        switch(e.key) {
+        switch (e.key) {
           case '1':
             e.preventDefault();
             setActiveSubject('Math');
@@ -99,17 +97,16 @@ export const SubjectSwitcher: React.FC = () => {
                 <button
                   key={subject}
                   onClick={() => handleSubjectSwitch(subject)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
                       ? 'shadow-md'
                       : 'hover:bg-slate-50'
-                  }`}
+                    }`}
                   style={
                     isActive
                       ? {
-                          backgroundColor: config.colorLight,
-                          borderColor: config.color
-                        }
+                        backgroundColor: config.colorLight,
+                        borderColor: config.color
+                      }
                       : undefined
                   }
                 >
@@ -167,17 +164,16 @@ export const SubjectSwitcher: React.FC = () => {
                 <button
                   key={exam}
                   onClick={() => setActiveExamContext(exam as any)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
-                    isActive
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isActive
                       ? 'shadow-md'
                       : 'hover:bg-slate-50'
-                  }`}
+                    }`}
                   style={
                     isActive
                       ? {
-                          backgroundColor: subjectConfig.colorLight,
-                          borderColor: subjectConfig.color
-                        }
+                        backgroundColor: subjectConfig.colorLight,
+                        borderColor: subjectConfig.color
+                      }
                       : undefined
                   }
                 >

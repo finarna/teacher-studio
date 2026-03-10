@@ -57,7 +57,7 @@ const TRAJECTORY_CARDS: TrajectoryCard[] = [
     pattern: {
       totalQuestions: 60,
       duration: 80,
-      subjects: ['P', 'C', 'M', 'B']
+      subjects: ['Physics', 'Chemistry', 'Math', 'Botany', 'Zoology']
     },
     highlights: [
       { icon: Medal, text: 'State Govt. Colleges' },
@@ -77,7 +77,7 @@ const TRAJECTORY_CARDS: TrajectoryCard[] = [
     pattern: {
       totalQuestions: 180,
       duration: 200,
-      subjects: ['Physics', 'Chemistry', 'Biology']
+      subjects: ['Physics', 'Chemistry', 'Botany', 'Zoology']
     },
     highlights: [
       { icon: Medal, text: 'Medical & Dental Colleges' },
