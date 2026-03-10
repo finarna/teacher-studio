@@ -258,13 +258,32 @@ export async function generateTestQuestions(
 
   console.log(`⚡ Optimized into ${batches.length} generation batches (Batch size limit: ${MAX_QUESTIONS_PER_BATCH})`);
 
+  let currentGlobalIndex = 0;
   const generationPromises = batches.map(async (batch, idx) => {
-    console.log(`🎯 Batch ${idx + 1}: Generating ${batch.reduce((sum, b) => sum + b.questionCount, 0)} questions across ${batch.length} topic segments...`);
+    const totalInBatchCount = batch.reduce((sum, b) => sum + b.questionCount, 0);
+    console.log(`🎯 Batch ${idx + 1}: Generating ${totalInBatchCount} questions across ${batch.length} topic segments...`);
+
+    // Determine section for this batch (for NEET/JEE)
+    let batchSection = 'Section A';
+    if (context.examConfig.examContext === 'NEET' && context.examConfig.totalQuestions === 200) {
+      // Logic for 200-question NEET paper:
+      // Physics (1-50), Chem (51-100), Botany (101-150), Zoology (151-200)
+      // Section A: first 35 of each subject. Section B: next 15.
+      const subjectIndex = Math.floor(currentGlobalIndex / 50);
+      const indexWithinSubject = currentGlobalIndex % 50;
+
+      if (indexWithinSubject >= 35) {
+        batchSection = 'Section B';
+      }
+    }
+
+    currentGlobalIndex += totalInBatchCount;
 
     return generateTopicQuestionsBatch({
-      batchAllocations: batch,
+      batchAllocations: batch.map(b => ({ ...b, section: batchSection })),
       examConfig: context.examConfig,
-      generationRules: context.generationRules
+      generationRules: context.generationRules,
+      section: batchSection
     }, geminiApiKey);
   });
 
@@ -608,15 +627,18 @@ async function generateTopicQuestionsBatch(
       difficultyDistribution: { easy: number; moderate: number; hard: number };
       studentMastery: number;
       evolutionNote?: string;
+      section?: string;
     }>;
     examConfig: ExamConfiguration;
     generationRules: GenerationRules;
+    section?: string; // Global section for this batch
   },
   geminiApiKey: string
 ): Promise<AnalyzedQuestion[]> {
 
-  const { batchAllocations, examConfig } = params;
-  const totalInBatch = batchAllocations.reduce((sum, a) => sum + a.questionCount, 0);
+  const { batchAllocations, examConfig, params: fullParams } = params as any;
+  const totalInBatch = batchAllocations.reduce((sum: number, a: any) => sum + a.questionCount, 0);
+  const targetSection = params.section || batchAllocations[0]?.section || 'Section A';
   const topicsText = batchAllocations.map(a => `- ${a.topicMetadata.topicName} (${a.questionCount} questions)\n  Targets: ${a.difficultyDistribution.easy}% Easy, ${a.difficultyDistribution.moderate}% Mod, ${a.difficultyDistribution.hard}% Hard${a.evolutionNote ? `\n  Evolution Insight: ${a.evolutionNote}` : ''}`).join('\n');
   const syllabusText = batchAllocations.map(a => `[TOPIC: ${a.topicMetadata.topicName}] SYLLABUS: ${a.topicMetadata.syllabus}`).join('\n\n');
 
@@ -655,6 +677,8 @@ Generate a total of ${totalInBatch} ULTIMATE-RIGOR MCQ questions.
 TOPICS & DISTRIBUTION:
 ${topicsText}
 
+SECTION TARGET: ${targetSection} (MANDATORY: Assign this to every question)
+
 CONTEXT:
 ${syllabusText}
 
@@ -683,7 +707,8 @@ Return ONLY a valid JSON array:
     "studyTip": "Mastery shortcut or visualization ritual",
     "commonMistakes": [{"mistake": "...", "why": "...", "howToAvoid": "..."}],
     "keyFormulas": ["$formula$"],
-    "keyConcepts": [{"name": "...", "explanation": "..."}]
+    "keyConcepts": [{"name": "...", "explanation": "..."}],
+    "section": "${targetSection}"
   }
 ]`;
 
@@ -737,6 +762,7 @@ Return ONLY a valid JSON array:
           keyConcepts: q.keyConcepts || q.key_concepts || [],
           masteryMaterial: q.masteryMaterial || q.mastery_material || q,
           correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? 0,
+          section: q.section || targetSection,
           source: `AI-Generated (Smart-Batch ${examConfig.examContext})`
         }));
       } catch (parseError) {
@@ -779,6 +805,7 @@ async function generateTopicQuestions(
     examConfig: ExamConfiguration;
     studentMastery: number;
     generationRules: GenerationRules;
+    section?: string;
   },
   geminiApiKey: string
 ): Promise<AnalyzedQuestion[]> {
@@ -796,6 +823,7 @@ async function generateTopicQuestions(
       // Validate generated questions
       const validatedQuestions: AnalyzedQuestion[] = [];
       const invalidQuestions: Array<{ q: AnalyzedQuestion; errors: string[] }> = [];
+      // ... (omitting validation logic for brevity in replace, but keeping it in actual file)
 
       questions.forEach(q => {
         const validation = validateQuestion(q);
@@ -854,11 +882,12 @@ async function generateTopicQuestionsInternal(
     examConfig: ExamConfiguration;
     studentMastery: number;
     generationRules: GenerationRules;
+    section?: string;
   },
   geminiApiKey: string
 ): Promise<AnalyzedQuestion[]> {
 
-  const { topicMetadata, questionCount, difficultyDistribution, examConfig } = params;
+  const { topicMetadata, questionCount, difficultyDistribution, examConfig, section: targetSection = 'Section A' } = params;
 
   const rigorDirective = getExamRigorDirective(examConfig.examContext as ExamContext, examConfig.subject as Subject);
 
@@ -873,6 +902,7 @@ MISSION: PRE-EMPTIVE COMPETITIVE FORECAST
 3. TOPIC: ${topicMetadata.topicName}
 4. CONTEXT: ${topicMetadata.syllabus}
 5. REQUIRED BLOOM'S LEVELS: ${topicMetadata.bloomsLevels.join(', ')}
+6. SECTION TARGET: ${targetSection} (Assign this to every question)
 
 GENERATE: ${questionCount} ULTIMATE-RIGOR MCQ questions.
 
@@ -903,13 +933,13 @@ GENERATE EACH QUESTION WITH THE FOLLOWING SCHEMA:
   "options": ["A", "B", "C", "D"],
   "correctOptionIndex": 0,
   "difficulty": "Easy|Moderate|Hard",
+  "section": "${targetSection}",
   "solutionSteps": ["Title ::: Detailed reasoning with $math$"],
   "aiReasoning": "Technical mindset/trap explanation",
   "historicalPattern": "Exam frequency context (e.g. KCET 2021 style)",
   "predictiveInsight": "Variation likely to see in future",
   "whyItMatters": "Engineering/Medical application",
-  "studyTip": "Mastery shortcut or visualization ritual",
-  "markingSteps": [{"step": "logic point", "mark": "1"}],
+    "markingSteps": [{"step": "logic point", "mark": "1"}],
   "commonMistakes": [{"mistake": "...", "why": "...", "howToAvoid": "..."}],
   "keyFormulas": ["$formula$"],
   "keyConcepts": [{"name": "...", "explanation": "..."}]
@@ -940,10 +970,8 @@ CRITICAL: Output MUST be valid JSON with NO markdown, NO extra text, JUST THE AR
     const response = await result.response;
     const text = response.text() || '[]';
 
-    // Extract JSON from response
-    const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/```\s*([\s\S]*?)\s*```/) || text.match(/\[[\s\S]*\]/);
-    const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : text;
-    const questions = JSON.parse(jsonStr);
+    // Gemini responseMimeType: 'application/json' is usually very clean.
+    const questions = JSON.parse(text);
 
     // Transform to AnalyzedQuestion format
     const { randomUUID } = await import('crypto');
@@ -953,6 +981,7 @@ CRITICAL: Output MUST be valid JSON with NO markdown, NO extra text, JUST THE AR
       options: q.options || [],
       marks: q.marks || examConfig.marksPerQuestion,
       difficulty: q.difficulty,
+      section: q.section || targetSection,
       topic: topicMetadata.topicName,
       blooms: q.blooms || 'Apply',
       solutionSteps: q.solutionSteps || q.solution_steps || [],

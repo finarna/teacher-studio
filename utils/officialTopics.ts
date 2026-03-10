@@ -20,6 +20,22 @@
  * Source: NEET/JEE/KCET Physics Class 12 Syllabus
  */
 export const OFFICIAL_PHYSICS_TOPICS = [
+  // Class 11
+  'Units and Measurements',
+  'Motion in a Straight Line',
+  'Motion in a Plane',
+  'Laws of Motion',
+  'Work, Energy and Power',
+  'System of Particles and Rotational Motion',
+  'Gravitation',
+  'Mechanical Properties of Solids',
+  'Mechanical Properties of Fluids',
+  'Thermal Properties of Matter',
+  'Thermodynamics',
+  'Kinetic Theory',
+  'Oscillations',
+  'Waves',
+  // Class 12
   'Electric Charges and Fields',
   'Electrostatic Potential and Capacitance',
   'Current Electricity',
@@ -43,6 +59,21 @@ export const OFFICIAL_PHYSICS_TOPICS = [
  * Note: KCET/PUC II have deleted: Solid State, Polymers, Chemistry in Everyday Life
  */
 export const OFFICIAL_CHEMISTRY_TOPICS = [
+  // Class 11
+  'Some Basic Concepts of Chemistry',
+  'Structure of Atom',
+  'Classification of Elements and Periodicity in Properties',
+  'Chemical Bonding and Molecular Structure',
+  'States of Matter',
+  'Thermodynamics',
+  'Equilibrium',
+  'Redox Reactions',
+  'Hydrogen',
+  's-Block Elements',
+  'Organic Chemistry: Some Basic Principles and Techniques',
+  'Hydrocarbons',
+  'Environmental Chemistry',
+  // Class 12
   'Solutions',
   'Electrochemistry',
   'Chemical Kinetics',
@@ -65,6 +96,30 @@ export const OFFICIAL_CHEMISTRY_TOPICS = [
  * Source: NEET/KCET Biology Class 12 Syllabus
  */
 export const OFFICIAL_BIOLOGY_TOPICS = [
+  // Class 11
+  'The Living World',
+  'Biological Classification',
+  'Plant Kingdom',
+  'Animal Kingdom',
+  'Morphology of Flowering Plants',
+  'Anatomy of Flowering Plants',
+  'Structural Organisation in Animals',
+  'Cell: The Unit of Life',
+  'Biomolecules',
+  'Cell Cycle and Cell Division',
+  'Transport in Plants',
+  'Mineral Nutrition',
+  'Photosynthesis in Higher Plants',
+  'Respiration in Plants',
+  'Plant Growth and Development',
+  'Digestion and Absorption',
+  'Breathing and Exchange of Gases',
+  'Body Fluids and Circulation',
+  'Excretory Products and Their Elimination',
+  'Locomotion and Movement',
+  'Neural Control and Coordination',
+  'Chemical Coordination and Integration',
+  // Class 12
   'Sexual Reproduction in Flowering Plants',
   'Principles of Inheritance and Variation',
   'Molecular Basis of Inheritance',
@@ -76,7 +131,57 @@ export const OFFICIAL_BIOLOGY_TOPICS = [
   'Human Reproduction',
   'Reproductive Health',
   'Human Health and Disease',
-  'Evolution'
+  'Microbes in Human Welfare',
+  'Evolution',
+  'Environmental Issues'
+] as const;
+
+/**
+ * Official Botany Topics (for NEET)
+ */
+export const OFFICIAL_BOTANY_TOPICS = [
+  'The Living World',
+  'Biological Classification',
+  'Plant Kingdom',
+  'Morphology of Flowering Plants',
+  'Anatomy of Flowering Plants',
+  'Cell: The Unit of Life',
+  'Biomolecules',
+  'Cell Cycle and Cell Division',
+  'Transport in Plants',
+  'Mineral Nutrition',
+  'Photosynthesis in Higher Plants',
+  'Respiration in Plants',
+  'Plant Growth and Development',
+  'Sexual Reproduction in Flowering Plants',
+  'Principles of Inheritance and Variation',
+  'Molecular Basis of Inheritance',
+  'Biotechnology Principles and Processes',
+  'Biotechnology and its Applications',
+  'Organisms and Populations',
+  'Ecosystem',
+  'Biodiversity and Conservation',
+  'Environmental Issues',
+  'Microbes in Human Welfare'
+] as const;
+
+/**
+ * Official Zoology Topics (for NEET)
+ */
+export const OFFICIAL_ZOOLOGY_TOPICS = [
+  'Animal Kingdom',
+  'Structural Organisation in Animals',
+  'Digestion and Absorption',
+  'Breathing and Exchange of Gases',
+  'Body Fluids and Circulation',
+  'Excretory Products and Their Elimination',
+  'Locomotion and Movement',
+  'Neural Control and Coordination',
+  'Chemical Coordination and Integration',
+  'Human Reproduction',
+  'Reproductive Health',
+  'Evolution',
+  'Human Health and Disease'
 ] as const;
 
 /**
@@ -107,6 +212,8 @@ export const ALL_OFFICIAL_TOPICS = [
   ...OFFICIAL_PHYSICS_TOPICS,
   ...OFFICIAL_CHEMISTRY_TOPICS,
   ...OFFICIAL_BIOLOGY_TOPICS,
+  ...OFFICIAL_BOTANY_TOPICS,
+  ...OFFICIAL_ZOOLOGY_TOPICS,
   ...OFFICIAL_MATH_TOPICS
 ] as const;
 
@@ -119,9 +226,11 @@ export function getOfficialTopics(subject: string): readonly string[] {
   if (normalized === 'physics') return OFFICIAL_PHYSICS_TOPICS;
   if (normalized === 'chemistry') return OFFICIAL_CHEMISTRY_TOPICS;
   if (normalized === 'biology') return OFFICIAL_BIOLOGY_TOPICS;
+  if (normalized === 'botany') return OFFICIAL_BOTANY_TOPICS;
+  if (normalized === 'zoology') return OFFICIAL_ZOOLOGY_TOPICS;
   if (normalized === 'math' || normalized === 'mathematics') return OFFICIAL_MATH_TOPICS;
 
-  throw new Error(`Unknown subject: ${subject}. Must be Physics, Chemistry, Biology, or Math.`);
+  throw new Error(`Unknown subject: ${subject}. Must be Physics, Chemistry, Biology, Botany, Zoology or Math.`);
 }
 
 /**
@@ -249,6 +358,23 @@ export const TOPIC_MAPPING_HINTS: Record<string, Record<string, string>> = {
     'Natural Selection': 'Evolution',
     'Human Evolution': 'Evolution'
   },
+  botany: {
+    'Plant Reproduction': 'Sexual Reproduction in Flowering Plants',
+    'Reproduction in Plants': 'Sexual Reproduction in Flowering Plants',
+    'Pollination': 'Sexual Reproduction in Flowering Plants',
+    'Photosynthesis': 'Plant Physiology',
+    'Respiration': 'Plant Physiology',
+    'Plant Growth': 'Plant Physiology',
+    'Cell Structure': 'Cell Structure and Function' // If added to official list
+  },
+  zoology: {
+    'Animal Reproduction': 'Human Reproduction',
+    'Genetic Inheritance': 'Principles of Inheritance and Variation',
+    'Human Physiology': 'Human Physiology', // If added to official list
+    'Animal tissues': 'Structural Organisation in Animals',
+    'Health': 'Human Health and Disease',
+    'Disease': 'Human Health and Disease'
+  },
   math: {
     'Functions': 'Relations and Functions',
     'Relation': 'Relations and Functions',
@@ -326,8 +452,8 @@ ${topics.map((t, i) => `${i + 1}. "${t}"`).join('\n')}
 ### Common Mapping (for reference):
 
 ${Object.entries(hints).slice(0, 10).map(([informal, official]) =>
-  `- If question is about "${informal}" → Use "${official}"`
-).join('\n')}
+    `- If question is about "${informal}" → Use "${official}"`
+  ).join('\n')}
 
 ### Examples:
 

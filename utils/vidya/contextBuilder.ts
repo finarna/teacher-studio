@@ -112,7 +112,8 @@ function extractExamYear(scanName: string): number | undefined {
 /**
  * Compression constants
  */
-const MAX_QUESTIONS = 50; // Don't send more than 50 questions
+const MAX_QUESTIONS_STANDARD = 50;
+const MAX_QUESTIONS_COMBINED = 200; // Allow more for NEET/JEE full analysis
 const MAX_QUESTION_TEXT_LENGTH = 500; // Truncate long questions
 const MAX_OPTIONS_PER_QUESTION = 4; // Standard MCQ format
 
@@ -135,9 +136,11 @@ function getDifficultyScore(difficulty: string): number {
  */
 function compressQuestions(
   questions: VidyaContextPayload['questions'],
-  prioritizeHardest: boolean = true
+  isCombinedPaper: boolean = false
 ): VidyaContextPayload['questions'] {
-  if (questions.length <= MAX_QUESTIONS) {
+  const maxLimit = isCombinedPaper ? MAX_QUESTIONS_COMBINED : MAX_QUESTIONS_STANDARD;
+
+  if (questions.length <= maxLimit) {
     // Already within limit, just truncate long texts
     return questions.map(q => ({
       ...q,
@@ -163,7 +166,7 @@ function compressQuestions(
     ...mostRecent.filter(q =>
       !hardest.some(h => h.scanName === q.scanName && h.questionNumber === q.questionNumber)
     ),
-  ].slice(0, MAX_QUESTIONS);
+  ].slice(0, maxLimit);
 
   // Truncate long texts
   return combined.map(q => ({
@@ -367,7 +370,9 @@ function buildContextPayloadInternal(appContext: VidyaAppContext & {
   }
 
   // COMPRESS QUESTIONS (Phase 4 optimization)
-  const compressedQuestions = compressQuestions(questions);
+  const isCombined = appContext.selectedScan?.subject === 'Combined' ||
+    appContext.selectedScan?.name.toLowerCase().includes('combined');
+  const compressedQuestions = compressQuestions(questions, isCombined);
 
   // Build payload
   const payload: VidyaContextPayload = {

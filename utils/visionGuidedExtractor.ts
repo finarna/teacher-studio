@@ -41,7 +41,8 @@ export interface ExtractedVisualImage {
  */
 export async function extractImagesByBoundingBoxes(
   file: File,
-  questionVisuals: Array<{ questionNumber: number; boundingBox: VisualBoundingBox }>
+  questionVisuals: Array<{ questionNumber: number; boundingBox: VisualBoundingBox }>,
+  onProgress?: (index: number, total: number) => void
 ): Promise<Map<number, ExtractedVisualImage[]>> {
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -49,7 +50,10 @@ export async function extractImagesByBoundingBoxes(
 
   console.log('🎯 [VISION-GUIDED] Extracting images for', questionVisuals.length, 'questions with visuals');
 
-  for (const { questionNumber, boundingBox } of questionVisuals) {
+  for (let i = 0; i < questionVisuals.length; i++) {
+    const { questionNumber, boundingBox } = questionVisuals[i];
+    onProgress?.(i, questionVisuals.length);
+
     try {
       const { pageNumber, x, y, width, height } = boundingBox;
 
@@ -61,7 +65,12 @@ export async function extractImagesByBoundingBoxes(
       const xPercent = parsePercentage(x);
       const yPercent = parsePercentage(y);
       const widthPercent = parsePercentage(width);
-      const heightPercent = parsePercentage(height);
+      let heightPercent = parsePercentage(height);
+
+      // CRITICAL FIX: Add 5% extra height margin to avoid bottom-chopping of figures/labels
+      // This ensures labels like (a), (b) or x-axis names are fully captured.
+      const heightPadding = 0.05;
+      heightPercent = Math.min(1.0 - yPercent, heightPercent + heightPadding);
 
       const xPixel = Math.floor(viewport.width * xPercent);
       const yPixel = Math.floor(viewport.height * yPercent);

@@ -50,7 +50,7 @@ router.get('/topics', async (req: Request, res: Response) => {
     }
 
     // Validate subject and examContext values
-    const validSubjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
+    const validSubjects = ['Physics', 'Chemistry', 'Math', 'Biology', 'Botany', 'Zoology'];
     const validExamContexts = ['NEET', 'JEE', 'KCET', 'CBSE'];
 
     if (!validSubjects.includes(subject)) {

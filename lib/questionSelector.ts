@@ -99,21 +99,37 @@ export async function selectQuestionsForTest(
     }
 
     // Try to get user scans to filter by ownership (user isolation)
+    // NOTE: For subjects like Botany/Zoology from combined NEET papers,
+    // the scan.subject is 'Combined', so we must also include combined paper scans.
     let scanIds: string[] = [];
     try {
-      const { data: userScans, error: scanError } = await supabase
+      // First: get exact-match subject scans (e.g. a standalone Physics scan)
+      const { data: exactScans } = await supabase
         .from('scans')
         .select('id')
         .or(`user_id.eq.${criteria.userId},is_system_scan.eq.true`)
-        .eq('subject', criteria.subject);
+        .eq('subject', criteria.subject)
+        .eq('exam_context', criteria.examContext);
 
-      if (scanError) {
-        console.warn('⚠️ Error fetching scans:', scanError.message);
-      } else if (userScans && userScans.length > 0) {
-        scanIds = userScans.map(s => s.id);
-        console.log(`🔍 Found ${scanIds.length} accessible scans (user + system) for ${criteria.userId} in ${criteria.subject}`);
+      // Second: get combined paper scans that contain this subject
+      const { data: combinedScans } = await supabase
+        .from('scans')
+        .select('id')
+        .or(`user_id.eq.${criteria.userId},is_system_scan.eq.true`)
+        .eq('is_combined_paper', true)
+        .eq('exam_context', criteria.examContext)
+        .contains('subjects', [criteria.subject]);
+
+      const allScans = [
+        ...(exactScans || []),
+        ...(combinedScans || [])
+      ];
+
+      if (allScans.length > 0) {
+        scanIds = [...new Set(allScans.map(s => s.id))];
+        console.log(`🔍 Found ${scanIds.length} accessible scans (user + system + combined) for ${criteria.subject} in ${criteria.examContext}`);
       } else {
-        console.warn(`⚠️ No scans found for user ${criteria.userId} in subject ${criteria.subject}. Proceeding with general questions...`);
+        console.warn(`⚠️ No scans found for ${criteria.subject} (${criteria.examContext}). Proceeding without scan filter...`);
       }
     } catch (e) {
       console.warn('⚠️ Scan lookup failed:', e);

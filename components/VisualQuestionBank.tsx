@@ -32,7 +32,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  BarChart3
+  BarChart3,
+  Maximize2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { RenderWithMath, DerivationStep } from './MathRenderer';
@@ -111,6 +112,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
   const [userAnswers, setUserAnswers] = useState<Map<string, number>>(new Map());
   // Track validated answers (after clicking Check Answer)
   const [validatedAnswers, setValidatedAnswers] = useState<Map<string, number>>(new Map());
+  const [enlargedImageUrl, setEnlargedImageUrl] = useState<string | null>(null);
 
   // CRITICAL FIX: Clear selectedAnalysisId when subject changes and selected scan doesn't match
   // Track previous subject to detect actual subject changes (not just scan changes)
@@ -1222,22 +1224,42 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                           </div>
 
                           {/* Bottom Row - All Tags */}
-                          <div className="flex items-center gap-2.5 flex-wrap">
-                            <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg">
-                              {q.year}
-                            </span>
+                          <div className="flex flex-col gap-1.5 min-w-0">
+                            <div className="flex items-center gap-3">
+                              <h3 className="text-sm font-black text-slate-900 font-outfit uppercase tracking-tight">
+                                {q.topic || 'General Problem'}
+                              </h3>
+                              {(activeSubject || (q as any).section) && (
+                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border transition-all duration-300 ${((q as any).section || '').includes('Section B')
+                                  ? 'bg-amber-500 text-white border-amber-600'
+                                  : 'bg-slate-900 text-slate-100 border-slate-700'
+                                  }`}>
+                                  {activeSubject ? `${activeSubject.toUpperCase().substring(0, 3)}-` : ''}
+                                  {(q as any).section?.replace(/Section\s*/i, '') || 'A'}
+                                </span>
+                              )}
+                            </div>
 
-                            <span className={`px-3 py-1.5 text-xs font-bold rounded-lg ${q.diff === 'Hard' ? 'bg-rose-100 text-rose-700' :
-                              q.diff === 'Moderate' ? 'bg-amber-100 text-amber-700' :
-                                'bg-emerald-100 text-emerald-700'
-                              }`}>
-                              {q.diff}
-                            </span>
+                            {/* Bottom Row - All Tags */}
+                            <div className="flex items-center gap-2.5 flex-wrap">
+                              <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-bold rounded-lg border border-blue-200 shadow-sm">
+                                {q.year}
+                              </span>
 
-                            <span className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg">
-                              {q.marks} Mark{parseInt(q.marks) > 1 ? 's' : ''}
-                            </span>
+                              <span className={`px-3 py-1.5 text-xs font-bold rounded-lg border shadow-sm ${q.diff === 'Hard' ? 'bg-rose-100 text-rose-700 border-rose-200' :
+                                q.diff === 'Moderate' ? 'bg-amber-100 text-amber-700 border-amber-200' :
+                                  'bg-emerald-100 text-emerald-700 border-emerald-200'
+                                }`}>
+                                {q.diff}
+                              </span>
 
+                              <span className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200 shadow-sm">
+                                {q.marks} Mark{parseInt(q.marks) > 1 ? 's' : ''}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2.5 flex-wrap mt-3">
                             {q.pedagogy && (
                               <span className={`px-3 py-1.5 text-xs font-bold rounded-lg flex items-center gap-1.5 ${getPedagogyColor(q.pedagogy)}`}>
                                 <Brain size={13} />
@@ -1272,8 +1294,8 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                               {q.options.map((option, idx) => {
                                 const isThisCorrect = q.correctOptionIndex === idx;
                                 const isSelected = selectedAnswer === idx;
-                                const isValidatedCorrect = hasValidated && validatedAnswer === idx && isThisCorrect;
-                                const isValidatedWrong = hasValidated && validatedAnswer === idx && !isThisCorrect;
+                                const isValidatedCorrect = hasValidated && validatedAnswers.get(q.id) === idx && isThisCorrect;
+                                const isValidatedWrong = hasValidated && validatedAnswers.get(q.id) === idx && !isThisCorrect;
                                 const optionLabel = String.fromCharCode(65 + idx); // A, B, C, D
 
                                 let bgColor = 'bg-white';
@@ -1372,8 +1394,10 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                                     )}
                                     {q.extractedImages && q.extractedImages.length > 0 && (
                                       <div className="grid grid-cols-1 gap-2 mt-2">
-                                        {q.extractedImages.map((imgData, idx) => (
-                                          <div key={idx} className="bg-white rounded-lg border border-blue-200 overflow-hidden">
+                                        {q.extractedImages.map((imgData, idx) =>
+                                          <div key={idx} className="bg-white rounded-lg border border-blue-200 overflow-hidden cursor-zoom-in hover:opacity-95 transition-opacity"
+                                            onClick={(e) => { e.stopPropagation(); setEnlargedImageUrl(imgData); }}
+                                          >
                                             <img
                                               src={imgData}
                                               alt={`Visual ${idx + 1}`}
@@ -1384,7 +1408,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                                               }}
                                             />
                                           </div>
-                                        ))}
+                                        )}
                                       </div>
                                     )}
                                   </div>
@@ -1437,13 +1461,12 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                             )}
                           </div>
                         </div>
-
                       </div>
                     );
                   })
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-32 text-center rounded-3xl border-4 border-dashed border-slate-200 bg-white">
-                    <div className="w-24 h-24 bg-slate-50 border-2 border-slate-100 rounded-3xl flex items-center justify-center mb-6 text-slate-200">
+                  <div className="flex flex-col items-center justify-center py-32 text-center rounded-3xl border-4 border-dashed border-slate-200 bg-white shadow-sm">
+                    <div className="w-24 h-24 bg-slate-50 border-2 border-slate-100 rounded-3xl flex items-center justify-center mb-6 text-slate-200 shadow-inner">
                       <FileQuestion size={48} />
                     </div>
                     <h2 className="text-3xl font-black text-slate-900 mb-4 font-outfit uppercase tracking-tighter">No Questions Yet</h2>
@@ -1457,300 +1480,336 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
           )}
         </div>
 
-      </div>
+      </div >
 
       {/* Modern Modal for Solution & Insights */}
-      {modalType && activeModalQuestionId && (() => {
-        const activeQuestion = questions.find(q => q.id === activeModalQuestionId);
-        if (!activeQuestion) return null;
+      {
+        modalType && activeModalQuestionId && (() => {
+          const activeQuestion = questions.find(q => q.id === activeModalQuestionId);
+          if (!activeQuestion) return null;
 
-        return (
-          <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in duration-200"
-              onClick={closeModal}
-            />
+          return (
+            <>
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in duration-200"
+                onClick={closeModal}
+              />
 
-            {/* Modal Panel - Slide in from right */}
-            <div className="fixed right-0 top-0 bottom-0 w-full max-w-2xl bg-white shadow-2xl z-50 overflow-y-auto animate-in slide-in-from-right duration-300">
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-gradient-to-r from-slate-900 to-slate-800 text-white px-6 py-5 border-b-4 border-primary-500 z-10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    {/* Question Reference Badge */}
-                    {(() => {
-                      const qNumMatch = activeQuestion.id?.match(/Q(\d+)/i);
-                      const qNum = qNumMatch ? qNumMatch[1] : null;
-                      return qNum ? (
-                        <div className="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg border-2 border-slate-600">
-                          <div className="text-center">
-                            <div className="text-xs font-bold text-slate-400">Q</div>
-                            <div className="text-lg font-black text-white leading-none">{qNum}</div>
+              {/* Modal Panel - Slide in from right */}
+              <div className="fixed right-0 top-0 bottom-0 w-full max-w-2xl bg-white shadow-2xl z-50 overflow-y-auto animate-in slide-in-from-right duration-300">
+                {/* Modal Header */}
+                <div className="sticky top-0 bg-gradient-to-r from-slate-900 to-slate-800 text-white px-6 py-5 border-b-4 border-primary-500 z-10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      {/* Question Reference Badge */}
+                      {(() => {
+                        const qNumMatch = activeQuestion.id?.match(/Q(\d+)/i);
+                        const qNum = qNumMatch ? qNumMatch[1] : null;
+                        return qNum ? (
+                          <div className="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center shadow-lg border-2 border-slate-600">
+                            <div className="text-center">
+                              <div className="text-xs font-bold text-slate-400">Q</div>
+                              <div className="text-lg font-black text-white leading-none">{qNum}</div>
+                            </div>
                           </div>
-                        </div>
-                      ) : null;
-                    })()}
+                        ) : null;
+                      })()}
 
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                        {modalType === 'solution' ? (
-                          <PenTool size={20} className="text-primary-400" />
-                        ) : (
-                          <Lightbulb size={20} className="text-primary-400" />
-                        )}
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-black">
-                          {modalType === 'solution' ? 'Solution Steps' : 'AI Insights'}
-                        </h2>
-                        <p className="text-xs text-slate-300 mt-0.5">
-                          {activeQuestion.topic} • {activeQuestion.domain}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+                          {modalType === 'solution' ? (
+                            <PenTool size={20} className="text-primary-400" />
+                          ) : (
+                            <Lightbulb size={20} className="text-primary-400" />
+                          )}
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-black">
+                            {modalType === 'solution' ? 'Solution Steps' : 'AI Insights'}
+                          </h2>
+                          <p className="text-xs text-slate-300 mt-0.5">
+                            {activeQuestion.topic} • {activeQuestion.domain}
+                          </p>
+                        </div>
                       </div>
                     </div>
+                    <button
+                      onClick={closeModal}
+                      className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-all"
+                    >
+                      <XCircle size={20} />
+                    </button>
                   </div>
-                  <button
-                    onClick={closeModal}
-                    className="w-9 h-9 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-all"
-                  >
-                    <XCircle size={20} />
-                  </button>
                 </div>
-              </div>
 
-              {/* Modal Content */}
-              <div className="p-6">
-                {modalType === 'solution' && activeQuestion.markingScheme && activeQuestion.markingScheme.length > 0 ? (
-                  <div className="space-y-5">
-                    {/* Solution Steps */}
-                    <div className="space-y-3">
-                      {activeQuestion.markingScheme.map((item, idx) => (
-                        <div key={idx} className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                          <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0 w-7 h-7 bg-slate-800 text-white rounded-md flex items-center justify-center font-bold text-xs">
-                              {idx + 1}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                                  {item.mark} Mark{parseInt(item.mark) > 1 ? 's' : ''}
-                                </span>
-                              </div>
-                              <div className="text-sm text-slate-700 leading-relaxed">
-                                <RenderWithMath text={item.step} showOptions={false} />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Extracted Images - Fit to Available Space */}
-                    {activeQuestion.extractedImages && activeQuestion.extractedImages.length > 0 && (
-                      <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-xl p-5">
-                        <div className="flex items-center gap-2 mb-4">
-                          <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                            Reference Diagrams ({activeQuestion.extractedImages.length})
-                          </h4>
-                        </div>
-                        <div className="space-y-4">
-                          {activeQuestion.extractedImages.map((imgData, idx) => (
-                            <div key={idx} className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                              <img
-                                src={imgData}
-                                alt={`Diagram ${idx + 1}${activeQuestion.visualElementDescription ? ` - ${activeQuestion.visualElementDescription}` : ''}`}
-                                className="w-full h-auto object-contain max-h-[500px] bg-white"
-                                style={{
-                                  imageRendering: 'auto',
-                                  objectFit: 'contain'
-                                }}
-                              />
-                              {activeQuestion.visualElementDescription && idx === 0 && (
-                                <div className="px-4 py-2 bg-slate-50 border-t border-slate-200">
-                                  <div className="text-xs text-slate-600">
-                                    <RenderWithMath text={activeQuestion.visualElementDescription} showOptions={false} serif={false} />
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : modalType === 'insights' ? (
-                  <div className="space-y-5">
-                    {/* AI Reasoning - Professional Section */}
-                    {activeQuestion.aiReasoning && (
-                      <div className="bg-white border-2 border-slate-300 rounded-lg p-5 shadow-sm">
-                        <div className="flex items-start gap-3 mb-3">
-                          <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
-                            <BarChart3 size={18} className="text-slate-700" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-2">Why This Question Matters</h3>
-                            <p className="text-sm text-slate-700 leading-relaxed">
-                              {activeQuestion.aiReasoning}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Historical & Predictive */}
-                        {(activeQuestion.historicalPattern || activeQuestion.predictiveInsight) && (
-                          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-200">
-                            {activeQuestion.historicalPattern && (
-                              <div className="bg-slate-50 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-1.5">
-                                  <Clock size={14} className="text-slate-600" />
-                                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Historical</span>
-                                </div>
-                                <p className="text-xs text-slate-600 leading-relaxed">{activeQuestion.historicalPattern}</p>
-                              </div>
-                            )}
-                            {activeQuestion.predictiveInsight && (
-                              <div className="bg-slate-50 rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-1.5">
-                                  <TrendingUp size={14} className="text-slate-600" />
-                                  <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Predictive</span>
-                                </div>
-                                <p className="text-xs text-slate-600 leading-relaxed">{activeQuestion.predictiveInsight}</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Key Concepts - Professional List with Explanations */}
-                    {activeQuestion.keyConcepts && activeQuestion.keyConcepts.length > 0 && (
-                      <div className="bg-white border-2 border-slate-200 rounded-lg p-5">
-                        <div className="flex items-center gap-2 mb-4">
-                          <BookOpen size={18} className="text-slate-700" />
-                          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Key Concepts</h4>
-                        </div>
-                        <div className="space-y-3">
-                          {activeQuestion.keyConcepts.map((concept, idx) => (
-                            <div key={idx} className="bg-slate-50 rounded-lg p-3 border-l-4 border-slate-400">
-                              <h5 className="text-sm font-bold text-slate-800 mb-1.5">
-                                {typeof concept === 'string' ? concept : concept.name}
-                              </h5>
-                              {typeof concept !== 'string' && concept.explanation && (
-                                <p className="text-xs text-slate-600 leading-relaxed">
-                                  {concept.explanation}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Things to Remember - Professional List */}
-                    {activeQuestion.thingsToRemember && activeQuestion.thingsToRemember.length > 0 && (
-                      <div className="bg-white border-2 border-slate-200 rounded-lg p-5">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Brain size={18} className="text-slate-700" />
-                          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Things to Remember</h4>
-                        </div>
-                        <ul className="space-y-2">
-                          {activeQuestion.thingsToRemember.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-700">
-                              <div className="w-5 h-5 bg-slate-700 text-white rounded flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
+                {/* Modal Content */}
+                <div className="p-6">
+                  {modalType === 'solution' && activeQuestion.markingScheme && activeQuestion.markingScheme.length > 0 ? (
+                    <div className="space-y-5">
+                      {/* Solution Steps */}
+                      <div className="space-y-3">
+                        {activeQuestion.markingScheme.map((item, idx) => (
+                          <div key={idx} className="bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-7 h-7 bg-slate-800 text-white rounded-md flex items-center justify-center font-bold text-xs">
                                 {idx + 1}
                               </div>
-                              <div className="leading-relaxed">
-                                <RenderWithMath text={item} showOptions={false} />
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Study Tip - Professional */}
-                    {activeQuestion.studyTip && (
-                      <div className="bg-white border-2 border-slate-200 rounded-lg p-5">
-                        <div className="flex items-start gap-3">
-                          <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
-                            <Zap size={18} className="text-slate-700" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-2">Study Strategy</h4>
-                            <p className="text-sm text-slate-700 leading-relaxed">
-                              {activeQuestion.studyTip}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Common Mistakes - Professional with Detailed Explanations */}
-                    {activeQuestion.commonMistakes && activeQuestion.commonMistakes.length > 0 && (
-                      <div className="bg-white border-2 border-slate-200 rounded-lg p-5">
-                        <div className="flex items-center gap-2 mb-4">
-                          <AlertCircle size={18} className="text-slate-700" />
-                          <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Common Mistakes to Avoid</h4>
-                        </div>
-                        <div className="space-y-4">
-                          {activeQuestion.commonMistakes.map((mistakeObj, idx) => {
-                            const mistake = typeof mistakeObj === 'string' ? mistakeObj : mistakeObj.mistake;
-                            const why = typeof mistakeObj !== 'string' ? mistakeObj.why : undefined;
-                            const howToAvoid = typeof mistakeObj !== 'string' ? mistakeObj.howToAvoid : undefined;
-
-                            return (
-                              <div key={idx} className="bg-slate-50 rounded-lg p-4 border-l-4 border-slate-400">
-                                <div className="flex items-start gap-2.5 mb-2">
-                                  <div className="w-6 h-6 bg-slate-700 text-white rounded flex items-center justify-center shrink-0 text-xs font-bold">
-                                    {idx + 1}
-                                  </div>
-                                  <h5 className="text-sm font-bold text-slate-800">{mistake}</h5>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                                    {item.mark} Mark{parseInt(item.mark) > 1 ? 's' : ''}
+                                  </span>
                                 </div>
-                                {why && (
-                                  <div className="ml-8 mb-2">
-                                    <p className="text-xs font-semibold text-slate-600 mb-1">Why this happens:</p>
-                                    <p className="text-xs text-slate-600 leading-relaxed">{why}</p>
-                                  </div>
-                                )}
-                                {howToAvoid && (
-                                  <div className="ml-8">
-                                    <p className="text-xs font-semibold text-slate-600 mb-1">How to avoid:</p>
-                                    <p className="text-xs text-slate-600 leading-relaxed">{howToAvoid}</p>
+                                <div className="text-sm text-slate-700 leading-relaxed">
+                                  <RenderWithMath text={item.step} showOptions={false} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Extracted Images - Fit to Available Space */}
+                      {activeQuestion.extractedImages && activeQuestion.extractedImages.length > 0 && (
+                        <div className="bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-xl p-5">
+                          <div className="flex items-center gap-2 mb-4">
+                            <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                              Reference Diagrams ({activeQuestion.extractedImages.length})
+                            </h4>
+                          </div>
+                          <div className="space-y-4">
+                            {activeQuestion.extractedImages.map((imgData, idx) => (
+                              <div key={idx} className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                <img
+                                  src={imgData}
+                                  alt={`Diagram ${idx + 1}${activeQuestion.visualElementDescription ? ` - ${activeQuestion.visualElementDescription}` : ''}`}
+                                  className="w-full h-auto object-contain max-h-[500px] bg-white"
+                                  style={{
+                                    imageRendering: 'auto',
+                                    objectFit: 'contain'
+                                  }}
+                                />
+                                {activeQuestion.visualElementDescription && idx === 0 && (
+                                  <div className="px-4 py-2 bg-slate-50 border-t border-slate-200">
+                                    <div className="text-xs text-slate-600">
+                                      <RenderWithMath text={activeQuestion.visualElementDescription} showOptions={false} serif={false} />
+                                    </div>
                                   </div>
                                 )}
                               </div>
-                            );
-                          })}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                  ) : modalType === 'insights' ? (
+                    <div className="space-y-5">
+                      {/* AI Reasoning - Professional Section */}
+                      {activeQuestion.aiReasoning && (
+                        <div className="bg-white border-2 border-slate-300 rounded-lg p-5 shadow-sm">
+                          <div className="flex items-start gap-3 mb-3">
+                            <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                              <BarChart3 size={18} className="text-slate-700" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-2">Why This Question Matters</h3>
+                              <p className="text-sm text-slate-700 leading-relaxed">
+                                {activeQuestion.aiReasoning}
+                              </p>
+                            </div>
+                          </div>
 
-                    {/* Fallback for old questions */}
-                    {!activeQuestion.aiReasoning && !activeQuestion.keyConcepts && !activeQuestion.studyTip && !activeQuestion.commonMistakes && (
-                      <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6 text-center">
-                        <AlertCircle size={32} className="text-amber-600 mx-auto mb-3" />
-                        <h4 className="text-sm font-bold text-amber-900 mb-2">No Insights Available</h4>
-                        <p className="text-xs text-slate-600">
-                          This is a legacy question. Generate new questions to get AI-powered insights.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 text-slate-400">
-                    <AlertCircle size={48} className="mx-auto mb-3" />
-                    <p>No content available</p>
-                  </div>
-                )}
+                          {/* Historical & Predictive */}
+                          {(activeQuestion.historicalPattern || activeQuestion.predictiveInsight) && (
+                            <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-200">
+                              {activeQuestion.historicalPattern && (
+                                <div className="bg-slate-50 rounded-lg p-3">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <Clock size={14} className="text-slate-600" />
+                                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Historical</span>
+                                  </div>
+                                  <p className="text-xs text-slate-600 leading-relaxed">{activeQuestion.historicalPattern}</p>
+                                </div>
+                              )}
+                              {activeQuestion.predictiveInsight && (
+                                <div className="bg-slate-50 rounded-lg p-3">
+                                  <div className="flex items-center gap-2 mb-1.5">
+                                    <TrendingUp size={14} className="text-slate-600" />
+                                    <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">Predictive</span>
+                                  </div>
+                                  <p className="text-xs text-slate-600 leading-relaxed">{activeQuestion.predictiveInsight}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Key Concepts - Professional List with Explanations */}
+                      {activeQuestion.keyConcepts && activeQuestion.keyConcepts.length > 0 && (
+                        <div className="bg-white border-2 border-slate-200 rounded-lg p-5">
+                          <div className="flex items-center gap-2 mb-4">
+                            <BookOpen size={18} className="text-slate-700" />
+                            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Key Concepts</h4>
+                          </div>
+                          <div className="space-y-3">
+                            {activeQuestion.keyConcepts.map((concept, idx) => (
+                              <div key={idx} className="bg-slate-50 rounded-lg p-3 border-l-4 border-slate-400">
+                                <h5 className="text-sm font-bold text-slate-800 mb-1.5">
+                                  {typeof concept === 'string' ? concept : concept.name}
+                                </h5>
+                                {typeof concept !== 'string' && concept.explanation && (
+                                  <p className="text-xs text-slate-600 leading-relaxed">
+                                    {concept.explanation}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Things to Remember - Professional List */}
+                      {activeQuestion.thingsToRemember && activeQuestion.thingsToRemember.length > 0 && (
+                        <div className="bg-white border-2 border-slate-200 rounded-lg p-5">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Brain size={18} className="text-slate-700" />
+                            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Things to Remember</h4>
+                          </div>
+                          <ul className="space-y-2">
+                            {activeQuestion.thingsToRemember.map((item, idx) => (
+                              <li key={idx} className="flex items-start gap-2.5 text-sm text-slate-700">
+                                <div className="w-5 h-5 bg-slate-700 text-white rounded flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
+                                  {idx + 1}
+                                </div>
+                                <div className="leading-relaxed">
+                                  <RenderWithMath text={item} showOptions={false} />
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Study Tip - Professional */}
+                      {activeQuestion.studyTip && (
+                        <div className="bg-white border-2 border-slate-200 rounded-lg p-5">
+                          <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                              <Zap size={18} className="text-slate-700" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-2">Study Strategy</h4>
+                              <p className="text-sm text-slate-700 leading-relaxed">
+                                {activeQuestion.studyTip}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Common Mistakes - Professional with Detailed Explanations */}
+                      {activeQuestion.commonMistakes && activeQuestion.commonMistakes.length > 0 && (
+                        <div className="bg-white border-2 border-slate-200 rounded-lg p-5">
+                          <div className="flex items-center gap-2 mb-4">
+                            <AlertCircle size={18} className="text-slate-700" />
+                            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Common Mistakes to Avoid</h4>
+                          </div>
+                          <div className="space-y-4">
+                            {activeQuestion.commonMistakes.map((mistakeObj, idx) => {
+                              const mistake = typeof mistakeObj === 'string' ? mistakeObj : mistakeObj.mistake;
+                              const why = typeof mistakeObj !== 'string' ? mistakeObj.why : undefined;
+                              const howToAvoid = typeof mistakeObj !== 'string' ? mistakeObj.howToAvoid : undefined;
+
+                              return (
+                                <div key={idx} className="bg-slate-50 rounded-lg p-4 border-l-4 border-slate-400">
+                                  <div className="flex items-start gap-2.5 mb-2">
+                                    <div className="w-6 h-6 bg-slate-700 text-white rounded flex items-center justify-center shrink-0 text-xs font-bold">
+                                      {idx + 1}
+                                    </div>
+                                    <h5 className="text-sm font-bold text-slate-800">{mistake}</h5>
+                                  </div>
+                                  {why && (
+                                    <div className="ml-8 mb-2">
+                                      <p className="text-xs font-semibold text-slate-600 mb-1">Why this happens:</p>
+                                      <p className="text-xs text-slate-600 leading-relaxed">{why}</p>
+                                    </div>
+                                  )}
+                                  {howToAvoid && (
+                                    <div className="ml-8">
+                                      <p className="text-xs font-semibold text-slate-600 mb-1">How to avoid:</p>
+                                      <p className="text-xs text-slate-600 leading-relaxed">{howToAvoid}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Fallback for old questions */}
+                      {!activeQuestion.aiReasoning && !activeQuestion.keyConcepts && !activeQuestion.studyTip && !activeQuestion.commonMistakes && (
+                        <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6 text-center">
+                          <AlertCircle size={32} className="text-amber-600 mx-auto mb-3" />
+                          <h4 className="text-sm font-bold text-amber-900 mb-2">No Insights Available</h4>
+                          <p className="text-xs text-slate-600">
+                            This is a legacy question. Generate new questions to get AI-powered insights.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-slate-400">
+                      <AlertCircle size={48} className="mx-auto mb-3" />
+                      <p>No content available</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          );
+        })()
+      }
+      {/* Enlarged Image Viewer */}
+      {enlargedImageUrl && (
+        <div
+          className="fixed inset-0 z-[100000] bg-slate-950/95 backdrop-blur-2xl flex flex-col p-4 sm:p-10 cursor-pointer"
+          onClick={() => setEnlargedImageUrl(null)}
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl">
+                <Maximize2 size={24} className="text-primary-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-black text-xl tracking-tight leading-none mb-1">Visual Context</h3>
+                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">Source Material • High Fidelity</p>
               </div>
             </div>
-          </>
-        );
-      })()}
-    </div>
+            <button
+              onClick={() => setEnlargedImageUrl(null)}
+              className="w-12 h-12 bg-white/5 hover:bg-white/10 text-white rounded-full flex items-center justify-center transition-all border border-white/10 active:scale-90"
+            >
+              <XCircle size={24} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-auto flex items-center justify-center bg-white/5 rounded-[3rem] border border-white/5 p-4 sm:p-12 shadow-inner">
+            <img
+              src={enlargedImageUrl}
+              alt="Enlarged diagram"
+              className="max-w-full max-h-[85vh] w-auto h-auto drop-shadow-2xl rounded-2xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+    </div >
   );
 };
 

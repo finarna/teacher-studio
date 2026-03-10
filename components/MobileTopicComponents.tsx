@@ -99,6 +99,7 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
     });
 
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
+    const [enlargedImageUrl, setEnlargedImageUrl] = useState<string | null>(null);
     const currentQuestion = questions[currentIndex];
 
     useEffect(() => {
@@ -210,6 +211,18 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
                         <RenderWithMath text={currentQuestion.text} />
                     </div>
                 </div>
+
+                {/* Diagrams for Mobile */}
+                {(currentQuestion.extractedImages && currentQuestion.extractedImages.length > 0) && (
+                    <div className="mb-4 bg-slate-50 rounded-2xl p-2 flex items-center justify-center border border-slate-100">
+                        <img
+                            src={currentQuestion.extractedImages[0]}
+                            alt="Visual aid"
+                            className="max-h-40 w-auto rounded-lg mix-blend-multiply cursor-zoom-in"
+                            onClick={() => setEnlargedImageUrl(currentQuestion.extractedImages![0])}
+                        />
+                    </div>
+                )}
 
                 {/* Options Grid - High Contrast */}
                 <div className="space-y-1.5">
@@ -452,6 +465,45 @@ export const MobilePracticeTab: React.FC<MobilePracticeTabProps> = ({
                                 })}
                             </div>
                         </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Enlarged Image Viewer (Mobile) */}
+            <AnimatePresence>
+                {enlargedImageUrl && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="fixed inset-0 z-[1000] bg-slate-950 flex flex-col p-6"
+                        onClick={() => setEnlargedImageUrl(null)}
+                    >
+                        <div className="flex items-center justify-between mb-8">
+                            <button
+                                onClick={() => setEnlargedImageUrl(null)}
+                                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white"
+                            >
+                                <X size={20} />
+                            </button>
+                            <div className="text-center">
+                                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Visual Detail</p>
+                            </div>
+                            <div className="w-10" />
+                        </div>
+
+                        <div className="flex-1 bg-white rounded-3xl overflow-hidden shadow-2xl flex items-center justify-center p-4">
+                            <img
+                                src={enlargedImageUrl}
+                                alt="Enlarged visual"
+                                className="w-full h-full object-contain"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        </div>
+
+                        <div className="mt-6 text-center">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Pinch to Zoom • Tap to Close</p>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -1,5 +1,5 @@
 
-export type Subject = 'Math' | 'Physics' | 'Chemistry' | 'Biology';
+export type Subject = 'Math' | 'Physics' | 'Chemistry' | 'Biology' | 'Botany' | 'Zoology';
 export type Grade = 'Class 10' | 'Class 11' | 'Class 12';
 export type ExamContext = 'KCET' | 'NEET' | 'JEE' | 'CBSE';
 
@@ -27,6 +27,13 @@ export interface ExamConfiguration {
     marksPerQuestion: number;
     negativeMarking: boolean;
     negativeMarkingValue?: number;
+    sections?: {
+      name: string;
+      questionCount: number;
+      attemptLimit?: number; // For Section B (e.g. 10)
+      isMandatory: boolean;
+      subjects?: Subject[]; // If section is subject-specific
+    }[];
   };
   syllabus: {
     subjects: Subject[];
@@ -261,6 +268,8 @@ export interface AnalyzedQuestion {
   visualBoundingBox?: { pageNumber: number; x: string; y: string; width: string; height: string };
   extractedImages?: string[];
   imageUrl?: string;           // Diagram image cropped from PDF page (e.g. Biology extractor's cropDiagram())
+  subject?: Subject;            // NEW: Added for combined paper question-level filtering
+  section?: string;            // NEW: Added for NEET/JEE Section A/B support
 }
 
 
@@ -305,6 +314,9 @@ export interface Scan {
   examContext?: ExamContext; // Optional for backward compatibility
   year?: string; // Year of the exam paper (e.g., "2024", "2023")
   analysisData?: ExamAnalysisData;
+  isCombinedPaper?: boolean; // NEW: true only for NEET/JEE all-in-one
+  subjects?: Subject[];      // NEW: ['Physics','Chemistry','Biology']
+  metadata?: any;            // Internal system flags and metadata
 }
 
 // --- VIDYA AI CHATBOT TYPES ---

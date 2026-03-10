@@ -9,9 +9,10 @@ import { useLearningJourney } from '../contexts/LearningJourneyContext';
 interface VaultDetailPageProps {
   scanId: string;
   onBack: () => void;
+  filterSubject?: string; // When opening from a subject hub, filter to show only this subject's questions
 }
 
-const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => {
+const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack, filterSubject }) => {
   const { startVaultPractice } = useLearningJourney();
   const [data, setData] = useState<{
     scan: Scan;
@@ -65,11 +66,27 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack }) => 
         grade: scanData.grade,
         subject: scanData.subject,
         examContext: scanData.exam_context,
-        analysisData: scanData.analysis_data
-      };
+        analysisData: scanData.analysis_data,
+        year: scanData.year, // Pass year for display name generation
+      } as any;
 
-      // 5. Transform for TestResultsPage
-      const transformed = transformScanToAttempt(mappedScan, userId, solvedQuestionIds);
+      // If this is a combined paper opened from a subject hub, filter to only that subject's questions
+      if (filterSubject && scanData.is_combined_paper && mappedScan.analysisData?.questions) {
+        const filteredQuestions = mappedScan.analysisData.questions.filter(
+          (q: any) => q.subject === filterSubject
+        );
+        mappedScan.analysisData = {
+          ...mappedScan.analysisData,
+          questions: filteredQuestions
+        };
+        console.log(`🔍 [VaultDetailPage] Filtered to ${filteredQuestions.length} questions for subject: ${filterSubject}`);
+      }
+
+      // 5. Transform for TestResultsPage — use filterSubject for display name if available
+      const displayScan = filterSubject
+        ? { ...mappedScan, subject: filterSubject as any }
+        : mappedScan;
+      const transformed = transformScanToAttempt(displayScan, userId, solvedQuestionIds);
 
       setData({
         scan: mappedScan,

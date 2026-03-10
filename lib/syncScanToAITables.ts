@@ -23,16 +23,17 @@ interface SyncResult {
  */
 export async function syncScanToAITables(
   supabase: SupabaseClient,
-  scanId: string
+  scanId: string,
+  targetSubject?: string
 ): Promise<SyncResult> {
 
   try {
-    console.log(`📊 Syncing scan ${scanId} to AI generator tables...`);
+    console.log(`📊 Syncing scan ${scanId}${targetSubject ? ` for subject ${targetSubject}` : ''} to AI generator tables...`);
 
     // Get scan metadata and analysis data
     const { data: scan, error: scanError } = await supabase
       .from('scans')
-      .select('year, exam_context, subject, analysis_data, difficulty_distribution, blooms_taxonomy, topic_weightage')
+      .select('year, exam_context, subject, analysis_data, difficulty_distribution, blooms_taxonomy, topic_weightage, is_combined_paper, subjects')
       .eq('id', scanId)
       .single();
 
@@ -41,9 +42,10 @@ export async function syncScanToAITables(
       return { success: false, patternsUpdated: false, distributionsUpdated: 0, message: 'Scan not found' };
     }
 
-    const { year, exam_context, subject, analysis_data, difficulty_distribution, topic_weightage } = scan;
+    const { year, exam_context, analysis_data, difficulty_distribution, is_combined_paper } = scan;
+    const finalSubject = targetSubject || scan.subject;
 
-    if (!year || !exam_context || !subject) {
+    if (!year || !exam_context || !finalSubject) {
       console.log('⚠️  Scan missing year/exam/subject, skipping AI table sync');
       return { success: true, patternsUpdated: false, distributionsUpdated: 0, message: 'Missing metadata' };
     }
@@ -59,20 +61,41 @@ export async function syncScanToAITables(
 
     if (aiQuestions.length > 0) {
       console.log(`   Using AI Analysis data (${aiQuestions.length} questions) as Source of Truth`);
-      mappedQuestions = aiQuestions.filter((q: any) => q.topic && q.topic.trim() !== '');
+      mappedQuestions = aiQuestions.filter((q: any, idx: number) => {
+        if (!q.topic || q.topic.trim() === '') return false;
+
+        // FILTER BY SUBJECT for targetSubject sync or combined paper splits
+        let qSubj = q.subject || (is_combined_paper ? null : scan.subject);
+
+        // NEET Legacy Subject Inference for sync
+        if ((!qSubj || qSubj === 'Biology') && exam_context === 'NEET' && (finalSubject === 'Botany' || finalSubject === 'Zoology' || finalSubject === 'Biology')) {
+          const idParts = (q.id || '').toString().split(/[^0-9]/).filter(Boolean);
+          const qNum = idParts.length > 0 ? parseInt(idParts[idParts.length - 1]) : (idx + 1);
+          if (qNum > 100 && qNum <= 150) qSubj = 'Botany';
+          else if (qNum > 150) qSubj = 'Zoology';
+          else if (qNum <= 100) qSubj = qNum > 50 ? 'Chemistry' : 'Physics';
+        }
+
+        if (finalSubject && qSubj && qSubj !== finalSubject) return false;
+        return true;
+      });
     } else {
-      // Fallback to active questions table (backward compatibility/manual adjustments)
+      // Fallback to active questions table
       console.log(`   AI Analysis questions missing, falling back to questions table...`);
       const { data: dbQuestions, error: questionsError } = await supabase
         .from('questions')
-        .select('id, topic, difficulty, marks, blooms, text')
+        .select('id, topic, difficulty, marks, blooms, text, subject, question_order')
         .eq('scan_id', scanId);
 
       if (questionsError) {
         console.error('❌ Error loading questions:', questionsError);
         return { success: false, patternsUpdated: false, distributionsUpdated: 0, message: 'Error loading questions' };
       }
-      mappedQuestions = (dbQuestions || []).filter(q => q.topic && q.topic.trim() !== '');
+      mappedQuestions = (dbQuestions || []).filter(q => {
+        if (!q.topic || q.topic.trim() === '') return false;
+        if (finalSubject && q.subject && q.subject !== finalSubject) return false;
+        return true;
+      });
     }
 
     if (mappedQuestions.length === 0) {
@@ -113,7 +136,7 @@ export async function syncScanToAITables(
     // 1. Update exam_historical_patterns
     const patternData: any = {
       exam_context,
-      subject,
+      subject: finalSubject,
       year: parseInt(year),
       total_marks: totalMarks,
       difficulty_easy_pct: difficultyEasyPct,
@@ -133,7 +156,7 @@ export async function syncScanToAITables(
         const audit = await auditPaperHistoricalContext(
           fullText,
           exam_context,
-          subject,
+          finalSubject as any,
           parseInt(year),
           apiKey
         );
@@ -208,7 +231,17 @@ export async function syncScanToAITables(
 
     // Log summary
     console.log('📊 AI Table Sync Summary:');
-    console.log(`   Year: ${year}, Exam: ${exam_context} ${subject}`);
+    console.log(`   Year: ${year}, Exam: ${exam_context} ${finalSubject}`);
+
+    // NEW (PHASE 2): RE-CALIBRATE FORECAST ORACLE
+    // This triggers the REI Evolution Engine to incorporate the new data
+    try {
+      const { getForecastedCalibration } = await import('./reiEvolutionEngine');
+      await getForecastedCalibration(exam_context as any, finalSubject as any);
+      console.log(`📡 [PHASE 2] Recalibrated forecast for ${exam_context} ${finalSubject}`);
+    } catch (e) {
+      console.warn('⚠️ Recalibration failed:', e);
+    }
     console.log(`   Final Sync Source Count: ${mappedQuestions.length} mapped questions`);
     console.log(`   Topics: ${topicGroups.size}`);
     console.log(`   Difficulty: Easy=${difficultyDist.easy} Moderate=${difficultyDist.moderate} Hard=${difficultyDist.hard}`);

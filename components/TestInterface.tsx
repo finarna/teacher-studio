@@ -22,10 +22,12 @@ import {
   RefreshCcw,
   BarChart3,
   Lightbulb,
-  Maximize2
+  Maximize2,
+  Info
 } from 'lucide-react';
 import type { AnalyzedQuestion, TestAttempt, TestResponse, ExamContext } from '../types';
 import { RenderWithMath } from './MathRenderer';
+import { getExamConfig } from '../config/exams';
 
 interface TestInterfaceProps {
   attempt: TestAttempt;
@@ -83,6 +85,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   const [timeRemaining, setTimeRemaining] = useState(attempt.durationMinutes * 60);
   const [showMasteryBriefing, setShowMasteryBriefing] = useState(false);
   const [showEnlargedSketch, setShowEnlargedSketch] = useState(false);
+  const [enlargedImageUrl, setEnlargedImageUrl] = useState<string | null>(null);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
 
   const mainScrollRef = useRef<HTMLDivElement>(null);
@@ -187,6 +190,25 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
   const handleOptionSelect = (optionIndex: number) => {
     if (isReviewMode) return; // Prevent selection in review mode
+
+    // NEET Section B limit check
+    if (attempt.examContext === 'NEET' && currentQuestion.section === 'Section B') {
+      const subject = currentQuestion.subject;
+      const responsesInSubjectSectionB = questions
+        .filter(q => q.subject === subject && q.section === 'Section B')
+        .filter(q => {
+          const r = responses.get(q.id);
+          // Don't count current question if it's already answered (we're just changing the answer)
+          if (q.id === currentQuestion.id && r?.selectedOption !== undefined) return false;
+          return r?.selectedOption !== undefined;
+        }).length;
+
+      if (responsesInSubjectSectionB >= 10 && responses.get(currentQuestion.id)?.selectedOption === undefined) {
+        alert("Section B Limit Reached: You can only attempt 10 questions in this section for this subject. Please unselect another question in Section B to answer this one.");
+        return;
+      }
+    }
+
     updateResponse(currentQuestion.id, { selectedOption: optionIndex });
   };
 
@@ -382,12 +404,12 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                   {isVaultMode && isReviewMode ? `Official Paper Walkthrough: ${attempt.testName}` : attempt.testName}
                 </h1>
                 <div className="flex items-center gap-1.5 overflow-hidden">
-                  <div className="px-1.5 py-0.5 bg-slate-900 text-slate-300 rounded text-[7px] font-black uppercase tracking-widest border border-white/10 shrink-0">
-                    {attempt.subject}
+                  <div className="px-2 py-0.5 bg-slate-900 text-white rounded text-[8px] font-black uppercase tracking-widest border border-white/10 shrink-0 shadow-sm">
+                    {attempt.subject}-{attempt.examContext}
                   </div>
                   <div className="flex items-center gap-1 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
-                    <CheckCircle2 size={9} className="text-emerald-500" />
-                    <span className="text-[7px] font-black text-emerald-600 tracking-wider">
+                    <CheckCircle2 size={10} className="text-emerald-500 font-bold" />
+                    <span className="text-[8px] font-black text-emerald-600 tracking-wider">
                       {answeredCount}/{questions.length}
                     </span>
                   </div>
@@ -465,7 +487,18 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                     </div>
 
                     <div className="space-y-0.5">
-                      <h3 className="text-[10px] font-extrabold text-primary-500 uppercase tracking-[0.2em]">{currentQuestion.topic || 'General Assessment'}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-[10px] font-extrabold text-primary-500 uppercase tracking-[0.2em]">{currentQuestion.topic || 'General Assessment'}</h3>
+                        {(currentQuestion.subject || currentQuestion.section) && (
+                          <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm transition-all duration-300 ${(currentQuestion.section || '').includes('Section B')
+                            ? 'bg-amber-500 text-white border-amber-600'
+                            : 'bg-slate-900 text-slate-100 border-slate-700'
+                            }`}>
+                            {currentQuestion.subject ? `${currentQuestion.subject.toUpperCase().substring(0, 3)}-` : ''}
+                            {currentQuestion.section?.replace(/Section\s*/i, '') || 'A'}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-1.5">
                         {currentQuestion.difficulty && (
                           <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border
@@ -541,7 +574,8 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                       <img
                         src={currentQuestion.diagramUrl || currentQuestion.imageUrl}
                         alt="Question diagram"
-                        className="max-w-full h-auto mx-auto rounded-lg"
+                        className="max-w-full h-auto mx-auto rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
+                        onClick={() => setEnlargedImageUrl(currentQuestion.diagramUrl || currentQuestion.imageUrl || null)}
                       />
                     ) : (
                       /* Fallback: First extracted image */
@@ -549,7 +583,8 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                         <img
                           src={currentQuestion.extractedImages[0]}
                           alt="Extracted question diagram"
-                          className="max-w-full h-auto mx-auto rounded-lg"
+                          className="max-w-full h-auto mx-auto rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
+                          onClick={() => setEnlargedImageUrl(currentQuestion.extractedImages![0])}
                         />
                       )
                     )}
@@ -1385,6 +1420,40 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               </p>
             </div>
           )}
+        </div>
+      )}
+      {/* Enlarged Image Viewer (Generic) */}
+      {enlargedImageUrl && (
+        <div
+          className="fixed inset-0 z-[120] bg-slate-950/95 backdrop-blur-2xl flex flex-col p-4 sm:p-10 animate-in fade-in zoom-in duration-300 cursor-pointer"
+          onClick={() => setEnlargedImageUrl(null)}
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl">
+                <Maximize2 size={20} className="text-primary-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-black text-xl tracking-tight leading-none mb-1">Visual Context</h3>
+                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">Source Material • High Fidelity</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setEnlargedImageUrl(null)}
+              className="w-12 h-12 bg-white/5 hover:bg-white/10 text-white rounded-full flex items-center justify-center transition-all border border-white/10 active:scale-90"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-auto flex items-center justify-center bg-white/5 rounded-[3rem] border border-white/5 p-4 sm:p-12 shadow-inner">
+            <img
+              src={enlargedImageUrl}
+              alt="Enlarged diagram"
+              className="max-w-full max-h-[80vh] w-auto h-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         </div>
       )}
     </div>

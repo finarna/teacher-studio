@@ -24,19 +24,22 @@ export const useFilteredScans = (allScans: Scan[]): FilteredScansResult => {
     }
 
     return allScans.filter(scan => {
-      // EXCLUDE AI practice placeholder scans (used only for satisfying questions.scan_id foreign key)
-      // These are internal system scans, not user-uploaded exam papers
+      // EXCLUDE AI practice placeholder scans
       const isPlaceholder = scan.metadata?.is_ai_practice_placeholder === true ||
-                           scan.metadata?.hidden_from_scans_list === true;
+        scan.metadata?.hidden_from_scans_list === true;
       if (isPlaceholder) {
-        return false; // Don't show placeholder scans in main scans list
+        return false;
       }
 
-      // Filter by subject (required)
-      const subjectMatch = scan.subject === activeSubject;
+      // NEW: Combined paper — match if activeSubject is one of its subjects
+      if (scan.isCombinedPaper && Array.isArray(scan.subjects)) {
+        const hasSubject = scan.subjects.includes(activeSubject as any);
+        const examMatch = !scan.examContext || scan.examContext === activeExamContext;
+        return hasSubject && examMatch;
+      }
 
-      // Filter by exam context - if scan has no examContext, include it
-      // This handles legacy scans that were uploaded before exam context was added
+      // EXISTING: Single subject scans
+      const subjectMatch = scan.subject === activeSubject;
       const examMatch = !scan.examContext || scan.examContext === activeExamContext;
 
       return subjectMatch && examMatch;
@@ -58,6 +61,7 @@ export const useFilteredScans = (allScans: Scan[]): FilteredScansResult => {
  * @returns Statistics about the scans
  */
 export const useSubjectStats = (allScans: Scan[]) => {
+  const { activeSubject } = useAppContext();
   const { scans: filteredScans } = useFilteredScans(allScans);
 
   const stats = useMemo(() => {
@@ -66,15 +70,23 @@ export const useSubjectStats = (allScans: Scan[]) => {
     const processingScans = filteredScans.filter(s => s.status === 'Processing').length;
     const failedScans = filteredScans.filter(s => s.status === 'Failed').length;
 
-    // Count total questions
+    // Helper to get questions for the specific subject
+    const getTargetQuestions = (scan: Scan) => {
+      const allQs = scan.analysisData?.questions || [];
+      if (!scan.isCombinedPaper) return allQs;
+      // For combined papers, only count questions tagged with this subject
+      return allQs.filter(q => (q as any).subject === activeSubject);
+    };
+
+    // Count total questions for this subject
     const totalQuestions = filteredScans.reduce((sum, scan) => {
-      return sum + (scan.analysisData?.questions?.length || 0);
+      return sum + getTargetQuestions(scan).length;
     }, 0);
 
-    // Get unique topics
+    // Get unique topics for this subject
     const uniqueTopics = new Set<string>();
     filteredScans.forEach(scan => {
-      scan.analysisData?.questions?.forEach(q => {
+      getTargetQuestions(scan).forEach(q => {
         if (q.topic) {
           uniqueTopics.add(q.topic);
         }
@@ -89,7 +101,7 @@ export const useSubjectStats = (allScans: Scan[]) => {
       totalQuestions,
       uniqueTopics: uniqueTopics.size
     };
-  }, [filteredScans]);
+  }, [filteredScans, activeSubject]);
 
   return stats;
 };

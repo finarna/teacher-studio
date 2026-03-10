@@ -118,7 +118,13 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
     }
 
     // Case 2: Current scan doesn't match active subject - switch to first filtered scan
-    if (scan && scan.subject !== activeSubject) {
+    // NEW: Combined paper — check if current scan contains the active subject
+    const isSubjectMatch = scan && (
+      scan.subject === activeSubject ||
+      (scan.isCombinedPaper && scan.subjects?.includes(activeSubject as any))
+    );
+
+    if (scan && !isSubjectMatch) {
       // Prevent infinite loop by checking if we already cleared this scan
       if (lastSelectedScanRef.current !== scan.id) {
         lastSelectedScanRef.current = scan.id;
@@ -134,7 +140,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
     }
 
     // Case 3: Valid scan selected - reset the ref
-    if (scan && scan.subject === activeSubject) {
+    if (isSubjectMatch) {
       lastSelectedScanRef.current = scan.id;
     }
   }, [activeSubject, scan?.id, filteredScans.length]);
@@ -185,11 +191,31 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
 
   // Main questions source that merges metadata from scan and large sketches from questionSketches state
   const questions = React.useMemo((): AnalyzedQuestion[] => {
-    return rawQuestions.map(q => ({
-      ...q,
-      sketchSvg: questionSketches[q.id] || q.sketchSvg || q.sketchSvgUrl
-    }));
-  }, [rawQuestions, questionSketches]);
+    // NEW: Filter by subject if it's a combined paper, UNLESS the global subject is 'Combined'
+    let filteredItems = rawQuestions;
+    if (scan?.isCombinedPaper && scan?.subject !== 'Combined') {
+      filteredItems = rawQuestions.filter(q => (q as any).subject === activeSubject);
+    }
+
+    return filteredItems.map((q, idx) => {
+      // DYNAMIC UPGRADE: Handle legacy 'Biology' tags for existing NEET scans
+      let inferredSubject = q.subject || scan?.subject;
+      if (inferredSubject === 'Biology' && scan?.examContext === 'NEET') {
+        // Precise extraction: Take the numeric part (e.g., from "1510-101" -> "101")
+        const idParts = (q.id || '').split(/[^0-9]/).filter(Boolean);
+        const qNum = idParts.length > 0 ? parseInt(idParts[idParts.length - 1]) : (idx + 1);
+
+        if (qNum > 100 && qNum <= 150) inferredSubject = 'Botany' as any;
+        else if (qNum > 150) inferredSubject = 'Zoology' as any;
+      }
+
+      return {
+        ...q,
+        subject: inferredSubject as Subject,
+        sketchSvg: questionSketches[q.id] || q.sketchSvg || q.sketchSvgUrl
+      };
+    });
+  }, [rawQuestions, questionSketches, scan?.isCombinedPaper, scan?.subject, scan?.examContext, activeSubject]);
 
 
   // Debug: Log visual elements in vault questions
@@ -247,7 +273,7 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
 
       // Generate pedagogical solution with JSON escaping examples
       // Biology-specific rules for space preservation and correct answer validation
-      const isBiology = scan.subject?.toLowerCase() === 'biology';
+      const isBiology = (question.subject || scan.subject)?.toLowerCase() === 'biology';
       const prompt = `Elite Academic Specialist: Generate pedagogical solution for ${scan.subject} ${scan.grade}: "${question.text}"${optionsText}
 
 RULES:
@@ -453,7 +479,7 @@ Schema: {
         selectedImageModel, // Use selected model
         question.visualConcept || question.topic,
         question.text,
-        scan.subject,
+        question.subject || scan.subject,
         apiKey,
         (status) => console.log(`📊 ${status}`),
         scan.examContext
@@ -554,7 +580,7 @@ Schema: {
             selectedImageModel,
             question.visualConcept || question.topic,
             question.text,
-            scan.subject,
+            question.subject || scan.subject,
             apiKey,
             (status) => console.log(`📊 ${question.id}: ${status}`),
             scan.examContext
@@ -1610,6 +1636,21 @@ Schema: {
                               } `}>
                               {q.marks}M
                             </span>
+                            {/* Subject Tag in List View */}
+                            {(q.subject || scan?.subject) && (
+                              <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md shadow-sm border transition-all duration-300 ${(q.section || '').includes('Section B')
+                                ? 'bg-amber-500 text-white border-amber-600'
+                                : (q.subject || scan?.subject) === 'Physics' ? 'bg-emerald-500 text-white border-emerald-600' :
+                                  (q.subject || scan?.subject) === 'Chemistry' ? 'bg-purple-500 text-white border-purple-600' :
+                                    (q.subject || scan?.subject) === 'Biology' ? 'bg-amber-500 text-white border-amber-600' :
+                                      (q.subject || scan?.subject) === 'Botany' ? 'bg-emerald-500 text-white border-emerald-600' :
+                                        (q.subject || scan?.subject) === 'Zoology' ? 'bg-orange-500 text-white border-orange-600' :
+                                          (q.subject || scan?.subject) === 'Math' ? 'bg-blue-500 text-white border-blue-600' :
+                                            'bg-slate-500 text-white border-slate-600'
+                                }`}>
+                                {(q.subject || scan?.subject || '').toString().substring(0, 3)}-{q.section?.replace(/Section\s*/i, '') || 'A'}
+                              </span>
+                            )}
                             {hasVisual && (
                               <span className="w-2 h-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-sm" title="Has diagram/image" />
                             )}
@@ -1690,12 +1731,23 @@ Schema: {
                                         } `}>
                                         {qNum}
                                       </span>
-                                      <span className={`px-2 py - 0.5 text-[10px] font-bold rounded-lg transition-colors ${isActive
+                                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-lg transition-colors ${isActive
                                         ? 'bg-purple-200 text-purple-700'
                                         : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-                                        } `}>
+                                        }`}>
                                         {q.marks}M
                                       </span>
+                                      {/* Subject-Section Tag in Grouped View */}
+                                      {(q.subject) && (
+                                        <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md border ${(q.subject) === 'Physics' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                                          (q.subject) === 'Chemistry' ? 'bg-purple-50 text-purple-600 border-purple-200' :
+                                            (q.subject) === 'Botany' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                                              (q.subject) === 'Zoology' ? 'bg-orange-50 text-orange-600 border-orange-200' :
+                                                'bg-slate-50 text-slate-600 border-slate-200'
+                                          }`}>
+                                          {q.subject.substring(0, 3)}-{q.section?.replace(/Section\s*/i, '') || 'A'}
+                                        </span>
+                                      )}
                                       {hasVisual && (
                                         <span className="w-1.5 h-1.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-sm" title="Has diagram/image" />
                                       )}
@@ -1765,6 +1817,21 @@ Schema: {
                               <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-semibold rounded">
                                 {selectedQ.marks}M
                               </span>
+                              {/* Subject-Section Tag in Detailed View */}
+                              {(selectedQ.subject || scan?.subject) && (
+                                <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm border-2 transition-all duration-300 ${(selectedQ.section || '').includes('Section B')
+                                  ? 'bg-amber-500 text-white border-amber-600'
+                                  : (selectedQ.subject || scan?.subject) === 'Physics' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                    (selectedQ.subject || scan?.subject) === 'Chemistry' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                      (selectedQ.subject || scan?.subject) === 'Biology' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                        (selectedQ.subject || scan?.subject) === 'Botany' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                          (selectedQ.subject || scan?.subject) === 'Zoology' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                                            (selectedQ.subject || scan?.subject) === 'Math' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                              'bg-slate-50 text-slate-700 border-slate-200'
+                                  }`}>
+                                  {(selectedQ.subject || scan?.subject || '').toString().substring(0, 3)}-{selectedQ.section?.replace(/Section\s*/i, '') || 'A'}
+                                </span>
+                              )}
                               {selectedQ.difficulty && (
                                 <span className={`px-2 py - 0.5 text-[10px] font-semibold rounded ${selectedQ.difficulty === 'Hard' ? 'bg-red-100 text-red-700' :
                                   selectedQ.difficulty === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
@@ -1910,7 +1977,8 @@ Schema: {
                                     <img
                                       src={selectedQ.imageUrl}
                                       alt="Question diagram"
-                                      className="w-full h-auto max-h-64 object-contain bg-white p-2"
+                                      className="w-full h-auto max-h-64 object-contain bg-white p-2 cursor-zoom-in hover:opacity-95 transition-opacity"
+                                      onClick={() => setEnlargedVisualNote({ imageUrl: selectedQ.imageUrl!, questionId: selectedQ.id })}
                                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                     />
                                     {selectedQ.visualElementDescription && (
@@ -1958,7 +2026,8 @@ Schema: {
                                         <img
                                           src={imgData}
                                           alt={`Diagram ${idx + 1}`}
-                                          className="w-full h-auto max-h-64 object-contain bg-white p-2"
+                                          className="w-full h-auto max-h-64 object-contain bg-white p-2 cursor-zoom-in hover:opacity-95 transition-opacity"
+                                          onClick={() => setEnlargedVisualNote({ imageUrl: imgData, questionId: selectedQ.id })}
                                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                         />
                                       </div>

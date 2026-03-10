@@ -35,7 +35,8 @@ import {
   Activity,
   Signal,
   Settings,
-  Monitor
+  Monitor,
+  Maximize2
 } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { cleanJsonResponse } from '../lib/aiParserUtils';
@@ -1175,6 +1176,7 @@ const PracticeTab: React.FC<{
     const [userAnswers, setUserAnswers] = useState<Map<string, number>>(new Map());
     const [trashedIds, setTrashedIds] = useState<Set<string>>(new Set());
     const [showStats, setShowStats] = useState(false);
+    const [enlargedImageUrl, setEnlargedImageUrl] = useState<string | null>(null);
 
     // Modal state
     const [solutionModalQuestion, setSolutionModalQuestion] = useState<AnalyzedQuestion | null>(null);
@@ -1974,11 +1976,22 @@ const PracticeTab: React.FC<{
                             <h3 className="text-[13px] md:text-base font-black text-slate-900 tracking-tight font-outfit uppercase line-clamp-1 leading-snug">
                               {q.topic || 'General Practice'}
                             </h3>
-                            {hasValidated && (
-                              <span className="inline-flex items-center justify-center px-1.5 md:px-2 py-0.5 bg-white border border-slate-200 text-slate-500 text-[9px] md:text-[10px] font-black rounded-md md:rounded-lg tracking-widest font-outfit shadow-[0_2px_4px_rgba(0,0,0,0.02)] whitespace-nowrap w-max mt-0.5 sm:mt-0">
-                                {Math.floor(sessionStats.avgTime || 0)}s <span className="text-slate-400 uppercase ml-1">Lat</span>
-                              </span>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {(subject || q.section) && (
+                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border transition-all duration-300 ${(q.section || '').includes('Section B')
+                                  ? 'bg-amber-500 text-white border-amber-600'
+                                  : 'bg-slate-900 text-slate-100 border-slate-700'
+                                  }`}>
+                                  {subject ? `${subject.toUpperCase().substring(0, 3)}-` : ''}
+                                  {q.section?.replace(/Section\s*/i, '') || 'A'}
+                                </span>
+                              )}
+                              {hasValidated && (
+                                <span className="inline-flex items-center justify-center px-1.5 md:px-2 py-0.5 bg-white border border-slate-200 text-slate-500 text-[9px] md:text-[10px] font-black rounded-md md:rounded-lg tracking-widest font-outfit shadow-[0_2px_4px_rgba(0,0,0,0.02)] whitespace-nowrap w-max mt-0.5 sm:mt-0">
+                                  {Math.floor(sessionStats.avgTime || 0)}s <span className="text-slate-400 uppercase ml-1">Lat</span>
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           <div className="flex flex-wrap gap-1.5 items-center">
@@ -2055,7 +2068,12 @@ const PracticeTab: React.FC<{
 
                       {q.hasVisualElement && q.extractedImages && q.extractedImages.length > 0 && (
                         <div className="mb-4 p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center">
-                          <img src={q.extractedImages[0]} alt="Conceptual aid" className="max-h-32 w-auto rounded-lg mix-blend-multiply" />
+                          <img
+                            src={q.extractedImages[0]}
+                            alt="Conceptual aid"
+                            className="max-h-32 w-auto rounded-lg mix-blend-multiply cursor-zoom-in hover:opacity-90 transition-opacity"
+                            onClick={(e) => { e.stopPropagation(); setEnlargedImageUrl(q.extractedImages![0]); }}
+                          />
                         </div>
                       )}
 
@@ -2303,6 +2321,43 @@ const PracticeTab: React.FC<{
             </div>
           )
         }
+
+        {/* Enlarged Image Viewer */}
+        <AnimatePresence>
+          {enlargedImageUrl && (
+            <div
+              className="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-2xl flex flex-col p-4 sm:p-10 cursor-pointer"
+              onClick={() => setEnlargedImageUrl(null)}
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl">
+                    <Maximize2 size={24} className="text-primary-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-black text-xl tracking-tight leading-none mb-1">Visual Context</h3>
+                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">Source Material • High Fidelity</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setEnlargedImageUrl(null)}
+                  className="w-12 h-12 bg-white/5 hover:bg-white/10 text-white rounded-full flex items-center justify-center transition-all border border-white/10 active:scale-90"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-auto flex items-center justify-center bg-white/5 rounded-[3rem] border border-white/5 p-4 sm:p-12 shadow-inner">
+                <img
+                  src={enlargedImageUrl}
+                  alt="Enlarged diagram"
+                  className="max-w-full max-h-[85vh] w-auto h-auto drop-shadow-2xl rounded-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };

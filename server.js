@@ -321,7 +321,7 @@ app.get('/api/learning-journey/topics', async (req, res) => {
             });
         }
 
-        const validSubjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
+        const validSubjects = ['Physics', 'Chemistry', 'Math', 'Biology', 'Botany', 'Zoology'];
         const validExamContexts = ['NEET', 'JEE', 'KCET', 'CBSE'];
 
         if (!validSubjects.includes(subject)) {
@@ -386,7 +386,10 @@ app.get('/api/learning-journey/subjects/:trajectory', async (req, res) => {
 
         const { aggregateTopicsForUser } = await import('./lib/topicAggregator.ts');
 
-        const subjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
+        // NEET Pivot: Use sub-disciplines for Biology
+        const subjects = trajectory === 'NEET'
+            ? ['Physics', 'Chemistry', 'Botany', 'Zoology']
+            : ['Physics', 'Chemistry', 'Math', 'Biology'];
         const subjectProgress = await Promise.all(
             subjects.map(async (subject) => {
                 const topics = await aggregateTopicsForUser(userId, subject, trajectory);

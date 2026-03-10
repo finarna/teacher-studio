@@ -69,15 +69,22 @@ export const transformScanToAttempt = (
         .slice(0, 3);
 
     // Create a virtual attempt object
+    // Extract year from scan metadata first, then fall back to name parsing
+    const yearFromName = scan.name?.match(/20\d{2}/)?.[0];
+    const displayYear = (scan as any).year || yearFromName;
+    const displayName = displayYear
+        ? `${(scan.examContext || '').toUpperCase()} ${scan.subject} ${displayYear} PYQ`
+        : formatScanDisplayName(scan.name, scan.examContext, scan.subject);
+
     const attempt: TestAttempt = {
         id: `scan-${scan.id}`,
         userId: userId,
         testType: 'full_mock', // Treat it as a full paper
-        testName: formatScanDisplayName(scan.name, scan.examContext, scan.subject),
+        testName: displayName,
         subject: scan.subject as any,
         examContext: scan.examContext as any,
         totalQuestions: questions.length,
-        durationMinutes: 180, // Default for full papers
+        durationMinutes: 200, // Official NEET duration
         startTime: new Date(scan.timestamp),
         completedAt: new Date(scan.timestamp),
         status: 'completed',

@@ -83,11 +83,49 @@ export const SUBJECT_CONFIGS: Record<Subject, SubjectConfiguration> = {
       'Plant Physiology',
       'Human Physiology',
       'Ecology',
-      'Biotechnology',
-      'Reproduction',
-      'Molecular Biology'
+      'Biotechnology'
     ],
     supportedExams: ['KCET', 'NEET', 'CBSE']
+  },
+  'Botany': {
+    id: 'Botany',
+    name: 'Botany',
+    displayName: 'Botany',
+    color: '#10B981', // Emerald
+    colorLight: '#D1FAE5',
+    colorDark: '#047857',
+    icon: 'Sprout',
+    iconEmoji: '🌱',
+    domains: [
+      'Plant Physiology',
+      'Reproduction in Plants',
+      'Genetics and Evolution',
+      'Ecology and Environment',
+      'Diversity of Plants',
+      'Structural Organisation',
+      'Biotechnology'
+    ],
+    supportedExams: ['NEET']
+  },
+  'Zoology': {
+    id: 'Zoology',
+    name: 'Zoology',
+    displayName: 'Zoology',
+    color: '#F97316', // Orange
+    colorLight: '#FFEDD5',
+    colorDark: '#C2410C',
+    icon: 'Dog',
+    iconEmoji: '🐾',
+    domains: [
+      'Human Physiology',
+      'Reproduction in Humans',
+      'Animal Kingdom',
+      'Structural Organisation',
+      'Biotechnology and Applications',
+      'Genetics',
+      'Evolution'
+    ],
+    supportedExams: ['NEET']
   }
 };
 

@@ -52,9 +52,10 @@ export async function aggregateTopicsForUser(
 
     // 🚀 [PERF] Parallel Phase 1: Basic structural data
     const [scansResult, resourcesResult] = await Promise.all([
-      supabase.from('scans').select('id, subject, exam_context, year')
+      supabase.from('scans').select('id, subject, exam_context, year, is_combined_paper, subjects')
         .or(`user_id.eq.${userId},is_system_scan.eq.true`)
-        .eq('subject', subject).eq('exam_context', examContext),
+        .or(`subject.eq.${subject},subjects.cs.{${subject}}`)
+        .eq('exam_context', examContext),
 
       supabase.from('topic_resources').select('*')
         .eq('user_id', userId).eq('subject', subject).eq('exam_context', examContext)
@@ -89,7 +90,9 @@ export async function aggregateTopicsForUser(
       (mRes.data || []).forEach((m: any) => questionTopicMap.set(m.question_id, m.topic_id));
     }
 
-    const allQuestions = questionsData.map(q => ({ ...q, source: 'practice' }));
+    const allQuestions = questionsData
+      .filter(q => q.subject === subject) // NEW: Ensure we only aggregate for the active subject
+      .map(q => ({ ...q, source: 'practice' }));
     const insights = insightsData;
     const sketches = sketchesData;
     const flashcardCache = flashcardsData;

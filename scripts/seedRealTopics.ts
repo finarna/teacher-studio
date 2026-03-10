@@ -41,6 +41,27 @@ if (!supabaseUrl || !supabaseServiceKey) {
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // ========================================
+// NEET PHYSICS - CLASS 11 (Official NTA 2026)
+// ========================================
+const PHYSICS_CLASS11_TOPICS = [
+  { name: 'Units and Measurements', domain: 'General Physics', difficulty: 'Easy' as const, estimatedHours: 4, description: 'SI units, dimensional analysis, errors', keyConcepts: ['SI Units', 'Dimensional Analysis', 'Significant Figures'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 2 } },
+  { name: 'Motion in a Straight Line', domain: 'Kinematics', difficulty: 'Easy' as const, estimatedHours: 6, description: 'Position, speed, velocity, acceleration', keyConcepts: ['Velocity', 'Acceleration', 'Kinematic Equations'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 3 } },
+  { name: 'Motion in a Plane', domain: 'Kinematics', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Vectors, projectile motion, circular motion', keyConcepts: ['Vectors', 'Projectile Motion', 'Circular Motion'], examWeightage: { NEET: 3, JEE: 3, KCET: 3, CBSE: 3 } },
+  { name: 'Laws of Motion', domain: 'Mechanics', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Newtons laws, friction, dynamics', keyConcepts: ['Newtons Laws', 'Friction', 'Free Body Diagrams'], examWeightage: { NEET: 3, JEE: 4, KCET: 4, CBSE: 4 } },
+  { name: 'Work, Energy and Power', domain: 'Mechanics', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Work-energy theorem, potential energy, collisions', keyConcepts: ['Work', 'Kinetic Energy', 'Potential Energy', 'Collisions'], examWeightage: { NEET: 4, JEE: 4, KCET: 4, CBSE: 4 } },
+  { name: 'System of Particles and Rotational Motion', domain: 'Mechanics', difficulty: 'Hard' as const, estimatedHours: 12, description: 'Center of mass, torque, angular momentum', keyConcepts: ['Torque', 'Angular Momentum', 'Moment of Inertia'], examWeightage: { NEET: 3, JEE: 4, KCET: 3, CBSE: 4 } },
+  { name: 'Gravitation', domain: 'Mechanics', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Keplers laws, universal law of gravitation', keyConcepts: ['Universal Gravitation', 'Gravitational Potential', 'Keplers Laws'], examWeightage: { NEET: 2, JEE: 3, KCET: 2, CBSE: 3 } },
+  { name: 'Mechanical Properties of Solids', domain: 'Properties of Matter', difficulty: 'Easy' as const, estimatedHours: 5, description: 'Elasticity, stress, strain', keyConcepts: ['Stress', 'Strain', 'Hookes Law'], examWeightage: { NEET: 1, JEE: 2, KCET: 1, CBSE: 2 } },
+  { name: 'Mechanical Properties of Fluids', domain: 'Properties of Matter', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Pressure, viscosity, surface tension', keyConcepts: ['Viscosity', 'Surface Tension', 'Bernoullis Principle'], examWeightage: { NEET: 2, JEE: 3, KCET: 2, CBSE: 3 } },
+  { name: 'Thermal Properties of Matter', domain: 'Heat', difficulty: 'Moderate' as const, estimatedHours: 6, description: 'Specific heat, latent heat, heat transfer', keyConcepts: ['Specific Heat', 'Conduction', 'Radiation'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 2 } },
+  { name: 'Thermodynamics', domain: 'Heat', difficulty: 'Moderate' as const, estimatedHours: 9, description: 'Laws of thermodynamics, heat engines', keyConcepts: ['First Law', 'Entropy', 'Second Law'], examWeightage: { NEET: 3, JEE: 4, KCET: 3, CBSE: 3 } },
+  { name: 'Kinetic Theory', domain: 'Heat', difficulty: 'Easy' as const, estimatedHours: 5, description: 'Ideal gases, mean free path', keyConcepts: ['Ideal Gas Law', 'RMS Velocity', 'Boltzman Constant'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 2 } },
+  { name: 'Oscillations', domain: 'Waves', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'SHM, energy in SHM', keyConcepts: ['SHM', 'Frequency', 'Amplitude'], examWeightage: { NEET: 2, JEE: 3, KCET: 3, CBSE: 3 } },
+  { name: 'Waves', domain: 'Waves', difficulty: 'Moderate' as const, estimatedHours: 9, description: 'Transverse, longitudinal, sound waves', keyConcepts: ['Wave Speed', 'Doppler Effect', 'Interference'], examWeightage: { NEET: 3, JEE: 3, KCET: 3, CBSE: 4 } },
+  { name: 'General Physics', domain: 'General', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Miscellaneous concepts', keyConcepts: ['General Concepts'], examWeightage: { NEET: 1, JEE: 1, KCET: 1, CBSE: 1 } }
+];
+
+// ========================================
 // NEET PHYSICS - CLASS 12 (Official NTA 2026)
 // ========================================
 const PHYSICS_CLASS12_TOPICS = [
@@ -170,6 +191,26 @@ const PHYSICS_CLASS12_TOPICS = [
     keyConcepts: ['PN Junction', 'Diode', 'Transistor', 'Logic Gates', 'Rectifier'],
     examWeightage: { NEET: 3, JEE: 4, KCET: 3, PUCII: 4, CBSE: 4 }
   }
+];
+
+// ========================================
+// NEET CHEMISTRY - CLASS 11 (Official NTA 2026)
+// ========================================
+const CHEMISTRY_CLASS11_TOPICS = [
+  { name: 'Some Basic Concepts of Chemistry', domain: 'Physical Chemistry', difficulty: 'Easy' as const, estimatedHours: 6, description: 'Mole concept, stoichiometry', keyConcepts: ['Mole', 'Molarity', 'Stoichiometry'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 3 } },
+  { name: 'Structure of Atom', domain: 'Physical Chemistry', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Quantum numbers, orbital shapes', keyConcepts: ['Orbitals', 'Quantum Numbers', 'Photoelectric Effect'], examWeightage: { NEET: 3, JEE: 3, KCET: 3, CBSE: 4 } },
+  { name: 'Classification of Elements and Periodicity in Properties', domain: 'Inorganic Chemistry', difficulty: 'Easy' as const, estimatedHours: 5, description: 'Periodic table, trends', keyConcepts: ['Atomic Radius', 'Electronegativity', 'Ionization Energy'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 2 } },
+  { name: 'Chemical Bonding and Molecular Structure', domain: 'Physical Chemistry', difficulty: 'Hard' as const, estimatedHours: 12, description: 'VSEPR, hybridization, MOT', keyConcepts: ['Hybridization', 'VSEPR', 'Molecular Orbitals'], examWeightage: { NEET: 4, JEE: 4, KCET: 4, CBSE: 5 } },
+  { name: 'States of Matter', domain: 'Physical Chemistry', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Gas laws, Dalton\'s law', keyConcepts: ['Gas Laws', 'Liquefaction'], examWeightage: { NEET: 2, JEE: 3, KCET: 2, CBSE: 2 } },
+  { name: 'Thermodynamics', domain: 'Physical Chemistry', difficulty: 'Hard' as const, estimatedHours: 10, description: 'Enthalpy, entropy, Gibbs energy', keyConcepts: ['Enthalpy', 'Gibbs Free Energy', 'Laws of Thermo'], examWeightage: { NEET: 4, JEE: 5, KCET: 4, CBSE: 4 } },
+  { name: 'Equilibrium', domain: 'Physical Chemistry', difficulty: 'Hard' as const, estimatedHours: 14, description: 'Chemical and ionic equilibrium', keyConcepts: ['Le Chateliers Principle', 'pH', 'Buffer Solutions'], examWeightage: { NEET: 4, JEE: 4, KCET: 4, CBSE: 5 } },
+  { name: 'Redox Reactions', domain: 'Physical Chemistry', difficulty: 'Easy' as const, estimatedHours: 6, description: 'Oxidation numbers, balancing', keyConcepts: ['Oxidation Number', 'Balancing Equations'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 2 } },
+  { name: 'Hydrogen', domain: 'Inorganic Chemistry', difficulty: 'Easy' as const, estimatedHours: 4, description: 'Isotopes, compounds of hydrogen', keyConcepts: ['Hydrides', 'Hardness of Water'], examWeightage: { NEET: 1, JEE: 1, KCET: 1, CBSE: 2 } },
+  { name: 's-Block Elements', domain: 'Inorganic Chemistry', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Alkali and alkaline earth metals', keyConcepts: ['Reactivity', 'Solubility'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 2 } },
+  { name: 'Organic Chemistry: Some Basic Principles and Techniques', domain: 'Organic Chemistry', difficulty: 'Moderate' as const, estimatedHours: 12, description: 'IUPAC, purification, mechanisms', keyConcepts: ['Nomenclature', 'Inductive Effect', 'Resonance'], examWeightage: { NEET: 4, JEE: 4, KCET: 4, CBSE: 5 } },
+  { name: 'Hydrocarbons', domain: 'Organic Chemistry', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Alkanes, alkenes, alkynes, aromatics', keyConcepts: ['Aromaticity', 'Addition Reactions', 'Alkyne Preparation'], examWeightage: { NEET: 4, JEE: 4, KCET: 4, CBSE: 5 } },
+  { name: 'Environmental Chemistry', domain: 'Applied Chemistry', difficulty: 'Easy' as const, estimatedHours: 4, description: 'Pollution, types of pollutants', keyConcepts: ['Greenhouse Effect', 'Smog'], examWeightage: { NEET: 1, JEE: 1, KCET: 1, CBSE: 2 } },
+  { name: 'General Chemistry', domain: 'General', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Miscellaneous concepts', keyConcepts: ['General Concepts'], examWeightage: { NEET: 1, JEE: 1, KCET: 1, CBSE: 1 } }
 ];
 
 // ========================================
@@ -310,6 +351,35 @@ const CHEMISTRY_CLASS12_TOPICS = [
 ];
 
 // ========================================
+// NEET BIOLOGY - CLASS 11 (Official NTA 2026)
+// ========================================
+const BIOLOGY_CLASS11_TOPICS = [
+  { name: 'The Living World', domain: 'Botany', difficulty: 'Easy' as const, estimatedHours: 4, description: 'Classification, taxonomy', keyConcepts: ['Binomial Nomenclature'], examWeightage: { NEET: 1, CBSE: 1 } },
+  { name: 'Biological Classification', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Five kingdom classification', keyConcepts: ['Monera', 'Protista', 'Fungi'], examWeightage: { NEET: 3, CBSE: 2 } },
+  { name: 'Plant Kingdom', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Algae, bryophyta, pteridophyta', keyConcepts: ['Gymnosperms', 'Angiosperms', 'Alternation of Generation'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Animal Kingdom', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Classification of animals', keyConcepts: ['Chordata', 'Non-Chordata', 'Mammals'], examWeightage: { NEET: 4, CBSE: 4 } },
+  { name: 'Morphology of Flowering Plants', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Plant parts and types', keyConcepts: ['Root', 'Stem', 'Leaf', 'Inflorescence'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Anatomy of Flowering Plants', domain: 'Botany', difficulty: 'Hard' as const, estimatedHours: 8, description: 'Tissues and structural detail', keyConcepts: ['Xylem', 'Phloem', 'Primary Growth'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Structural Organisation in Animals', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Animal tissues', keyConcepts: ['Epithelium', 'Connective Tissue', 'Muscle'], examWeightage: { NEET: 2, CBSE: 2 } },
+  { name: 'Cell: The Unit of Life', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Cell structure and functions', keyConcepts: ['Prokaryote', 'Eukaryote', 'Organelles'], examWeightage: { NEET: 4, CBSE: 4 } },
+  { name: 'Biomolecules', domain: 'Botany', difficulty: 'Hard' as const, estimatedHours: 10, description: 'Enzymes, proteins, carbs', keyConcepts: ['Enzymes', 'Amino Acids', 'Proteins'], examWeightage: { NEET: 4, CBSE: 4 } },
+  { name: 'Cell Cycle and Cell Division', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Mitosis and meiosis', keyConcepts: ['Mitosis', 'Meiosis', 'Cytokinesis'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Transport in Plants', domain: 'Botany', difficulty: 'Hard' as const, estimatedHours: 8, description: 'Water and mineral transport', keyConcepts: ['Osmosis', 'Xylem Transport', 'Transpiration'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Mineral Nutrition', domain: 'Botany', difficulty: 'Easy' as const, estimatedHours: 5, description: 'Nutrients for plant growth', keyConcepts: ['Nitrogen Cycle', 'Deficiency Symptoms'], examWeightage: { NEET: 2, CBSE: 2 } },
+  { name: 'Photosynthesis in Higher Plants', domain: 'Botany', difficulty: 'Hard' as const, estimatedHours: 10, description: 'Light and dark reactions', keyConcepts: ['C3 Cycle', 'C4 Cycle', 'Chlorophyll'], examWeightage: { NEET: 4, CBSE: 4 } },
+  { name: 'Respiration in Plants', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Glycolysis, TCA cycle', keyConcepts: ['Glycolysis', 'Krebs Cycle', 'ETC'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Plant Growth and Development', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Phytohormones', keyConcepts: ['Auxin', 'Gibberellin', 'Cytokinin'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Digestion and Absorption', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Human digestive system', keyConcepts: ['Stomach', 'Small Intestine', 'Enzymes'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Breathing and Exchange of Gases', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 6, description: 'Mechanism of breathing', keyConcepts: ['Alveoli', 'Hemoglobin', 'Respiratory Disorders'], examWeightage: { NEET: 2, CBSE: 2 } },
+  { name: 'Body Fluids and Circulation', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Human heart and blood', keyConcepts: ['Blood Pressure', 'Cardiac Cycle', 'ECG'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Excretory Products and Their Elimination', domain: 'Zoology', difficulty: 'Hard' as const, estimatedHours: 8, description: 'Kidney function', keyConcepts: ['Nephron', 'Urea Cycle', 'Micturition'], examWeightage: { NEET: 2, CBSE: 2 } },
+  { name: 'Locomotion and Movement', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Muscles and skeletal system', keyConcepts: ['Sarcomere', 'Sliding Filament Theory'], examWeightage: { NEET: 2, CBSE: 2 } },
+  { name: 'Neural Control and Coordination', domain: 'Zoology', difficulty: 'Hard' as const, estimatedHours: 10, description: 'Brain and nervous system', keyConcepts: ['Neuron', 'Synapse', 'Reflex Arc'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Chemical Coordination and Integration', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Endocrine glands', keyConcepts: ['Hormones', 'Pituitary', 'Thyroid'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'General Biology', domain: 'General', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Miscellaneous concepts', keyConcepts: ['General Concepts'], examWeightage: { NEET: 1, CBSE: 1 } }
+];
+
+// ========================================
 // NEET BIOLOGY - CLASS 12 (Official NTA 2026)
 // ========================================
 const BIOLOGY_CLASS12_TOPICS = [
@@ -432,6 +502,15 @@ const BIOLOGY_CLASS12_TOPICS = [
     description: 'Origin of life, evidences of evolution, natural selection',
     keyConcepts: ['Darwins Theory', 'Natural Selection', 'Evidence of Evolution', 'Human Evolution'],
     examWeightage: { NEET: 5, KCET: 4, CBSE: 5 }
+  },
+  {
+    name: 'Environmental Issues',
+    domain: 'Ecology',
+    difficulty: 'Easy' as const,
+    estimatedHours: 6,
+    description: 'Air/Water pollution, global warming, ozone depletion',
+    keyConcepts: ['Pollution', 'Ozone Layer', 'Global Warming', 'Greenhouse Effect', 'Dobson Unit'],
+    examWeightage: { NEET: 3, CBSE: 3 }
   }
 ];
 
@@ -581,8 +660,9 @@ async function seedRealTopics() {
     let totalCreated = 0;
 
     // Seed Physics
-    console.log('📚 Seeding Physics (Class 12)...');
-    for (const topic of PHYSICS_CLASS12_TOPICS) {
+    console.log('📚 Seeding Physics (Class 11 + 12)...');
+    const PHYSICS_TOPICS = [...PHYSICS_CLASS11_TOPICS, ...PHYSICS_CLASS12_TOPICS];
+    for (const topic of PHYSICS_TOPICS) {
       const { error } = await supabase.from('topics').insert({
         subject: 'Physics',
         domain: topic.domain,
@@ -603,8 +683,9 @@ async function seedRealTopics() {
     }
 
     // Seed Chemistry
-    console.log('\n📚 Seeding Chemistry (Class 12)...');
-    for (const topic of CHEMISTRY_CLASS12_TOPICS) {
+    console.log('\n📚 Seeding Chemistry (Class 11 + 12)...');
+    const CHEMISTRY_TOPICS = [...CHEMISTRY_CLASS11_TOPICS, ...CHEMISTRY_CLASS12_TOPICS];
+    for (const topic of CHEMISTRY_TOPICS) {
       const { error } = await supabase.from('topics').insert({
         subject: 'Chemistry',
         domain: topic.domain,
@@ -625,10 +706,74 @@ async function seedRealTopics() {
     }
 
     // Seed Biology
-    console.log('\n📚 Seeding Biology (Class 12)...');
-    for (const topic of BIOLOGY_CLASS12_TOPICS) {
+    console.log('\n📚 Seeding Biology (Class 11 + 12)...');
+    const BIOLOGY_TOPICS = [...BIOLOGY_CLASS11_TOPICS, ...BIOLOGY_CLASS12_TOPICS];
+    for (const topic of BIOLOGY_TOPICS) {
       const { error } = await supabase.from('topics').insert({
         subject: 'Biology',
+        domain: topic.domain,
+        name: topic.name,
+        description: topic.description,
+        difficulty_level: topic.difficulty,
+        estimated_study_hours: topic.estimatedHours,
+        exam_weightage: topic.examWeightage,
+        key_concepts: topic.keyConcepts
+      });
+
+      if (error) {
+        console.error(`  ❌ Failed: ${topic.name} - ${error.message}`);
+      } else {
+        console.log(`  ✅ Created: ${topic.name}`);
+        totalCreated++;
+      }
+    }
+
+    // LISTS FOR BOTANY/ZOOLOGY SPLIT
+    const BOTANY_TOPIC_NAMES = [
+      'The Living World', 'Biological Classification', 'Plant Kingdom', 'Morphology of Flowering Plants',
+      'Anatomy of Flowering Plants', 'Cell: The Unit of Life', 'Biomolecules', 'Cell Cycle and Cell Division',
+      'Transport in Plants', 'Mineral Nutrition', 'Photosynthesis in Higher Plants', 'Respiration in Plants',
+      'Plant Growth and Development', 'Sexual Reproduction in Flowering Plants', 'Principles of Inheritance and Variation',
+      'Molecular Basis of Inheritance', 'Biotechnology Principles and Processes', 'Biotechnology and its Applications',
+      'Organisms and Populations', 'Ecosystem', 'Biodiversity and Conservation', 'Environmental Issues', 'Microbes in Human Welfare'
+    ];
+
+    const ZOOLOGY_TOPIC_NAMES = [
+      'Animal Kingdom', 'Structural Organisation in Animals', 'Digestion and Absorption', 'Breathing and Exchange of Gases',
+      'Body Fluids and Circulation', 'Excretory Products and Their Elimination', 'Locomotion and Movement',
+      'Neural Control and Coordination', 'Chemical Coordination and Integration', 'Human Reproduction',
+      'Reproductive Health', 'Evolution', 'Human Health and Disease'
+    ];
+
+    // Seed Botany
+    console.log('\n📚 Seeding Botany (NEET Split)...');
+    const BOTANY_TOPICS = BIOLOGY_TOPICS.filter(t => BOTANY_TOPIC_NAMES.includes(t.name));
+    for (const topic of BOTANY_TOPICS) {
+      const { error } = await supabase.from('topics').insert({
+        subject: 'Botany',
+        domain: topic.domain,
+        name: topic.name,
+        description: topic.description,
+        difficulty_level: topic.difficulty,
+        estimated_study_hours: topic.estimatedHours,
+        exam_weightage: topic.examWeightage,
+        key_concepts: topic.keyConcepts
+      });
+
+      if (error) {
+        console.error(`  ❌ Failed: ${topic.name} - ${error.message}`);
+      } else {
+        console.log(`  ✅ Created: ${topic.name}`);
+        totalCreated++;
+      }
+    }
+
+    // Seed Zoology
+    console.log('\n📚 Seeding Zoology (NEET Split)...');
+    const ZOOLOGY_TOPICS = BIOLOGY_TOPICS.filter(t => ZOOLOGY_TOPIC_NAMES.includes(t.name));
+    for (const topic of ZOOLOGY_TOPICS) {
+      const { error } = await supabase.from('topics').insert({
+        subject: 'Zoology',
         domain: topic.domain,
         name: topic.name,
         description: topic.description,
@@ -671,9 +816,11 @@ async function seedRealTopics() {
     console.log('\n' + '='.repeat(60));
     console.log('📊 Seeding Summary:');
     console.log(`✅ Successfully created: ${totalCreated} REAL syllabus topics`);
-    console.log(`  - Physics: ${PHYSICS_CLASS12_TOPICS.length} topics`);
-    console.log(`  - Chemistry: ${CHEMISTRY_CLASS12_TOPICS.length} topics`);
-    console.log(`  - Biology: ${BIOLOGY_CLASS12_TOPICS.length} topics`);
+    console.log(`  - Physics: ${PHYSICS_CLASS12_TOPICS.length + PHYSICS_CLASS11_TOPICS.length} topics`);
+    console.log(`  - Chemistry: ${CHEMISTRY_CLASS12_TOPICS.length + CHEMISTRY_CLASS11_TOPICS.length} topics`);
+    console.log(`  - Biology: ${BIOLOGY_TOPICS.length} topics`);
+    console.log(`  - Botany: ${BOTANY_TOPICS.length} topics`);
+    console.log(`  - Zoology: ${ZOOLOGY_TOPICS.length} topics`);
     console.log(`  - Math: ${MATH_CLASS12_TOPICS.length} topics`);
     console.log('='.repeat(60));
     console.log('\n✨ Topic seeding complete!');

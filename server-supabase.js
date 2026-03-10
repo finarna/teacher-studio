@@ -200,6 +200,8 @@ function transformDbScanToApi(dbScan) {
     subject: dbScan.subject,
     examContext: dbScan.exam_context || 'KCET', // Default to KCET if not set
     year: dbScan.year,
+    isCombinedPaper: dbScan.is_combined_paper || false,
+    subjects: dbScan.subjects || [],
     analysisData: dbScan.analysis_data || {
       summary: dbScan.summary,
       overallDifficulty: dbScan.overall_difficulty,
@@ -231,7 +233,7 @@ function transformApiScanToDb(apiScan) {
 
   // Default exam context based on subject if not provided
   const defaultExamContext = (subject) => {
-    if (subject === 'Biology') return 'NEET';
+    if (['Biology', 'Botany', 'Zoology'].includes(subject)) return 'NEET';
     return 'KCET';
   };
 
@@ -263,6 +265,8 @@ function transformApiScanToDb(apiScan) {
     strategy: apiScan.analysisData?.strategy,
     scan_date: apiScan.date ? new Date(apiScan.date).toISOString() : new Date().toISOString(),
     year: extractedYear, // Auto-extract year from filename
+    is_combined_paper: apiScan.isCombinedPaper || false,
+    subjects: apiScan.subjects || [],
     metadata: {},
   };
 }
@@ -640,9 +644,10 @@ app.get('/api/scans', async (req, res) => {
       .select('*')
       .eq('user_id', userId);
 
-    // Apply subject filter
+    // Apply subject filter (Additive: include combined papers containing the subject)
     if (subject) {
-      query = query.eq('subject', subject);
+      // Logic: subject is 'Physics' OR subjects array contains 'Physics'
+      query = query.or(`subject.eq.${subject},subjects.cs.{${subject}}`);
     }
 
     // Apply examContext filter
@@ -1699,7 +1704,7 @@ app.get('/api/learning-journey/topics', async (req, res) => {
       });
     }
 
-    const validSubjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
+    const validSubjects = ['Physics', 'Chemistry', 'Math', 'Biology', 'Botany', 'Zoology'];
     const validExamContexts = ['NEET', 'JEE', 'KCET', 'CBSE'];
 
     if (!validSubjects.includes(subject)) {
@@ -1778,7 +1783,11 @@ app.get('/api/learning-journey/subjects/:trajectory', async (req, res) => {
     }
 
     const { getSubjectSummaryStats } = await import('./lib/topicAggregator.ts');
-    const subjects = ['Physics', 'Chemistry', 'Math', 'Biology'];
+
+    // NEET Pivot: Use sub-disciplines for Biology
+    const subjects = trajectory === 'NEET'
+      ? ['Physics', 'Chemistry', 'Botany', 'Zoology']
+      : ['Physics', 'Chemistry', 'Math', 'Biology'];
 
     // 🚀 [PERF] Use lean aggregator for subjects overview
     const subjectProgress = await Promise.all(
