@@ -573,8 +573,15 @@ Return ONLY a valid JSON array:
       });
     }
 
-    // Create test attempt
+    // ─── NEET Section tagging ─────────────────────────────────────────────────
+    // Tag sections BEFORE saving the snapshot so scoring filter works at submit time.
+    // predictive_mock 50Q → SecA=35, SecB=15; custom n → proportional round(n×35/50)
+    if (examContext === 'NEET') {
+      questionSet.questions = assignNEETSections(questionSet.questions, qCount, subject);
+      console.log(`📐 NEET sections tagged: ${questionSet.questions.filter(q => q.section === 'Section A').length} SecA, ${questionSet.questions.filter(q => q.section === 'Section B').length} SecB`);
+    }
 
+    // Create test attempt
     const { data: attempt, error: attemptError } = await supabaseAdmin
       .from('test_attempts')
       .insert({
@@ -755,13 +762,17 @@ export async function submitTest(req, res) {
       console.log('🧪 Applying NEET Sectional Scoring Logic (Section A: 35, Section B: 10/15)');
       const subjects = ['Physics', 'Chemistry', 'Botany', 'Zoology'];
 
+      // selectedOption is null (not undefined) from DB when skipped — null !== undefined is TRUE (wrong)
+      // Use isAttempted() to correctly distinguish answered vs skipped
+      const isAttempted = (opt) => opt !== null && opt !== undefined;
+
       subjects.forEach(subject => {
         // 1. Process Section A (Mandatory 35 per subject)
         const sectionAQs = snapshotQs.filter(q => q.subject === subject && q.section === 'Section A');
         sectionAQs.forEach(q => {
           const r = responses.find(resp => resp.questionId === q.id);
           marksTotal += 4;
-          if (r && r.selectedOption !== undefined) {
+          if (r && isAttempted(r.selectedOption)) {
             questionsAttempted++;
             if (r.isCorrect) {
               correctCount++;
@@ -773,35 +784,36 @@ export async function submitTest(req, res) {
           }
         });
 
-        // 2. Process Section B (Attempt first 10 per subject)
+        // 2. Process Section B (count only first 10 attempts per subject)
         const sectionBQs = snapshotQs.filter(q => q.subject === subject && q.section === 'Section B');
         let subjectBAttempts = 0;
         sectionBQs.forEach(q => {
           const r = responses.find(resp => resp.questionId === q.id);
-          if (r && r.selectedOption !== undefined) {
-            if (subjectBAttempts < 10) {
-              subjectBAttempts++;
-              questionsAttempted++;
-              if (r.isCorrect) {
-                correctCount++;
-                marksObtained += 4;
-              } else {
-                incorrectCount++;
-                marksObtained -= 1;
-              }
+          if (r && isAttempted(r.selectedOption) && subjectBAttempts < 10) {
+            subjectBAttempts++;
+            questionsAttempted++;
+            if (r.isCorrect) {
+              correctCount++;
+              marksObtained += 4;
+            } else {
+              incorrectCount++;
+              marksObtained -= 1;
             }
           }
         });
-        marksTotal += 40; // 10 * 4
+        // SecB max: real NEET = 10 countable, custom tests may have fewer SecB questions
+        marksTotal += Math.min(sectionBQs.length, 10) * 4;
       });
 
-      // NEET Total should always be 720 if it's a full paper
+      // Full NEET paper (200Q per subject × 4) should always total 720
       if (marksTotal < 720 && snapshotQs.length >= 200) marksTotal = 720;
     } else {
-      // Standard Global Scoring
+      // Standard scoring — KCET / JEE / CBSE
+      // isAttempted guard: null selectedOption from DB must not be treated as answered
+      const isAttempted = (opt) => opt !== null && opt !== undefined;
       correctCount = responses.filter(r => r.isCorrect).length;
-      incorrectCount = responses.filter(r => !r.isCorrect && r.selectedOption !== undefined).length;
-      questionsAttempted = responses.filter(r => r.selectedOption !== undefined).length;
+      incorrectCount = responses.filter(r => !r.isCorrect && isAttempted(r.selectedOption)).length;
+      questionsAttempted = responses.filter(r => isAttempted(r.selectedOption)).length;
 
       responses.forEach(r => {
         const questionMarks = r.marks || marksPerQuestion;
@@ -809,7 +821,7 @@ export async function submitTest(req, res) {
 
         if (r.isCorrect) {
           marksObtained += questionMarks;
-        } else if (r.selectedOption !== undefined && negativeMarkingEnabled) {
+        } else if (isAttempted(r.selectedOption) && negativeMarkingEnabled) {
           marksObtained += negativeDeduction;
         }
       });
@@ -1632,6 +1644,23 @@ export async function getWeakTopics(req, res) {
  * Background worker: runs AI generation + DB writes after the HTTP response is sent.
  * Stores the final result (or error) in generationProgress so the client can poll.
  */
+/**
+ * Tags NEET Section A / Section B on a flat array of questions for a single subject.
+ * Rules (matches real NEET pattern):
+ *   - 50Q per subject  → SecA = first 35, SecB = last 15
+ *   - Custom n < 50    → SecA = first round(n × 35/50), SecB = rest
+ * All questions also get the subject tag stamped so the scoring filter works.
+ */
+function assignNEETSections(questions, totalCount, subjectName) {
+  if (!questions || questions.length === 0) return questions;
+  const sectionACount = totalCount >= 50 ? 35 : Math.round(totalCount * 35 / 50);
+  return questions.map((q, idx) => ({
+    ...q,
+    subject: q.subject || subjectName,
+    section: idx < sectionACount ? 'Section A' : 'Section B'
+  }));
+}
+
 async function generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId, strategyMode, oracleMode }) {
   // Check if AI generation is enabled (requires GEMINI_API_KEY)
   let useAIGeneration = !!(process.env.GEMINI_API_KEY && examContext && subject);
@@ -2035,15 +2064,26 @@ Return ONLY a valid JSON array:
       throw new Error(`Could not generate questions for ${subject} (${examContext}). Please check your Gemini API key or upload past papers.`);
     }
 
+    // ─── NEET Section tagging ─────────────────────────────────────────────────
+    // Must happen BEFORE the snapshot so scoring filter (q.subject + q.section) works.
+    // predictive_mock (50Q) → SecA=35, SecB=15 (exact spec)
+    // hybrid / adaptive_growth (custom n) → SecA=round(n×35/50), SecB=rest
+    if (examContext === 'NEET') {
+      finalQuestions = assignNEETSections(finalQuestions, questionCount, subject);
+      console.log(`📐 NEET sections assigned: ${finalQuestions.filter(q => q.section === 'Section A').length} SecA, ${finalQuestions.filter(q => q.section === 'Section B').length} SecB`);
+    }
+
     // Create test attempt — store the full questions snapshot so review always works
     // (AI questions are not persisted in the questions table, so we need this fallback)
     const questionsSnapshot = finalQuestions.map(q => ({
       id: q.id,
       text: q.text,
       options: q.options,
-      marks: q.marks,
+      marks: q.marks || 4,
       difficulty: q.difficulty,
       topic: q.topic,
+      subject: q.subject || subject,   // critical for NEET scoring filter
+      section: q.section || null,      // critical for NEET SecA/SecB scoring
       blooms: q.blooms,
       domain: q.domain,
       year: q.year,

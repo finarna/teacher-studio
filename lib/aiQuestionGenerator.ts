@@ -263,16 +263,15 @@ export async function generateTestQuestions(
     const totalInBatchCount = batch.reduce((sum, b) => sum + b.questionCount, 0);
     console.log(`🎯 Batch ${idx + 1}: Generating ${totalInBatchCount} questions across ${batch.length} topic segments...`);
 
-    // Determine section for this batch (for NEET/JEE)
+    // Determine section for this batch (NEET only)
+    // Generation is always per-subject (max 50Q), never 200Q in one call.
+    // For 50Q: SecA = first 35, SecB = next 15 (exact NEET spec)
+    // For custom count n: SecA = first round(n * 35/50), SecB = rest (proportional)
     let batchSection = 'Section A';
-    if (context.examConfig.examContext === 'NEET' && context.examConfig.totalQuestions === 200) {
-      // Logic for 200-question NEET paper:
-      // Physics (1-50), Chem (51-100), Botany (101-150), Zoology (151-200)
-      // Section A: first 35 of each subject. Section B: next 15.
-      const subjectIndex = Math.floor(currentGlobalIndex / 50);
-      const indexWithinSubject = currentGlobalIndex % 50;
-
-      if (indexWithinSubject >= 35) {
+    if (context.examConfig.examContext === 'NEET') {
+      const totalQ = context.examConfig.totalQuestions;
+      const sectionACount = totalQ >= 50 ? 35 : Math.round(totalQ * 35 / 50);
+      if (currentGlobalIndex >= sectionACount) {
         batchSection = 'Section B';
       }
     }

@@ -136,13 +136,17 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
   const examConfig = useMemo(() => attempt.examContext ? getExamConfig(attempt.examContext as any) : null, [attempt.examContext]);
   const isNEET = attempt.examContext === 'NEET';
 
+  // selectedOption from DB is null (not undefined) when skipped — null !== undefined is TRUE which is wrong
+  // Use this helper everywhere to treat both null and undefined as "not answered"
+  const isAnswered = (opt: number | null | undefined): opt is number => opt !== null && opt !== undefined;
+
   // Metrics Calculation
   const metrics = useMemo(() => {
     let correct = 0, incorrect = 0, skipped = 0, marks = 0, totalMarks = 0;
 
     if (isNEET && examConfig?.pattern?.sections) {
       const subjectSections = ['Physics', 'Chemistry', 'Botany', 'Zoology'];
-      let sectionedFound = questions.some(q => q.section === 'Section A' || q.section === 'Section B');
+      const sectionedFound = questions.some(q => q.section === 'Section A' || q.section === 'Section B');
 
       if (sectionedFound) {
         subjectSections.forEach(subject => {
@@ -150,42 +154,74 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
           sA.forEach(q => {
             const r = responses.find(res => res.questionId === q.id);
             totalMarks += 4;
-            if (r?.selectedOption !== undefined) { if (r.isCorrect) { correct++; marks += 4; } else { incorrect++; marks -= 1; } }
+            if (r && isAnswered(r.selectedOption)) { if (r.isCorrect) { correct++; marks += 4; } else { incorrect++; marks -= 1; } }
             else skipped++;
           });
           const sB = questions.filter(q => q.subject === subject && q.section === 'Section B');
           let attB = 0;
           sB.forEach(q => {
             const r = responses.find(res => res.questionId === q.id);
-            if (r?.selectedOption !== undefined && attB < 10) {
+            if (r && isAnswered(r.selectedOption) && attB < 10) {
               attB++; if (r.isCorrect) { correct++; marks += 4; } else { incorrect++; marks -= 1; }
-            } else if (r?.selectedOption === undefined) skipped++;
+            } else skipped++;
           });
-          totalMarks += 40;
+          // SecB max: real NEET = 10 countable, custom tests may have fewer SecB questions
+          totalMarks += Math.min(sB.length, 10) * 4;
         });
       } else {
+        // NEET questions without section tags — score all at 4 marks each
         questions.forEach(q => {
           const r = responses.find(res => res.questionId === q.id);
           totalMarks += 4;
-          if (r) { if (r.isCorrect) { correct++; marks += 4; } else if (r.selectedOption !== undefined) { incorrect++; marks -= 1; } else skipped++; }
+          if (r) { if (r.isCorrect) { correct++; marks += 4; } else if (isAnswered(r.selectedOption)) { incorrect++; marks -= 1; } else skipped++; }
           else skipped++;
         });
       }
     } else {
+      // KCET / JEE / CBSE — exam-agnostic scoring
       correct = responses.filter(r => r.isCorrect).length;
-      incorrect = responses.filter(r => !r.isCorrect && r.selectedOption !== undefined).length;
+      incorrect = responses.filter(r => !r.isCorrect && isAnswered(r.selectedOption)).length;
       skipped = questions.length - (correct + incorrect);
       const mPerQ = examConfig?.pattern?.marksPerQuestion || 1;
       const hNeg = examConfig?.pattern?.negativeMarking || false;
       const nVal = examConfig?.pattern?.negativeMarkingValue || 0;
       responses.forEach(r => {
         totalMarks += mPerQ;
-        if (r.isCorrect) marks += mPerQ; else if (r.selectedOption !== undefined && hNeg) marks += nVal;
+        if (r.isCorrect) marks += mPerQ; else if (isAnswered(r.selectedOption) && hNeg) marks += nVal;
       });
     }
     const perc = totalMarks > 0 ? Math.round((Math.max(0, marks) / totalMarks) * 100) : 0;
     return { correct, incorrect, skipped, marks, totalMarks, percentage: perc };
   }, [questions, responses, isNEET, examConfig]);
+
+  // NEET per-subject Section A / Section B breakdown for the results table
+  const neetSectionBreakdown = useMemo(() => {
+    if (!isNEET) return [];
+    const sectionedFound = questions.some(q => q.section === 'Section A' || q.section === 'Section B');
+    if (!sectionedFound) return [];
+    return ['Physics', 'Chemistry', 'Botany', 'Zoology'].map(subject => {
+      const sAQs = questions.filter(q => q.subject === subject && q.section === 'Section A');
+      let aCorrect = 0, aIncorrect = 0, aMarks = 0;
+      sAQs.forEach(q => {
+        const r = responses.find(res => res.questionId === q.id);
+        if (r && isAnswered(r.selectedOption)) {
+          if (r.isCorrect) { aCorrect++; aMarks += 4; } else { aIncorrect++; aMarks -= 1; }
+        }
+      });
+      const sBQs = questions.filter(q => q.subject === subject && q.section === 'Section B');
+      let bAttempted = 0, bCorrect = 0, bIncorrect = 0, bMarks = 0;
+      sBQs.forEach(q => {
+        const r = responses.find(res => res.questionId === q.id);
+        if (r && isAnswered(r.selectedOption) && bAttempted < 10) {
+          bAttempted++;
+          if (r.isCorrect) { bCorrect++; bMarks += 4; } else { bIncorrect++; bMarks -= 1; }
+        }
+      });
+      const subjectMarks = aMarks + bMarks;
+      const subjectMaxMarks = sAQs.length * 4 + Math.min(sBQs.length, 10) * 4;
+      return { subject, sA: { total: sAQs.length, correct: aCorrect, incorrect: aIncorrect, marks: aMarks }, sB: { total: sBQs.length, attempted: bAttempted, correct: bCorrect, incorrect: bIncorrect, marks: bMarks }, subjectMarks, subjectMaxMarks };
+    }).filter(s => s.sA.total > 0 || s.sB.total > 0);
+  }, [questions, responses, isNEET]);
 
   // For compatibility with rest of the code that uses top-level variables
   const totalQuestions = questions.length;
@@ -569,6 +605,16 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                 <div className="text-6xl font-black text-white font-outfit leading-none tracking-tighter">
                   {isVaultMode ? totalQuestions : percentage}<span className="text-xl text-white/30 ml-1">{isVaultMode ? 'Q' : '%'}</span>
                 </div>
+                {/* Total marks display — critical for NEET (shows e.g. 360/720) */}
+                {!isVaultMode && metrics.totalMarks > 0 && (
+                  <div className="mt-1.5 text-sm font-black tracking-tight font-outfit">
+                    <span className={metrics.marks < 0 ? 'text-rose-400' : 'text-white/50'}>
+                      {metrics.marks}
+                    </span>
+                    <span className="text-white/25">/{metrics.totalMarks}</span>
+                    <span className="text-xs text-white/30 ml-1.5 font-bold">marks</span>
+                  </div>
+                )}
                 <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mt-2.5 border ${isVaultMode ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : (percentage >= 75 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
                   percentage >= 50 ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
                     'bg-rose-500/10 border-rose-500/20 text-rose-400')
@@ -806,6 +852,69 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
 
           {/* RIGHT COLUMN: Studio Breakdown */}
           <div className="flex flex-col gap-2.5 lg:h-full lg:overflow-y-auto lg:pr-1 lg:pb-3 custom-scrollbar">
+
+            {/* NEET Section A / B Breakdown Table */}
+            {isNEET && !isVaultMode && neetSectionBreakdown.length > 0 && (
+              <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm shrink-0">
+                <h3 className="text-sm font-black text-slate-900 font-outfit mb-3 flex items-center gap-2">
+                  <TableIcon size={15} className="text-slate-400" /> Subject × Section Breakdown
+                  <span className="ml-auto text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sec A: 35Q · Sec B: 10/15Q</span>
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100">
+                        <th className="text-left py-2 pr-3 font-black text-slate-500 uppercase tracking-wider text-[10px]">Subject</th>
+                        <th className="text-center py-2 px-2 font-black text-indigo-500 uppercase tracking-wider text-[10px]">Sec A (35)</th>
+                        <th className="text-center py-2 px-2 font-black text-violet-500 uppercase tracking-wider text-[10px]">Sec B (10↑)</th>
+                        <th className="text-center py-2 pl-2 font-black text-slate-500 uppercase tracking-wider text-[10px]">Score</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {neetSectionBreakdown.map(s => (
+                        <tr key={s.subject} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="py-2.5 pr-3">
+                            <span className="font-black text-slate-800 text-[11px]">{s.subject.substring(0, 4).toUpperCase()}</span>
+                          </td>
+                          <td className="py-2.5 px-2 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="text-emerald-600 font-black">{s.sA.correct}</span>
+                              <span className="text-slate-300">/</span>
+                              <span className="text-slate-500 font-bold">{s.sA.total}</span>
+                              {s.sA.incorrect > 0 && <span className="text-rose-400 font-bold text-[9px] ml-1">-{s.sA.incorrect}</span>}
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-2 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="text-emerald-600 font-black">{s.sB.correct}</span>
+                              <span className="text-slate-300">/</span>
+                              <span className="text-slate-500 font-bold">{s.sB.attempted}</span>
+                              {s.sB.incorrect > 0 && <span className="text-rose-400 font-bold text-[9px] ml-1">-{s.sB.incorrect}</span>}
+                              <span className="text-slate-300 text-[9px] ml-0.5">of {s.sB.total}</span>
+                            </div>
+                          </td>
+                          <td className="py-2.5 pl-2 text-center">
+                            <span className={`font-black text-sm ${s.subjectMarks < 0 ? 'text-rose-600' : s.subjectMarks >= s.subjectMaxMarks * 0.75 ? 'text-emerald-600' : s.subjectMarks >= s.subjectMaxMarks * 0.5 ? 'text-amber-600' : 'text-rose-500'}`}>
+                              {s.subjectMarks}
+                            </span>
+                            <span className="text-slate-400 font-bold text-[10px]">/{s.subjectMaxMarks}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-slate-200">
+                        <td colSpan={3} className="pt-2.5 pr-3 font-black text-slate-700 text-[11px] uppercase tracking-wider">Total Score</td>
+                        <td className="pt-2.5 pl-2 text-center">
+                          <span className={`font-black text-base ${metrics.marks < 0 ? 'text-rose-600' : 'text-slate-900'}`}>{metrics.marks}</span>
+                          <span className="text-slate-400 font-bold text-[10px]">/{metrics.totalMarks}</span>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            )}
 
             {/* AI Mastermind Box */}
             <div className="bg-white border-2 border-slate-100 rounded-3xl p-3.5 md:p-4 shadow-md relative overflow-hidden shrink-0">
