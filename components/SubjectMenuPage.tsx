@@ -74,14 +74,16 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
 
   // Fetch stats on mount
   useEffect(() => {
-    fetchStats();
+    let cancelled = false;
+    fetchStats(cancelled);
+    return () => { cancelled = true; };
   }, [subject, examContext]);
 
-  const fetchStats = async () => {
+  const fetchStats = async (cancelled = false) => {
     setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user || cancelled) return;
 
       // Parallelize independent data fetches for the dashboard cards
       const [
@@ -170,6 +172,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
         avgMockScore = Math.round(totalScore / customTestsTaken);
       }
 
+      if (cancelled) return;
       setStats({
         totalTopics: totalTopicsCount || 0,
         masteredTopics: mCount || 0,
@@ -179,10 +182,11 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
         customTestsTaken,
         avgMockScore
       });
-    } catch (error) {
+    } catch (error: any) {
+      if (cancelled || error?.name === 'AbortError') return;
       console.error('Error fetching subject menu stats:', error);
     } finally {
-      setIsLoading(false);
+      if (!cancelled) setIsLoading(false);
     }
   };
 

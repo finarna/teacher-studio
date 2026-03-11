@@ -41,7 +41,7 @@ async function getOrCreateAIScan(supabase, subject, examContext, userId) {
     .eq('name', scanName)
     .eq('subject', subject)
     .eq('exam_context', examContext)
-    .eq('is_system_scan', true)
+    .eq('is_system_scan', false)
     .eq('user_id', userId)
     .single();
 
@@ -50,7 +50,7 @@ async function getOrCreateAIScan(supabase, subject, examContext, userId) {
     return existing.id;
   }
 
-  // Create new AI scan
+  // Create new AI scan — must NOT be a system scan, or it appears in the PYQ hub
   const { data: newScan, error } = await supabase
     .from('scans')
     .insert({
@@ -58,7 +58,7 @@ async function getOrCreateAIScan(supabase, subject, examContext, userId) {
       user_id: userId,
       subject,
       exam_context: examContext,
-      is_system_scan: true,
+      is_system_scan: false,
       status: 'Complete',
       summary: 'AI-generated questions',
       grade: 'Class 12',
