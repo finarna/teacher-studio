@@ -415,6 +415,11 @@ const AdminScanApproval: React.FC = () => {
 
       const extractedYear = scanYears[scanId] || scan.year || extractYearFromFilename(scan.name || '');
 
+      if (!extractedYear) {
+        const confirmed = window.confirm('⚠️ No year set for this scan. It will not appear in the Past Year Exams page.\n\nPublish anyway?');
+        if (!confirmed) { setPublishing(null); return; }
+      }
+
       const { data: updateData, error: publishError } = await supabase
         .from('scans')
         .update({
