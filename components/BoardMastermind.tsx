@@ -1208,9 +1208,16 @@ CRITICAL RULES:
               }
 
               if (images && images.length > 0) {
-                newQuestion.extractedImages = images.map(img => img.imageData);
+                newQuestion.extractedImages = images.map((img: any) => img.imageData);
                 newQuestion.hasVisualElement = true; // Force UI to recognize images
-                console.log(`🔗 [IMAGE MERGE] Attached ${images.length} image(s) to question ${questionNum}`);
+                const sizes = (newQuestion.extractedImages as string[]).map((d: string) => `${(d.length * 0.75 / 1024).toFixed(1)}KB`);
+                console.log(`🔗 [IMAGE MERGE] Q${questionNum}: attached ${images.length} image(s) [${sizes.join(', ')}] — dataURL prefix: ${(newQuestion.extractedImages as string[])[0]?.substring(0, 40)}`);
+              } else if (q.hasVisualElement) {
+                console.warn(`⚠️ [IMAGE MERGE] Q${questionNum}: hasVisualElement=true but NO image found in imageMapping (keys: ${Array.from(imageMapping.keys()).join(',')})`);
+              }
+            } else {
+              if (q.hasVisualElement) {
+                console.warn(`⚠️ [IMAGE MERGE] Q id="${q.id}" has no numeric part — cannot look up in imageMapping`);
               }
             }
           }
@@ -1218,28 +1225,22 @@ CRITICAL RULES:
           return newQuestion;
         });
 
-        // Debug: Check if extractedImages actually made it onto the questions
-        if (imageMapping && imageMapping.size > 0) {
-          const questionNumbersWithImages = Array.from(imageMapping.keys());
-          const sampleQuestionsWithImages = extractionData.questions.filter((q: any) => {
-            const rawId = q.id?.toString() || "";
-            const numMatch = rawId.match(/(\d+)/);
-            if (numMatch) {
-              const num = parseInt(numMatch[1]);
-              return questionNumbersWithImages.includes(num);
-            }
-            return false;
+        // ── POST-MERGE AUDIT ──────────────────────────────────────────────
+        const withImages = extractionData.questions.filter((q: any) => q.extractedImages?.length > 0);
+        const withVisualNoImg = extractionData.questions.filter((q: any) => q.hasVisualElement && !q.extractedImages?.length);
+        console.group('📊 [IMAGE MERGE AUDIT] Post-merge summary');
+        console.log(`  Questions total         : ${extractionData.questions.length}`);
+        console.log(`  Questions WITH images   : ${withImages.length}`);
+        console.log(`  hasVisual but NO image  : ${withVisualNoImg.length}`, withVisualNoImg.map((q: any) => q.id));
+        if (withImages.length > 0) {
+          // Log first 3 as sample
+          console.log('  Sample questions with images:');
+          withImages.slice(0, 3).forEach((q: any) => {
+            const img0: string = q.extractedImages[0];
+            console.log(`    Q id=${q.id}: ${q.extractedImages.length} img(s), first img size=${(img0.length*0.75/1024).toFixed(1)}KB, starts="${img0.substring(0,60)}"`);
           });
-
-          if (sampleQuestionsWithImages.length > 0) {
-            console.log(`🔍 [POST-MERGE DEBUG] Questions ${questionNumbersWithImages.join(', ')} after merge:`, sampleQuestionsWithImages.map((q: any) => ({
-              id: q.id,
-              hasExtractedImages: !!q.extractedImages,
-              extractedImagesCount: q.extractedImages?.length || 0,
-              extractedImagesPreview: q.extractedImages?.[0]?.substring(0, 50)
-            })));
-          }
         }
+        console.groupEnd();
       }
 
       updatePipelineStatus('extraction', 'complete');

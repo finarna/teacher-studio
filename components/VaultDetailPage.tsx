@@ -71,26 +71,32 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack, filte
       } as any;
 
       if (filterSubject && mappedScan.analysisData?.questions) {
+        // Single-subject scans: questions have no per-question subject field.
+        // If the scan itself belongs to the requested subject, all questions qualify — skip the filter.
+        const scanSubjectMatches = mappedScan.subject === filterSubject;
+        const isCombined = !!(mappedScan as any).isCombinedPaper;
         const isNeetSub = mappedScan.examContext === 'NEET' && (filterSubject === 'Botany' || filterSubject === 'Zoology');
 
-        const filteredQuestions = mappedScan.analysisData.questions.filter(
-          (q: any) => {
-            // Direct match
-            if (q.subject === filterSubject) return true;
-            // Split logic for legacy/Bio questions
-            if (isNeetSub && (q.subject === 'Biology' || !q.subject)) {
-              const qNum = q.questionOrder ?? q.index ?? 0;
-              if (filterSubject === 'Botany') return qNum > 100 && qNum <= 150;
-              if (filterSubject === 'Zoology') return qNum > 150 && qNum <= 200;
+        const filteredQuestions = (scanSubjectMatches && !isCombined)
+          ? mappedScan.analysisData.questions // All questions belong to this subject
+          : mappedScan.analysisData.questions.filter(
+            (q: any) => {
+              // Direct match on per-question subject
+              if (q.subject === filterSubject) return true;
+              // Split logic for legacy/Bio questions in combined NEET papers
+              if (isNeetSub && (q.subject === 'Biology' || !q.subject)) {
+                const qNum = q.questionOrder ?? q.index ?? 0;
+                if (filterSubject === 'Botany') return qNum > 100 && qNum <= 150;
+                if (filterSubject === 'Zoology') return qNum > 150 && qNum <= 200;
+              }
+              return false;
             }
-            return false;
-          }
-        );
+          );
         mappedScan.analysisData = {
           ...mappedScan.analysisData,
           questions: filteredQuestions
         };
-        console.log(`🔍 [VaultDetailPage] Filtered to ${filteredQuestions.length} questions for subject: ${filterSubject}`);
+        console.log(`🔍 [VaultDetailPage] Filtered to ${filteredQuestions.length} questions for subject: ${filterSubject} (scanSubjectMatches=${scanSubjectMatches}, isCombined=${isCombined})`);
       }
 
       // 5. Transform for TestResultsPage — use filterSubject for display name if available

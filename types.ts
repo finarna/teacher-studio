@@ -265,7 +265,7 @@ export interface AnalyzedQuestion {
   | 'energy-level-diagram';
   visualElementDescription?: string;
   visualElementPosition?: 'above' | 'below' | 'inline' | 'side';
-  visualBoundingBox?: { pageNumber: number; x: string; y: string; width: string; height: string };
+  visualBoundingBox?: { pageNumber: number; x: string | number; y: string | number; width: string | number; height: string | number };
   extractedImages?: string[];
   imageUrl?: string;           // Diagram image cropped from PDF page (e.g. Biology extractor's cropDiagram())
   subject?: Subject;            // NEW: Added for combined paper question-level filtering
