@@ -528,10 +528,10 @@ const AdminScanApproval: React.FC = () => {
         if (scan.is_combined_paper && scan.subjects) {
           for (const subj of scan.subjects) {
             console.log(`📡 [SYNC] Starting subject fragment sync for: ${subj}`);
-            await syncScanToAITables(supabase, scanId, subj);
+            await syncScanToAITables(supabase, scanId, subj, extractedYear, scan.exam_context);
           }
         } else {
-          await syncScanToAITables(supabase, scanId, scan.subject);
+          await syncScanToAITables(supabase, scanId, scan.subject, extractedYear, scan.exam_context);
         }
         console.log('✅ [SYNC] Integrated scan intelligence into AI forecasting models.');
       } catch (syncError) {

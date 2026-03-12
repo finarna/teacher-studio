@@ -24,7 +24,9 @@ interface SyncResult {
 export async function syncScanToAITables(
   supabase: SupabaseClient,
   scanId: string,
-  targetSubject?: string
+  targetSubject?: string,
+  overrideYear?: string | null,
+  overrideExamContext?: string | null
 ): Promise<SyncResult> {
 
   try {
@@ -42,7 +44,9 @@ export async function syncScanToAITables(
       return { success: false, patternsUpdated: false, distributionsUpdated: 0, message: 'Scan not found' };
     }
 
-    const { year, exam_context, analysis_data, difficulty_distribution, is_combined_paper } = scan;
+    const year = overrideYear || scan.year;
+    const exam_context = overrideExamContext || scan.exam_context;
+    const { analysis_data, difficulty_distribution, is_combined_paper } = scan;
     const finalSubject = targetSubject || scan.subject;
 
     if (!year || !exam_context || !finalSubject) {
