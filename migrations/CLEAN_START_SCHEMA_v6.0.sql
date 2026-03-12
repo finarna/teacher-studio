@@ -664,11 +664,122 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- cleanup_expired_cache() - from Migration 001
+CREATE OR REPLACE FUNCTION cleanup_expired_cache()
+RETURNS INTEGER AS $$
+DECLARE
+  deleted_count INTEGER;
+BEGIN
+  WITH deleted AS (
+    DELETE FROM question_banks WHERE expires_at < NOW() RETURNING id
+  )
+  SELECT COUNT(*) INTO deleted_count FROM deleted;
+  DELETE FROM flashcards WHERE expires_at < NOW();
+  RETURN deleted_count;
+END;
+$$ LANGUAGE plpgsql;
+COMMENT ON FUNCTION cleanup_expired_cache() IS 'Delete expired cache entries (question_banks, flashcards). Run via cron.';
+
+-- auto_create_free_subscription() - from Migration 005
+CREATE OR REPLACE FUNCTION auto_create_free_subscription()
+RETURNS TRIGGER AS $$
+DECLARE
+  free_plan_id UUID;
+BEGIN
+  SELECT id INTO free_plan_id FROM pricing_plans WHERE slug = 'free' LIMIT 1;
+  IF free_plan_id IS NOT NULL THEN
+    INSERT INTO subscriptions (user_id, plan_id, status, current_period_start, current_period_end, scans_limit)
+    VALUES (NEW.id, free_plan_id, 'active', NOW(), NOW() + INTERVAL '100 years', 5);
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- get_user_subscription_limits() - from Migration 006
+CREATE OR REPLACE FUNCTION get_user_subscription_limits(p_user_id UUID DEFAULT auth.uid())
+RETURNS TABLE (
+  subscription_id UUID, plan_name VARCHAR, plan_slug VARCHAR,
+  scans_used INTEGER, scans_limit INTEGER, can_create_scan BOOLEAN,
+  current_period_end TIMESTAMPTZ, features JSONB, limits JSONB
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT s.id, p.name, p.slug, s.scans_used, s.scans_limit,
+    CASE WHEN s.scans_limit = -1 THEN true WHEN s.scans_used < s.scans_limit THEN true ELSE false END,
+    s.current_period_end, p.features, p.limits
+  FROM subscriptions s
+  JOIN pricing_plans p ON s.plan_id = p.id
+  WHERE s.user_id = p_user_id AND s.status = 'active'
+  ORDER BY s.created_at DESC LIMIT 1;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- increment_scan_usage() - from Migration 006
+CREATE OR REPLACE FUNCTION increment_scan_usage(p_user_id UUID DEFAULT auth.uid())
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_subscription_id UUID; v_scans_used INTEGER; v_scans_limit INTEGER;
+BEGIN
+  SELECT id, scans_used, scans_limit INTO v_subscription_id, v_scans_used, v_scans_limit
+  FROM subscriptions WHERE user_id = p_user_id AND status = 'active' ORDER BY created_at DESC LIMIT 1;
+  IF v_subscription_id IS NULL THEN RETURN false; END IF;
+  IF v_scans_limit = -1 THEN RETURN true; END IF;
+  IF v_scans_used >= v_scans_limit THEN RETURN false; END IF;
+  UPDATE subscriptions SET scans_used = scans_used + 1, updated_at = NOW() WHERE id = v_subscription_id;
+  RETURN true;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- can_user_create_scan() - from Migration 006
+CREATE OR REPLACE FUNCTION can_user_create_scan(p_user_id UUID DEFAULT auth.uid())
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_scans_used INTEGER; v_scans_limit INTEGER;
+BEGIN
+  SELECT scans_used, scans_limit INTO v_scans_used, v_scans_limit
+  FROM subscriptions WHERE user_id = p_user_id AND status = 'active' ORDER BY created_at DESC LIMIT 1;
+  IF v_scans_limit IS NULL THEN RETURN false; END IF;
+  IF v_scans_limit = -1 THEN RETURN true; END IF;
+  RETURN v_scans_used < v_scans_limit;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- reset_monthly_scan_usage() - from Migration 006
+CREATE OR REPLACE FUNCTION reset_monthly_scan_usage()
+RETURNS INTEGER AS $$
+DECLARE v_reset_count INTEGER;
+BEGIN
+  UPDATE subscriptions s SET scans_used = 0, updated_at = NOW()
+  FROM pricing_plans p WHERE s.plan_id = p.id AND s.status = 'active'
+    AND p.billing_period = 'monthly' AND s.current_period_end < NOW();
+  GET DIAGNOSTICS v_reset_count = ROW_COUNT;
+  UPDATE subscriptions s SET current_period_start = NOW(), current_period_end = NOW() + INTERVAL '1 month', updated_at = NOW()
+  FROM pricing_plans p WHERE s.plan_id = p.id AND s.status = 'active'
+    AND p.billing_period = 'monthly' AND s.current_period_end < NOW();
+  RETURN v_reset_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- update_practice_answers_timestamp() - from Migration 010
+CREATE OR REPLACE FUNCTION update_practice_answers_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN NEW.updated_at = NOW(); RETURN NEW; END;
+$$ LANGUAGE plpgsql;
+
+GRANT EXECUTE ON FUNCTION get_user_subscription_limits(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION increment_scan_usage(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION can_user_create_scan(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION reset_monthly_scan_usage() TO service_role;
+
 -- 8. TRIGGERS
 -- =====================================================
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+DROP TRIGGER IF EXISTS on_user_created_create_free_subscription ON auth.users;
+CREATE TRIGGER on_user_created_create_free_subscription
+  AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION auto_create_free_subscription();
 
 DO $$
 DECLARE
@@ -680,6 +791,11 @@ BEGIN
         EXECUTE format('CREATE TRIGGER tr_update_%I_updated_at BEFORE UPDATE ON public.%I FOR EACH ROW EXECUTE FUNCTION update_updated_at_column()', t, t);
     END LOOP;
 END $$;
+
+DROP TRIGGER IF EXISTS practice_answers_updated_at ON public.practice_answers;
+CREATE TRIGGER practice_answers_updated_at
+  BEFORE UPDATE ON public.practice_answers FOR EACH ROW
+  EXECUTE FUNCTION update_practice_answers_timestamp();
 
 -- 9. ROW LEVEL SECURITY (RLS) - FOR EVERY TABLE
 -- =====================================================
@@ -817,12 +933,20 @@ CREATE POLICY "Users can manage own sketch progress" ON public.sketch_progress
   USING (auth.uid() = user_id OR public.is_admin())
   WITH CHECK (auth.uid() = user_id OR public.is_admin());
 
--- AI Trends Policies (Public Viewable)
+-- AI Trends Policies (Public Viewable + Admin Write)
 DROP POLICY IF EXISTS "Trends viewable by everyone" ON public.exam_historical_patterns;
 CREATE POLICY "Trends viewable by everyone" ON public.exam_historical_patterns FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Admins can write exam_historical_patterns" ON public.exam_historical_patterns;
+CREATE POLICY "Admins can write exam_historical_patterns" ON public.exam_historical_patterns
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
+
 DROP POLICY IF EXISTS "Distributions viewable by everyone" ON public.exam_topic_distributions;
 CREATE POLICY "Distributions viewable by everyone" ON public.exam_topic_distributions FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Admins can write exam_topic_distributions" ON public.exam_topic_distributions;
+CREATE POLICY "Admins can write exam_topic_distributions" ON public.exam_topic_distributions
+  FOR ALL USING (public.is_admin()) WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Metadata viewable by everyone" ON public.topic_metadata;
 CREATE POLICY "Metadata viewable by everyone" ON public.topic_metadata FOR SELECT USING (true);
@@ -960,11 +1084,54 @@ CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user_id ON public.quiz_attempts(use
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_topic_resource ON public.quiz_attempts(topic_resource_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_created_at ON public.quiz_attempts(created_at DESC);
 
--- Initial Seed for KCET/JEE (Learned from 2023 Analysis) - from Migration 028
-INSERT INTO public.rei_evolution_configs (exam_context, subject, rigor_drift_multiplier, ids_baseline, speed_requirement_weight)
-VALUES 
-('KCET', 'Math', 1.8, 0.98, 0.95),
-('JEE', 'Math', 2.0, 0.99, 0.6)
+-- ============================================================
+-- STORAGE: edujourney-images bucket + RLS (from Migration 029)
+-- ============================================================
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'edujourney-images',
+  'edujourney-images',
+  true,
+  20971520,
+  ARRAY['image/png','image/jpeg','image/webp','image/svg+xml']
+)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Authenticated users can upload own sketches" ON storage.objects;
+CREATE POLICY "Authenticated users can upload own sketches"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (
+    bucket_id = 'edujourney-images'
+    AND (storage.foldername(name))[1] = 'sketches'
+    AND (storage.foldername(name))[2] = auth.uid()::text
+  );
+
+DROP POLICY IF EXISTS "Public read for edujourney-images" ON storage.objects;
+CREATE POLICY "Public read for edujourney-images"
+  ON storage.objects FOR SELECT TO public
+  USING (bucket_id = 'edujourney-images');
+
+DROP POLICY IF EXISTS "Authenticated users can manage own sketches" ON storage.objects;
+CREATE POLICY "Authenticated users can manage own sketches"
+  ON storage.objects FOR ALL TO authenticated
+  USING (
+    bucket_id = 'edujourney-images'
+    AND (storage.foldername(name))[2] = auth.uid()::text
+  )
+  WITH CHECK (
+    bucket_id = 'edujourney-images'
+    AND (storage.foldername(name))[2] = auth.uid()::text
+  );
+
+-- Initial Seed for KCET/JEE/NEET - from Migration 028 + 030
+INSERT INTO public.rei_evolution_configs (exam_context, subject, rigor_drift_multiplier, ids_baseline, synthesis_weight, trap_density_weight, linguistic_load_weight, speed_requirement_weight)
+VALUES
+('KCET', 'Math', 1.8, 0.98, 0.7, 0.8, 0.5, 0.95),
+('JEE', 'Math', 2.0, 0.99, 0.75, 0.85, 0.6, 0.6),
+('NEET', 'Physics', 1.9, 0.96, 0.75, 0.85, 0.55, 0.85),
+('NEET', 'Chemistry', 1.7, 0.95, 0.7, 0.8, 0.5, 0.8),
+('NEET', 'Botany', 1.5, 0.93, 0.65, 0.7, 0.6, 0.75),
+('NEET', 'Zoology', 1.5, 0.93, 0.65, 0.7, 0.6, 0.75)
 ON CONFLICT (exam_context, subject) DO NOTHING;
 
 -- ✅ CONSOLIDATED CLEAN SETUP v6.0 COMPLETE

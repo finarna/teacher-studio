@@ -3,6 +3,7 @@
 This guide will help you move your database to a fresh, healthy Supabase project with optimized schema and "Clean Data" (Official 2026 Syllabi).
 
 **Latest Updates:**
+- ✅ **v6.0 Schema** (March 2026): All 30 migrations fully consolidated. Admin write RLS for AI tables (030). Storage bucket + RLS (029). NEET REI v3.0 seeds. Added missing helper functions: `cleanup_expired_cache`, `auto_create_free_subscription`, `get_user_subscription_limits`, `increment_scan_usage`, `can_user_create_scan`, `reset_monthly_scan_usage`, `update_practice_answers_timestamp`.
 - ✅ **v6.0 Schema** (March 2025): **REI v3.0 Enhanced**. Added Oracle Forecasting columns, generation rules, and 60-question limit support.
 - ✅ **v5.5 Schema** (March 2025): Added RLS for Visual Notes (topic_sketches)
 - ✅ **Auto-Mapping**: Questions automatically link to official syllabus topics
@@ -31,7 +32,8 @@ This guide will help you move your database to a fresh, healthy Supabase project
 4. ✅ This creates all 35+ tables (including Razorpay, Learning Journey, and AI Content), RLS policies for every table, and the Unified Auth Trigger.
    * *Note: This version (v5.6) consolidates all migrations and includes all previous fixes.*
 
-- **v6.0** (Latest): **REI v3.0 RESTORATION**. Added missing Oracle columns and `generation_rules` table. Fixes 30-question limit (now sets 60 for KCET).
+- **v6.0** (Latest, March 2026): Admin write RLS for AI intelligence tables. NEET REI config seeds. Year-guard on scan publish. syncScanToAITables override params for year/exam_context.
+- **v6.0** (March 2025): **REI v3.0 RESTORATION**. Added missing Oracle columns and `generation_rules` table. Fixes 30-question limit (now sets 60 for KCET).
 - **v5.6**: Full Admin UPDATE/DELETE permissions (Fixes Publish), includes all previous fixes
 - **v5.5**: Added RLS policies for topic_sketches (needed for AdminScanApproval counts)
 - **v5.4**: Fixed KCET weightage for Math topics, includes all previous fixes
@@ -151,6 +153,19 @@ cat FIX_MISSING_COLUMNS.sql
 ```
 
 This adds all missing metadata columns and RLS policies needed for AdminScanApproval and Learning Journey.
+
+### Recent Migrations (for existing DBs — run in order if not on clean schema)
+
+| Migration | Description |
+|-----------|-------------|
+| `030_fix_ai_tables_admin_write_rls.sql` | Admin write RLS for `exam_historical_patterns` and `exam_topic_distributions` |
+| `029_storage_visual_rls.sql` | `edujourney-images` storage bucket + upload/read/manage RLS policies |
+| `028_rei_deep_store.sql` | REI v3.0 config table + NEET/JEE/KCET seeds |
+| `026_deep_intelligence_columns.sql` | `board_signature`, `intent_signature` columns on patterns |
+| `025_rei_v3_restoration.sql` | REI v3.0 AI forecasting tables |
+| `021_ai_trends_tables.sql` | `exam_historical_patterns` + `exam_topic_distributions` |
+
+---
 
 ### Available Fix Scripts
 

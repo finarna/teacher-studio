@@ -35,11 +35,15 @@ ALTER TABLE public.rei_evolution_configs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Configs viewable by everyone" ON public.rei_evolution_configs;
 CREATE POLICY "Configs viewable by everyone" ON public.rei_evolution_configs FOR SELECT USING (true);
 
--- 4. Initial Seed for KCET/JEE (Learned from 2023 Analysis)
-INSERT INTO public.rei_evolution_configs (exam_context, subject, rigor_drift_multiplier, ids_baseline, speed_requirement_weight)
-VALUES 
-('KCET', 'Math', 1.8, 0.98, 0.95),
-('JEE', 'Math', 2.0, 0.99, 0.6)
+-- 4. Initial Seed for KCET/JEE/NEET
+INSERT INTO public.rei_evolution_configs (exam_context, subject, rigor_drift_multiplier, ids_baseline, synthesis_weight, trap_density_weight, linguistic_load_weight, speed_requirement_weight)
+VALUES
+('KCET', 'Math', 1.8, 0.98, 0.7, 0.8, 0.5, 0.95),
+('JEE', 'Math', 2.0, 0.99, 0.75, 0.85, 0.6, 0.6),
+('NEET', 'Physics', 1.9, 0.96, 0.75, 0.85, 0.55, 0.85),
+('NEET', 'Chemistry', 1.7, 0.95, 0.7, 0.8, 0.5, 0.8),
+('NEET', 'Botany', 1.5, 0.93, 0.65, 0.7, 0.6, 0.75),
+('NEET', 'Zoology', 1.5, 0.93, 0.65, 0.7, 0.6, 0.75)
 ON CONFLICT (exam_context, subject) DO NOTHING;
 
 NOTIFY pgrst, 'reload schema';
