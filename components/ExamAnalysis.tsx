@@ -1796,14 +1796,18 @@ Schema: {
                       const qId = selectedQ.id || 'frag-0';
 
                       // Debug: Check if extractedImages is present on selectedQ
-                      console.debug('🔍 [VAULT DISPLAY DEBUG] Selected question:', {
-                        id: selectedQ.id,
-                        hasExtractedImages: !!selectedQ.extractedImages,
-                        extractedImagesCount: selectedQ.extractedImages?.length || 0,
-                        hasVisualElement: selectedQ.hasVisualElement,
-                        hasSketch: !!selectedQ.sketchSvg, // New: track AI sketch
-                        questionKeys: Object.keys(selectedQ)
-                      });
+                      console.group(`🔍 [VAULT DISPLAY DEBUG] Q ${selectedQ.id}`);
+                      console.log('  hasVisualElement :', selectedQ.hasVisualElement);
+                      console.log('  imageUrl         :', selectedQ.imageUrl || '—');
+                      console.log('  sketchSvg        :', selectedQ.sketchSvg ? `${(selectedQ.sketchSvg.length * 0.75 / 1024).toFixed(1)}KB` : '—');
+                      console.log('  extractedImages  :', selectedQ.extractedImages
+                        ? `${selectedQ.extractedImages.length} img(s): ${selectedQ.extractedImages.map((d: string) => `${(d.length*0.75/1024).toFixed(1)}KB`).join(', ')}`
+                        : 'undefined (NOT PRESENT)');
+                      console.log('  All question keys:', Object.keys(selectedQ).join(', '));
+                      if (selectedQ.extractedImages?.length) {
+                        console.log('  img[0] prefix    :', selectedQ.extractedImages[0].substring(0, 80));
+                      }
+                      console.groupEnd();
 
                       return (
                         <>
@@ -1988,6 +1992,15 @@ Schema: {
                                 )}
 
                                 {/* Source 2: extractedImages array — legacy pdfImageExtractor output */}
+                                {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (() => {
+                                  console.group(`🖼️ [RENDER-IMG] Q${selectedQ.id} — rendering ${selectedQ.extractedImages!.length} extracted image(s)`);
+                                  selectedQ.extractedImages!.forEach((d: string, i: number) => {
+                                    console.log(`  img[${i}]: length=${d.length} chars (~${(d.length*0.75/1024).toFixed(1)}KB), starts="${d.substring(0,80)}"`);
+                                    if (!d.startsWith('data:')) console.warn(`  ⚠️ img[${i}] does NOT start with "data:" — src will be invalid!`);
+                                  });
+                                  console.groupEnd();
+                                  return null;
+                                })()}
                                 {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (
                                   <div className="mb-4 space-y-2">
                                     {selectedQ.extractedImages.map((imgData: string, idx: number) => (
@@ -2034,6 +2047,16 @@ Schema: {
                                 )}
 
                                 {/* Source 3: hasVisualElement but no images yet — show indicator */}
+                                {selectedQ.hasVisualElement && !selectedQ.imageUrl && (!selectedQ.extractedImages || selectedQ.extractedImages.length === 0) && (() => {
+                                  console.warn(`🖼️ [RENDER-IMG] Q${selectedQ.id} falling through to Source-3 placeholder — no images available`, {
+                                    hasVisualElement: selectedQ.hasVisualElement,
+                                    imageUrl: selectedQ.imageUrl,
+                                    extractedImages: selectedQ.extractedImages,
+                                    sketchSvg: !!selectedQ.sketchSvg,
+                                    allKeys: Object.keys(selectedQ),
+                                  });
+                                  return null;
+                                })()}
                                 {selectedQ.hasVisualElement && !selectedQ.imageUrl && (!selectedQ.extractedImages || selectedQ.extractedImages.length === 0) && (
                                   <div className="mb-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 flex items-start gap-3">
                                     <span className="text-2xl flex-shrink-0">🖼️</span>
