@@ -137,7 +137,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
             let year = scan.year;
             if (!year) {
               const yearMatch = scan.name.match(/20\d{2}/);
-              year = yearMatch ? yearMatch[0] : (examContext === 'NEET' ? '2021' : 'Recent');
+              year = yearMatch ? yearMatch[0] : null;
             }
 
             return {
@@ -433,7 +433,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                             )}
                           </div>
                           <h4 className="text-lg font-black text-slate-900 leading-tight font-outfit tracking-tight">
-                            {formatScanDisplayName(scan.name, examContext, subject)}
+                            {`${examContext} ${subject} ${yd.year || ''}`.trim()}
                           </h4>
                         </div>
 

@@ -49,6 +49,7 @@ interface ScanInfo {
   analysis_data?: any;
   is_combined_paper?: boolean;
   subjects?: Subject[];
+  year?: string | null;
 }
 
 const AdminScanApproval: React.FC = () => {
@@ -63,6 +64,8 @@ const AdminScanApproval: React.FC = () => {
   const [officialTopicsList, setOfficialTopicsList] = useState<{ id: string, name: string }[]>([]);
   const [expandedQuestions, setExpandedQuestions] = useState<Record<number, boolean>>({});
   const [showOnlyUnmapped, setShowOnlyUnmapped] = useState(false);
+  const [scanYears, setScanYears] = useState<Record<string, string>>({});
+  const [savingYear, setSavingYear] = useState<string | null>(null);
 
   // Strategic Briefing Filters (Linked to Global Context)
   const { activeSubject, activeExamContext } = useAppContext();
@@ -359,11 +362,18 @@ const AdminScanApproval: React.FC = () => {
           flashcards_count: flashcardsCount,
           analysis_data: scan.analysis_data,
           is_combined_paper: scan.is_combined_paper,
-          subjects: scan.subjects
+          subjects: scan.subjects,
+          year: scan.year || scan.name?.match(/\b(20|19)\d{2}\b/)?.[0] || null
         };
       });
 
       setScans(scansWithCounts);
+      // Seed scanYears from DB so inputs are pre-populated
+      setScanYears(prev => {
+        const next = { ...prev };
+        scansWithCounts.forEach(s => { if (s.year && !next[s.id]) next[s.id] = s.year; });
+        return next;
+      });
 
       if (filterStatus === 'all') {
         const pubCount = scansWithCounts.filter(s => s.is_system_scan).length;
@@ -403,7 +413,7 @@ const AdminScanApproval: React.FC = () => {
         return yearMatch ? yearMatch[0] : null;
       };
 
-      const extractedYear = scan.year || extractYearFromFilename(scan.name || '');
+      const extractedYear = scanYears[scanId] || scan.year || extractYearFromFilename(scan.name || '');
 
       const { data: updateData, error: publishError } = await supabase
         .from('scans')
@@ -574,6 +584,21 @@ const AdminScanApproval: React.FC = () => {
       alert('Failed to unpublish scan. Check console for details.');
     } finally {
       setPublishing(null);
+    }
+  };
+
+  const saveYearForScan = async (scanId: string, year: string) => {
+    if (!year) return;
+    setSavingYear(scanId);
+    try {
+      await supabase.from('scans').update({ year }).eq('id', scanId);
+      await supabase.from('questions').update({ year: parseInt(year) }).eq('scan_id', scanId);
+      setScans(prev => prev.map(s => s.id === scanId ? { ...s } : s));
+    } catch (error) {
+      console.error('Error saving year:', error);
+      alert('Failed to save year.');
+    } finally {
+      setSavingYear(null);
     }
   };
 
@@ -748,12 +773,38 @@ const AdminScanApproval: React.FC = () => {
                             ))}
                           </div>
                         )}
-                        <div className="flex items-center gap-4 text-sm text-slate-500 font-medium mb-4">
+                        <div className="flex items-center gap-4 text-sm text-slate-500 font-medium mb-3">
                           <span className="font-bold text-slate-700">{scan.is_combined_paper ? 'NEET Combined' : scan.subject}</span>
                           <span>•</span>
                           <span className="font-bold text-slate-700">{scan.exam_context}</span>
                           <span>•</span>
                           <span>{new Date(scan.created_at).toLocaleDateString()}</span>
+                        </div>
+                        {/* Year Editor */}
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Exam Year:</span>
+                          <input
+                            type="number"
+                            min="2010"
+                            max="2030"
+                            placeholder="e.g. 2023"
+                            value={scanYears[scan.id] || ''}
+                            onChange={e => setScanYears(prev => ({ ...prev, [scan.id]: e.target.value }))}
+                            className="w-24 px-2 py-1 text-sm font-black border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800"
+                          />
+                          {scan.year && scanYears[scan.id] === scan.year && (
+                            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">✓ Saved</span>
+                          )}
+                          {scan.year && !scanYears[scan.id] && (
+                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Auto: {scan.year}</span>
+                          )}
+                          <button
+                            onClick={() => saveYearForScan(scan.id, scanYears[scan.id] || '')}
+                            disabled={savingYear === scan.id || !scanYears[scan.id]}
+                            className="px-3 py-1 text-xs font-black bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                          >
+                            {savingYear === scan.id ? 'Saving...' : 'Set Year'}
+                          </button>
                         </div>
 
                         {/* Stats Grid */}

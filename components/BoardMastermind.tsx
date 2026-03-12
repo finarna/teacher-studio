@@ -1258,8 +1258,8 @@ CRITICAL RULES:
         questions: extractionData.questions || []
       };
 
-      // Extract year from filename if present
-      const yearMatch = file.name.match(/\b(19|20)\d{2}\b/);
+      // Extract year from filename if present (avoid \b since _ is a word char, e.g. NEET_2023.pdf)
+      const yearMatch = file.name.match(/(19|20)\d{2}/);
       const extractedYear = yearMatch ? yearMatch[0] : null;
 
       const newScan: Scan = {

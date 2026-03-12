@@ -133,10 +133,17 @@ app.post('/api/cache/clear-solutions', async (req, res) => {
 app.get('/api/scans', async (req, res) => {
     try {
         if (redis.status === 'ready') {
-            const keys = await redis.keys('scan:*');
+            const keys = [];
+            let cursor = '0';
+            do {
+                const [nextCursor, batch] = await redis.scan(cursor, 'MATCH', 'scan:*', 'COUNT', 100);
+                cursor = nextCursor;
+                keys.push(...batch);
+            } while (cursor !== '0');
+
             if (keys.length > 0) {
                 const scans = await redis.mget(...keys);
-                const parsedScans = scans.map(s => JSON.parse(s));
+                const parsedScans = scans.filter(Boolean).map(s => JSON.parse(s));
                 // Sync memory cache with Redis
                 parsedScans.forEach(s => inMemoryCache.set(s.id, s));
             }

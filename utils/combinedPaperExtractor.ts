@@ -118,7 +118,10 @@ export async function extractCombinedPaper(
         ]);
 
         const responseText = result.response.text();
-        console.log(`📥 [MEGA-SCAN] Received ${responseText.length} chars. Repairing JSON...`);
+        const candidate = result.response.candidates?.[0];
+        const finishReason = candidate?.finishReason;
+        const tokenCount = result.response.usageMetadata?.candidatesTokenCount;
+        console.log(`📥 [MEGA-SCAN] Received ${responseText.length} chars | finishReason: ${finishReason} | outputTokens: ${tokenCount}. Repairing JSON...`);
 
         // Use our battle-tested safeAiParse from aiParser.ts
         const parsedData = safeAiParse<any>(responseText, { questions: [] }, true);
