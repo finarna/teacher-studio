@@ -86,7 +86,7 @@ const LearningJourneyHeader: React.FC<LearningJourneyHeaderProps> = ({
             <div className="flex items-center justify-between w-full gap-2">
 
               {/* Left: Navigation Actions */}
-              <div className="flex items-center gap-2 w-20 md:w-auto shrink-0 transition-all">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => window.dispatchEvent(new CustomEvent('openMobileMenu'))}
                   className="w-10 h-10 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-full active:bg-slate-100 shadow-sm md:hidden"

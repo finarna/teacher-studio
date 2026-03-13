@@ -149,59 +149,54 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
     const masteryGap = strongest.mastery - weakest.mastery;
 
     // 3. Determine Global Strategy State
-    let title = "Syncing Neural Map";
-    let description = "Begin your practice sessions to allow the AI Analyst to map your cognitive strengths and weaknesses.";
+    let title = "AI Is Learning Your Style";
+    let description = "Start practising to let AI figure out your strengths and where you need the most help.";
     let focusArea = "General";
     let trend: 'improving' | 'stable' | 'attention' = 'stable';
     let tags = ["Calibration"];
 
     if (totalVolume === 0) {
-      title = "Initialization Phase";
-      description = `Your ${exam} roadmap reached standby. The AI is waiting for your first 10 questions to map your cognitive footprint. Start with any subject to activate analysis.`;
-      tags = ["Ready to Launch", "Baseline"];
+      title = "Let's Get Started!";
+      description = `AI is ready to personalise your ${exam} prep — it just needs your first few answers to figure out where you stand. Pick any subject and start practising!`;
+      tags = ["Ready to Go", "First Steps"];
     }
     else if (totalVolume < 50 || avgMastery < 3) {
-      title = "Syncing Neural Map";
+      title = "AI Is Learning Your Style";
       const masteryValue = Math.round(avgMastery);
-      description = `Data acquisition in progress. Mastery is currently at ${masteryValue}%. ${masteryValue === 0 && avgAccuracy > 0 ? "Initial accuracy is promising, but we need more volume to confirm your cognitive stability." : `Complete 25 more questions across your active arenas to unlock the "Strategy Pivot" mode.`}`;
-      tags = ["Calibration", "Data Sync"];
+      description = `You're off to a good start! ${masteryValue === 0 && avgAccuracy > 0 ? "Your accuracy looks promising — keep going and AI will start giving you personalised tips." : `Do ${25} more questions and AI will unlock a personalised study plan just for you.`}`;
+      tags = ["Getting Started", "Almost There"];
     }
     else if (masteryGap > 40 && avgMastery > 20) {
-      // SUBJECT NEGLECT PATTERN
-      title = "Structural Imbalance Detected";
-      description = `Your performance in ${strongest.name} is excellent, but ${weakest.name} (${weakest.mastery}%) is currently a bottleneck for your global ${exam} rank. A "Subject Pivot" strategy is recommended for the next 48 hours.`;
+      title = "One Subject Needs Attention";
+      description = `You're doing well in ${strongest.name}, but ${weakest.name} (${weakest.mastery}% mastery) is holding back your overall ${exam} score. Focus there for the next few days and AI will guide you through it.`;
       focusArea = weakest.name;
       trend = 'attention';
-      tags = ["Subject Pivot", "Rank Protection"];
+      tags = ["Focus Here", "Quick Win"];
     }
     else if (avgAccuracy < 50 && totalVolume > 50) {
-      // RIGOR/ACCURACY PATTERN
-      title = "Accuracy Recovery Required";
-      description = `Your practice volume is high (${totalVolume} Qs), but your accuracy is hovering at ${Math.round(avgAccuracy)}%. You are likely rushing. We recommend "Slow-Mode Study" for ${weakest.name} to stabilize fundamentals.`;
+      title = "Slow Down to Speed Up";
+      description = `You've practised a lot (${totalVolume} questions!), but accuracy is at ${Math.round(avgAccuracy)}%. AI suggests slowing down on ${weakest.name} — understanding each answer properly will boost your score faster.`;
       focusArea = weakest.name;
       trend = 'attention';
-      tags = ["Rigor Check", "Conceptual Gaps"];
+      tags = ["Build Accuracy", "Focus Mode"];
     }
     else if (avgMastery > 70) {
-      // PEAK PERFORMANCE PATTERN
-      title = "Elite Refinement Strategy";
-      description = `You have achieved critical mass in the core syllabus. Your trajectory indicates a top-tier percentile potential. Shifting focus to "Edge Cases" and "Timed Mock Simulation" to optimize performance.`;
+      title = "You're in Top Form!";
+      description = `Your syllabus coverage is excellent. AI recommends shifting to timed mock tests and tricky edge-case questions to push your score even higher before exam day.`;
       trend = 'improving';
-      tags = ["Elite Track", "Speed Optimization"];
+      tags = ["Top Form", "Final Push"];
     }
     else if (avgMastery > 20 && totalVolume > 80) {
-      // STEADY PROGRESS
-      title = "Cognitive Momentum Active";
-      description = `Your overall ${exam} command is growing steadily. ${weakest.name} is currently your high-yield focus area. Mastering just a few more topics here will push your matrix into the next proficiency tier.`;
+      title = "Great Progress — Keep Going!";
+      description = `Your ${exam} prep is on the right track. ${weakest.name} is your next big opportunity — a few focused sessions there and AI predicts a solid jump in your score.`;
       focusArea = weakest.name;
       trend = 'improving';
-      tags = ["Growth Hub", "High Yield"];
+      tags = ["On Track", "High Yield"];
     }
     else {
-      // DEFAULT FALLBACK FOR ACTIVE BUT MODERATE PROGRESS
-      title = "Baseline Established";
-      description = `Your initial profile is mapped. Current average accuracy is ${Math.round(avgAccuracy)}%. To see a "Momentum" shift, increase your daily practice volume and clear ${activeSubjects.length * 2} more high-weightage topics.`;
-      tags = ["Active Learning", "Phase 1"];
+      title = "Building Your Foundation";
+      description = `You're making steady progress! Average accuracy is ${Math.round(avgAccuracy)}%. Keep practising daily and finish ${activeSubjects.length * 2} more topics — AI will show you exactly which ones matter most.`;
+      tags = ["Stay Consistent", "Keep Going"];
     }
 
     return { title, description, focusArea, trend, tags };
@@ -210,11 +205,15 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
   const fetchComprehensiveStats = useCallback(async (isInitial = false) => {
     if (isInitial) setIsLoadingStats(true);
     try {
-      const { data: publishedScans } = await supabase
-        .from('scans')
-        .select('id, subject, analysis_data')
-        .eq('is_system_scan', true)
-        .eq('exam_context', examContext);
+      // Phase 1: Scans (no analysis_data) + topics in parallel
+      const [{ data: publishedScans }, { data: allTopics }] = await Promise.all([
+        supabase
+          .from('scans')
+          .select('id, subject')
+          .eq('is_system_scan', true)
+          .eq('exam_context', examContext),
+        supabase.from('topics').select('id, subject, domain'),
+      ]);
 
       if (!publishedScans) {
         if (isInitial) setIsLoadingStats(false);
@@ -222,28 +221,24 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
       }
 
       const scanIds = publishedScans.map(s => s.id);
-      // Guard: Supabase `.in('col', [])` sends `col=in.()` → 404 on missing tables.
-      // Skip the query entirely when there are no scan IDs.
-      const flashcardRecords = scanIds.length > 0
-        ? (await supabase.from('flashcards').select('scan_id, data').in('scan_id', scanIds)).data ?? []
-        : [];
-      const { data: allTopics } = await supabase.from('topics').select('id, subject, domain');
 
-      const subjectPromises = availableSubjects.map(async (subject) => {
-        // NEET Pivot Logic: Map Biology questions/resources to sub-disciplines
+      // Phase 2: All count queries in parallel (all need scanIds from Phase 1)
+      const empty = Promise.resolve({ data: [] as any[] });
+      const sketchPromise = scanIds.length > 0
+        ? supabase.from('topic_sketches').select('scan_id').in('scan_id', scanIds)
+        : empty;
+      const flashcardPromise = scanIds.length > 0
+        ? supabase.from('flashcards').select('scan_id, data').in('scan_id', scanIds)
+        : empty;
+
+      const subjectCountPromises = availableSubjects.map(async (subject) => {
         const isNeetSub = examContext === 'NEET' && (subject === 'Botany' || subject === 'Zoology');
-        const isNeetMain = examContext === 'NEET' && (subject === 'Physics' || subject === 'Chemistry');
-
-        // 1. Direct Question Count
         const { count: directCount } = await supabase
           .from('questions')
           .select('*', { count: 'exact', head: true })
           .eq('subject', subject)
           .in('scan_id', scanIds);
-
         let qCount = directCount || 0;
-
-        // 2. Legacy Biology Count Fallback (Split 50/50 for Botany/Zoology cards)
         if (qCount === 0 && isNeetSub) {
           const { count: biologyTotal } = await supabase
             .from('questions')
@@ -252,22 +247,40 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
             .in('scan_id', scanIds);
           qCount = Math.floor((biologyTotal || 0) / 2);
         }
+        return [subject, qCount] as [Subject, number];
+      });
 
-        // 3. Scan-based resources (Combined papers map to all subjects)
+      const [sketchResult, flashcardResult, ...subjectCountResults] = await Promise.all([
+        sketchPromise,
+        flashcardPromise,
+        ...subjectCountPromises,
+      ]);
+
+      // Build O(1) lookup maps from results
+      const sketchCountByScan: Record<string, number> = {};
+      (sketchResult.data || []).forEach((r: any) => {
+        sketchCountByScan[r.scan_id] = (sketchCountByScan[r.scan_id] || 0) + 1;
+      });
+      const flashcardRecords: { scan_id: string; data: any[] }[] = flashcardResult.data || [];
+
+      const subjectStatsResults = (subjectCountResults as [Subject, number][]).map(([subject, qCount]) => {
+        const isNeetSub = examContext === 'NEET' && (subject === 'Botany' || subject === 'Zoology');
+        const isNeetMain = examContext === 'NEET' && (subject === 'Physics' || subject === 'Chemistry');
         const subjectScanIds = publishedScans.filter(s =>
           s.subject === subject ||
           (examContext === 'NEET' && s.subject === 'Combined' && (isNeetSub || isNeetMain)) ||
           (examContext === 'NEET' && s.subject === 'Biology' && isNeetSub)
         ).map(s => s.id);
 
-        const subjectFlashcards = flashcardRecords?.filter(f => subjectScanIds.includes(f.scan_id)).reduce((sum, f) => sum + (Array.isArray(f.data) ? f.data.length : 0), 0) || 0;
-        const subjectSketches = publishedScans.filter(s => subjectScanIds.includes(s.id) && s.analysis_data?.topicBasedSketches).reduce((sum, s) => sum + Object.keys(s.analysis_data.topicBasedSketches).length, 0);
+        const subjectSketches = subjectScanIds.reduce((sum, sid) => sum + (sketchCountByScan[sid] || 0), 0);
+        const subjectFlashcards = flashcardRecords
+          .filter(f => subjectScanIds.includes(f.scan_id))
+          .reduce((sum, f) => sum + (Array.isArray(f.data) ? f.data.length : 0), 0);
         const subjectTopics = allTopics?.filter(t => t.subject === subject).length || 0;
 
         return [subject, { questions: qCount, sketches: subjectSketches, flashcards: subjectFlashcards, topics: subjectTopics }] as [Subject, any];
       });
 
-      const subjectStatsResults = await Promise.all(subjectPromises);
       const subjectStatsDict = Object.fromEntries(subjectStatsResults) as Record<Subject, any>;
 
       const totalQuestions = Object.values(subjectStatsDict).reduce((sum, s: any) => sum + s.questions, 0);
@@ -397,7 +410,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
             <div className="flex items-center justify-between px-1 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-1 h-5 bg-slate-900 rounded-full" />
-                <h2 className="text-xs md:text-sm font-bold text-slate-900 tracking-wide">Arena Selection</h2>
+                <h2 className="text-xs md:text-sm font-bold text-slate-900 tracking-wide">Your Subjects</h2>
               </div>
               <div className="text-[9px] font-bold text-slate-400 tracking-wide">
                 {availableSubjects.length} Subjects Active
@@ -424,10 +437,10 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                   if (m === 0 || v === 0) return `Baseline missing. Complete 5 questions in ${s} to activate AI coaching.`;
                   if (v < 15) return `Data syncing. Complete more questions in ${s} to generate a specialized strategy.`;
                   if (a < 40) return `Critical accuracy gap detected. Move from practice to "Theory Review" immediately.`;
-                  if (m < 20 && a > 75) return `Strong fundamentals but low volume. Acceleration towards mock tests required.`;
-                  if (m > 60 && a < 60) return `High coverage but low retention. Re-practice "Weakest Topics" for stability.`;
-                  if (m > 80 && a > 80) return `Elite level achievement. Switch to "Peer Benchmarking" & "Advanced PYQs".`;
-                  return `Steady progress. Target +10% mastery to reach the next proficiency tier in ${s}.`;
+                  if (m < 20 && a > 75) return `Good accuracy — now pick up the pace. Try more topics to build your score.`;
+                  if (m > 60 && a < 60) return `You've covered a lot, but accuracy needs work. Redo your weakest topics to lock in the concepts.`;
+                  if (m > 80 && a > 80) return `Excellent! You're well prepared — switch to past year papers to sharpen exam skills.`;
+                  return `Steady progress! Push ${s} mastery up by 10% and you'll see a real score improvement.`;
                 };
 
                 return (
@@ -533,7 +546,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                               }}
                               className="flex items-center justify-center gap-1 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-[9px] font-bold hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100"
                             >
-                              <BookOpen size={12} /> <span className="hidden md:inline">Syllabus</span>
+                              <BookOpen size={12} /> <span className="hidden md:inline">Topics</span>
                             </button>
                             <button
                               onClick={(e) => {
@@ -542,7 +555,7 @@ const SubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                               }}
                               className="flex items-center justify-center gap-1 py-2 bg-amber-50 text-amber-700 rounded-lg text-[9px] font-bold hover:bg-amber-600 hover:text-white transition-all border border-amber-100"
                             >
-                              <Target size={12} /> <span className="hidden md:inline">Vault</span>
+                              <Target size={12} /> <span className="hidden md:inline">Papers</span>
                             </button>
                           </div>
 

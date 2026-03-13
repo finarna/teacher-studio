@@ -3,6 +3,7 @@
 This guide will help you move your database to a fresh, healthy Supabase project with optimized schema and "Clean Data" (Official 2026 Syllabi).
 
 **Latest Updates:**
+- ✅ **v6.0 Schema** (March 2026, migration 031): GIN index on `scans.subjects[]` + composite index on `(subject, exam_context, is_system_scan)`. Fixes statement timeout on PYQ page load when `subjects.cs.{Subject}` caused full table scans.
 - ✅ **v6.0 Schema** (March 2026): All 30 migrations fully consolidated. Admin write RLS for AI tables (030). Storage bucket + RLS (029). NEET REI v3.0 seeds. Added missing helper functions: `cleanup_expired_cache`, `auto_create_free_subscription`, `get_user_subscription_limits`, `increment_scan_usage`, `can_user_create_scan`, `reset_monthly_scan_usage`, `update_practice_answers_timestamp`.
 - ✅ **v6.0 Schema** (March 2025): **REI v3.0 Enhanced**. Added Oracle Forecasting columns, generation rules, and 60-question limit support.
 - ✅ **v5.5 Schema** (March 2025): Added RLS for Visual Notes (topic_sketches)
@@ -32,7 +33,7 @@ This guide will help you move your database to a fresh, healthy Supabase project
 4. ✅ This creates all 35+ tables (including Razorpay, Learning Journey, and AI Content), RLS policies for every table, and the Unified Auth Trigger.
    * *Note: This version (v5.6) consolidates all migrations and includes all previous fixes.*
 
-- **v6.0** (Latest, March 2026): Admin write RLS for AI intelligence tables. NEET REI config seeds. Year-guard on scan publish. syncScanToAITables override params for year/exam_context.
+- **v6.0** (Latest, March 2026): Admin write RLS for AI intelligence tables. NEET REI config seeds. Year-guard on scan publish. syncScanToAITables override params for year/exam_context. GIN index on `scans.subjects[]` (migration 031) — fixes PYQ page statement timeout.
 - **v6.0** (March 2025): **REI v3.0 RESTORATION**. Added missing Oracle columns and `generation_rules` table. Fixes 30-question limit (now sets 60 for KCET).
 - **v5.6**: Full Admin UPDATE/DELETE permissions (Fixes Publish), includes all previous fixes
 - **v5.5**: Added RLS policies for topic_sketches (needed for AdminScanApproval counts)

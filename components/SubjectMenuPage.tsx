@@ -99,11 +99,11 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
           .select('*', { count: 'exact', head: true })
           .eq('subject', subject),
 
-        // 2. Scans for Past Year Questions
+        // 2. Scans for Past Year Questions (no analysis_data — too large, count from questions table instead)
         supabase
           .from('scans')
-          .select('id, year, analysis_data, is_combined_paper, subjects') // Added new fields
-          .or(`subject.eq.${subject},subjects.cs.{${subject}}`) // NEW: Fixed subject filter
+          .select('id, year, is_combined_paper, subjects')
+          .or(`subject.eq.${subject},subjects.cs.{${subject}}`)
           .eq('exam_context', examContext)
           .eq('is_system_scan', true)
           .not('year', 'is', null),
@@ -152,17 +152,18 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
 
       if (scansData && scansData.length > 0) {
         scansData.forEach((scan: any) => {
-          const questions = scan.analysis_data?.questions || [];
-          if (scan.is_combined_paper) {
-            // Only count questions for this subject
-            const filteredCount = questions.filter((q: any) => q.subject === subject).length;
-            pastYearQuestionsCount += filteredCount;
-          } else {
-            pastYearQuestionsCount += questions.length;
-          }
           if (scan.year) availableYears.push(scan.year);
         });
         availableYears = [...new Set(availableYears)].sort((a, b) => parseInt(b) - parseInt(a));
+
+        // Count questions from the questions table (avoids fetching large analysis_data JSONB)
+        const scanIds = scansData.map((s: any) => s.id);
+        const { count: qCount } = await supabase
+          .from('questions')
+          .select('*', { count: 'exact', head: true })
+          .in('scan_id', scanIds)
+          .eq('subject', subject);
+        pastYearQuestionsCount = qCount || 0;
       }
 
       const customTestsTaken = testsData?.length || 0;
@@ -194,36 +195,36 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
     {
       id: 'past_exams' as const,
       icon: Calendar,
-      title: 'Solved Paper Vault',
-      description: 'Solve real past papers with AI-powered step-by-step logic',
+      title: 'Past Year Papers',
+      description: 'Solve real exam questions from previous years — AI explains every answer step-by-step',
       gradient: 'from-blue-500 to-blue-600',
       stats: stats.totalPapers > 0
         ? `${stats.totalPapers} ${stats.totalPapers === 1 ? 'paper' : 'papers'} • ${stats.availableYears.length} ${stats.availableYears.length === 1 ? 'year' : 'years'} • ${stats.pastYearQuestionsCount} questions`
-        : 'Looking into the vault...',
+        : 'Loading papers...',
       badge: stats.availableYears.length > 0 ? `${stats.availableYears.length} Years` : null,
-      illustration: 'blackboard' // Blackboard with years, formulas, graphs
+      illustration: 'blackboard'
     },
     {
       id: 'topicwise' as const,
       icon: BookOpen,
       title: 'Topic Mastery Hub',
-      description: 'Tailored topic mastery with historical pattern analysis',
+      description: 'Study each topic deeply — AI tracks what you\'ve mastered and tells you exactly what to revise next',
       gradient: 'from-purple-500 to-purple-600',
       stats: stats.totalTopics > 0
-        ? `${stats.totalTopics} topics available`
-        : 'Checking what\'s available...',
+        ? `${stats.totalTopics} topics to explore`
+        : 'Loading topics...',
       badge: stats.masteredTopics > 0 ? `${stats.masteredTopics} Mastered` : null,
-      illustration: 'study-desk' // Study desk with books, flashcards, notes
+      illustration: 'study-desk'
     },
     {
       id: 'mock_builder' as const,
       icon: Zap,
-      title: 'Exam Prediction and Simulation Test Engine',
-      description: 'Adaptive hybrid tests that predict exam patterns with near-real question sets',
+      title: 'Practice Tests & Mock Exams',
+      description: 'AI builds you a personalised test from real exam patterns — timed, scored, and fully reviewed',
       gradient: 'from-amber-500 to-amber-600',
-      stats: 'Pattern Prediction • Adaptive • Hybrid',
-      badge: stats.customTestsTaken > 0 ? `${stats.customTestsTaken} Tests Taken` : 'AI ACTIVE',
-      illustration: 'ai-brain' // AI brain analyzing performance graphs
+      stats: 'AI-Built • Timed • Fully Reviewed',
+      badge: stats.customTestsTaken > 0 ? `${stats.customTestsTaken} Tests Done` : 'Try One Now',
+      illustration: 'ai-brain'
     }
   ];
 
@@ -501,8 +502,8 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
         <LearningJourneyHeader
           showBack
           onBack={onBack}
-          title={`${subject} Mission Center`}
-          subtitle={`Systematic preparation for ${(examContext as any)?.name || examContext}`}
+          title={`Your ${subject} Hub`}
+          subtitle={`${(examContext as any)?.name || examContext} prep — all your tools in one place`}
           subject={subject}
           trajectory={examContext}
           mastery={subProg?.overallMastery}
@@ -521,13 +522,13 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
               <div className="relative z-10">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-[10px] font-bold uppercase tracking-wider mb-4 border border-primary-100">
                   <Target size={12} />
-                  <span>Current Mission</span>
+                  <span>Where to next?</span>
                 </div>
                 <h2 className="text-4xl font-bold text-slate-900 tracking-tighter leading-tight mb-4 max-w-md">
-                  Choose Your Next <span className="text-primary-600">Learning Milestone.</span>
+                  What would you like to <span className="text-primary-600">work on today?</span>
                 </h2>
                 <p className="text-slate-500 font-instrument text-lg mb-6 max-w-md leading-relaxed">
-                  Systematic preparation for <span className="text-slate-900 font-bold">{examContext}</span>. Track every topic and paper in real-time.
+                  AI-powered <span className="text-slate-900 font-bold">{examContext}</span> prep — papers, topics, and mock tests all in one place.
                 </p>
 
                 {lastActivity && (
@@ -539,7 +540,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       <Play size={16} fill="white" />
                     </div>
                     <div className="text-left">
-                      <div className="text-[9px] font-bold text-primary-400 uppercase tracking-widest leading-none mb-1">Resume Session</div>
+                      <div className="text-[9px] font-bold text-primary-400 uppercase tracking-widest leading-none mb-1">Pick up where you left off</div>
                       <div className="text-sm font-bold leading-none">{lastActivity.name}</div>
                     </div>
                     <ArrowRight size={16} className="ml-4 opacity-50 group-hover:opacity-100 transition-opacity" />
@@ -557,8 +558,8 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                     <Zap size={20} />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-primary-400 uppercase tracking-widest leading-none mb-1">AI Diagnostic</div>
-                    <div className="text-[10px] text-white/50 font-bold uppercase tracking-widest">Subject Level Advice</div>
+                    <div className="text-xs font-bold text-primary-400 uppercase tracking-widest leading-none mb-1">Your AI Study Coach</div>
+                    <div className="text-[10px] text-white/50 font-bold uppercase tracking-widest">Personalised tip just for you</div>
                   </div>
                 </div>
 
@@ -572,7 +573,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (mastery === 0) {
                         return (
                           <>
-                            "The <span className="text-white font-bold">{subject} Mission Center</span> is initialized. Since you haven't started yet, I recommend beginning with <span className="text-white font-bold">Topic Mastery Hub</span> to establish your baseline concepts."
+                            Looks like you're just getting started with <span className="text-white font-bold">{subject}</span>! I'd suggest starting with <span className="text-white font-bold">Topic Mastery Hub</span> — AI will walk you through each concept step by step.
                           </>
                         );
                       }
@@ -580,7 +581,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (mastery < 30) {
                         return (
                           <>
-                            "You are in the <span className="text-white font-bold">Foundation Building</span> phase. Focus on high-weightage topics in <span className="text-white font-bold">Topic Mastery Hub</span> to quickly boost your Command metric before moving to papers."
+                            You're building your foundation — great start! Focus on the key topics in <span className="text-white font-bold">Topic Mastery Hub</span> first. AI will tell you exactly which ones to do in the right order.
                           </>
                         );
                       }
@@ -588,7 +589,7 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (accuracy < 60 && mastery > 20) {
                         return (
                           <>
-                            "Your coverage is growing, but your <span className="text-white font-bold">Accuracy</span> is under 60%. I recommend the <span className="text-white font-bold">Exam Prediction and Simulation Test Engine</span> focused on your recently practiced topics to stabilize your fundamentals."
+                            You've covered a lot of ground, but your accuracy needs a boost. Try a <span className="text-white font-bold">Practice Test</span> — AI will focus on the topics where you're dropping marks and help you fix them fast.
                           </>
                         );
                       }
@@ -596,14 +597,14 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
                       if (mastery > 70) {
                         return (
                           <>
-                            "Your <span className="text-white font-bold">Concept Density</span> in high-yield topics is excellent. I recommend pivoting to <span className="text-white font-bold">Solved Paper Vault</span> to improve your session stamina for the upcoming {examContext} cycle."
+                            Your concept coverage is excellent! Time to level up — head to <span className="text-white font-bold">Past Year Papers</span> and practise under real exam conditions. AI explains every answer in detail.
                           </>
                         );
                       }
 
                       return (
                         <>
-                          "Your progress is steady. To accelerate towards mastery, try mixing <span className="text-white font-bold">Topicwise Quiz</span> with a few <span className="text-white font-bold">Past Year Questions</span> to see how theory applies in real exams."
+                          Great progress! Keep mixing <span className="text-white font-bold">Topic Mastery</span> with some <span className="text-white font-bold">Past Year Questions</span> — that's the fastest way to go from knowing the theory to scoring in the actual exam.
                         </>
                       );
                     })()}
@@ -612,12 +613,12 @@ const SubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
 
                 <div className="bg-white/5 rounded-xl border border-white/10 p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Subject Health</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Your Progress</span>
                     <span className={`text-[10px] font-bold uppercase tracking-widest ${(subProg?.overallMastery || 0) < 30 ? 'text-rose-400' :
                       (subProg?.overallMastery || 0) > 75 ? 'text-blue-400' : 'text-emerald-400'
                       }`}>
-                      {(subProg?.overallMastery || 0) < 30 ? 'Requires Boost' :
-                        (subProg?.overallMastery || 0) > 75 ? 'Optimal' : 'Stable'}
+                      {(subProg?.overallMastery || 0) < 30 ? 'Just getting started' :
+                        (subProg?.overallMastery || 0) > 75 ? 'Looking great!' : 'On track'}
                     </span>
                   </div>
                   <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">

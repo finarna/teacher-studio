@@ -112,15 +112,35 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   // Navigation history for back button
   const [viewHistory, setViewHistory] = useState<ViewType[]>(['trajectory']);
 
-  // Navigate to specific view (External sync)
+  // Navigate to specific view — used by breadcrumbs and popstate handler
   const navigateToView = (view: ViewType) => {
     if (state.currentView === view) return;
 
     setState(prev => ({
       ...prev,
-      currentView: view
+      currentView: view,
+      // Clear downstream state when jumping backward in hierarchy
+      ...(view === 'subject' && {
+        selectedSubject: null,
+        selectedTopicId: null,
+        selectedScan: null,
+        selectedScanId: null,
+      }),
+      ...(view === 'subject_menu' && {
+        selectedTopicId: null,
+        selectedScan: null,
+        selectedScanId: null,
+      }),
+      ...(view === 'topic_dashboard' && { selectedTopicId: null }),
+      ...(view === 'past_year_exams' && { selectedScan: null, selectedScanId: null }),
     }));
-    // We don't push to viewHistory here because popstate handles history
+
+    // Sync viewHistory: trim back to this view if already present, otherwise push
+    setViewHistory(prev => {
+      const idx = prev.lastIndexOf(view);
+      if (idx >= 0) return prev.slice(0, idx + 1);
+      return [...prev, view];
+    });
   };
 
   // Select trajectory

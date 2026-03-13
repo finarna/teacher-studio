@@ -14,7 +14,8 @@ import {
     Leaf,
     Brain,
     History,
-    Layout
+    Layout,
+    Menu
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Subject, ExamContext } from '../types';
@@ -87,39 +88,46 @@ const MobileSubjectMenuPage: React.FC<SubjectMenuPageProps> = ({
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] flex flex-col pb-24">
-            {/* Premium Header */}
-            <div className="bg-slate-900 pt-12 pb-16 px-6 rounded-b-[3rem] shadow-2xl relative overflow-hidden">
+            {/* Header */}
+            <div className="bg-slate-900 pt-12 pb-10 px-4 rounded-b-[2rem] shadow-xl relative overflow-hidden">
                 <div
                     className="absolute top-0 right-0 w-64 h-64 opacity-10 blur-[80px]"
                     style={{ backgroundColor: config.color }}
                 />
 
-                <button onClick={onBack} className="relative z-10 mb-8 flex items-center gap-2 text-white/50">
-                    <ChevronLeft size={20} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Back to Journey</span>
-                </button>
-
-                <div className="relative z-10 flex items-center gap-6">
+                {/* Top bar: [☰][←] | subject + exam | icon */}
+                <div className="relative z-10 flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-1.5">
+                        <button
+                            onClick={() => window.dispatchEvent(new CustomEvent('openMobileMenu'))}
+                            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/70 border border-white/10 active:bg-white/20 transition-all"
+                            aria-label="Open menu"
+                        >
+                            <Menu size={16} />
+                        </button>
+                        <button
+                            onClick={onBack}
+                            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/70 border border-white/10 active:bg-white/20 transition-all"
+                            aria-label="Go back"
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                    </div>
+                    <div className="text-center">
+                        <h1 className="text-sm font-black text-white tracking-wide font-outfit">{subject}</h1>
+                        <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{examContext}</p>
+                    </div>
                     <div
-                        className="w-20 h-20 rounded-[1.75rem] flex items-center justify-center text-white shadow-2xl"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0"
                         style={{ background: `linear-gradient(135deg, ${config.color}, ${config.colorDark})` }}
                     >
-                        <Icon size={40} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{examContext} Targeting</span>
-                            <div className="w-1 h-3 bg-white/20 rounded-full" />
-                        </div>
-                        <h1 className="text-4xl font-black text-white font-outfit uppercase tracking-tighter italic leading-none">
-                            {subject}
-                        </h1>
+                        <Icon size={18} strokeWidth={2.5} />
                     </div>
                 </div>
             </div>
 
             {/* Main Content */}
-            <div className="px-6 -mt-8 relative z-20 space-y-6">
+            <div className="px-6 mt-4 relative z-20 space-y-6">
                 {/* Status Dashboard */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white rounded-3xl p-4 shadow-xl border border-slate-100">

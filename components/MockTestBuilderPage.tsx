@@ -134,51 +134,51 @@ interface PastTestAttempt {
 // REI v3.0 UI THEME MAPPINGS
 const EXAM_UI_THEMES: Record<string, any> = {
   JEE: {
-    oracleLabel: 'Assess 2026 Predictive Blueprint',
-    oracleActive: '✨ 2026 Premium Rigor Active',
+    oracleLabel: 'See What JEE 2026 Might Look Like',
+    oracleActive: '✨ AI Exam Prediction Active',
     signature: 'THE ANALYST',
     protocol: 'SYLLABUS-MAX',
     description: 'Advanced cross-topic conceptual synthesis',
     strategyNote: {
-      predictive_mock: 'REI-v3 Neural Simulation: Mimics exact JEE trends, linguistic traps, and Assertion-Reasoning complexity for maximum score predictability.',
-      hybrid: 'Precision Growth Engine: Fuses your personal accuracy gaps with high-yield exam patterns to bridge the score gap effectively.',
-      adaptive_growth: 'Surgical Score Recovery: Targeted AI intervention focused on flipping your lowest-rigor chapters into scoring strengths.'
+      predictive_mock: 'AI has studied 5 years of JEE patterns to predict the most likely questions and traps. This test mirrors what JEE actually feels like — same difficulty, same style.',
+      hybrid: 'AI combines the topics you\'re weakest in with high-yield JEE patterns — so every question you practise moves your score forward.',
+      adaptive_growth: 'AI identifies exactly which chapters are pulling your score down and drills them until they become your strongest points.'
     }
   },
   NEET: {
-    oracleLabel: 'NTA Standard Blueprint',
-    oracleActive: '✨ NTA Pattern Synthesis Active',
+    oracleLabel: 'See What NTA Might Ask Next',
+    oracleActive: '✨ AI Pattern Matching Active',
     signature: 'THE SPECIALIST',
     protocol: 'ACCURACY-PRECISION',
     description: 'Focus on NCERT-based logic and trap detection',
     strategyNote: {
-      predictive_mock: 'NCERT Pattern Simulation: Targets linguistic traps and Assertion-Reasoning speed with AI-predicted high-rigor drills.',
-      hybrid: 'Adaptive Skill Synthesis: NCERT-plus trends fused with your personal accuracy gaps for holistic score improvement.',
-      adaptive_growth: 'Vulnerability Elimination: Focuses AI generation on rapid-fire conceptual recall to secure easy marks first.'
+      predictive_mock: 'AI builds questions the way NTA does — NCERT-rooted, with the same tricky phrasing and Assertion-Reasoning style. Great for building exam instinct.',
+      hybrid: 'AI blends your weakest NCERT topics with the questions NTA asks most often — helping you improve accuracy while staying exam-ready.',
+      adaptive_growth: 'AI focuses only on the topics where you\'re dropping marks, so you can secure those easy questions before tackling harder ones.'
     }
   },
   KCET: {
-    oracleLabel: 'Assess 2026 Peak Pattern',
-    oracleActive: '✨ 2026 Standard Calibration Active',
+    oracleLabel: 'See What KCET 2026 Might Ask',
+    oracleActive: '✨ AI Exam Calibration Active',
     signature: 'THE SYNTHESIZER',
     protocol: 'PATTERN-RECOGNITION',
     description: 'Heuristic pattern calibration and fast recall',
     strategyNote: {
-      predictive_mock: 'Heuristic Exam Simulation: 1:1 real exam pattern logic with AI-predicted trending properties and recall traps.',
-      hybrid: 'Pattern Growth Bridge: Fuses official trends with your personal property-solving speed gaps for optimized performance.',
-      adaptive_growth: 'Property Mastery Recovery: Prioritizes AI drills for your specific property-recall vulnerabilities to recover lost marks.'
+      predictive_mock: 'AI mirrors KCET\'s exact question style — matching the speed, pattern, and recall traps the board likes to use. Just like the real exam.',
+      hybrid: 'AI combines real KCET patterns with your personal weak spots — helping you fix gaps while practising the way the board actually tests you.',
+      adaptive_growth: 'AI finds the properties and concepts you keep getting wrong, then drills them specifically until you stop losing marks there.'
     }
   },
   CBSE: {
-    oracleLabel: 'Board Blueprint Replicator',
-    oracleActive: '✨ Official Blueprint Match Active',
+    oracleLabel: 'Match the Board\'s Blueprint',
+    oracleActive: '✨ Board Blueprint Matched',
     signature: 'THE ARCHITECT',
     protocol: 'STAGING-CORE',
     description: 'High-fidelity alignment with Board standards',
     strategyNote: {
-      predictive_mock: 'Board Standard Simulation: High-fidelity blueprint replication with AI-generated step-wise credit verification questions.',
-      hybrid: 'Conceptual Stability Bridge: Board pattern stability fused with your individual conceptual gaps for peak assurance.',
-      adaptive_growth: 'Success-Buffer Mode: Ensures guaranteed mastery of high-yield annual patterns and recurring board topics.'
+      predictive_mock: 'AI replicates CBSE\'s marking scheme and question style exactly — including step-wise credit questions that the board loves to set.',
+      hybrid: 'AI blends the board\'s favourite recurring topics with your personal conceptual gaps — so you\'re confident on both predictable and surprise questions.',
+      adaptive_growth: 'AI locks in the high-yield annual topics you\'re most likely to see and ensures you never drop easy marks there again.'
     }
   }
 };
@@ -521,7 +521,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
     setIsCreatingTest(true);
     setError(null);
-    setProgressMessage('Initializing AI test generation...');
+    setProgressMessage('AI is building your personalised test...');
     setProgressPercentage(5);
 
     let pollInterval: NodeJS.Timeout | null = null;
@@ -761,29 +761,29 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           {[
                             {
                               id: 'predictive_mock',
-                              label: 'Ultimate Simulation',
-                              tagline: 'Real-Exam Rigor',
+                              label: 'Real Exam Style',
+                              tagline: 'AI-Matched Difficulty',
                               icon: <Sparkles size={20} />,
-                              desc: 'Master the official pattern',
-                              impact: 'EXAM-READY PRECISION',
+                              desc: 'Practise exactly how the exam feels',
+                              impact: 'FEEL EXAM-READY',
                               color: 'indigo'
                             },
                             {
                               id: 'hybrid',
-                              label: 'Mastery Mix',
-                              tagline: 'Balanced Growth',
+                              label: 'Smart Mix',
+                              tagline: 'Grow & Improve',
                               icon: <Target size={20} />,
-                              desc: 'Weak Spots + Exam Trends',
-                              impact: 'MAX SCORE VELOCITY',
+                              desc: 'Fix weak spots + real exam patterns',
+                              impact: 'BEST OF BOTH',
                               color: 'emerald'
                             },
                             {
                               id: 'adaptive_growth',
-                              label: 'Rapid Recovery',
-                              tagline: 'Targeted Fixes',
+                              label: 'Fix Weak Spots',
+                              tagline: 'Focused Practice',
                               icon: <Zap size={20} />,
-                              desc: 'Turn weakness into strength',
-                              impact: 'STOP SCORE LEAKS',
+                              desc: 'AI targets only what you\'re dropping marks on',
+                              impact: 'PLUG THE GAPS',
                               color: 'rose'
                             }
                           ].map(s => {
@@ -875,14 +875,14 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                   <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded ${oracleModeEnabled ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-600'}`}>Ultimate Core</span>
                                   {oracleModeEnabled && <span className="animate-pulse flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]" />}
                                 </div>
-                                <span className={`text-xl font-black block font-outfit ${oracleModeEnabled ? 'text-white' : 'text-slate-900'}`}>Smart Exam Assistant</span>
-                                <span className={`text-xs font-bold block ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-400'}`}>Personalized Topic Balance & Score Prediction</span>
+                                <span className={`text-xl font-black block font-outfit ${oracleModeEnabled ? 'text-white' : 'text-slate-900'}`}>Let AI Build My Test</span>
+                                <span className={`text-xs font-bold block ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-400'}`}>AI picks the right topics and difficulty based on where you need the most practice</span>
                               </div>
                             </div>
 
                             <div className="flex items-center gap-3 relative z-10">
                               <div className={`flex flex-col items-end hidden md:flex mr-4 ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-300'}`}>
-                                <span className="text-xs font-bold uppercase">{oracleModeEnabled ? 'Fully Active' : 'Standby'}</span>
+                                <span className="text-xs font-bold uppercase">{oracleModeEnabled ? 'AI Active' : 'Off'}</span>
                               </div>
                               <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 shadow-lg scale-110' : 'bg-slate-50 text-slate-300'}`}>
                                 {oracleModeEnabled ? <Check size={24} strokeWidth={3} /> : <div className="w-2 h-2 rounded-full bg-slate-200" />}
@@ -904,24 +904,24 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-1.5">
                               <h4 className={`text-sm font-black uppercase tracking-[0.15em] ${oracleModeEnabled ? 'text-indigo-400' : 'text-indigo-600'}`}>
-                                {oracleModeEnabled ? 'AI Performance Oracle' : strategyMode === 'predictive_mock' ? 'Scientific Simulation' : strategyMode === 'hybrid' ? 'Adaptive Hybrid' : 'Rapid Recovery'}
+                                {oracleModeEnabled ? 'AI Is Building Your Test' : strategyMode === 'predictive_mock' ? 'Real Exam Style' : strategyMode === 'hybrid' ? 'Smart Mix' : 'Fix Weak Spots'}
                               </h4>
                               <div className={`flex items-center gap-2 px-2 py-1 rounded-lg border ${oracleModeEnabled ? 'bg-indigo-500/20 border-indigo-500/30' : 'bg-white border-indigo-100'}`}>
                                 <div className={`w-1.5 h-1.5 rounded-full ${oracleModeEnabled ? 'bg-emerald-400' : 'bg-indigo-500'} shadow-[0_0_8px_rgba(99,102,241,0.6)]`} />
-                                <span className={`text-[10px] font-bold uppercase tracking-tight ${oracleModeEnabled ? 'text-indigo-200' : 'text-indigo-600'}`}>Engine Calibrated</span>
+                                <span className={`text-[10px] font-bold uppercase tracking-tight ${oracleModeEnabled ? 'text-indigo-200' : 'text-indigo-600'}`}>AI Ready</span>
                               </div>
                             </div>
                             <p className={`text-sm font-medium leading-relaxed ${oracleModeEnabled ? 'text-indigo-100/80' : 'text-slate-500'}`}>
                               {oracleModeEnabled
-                                ? "Our AI analyzes historical board patterns and your current progress to build the most predictive exam experience possible."
-                                : theme.strategyNote?.[strategyMode === 'predictive_mock' ? 'predictive_mock' : strategyMode === 'hybrid' ? 'hybrid' : 'adaptive_growth'] || "Your assessment is being optimized based on selected intelligence parameters."
+                                ? "AI looks at your progress and real exam patterns to build a test that's perfectly matched to what you need to work on next."
+                                : theme.strategyNote?.[strategyMode === 'predictive_mock' ? 'predictive_mock' : strategyMode === 'hybrid' ? 'hybrid' : 'adaptive_growth'] || "AI is setting up your test based on your chosen settings."
                               }
                             </p>
                           </div>
                           <div className={`hidden lg:flex flex-col items-end shrink-0 gap-1 border-l pl-6 py-1 ${oracleModeEnabled ? 'border-slate-700' : 'border-indigo-100'}`}>
                             <span className={`text-[10px] font-bold uppercase tracking-widest ${oracleModeEnabled ? 'text-slate-500' : 'text-slate-400'}`}>Status</span>
                             <span className={`text-xs font-black uppercase ${oracleModeEnabled ? 'text-emerald-400' : 'text-indigo-600'}`}>
-                              {oracleModeEnabled || strategyMode === 'predictive_mock' ? 'Ready for Deployment' : 'Optimization Active'}
+                              {oracleModeEnabled || strategyMode === 'predictive_mock' ? 'Ready to Start' : 'Setting Up'}
                             </span>
                           </div>
                         </motion.div>
@@ -933,7 +933,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           disabled={!testName.trim()}
                           className={`px-12 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-3 ${!testName.trim() ? 'bg-slate-50 text-slate-300 border border-slate-200 cursor-not-allowed' : 'bg-slate-900 text-white shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-1 active:scale-95'}`}
                         >
-                          {strategyMode === 'predictive_mock' || oracleModeEnabled ? 'Review Setup' : 'Start Preparing'}
+                          {strategyMode === 'predictive_mock' || oracleModeEnabled ? 'Next: Choose Topics' : 'Next: Choose Topics'}
                           <ArrowRight size={20} className={!testName.trim() ? '' : 'animate-pulse'} />
                         </button>
                       </div>
@@ -956,15 +956,15 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                             <Settings size={22} />
                           </div>
                           <div>
-                            <h2 className="text-xl font-bold text-slate-900 font-outfit">Customize Topics & Difficulty</h2>
-                            <p className="text-sm text-slate-500 font-medium">Fine-tune exactly what will appear in your test</p>
+                            <h2 className="text-xl font-bold text-slate-900 font-outfit">Choose Your Topics & Settings</h2>
+                            <p className="text-sm text-slate-500 font-medium">Pick what goes into your test — or let AI decide for you</p>
                           </div>
                         </div>
                         <div className="hidden md:flex bg-slate-50 border border-slate-200 text-slate-900 px-5 py-2 rounded-2xl items-center gap-4 shadow-sm">
                           <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Strategy</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Test Mode</span>
                             <span className="text-xs font-bold uppercase tracking-tight text-slate-900">
-                              {oracleModeEnabled ? 'AI Predictive Oracle' : strategyMode === 'predictive_mock' ? 'Scientific Mock Simulation' : strategyMode === 'hybrid' ? 'Adaptive Progress Hub' : 'Rapid Recovery'}
+                              {oracleModeEnabled ? 'AI Picks for Me' : strategyMode === 'predictive_mock' ? 'Real Exam Style' : strategyMode === 'hybrid' ? 'Smart Mix' : 'Fix Weak Spots'}
                             </span>
                           </div>
                         </div>
@@ -1392,7 +1392,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                         <div className="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 mb-8 border-4 border-white shadow-xl">
                           <History size={48} />
                         </div>
-                        <h4 className="text-2xl font-bold text-slate-900 mb-3">No Mock Tests Generated Yet</h4>
+                        <h4 className="text-2xl font-bold text-slate-900 mb-3">No tests taken yet — let's build your first one!</h4>
                         <p className="text-base font-medium text-slate-500 max-w-md mb-10 leading-relaxed">
                           Complete your first mock assessment to unlock detailed performance analytics, topic mastery breakdowns, and historical score tracking.
                         </p>

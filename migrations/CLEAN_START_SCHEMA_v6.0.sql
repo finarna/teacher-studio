@@ -1084,6 +1084,12 @@ CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user_id ON public.quiz_attempts(use
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_topic_resource ON public.quiz_attempts(topic_resource_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_created_at ON public.quiz_attempts(created_at DESC);
 
+-- Add indexes for scans PYQ queries (from migration 031)
+-- GIN index on subjects[] enables fast array-contains (subjects.cs.{Math}) without full table scan
+CREATE INDEX IF NOT EXISTS idx_scans_subjects_gin ON public.scans USING GIN(subjects);
+CREATE INDEX IF NOT EXISTS idx_scans_exam_context ON public.scans(exam_context);
+CREATE INDEX IF NOT EXISTS idx_scans_subject_exam_system ON public.scans(subject, exam_context, is_system_scan);
+
 -- ============================================================
 -- STORAGE: edujourney-images bucket + RLS (from Migration 029)
 -- ============================================================

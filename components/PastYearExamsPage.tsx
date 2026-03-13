@@ -117,7 +117,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
 
         const { data: scansData, error: scansError } = await supabase
           .from('scans')
-          .select('id, name, created_at, status, subject, grade, exam_context, year, is_combined_paper, subjects, analysis_data')
+          .select('id, name, created_at, status, subject, grade, exam_context, year, is_combined_paper, subjects')
           .or(subjectFilter)
           .eq('exam_context', examContext)
           .eq('is_system_scan', true);
@@ -163,15 +163,6 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
 
       console.log('📊 [PAST YEAR] Fetched scans:', mappedScans.length);
 
-      // Fetch practice answers for solved status
-      const { data: allPracticeData } = await supabase
-        .from('practice_answers')
-        .select('question_id, is_correct')
-        .eq('user_id', userId)
-        .eq('is_correct', true);
-
-      const solvedQuestionIds = new Set(allPracticeData?.map(p => p.question_id) || []);
-
       // Group scans by year
       const scansByYear = mappedScans.reduce((acc, scan) => {
         const year = scan.year;
@@ -184,28 +175,8 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
       // 🚀 OPTIMIZATION: Use bare minimum processing for the grid
       const resolvedYearData = Object.entries(scansByYear).map(([year, scans]) => {
         const scansWithAnalysis = scans.map(scan => {
-          let questionsCount = 0;
-          if (scan.analysis_data?.questions) {
-            const isNeetSub = examContext === 'NEET' && (subject === 'Botany' || subject === 'Zoology');
-            const neetQuestions = scan.analysis_data.questions.filter((q: any) => {
-              // Direct match
-              if (q.subject === subject) return true;
-              // Split logic for legacy Biology questions (approximate split for display)
-              if (isNeetSub && (q.subject === 'Biology' || !q.subject)) {
-                // Approximate split based on question number if available
-                const qNum = q.questionOrder ?? q.index ?? 0;
-                if (subject === 'Botany') return qNum <= 150; // Simple heuristic for paper split
-                if (subject === 'Zoology') return qNum > 150;
-              }
-              return false;
-            });
-            questionsCount = neetQuestions.length;
-          }
-
-          // Fallback for scans without direct analysis data but known to contain the subject
-          if (questionsCount === 0 && (scan.subject === subject || (scan.isCombinedPaper && (examContext === 'NEET' || scan.subjects?.includes(subject))))) {
-            questionsCount = examContext === 'NEET' ? 45 : 60; // Standard counts
-          }
+          // Use standard per-exam question counts (analysis_data not fetched to avoid payload bloat)
+          const questionsCount = examContext === 'NEET' ? 45 : 60;
 
           return {
             ...scan,
@@ -256,11 +227,11 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
         showBack
         onBack={onBack}
         icon={activeView === 'papers' ? <Calendar size={24} className="text-white" /> : <TrendingUp size={24} className="text-white" />}
-        title={activeView === 'papers' ? "" : "Predictive Trends"}
+        title={activeView === 'papers' ? "" : "What to Expect Next"}
         subtitle={`${subject} • ${examContext}`}
         description={activeView === 'papers'
-          ? "Browse and solve previous exam papers with detailed explanations"
-          : "Historical patterns, topic evolution, and predictions for upcoming exams"
+          ? "Browse and solve previous exam papers — AI explains every answer"
+          : "AI analyses past exams to show which topics and question types are most likely to appear next"
         }
         subject={subject}
         trajectory={examContext}
@@ -324,7 +295,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                 )}
                 <div className="relative z-10 flex items-center justify-center gap-2.5">
                   <TrendingUp size={16} className={activeView === 'trends' ? 'text-white' : 'group-hover:scale-110 transition-transform'} />
-                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Predictive Trends</span>
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap">What to Expect Next</span>
                 </div>
               </button>
             </div>
@@ -372,8 +343,8 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                     <Sparkles size={28} className="text-indigo-400 animate-pulse" />
                   </div>
                 </div>
-                <h3 className="text-lg font-black text-slate-900 font-outfit uppercase tracking-tighter mb-1">Opening the Paper Vault</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Finding where the most important questions are hidden...</p>
+                <h3 className="text-lg font-black text-slate-900 font-outfit uppercase tracking-tighter mb-1">Loading Your Papers</h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Getting your past year papers ready...</p>
               </div>
             )}
 
@@ -384,10 +355,10 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                   <Calendar size={36} className="text-slate-400" />
                 </div>
                 <h3 className="font-black text-xl text-slate-900 font-outfit mb-2">
-                  No Past Year Exams Available
+                  No papers here yet
                 </h3>
                 <p className="text-slate-600 font-instrument">
-                  Past year exam papers will appear here once they're added to the system.
+                  Past year exam papers will show up here as soon as they're available.
                 </p>
               </div>
             )}
@@ -416,7 +387,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[9px] font-black text-blue-800 uppercase tracking-widest leading-none">
-                              {yd.year} PYQ
+                              {yd.year} Exam
                             </span>
                             <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded text-[9px] font-black text-indigo-700 uppercase tracking-widest leading-none">
                               {subject}
@@ -428,7 +399,7 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                             )}
                             {isCompleted && (
                               <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none">
-                                DONE
+                                Completed
                               </span>
                             )}
                           </div>
@@ -441,11 +412,11 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
                         <div className="pt-3 border-t border-slate-50 flex items-center justify-between">
                           <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
                             <FileText size={12} className="text-slate-400" />
-                            <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">{scan.questionsCount} Items</span>
+                            <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">{scan.questionsCount} Questions</span>
                           </div>
 
                           <div className="flex items-center gap-1.5 text-slate-900 font-black text-[10px] uppercase tracking-widest group-hover:text-indigo-600 transition-colors">
-                            <span>Analyze</span>
+                            <span>Start Solving</span>
                             <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" strokeWidth={3} />
                           </div>
                         </div>

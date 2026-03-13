@@ -9,7 +9,8 @@ import {
     Zap,
     Target,
     Trophy,
-    ChevronRight
+    ChevronRight,
+    Menu
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { ExamContext } from '../types';
@@ -76,7 +77,19 @@ const MobileTrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
                     <div className="absolute bottom-[-10%] left-[-5%] w-48 h-48 bg-indigo-500/20 rounded-full blur-[60px]" />
                 </div>
 
-                <div className="relative z-10 px-6 pt-10 pb-2">
+                <div className="relative z-10 px-4 pt-4 pb-2">
+                    {/* Top bar: [☰] | app name | spacer */}
+                    <div className="flex items-center justify-between mb-5">
+                        <button
+                            onClick={() => window.dispatchEvent(new CustomEvent('openMobileMenu'))}
+                            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/70 border border-white/10 active:bg-white/20 transition-all"
+                            aria-label="Open menu"
+                        >
+                            <Menu size={16} />
+                        </button>
+                        <span className="text-[11px] font-black text-white/50 uppercase tracking-widest">plus2AI</span>
+                        <div className="w-9 h-9" />
+                    </div>
                     {/* Header */}
                     <div className="mb-10">
                         <motion.div
@@ -85,15 +98,15 @@ const MobileTrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
                             className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 mb-4"
                         >
                             <Sparkles size={12} className="text-amber-400" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Mission Protocol</span>
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">AI-Powered Prep</span>
                         </motion.div>
                         <motion.h1
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="text-4xl font-black text-white font-outfit uppercase tracking-tight leading-tight italic"
                         >
-                            Choose Your <br />
-                            <span className="text-primary-400 non-italic">Trajectory</span>
+                            Which exam are you <br />
+                            <span className="text-primary-400 non-italic">preparing for?</span>
                         </motion.h1>
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
@@ -101,7 +114,7 @@ const MobileTrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
                             transition={{ delay: 0.1 }}
                             className="text-slate-400 font-medium text-sm mt-2 max-w-[280px]"
                         >
-                            Select a learning path tailored to your exam target and goals.
+                            AI will build your personalised study plan once you pick your exam.
                         </motion.p>
                     </div>
 
@@ -118,7 +131,7 @@ const MobileTrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
                             </div>
                             <div>
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Overall Mastery</p>
-                                <h3 className="text-xl font-black text-slate-900 font-outfit italic">EXCELLENCE LEVEL</h3>
+                                <h3 className="text-xl font-black text-slate-900 font-outfit italic">YOUR PROGRESS</h3>
                             </div>
                         </div>
                         <div className="text-right">
@@ -208,7 +221,7 @@ const MobileTrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
                         <div>
                             <p className="text-[9px] font-black text-primary-400 uppercase tracking-widest mb-1">Daily Brief</p>
                             <p className="text-[13px] font-bold text-slate-700 leading-snug italic">
-                                Exam peaks are appearing in <span className="text-primary-600">Calculus</span>. Start your Math trajectory to lock in these marks.
+                                AI has spotted high-value topics in <span className="text-primary-600">Calculus</span>. Pick your exam above and start practising them now.
                             </p>
                         </div>
                     </motion.div>

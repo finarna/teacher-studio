@@ -172,7 +172,7 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
             className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50/50 text-indigo-600 rounded-full text-[11px] font-bold mb-4 border border-indigo-100 shadow-sm"
           >
             <Sparkles size={12} className="text-indigo-500" />
-            AI-Powered Personalization Engine
+            AI Personalises Your Study Plan
           </motion.div>
 
           <motion.h2
@@ -180,7 +180,7 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
             animate={{ opacity: 1, y: 0 }}
             className="text-3xl md:text-5xl font-extrabold text-slate-900 font-outfit mb-2 tracking-tight"
           >
-            Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">Trajectory</span>
+            Which exam are you <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600">preparing for?</span>
           </motion.h2>
 
           <motion.p
@@ -189,8 +189,8 @@ const TrajectorySelectionPage: React.FC<TrajectorySelectionPageProps> = ({
             transition={{ delay: 0.1 }}
             className="text-slate-500 font-medium text-base md:text-lg leading-relaxed px-4"
           >
-            We've analyzed current exam trends to tailor your learning path.
-            <br className="hidden md:block" /> Pick the arena where you'll prove your excellence today.
+            AI will personalise your entire study plan — topics, papers, and mock tests — based on your exam.
+            <br className="hidden md:block" /> Pick the one you're targeting.
           </motion.p>
         </div>
 

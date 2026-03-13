@@ -21,7 +21,8 @@ import {
     Sprout,
     PawPrint,
     Flower2,
-    Leaf
+    Leaf,
+    Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Subject, ExamContext, SubjectProgress } from '../types';
@@ -124,54 +125,54 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
         const strongest = sortedByMastery[subjectMetrics.length - 1];
         const masteryGap = strongest.mastery - weakest.mastery;
 
-        let title = "Syncing Neural Map";
-        let description = "Begin your practice sessions to allow the AI Analyst to map your cognitive strengths and weaknesses.";
+        let title = "AI Is Learning Your Style";
+        let description = "Start practising to let AI figure out your strengths and where you need the most help.";
         let focusArea = "General";
         let trend: 'improving' | 'stable' | 'attention' = 'stable';
         let tags = ["Calibration"];
 
         if (totalVolume === 0) {
-            title = "Initialization Phase";
-            description = `Your ${exam} roadmap reached standby. The AI is waiting for your first 10 questions to map your cognitive footprint. Start with any subject to activate analysis.`;
-            tags = ["Ready to Launch", "Baseline"];
+            title = "Let's Get Started!";
+            description = `AI is ready to personalise your ${exam} prep — it just needs your first few answers to figure out where you stand. Pick any subject and start practising!`;
+            tags = ["Ready to Go", "First Steps"];
         }
         else if (totalVolume < 50 || avgMastery < 3) {
-            title = "Syncing Neural Map";
+            title = "AI Is Learning Your Style";
             const masteryValue = Math.round(avgMastery);
-            description = `Data acquisition in progress. Mastery is currently at ${masteryValue}%. ${masteryValue === 0 && avgAccuracy > 0 ? "Initial accuracy is promising, but we need more volume to confirm your cognitive stability." : `Complete 25 more questions across your active arenas to unlock the "Strategy Pivot" mode.`}`;
-            tags = ["Calibration", "Data Sync"];
+            description = `You're off to a good start! ${masteryValue === 0 && avgAccuracy > 0 ? "Your accuracy looks promising — keep going and AI will start giving you personalised tips." : `Do ${25} more questions and AI will unlock a personalised study plan just for you.`}`;
+            tags = ["Getting Started", "Almost There"];
         }
         else if (masteryGap > 40 && avgMastery > 20) {
-            title = "Structural Imbalance Detected";
-            description = `Your performance in ${strongest.name} is excellent, but ${weakest.name} (${weakest.mastery}%) is currently a bottleneck for your global ${exam} rank. A "Subject Pivot" strategy is recommended for the next 48 hours.`;
+            title = "One Subject Needs Attention";
+            description = `You're doing well in ${strongest.name}, but ${weakest.name} (${weakest.mastery}% mastery) is holding back your overall ${exam} score. Focus there for the next few days and AI will guide you through it.`;
             focusArea = weakest.name;
             trend = 'attention';
-            tags = ["Subject Pivot", "Rank Protection"];
+            tags = ["Focus Here", "Quick Win"];
         }
         else if (avgAccuracy < 50 && totalVolume > 50) {
-            title = "Accuracy Recovery Required";
-            description = `Your practice volume is high (${totalVolume} Qs), but your accuracy is hovering at ${Math.round(avgAccuracy)}%. You are likely rushing. We recommend "Slow-Mode Study" for ${weakest.name} to stabilize fundamentals.`;
+            title = "Slow Down to Speed Up";
+            description = `You've practised a lot (${totalVolume} questions!), but accuracy is at ${Math.round(avgAccuracy)}%. AI suggests slowing down on ${weakest.name} — understanding each answer properly will boost your score faster.`;
             focusArea = weakest.name;
             trend = 'attention';
-            tags = ["Accuracy Check", "Conceptual Gaps"];
+            tags = ["Build Accuracy", "Focus Mode"];
         }
         else if (avgMastery > 70) {
-            title = "Elite Refinement Strategy";
-            description = `You have achieved critical mass in the core syllabus. Your trajectory indicates a top-tier percentile potential. Shifting focus to "Edge Cases" and "Timed Mock Simulation" to optimize performance.`;
+            title = "You're in Top Form!";
+            description = `Your syllabus coverage is excellent. AI recommends shifting to timed mock tests and tricky edge-case questions to push your score even higher before exam day.`;
             trend = 'improving';
-            tags = ["Elite Track", "Speed Optimization"];
+            tags = ["Top Form", "Final Push"];
         }
         else if (avgMastery > 20 && totalVolume > 80) {
-            title = "Cognitive Momentum Active";
-            description = `Your overall ${exam} mastery is growing steadily. ${weakest.name} is currently your high-yield focus area. Mastering just a few more topics here will push your matrix into the next proficiency tier.`;
+            title = "Great Progress — Keep Going!";
+            description = `Your ${exam} prep is on the right track. ${weakest.name} is your next big opportunity — a few focused sessions there and AI predicts a solid jump in your score.`;
             focusArea = weakest.name;
             trend = 'improving';
-            tags = ["Growth Hub", "High Yield"];
+            tags = ["On Track", "High Yield"];
         }
         else {
-            title = "Baseline Established";
-            description = `Your initial profile is mapped. Current average accuracy is ${Math.round(avgAccuracy)}%. To see a "Momentum" shift, increase your daily practice volume and clear ${activeSubjects.length * 2} more high-weightage topics.`;
-            tags = ["Active Learning", "Phase 1"];
+            title = "Building Your Foundation";
+            description = `You're making steady progress! Average accuracy is ${Math.round(avgAccuracy)}%. Keep practising daily and finish ${activeSubjects.length * 2} more topics — AI will show you exactly which ones matter most.`;
+            tags = ["Stay Consistent", "Keep Going"];
         }
 
         return { title, description, focusArea, trend, tags };
@@ -179,36 +180,37 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
 
     const fetchComprehensiveStats = useCallback(async () => {
         try {
-            const { data: publishedScans } = await supabase
-                .from('scans')
-                .select('id, subject, analysis_data')
-                .eq('is_system_scan', true)
-                .eq('exam_context', examContext);
+            // Phase 1: Scans (no analysis_data) + topics in parallel
+            const [{ data: publishedScans }, { data: allTopics }] = await Promise.all([
+                supabase
+                    .from('scans')
+                    .select('id, subject')
+                    .eq('is_system_scan', true)
+                    .eq('exam_context', examContext),
+                supabase.from('topics').select('id, subject, domain'),
+            ]);
 
             if (!publishedScans) return;
 
             const scanIds = publishedScans.map(s => s.id);
-            // Guard: `.in('col', [])` → `col=in.()` → 404. Skip when no scan IDs.
-            const flashcardRecords = scanIds.length > 0
-                ? (await supabase.from('flashcards').select('scan_id, data').in('scan_id', scanIds)).data ?? []
-                : [];
-            const { data: allTopics } = await supabase.from('topics').select('id, subject, domain');
 
-            const subjectPromises = availableSubjects.map(async (subject) => {
-                // NEET Pivot Logic: Map Biology questions/resources to sub-disciplines
+            // Phase 2: All count queries in parallel (need scanIds from Phase 1)
+            const empty = Promise.resolve({ data: [] as any[] });
+            const sketchPromise = scanIds.length > 0
+                ? supabase.from('topic_sketches').select('scan_id').in('scan_id', scanIds)
+                : empty;
+            const flashcardPromise = scanIds.length > 0
+                ? supabase.from('flashcards').select('scan_id, data').in('scan_id', scanIds)
+                : empty;
+
+            const subjectCountPromises = availableSubjects.map(async (subject) => {
                 const isNeetSub = examContext === 'NEET' && (subject === 'Botany' || subject === 'Zoology');
-                const isNeetMain = examContext === 'NEET' && (subject === 'Physics' || subject === 'Chemistry');
-
-                // 1. Direct Question Count
                 const { count: directCount } = await supabase
                     .from('questions')
                     .select('*', { count: 'exact', head: true })
                     .eq('subject', subject)
                     .in('scan_id', scanIds);
-
                 let qCount = directCount || 0;
-
-                // 2. Legacy Biology Count Fallback (Split 50/50 for Botany/Zoology cards)
                 if (qCount === 0 && isNeetSub) {
                     const { count: biologyTotal } = await supabase
                         .from('questions')
@@ -217,23 +219,40 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                         .in('scan_id', scanIds);
                     qCount = Math.floor((biologyTotal || 0) / 2);
                 }
+                return [subject, qCount] as [Subject, number];
+            });
 
-                // 3. Scan-based resources (Combined papers map to all subjects)
+            const [sketchResult, flashcardResult, ...subjectCountResults] = await Promise.all([
+                sketchPromise,
+                flashcardPromise,
+                ...subjectCountPromises,
+            ]);
+
+            const sketchCountByScan: Record<string, number> = {};
+            (sketchResult.data || []).forEach((r: any) => {
+                sketchCountByScan[r.scan_id] = (sketchCountByScan[r.scan_id] || 0) + 1;
+            });
+            const flashcardRecords: { scan_id: string; data: any[] }[] = flashcardResult.data || [];
+
+            const subjectPromises = (subjectCountResults as [Subject, number][]).map(([subject, qCount]) => {
+                const isNeetSub = examContext === 'NEET' && (subject === 'Botany' || subject === 'Zoology');
+                const isNeetMain = examContext === 'NEET' && (subject === 'Physics' || subject === 'Chemistry');
                 const subjectScanIds = publishedScans.filter(s =>
                     s.subject === subject ||
                     (examContext === 'NEET' && s.subject === 'Combined' && (isNeetSub || isNeetMain)) ||
                     (examContext === 'NEET' && s.subject === 'Biology' && isNeetSub)
                 ).map(s => s.id);
 
-                const subjectFlashcards = flashcardRecords?.filter(f => subjectScanIds.includes(f.scan_id)).reduce((sum, f) => sum + (Array.isArray(f.data) ? f.data.length : 0), 0) || 0;
-                const subjectSketches = publishedScans.filter(s => subjectScanIds.includes(s.id) && s.analysis_data?.topicBasedSketches).reduce((sum, s) => sum + Object.keys(s.analysis_data.topicBasedSketches).length, 0);
+                const subjectSketches = subjectScanIds.reduce((sum, sid) => sum + (sketchCountByScan[sid] || 0), 0);
+                const subjectFlashcards = flashcardRecords
+                    .filter(f => subjectScanIds.includes(f.scan_id))
+                    .reduce((sum, f) => sum + (Array.isArray(f.data) ? f.data.length : 0), 0);
                 const subjectTopics = allTopics?.filter(t => t.subject === subject).length || 0;
 
                 return [subject, { questions: qCount, sketches: subjectSketches, flashcards: subjectFlashcards, topics: subjectTopics }] as [Subject, any];
             });
 
-            const subjectStatsResults = await Promise.all(subjectPromises);
-            const subjectStatsDict = Object.fromEntries(subjectStatsResults) as Record<Subject, any>;
+            const subjectStatsDict = Object.fromEntries(subjectPromises) as Record<Subject, any>;
 
             const totalQuestions = Object.values(subjectStatsDict).reduce((sum, s: any) => sum + s.questions, 0);
             const totalSketches = Object.values(subjectStatsDict).reduce((sum, s: any) => sum + s.sketches, 0);
@@ -271,33 +290,44 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
 
     return (
         <div className="h-screen bg-[#F8FAFC] flex flex-col relative overflow-hidden">
-            {/* Dynamic Header */}
-            <div className="bg-slate-900 pt-12 pb-8 px-6 rounded-b-[2.5rem] shadow-2xl relative overflow-hidden">
+            {/* Header */}
+            <div className="bg-slate-900 pt-12 pb-6 px-4 rounded-b-[2rem] shadow-xl relative overflow-hidden">
                 <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-primary-500/10 rounded-full blur-[80px]" />
                 <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-6">
-                        <button onClick={onBack} className="flex items-center gap-2 text-slate-400 group">
-                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-active:scale-90 transition-transform">
+                    {/* Top bar: [☰][←] | title | [✨] */}
+                    <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent('openMobileMenu'))}
+                                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/70 border border-white/10 active:bg-white/20 transition-all"
+                                aria-label="Open menu"
+                            >
+                                <Menu size={16} />
+                            </button>
+                            <button
+                                onClick={onBack}
+                                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/70 border border-white/10 active:bg-white/20 transition-all"
+                                aria-label="Go back"
+                            >
                                 <ChevronRight className="rotate-180" size={16} />
-                            </div>
-                            <span className="text-[10px] font-bold text-white/50 tracking-wide">Mission Selection</span>
-                        </button>
+                            </button>
+                        </div>
+                        <div className="text-center">
+                            <h1 className="text-sm font-black text-white tracking-wide font-outfit">Your Subjects</h1>
+                            <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{examContext}</p>
+                        </div>
                         <button
                             onClick={() => setIsAiDrawerOpen(true)}
-                            className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-primary-400 border border-white/10 relative"
+                            className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-primary-400 border border-white/10 relative active:bg-white/20 transition-all"
                         >
-                            <Sparkles size={18} />
+                            <Sparkles size={16} />
                             {aiInsights && (
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full border-2 border-slate-900" />
+                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-slate-900" />
                             )}
                         </button>
                     </div>
 
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-white font-outfit tracking-tight mb-2">
-                        Subject <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-indigo-400">Matrix</span>
-                    </h1>
-
-                    <div className="flex items-center gap-4 mt-6">
+                    <div className="flex items-center gap-4">
                         <div className="flex-1 bg-white/5 backdrop-blur-md rounded-2xl p-3 border border-white/10">
                             <p className="text-[9px] font-bold text-white/40 tracking-wide mb-1">Global Mastery</p>
                             <div className="flex items-baseline gap-1">
@@ -353,10 +383,10 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
 
                         <div className="relative z-10">
                             <h3 className="text-xl font-extrabold text-white tracking-tight mb-2 font-outfit">
-                                {aiInsights ? aiInsights.title : "Initializing Neural Map..."}
+                                {aiInsights ? aiInsights.title : "AI is getting ready..."}
                             </h3>
                             <p className="text-sm font-medium text-slate-400 leading-relaxed font-instrument">
-                                "{aiInsights ? aiInsights.description : "Analyzing your latest cognitive footprint to optimize your rank displacement..."}"
+                                "{aiInsights ? aiInsights.description : "Start practising and AI will show you exactly what to work on next."}"
                             </p>
                         </div>
 
@@ -443,7 +473,7 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                         >
                                             <div className="flex items-center gap-2 mb-1">
                                                 <div className="w-1 h-3 bg-slate-900 rounded-full" />
-                                                <span className="text-[9px] font-bold text-slate-400 tracking-wide">Arena Quick Actions</span>
+                                                <span className="text-[9px] font-bold text-slate-400 tracking-wide">Quick Start</span>
                                             </div>
 
                                             <div className="grid grid-cols-1 gap-2">
@@ -456,8 +486,8 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                                             <BookOpen size={16} />
                                                         </div>
                                                         <div className="text-left">
-                                                            <div className="text-xs font-bold text-slate-900">Topic Mastery Hub</div>
-                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">Conceptual Masterclass</div>
+                                                            <div className="text-xs font-bold text-slate-900">Topic Mastery</div>
+                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">AI tracks what you know</div>
                                                         </div>
                                                     </div>
                                                     <ArrowRight size={12} className="text-slate-300" />
@@ -472,8 +502,8 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                                             <HistoryIcon size={16} />
                                                         </div>
                                                         <div className="text-left">
-                                                            <div className="text-xs font-bold text-slate-900">Solved Paper Vault</div>
-                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">Practice Past Papers</div>
+                                                            <div className="text-xs font-bold text-slate-900">Past Year Papers</div>
+                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">AI explains every answer</div>
                                                         </div>
                                                     </div>
                                                     <ArrowRight size={12} className="text-slate-300" />
@@ -488,8 +518,8 @@ const MobileSubjectSelectionPage: React.FC<SubjectSelectionPageProps> = ({
                                                             <Zap size={16} />
                                                         </div>
                                                         <div className="text-left">
-                                                            <div className="text-xs font-bold text-slate-900">Exam Prediction and Simulation Test Engine</div>
-                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">Adaptive Hybrid • Pattern Prediction</div>
+                                                            <div className="text-xs font-bold text-slate-900">AI Practice Test</div>
+                                                            <div className="text-[8px] font-bold text-slate-400 tracking-wide">AI builds your test for you</div>
                                                         </div>
                                                     </div>
                                                     <ArrowRight size={12} className="text-slate-300" />

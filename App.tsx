@@ -580,6 +580,7 @@ const AppShell: React.FC<{
           />
         )}
 
+
         <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-50/50">
           {/* Global Compact Header - Hidden during focus mode, mobile LJ, and ALL learning journey sub-views
               (each LJ page has its own back button + header, so this bar is redundant there) */}

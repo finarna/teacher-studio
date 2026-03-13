@@ -19,7 +19,10 @@ import {
   BarChart3,
   Zap,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Trash2,
+  Square,
+  CheckSquare
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Subject, ExamContext } from '../types';
@@ -66,6 +69,8 @@ const AdminScanApproval: React.FC = () => {
   const [showOnlyUnmapped, setShowOnlyUnmapped] = useState(false);
   const [scanYears, setScanYears] = useState<Record<string, string>>({});
   const [savingYear, setSavingYear] = useState<string | null>(null);
+  const [selectedScanIds, setSelectedScanIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   // Strategic Briefing Filters (Linked to Global Context)
   const { activeSubject, activeExamContext } = useAppContext();
@@ -117,12 +122,17 @@ const AdminScanApproval: React.FC = () => {
   }, []);
 
   const loadOfficialTopics = async () => {
-    const { data } = await supabase.from('topics').select('id, name');
-    setOfficialTopicsList(data || []);
+    try {
+      const { data } = await supabase.from('topics').select('id, name');
+      setOfficialTopicsList(data || []);
+    } catch (err) {
+      console.error('Error loading official topics:', err);
+    }
   };
 
   useEffect(() => {
     loadScans();
+    setSelectedScanIds(new Set());
   }, [filterStatus]);
 
   /**
@@ -256,7 +266,7 @@ const AdminScanApproval: React.FC = () => {
           flashcards:flashcards(data)
         `)
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(100);
 
       if (filterStatus === 'published') {
         query = query.eq('is_system_scan', true);
@@ -607,6 +617,56 @@ const AdminScanApproval: React.FC = () => {
     }
   };
 
+  const deleteScan = async (scanId: string): Promise<void> => {
+    const { data: questions } = await supabase.from('questions').select('id').eq('scan_id', scanId);
+    if (questions?.length) {
+      await supabase.from('topic_question_mapping').delete().in('question_id', questions.map(q => q.id));
+      await supabase.from('questions').delete().eq('scan_id', scanId);
+    }
+    await supabase.from('topic_sketches').delete().eq('scan_id', scanId);
+    await supabase.from('flashcards').delete().eq('scan_id', scanId);
+    await supabase.from('scans').delete().eq('id', scanId);
+  };
+
+  const bulkDeleteScans = async () => {
+    if (!selectedScanIds.size) return;
+    const confirmed = window.confirm(
+      `Permanently delete ${selectedScanIds.size} unpublished scan(s) and all their data?\n\nThis cannot be undone.`
+    );
+    if (!confirmed) return;
+    setBulkDeleting(true);
+    try {
+      for (const scanId of Array.from(selectedScanIds)) {
+        await deleteScan(scanId);
+      }
+      setSelectedScanIds(new Set());
+      await loadCounts();
+      await loadScans();
+    } catch (err) {
+      console.error('Bulk delete failed:', err);
+      alert('Some deletions failed. Check console for details.');
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const toggleSelectScan = (scanId: string) => {
+    setSelectedScanIds(prev => {
+      const next = new Set(prev);
+      next.has(scanId) ? next.delete(scanId) : next.add(scanId);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const unpublishedIds = scans.filter(s => !s.is_system_scan).map(s => s.id);
+    if (selectedScanIds.size === unpublishedIds.length) {
+      setSelectedScanIds(new Set());
+    } else {
+      setSelectedScanIds(new Set(unpublishedIds));
+    }
+  };
+
   const getSuccessRateColor = (rate: number) => {
     if (rate >= 80) return 'text-emerald-600 bg-emerald-50 border-emerald-200';
     if (rate >= 50) return 'text-amber-600 bg-amber-50 border-amber-200';
@@ -671,7 +731,7 @@ const AdminScanApproval: React.FC = () => {
       {view === 'scans' ? (
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Filter Tabs */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setFilterStatus('all')}
               className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${filterStatus === 'all'
@@ -699,6 +759,33 @@ const AdminScanApproval: React.FC = () => {
             >
               Unpublished ({counts.unpublished})
             </button>
+
+            {/* Bulk Actions — visible only in unpublished tab */}
+            {filterStatus === 'unpublished' && scans.length > 0 && (
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={toggleSelectAll}
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors"
+                >
+                  {selectedScanIds.size === scans.filter(s => !s.is_system_scan).length && scans.filter(s => !s.is_system_scan).length > 0
+                    ? <><CheckSquare size={14} /> Deselect All</>
+                    : <><Square size={14} /> Select All</>
+                  }
+                </button>
+                {selectedScanIds.size > 0 && (
+                  <button
+                    onClick={bulkDeleteScans}
+                    disabled={bulkDeleting}
+                    className="flex items-center gap-1.5 px-4 py-2 text-xs font-black text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+                  >
+                    {bulkDeleting
+                      ? <><RefreshCw size={14} className="animate-spin" /> Deleting...</>
+                      : <><Trash2 size={14} /> Delete {selectedScanIds.size} Selected</>
+                    }
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Scans List */}
@@ -718,14 +805,32 @@ const AdminScanApproval: React.FC = () => {
                 {filteredScans.map((scan) => (
                   <div
                     key={scan.id}
-                    className={`bg-white rounded-xl border-2 p-6 transition-all ${scan.is_system_scan
-                      ? 'border-emerald-200 shadow-emerald-100 shadow-lg'
-                      : 'border-slate-200 hover:border-slate-300'
-                      }`}
+                    className={`bg-white rounded-xl border-2 p-6 transition-all ${
+                      selectedScanIds.has(scan.id)
+                        ? 'border-red-300 bg-red-50/30'
+                        : scan.is_system_scan
+                        ? 'border-emerald-200 shadow-emerald-100 shadow-lg'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
                   >
                     <div className="flex items-start justify-between gap-6">
                       {/* Left Section - Scan Info */}
                       <div className="flex-1">
+                        {/* Checkbox (unpublished only) */}
+                        {filterStatus === 'unpublished' && !scan.is_system_scan && (
+                          <div className="flex items-center gap-2 mb-3">
+                            <button
+                              onClick={() => toggleSelectScan(scan.id)}
+                              className={`flex items-center gap-2 text-xs font-bold transition-colors ${selectedScanIds.has(scan.id) ? 'text-red-600' : 'text-slate-400 hover:text-slate-600'}`}
+                            >
+                              {selectedScanIds.has(scan.id)
+                                ? <CheckSquare size={18} className="text-red-500" />
+                                : <Square size={18} />
+                              }
+                              {selectedScanIds.has(scan.id) ? 'Selected for deletion' : 'Select'}
+                            </button>
+                          </div>
+                        )}
                         <div className="flex items-center gap-3 mb-3 flex-wrap">
                           {/* Published Badge */}
                           {scan.is_system_scan ? (
