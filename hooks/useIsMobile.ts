@@ -16,10 +16,19 @@ export const useIsMobile = (breakpoint: number = 768) => {
         // Initial check
         checkIsMobile();
 
-        // Event listener
-        window.addEventListener('resize', checkIsMobile);
+        // Debounced resize handler — batches rapid resize events to avoid
+        // triggering expensive re-renders on every pixel change.
+        let timer: ReturnType<typeof setTimeout>;
+        const handleResize = () => {
+            clearTimeout(timer);
+            timer = setTimeout(checkIsMobile, 150);
+        };
 
-        return () => window.removeEventListener('resize', checkIsMobile);
+        window.addEventListener('resize', handleResize);
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('resize', handleResize);
+        };
     }, [breakpoint]);
 
     return isMobile;

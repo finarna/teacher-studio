@@ -566,117 +566,147 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                   </div>
                 </div>
 
-                {/* Diagram (if present) */}
-                {currentQuestion.hasVisualElement && (currentQuestion.diagramUrl || currentQuestion.imageUrl || (currentQuestion.extractedImages && currentQuestion.extractedImages.length > 0)) && (
-                  <div className="mb-4 p-3 bg-white/50 border border-slate-200 rounded-2xl shadow-sm">
-                    {/* Primary Diagram Source */}
-                    {currentQuestion.diagramUrl || currentQuestion.imageUrl ? (
-                      <img
-                        src={currentQuestion.diagramUrl || currentQuestion.imageUrl}
-                        alt="Question diagram"
-                        className="max-w-full h-auto mx-auto rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
-                        onClick={() => setEnlargedImageUrl(currentQuestion.diagramUrl || currentQuestion.imageUrl || null)}
-                      />
-                    ) : (
-                      /* Fallback: First extracted image */
-                      currentQuestion.extractedImages && currentQuestion.extractedImages.length > 0 && (
-                        <img
-                          src={currentQuestion.extractedImages[0]}
-                          alt="Extracted question diagram"
-                          className="max-w-full h-auto mx-auto rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
-                          onClick={() => setEnlargedImageUrl(currentQuestion.extractedImages![0])}
-                        />
-                      )
-                    )}
-                    {currentQuestion.visualElementDescription && (
-                      <p className="mt-2 text-[10px] text-slate-500 italic text-center font-instrument">
-                        {currentQuestion.visualElementDescription}
-                      </p>
-                    )}
-                  </div>
-                )}
+                {/* Diagrams + Options — computed together to share image-classification logic.
+                     Heuristic (applied per question):
+                       extractedImages.length === options.length     → all images are option diagrams
+                       extractedImages.length === options.length + 1 → [0] is question diagram, rest are option diagrams
+                       otherwise                                      → all images are question diagrams */}
+                {(() => {
+                  const allImgs: string[] = (currentQuestion as any).extractedImages || [];
+                  const opts: string[] = currentQuestion.options || [];
+                  const optCount = opts.length;
 
-                {/* Compact MCQ Options - 2 Column Grid */}
-                {currentQuestion.options && currentQuestion.options.length > 0 && (
-                  <div className="grid grid-cols-1 gap-3 mb-6">
-                    {currentQuestion.options.map((option, idx) => {
-                      const isSelected = responses.get(currentQuestion.id)?.selectedOption === idx;
-                      const isCorrect = currentQuestion.correctOptionIndex === idx;
-                      const optionLabel = String.fromCharCode(65 + idx); // A, B, C, D
+                  let questionImgs: string[] = [];
+                  let optionImgs: string[] = [];
+                  if (allImgs.length > 0 && optCount > 0 && allImgs.length === optCount) {
+                    optionImgs = allImgs;
+                  } else if (allImgs.length > 0 && optCount > 0 && allImgs.length === optCount + 1) {
+                    questionImgs = [allImgs[0]];
+                    optionImgs = allImgs.slice(1);
+                  } else {
+                    questionImgs = allImgs;
+                  }
 
-                      // Review mode styling
-                      const getReviewModeStyle = () => {
-                        if (!isReviewMode) {
-                          return isSelected
-                            ? 'bg-primary-50/50 ring-4 ring-primary-500/10 border-primary-500 shadow-xl shadow-primary-500/5 z-10'
-                            : 'bg-white hover:bg-slate-50 hover:border-slate-300 border-slate-200 shadow-sm';
-                        }
+                  const hasQuestionDiagram = !!(currentQuestion.diagramUrl || currentQuestion.imageUrl || questionImgs.length > 0);
 
-                        if (isCorrect) {
-                          return 'bg-emerald-50 border-emerald-500 ring-4 ring-emerald-500/10 shadow-lg z-10';
-                        }
-                        if (isSelected && !isCorrect) {
-                          return 'bg-rose-50 border-rose-500 ring-4 ring-rose-500/10 shadow-md grayscale-[0.2]';
-                        }
-                        return 'bg-white border-slate-100 opacity-60';
-                      };
-
-                      const getLabelStyle = () => {
-                        if (!isReviewMode) {
-                          return isSelected
-                            ? 'bg-slate-900 text-white shadow-[0_4px_12px_rgba(15,23,42,0.3)] scale-110'
-                            : 'bg-white text-slate-400 border-2 border-slate-100 group-hover:border-slate-200 group-hover:bg-slate-50';
-                        }
-
-                        if (isCorrect) {
-                          return 'bg-emerald-500 text-white shadow-emerald-500/30 shadow-lg scale-110';
-                        }
-                        if (isSelected && !isCorrect) {
-                          return 'bg-rose-500 text-white shadow-rose-500/30';
-                        }
-                        return 'bg-white text-slate-300 border-2 border-slate-100';
-                      };
-
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => handleOptionSelect(idx)}
-                          disabled={isReviewMode}
-                          className={`relative flex items-center gap-4 px-4 py-2.5 rounded-[1.25rem] border-2 transition-all text-left group ${getReviewModeStyle()
-                            } ${!isReviewMode ? 'cursor-pointer active:scale-[0.98]' : 'cursor-default'}`}
-                        >
-                          {/* Option Label */}
-                          <div className={`shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-base transition-all ${getLabelStyle()
-                            }`}>
-                            {optionLabel}
-                          </div>
-
-                          {/* Option Text */}
-                          <div className={`flex-1 font-outfit font-semibold text-[15px] sm:text-[16px] tracking-tight ${!isReviewMode ? 'text-slate-600' : (isCorrect || isSelected ? 'text-slate-700' : 'text-slate-400')
-                            }`}>
-                            <RenderWithMath text={option} showOptions={false} />
-                          </div>
-
-                          {/* Review mode indicators */}
-                          {isReviewMode && (isCorrect || isSelected) && (
-                            <div className="flex items-center gap-2">
-                              {isCorrect && (
-                                <div className="p-2 bg-emerald-100/50 text-emerald-600 rounded-xl">
-                                  <Check size={20} className="stroke-[4]" />
-                                </div>
-                              )}
-                              {isSelected && !isCorrect && (
-                                <div className="p-2 bg-rose-100/50 text-rose-600 rounded-xl">
-                                  <X size={20} className="stroke-[4]" />
-                                </div>
-                              )}
-                            </div>
+                  return (
+                    <>
+                      {/* Diagram area */}
+                      {hasQuestionDiagram && (
+                        <div className="mb-4 p-3 bg-white/50 border border-slate-200 rounded-2xl shadow-sm space-y-2">
+                          {(currentQuestion.diagramUrl || currentQuestion.imageUrl) && (
+                            <img
+                              src={currentQuestion.diagramUrl || currentQuestion.imageUrl}
+                              alt="Question diagram"
+                              className="max-w-full h-auto mx-auto rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
+                              onClick={() => setEnlargedImageUrl(currentQuestion.diagramUrl || currentQuestion.imageUrl || null)}
+                            />
                           )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                          {questionImgs.map((imgSrc, imgIdx) => (
+                            <img
+                              key={imgIdx}
+                              src={imgSrc}
+                              alt={`Question diagram${questionImgs.length > 1 ? ` ${imgIdx + 1}` : ''}`}
+                              className="max-w-full h-auto mx-auto rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
+                              onClick={() => setEnlargedImageUrl(imgSrc)}
+                            />
+                          ))}
+                          {currentQuestion.visualElementDescription && (
+                            <p className="mt-2 text-[10px] text-slate-500 italic text-center font-instrument">
+                              {currentQuestion.visualElementDescription}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* MCQ Options */}
+                      {opts.length > 0 && (
+                        <div className="grid grid-cols-1 gap-3 mb-6">
+                          {opts.map((option, idx) => {
+                            const isSelected = responses.get(currentQuestion.id)?.selectedOption === idx;
+                            const isCorrect = currentQuestion.correctOptionIndex === idx;
+                            const optionLabel = String.fromCharCode(65 + idx);
+                            const optImg: string | undefined = optionImgs[idx];
+
+                            const getReviewModeStyle = () => {
+                              if (!isReviewMode) {
+                                return isSelected
+                                  ? 'bg-primary-50/50 ring-4 ring-primary-500/10 border-primary-500 shadow-xl shadow-primary-500/5 z-10'
+                                  : 'bg-white hover:bg-slate-50 hover:border-slate-300 border-slate-200 shadow-sm';
+                              }
+                              if (isCorrect) return 'bg-emerald-50 border-emerald-500 ring-4 ring-emerald-500/10 shadow-lg z-10';
+                              if (isSelected && !isCorrect) return 'bg-rose-50 border-rose-500 ring-4 ring-rose-500/10 shadow-md grayscale-[0.2]';
+                              return 'bg-white border-slate-100 opacity-60';
+                            };
+
+                            const getLabelStyle = () => {
+                              if (!isReviewMode) {
+                                return isSelected
+                                  ? 'bg-slate-900 text-white shadow-[0_4px_12px_rgba(15,23,42,0.3)] scale-110'
+                                  : 'bg-white text-slate-400 border-2 border-slate-100 group-hover:border-slate-200 group-hover:bg-slate-50';
+                              }
+                              if (isCorrect) return 'bg-emerald-500 text-white shadow-emerald-500/30 shadow-lg scale-110';
+                              if (isSelected && !isCorrect) return 'bg-rose-500 text-white shadow-rose-500/30';
+                              return 'bg-white text-slate-300 border-2 border-slate-100';
+                            };
+
+                            return (
+                              <button
+                                key={idx}
+                                onClick={() => handleOptionSelect(idx)}
+                                disabled={isReviewMode}
+                                className={`relative flex items-start gap-4 px-4 py-2.5 rounded-[1.25rem] border-2 transition-all text-left group ${getReviewModeStyle()
+                                  } ${!isReviewMode ? 'cursor-pointer active:scale-[0.98]' : 'cursor-default'}`}
+                              >
+                                {/* Option Label */}
+                                <div className={`shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-base transition-all mt-0.5 ${getLabelStyle()}`}>
+                                  {optionLabel}
+                                </div>
+
+                                {/* Option Image or Text */}
+                                {optImg ? (
+                                  <div className="flex-1 flex flex-col gap-1">
+                                    <img
+                                      src={optImg}
+                                      alt={`Option ${optionLabel}`}
+                                      className="max-w-full h-auto max-h-40 object-contain rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity"
+                                      onClick={(e) => { e.stopPropagation(); setEnlargedImageUrl(optImg); }}
+                                    />
+                                    {option && option.trim() && option.trim() !== optionLabel && (
+                                      <div className={`text-xs font-outfit ${!isReviewMode ? 'text-slate-500' : (isCorrect || isSelected ? 'text-slate-600' : 'text-slate-400')}`}>
+                                        <RenderWithMath text={option} showOptions={false} />
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className={`flex-1 font-outfit font-semibold text-[15px] sm:text-[16px] tracking-tight ${!isReviewMode ? 'text-slate-600' : (isCorrect || isSelected ? 'text-slate-700' : 'text-slate-400')}`}>
+                                    <RenderWithMath text={option} showOptions={false} />
+                                  </div>
+                                )}
+
+                                {/* Review mode indicators */}
+                                {isReviewMode && (isCorrect || isSelected) && (
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    {isCorrect && (
+                                      <div className="p-2 bg-emerald-100/50 text-emerald-600 rounded-xl">
+                                        <Check size={20} className="stroke-[4]" />
+                                      </div>
+                                    )}
+                                    {isSelected && !isCorrect && (
+                                      <div className="p-2 bg-rose-100/50 text-rose-600 rounded-xl">
+                                        <X size={20} className="stroke-[4]" />
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
 
                 {/* Mastery Briefing Trigger - Desktop & Mobile */}
                 {isReviewMode && (

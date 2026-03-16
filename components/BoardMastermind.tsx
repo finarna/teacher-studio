@@ -35,6 +35,9 @@ import { matchToOfficialTopic } from '../utils/officialTopics'; // NEW: Official
 import { AI_CONFIG } from '../config/aiConfigs';
 
 import { mapTopicsFast } from '../utils/topicMapper'; // NEW: Instant keyword-based topic mapping
+import { extractAndMapImages, extractQuestionLocations } from '../utils/pdfImageExtractor';
+import { extractImagesByBoundingBoxes } from '../utils/visionGuidedExtractor';
+import { extractCombinedPaper } from '../utils/combinedPaperExtractor';
 import { useAppContext } from '../contexts/AppContext';
 import { useFilteredScans, useSubjectStats } from '../hooks/useFilteredScans';
 import { EmptyState } from './EmptyState';
@@ -134,7 +137,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
           try {
             console.log(`🖼️ [BULK PDF EXTRACTOR] Starting image extraction from ${file.name}...`);
-            const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+
             const result = await extractAndMapImages(file);
             fileImageMapping = result?.mapping;
             (window as any).rawExtractedImages = result?.rawImages;
@@ -286,7 +289,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           const questionsWithBoundingBoxes = extractedData.questions
             .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
             .map((q: any) => {
-              const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+              const questionNumMatch = q.id?.toString().match(/(\d+)$/);
               const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
               return { questionNumber, boundingBox: q.visualBoundingBox };
             })
@@ -310,7 +313,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           if (questionsWithBoundingBoxes.length > 0) {
             try {
               console.log(`🎯 [BULK VISION-GUIDED] ${file.name}: Found ${questionsWithBoundingBoxes.length} questions with bounding boxes`);
-              const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+
               visionGuidedMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
               console.log(`✅ [BULK VISION-GUIDED] ${file.name}: Extracted images for ${visionGuidedMapping.size} questions`);
             } catch (err) {
@@ -325,7 +328,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
               source: file.name
             };
 
-            const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+            const questionNumMatch = q.id?.toString().match(/(\d+)$/);
             if (questionNumMatch) {
               const questionNum = parseInt(questionNumMatch[1]);
 
@@ -476,7 +479,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           });
         }, 3000);
 
-        const { extractCombinedPaper } = await import('../utils/combinedPaperExtractor');
+        // extractCombinedPaper is statically imported at top of file
         const combinedQuestions = await extractCombinedPaper(
           file, apiKey, selectedModel, activeExamContext as 'NEET' | 'JEE', (stage) => setLoadingStage(stage)
         );
@@ -496,7 +499,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
             return {
               id: q.id,
-              question_number: q.id.toString().replace(/\D/g, '') || (idx + 1).toString(),
+              question_number: q.id.toString().match(/(\d+)$/)?.[1] || (idx + 1).toString(),
               text: q.text,
               correct_answer: correctLetter,
               options: q.options,
@@ -555,7 +558,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
             if (questionsWithBoxes.length > 0) {
               console.log('🎯 [COMBINED - VISION] Extracting images using AI bounding boxes:', questionsWithBoxes.length);
-              const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+
 
               imageMapping = await extractImagesByBoundingBoxes(
                 file,
@@ -569,7 +572,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
               setPipelineProgress(85);
             } else {
               console.log('🖼️ [COMBINED - BASIC] Fallback image extraction...');
-              const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+
               const result = await extractAndMapImages(file);
               imageMapping = result?.mapping;
             }
@@ -589,7 +592,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
             return {
               id: sq.id ? sq.id.toString() : (sIdx + 1).toString(),
-              question_number: sq.id ? sq.id.toString().replace(/\D/g, '') : (sIdx + 1).toString(),
+              question_number: sq.id ? (sq.id.toString().match(/(\d+)$/)?.[1] || (sIdx + 1).toString()) : (sIdx + 1).toString(),
               page_number: sq.page || 1,
               text: sq.text,
               correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
@@ -633,13 +636,13 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
             if (questionsWithBoxes.length > 0) {
               console.log('🎯 [SIMPLIFIED MATH - VISION] Using precise AI bounding boxes:', questionsWithBoxes.length);
-              const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+
               imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoxes);
               console.log('✅ [SIMPLIFIED MATH - VISION] Extracted diagrams for', imageMapping.size, 'questions');
             } else {
               // Priority 2: Basic Proximity Fallback (Only if no boxes provided)
               console.log('🖼️ [SIMPLIFIED MATH - BASIC] Page-Level fallback...');
-              const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+
               const result = await extractAndMapImages(file);
               imageMapping = result?.mapping;
               (window as any).rawExtractedImages = result?.rawImages;
@@ -651,13 +654,41 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         }
       } else if (useSimplifiedExtraction && subj === 'Physics') {
         console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - PHYSICS] Using schema-driven extraction with @google/genai');
-        const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
+
+        // Pre-detect column layout using PDF text positions (fast, no LLM call)
+        // Single-column: all questions share a narrow X band
+        // Two-column: questions are split into two distinct X bands
+        // NOTE: Answer-key tables (e.g. last page) have many questions at the same Y in a row →
+        //       filter those out before computing X spread.
+        let detectedLayout: 'single' | 'double' = 'double'; // safe default
+        let questionLocs: Awaited<ReturnType<typeof extractQuestionLocations>> = [];
+        try {
+          // extractQuestionLocations already strips answer-key table rows
+          questionLocs = await extractQuestionLocations(file);
+          if (questionLocs.length >= 3) {
+            // Cluster X positions into 40pt buckets; find dominant bucket share.
+            // Single-column: one bucket holds >70% of detections.
+            // Double-column: two significant clusters.
+            const xBuckets: Record<number, number> = {};
+            for (const loc of questionLocs) {
+              const bucket = Math.round(loc.x / 40) * 40;
+              xBuckets[bucket] = (xBuckets[bucket] || 0) + 1;
+            }
+            const topShare = Math.max(...Object.values(xBuckets)) / questionLocs.length;
+            detectedLayout = topShare > 0.70 ? 'single' : 'double';
+            console.log(`📐 [PHYSICS LAYOUT DETECT] ${questionLocs.length} locs. Top X-bucket: ${(topShare * 100).toFixed(0)}% → ${detectedLayout}-column`);
+          }
+        } catch (e) {
+          console.warn('⚠️ [PHYSICS LAYOUT DETECT] Failed, defaulting to double-column', e);
+        }
+
+        const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext, undefined, detectedLayout);
         // Convert simplified format to our existing format
         extractionData = {
           questions: simpleQuestions.map((sq: any) => ({
             id: `Q${sq.id}`,
             text: sq.text,
-            options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
+            options: (sq.options || []).map((opt: any) => `(${opt.id}) ${opt.text}`),
             correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
             marks: 1,
             difficulty: sq.difficulty || 'Medium',
@@ -678,25 +709,59 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
             if (enableVisionExtraction) {
               const questionsWithBoundingBoxes = extractionData.questions
                 .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
-                .map((q: any) => ({
-                  questionNumber: parseInt(q.id.replace(/\D/g, '')),
-                  boundingBox: q.visualBoundingBox
-                }))
+                .map((q: any) => {
+                  const qNum = parseInt(q.id.toString().match(/(\d+)$/)?.[1] || '0');
+                  const loc = questionLocs.find(l => l.questionNumber === qNum);
+                  return { questionNumber: qNum, boundingBox: q.visualBoundingBox, questionX: loc?.x };
+                })
                 .filter((item: any) => item.questionNumber && item.boundingBox);
 
               if (questionsWithBoundingBoxes.length > 0) {
                 console.log('🎯 [SIMPLIFIED PHYSICS - VISION] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
-                const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+
                 imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
                 console.log('✅ [SIMPLIFIED PHYSICS - VISION] Extracted', imageMapping.size, 'images');
               }
             } else {
               console.log('🖼️ [SIMPLIFIED PHYSICS - BASIC] Extracting images...');
-              const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
               const result = await extractAndMapImages(file);
               imageMapping = result.mapping;
               (window as any).rawExtractedImages = result.rawImages;
               console.log('✅ [SIMPLIFIED PHYSICS - BASIC] Extracted', imageMapping?.size || 0, 'images');
+
+              // Fallback: for questions with Gemini-provided bounding boxes but no bitmap found, use vision-guided extraction
+              const missingVisualQs = extractionData.questions.filter((q: any) => {
+                const qNum = parseInt(q.id.toString().match(/(\d+)$/)?.[1] || '0');
+                if (!q.hasVisualElement || !q.visualBoundingBox || !qNum) return false;
+                if (!imageMapping || !imageMapping.has(qNum)) return true;
+                const existingImgs = imageMapping.get(qNum);
+                // Also fallback if existing bitmap is suspiciously small (< ~4KB base64 = wrong crop)
+                const existingTooSmall = existingImgs && existingImgs.length > 0 &&
+                  (existingImgs[0].imageData?.length || 0) < 5500;
+                // Also fallback if multiple bitmaps found — indicates option-as-images question
+                // (e.g. Q26: 4 option images but PDF bitmap extractor only captures 2-3 of them).
+                // Replace partial bitmaps with the full Gemini bounding-box crop that covers all options.
+                const hasPartialOptionImages = existingImgs && existingImgs.length >= 2;
+                return existingTooSmall || hasPartialOptionImages;
+              });
+              if (missingVisualQs.length > 0) {
+                console.log(`🎯 [SIMPLIFIED PHYSICS - VECTOR FALLBACK] ${missingVisualQs.length} questions with missing images — trying bounding box extraction`);
+                const fallbackBoxes = missingVisualQs.map((q: any) => {
+                  const qNum = parseInt(q.id.toString().match(/(\d+)$/)?.[1] || '0');
+                  const loc = questionLocs.find(l => l.questionNumber === qNum);
+                  return { questionNumber: qNum, boundingBox: q.visualBoundingBox, questionX: loc?.x };
+                }).filter((item: any) => item.questionNumber);
+                try {
+                  const fallbackMapping = await extractImagesByBoundingBoxes(file, fallbackBoxes);
+                  fallbackMapping.forEach((imgs, qNum) => {
+                    if (!imageMapping) imageMapping = new Map();
+                    imageMapping.set(qNum, imgs);
+                  });
+                  console.log(`✅ [SIMPLIFIED PHYSICS - VECTOR FALLBACK] Added ${fallbackMapping.size} vector images`);
+                } catch (fbErr) {
+                  console.warn('⚠️ [SIMPLIFIED PHYSICS - VECTOR FALLBACK] Failed:', fbErr);
+                }
+              }
             }
           } catch (err) {
             console.warn('⚠️ [SIMPLIFIED PHYSICS - IMAGE] Failed:', err);
@@ -732,20 +797,20 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
               const questionsWithBoundingBoxes = extractionData.questions
                 .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
                 .map((q: any) => ({
-                  questionNumber: parseInt(q.id.replace(/\D/g, '')),
+                  questionNumber: parseInt(q.id.toString().match(/(\d+)$/)?.[1] || '0'),
                   boundingBox: q.visualBoundingBox
                 }))
                 .filter((item: any) => item.questionNumber && item.boundingBox);
 
               if (questionsWithBoundingBoxes.length > 0) {
                 console.log('🎯 [SIMPLIFIED BIOLOGY - VISION] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
-                const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+  
                 imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
                 console.log('✅ [SIMPLIFIED BIOLOGY - VISION] Extracted', imageMapping.size, 'images');
               }
             } else {
               console.log('🖼️ [SIMPLIFIED BIOLOGY - BASIC] Extracting images...');
-              const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+
               const result = await extractAndMapImages(file);
               imageMapping = result.mapping;
               (window as any).rawExtractedImages = result.rawImages;
@@ -780,7 +845,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         // Image extraction for Chemistry (basic proximity-based)
         if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
           try {
-            const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
+
             const result = await extractAndMapImages(file);
             imageMapping = result.mapping;
             (window as any).rawExtractedImages = result.rawImages;
@@ -1119,7 +1184,7 @@ CRITICAL RULES:
             const questionsWithBoundingBoxes = extractionData.questions
               .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
               .map((q: any) => {
-                const questionNumMatch = q.id?.match(/Q?(\d+)/i);
+                const questionNumMatch = q.id?.toString().match(/(\d+)$/);
                 const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
                 return {
                   questionNumber,
@@ -1145,7 +1210,7 @@ CRITICAL RULES:
 
             if (questionsWithBoundingBoxes.length > 0) {
               console.log('🎯 [VISION-GUIDED] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
-              const { extractImagesByBoundingBoxes } = await import('../utils/visionGuidedExtractor');
+
               imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
               console.log('✅ [VISION-GUIDED] Extracted images for', imageMapping.size, 'questions');
             } else {
@@ -1154,7 +1219,6 @@ CRITICAL RULES:
           } else if (!imageMapping || (typeof imageMapping.size === 'number' && imageMapping.size === 0) || typeof imageMapping.get !== 'function') {
             // BASIC MODE: Extract all images from PDF pages (faster, less precise)
             console.log('🖼️ [BASIC IMAGE EXTRACTION] Extracting images from PDF pages...');
-            const { extractAndMapImages } = await import('../utils/pdfImageExtractor');
             const result = await extractAndMapImages(file);
             imageMapping = result?.mapping;
             (window as any).rawExtractedImages = result?.rawImages;
@@ -1207,9 +1271,8 @@ CRITICAL RULES:
                 }
               }
 
-              if (images && images.length > 0) {
+              if (images && images.length > 0 && q.hasVisualElement) {
                 newQuestion.extractedImages = images.map((img: any) => img.imageData);
-                newQuestion.hasVisualElement = true; // Force UI to recognize images
                 const sizes = (newQuestion.extractedImages as string[]).map((d: string) => `${(d.length * 0.75 / 1024).toFixed(1)}KB`);
                 console.log(`🔗 [IMAGE MERGE] Q${questionNum}: attached ${images.length} image(s) [${sizes.join(', ')}] — dataURL prefix: ${(newQuestion.extractedImages as string[])[0]?.substring(0, 40)}`);
               } else if (q.hasVisualElement) {

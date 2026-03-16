@@ -99,7 +99,7 @@ export async function getForecastedCalibration(
         .select('*')
         .eq('exam_context', examContext)
         .eq('subject', subject || null)
-        .single();
+        .maybeSingle();
 
     const driftMultiplier = config?.rigor_drift_multiplier || 1.8;
     // @ts-ignore - Added ids_baseline in migration

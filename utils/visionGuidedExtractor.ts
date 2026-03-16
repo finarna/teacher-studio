@@ -21,9 +21,18 @@ export interface VisualBoundingBox {
   height: string; // Height as percentage, e.g. "25%"
 }
 
-// Helper to parse percentage string to decimal
-function parsePercentage(percent: string): number {
-  return parseFloat(percent.replace('%', '')) / 100;
+// Parse a bounding-box coordinate that Gemini may return as:
+//   "21%"  → 0.21   (percentage with % sign — expected)
+//   "21"   → 0.21   (percentage 0-100, % sign omitted)
+//   "0.21" → 0.21   (already a 0-1 ratio)
+//   "210"  → normalized by un-scaled page dimension (PDF point coordinate)
+function parsePercentage(value: string, pageSize?: number): number {
+  const raw = parseFloat((value || '0').replace('%', ''));
+  if (isNaN(raw)) return 0;
+  if (raw <= 1.0) return raw;           // already 0-1 ratio
+  if (raw <= 100) return raw / 100;     // percentage 0-100
+  // PDF point coordinate — normalize by un-scaled page dimension if available
+  return pageSize ? Math.min(raw / pageSize, 1.0) : 1.0;
 }
 
 export interface ExtractedVisualImage {
@@ -37,11 +46,15 @@ export interface ExtractedVisualImage {
 }
 
 /**
- * Extract images from PDF based on Gemini's visual bounding boxes
+ * Extract images from PDF based on Gemini's visual bounding boxes.
+ *
+ * questionX: the question's actual X position in PDF points (from pdfImageExtractor's
+ *   item.transform[4]). Used to determine which column a question is in for 2-column PDFs,
+ *   so we can correct Gemini's often-wrong x/width values.
  */
 export async function extractImagesByBoundingBoxes(
   file: File,
-  questionVisuals: Array<{ questionNumber: number; boundingBox: VisualBoundingBox }>,
+  questionVisuals: Array<{ questionNumber: number; boundingBox: VisualBoundingBox; questionX?: number }>,
   onProgress?: (index: number, total: number) => void
 ): Promise<Map<number, ExtractedVisualImage[]>> {
   const arrayBuffer = await file.arrayBuffer();
@@ -51,7 +64,7 @@ export async function extractImagesByBoundingBoxes(
   console.log('🎯 [VISION-GUIDED] Extracting images for', questionVisuals.length, 'questions with visuals');
 
   for (let i = 0; i < questionVisuals.length; i++) {
-    const { questionNumber, boundingBox } = questionVisuals[i];
+    const { questionNumber, boundingBox, questionX } = questionVisuals[i];
     onProgress?.(i, questionVisuals.length);
 
     try {
@@ -61,16 +74,64 @@ export async function extractImagesByBoundingBoxes(
       const page = await pdf.getPage(pageNumber);
       const viewport = page.getViewport({ scale: 2.0 }); // 2x scale for better quality
 
-      // Calculate exact pixel coordinates from percentages
-      const xPercent = parsePercentage(x);
-      const yPercent = parsePercentage(y);
-      const widthPercent = parsePercentage(width);
-      let heightPercent = parsePercentage(height);
+      // Un-scaled page dimensions (viewport is at 2x scale)
+      const pageW = viewport.width / 2.0;
+      const pageH = viewport.height / 2.0;
 
-      // CRITICAL FIX: Add 5% extra height margin to avoid bottom-chopping of figures/labels
-      // This ensures labels like (a), (b) or x-axis names are fully captured.
-      const heightPadding = 0.05;
-      heightPercent = Math.min(1.0 - yPercent, heightPercent + heightPadding);
+      // Calculate initial fractions — robust to %, bare 0-100, or PDF point values
+      let xFrac = parsePercentage(x, pageW);
+      const yFrac = parsePercentage(y, pageH);
+      let wFrac = parsePercentage(width, pageW);
+      let hFrac = parsePercentage(height, pageH);
+
+      // --- COLUMN-AWARE HORIZONTAL CORRECTION ---
+      // Gemini returns bounding-box x/width in an internal image coordinate space that is
+      // wider than the actual PDF (~850pt vs 595pt), causing right-column crops to overflow.
+      // When we know which column the question lives in (questionX from pdfImageExtractor),
+      // we constrain the horizontal crop to that column's safe bounds.
+      if (questionX !== undefined && pageW > 0) {
+        // Column divider sits at ~50% of page width (left col ~10%, right col ~57% for KCET A4)
+        const colThreshold = pageW * 0.50;
+        const isRightCol = questionX >= colThreshold;
+
+        if (isRightCol) {
+          // Right column: crop must be in the right half
+          const rcStart = 0.52;
+          const rcEnd   = 0.98;
+          if (xFrac < 0.45 || xFrac + wFrac > 1.05) {
+            // Gemini placed crop in wrong area or it overflows — use full right column
+            xFrac = rcStart;
+            wFrac = rcEnd - rcStart;
+          } else {
+            // x looks plausible; just clamp width to stay on page
+            wFrac = Math.min(wFrac, rcEnd - xFrac);
+          }
+        } else {
+          // Left column: crop must be in the left half
+          const lcStart = 0.02;
+          const lcEnd   = 0.50;
+          if (xFrac > 0.55 || xFrac + wFrac > 0.60) {
+            // Gemini placed crop in wrong column or overflows into right — use full left column
+            xFrac = lcStart;
+            wFrac = lcEnd - lcStart;
+          } else {
+            // x looks plausible; clamp width to stay within left column
+            wFrac = Math.min(wFrac, lcEnd - xFrac);
+          }
+        }
+        console.log(`📐 [VISION-GUIDED] Q${questionNumber}: ${isRightCol ? 'RIGHT' : 'LEFT'} col correction → x=${xFrac.toFixed(3)} w=${wFrac.toFixed(3)}`);
+      } else {
+        // No column info — just clamp to avoid overflow
+        wFrac = Math.min(wFrac, 1.0 - xFrac);
+      }
+
+      // Height: add 5% padding (bottom labels) but never exceed page bottom
+      hFrac = Math.min(1.0 - yFrac, hFrac + 0.05);
+      // Safety clamps
+      const xPercent = Math.max(0, Math.min(xFrac, 0.99));
+      const yPercent = Math.max(0, Math.min(yFrac, 0.99));
+      const widthPercent  = Math.max(0.01, Math.min(wFrac, 1.0 - xPercent));
+      const heightPercent = Math.max(0.01, Math.min(hFrac, 1.0 - yPercent));
 
       const xPixel = Math.floor(viewport.width * xPercent);
       const yPixel = Math.floor(viewport.height * yPercent);

@@ -69,6 +69,7 @@ const AppContent: React.FC = () => {
   // God Mode Feature State
   const [recentScans, setRecentScans] = useState<Scan[]>([]);
   const [selectedScan, setSelectedScan] = useState<Scan | null>(null);
+  const [scanRefreshKey, setScanRefreshKey] = useState(0);
 
   const [userState, setUserState] = useState<UserState>({
     currentModuleIndex: 0,
@@ -221,7 +222,14 @@ const AppContent: React.FC = () => {
       }
     };
     fetchScans();
-  }, [user?.id]); // Use user.id instead of full user object to prevent unnecessary re-runs
+  }, [user?.id, scanRefreshKey]); // scanRefreshKey increments when admin publishes a scan
+
+  // Listen for admin publish events to refresh scan data in appContext
+  useEffect(() => {
+    const handler = () => setScanRefreshKey(k => k + 1);
+    window.addEventListener('scansUpdated', handler);
+    return () => window.removeEventListener('scansUpdated', handler);
+  }, []);
 
   // Auto-select latest scan when switching to analysis view
   useEffect(() => {
@@ -229,6 +237,32 @@ const AppContent: React.FC = () => {
       setSelectedScan(recentScans[0]);
     }
   }, [godModeView, selectedScan, recentScans]);
+
+  // Lazy-fetch full scan data when selectedScan has no questions (list endpoint strips analysis_data)
+  useEffect(() => {
+    if (!selectedScan?.id || (selectedScan.analysisData?.questions?.length ?? 0) > 0) return;
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        const res = await fetch(getApiUrl(`/api/scans/${selectedScan.id}`), {
+          signal: controller.signal,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (controller.signal.aborted || !res.ok) return;
+        const full = await res.json();
+        if (controller.signal.aborted) return;
+        if (full?.analysisData?.questions?.length > 0) {
+          setSelectedScan(full);
+          setRecentScans(prev => prev.map(s => s.id === full.id ? full : s));
+        }
+      } catch (err: any) {
+        if (err?.name !== 'AbortError') console.error('Failed to lazy-fetch scan detail:', err);
+      }
+    })();
+    return () => controller.abort();
+  }, [selectedScan?.id]);
 
   // Handle RBAC View Defaults
   useEffect(() => {
@@ -361,7 +395,7 @@ const AppContent: React.FC = () => {
       console.log(`🔄 Syncing scan to Supabase: ${scan.id}`, {
         subject: scan.subject,
         questionCount: scan.analysisData?.questions?.length,
-        questionsWithSketches: scan.analysisData?.questions?.filter(q => q.sketchSvg).length || 0
+        questionsWithSketches: scan.analysisData?.questions?.filter(q => q.sketchSvg || (q.images && q.images.length > 0)).length || 0
       });
 
       // CRITICAL: Strip large topic sketch data to avoid 413 Content Too Large errors
@@ -399,11 +433,26 @@ const AppContent: React.FC = () => {
       // Always POST - backend has upsert logic
       console.log(`📝 Upserting stripped scan ${scan.id}`);
 
-      const response = await fetch(getApiUrl('/api/scans'), {
+      const doFetch = () => fetch(getApiUrl('/api/scans'), {
         method: 'POST',
         headers,
         body: JSON.stringify(scanToSync)
       });
+
+      let response: Response;
+      try {
+        response = await doFetch();
+      } catch (fetchErr: any) {
+        // ERR_NETWORK_CHANGED happens after long Gemini calls — retry once after 3s
+        const isNetworkChange = fetchErr?.message?.includes('fetch') || fetchErr?.message?.includes('network');
+        if (isNetworkChange) {
+          console.warn(`⚠️ Network changed during sync, retrying in 3s...`);
+          await new Promise(r => setTimeout(r, 3000));
+          response = await doFetch();
+        } else {
+          throw fetchErr;
+        }
+      }
 
       if (!response.ok) {
         const result = await response.json();

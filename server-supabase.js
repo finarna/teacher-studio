@@ -638,10 +638,14 @@ app.get('/api/scans', async (req, res) => {
       return res.status(401).json({ error: 'Auth session missing!' });
     }
 
-    // Fetch from Supabase with optional filters
+    // Fetch from Supabase with optional filters.
+    // Deliberately exclude analysis_data (large JSON with all questions) from the
+    // list endpoint — it's only needed for single-scan detail view (GET /api/scans/:id).
+    // Omitting it keeps the list response lean, fast, and avoids ERR_NETWORK_CHANGED
+    // on slow connections caused by transferring 50-100KB per scan.
     let query = supabaseAdmin
       .from('scans')
-      .select('*')
+      .select('id, name, scan_date, status, grade, subject, exam_context, year, is_combined_paper, subjects, summary, overall_difficulty, difficulty_distribution, blooms_taxonomy, topic_weightage, trends, predictive_topics, faq, strategy, user_id')
       .eq('user_id', userId);
 
     // Apply subject filter (Additive: include combined papers containing the subject)

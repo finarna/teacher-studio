@@ -157,6 +157,8 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
       return;
     }
 
+    const controller = new AbortController();
+
     const loadVisuals = async () => {
       console.log('🖼️ [loadVisuals] Starting for scan:', scan.id);
       try {
@@ -167,13 +169,16 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
         console.log('🖼️ [loadVisuals] Fetching from:', url);
 
         const response = await fetch(url, {
+          signal: controller.signal,
           headers: {
             'Authorization': token ? `Bearer ${token}` : ''
           }
         });
 
+        if (controller.signal.aborted) return;
         if (response.ok) {
           const result = await response.json();
+          if (controller.signal.aborted) return;
           console.log('🖼️ [loadVisuals] Success:', result.data?.questionSketches ? Object.keys(result.data.questionSketches).length : 0, 'sketches found');
           if (result.data?.questionSketches) {
             setQuestionSketches(result.data.questionSketches);
@@ -181,12 +186,14 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
         } else {
           console.error('🖼️ [loadVisuals] Server error:', response.status);
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return;
         console.error('🖼️ [loadVisuals] Error:', err);
       }
     };
 
     loadVisuals();
+    return () => controller.abort();
   }, [scan?.id]);
 
   // Main questions source that merges metadata from scan and large sketches from questionSketches state
@@ -1202,7 +1209,7 @@ Schema: {
                             <div className="flex-1 space-y-4">
                               <h4 className="text-[11px] font-black text-accent-400 uppercase tracking-[0.3em]">Longitudinal Cognitive Drift</h4>
                               <div className="h-40 w-full min-h-0">
-                                <ResponsiveContainer width="100%" height="100%" minHeight={150}>
+                                <ResponsiveContainer width="100%" height={160}>
                                   <AreaChart data={portfolioStats}>
                                     <defs>
                                       <linearGradient id="colorMathExec" x1="0" y1="0" x2="0" y2="1">
@@ -1240,7 +1247,7 @@ Schema: {
                               </div>
                             </div>
                             <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30 min-h-0">
-                              <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+                              <ResponsiveContainer width="100%" height={192}>
                                 <LineChart data={portfolioStats}>
                                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                   <XAxis dataKey="source" hide />
@@ -1257,7 +1264,7 @@ Schema: {
                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Rigor Segmentation (Y-o-Y)</h4>
                             <div className="h-48 border border-slate-100 rounded-3xl p-4 bg-slate-50/30 min-h-0">
                               {portfolioStats && (portfolioStats as any[]).length > 0 && (
-                                <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+                                <ResponsiveContainer width="100%" height={192}>
                                   <BarChart data={portfolioStats} layout="vertical" margin={{ left: 10, right: 30, top: 0, bottom: 0 }}>
                                     <XAxis type="number" hide domain={[0, 100]} />
                                     <YAxis dataKey="source" type="category" hide />
@@ -1905,39 +1912,64 @@ Schema: {
                           </div>
 
                           {/* Options - Minimal */}
-                          {selectedQ.options && selectedQ.options.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2 mb-6">
-                              {selectedQ.options.map((option: string, idx: number) => {
-                                const isCorrect = selectedQ.correctOptionIndex !== undefined && idx === selectedQ.correctOptionIndex;
-                                return (
-                                  <div
-                                    key={idx}
-                                    className={`flex items-center gap-2 p-3 rounded-lg transition-colors relative ${isCorrect
-                                      ? 'bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-300'
-                                      : 'bg-slate-50 hover:bg-slate-100'
-                                      } `}
-                                  >
-                                    {isCorrect && (
-                                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-md">
-                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                        </svg>
+                          {selectedQ.options && selectedQ.options.length > 0 && (() => {
+                            const allImgs: string[] = selectedQ.extractedImages || [];
+                            const optCount: number = selectedQ.options.length;
+                            let optionImgs: string[] = [];
+                            if (allImgs.length === optCount) {
+                              optionImgs = allImgs;
+                            } else if (allImgs.length === optCount + 1) {
+                              optionImgs = allImgs.slice(1);
+                            }
+                            return (
+                              <div className="grid grid-cols-2 gap-2 mb-6">
+                                {selectedQ.options.map((option: string, idx: number) => {
+                                  const isCorrect = selectedQ.correctOptionIndex !== undefined && idx === selectedQ.correctOptionIndex;
+                                  const optImg: string | undefined = optionImgs[idx];
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className={`flex items-start gap-2 p-3 rounded-lg transition-colors relative ${isCorrect
+                                        ? 'bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-300'
+                                        : 'bg-slate-50 hover:bg-slate-100'
+                                        } `}
+                                    >
+                                      {isCorrect && (
+                                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shadow-md">
+                                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                          </svg>
+                                        </div>
+                                      )}
+                                      <span className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold mt-0.5 ${isCorrect
+                                        ? 'bg-emerald-600 text-white'
+                                        : 'bg-slate-200 text-slate-700'
+                                        } `}>
+                                        {['A', 'B', 'C', 'D'][idx]}
+                                      </span>
+                                      <div className={`flex-1 text-sm ${isCorrect ? 'text-emerald-900 font-semibold' : 'text-slate-700'} `}>
+                                        {optImg ? (
+                                          <div className="flex flex-col gap-1">
+                                            <img
+                                              src={optImg}
+                                              alt={`Option ${['A', 'B', 'C', 'D'][idx]}`}
+                                              className="max-w-full h-auto max-h-32 object-contain rounded cursor-zoom-in hover:opacity-90 transition-opacity"
+                                              onClick={() => setEnlargedVisualNote({ imageUrl: optImg, questionId: selectedQ.id })}
+                                            />
+                                            {option && option.trim() && option.trim() !== ['A', 'B', 'C', 'D'][idx] && (
+                                              <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
+                                        )}
                                       </div>
-                                    )}
-                                    <span className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold ${isCorrect
-                                      ? 'bg-emerald-600 text-white'
-                                      : 'bg-slate-200 text-slate-700'
-                                      } `}>
-                                      {['A', 'B', 'C', 'D'][idx]}
-                                    </span>
-                                    <div className={`flex-1 text-sm ${isCorrect ? 'text-emerald-900 font-semibold' : 'text-slate-700'} `}>
-                                      <RenderWithMath text={option.replace(/^\([A-D]\)\s*/, '')} showOptions={false} serif={false} />
                                     </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
+                                  );
+                                })}
+                              </div>
+                            );
+                          })()}
 
                           {/* Content Container with Tab Switcher */}
                           <div className="relative border-t border-slate-200 pt-6">
@@ -1991,25 +2023,35 @@ Schema: {
                                   </div>
                                 )}
 
-                                {/* Source 2: extractedImages array — legacy pdfImageExtractor output */}
+                                {/* Source 2: extractedImages array — only question-level images (option images are shown in options grid above) */}
                                 {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (() => {
-                                  console.group(`🖼️ [RENDER-IMG] Q${selectedQ.id} — rendering ${selectedQ.extractedImages!.length} extracted image(s)`);
-                                  selectedQ.extractedImages!.forEach((d: string, i: number) => {
+                                  const allImgs: string[] = selectedQ.extractedImages!;
+                                  const optCount: number = selectedQ.options?.length || 0;
+                                  // Determine which images are question diagrams vs option diagrams
+                                  let questionLevelImgs: string[];
+                                  if (allImgs.length === optCount && optCount > 0) {
+                                    questionLevelImgs = []; // all are option images, shown in options grid
+                                  } else if (allImgs.length === optCount + 1 && optCount > 0) {
+                                    questionLevelImgs = [allImgs[0]]; // first is question diagram
+                                  } else {
+                                    questionLevelImgs = allImgs; // all are question diagrams
+                                  }
+                                  console.group(`🖼️ [RENDER-IMG] Q${selectedQ.id} — ${allImgs.length} total, ${questionLevelImgs.length} question-level`);
+                                  allImgs.forEach((d: string, i: number) => {
                                     console.log(`  img[${i}]: length=${d.length} chars (~${(d.length*0.75/1024).toFixed(1)}KB), starts="${d.substring(0,80)}"`);
                                     if (!d.startsWith('data:')) console.warn(`  ⚠️ img[${i}] does NOT start with "data:" — src will be invalid!`);
                                   });
                                   console.groupEnd();
-                                  return null;
-                                })()}
-                                {selectedQ.extractedImages && selectedQ.extractedImages.length > 0 && (
-                                  <div className="mb-4 space-y-2">
-                                    {selectedQ.extractedImages.map((imgData: string, idx: number) => (
-                                      <div key={idx} className="rounded-xl overflow-hidden border border-blue-200 shadow-sm">
+                                  if (questionLevelImgs.length === 0) return null;
+                                  return (
+                                    <div className="mb-4 space-y-2">
+                                      {questionLevelImgs.map((imgData: string, idx: number) => (
+                                        <div key={idx} className="rounded-xl overflow-hidden border border-blue-200 shadow-sm">
                                         <div className="bg-blue-50 px-3 py-1.5 border-b border-blue-100 flex items-center justify-between gap-2">
                                           <div className="flex items-center gap-2">
                                             <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                             <span className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide">
-                                              Figure {selectedQ.extractedImages.length > 1 ? idx + 1 : ''}
+                                              Figure {questionLevelImgs.length > 1 ? idx + 1 : ''}
                                             </span>
                                           </div>
                                           <button
@@ -2044,7 +2086,8 @@ Schema: {
                                       </div>
                                     ))}
                                   </div>
-                                )}
+                                  );
+                                })()}
 
                                 {/* Source 3: hasVisualElement but no images yet — show indicator */}
                                 {selectedQ.hasVisualElement && !selectedQ.imageUrl && (!selectedQ.extractedImages || selectedQ.extractedImages.length === 0) && (() => {

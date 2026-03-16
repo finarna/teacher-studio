@@ -112,7 +112,7 @@ function extractExamYear(scanName: string): number | undefined {
 /**
  * Compression constants
  */
-const MAX_QUESTIONS_STANDARD = 50;
+const MAX_QUESTIONS_STANDARD = 90; // KCET=60, NEET per-subject=60, JEE=30 — cover all standard exams
 const MAX_QUESTIONS_COMBINED = 200; // Allow more for NEET/JEE full analysis
 const MAX_QUESTION_TEXT_LENGTH = 500; // Truncate long questions
 const MAX_OPTIONS_PER_QUESTION = 4; // Standard MCQ format
@@ -286,7 +286,7 @@ function buildContextPayloadInternal(appContext: VidyaAppContext & {
         scanName: scan.name,
         scanDate: scan.date,
         examYear,
-        questionNumber: (q as any).questionNumber || 0,
+        questionNumber: (() => { const m = (q.id || '').toString().match(/Q(\d+)$/i); return m ? parseInt(m[1]) : parseInt(q.id) || (q as any).questionNumber || 0; })(),
         topic: q.topic || 'General',
         difficulty: (q.difficulty as any) || q.diff || 'Unknown',
         marks: typeof q.marks === 'number' ? q.marks : Number(q.marks) || 0,
@@ -316,7 +316,7 @@ function buildContextPayloadInternal(appContext: VidyaAppContext & {
             scanName: scan.name,
             scanDate: scan.date,
             examYear,
-            questionNumber: (q as any).questionNumber || 0,
+            questionNumber: (() => { const m = (q.id || '').toString().match(/Q(\d+)$/i); return m ? parseInt(m[1]) : parseInt(q.id) || (q as any).questionNumber || 0; })(),
             topic: q.topic || 'General',
             difficulty: (q.difficulty as any) || q.diff || 'Unknown',
             marks: typeof q.marks === 'number' ? q.marks : Number(q.marks) || 0,

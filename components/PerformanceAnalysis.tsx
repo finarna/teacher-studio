@@ -432,7 +432,7 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
     return m > 0 ? `${m}m ${s}s` : `${s}s`;
   };
 
-  const fetchAISummary = async () => {
+  const fetchAISummary = async (signal?: AbortSignal) => {
     const isSimplifiedVerdict = attempt.aiReport?.verdict?.toLowerCase().includes('simplified mode') ||
       attempt.aiReport?.verdict?.toLowerCase().includes('extracted using');
 
@@ -469,6 +469,7 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
 
       const response = await fetch(url, {
         method: 'POST',
+        signal,
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -502,8 +503,10 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
         })
       });
 
+      if (signal?.aborted) return;
       if (response.ok) {
         const result = await response.json();
+        if (signal?.aborted) return;
         if (result.success && result.data) {
           setAiSummary(result.data);
           // Sync back to context so it persists on navigation
@@ -514,10 +517,11 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
       } else {
         setAiError(true);
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.name === 'AbortError') return; // Strict Mode test-invoke cancelled — ignore
       setAiError(true);
     } finally {
-      setIsLoadingAI(false);
+      if (!signal?.aborted) setIsLoadingAI(false);
     }
   };
 
@@ -553,9 +557,11 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
     </div>
   );
 
-  // Fetch AI summary on mount
+  // Fetch AI summary on mount — AbortController cancels the Strict Mode test-invoke
   useEffect(() => {
-    fetchAISummary();
+    const controller = new AbortController();
+    fetchAISummary(controller.signal);
+    return () => controller.abort();
   }, []);
 
   return (

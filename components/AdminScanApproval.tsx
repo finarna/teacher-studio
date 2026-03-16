@@ -27,6 +27,7 @@ import {
 import { supabase } from '../lib/supabase';
 import type { Subject, ExamContext } from '../types';
 import { syncScanToAITables } from '../lib/syncScanToAITables';
+import { invalidateContextCache } from '../utils/vidya/contextCache';
 import { getForecastedCalibration } from '../lib/reiEvolutionEngine';
 import StrategicBriefing from './StrategicBriefing';
 import { useAppContext } from '../contexts/AppContext';
@@ -134,6 +135,21 @@ const AdminScanApproval: React.FC = () => {
     loadScans();
     setSelectedScanIds(new Set());
   }, [filterStatus]);
+
+  // Lazy-load analysis_data when a scan is selected (not fetched in list query)
+  useEffect(() => {
+    if (!selectedScan || selectedScan.analysis_data) return;
+    supabase
+      .from('scans')
+      .select('analysis_data')
+      .eq('id', selectedScan.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.analysis_data) {
+          setSelectedScan(prev => prev ? { ...prev, analysis_data: data.analysis_data } : prev);
+        }
+      });
+  }, [selectedScan?.id]);
 
   /**
    * Map questions from a scan to official topics
@@ -259,11 +275,11 @@ const AdminScanApproval: React.FC = () => {
       let query = supabase
         .from('scans')
         .select(`
-          id, name, subject, exam_context, status, is_system_scan, created_at, year, analysis_data,
+          id, name, subject, exam_context, status, is_system_scan, created_at, year,
           is_combined_paper, subjects,
           questions:questions(count),
           visual_notes:topic_sketches(count),
-          flashcards:flashcards(data)
+          flashcards:flashcards(count)
         `)
         .order('created_at', { ascending: false })
         .limit(100);
@@ -311,47 +327,16 @@ const AdminScanApproval: React.FC = () => {
 
       const scansWithCounts = completedScans.map(scan => {
         const dbQuestionCount = (scan as any).questions?.[0]?.count || 0;
-        const analysisQuestions = scan.analysis_data?.questions || [];
-
-        const questionCount = scan.is_system_scan
-          ? dbQuestionCount
-          : (dbQuestionCount > 0 ? dbQuestionCount : analysisQuestions.length);
-
-        let mappedCount = mappingsByScan[scan.id] || 0;
-        if (dbQuestionCount === 0 && analysisQuestions.length > 0) {
-          mappedCount = analysisQuestions.filter((q: any, idx: number) => {
-            // APPLY LEGACY SYNC for mapping estimate
-            let qSubj = q.subject || scan.subject;
-            if ((qSubj === 'Biology' || qSubj === 'Botany' || qSubj === 'Zoology') && scan.exam_context === 'NEET') {
-              const idParts = (q.id || '').split(/[^0-9]/).filter(Boolean);
-              const qNum = idParts.length > 0 ? parseInt(idParts[idParts.length - 1]) : (idx + 1);
-              if (qNum > 100 && qNum <= 150) qSubj = 'Botany';
-              else if (qNum > 150) qSubj = 'Zoology';
-            }
-
-            // Check if topic is non-generic AND matches an official topic
-            const isGeneric = ['General', 'Mathematics', 'Physics', 'Biology', 'Chemistry', 'Botany', 'Zoology', 'Unknown', 'Unmapped', ''].includes(q.topic || '');
-
-            // Map Botany/Zoology topics using the official topics list
-            const matchingTopic = findMatchingOfficialTopic(q.topic, officialTopicsList);
-            return !isGeneric && matchingTopic;
-          }).length;
-        }
+        const questionCount = dbQuestionCount;
+        const mappedCount = mappingsByScan[scan.id] || 0;
 
         const unmappedCount = Math.max(0, questionCount - mappedCount);
         const successRate = questionCount > 0
           ? (mappedCount === questionCount ? 100 : Number(((mappedCount / questionCount) * 100).toFixed(1)))
           : 0;
 
-        const dbVisualNotesCount = (scan as any).visual_notes?.[0]?.count || 0;
-        const legacyVisualNotesCount = scan.analysis_data?.topicBasedSketches
-          ? Object.keys(scan.analysis_data.topicBasedSketches).length
-          : 0;
-
-        const visualNotesCount = dbVisualNotesCount > 0 ? dbVisualNotesCount : legacyVisualNotesCount;
-
-        const flashcardsBatch = (scan as any).flashcards?.[0];
-        const flashcardsCount = flashcardsBatch?.data ? (Array.isArray(flashcardsBatch.data) ? flashcardsBatch.data.length : 0) : 0;
+        const visualNotesCount = (scan as any).visual_notes?.[0]?.count || 0;
+        const flashcardsCount = (scan as any).flashcards?.[0]?.count || 0;
 
         return {
           id: scan.id,
@@ -370,7 +355,6 @@ const AdminScanApproval: React.FC = () => {
           has_exam_analysis: questionCount > 0,
           visual_notes_count: visualNotesCount,
           flashcards_count: flashcardsCount,
-          analysis_data: scan.analysis_data,
           is_combined_paper: scan.is_combined_paper,
           subjects: scan.subjects,
           year: scan.year || scan.name?.match(/\b(20|19)\d{2}\b/)?.[0] || null
@@ -473,7 +457,13 @@ const AdminScanApproval: React.FC = () => {
         await supabase.from('questions').delete().eq('scan_id', scanId);
       }
 
-      const questionsToInsert = scan.analysis_data?.questions || [];
+      // Fetch analysis_data fresh for this scan (not loaded in list query to avoid timeout)
+      const { data: freshScanRow } = await supabase
+        .from('scans')
+        .select('analysis_data')
+        .eq('id', scanId)
+        .single();
+      const questionsToInsert = freshScanRow?.analysis_data?.questions || [];
 
       if (questionsToInsert.length > 0) {
         const normalizeDifficulty = (diff: string | undefined): 'Easy' | 'Moderate' | 'Hard' => {
@@ -559,6 +549,10 @@ const AdminScanApproval: React.FC = () => {
       } else {
         await loadScans();
       }
+      // Invalidate context cache and notify App.tsx to re-fetch scans so
+      // contextBuilder reflects the freshly published question count.
+      invalidateContextCache('scan_published');
+      window.dispatchEvent(new CustomEvent('scansUpdated'));
     } catch (error) {
       console.error('Error publishing scan:', error);
       alert('Failed to publish scan. Check console for details.');
@@ -980,17 +974,17 @@ const AdminScanApproval: React.FC = () => {
                                 onClick={() => setSelectedScan(scan)}
                                 className="text-[10px] font-black text-indigo-200 bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full uppercase tracking-widest transition-colors flex items-center gap-1.5 border border-white/10 cursor-pointer"
                               >
-                                Synthesized {scan.analysis_data?.questions?.length || 0} / {scan.question_count} <Eye size={10} className="opacity-70" />
+                                Synthesized {scan.question_count} / {scan.question_count} <Eye size={10} className="opacity-70" />
                               </button>
                             </div>
 
                             <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden shadow-inner w-full">
                               <div
                                 className="h-full bg-gradient-to-r from-indigo-500 to-purple-400 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
-                                style={{ width: `${Math.min(100, ((scan.analysis_data?.questions?.length || 0) / (Math.max(scan.question_count, 1))) * 100)}%` }}
+                                style={{ width: scan.question_count > 0 ? '100%' : '0%' }}
                               />
                             </div>
-                            {scan.question_count > 0 && scan.analysis_data?.questions?.length === scan.question_count ? (
+                            {scan.question_count > 0 ? (
                               <p className="text-[10px] text-indigo-300 font-medium mt-2 flex items-center gap-1.5">
                                 <CheckCircle2 size={10} className="text-emerald-400" /> Auto-Reasoning & Predictive Insights Ready. Click to view details.
                               </p>

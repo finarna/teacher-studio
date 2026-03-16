@@ -28,6 +28,7 @@ export interface ExtractedImage {
 export interface QuestionLocation {
   questionNumber: number;
   questionText: string;
+  x: number; // X coordinate on page (used for column detection)
   y: number; // Y coordinate on page
   pageNum: number;
 }
@@ -220,6 +221,7 @@ export async function extractQuestionLocations(file: File, pageFilter?: number[]
                 locations.push({
                   questionNumber: questionNum,
                   questionText: currentText.slice(0, 100),
+                  x: itemX,
                   y: currentY,
                   pageNum
                 });
@@ -235,7 +237,23 @@ export async function extractQuestionLocations(file: File, pageFilter?: number[]
     }
   }
 
-  return locations;
+  // --- POST-PROCESS: strip answer-key table rows ---
+  // A "table row" is a Y bucket (±10pt) on one page that contains 3+ distinct questions.
+  // These are horizontal answer-key grids (e.g. last page), not real question positions.
+  const yBucketCounts: Record<string, number> = {};
+  for (const loc of locations) {
+    const key = `${loc.pageNum}_${Math.round(loc.y / 10)}`;
+    yBucketCounts[key] = (yBucketCounts[key] || 0) + 1;
+  }
+  const filtered = locations.filter(loc => {
+    const key = `${loc.pageNum}_${Math.round(loc.y / 10)}`;
+    return yBucketCounts[key] < 3;
+  });
+  if (filtered.length < locations.length) {
+    console.log(`🧹 [PDF EXTRACTOR] Removed ${locations.length - filtered.length} answer-key table entries (kept ${filtered.length} real question locations)`);
+  }
+
+  return filtered;
 }
 
 /**
@@ -255,23 +273,45 @@ export function mapImagesToQuestions(
       continue;
     }
 
-    let closestQuestion = samePage[0];
-    let minDistance = 10000;
+    // --- COLUMN THRESHOLD (dynamic) ---
+    // Compute threshold just below right-column question X so that 2x2 option
+    // images in the right half of the left column are not misclassified.
+    const pageXValues = [...new Set(samePage.map(q => q.x))].sort((a, b) => a - b);
+    let colThreshold = 170; // fallback
+    for (let i = 1; i < pageXValues.length; i++) {
+      if (pageXValues[i] - pageXValues[i - 1] > 50) {
+        colThreshold = pageXValues[i] - 30;
+        break;
+      }
+    }
+    const imageIsLeftCol = image.x < colThreshold;
+    const sameCol = samePage.filter(q => imageIsLeftCol ? q.x < colThreshold : q.x >= colThreshold);
+    const candidates = sameCol.length > 0 ? sameCol : samePage;
 
-    for (const q of samePage) {
-      const distance = image.y - q.y;
-      // Questions are usually ABOVE the diagram (positive distance)
-      // We allow up to 600px of distance for large diagrams
-      if (distance > -50 && distance < minDistance) {
-        closestQuestion = q;
-        minDistance = distance;
+    // --- ZONE-BASED OWNERSHIP ---
+    // Sort by Y. Each question owns from its Y down to just before the next
+    // question's Y. 10px slack handles minor measurement noise but doesn't
+    // swallow option images that sit just above the next question's text.
+    // (50px was too large: Q37's C/D options at Y=1111 sat only 39px above
+    //  Q38's text at Y=1150, causing them to fall into Q38's zone.)
+    const SLACK = 10;
+    const sorted = [...candidates].sort((a, b) => a.y - b.y);
+    let ownerQuestion = sorted[0]; // default: first question on page
+
+    for (let i = 0; i < sorted.length; i++) {
+      const zoneStart = sorted[i].y - SLACK;
+      const zoneEnd = i + 1 < sorted.length ? sorted[i + 1].y - SLACK : Infinity;
+      if (image.y >= zoneStart && image.y < zoneEnd) {
+        ownerQuestion = sorted[i];
+        break;
       }
     }
 
-    const qNum = closestQuestion.questionNumber;
+    const qNum = ownerQuestion.questionNumber;
+    const colLabel = imageIsLeftCol ? 'L' : 'R';
     if (!mapping.has(qNum)) mapping.set(qNum, []);
     mapping.get(qNum)!.push(image);
-    console.log(`🔗 [PDF EXTRACTOR] Mapped image to Q${qNum} on P${image.pageNum} (dist: ${minDistance.toFixed(0)}px)`);
+    console.log(`🔗 [PDF EXTRACTOR] Mapped image to Q${qNum} on P${image.pageNum} (col:${colLabel}, imgX:${image.x.toFixed(0)}, imgY:${image.y.toFixed(0)}, thresh:${colThreshold})`);
   }
 
   return mapping;
