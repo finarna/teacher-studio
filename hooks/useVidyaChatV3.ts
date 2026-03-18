@@ -2,16 +2,11 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  * VIDYA V3 - CLEAN CHAT HOOK
  * ═══════════════════════════════════════════════════════════════════════════════
- *
- * AI-First architecture inspired by clean math chat pattern:
- * - Clean system instructions (~30 lines)
- * - Structured JSON context injection
- * - Trust Gemini to be intelligent
- * - Minimal rules, maximum AI capability
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getGeminiClient, withGeminiRetry } from '../utils/geminiClient';
+import { AI_CONFIG } from '../config/aiConfigs';
 import { VidyaMessage, VidyaAppContext } from '../types';
 import {
   getSystemInstruction,
@@ -20,16 +15,8 @@ import {
   VidyaRole
 } from '../utils/vidya/systemInstructions';
 import { buildContextPayload, formatContextForGemini } from '../utils/vidya/contextBuilder';
-import { getRoutingDecision, classifyIntent } from '../utils/vidya/intentClassifier';
-import { classifyIntentHybrid } from '../utils/vidya/semanticIntentClassifier';
-import { validateChatSecurity } from '../utils/vidya/rbacValidator';
 import { trackMessagePerformance, estimateTokenCount } from '../utils/vidya/performanceMonitor';
-import { executeTool, formatToolResult, isToolAvailable, ToolName } from '../utils/vidya/toolHandlers';
 import { formatMathInResponse } from '../utils/vidya/mathFormatter';
-
-interface Chat {
-  sendMessageStream(params: { message: string }): Promise<AsyncIterable<{ text: string }>>;
-}
 
 interface VidyaChatV3State {
   messages: VidyaMessage[];
@@ -50,9 +37,6 @@ export interface UseVidyaChatV3Return {
   clearChat: () => void;
 }
 
-/**
- * VidyaV3 Chat Hook - Clean, AI-first design
- */
 export function useVidyaChatV3(
   appContext?: VidyaAppContext
 ): UseVidyaChatV3Return {
@@ -70,51 +54,14 @@ export function useVidyaChatV3(
     error: null,
   });
 
-  const chatSessionRef = useRef<Chat | null>(null);
-  const genAIRef = useRef<GoogleGenerativeAI | null>(null);
+  const initializedRef = useRef(false);
 
   /**
    * Initialize or reinitialize chat when role changes
    */
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-      setState(prev => ({
-        ...prev,
-        error: 'Gemini API key not found. Please check environment variables.',
-      }));
-      return;
-    }
-
-    try {
-      // Initialize Gemini
-      if (!genAIRef.current) {
-        genAIRef.current = new GoogleGenerativeAI(apiKey);
-      }
-
-      const ai = genAIRef.current;
-
-      // Create new chat session with clean system instruction
-      const model = (ai as any).getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        systemInstruction: {
-          parts: [{ text: getSystemInstruction(userRole) }],
-          role: 'user',
-        },
-      });
-
-      chatSessionRef.current = model.startChat({
-        generationConfig: {
-          temperature: 0.65,      // Slightly lower for faster, more focused responses (Phase 4 optimization)
-          maxOutputTokens: 700,   // Optimized for balance between quality and speed
-          topP: 0.92,            // Slightly lower for faster token sampling
-          topK: 32,              // Reduced for faster generation
-          candidateCount: 1,     // Only generate 1 response (faster)
-        },
-      });
-
-      // Add role transition message if not first initialization
-      if (state.messages.length > 1) {
+    // Add role transition message if not first initialization
+    if (initializedRef.current) {
         const transitionMsg: VidyaMessage = {
           id: Date.now().toString(),
           role: 'assistant',
@@ -125,15 +72,8 @@ export function useVidyaChatV3(
           ...prev,
           messages: [...prev.messages, transitionMsg],
         }));
-      }
-
-    } catch (error) {
-      console.error('Failed to initialize Vidya V3:', error);
-      setState(prev => ({
-        ...prev,
-        error: 'Failed to initialize AI. Please refresh the page.',
-      }));
     }
+    initializedRef.current = true;
   }, [userRole]);
 
   /**
@@ -144,15 +84,13 @@ export function useVidyaChatV3(
   }, []);
 
   /**
-   * Send message with intelligent routing
-   * Phase 2: Intent classification → route to Gemini or tools
+   * Send message with manual history management and new SDK
    */
   const sendMessage = useCallback(async (textToSend: string) => {
-    if (!textToSend.trim() || state.isTyping || !chatSessionRef.current) {
+    if (!textToSend.trim() || state.isTyping) {
       return;
     }
 
-    // Add user message
     const userMsg: VidyaMessage = {
       id: Date.now().toString(),
       role: 'user',
@@ -168,10 +106,11 @@ export function useVidyaChatV3(
     }));
 
     try {
-      // PERFORMANCE TRACKING START
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      const ai = getGeminiClient(apiKey);
       const perfStartTime = performance.now();
 
-      // BUILD STRUCTURED CONTEXT PAYLOAD
+      // Build context
       const contextPayload = buildContextPayload({
         currentView: appContext?.currentView,
         scannedPapers: appContext?.scannedPapers,
@@ -180,115 +119,33 @@ export function useVidyaChatV3(
 
       const contextSize = JSON.stringify(contextPayload).length;
 
-      // PHASE 2: HYBRID INTENT CLASSIFICATION & ROUTING
-      // Step 1: Fast keyword classification
-      const keywordIntent = classifyIntent(textToSend, contextPayload);
+      // Prepare history for Gemini format
+      const history = state.messages.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.content }]
+      }));
 
-      // Step 2: Hybrid classification (semantic if low confidence)
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      const finalIntent = await classifyIntentHybrid(
-        textToSend,
-        state.messages,  // Pass conversation history
-        keywordIntent,
-        apiKey
-      );
+      const promptWithContext = formatContextForGemini(contextPayload, textToSend);
 
-      // Step 3: Get routing decision with final intent
-      const routing = getRoutingDecision(textToSend, contextPayload);
-      // Override routing with hybrid intent
-      routing.intent = finalIntent;
-
-      // Log intent for analytics
-      console.log('[VidyaV3] Intent:', routing.intent.type, 'Confidence:', routing.intent.confidence);
-
-      // PHASE 3: RBAC SECURITY VALIDATION
-      const securityValidation = validateChatSecurity(
-        userRole,
-        routing.intent.type,
-        contextPayload,
-        textToSend
-      );
-
-      // Log security warnings if any
-      if (securityValidation.warnings.length > 0) {
-        console.warn('[VidyaV3] Security warnings:', securityValidation.warnings);
-      }
-
-      // Use filtered context (students get restricted data removed)
-      const safeContext = securityValidation.filteredContext;
-
-      // PHASE 5: DIRECT TOOL EXECUTION
-      if (routing.route === 'tool' && routing.toolName) {
-        console.log('[VidyaV3] Executing tool directly:', routing.toolName);
-
-        // Check if tool is available for user role
-        if (!isToolAvailable(routing.toolName as ToolName, userRole)) {
-          setState(prev => ({
-            ...prev,
-            messages: [
-              ...prev.messages,
-              {
-                id: Date.now().toString(),
-                role: 'assistant',
-                content: `❌ Tool "${routing.toolName}" is not available for ${userRole}s.`,
-                timestamp: new Date(),
-              },
-            ],
-            isTyping: false,
-          }));
-          return;
+      // Call streaming API
+      const result = await withGeminiRetry(() => ai.models.generateContentStream({
+        model: AI_CONFIG.defaultModel,
+        contents: [
+            ...history,
+            { role: 'user', parts: [{ text: promptWithContext }] }
+        ],
+        config: {
+          systemInstruction: getSystemInstruction(userRole),
+          temperature: 0.65,
+          maxOutputTokens: 2048,
+          topP: 0.92,
+          topK: 32
         }
-
-        // Execute tool
-        const toolResult = await executeTool(
-          routing.toolName as ToolName,
-          routing.toolParams || {}
-        );
-
-        // Add tool result as message with math formatting
-        const formattedToolResult = formatMathInResponse(formatToolResult(toolResult));
-        setState(prev => ({
-          ...prev,
-          messages: [
-            ...prev.messages,
-            {
-              id: Date.now().toString(),
-              role: 'assistant',
-              content: formattedToolResult,
-              timestamp: new Date(),
-            },
-          ],
-          isTyping: false,
-        }));
-
-        // Track performance for tool execution
-        const perfEndTime = performance.now();
-        trackMessagePerformance({
-          messageId: Date.now().toString(),
-          intent: routing.intent.type,
-          userRole,
-          contextSize,
-          questionCount: contextPayload.questions.length,
-          responseTime: perfEndTime - perfStartTime,
-          streamingDuration: 0,
-          tokenCount: estimateTokenCount(toolResult.message),
-          cacheHit: false,
-          timestamp: new Date(),
-        });
-
-        return; // Exit early - don't send to Gemini
-      }
-
-      // SEND TO GEMINI (default route)
-      // FORMAT WITH JSON DELIMITERS (like math chat pattern)
-      const promptWithContext = formatContextForGemini(safeContext, textToSend);
-
-      // Stream response from Gemini
-      const result = await chatSessionRef.current.sendMessageStream(promptWithContext);
+      }));
 
       const botMsgId = (Date.now() + 1).toString();
 
-      // Add bot message placeholder
+      // Add placeholder
       setState(prev => ({
         ...prev,
         messages: [
@@ -303,20 +160,16 @@ export function useVidyaChatV3(
         ],
       }));
 
-      // Stream chunks with debouncing (Phase 4 optimization)
       let fullText = '';
       let lastUpdateTime = Date.now();
-      const UPDATE_INTERVAL = 150; // Update UI every 150ms (optimal balance)
+      const UPDATE_INTERVAL = 150;
 
-      for await (const chunk of result.stream) {
-        const text = chunk.text();
+      for await (const chunk of result) {
+        const text = chunk.text;
         if (text) {
           fullText += text;
-
           const now = Date.now();
-          // Debounce: only update UI every UPDATE_INTERVAL ms
           if (now - lastUpdateTime > UPDATE_INTERVAL) {
-            // Apply math formatter for LaTeX safety
             const formattedText = formatMathInResponse(fullText);
             setState(prev => ({
               ...prev,
@@ -329,44 +182,28 @@ export function useVidyaChatV3(
         }
       }
 
-      // Final update with complete text + math formatting
-      console.debug('[VidyaV3] Raw AI response (first 500 chars):', fullText.substring(0, 500));
+      // Final complete update
       const formattedFinalText = formatMathInResponse(fullText);
-      console.debug('[VidyaV3] Formatted response (first 500 chars):', formattedFinalText.substring(0, 500));
-      console.debug('[VidyaV3] Formatter made changes:', fullText !== formattedFinalText);
-
       setState(prev => ({
         ...prev,
         messages: prev.messages.map(m =>
-          m.id === botMsgId ? { ...m, content: formattedFinalText } : m
-        ),
-      }));
-
-      // Mark streaming complete
-      setState(prev => ({
-        ...prev,
-        messages: prev.messages.map(m =>
-          m.id === botMsgId ? { ...m, isStreaming: false } : m
+          m.id === botMsgId ? { ...m, content: formattedFinalText, isStreaming: false } : m
         ),
         isTyping: false,
       }));
 
-      // PERFORMANCE TRACKING END
+      // Track performance
       const perfEndTime = performance.now();
-      const responseTime = perfEndTime - perfStartTime;
-      const streamingDuration = perfEndTime - perfStartTime; // Approximate
-      const tokenCount = estimateTokenCount(fullText);
-
       trackMessagePerformance({
         messageId: botMsgId,
-        intent: routing.intent.type,
+        intent: 'unclear',
         userRole,
         contextSize,
         questionCount: contextPayload.questions.length,
-        responseTime,
-        streamingDuration,
-        tokenCount,
-        cacheHit: false, // Will be set by context builder logs
+        responseTime: perfEndTime - perfStartTime,
+        streamingDuration: perfEndTime - perfStartTime,
+        tokenCount: estimateTokenCount(fullText),
+        cacheHit: false,
         timestamp: new Date(),
       });
 
@@ -379,18 +216,18 @@ export function useVidyaChatV3(
           {
             id: Date.now().toString(),
             role: 'assistant',
-            content: 'I encountered a network issue. Please try again.',
+            content: 'I encountered a issue with the AI assistant. Please try again.',
             timestamp: new Date(),
           },
         ],
         isTyping: false,
-        error: 'Failed to send message. Please check your connection.',
+        error: 'Communication failure.',
       }));
     }
-  }, [state.isTyping, appContext, userRole]);
+  }, [state.messages, state.isTyping, appContext, userRole]);
 
   /**
-   * Clear chat history
+   * Clear chat
    */
   const clearChat = useCallback(() => {
     setState(prev => ({
@@ -404,29 +241,7 @@ export function useVidyaChatV3(
         timestamp: new Date(),
       }],
     }));
-
-    // Reinitialize chat session
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (apiKey && genAIRef.current) {
-      const ai = genAIRef.current;
-      const model = (ai as any).getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        systemInstruction: {
-          parts: [{ text: getSystemInstruction(userRole) }],
-          role: 'user',
-        },
-      });
-
-      chatSessionRef.current = model.startChat({
-        generationConfig: {
-          temperature: 0.65,      // Slightly lower for faster, more focused responses (Phase 4 optimization)
-          maxOutputTokens: 700,   // Optimized for balance between quality and speed
-          topP: 0.92,            // Slightly lower for faster token sampling
-          topK: 32,              // Reduced for faster generation
-          candidateCount: 1,     // Only generate 1 response (faster)
-        },
-      });
-    }
+    initializedRef.current = false;
   }, [userRole]);
 
   return {

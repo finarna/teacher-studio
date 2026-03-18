@@ -19,7 +19,7 @@ async function main() {
     const actualText = fs.readFileSync(ACTUAL_TEXT_PATH, 'utf-8');
     const oracleContent = fs.readFileSync(ORACLE_PATH, 'utf-8');
 
-    const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = ai.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
     const prompt = `
   You are an expert exam auditor. Compare the ACTUAL 2023 KCET Math paper against the PREDICTED AI Oracle paper question by question.

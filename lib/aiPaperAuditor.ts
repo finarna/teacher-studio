@@ -1,12 +1,10 @@
 
-import { GoogleGenAI } from '@google/genai';
+import { getGeminiClient, withGeminiRetry } from '../utils/geminiClient';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AI_CONFIG } from '../config/aiConfigs';
 
 /**
  * AI Paper Auditor (REI v3.0 Phase 1)
- * Analyzes a full exam paper's text to extract high-level "Evolution Intent"
- * and "Board Signature" used for dynamic REI forecasting.
  */
 
 export interface PaperAuditResult {
@@ -30,7 +28,7 @@ export async function auditPaperHistoricalContext(
     apiKey: string
 ): Promise<PaperAuditResult | null> {
     try {
-        const ai = new GoogleGenAI({ apiKey });
+        const ai = getGeminiClient(apiKey);
 
         const prompt = `You are an expert ${examContext} Exam Auditor.
 Analyze the following text of the ${year} ${subject} paper to identify the "Evolutionary Intent".
@@ -66,11 +64,18 @@ Return ONLY valid JSON:
   "idsActual": 0.82
 }`;
 
-        const result = await ai.models.generateContent({
-            model: AI_CONFIG.defaultModel,
-            contents: prompt,
-        });
-        const text = result.text ?? '';
+        const result = await withGeminiRetry(() => ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: [{
+                role: "user",
+                parts: [{ text: prompt }]
+            }],
+            config: {
+                responseMimeType: "application/json",
+                temperature: 0.1
+            }
+        }));
+        const text = (result.text || "{}").trim();
         const cleaned = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleaned);
 

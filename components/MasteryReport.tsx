@@ -21,7 +21,7 @@ const MasteryReport: React.FC<MasteryReportProps> = ({ score, misconceptions, cu
       setLoading(true);
       try {
         const genAI = new (window as any).GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
         const prompt = `
           Generate a personalized post-lesson feedback plan for a student who just finished "${currentLesson.title}" (${currentLesson.subject}, ${currentLesson.grade}).
           Score: ${score}%.

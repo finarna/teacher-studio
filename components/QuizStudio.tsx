@@ -151,7 +151,7 @@ const QuizStudio: React.FC<QuizStudioProps> = ({ recentScans = [] }) => {
       const topicsList = Array.from(new Set(scanQuestions.map((q: any) => q.topic).filter(Boolean)));
 
       // Use model from settings (same as RapidRecall)
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
 
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({

@@ -8,7 +8,8 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { GoogleGenerativeAI, ChatSession, FunctionCall } from '@google/generative-ai';
+import { getGeminiClient, withGeminiRetry } from '../utils/geminiClient';
+import { AI_CONFIG } from '../config/aiConfigs';
 import {
   VidyaChatState,
   VidyaMessage,
@@ -28,6 +29,12 @@ import { VidyaContextEngine, createContextEngine } from '../utils/vidyaContext';
 import { VidyaSessionManager, autoSaveSession } from '../utils/vidyaSession';
 import { VidyaSuggestionEngine, createSuggestionEngine, filterExpiredSuggestions } from '../utils/vidyaSuggestions';
 import { processVidyaRequest } from '../utils/vidyaV3Orchestrator';
+
+// Define locally to avoid missing types from @google/generative-ai
+export interface FunctionCall {
+  name: string;
+  args: any;
+}
 
 /**
  * Main Vidya V2 Hook
@@ -64,8 +71,8 @@ export function useVidyaV2(
   // REFS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  const genAIRef = useRef<GoogleGenerativeAI | null>(null);
-  const chatRef = useRef<ChatSession | null>(null);
+  const aiRef = useRef<any>(null);
+  const initializedRef = useRef<boolean>(false);
   const contextEngineRef = useRef<VidyaContextEngine | null>(null);
   const suggestionEngineRef = useRef<VidyaSuggestionEngine | null>(null);
   const activityLogRef = useRef<VidyaActivity[]>([]);
@@ -92,32 +99,15 @@ export function useVidyaV2(
         session = VidyaSessionManager.createSession(userRole);
       }
 
-      // Initialize Gemini AI
-      genAIRef.current = new GoogleGenerativeAI(apiKey);
+      // Initialize Gemini AI with Vertex support
+      aiRef.current = getGeminiClient(apiKey);
+      initializedRef.current = true;
 
       // Create context engine
       contextEngineRef.current = createContextEngine(appContext, userRole, session);
 
       // Create suggestion engine
       suggestionEngineRef.current = createSuggestionEngine(appContext, userRole, activityLogRef.current);
-
-      // Create Gemini model with function calling
-      const model = genAIRef.current.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        tools: [{
-          functionDeclarations: getToolDeclarations(),
-        }],
-        systemInstruction: contextEngineRef.current.generateSystemPrompt(),
-      });
-
-      // Start chat session
-      chatRef.current = model.startChat({
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 800,
-          topP: 0.95,
-        },
-      });
 
       // Generate initial suggestions
       const suggestions = suggestionEngineRef.current.generateSuggestions();
@@ -138,7 +128,7 @@ export function useVidyaV2(
         error: 'Failed to initialize AI assistant. Please refresh.',
       }));
     }
-  }, [userRole, appContext, state.isInitialized]);
+  }, [state.isInitialized, userRole, appContext]);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // MESSAGE HANDLING
@@ -228,9 +218,6 @@ export function useVidyaV2(
             content: v3Response.response.markdown,
             timestamp: new Date(),
             metadata: {
-              intent: v3Response.intent?.intent,
-              queryType: v3Response.intent?.subType,
-              executionTime: v3Response.response.executionTime,
               handledLocally: true,
             },
           };
@@ -270,16 +257,33 @@ export function useVidyaV2(
         // FALLBACK TO GEMINI for complex queries/conversations
         // ═══════════════════════════════════════════════════════════════════════════
 
-        if (!chatRef.current) {
+        if (!aiRef.current) {
           throw new Error('Gemini chat not initialized');
         }
 
-        // Send to Gemini
-        const result = await chatRef.current.sendMessage(trimmedMessage);
-        const response = result.response;
+        // Prepare history for manual chat management
+        const history = (state.session?.messages || []).map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        }));
 
-        // Check for function calls
-        const functionCalls = response.functionCalls?.();
+        // Send to Gemini with Vertex AI billing and common retry
+        const aiResponse = await withGeminiRetry(async () => {
+          return await aiRef.current.models.generateContent({
+            model: AI_CONFIG.defaultModel,
+            contents: [...history, { role: "user", parts: [{ text: trimmedMessage }] }],
+            config: {
+              tools: [{ functionDeclarations: getToolDeclarations() }],
+              systemInstruction: contextEngineRef.current?.generateSystemPrompt() || "",
+              temperature: 0.7,
+              maxOutputTokens: 2048,
+              topP: 0.95
+            }
+          });
+        });
+
+        const responseText = (aiResponse as any).text || "";
+        const functionCalls = aiResponse.candidates?.[0]?.content?.parts?.filter((p: any) => p.functionCall).map((p: any) => p.functionCall);
 
         if (functionCalls && functionCalls.length > 0) {
           // Process function calls
@@ -290,10 +294,9 @@ export function useVidyaV2(
             id: `assistant-${Date.now()}`,
             role: 'assistant',
             type: 'text',
-            content: response.text(),
+            content: responseText,
             timestamp: new Date(),
             metadata: {
-              intent: v3Response.intent?.intent,
               handledLocally: false,
             },
           };
@@ -351,17 +354,17 @@ export function useVidyaV2(
         }, 5000);
       }
     },
-    [state.session, appContext]
+    [state.session, appContext, actions, userRole]
   );
 
   /**
    * Handle function calls from Gemini
    */
   const handleFunctionCalls = async (
-    functionCalls: FunctionCall[],
+    functionCalls: any[],
     startTime: number
   ) => {
-    if (!chatRef.current || !state.session) return;
+    if (!aiRef.current || !state.session) return;
 
     setState((prev) => ({
       ...prev,
@@ -413,15 +416,38 @@ export function useVidyaV2(
         },
       }));
 
-      const finalResult = await chatRef.current.sendMessage(functionResponses as any);
-      const finalResponse = finalResult.response;
+      // Send tool results back using manual history
+      const history = (state.session?.messages || []).map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+
+      const finalResult = await withGeminiRetry(async () => {
+        return await aiRef.current.models.generateContent({
+          model: AI_CONFIG.defaultModel,
+          contents: [
+            ...history,
+            { role: 'user', parts: functionCalls.map(c => ({ functionCall: c })) },
+            { role: 'user', parts: functionResponses }
+          ],
+          config: {
+            tools: [{ functionDeclarations: getToolDeclarations() }],
+            systemInstruction: contextEngineRef.current?.generateSystemPrompt() || "",
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+            topP: 0.95
+          }
+        });
+      });
+
+      const finalContent = (finalResult as any).text || "";
 
       // Create AI message with tool results
       const aiMsg: VidyaMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
         type: 'text',
-        content: finalResponse.text(),
+        content: finalContent,
         timestamp: new Date(),
         toolCalls: functionCalls.map((call, idx) => ({
           id: `tool-${Date.now()}-${idx}`,
@@ -648,33 +674,17 @@ export function useVidyaV2(
   }, [appContext, state.session]);
 
   /**
-   * Reinitialize Gemini chat when critical context changes (e.g., selected scan)
-   * This ensures Gemini has fresh context with updated data
+   * Reinitialize Gemini chat when critical context changes
    */
   useEffect(() => {
-    if (!state.isInitialized || !genAIRef.current || !contextEngineRef.current) return;
+    if (!state.isInitialized || !aiRef.current || !contextEngineRef.current) return;
 
-    // Recreate the Gemini chat with updated system instruction
     try {
-      const model = genAIRef.current.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        tools: [{
-          functionDeclarations: getToolDeclarations(),
-        }],
-        systemInstruction: contextEngineRef.current.generateSystemPrompt(), // Fresh context!
-      });
-
-      chatRef.current = model.startChat({
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 800,
-          topP: 0.95,
-        },
-      });
-
-      console.log('✅ Gemini chat reinitialized with updated context');
+      // With the new SDK and manual history, we don't need to recreate "chat" sessions
+      // The context engine prompt will be picked up in the next generateContent call
+      console.log('✅ Gemini context refreshed for next interaction');
     } catch (error) {
-      console.error('❌ Failed to reinitialize Gemini chat:', error);
+      console.error('❌ Failed to refresh context:', error);
     }
   }, [appContext.selectedScan, state.isInitialized]);
 
@@ -693,7 +703,7 @@ export function useVidyaV2(
     executeTool: executeToolDirect,
     saveSession,
     loadSession,
-    exportSession,
+    exportSession: exportSession,
     isVisible: state.isOpen,
     hasUnreadMessages: false, // TODO: Implement unread tracking
     canSendMessage: !state.isThinking && !state.isProcessingTool,

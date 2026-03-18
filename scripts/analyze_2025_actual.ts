@@ -12,7 +12,7 @@ async function analyzeActual2025() {
     const fullText = fs.readFileSync('./actual_2025_text.txt', 'utf8');
 
     const genAI = new GoogleGenerativeAI(API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
     const prompt = `You are an expert Math teacher. Analyze the following text of the ACTUAL KCET 2025 Math paper.
     Extract the details of EVERY question (all 60).

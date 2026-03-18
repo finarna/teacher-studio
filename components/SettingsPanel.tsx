@@ -14,7 +14,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
 
   // AI Model Settings
   const [geminiModel, setGeminiModel] = useState(() => {
-    return localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+    return localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
   });
 
   const [temperature, setTemperature] = useState(() => {
@@ -23,7 +23,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onBack }) => {
 
   const aiModels = [
     {
-      id: 'gemini-2.0-flash',
+      id: 'gemini-3-flash-preview',
       name: 'Gemini 2.0 Flash',
       description: 'Fastest - Best for quick question generation',
       icon: Zap,

@@ -1,13 +1,10 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getGeminiClient, withGeminiRetry } from './geminiClient';
 import { AnalyzedQuestion, Subject } from '../types';
 import { generateTopicInstruction, matchToOfficialTopic } from './officialTopics';
 import { safeAiParse } from './aiParser';
 
 /**
  * Combined Paper Extractor - NEET/JEE Multi-Subject High-Fidelity Logic
- * 
- * Optimized for 200-question NEET PDFs.
- * Uses a single-pass "Mega-Scan" with robust JSON recovery.
  */
 
 export async function extractCombinedPaper(
@@ -19,26 +16,13 @@ export async function extractCombinedPaper(
 ): Promise<AnalyzedQuestion[]> {
     onProgress?.('Initializing High-Fidelity Multi-Subject Scan...');
 
-    // Convert file to base64
-    const buffer = await file.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    const chunkSizeBytes = 8192;
-    for (let i = 0; i < bytes.length; i += chunkSizeBytes) {
-        binary += String.fromCharCode(...bytes.slice(i, i + chunkSizeBytes));
-    }
-    const base64 = btoa(binary);
-    const mimeType = 'application/pdf';
+    // Vertex AI Centralized Client
+    const ai = getGeminiClient(apiKey);
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-        model: modelName,
-        generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 65536, // Max for Gemini 1.5/2.0
-            responseMimeType: "application/json"
-        }
-    });
+    // Efficient base64 conversion
+    const buffer = await file.arrayBuffer();
+    const base64 = btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+    const mimeType = 'application/pdf';
 
     const expectedCount = examContext === 'NEET' ? 200 : 90;
 
@@ -112,15 +96,26 @@ export async function extractCombinedPaper(
     `;
 
     try {
-        const result = await model.generateContent([
-            { inlineData: { mimeType, data: base64 } },
-            { text: prompt }
-        ]);
+        const result = await withGeminiRetry(() => ai.models.generateContent({
+            model: modelName,
+            contents: [{
+                role: "user",
+                parts: [
+                    { inlineData: { mimeType, data: base64 } },
+                    { text: prompt }
+                ]
+            }],
+            config: {
+                responseMimeType: "application/json",
+                temperature: 0.1,
+                maxOutputTokens: 65536
+            }
+        }));
 
-        const responseText = result.response.text();
-        const candidate = result.response.candidates?.[0];
+        const responseText = result.text || "{}";
+        const candidate = result.candidates?.[0];
         const finishReason = candidate?.finishReason;
-        const tokenCount = result.response.usageMetadata?.candidatesTokenCount;
+        const tokenCount = result.usageMetadata?.candidatesTokenCount;
         console.log(`📥 [MEGA-SCAN] Received ${responseText.length} chars | finishReason: ${finishReason} | outputTokens: ${tokenCount}. Repairing JSON...`);
 
         // Use our battle-tested safeAiParse from aiParser.ts

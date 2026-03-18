@@ -2383,17 +2383,19 @@ app.post('/api/learning-journey/ai-summary', async (req, res) => {
       });
     }
 
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+    const { getGeminiClient, withGeminiRetry } = await import('./utils/geminiClient.ts');
+    const ai = getGeminiClient(GEMINI_KEY);
 
-    const model = genAI.getGenerativeModel({
+    const result = await withGeminiRetry(() => ai.models.generateContent({
       model: AI_CONFIG.defaultModel,
-      generationConfig: { responseMimeType: 'application/json' }
-    });
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: { 
+        responseMimeType: 'application/json',
+        temperature: 0.1
+      }
+    }));
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let rawText = response.text() || '';
+    let rawText = result.text || '';
 
     // Strip markdown code fences if present
     rawText = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();

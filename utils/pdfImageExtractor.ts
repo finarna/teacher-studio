@@ -134,34 +134,7 @@ export async function extractImagesFromPDF(file: File, pageFilter?: number[] | n
       }
 
       // --- PHASE 2: CAPTURE VECTOR DIAGRAMS (Legacy Fallback) ---
-      // 💡 ONLY do this if explicitly requested or on specific high-value pages
-      // This used to cause 'wrong detections' on common pages by capturing empty regions
-      const enableRegionCapture = (window as any).EXTRACT_VECTOR_REGIONS === true;
-      if (enableRegionCapture && (pageNum === 6)) {
-        console.log(`🎨 [PDF EXTRACTOR] P${pageNum}: Checking for vector diagrams (Manual Region Capture)...`);
-
-        // Take a snapshot of the 'Graph Zone' (middle-right section)
-        const cropCanvas = document.createElement('canvas');
-        const cropCtx = cropCanvas.getContext('2d');
-        const cropW = viewport.width * 0.55;
-        const cropH = viewport.height * 0.35;
-        const cropX = viewport.width * 0.4;
-        const cropY = viewport.height * 0.15; // Target Q56 area
-
-        cropCanvas.width = cropW;
-        cropCanvas.height = cropH;
-        if (cropCtx && context) {
-          cropCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-
-          images.push({
-            imageData: cropCanvas.toDataURL('image/png'),
-            x: cropX, y: cropY,
-            width: cropW, height: cropH,
-            pageNum
-          });
-          console.log(`✅ [PDF EXTRACTOR] P${pageNum}: Captured vector region snapshot`);
-        }
-      }
+      // 💡 Deprecated for Vision-Guided extraction
 
     } catch (err) {
       console.error(`❌ [PDF EXTRACTOR] Error processing page ${pageNum}:`, err);
@@ -261,32 +234,34 @@ export async function extractQuestionLocations(file: File, pageFilter?: number[]
  */
 export function mapImagesToQuestions(
   images: ExtractedImage[],
-  questions: QuestionLocation[]
+  questions: QuestionLocation[],
+  layout: 'single' | 'double' = 'double'
 ): Map<number, ExtractedImage[]> {
   const mapping = new Map<number, ExtractedImage[]>();
 
   for (const image of images) {
     const samePage = questions.filter(q => q.pageNum === image.pageNum);
     if (samePage.length === 0) {
-      // 💡 FALLBACK: If we have an image on a page (especially P5 or P6) and no questions detected by text,
-      // it might be a vector diagram like Q56. We'll leave it to BoardMastermind to map by Page.
       continue;
     }
 
     // --- COLUMN THRESHOLD (dynamic) ---
-    // Compute threshold just below right-column question X so that 2x2 option
-    // images in the right half of the left column are not misclassified.
-    const pageXValues = [...new Set(samePage.map(q => q.x))].sort((a, b) => a - b);
-    let colThreshold = 170; // fallback
-    for (let i = 1; i < pageXValues.length; i++) {
-      if (pageXValues[i] - pageXValues[i - 1] > 50) {
-        colThreshold = pageXValues[i] - 30;
-        break;
+    let candidates = samePage;
+    let imageIsLeftCol = true;
+    let colThreshold = 170;
+
+    if (layout === 'double') {
+      const pageXValues = [...new Set(samePage.map(q => q.x))].sort((a, b) => a - b);
+      for (let i = 1; i < pageXValues.length; i++) {
+        if (pageXValues[i] - pageXValues[i - 1] > 50) {
+          colThreshold = pageXValues[i] - 30;
+          break;
+        }
       }
+      imageIsLeftCol = image.x < colThreshold;
+      candidates = samePage.filter(q => imageIsLeftCol ? q.x < colThreshold : q.x >= colThreshold);
+      if (candidates.length === 0) candidates = samePage;
     }
-    const imageIsLeftCol = image.x < colThreshold;
-    const sameCol = samePage.filter(q => imageIsLeftCol ? q.x < colThreshold : q.x >= colThreshold);
-    const candidates = sameCol.length > 0 ? sameCol : samePage;
 
     // --- ZONE-BASED OWNERSHIP ---
     // Sort by Y. Each question owns from its Y down to just before the next
@@ -317,7 +292,7 @@ export function mapImagesToQuestions(
   return mapping;
 }
 
-export async function extractAndMapImages(file: File, pageFilter?: number[] | null): Promise<{
+export async function extractAndMapImages(file: File, pageFilter?: number[] | null, layout: 'single' | 'double' = 'double'): Promise<{
   mapping: Map<number, ExtractedImage[]>,
   rawImages: ExtractedImage[]
 }> {
@@ -326,7 +301,7 @@ export async function extractAndMapImages(file: File, pageFilter?: number[] | nu
     extractQuestionLocations(file, pageFilter)
   ]);
   return {
-    mapping: mapImagesToQuestions(images, questionLocations),
+    mapping: mapImagesToQuestions(images, questionLocations, layout),
     rawImages: images
   };
 }

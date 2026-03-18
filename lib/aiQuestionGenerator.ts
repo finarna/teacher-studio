@@ -1,3 +1,4 @@
+import { getGeminiClient, withGeminiRetry } from '../utils/geminiClient';
 /**
  * GENERIC AI-Powered Question Generator
  *
@@ -462,22 +463,24 @@ Return ONLY valid JSON:
 }`;
 
   try {
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const model = genAI.getGenerativeModel({
+    const ai = getGeminiClient(geminiApiKey);
+
+    const result = await withGeminiRetry(() => ai.models.generateContent({
       model: AI_CONFIG.defaultModel,
-      generationConfig: {
+      contents: [{
+        role: "user",
+        parts: [{ text: prompt }]
+      }],
+      config: {
         temperature: 0.2,
         topK: 1,
         topP: 0.8,
         maxOutputTokens: 4096,
         responseMimeType: 'application/json'
       }
-    });
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text() || '{}';
+    }));
+    
+    const text = result.text || '{}';
 
     const jsonStr = cleanJsonResponse(text);
     const prediction = JSON.parse(jsonStr);
@@ -798,18 +801,7 @@ Return ONLY a valid JSON array:
 ]`;
 
   try {
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const model = genAI.getGenerativeModel({
-      model: AI_CONFIG.defaultModel,
-      generationConfig: {
-        temperature: isOracle ? 0.3 : 0.7, // Lower temperature for deterministic precision in Oracle Mode
-        topK: 40,
-        topP: 0.9,
-        maxOutputTokens: 12000,
-        responseMimeType: 'application/json'
-      }
-    });
+    const ai = getGeminiClient(geminiApiKey);
 
     const MAX_BATCH_RETRIES = 3;
     let attempt = 0;
@@ -817,9 +809,21 @@ Return ONLY a valid JSON array:
     while (attempt <= MAX_BATCH_RETRIES) {
       let text = '';
       try {
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        text = response.text() || '[]';
+        const result = await withGeminiRetry(() => ai.models.generateContent({
+          model: AI_CONFIG.defaultModel,
+          contents: [{
+            role: "user",
+            parts: [{ text: prompt }]
+          }],
+          config: {
+            temperature: isOracle ? 0.3 : 0.7,
+            topK: 40,
+            topP: 0.9,
+            maxOutputTokens: 12000,
+            responseMimeType: 'application/json'
+          }
+        }));
+        text = result.text || '[]';
 
         // responseMimeType: 'application/json' guarantees valid JSON from Gemini.
         // cleanJsonResponse doubles backslashes on already-valid JSON, breaking LaTeX.
@@ -1038,22 +1042,24 @@ CRITICAL RIGOR MANDATE:
 CRITICAL: Output MUST be valid JSON with NO markdown, NO extra text, JUST THE ARRAY.`;
 
   try {
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const model = genAI.getGenerativeModel({
+    const ai = getGeminiClient(geminiApiKey);
+
+    const result = await withGeminiRetry(() => ai.models.generateContent({
       model: AI_CONFIG.defaultModel,
-      generationConfig: {
+      contents: [{
+        role: "user",
+        parts: [{ text: prompt }]
+      }],
+      config: {
         temperature: 0.7,
         topK: 40,
         topP: 0.9,
         maxOutputTokens: 12000,
         responseMimeType: 'application/json'
       }
-    });
+    }));
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text() || '[]';
+    const text = result.text || '[]';
 
     // Gemini responseMimeType: 'application/json' is usually very clean.
     const questions = JSON.parse(text);

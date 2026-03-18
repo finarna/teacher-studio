@@ -3835,7 +3835,7 @@ const FlashcardsTab: React.FC<{
     if (!user) { alert('Please log in.'); return; }
     setIsGenerating(true);
     try {
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({
         model: selectedModel,

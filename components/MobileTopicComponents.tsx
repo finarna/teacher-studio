@@ -1178,7 +1178,7 @@ export const MobileFlashcardsTab: React.FC<{
         try {
             const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({
-                model: 'gemini-2.0-flash',
+                model: 'gemini-3-flash-preview',
                 generationConfig: {
                     responseMimeType: 'application/json',
                     temperature: 0.7,

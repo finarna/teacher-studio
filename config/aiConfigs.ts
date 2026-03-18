@@ -17,19 +17,19 @@ export const AI_CONFIG = {
     // Alternative models for specific use cases
     models: {
         flash: 'gemini-3-flash-preview',
-        pro: 'gemini-1.5-pro',
-        vision: 'gemini-1.5-flash',
-        ultra: 'gemini-2.0-flash-lite'
+        pro: 'gemini-3-pro',
+        vision: 'gemini-3-flash-preview',
+        ultra: 'gemini-3-pro',
+        exp: 'gemini-2.0-pro-exp'
     },
 
     // Models to show in UI selectors
     displayModels: [
-        { id: 'gemini-3-flash-preview', label: 'GEMINI 3 FLASH PREVIEW ⚡' },
+        { id: 'gemini-3-flash-preview', label: 'GEMINI 3 FLASH PREVIEW ⚡ (DEFAULT)' },
+        { id: 'gemini-3-flash-preview-001', label: 'GEMINI 2.0 FLASH (FAST)' },
         { id: 'gemini-1.5-pro', label: 'GEMINI 1.5 PRO (SMART)' },
-        { id: 'gemini-1.5-flash', label: 'GEMINI 1.5 FLASH (STABLE)' },
-        { id: 'gemini-2.0-flash-lite', label: 'GEMINI 2.0 FLASH LITE (FAST)' },
-        { id: 'gemini-2.5-flash-latest', label: 'GEMINI 2.5 FLASH' },
-        { id: 'gemini-3-pro', label: 'GEMINI 3 PRO' }
+        { id: 'gemini-3-pro', label: 'GEMINI 3 PRO (QUALITY)' },
+        { id: 'gemini-2.0-pro-exp', label: 'GEMINI 2.0 PRO EXP' }
     ],
 
     // Model settings

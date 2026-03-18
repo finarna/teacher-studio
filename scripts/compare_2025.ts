@@ -14,7 +14,7 @@ async function compare2025() {
     const actualQuestions = JSON.parse(fs.readFileSync('./actual_2025_analysis.json', 'utf8'));
 
     const genAI = new GoogleGenerativeAI(API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
     // 1. Semantic Match Analysis
     const prompt = `Compare these two sets of questions for KCET 2025 Math. 

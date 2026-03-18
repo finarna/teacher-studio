@@ -16,7 +16,7 @@ async function main() {
     const oracleJson = JSON.parse(fs.readFileSync(ORACLE_JSON_PATH, 'utf-8'));
 
     const ai = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = ai.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
     // We will send the full actual text and the first 20 oracle questions for a deep dive
     const oracleSub = oracleJson.slice(0, 25).map((q: any, i: number) => ({

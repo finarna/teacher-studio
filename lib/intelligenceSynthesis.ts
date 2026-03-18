@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getGeminiClient, withGeminiRetry } from '../utils/geminiClient';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AI_CONFIG } from '../config/aiConfigs';
 
@@ -40,8 +40,7 @@ export async function synthesizeQuestionIntelligence(
     modelName: string = AI_CONFIG.defaultModel
 ): Promise<any | null> {
     try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: modelName });
+        const ai = getGeminiClient(apiKey);
 
         console.log(`🧠 [SynthesisEngine] Synthesizing for Q ID: ${question.id}`);
 
@@ -101,9 +100,18 @@ CRITICAL:
 - DO NOT use any other delimiters like \( \) or \[ \].
 - NO extra text outside JSON.`;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        let text = response.text().trim();
+        const result = await withGeminiRetry(() => ai.models.generateContent({
+            model: modelName,
+            contents: [{
+                role: "user",
+                parts: [{ text: prompt }]
+            }],
+            config: {
+                responseMimeType: "application/json",
+                temperature: 0.1
+            }
+        }));
+        let text = (result.text || "{}").trim();
 
         // Clean up potential markdown formatting
         if (text.startsWith('```json')) {
