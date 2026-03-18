@@ -78,7 +78,7 @@ const LessonCreator: React.FC<LessonCreatorProps> = ({ onClose, onLessonCreated 
 
     try {
       // Get model from Settings
-      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-2.0-flash';
+      const selectedModel = localStorage.getItem('gemini_model') || 'gemini-3-flash-preview';
 
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({

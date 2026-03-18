@@ -157,7 +157,7 @@ function autoFix(text) {
 
 // ─── GEMINI EXTRACTION (2-PASS, mirrors simpleMathExtractor.ts) ──────────────
 
-const MODEL = 'gemini-2.0-flash';
+const MODEL = 'gemini-3-flash-preview';
 
 const RESPONSE_SCHEMA = {
     type: 'array',

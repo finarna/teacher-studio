@@ -69,6 +69,9 @@ export interface VidyaMessageMetadata {
   // Tool execution metadata
   toolCallId?: string;
   toolName?: string;
+
+  // Local/Remote processing flags
+  handledLocally?: boolean;
 }
 
 export interface VidyaMessage {

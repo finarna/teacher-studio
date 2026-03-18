@@ -26,13 +26,25 @@ export interface VisualBoundingBox {
 //   "21"   → 0.21   (percentage 0-100, % sign omitted)
 //   "0.21" → 0.21   (already a 0-1 ratio)
 //   "210"  → normalized by un-scaled page dimension (PDF point coordinate)
-function parsePercentage(value: string, pageSize?: number): number {
-  const raw = parseFloat((value || '0').replace('%', ''));
+// 🚨 GEMINI-NATIVE COORDINATE PARSING
+// Gemini 1.5/2.0 best handles normalized coordinates in 0-1000 range.
+// We prioritize:
+// 1. Strings with % (e.g. "21%") -> divided by 100
+// 2. Numbers in 0-1 range -> use as is
+// 3. Numbers in 1-1000 range -> divided by 1000 (Gemini's native vision scale)
+// 4. Large numbers (> 1500) -> likely PDF points, divided by pageSize
+function parsePercentage(value: string | number, pageSize?: number): number {
+  if (value === undefined || value === null) return 0;
+  const str = value.toString();
+  const hasPercent = str.includes('%');
+  const raw = parseFloat(str.replace('%', ''));
   if (isNaN(raw)) return 0;
-  if (raw <= 1.0) return raw;           // already 0-1 ratio
-  if (raw <= 100) return raw / 100;     // percentage 0-100
-  // PDF point coordinate — normalize by un-scaled page dimension if available
-  return pageSize ? Math.min(raw / pageSize, 1.0) : 1.0;
+
+  if (hasPercent) return raw / 100;
+  if (raw <= 1.0) return raw;
+  if (raw <= 1000) return raw / 1000; // Gemini Native Scale priority
+  if (pageSize && raw > 1000) return raw / pageSize;
+  return raw / 1000; 
 }
 
 export interface ExtractedVisualImage {
@@ -47,21 +59,18 @@ export interface ExtractedVisualImage {
 
 /**
  * Extract images from PDF based on Gemini's visual bounding boxes.
- *
- * questionX: the question's actual X position in PDF points (from pdfImageExtractor's
- *   item.transform[4]). Used to determine which column a question is in for 2-column PDFs,
- *   so we can correct Gemini's often-wrong x/width values.
  */
 export async function extractImagesByBoundingBoxes(
   file: File,
   questionVisuals: Array<{ questionNumber: number; boundingBox: VisualBoundingBox; questionX?: number }>,
-  onProgress?: (index: number, total: number) => void
+  onProgress?: (index: number, total: number) => void,
+  layout: 'single' | 'double' = 'double'
 ): Promise<Map<number, ExtractedVisualImage[]>> {
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const imageMap = new Map<number, ExtractedVisualImage[]>();
-
-  console.log('🎯 [VISION-GUIDED] Extracting images for', questionVisuals.length, 'questions with visuals');
+  
+  const pageCache = new Map<number, { canvas: HTMLCanvasElement; viewport: any }>();
 
   for (let i = 0; i < questionVisuals.length; i++) {
     const { questionNumber, boundingBox, questionX } = questionVisuals[i];
@@ -69,109 +78,100 @@ export async function extractImagesByBoundingBoxes(
 
     try {
       const { pageNumber, x, y, width, height } = boundingBox;
+      const pNum = typeof pageNumber === 'string' ? parseInt(pageNumber) : pageNumber;
 
-      // Get the page
-      const page = await pdf.getPage(pageNumber);
-      const viewport = page.getViewport({ scale: 2.0 }); // 2x scale for better quality
+      if (!pageCache.has(pNum)) {
+        const page = await pdf.getPage(pNum);
+        const viewport = page.getViewport({ scale: 4.0 }); // Increased to 4x for extreme clarity
+        
+        const renderCanvas = document.createElement('canvas');
+        const renderContext = renderCanvas.getContext('2d', { alpha: false });
+        renderCanvas.width = viewport.width;
+        renderCanvas.height = viewport.height;
+        
+        if (renderContext) {
+          renderContext.fillStyle = 'white';
+          renderContext.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+          await page.render({ canvasContext: renderContext, viewport, intent: 'display' }).promise;
+          pageCache.set(pNum, { canvas: renderCanvas, viewport });
+        }
+      }
 
-      // Un-scaled page dimensions (viewport is at 2x scale)
-      const pageW = viewport.width / 2.0;
-      const pageH = viewport.height / 2.0;
+      const cachedMap = pageCache.get(pNum);
+      if (!cachedMap) continue;
 
-      // Calculate initial fractions — robust to %, bare 0-100, or PDF point values
+      const { canvas: renderCanvas, viewport } = cachedMap;
+      const pageW = viewport.width / 4.0;
+      const pageH = viewport.height / 4.0;
+
       let xFrac = parsePercentage(x, pageW);
-      const yFrac = parsePercentage(y, pageH);
+      let yFrac = parsePercentage(y, pageH);
       let wFrac = parsePercentage(width, pageW);
       let hFrac = parsePercentage(height, pageH);
 
-      // --- COLUMN-AWARE HORIZONTAL CORRECTION ---
-      // Gemini returns bounding-box x/width in an internal image coordinate space that is
-      // wider than the actual PDF (~850pt vs 595pt), causing right-column crops to overflow.
-      // When we know which column the question lives in (questionX from pdfImageExtractor),
-      // we constrain the horizontal crop to that column's safe bounds.
-      if (questionX !== undefined && pageW > 0) {
-        // Column divider sits at ~50% of page width (left col ~10%, right col ~57% for KCET A4)
-        const colThreshold = pageW * 0.50;
-        const isRightCol = questionX >= colThreshold;
+      // --- COLUMN-AWARE REFINEMENT (LIGHT-TOUCH ONLY) ---
+      if (layout === 'double' && questionX !== undefined && pageW > 0) {
+        let normalizedQX = questionX;
+        if (questionX <= 1.0) normalizedQX = questionX * pageW;
+        else if (questionX <= 100.0) normalizedQX = (questionX / 100) * pageW;
+        
+        const isRightCol = normalizedQX >= (pageW * 0.50);
 
-        if (isRightCol) {
-          // Right column: crop must be in the right half
-          const rcStart = 0.52;
-          const rcEnd   = 0.98;
-          if (xFrac < 0.45 || xFrac + wFrac > 1.05) {
-            // Gemini placed crop in wrong area or it overflows — use full right column
-            xFrac = rcStart;
-            wFrac = rcEnd - rcStart;
-          } else {
-            // x looks plausible; just clamp width to stay on page
-            wFrac = Math.min(wFrac, rcEnd - xFrac);
-          }
-        } else {
-          // Left column: crop must be in the left half
-          const lcStart = 0.02;
-          const lcEnd   = 0.50;
-          if (xFrac > 0.55 || xFrac + wFrac > 0.60) {
-            // Gemini placed crop in wrong column or overflows into right — use full left column
-            xFrac = lcStart;
-            wFrac = lcEnd - lcStart;
-          } else {
-            // x looks plausible; clamp width to stay within left column
-            wFrac = Math.min(wFrac, lcEnd - xFrac);
-          }
+        // We only "snap" if Gemini is completely in the wrong side or the box is massive
+        if (isRightCol && xFrac + wFrac < 0.40) {
+            xFrac = 0.52; // Fallback to right side
+            wFrac = 0.45;
+        } else if (!isRightCol && xFrac > 0.60) {
+            xFrac = 0.02; // Fallback to left side
+            wFrac = 0.45;
         }
-        console.log(`📐 [VISION-GUIDED] Q${questionNumber}: ${isRightCol ? 'RIGHT' : 'LEFT'} col correction → x=${xFrac.toFixed(3)} w=${wFrac.toFixed(3)}`);
       } else {
-        // No column info — just clamp to avoid overflow
         wFrac = Math.min(wFrac, 1.0 - xFrac);
       }
 
-      // Height: add 5% padding (bottom labels) but never exceed page bottom
-      hFrac = Math.min(1.0 - yFrac, hFrac + 0.05);
-      // Safety clamps
+      // Broader padding for bilingual/handwritten-style scans
+      const padW = 0.04; // 4%
+      const padH = 0.05; // 5%
+      
+      xFrac = Math.max(0, xFrac - padW / 2);
+      wFrac = Math.min(1.0 - xFrac, wFrac + padW);
+      yFrac = Math.max(0, yFrac - padH / 2);
+      hFrac = Math.min(1.0 - yFrac, hFrac + padH);
+
       const xPercent = Math.max(0, Math.min(xFrac, 0.99));
       const yPercent = Math.max(0, Math.min(yFrac, 0.99));
       const widthPercent  = Math.max(0.01, Math.min(wFrac, 1.0 - xPercent));
       const heightPercent = Math.max(0.01, Math.min(hFrac, 1.0 - yPercent));
 
-      const xPixel = Math.floor(viewport.width * xPercent);
-      const yPixel = Math.floor(viewport.height * yPercent);
-      const widthPixel = Math.floor(viewport.width * widthPercent);
-      const heightPixel = Math.floor(viewport.height * heightPercent);
-
-      // Create canvas for the extracted region
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      canvas.width = widthPixel;
-      canvas.height = heightPixel;
-
-      if (!context) {
-        console.warn(`⚠️ [VISION-GUIDED] Could not get canvas context for Q${questionNumber}`);
-        continue;
+      // SANITY: Enforce minimum pixels (prevent noise crops)
+      const minPixelDim = 80;
+      let widthPixel = Math.floor(viewport.width * widthPercent);
+      let heightPixel = Math.floor(viewport.height * heightPercent);
+      
+      if (widthPixel < minPixelDim || heightPixel < minPixelDim) {
+         widthPixel = Math.max(widthPixel, minPixelDim);
+         heightPixel = Math.max(heightPixel, minPixelDim);
       }
 
-      // Render full page first
-      const renderCanvas = document.createElement('canvas');
-      const renderContext = renderCanvas.getContext('2d');
-      renderCanvas.width = viewport.width;
-      renderCanvas.height = viewport.height;
+      const xPixel = Math.floor(viewport.width * xPercent);
+      const yPixel = Math.floor(viewport.height * yPercent);
 
-      if (!renderContext) continue;
+      // Create output canvas for the region
+      const outputCanvas = document.createElement('canvas');
+      const outputContext = outputCanvas.getContext('2d');
+      outputCanvas.width = widthPixel;
+      outputCanvas.height = heightPixel;
 
-      await page.render({
-        canvasContext: renderContext,
-        viewport: viewport
-      }).promise;
+      if (outputContext) {
+        outputContext.drawImage(
+          renderCanvas,
+          xPixel, yPixel, widthPixel, heightPixel,
+          0, 0, widthPixel, heightPixel
+        );
+      }
 
-      // Copy the specific region to our output canvas
-      context.drawImage(
-        renderCanvas,
-        xPixel, yPixel, // source x, y
-        widthPixel, heightPixel, // source width, height
-        0, 0, // dest x, y
-        widthPixel, heightPixel // dest width, height
-      );
-
-      const imageDataUrl = canvas.toDataURL('image/png');
+      // Use JPEG with 0.95 quality — significantly better for scanned PDF textures
+      const imageDataUrl = outputCanvas.toDataURL('image/jpeg', 0.95);
 
       if (!imageMap.has(questionNumber)) {
         imageMap.set(questionNumber, []);
@@ -180,19 +180,23 @@ export async function extractImagesByBoundingBoxes(
       imageMap.get(questionNumber)!.push({
         questionNumber,
         imageData: imageDataUrl,
-        pageNumber,
-        x,
-        y,
-        width,
-        height
+        pageNumber: pNum,
+        x: (xPercent * 100).toFixed(1) + '%',
+        y: (yPercent * 100).toFixed(1) + '%',
+        width: (widthPercent * 100).toFixed(1) + '%',
+        height: (heightPercent * 100).toFixed(1) + '%'
       });
 
-      console.log(`✅ [VISION-GUIDED] Extracted Q${questionNumber} visual from page ${pageNumber} at (${x}, ${y}) size ${width}×${height}`);
+      console.log(`✅ [VISION-GUIDED] Extracted Q${questionNumber} visual from page ${pNum} | scale:4.0 | quality:0.95`);
     } catch (err) {
       console.error(`❌ [VISION-GUIDED] Failed to extract Q${questionNumber}:`, err);
     }
   }
 
+  // Cleanup cache to free memory
+  pageCache.clear();
+
   console.log('✅ [VISION-GUIDED] Complete:', imageMap.size, 'questions have extracted visuals');
   return imageMap;
 }
+

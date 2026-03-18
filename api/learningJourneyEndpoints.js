@@ -372,16 +372,8 @@ export async function generateTest(req, res) {
     if (!questionSet && GEMINI_KEY) {
       console.log('🤖 Falling back to direct Gemini generation (no DB context)…');
       try {
-        const { GoogleGenerativeAI } = await import('@google/generative-ai');
-        const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-        const model = genAI.getGenerativeModel({
-          model: AI_CONFIG.defaultModel,
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.7,
-            maxOutputTokens: 12000
-          }
-        });
+        const { getGeminiClient, withGeminiRetry } = await import('../utils/geminiClient.ts');
+        const ai = getGeminiClient(GEMINI_KEY);
 
         // topics[] contains UUIDs from the frontend — resolve to readable names first
         const UUID_REGEX_TOPIC = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -430,49 +422,25 @@ A) SOLUTION STEPS (4-6 steps minimum):
    - Include intermediate results, not just "solve this"
    - Show WHY each step follows from the previous one
    - Use proper LaTeX for all mathematical expressions
-   - Example: "Step 1: Identify domain restriction ::: For $f(x) = \\\\frac{x}{1-|x|}$, the denominator cannot be zero. Set $1-|x|=0 \\\\Rightarrow |x|=1 \\\\Rightarrow x = \\\\pm 1$. These are the excluded values."
 
 B) PITFALLS (3-5 specific mistakes):
    - State the EXACT mistake students make
    - Explain WHY they make it (misconception/rushed thinking)
    - Show HOW to avoid it with a concrete technique
-   - Example: "PITFALL: Confusing 'domain is $\\\\mathbb{R} - [-1,1]$' with '$\\\\mathbb{R} - \\\\{-1,1\\\\}$'. WHY: Students forget that $|x|=1$ gives discrete points, not an interval. The interval $[-1,1]$ includes all values from -1 to 1, which is incorrect. HOW TO AVOID: Always solve the restriction equation completely to find exact excluded points, then use set notation with curly braces for discrete values."
 
 C) KEY FORMULAS (3-5 formulas):
    - Include all formulas needed to solve the question
    - Add context: when to use each formula
-   - Example: "$\\\\text{Domain of } \\\\frac{f(x)}{g(x)}: \\\\text{Dom}(f) \\\\cap \\\\{x : g(x) \\\\neq 0\\\\}$ - Always check both numerator domain AND denominator ≠ 0"
 
 D) EXAM TIP:
    - Give a SPECIFIC time-saving strategy for this question type
    - Mention common exam traps
-   - Example: "In ${examContext} exams, domain questions often test absolute value cases. ALWAYS split $|x|$ into $x \\\\geq 0$ and $x < 0$ cases separately, then combine. This avoids missing edge cases that cost marks."
 
 E) MASTERY MATERIAL (DEEP INSIGHTS):
-
-   - aiReasoning (2-3 sentences):
-     Explain the EXACT conceptual skill being tested. NOT generic placeholders.
-     Example: "This question combines three concepts: (1) domain restrictions from denominators, (2) absolute value properties creating piecewise conditions, and (3) set theory notation. It specifically tests whether students can identify that $|x|=1$ yields two discrete points, not a continuous interval—a common ${examContext} trap."
-
-   - whyItMatters (2-3 sentences):
-     Explain how this concept connects to other topics and real applications.
-     Example: "Domain mastery is foundational for limits, continuity, and integration in calculus. Understanding absolute value restrictions appears in optimization problems, and the set notation distinction ($\\\\{-1,1\\\\}$ vs $[-1,1]$) is critical for advanced topics like measure theory and database query ranges in computer science."
-
-   - historicalPattern (specific data):
-     Give actual exam frequency and patterns, not vague percentages.
-     Example: "Domain problems appear in 85-90% of ${examContext} ${subject} papers (2018-2024). Absolute value in denominators specifically appeared in 2024, 2022, 2020, and 2019 papers. The trend shows increasing complexity: recent exams combine domain with composition of functions."
-
-   - predictiveInsight (trend analysis):
-     Based on actual exam evolution, predict what's coming.
-     Example: "Given the 2023-2024 shift toward multi-layered function problems, expect ${examContext} 2025 to combine domain restrictions with inverse functions or parametric forms. Probability: 75-80% based on syllabus rotation patterns and examiner emphasis on composite reasoning."
-
-   - keyConcepts (3-5 foundational concepts):
-     Each concept must include: definition, key theorem/formula, worked mini-example, and connection to question.
-     Example format:
-     {
-       "name": "Absolute Value Properties",
-       "explanation": "$|x| = a$ means $x = \\\\pm a$ (for $a > 0$). This creates TWO solutions, not an interval. Geometrically: distance from origin equals $a$ at exactly two points on the number line. In this question: $|x|=1$ gives $x \\\\in \\\\{-1, 1\\\\}$ (2 discrete points), NOT $x \\\\in [-1,1]$ (interval with infinitely many points). Connection: This distinction is why the domain excludes exactly 2 values, making the answer $\\\\mathbb{R} - \\\\{-1,1\\\\}$."
-     }
+   - aiReasoning (2-3 sentences): Explain the EXACT conceptual skill being tested.
+   - whyItMatters (2-3 sentences): Explain how this concept connects to other topics.
+   - historicalPattern (specific data): Give actual exam frequency and patterns.
+   - predictiveInsight (trend analysis): Based on actual exam evolution, predict what's coming.
 
 Return ONLY a valid JSON array:
 [
@@ -481,41 +449,17 @@ Return ONLY a valid JSON array:
     "text": "The rigorous question with $Proper \\\\LaTeX$...",
     "options": ["...", "...", "...", "..."],
     "correctOptionIndex": 0,
-    "solutionSteps": [
-      "Step 1: Title ::: Detailed mathematical reasoning with intermediate calculations and LaTeX",
-      "Step 2: Title ::: Show exactly what to do, with actual numbers/expressions",
-      "Step 3: Title ::: Continue with complete working",
-      "Step 4: Title ::: Final step with answer derivation"
-    ],
-    "examTip": "Specific time-saving technique for this question type in ${examContext} exams, mentioning common traps",
-    "keyFormulas": [
-      "$formula_1$ - context on when to use",
-      "$formula_2$ - context on when to use",
-      "$formula_3$ - context on when to use"
-    ],
-    "pitfalls": [
-      "EXACT mistake ::: WHY students make it ::: HOW to avoid with specific technique",
-      "EXACT mistake ::: WHY students make it ::: HOW to avoid with specific technique",
-      "EXACT mistake ::: WHY students make it ::: HOW to avoid with specific technique"
-    ],
+    "solutionSteps": ["Step 1: ...", "Step 2: ..."],
+    "examTip": "...",
+    "keyFormulas": ["..."],
+    "pitfalls": ["..."],
     "masteryMaterial": {
-      "aiReasoning": "2-3 sentences explaining the EXACT conceptual skills being tested, with specific reference to what makes this question challenging for ${examContext} students",
-      "whyItMatters": "2-3 sentences on how this concept connects to other ${subject} topics, higher mathematics, and real-world applications. Be specific with topic names.",
-      "historicalPattern": "Specific exam frequency data (e.g., '85% of 2018-2024 papers'), mention actual years where this appeared, describe how difficulty evolved",
-      "predictiveInsight": "Based on 2023-2024 trends, predict what variation will appear in 2025-2026 ${examContext} with probability estimate and reasoning",
+      "aiReasoning": "...",
+      "whyItMatters": "...",
+      "historicalPattern": "...",
+      "predictiveInsight": "...",
       "keyConcepts": [
-        {
-          "name": "Concept Name (e.g., Absolute Value Properties)",
-          "explanation": "Complete explanation: (1) Definition with LaTeX, (2) Key theorem/formula, (3) Worked mini-example with numbers, (4) Direct connection to how it's used in THIS question. Minimum 3-4 sentences with actual mathematical content."
-        },
-        {
-          "name": "Second Core Concept",
-          "explanation": "Complete explanation with definition, theorem, example, and question connection"
-        },
-        {
-          "name": "Third Core Concept",
-          "explanation": "Complete explanation with definition, theorem, example, and question connection"
-        }
+        { "name": "...", "explanation": "..." }
       ]
     },
     "topic": "${topicNames}",
@@ -523,8 +467,17 @@ Return ONLY a valid JSON array:
   }
 ]`;
 
-        const result = await model.generateContent(prompt);
-        const raw = result.response.text().trim();
+        const result = await withGeminiRetry(() => ai.models.generateContent({
+          model: AI_CONFIG.defaultModel,
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          config: {
+            responseMimeType: 'application/json',
+            temperature: 0.7,
+            maxOutputTokens: 12000
+          }
+        }));
+
+        const raw = result.text || '';
         const jsonStr = raw.includes('```json')
           ? raw.match(/```json\n([\s\S]*?)\n```/)?.[1] || raw
           : raw;
@@ -1797,16 +1750,8 @@ async function generateTestInBackground({ userId, testName, subject, examContext
       if (GEMINI_KEY) {
         console.log('🤖 Strategy 2: Direct Gemini generation for custom mock test...');
         try {
-          const { GoogleGenerativeAI } = await import('@google/generative-ai');
-          const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-          const model = genAI.getGenerativeModel({
-            model: AI_CONFIG.defaultModel,
-            generationConfig: {
-              responseMimeType: 'application/json',
-              temperature: 0.7,
-              maxOutputTokens: 12000
-            }
-          });
+          const { getGeminiClient, withGeminiRetry } = await import('../utils/geminiClient.ts');
+          const ai = getGeminiClient(GEMINI_KEY);
 
           // Resolve topic names if we don't have them yet
           let topicNamesForPrompt = subject;
@@ -1941,8 +1886,16 @@ Return ONLY a valid JSON array:
   }
 ]`;
 
-          const result = await model.generateContent(prompt);
-          const raw = result.response.text().trim();
+          const result = await withGeminiRetry(() => ai.models.generateContent({
+            model: AI_CONFIG.defaultModel,
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            config: {
+              responseMimeType: 'application/json',
+              temperature: 0.7,
+              maxOutputTokens: 12000
+            }
+          }));
+          const raw = result.text || '';
           const jsonStr = raw.includes('```json')
             ? raw.match(/```json\n([\s\S]*?)\n```/)?.[1] || raw
             : raw.startsWith('[') ? raw : raw;

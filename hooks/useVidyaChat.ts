@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { GoogleGenerativeAI, ChatSession } from '@google/generative-ai';
+import { getGeminiClient, withGeminiRetry } from '../utils/geminiClient';
 import { VidyaMessage, VidyaChatState, UserRole, VidyaAppContext } from '../types';
 import { getContextualPrompt, getWelcomeMessage, generateAppContextSummary } from '../utils/vidyaPrompts';
+import { AI_CONFIG } from '../config/aiConfigs';
 
 /**
  * Custom hook for managing Vidya AI chatbot state and streaming responses
@@ -16,41 +17,18 @@ export function useVidyaChat(userRole: UserRole, currentView?: string, appContex
   });
 
   // Refs to persist across renders
-  const genAIRef = useRef<GoogleGenerativeAI | null>(null);
-  const chatRef = useRef<ChatSession | null>(null);
+  const aiRef = useRef<any>(null);
   const initializedRef = useRef(false);
 
   /**
-   * Initialize Gemini AI and create chat session with system instruction
+   * Initialize Gemini AI client
    */
   const initializeChat = useCallback(() => {
     if (initializedRef.current) return;
 
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error('Gemini API key not found in environment variables');
-      }
-
-      // Initialize Gemini AI
-      genAIRef.current = new GoogleGenerativeAI(apiKey);
-      const model = genAIRef.current.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        systemInstruction: {
-          parts: [{ text: getContextualPrompt(userRole, currentView, appContext) }],
-          role: 'user',
-        },
-      });
-
-      // Create chat session
-      chatRef.current = model.startChat({
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 500,
-          topP: 0.95,
-          topK: 40,
-        },
-      });
+      // Use centralized client (Vertex AI)
+      aiRef.current = getGeminiClient();
 
       // Add welcome message
       const welcomeMessage: VidyaMessage = {
@@ -74,7 +52,7 @@ export function useVidyaChat(userRole: UserRole, currentView?: string, appContex
         error: 'Failed to initialize AI assistant. Please refresh the page.',
       }));
     }
-  }, [userRole, currentView, appContext]);
+  }, [userRole]);
 
   /**
    * Toggle chat window open/closed
@@ -96,11 +74,11 @@ export function useVidyaChat(userRole: UserRole, currentView?: string, appContex
   }, [initializeChat]);
 
   /**
-   * Send user message and stream AI response token-by-token
+   * Send user message and handle state updates
    */
   const sendMessage = useCallback(
     async (userMessage: string) => {
-      if (!chatRef.current || !userMessage.trim()) return;
+      if (!aiRef.current || !userMessage.trim()) return;
 
       const trimmedMessage = userMessage.trim();
 
@@ -120,7 +98,7 @@ export function useVidyaChat(userRole: UserRole, currentView?: string, appContex
       }));
 
       try {
-        // Create placeholder for streaming AI response
+        // Create placeholder for AI response
         const aiMessageId = `assistant-${Date.now()}`;
         const aiMsg: VidyaMessage = {
           id: aiMessageId,
@@ -137,45 +115,52 @@ export function useVidyaChat(userRole: UserRole, currentView?: string, appContex
           isThinking: false,
         }));
 
-        // Inject current app context with EVERY message for real-time data
+        // Context injection
         const appContextData = generateAppContextSummary(appContext);
         const enhancedMessage = appContextData
           ? `${trimmedMessage}\n\n---\nCURRENT APP STATE (use this to answer):${appContextData}`
           : trimmedMessage;
 
-        // Send message and stream response
-        const result = await chatRef.current.sendMessageStream(enhancedMessage);
-        let fullText = '';
+        // System Instruction update
+        const systemPrompt = getContextualPrompt(userRole, currentView, appContext);
 
-        // Stream chunks token-by-token
-        for await (const chunk of result.stream) {
-          const chunkText = chunk.text();
-          fullText += chunkText;
+        // Prepare conversation history for generateContent
+        const history = state.messages.map(m => ({
+          role: m.role === 'user' ? 'user' : 'model',
+          parts: [{ text: m.content }]
+        }));
 
-          // Update message content in real-time
-          setState((prev) => ({
-            ...prev,
-            messages: prev.messages.map((msg) =>
-              msg.id === aiMessageId
-                ? { ...msg, content: fullText }
-                : msg
-            ),
-          }));
-        }
+        // Vertex AI Generation via Centralized Utility
+        const result = await withGeminiRetry(() => aiRef.current.models.generateContent({
+          model: AI_CONFIG.defaultModel,
+          contents: [
+            ...history,
+            { role: "user", parts: [{ text: enhancedMessage }] }
+          ],
+          config: {
+            systemInstruction: systemPrompt,
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+            topP: 0.95
+          }
+        })) as any;
 
-        // Finalize streaming (remove streaming flag)
+        const fullText = result.text || "Sorry, I couldn't generate a response.";
+
+        // Finalize state
         setState((prev) => ({
           ...prev,
           messages: prev.messages.map((msg) =>
             msg.id === aiMessageId
-              ? { ...msg, isStreaming: false }
+              ? { ...msg, content: fullText, isStreaming: false }
               : msg
           ),
         }));
+
       } catch (error) {
         console.error('Error sending message to Vidya:', error);
 
-        // Remove placeholder message and show error
+        // Clear placeholder and show error
         setState((prev) => ({
           ...prev,
           messages: prev.messages.slice(0, -1),
@@ -183,67 +168,36 @@ export function useVidyaChat(userRole: UserRole, currentView?: string, appContex
           error: 'Failed to get response. Please try again.',
         }));
 
-        // Auto-clear error after 5 seconds
         setTimeout(() => {
           setState((prev) => ({ ...prev, error: null }));
         }, 5000);
       }
     },
-    [appContext]
+    [appContext, userRole, currentView, state.messages]
   );
 
   /**
-   * Clear chat history and reset to welcome message
+   * Clear chat history
    */
   const clearHistory = useCallback(() => {
-    if (!genAIRef.current) return;
+    const welcomeMessage: VidyaMessage = {
+      id: `welcome-${Date.now()}`,
+      role: 'assistant',
+      content: getWelcomeMessage(userRole),
+      timestamp: new Date(),
+    };
 
-    try {
-      // Reinitialize chat session
-      const model = genAIRef.current.getGenerativeModel({
-        model: 'gemini-2.0-flash',
-        systemInstruction: {
-          parts: [{ text: getContextualPrompt(userRole, currentView, appContext) }],
-          role: 'user',
-        },
-      });
-
-      chatRef.current = model.startChat({
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 500,
-          topP: 0.95,
-          topK: 40,
-        },
-      });
-
-      // Reset to welcome message only
-      const welcomeMessage: VidyaMessage = {
-        id: `welcome-${Date.now()}`,
-        role: 'assistant',
-        content: getWelcomeMessage(userRole),
-        timestamp: new Date(),
-      };
-
-      setState((prev) => ({
-        ...prev,
-        messages: [welcomeMessage],
-        error: null,
-      }));
-    } catch (error) {
-      console.error('Failed to clear Vidya chat history:', error);
-      setState((prev) => ({
-        ...prev,
-        error: 'Failed to clear history. Please refresh the page.',
-      }));
-    }
-  }, [userRole, currentView, appContext]);
+    setState((prev) => ({
+      ...prev,
+      messages: [welcomeMessage],
+      error: null,
+    }));
+  }, [userRole]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      chatRef.current = null;
-      genAIRef.current = null;
+      aiRef.current = null;
       initializedRef.current = false;
     };
   }, []);

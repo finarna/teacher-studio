@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getGeminiClient, withGeminiRetry } from '../utils/geminiClient';
 import {
   Upload,
   FileText,
@@ -22,15 +22,9 @@ import { Scan, ExamAnalysisData, AnalyzedQuestion, Subject } from '../types';
 import { safeAiParse, normalizeData } from '../utils/aiParser';
 import { generateMathExtractionInstructions, generateStreamlinedMathInstructions } from '../utils/mathLatexReference';
 import { generatePhysicsExtractionInstructions } from '../utils/physicsNotationReference';
-import { generateCleanMathPrompt, validateExtraction } from '../utils/cleanMathExtractor';
-import { generateCleanPhysicsPrompt } from '../utils/cleanPhysicsExtractor';
-import { generateCleanBiologyPrompt } from '../utils/cleanBiologyExtractor';
-import { generateCleanChemistryPrompt } from '../utils/cleanChemistryExtractor';
+// Removed legacy validation imports
 import { processQuestionsUnicode } from '../utils/unicodeToLatex'; // Latest: fixed escape char regex patterns
-import { extractQuestionsSimplified } from '../utils/simpleMathExtractor';
-import { extractPhysicsQuestionsSimplified } from '../utils/simplePhysicsExtractor';
-import { extractBiologyQuestionsSimplified } from '../utils/simpleBiologyExtractor';
-import { extractChemistryQuestionsSimplified } from '../utils/simpleChemistryExtractor'; // NEW: Simplified Chemistry
+import { extractPaperStandardized } from '../utils/standardizedPaperExtractor';
 import { matchToOfficialTopic } from '../utils/officialTopics'; // NEW: Official Topic Mapping
 import { AI_CONFIG } from '../config/aiConfigs';
 
@@ -64,6 +58,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
   const [useSimplifiedExtraction, setUseSimplifiedExtraction] = useState(true); // NEW: Toggle for simplified extraction
   const [enableVisionExtraction, setEnableVisionExtraction] = useState(false); // NEW: Toggle for vision-guided image extraction (slow)
   const [isCombinedPaperMode, setIsCombinedPaperMode] = useState(false); // NEW: Toggle for full NEET/JEE combined papers
+  const [columnLayout, setColumnLayout] = useState<'single' | 'double'>('double'); // NEW: Column layout toggle
   const [isProcessing, setIsProcessing] = useState(false);
   const [loadingStage, setLoadingStage] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -106,15 +101,8 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         throw new Error("API Key Missing");
       }
 
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const genModel = genAI.getGenerativeModel({
-        model: selectedModel,
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.1,
-          maxOutputTokens: 65536  // Max allowed - handle all 60 questions in one response
-        }
-      });
+      // Vertex AI Centralized Client
+      const ai = getGeminiClient(apiKey);
 
       const allExtractedQuestions: AnalyzedQuestion[] = [];
       // Process files one by one for maximum clarity and per-file progress tracking
@@ -132,13 +120,33 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         const base64Data = await base64Promise;
         const mimeType = file.type || 'application/pdf';
 
+        // Detect layout for each file in bulk
+        let bulkDetectedLayout: 'single' | 'double' = columnLayout;
+        if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+          try {
+            const locs = await extractQuestionLocations(file);
+            if (locs.length >= 3) {
+              const xBuckets: Record<number, number> = {};
+              for (const loc of locs) {
+                const bucket = Math.round(loc.x / 40) * 40;
+                xBuckets[bucket] = (xBuckets[bucket] || 0) + 1;
+              }
+              const topShare = Math.max(...Object.values(xBuckets)) / locs.length;
+              const autoDetected: 'single' | 'double' = topShare > 0.70 ? 'single' : 'double';
+              bulkDetectedLayout = columnLayout === 'single' ? 'single' : autoDetected;
+            }
+          } catch (e) {
+            console.warn(`⚠️ [BULK LAYOUT] Failed for ${file.name}:`, e);
+          }
+        }
+
         // Extract images from PDF (if PDF file)
         let fileImageMapping: any = null;
         if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
           try {
-            console.log(`🖼️ [BULK PDF EXTRACTOR] Starting image extraction from ${file.name}...`);
+            console.log(`🖼️ [BULK PDF EXTRACTOR] Starting image extraction from ${file.name} | Layout: ${bulkDetectedLayout}...`);
 
-            const result = await extractAndMapImages(file);
+            const result = await extractAndMapImages(file, null, bulkDetectedLayout);
             fileImageMapping = result?.mapping;
             (window as any).rawExtractedImages = result?.rawImages;
             console.log(`✅ [BULK PDF EXTRACTOR] ${file.name}: Extracted images for`, (fileImageMapping?.size !== undefined ? fileImageMapping.size : "0"), 'questions');
@@ -147,102 +155,66 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           }
         }
 
-        // 🎯 SIMPLIFIED EXTRACTION (if enabled for Math or Physics)
+        // 🎯 UNIVERSAL STANDARDIZED EXTRACTION
         let extractedData: any;
-        if (useSimplifiedExtraction && subj === 'Math') {
-          console.log('🚀 [SIMPLIFIED MODE - MATH] Using schema-driven extraction with @google/genai');
-          const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
-          // Convert simplified format to our existing format
+        if (useSimplifiedExtraction) {
+          console.log(`🚀 [UNIVERSAL EXTRACTION] Processing ${subj} via standardized pipeline. Model: ${selectedModel}`);
+          const simpleQuestions = await extractPaperStandardized(file, apiKey, selectedModel, subj, activeExamContext, undefined, bulkDetectedLayout);
+          
           extractedData = {
             questions: simpleQuestions.map((sq: any) => ({
+              ...sq,
               id: `Q${sq.id}`,
-              text: sq.text,
-              options: Array.isArray(sq.options) ? sq.options.map((opt: any) => {
-                if (typeof opt === 'string') return opt;
-                const idStr = opt.id ? `(${opt.id.toLowerCase()}) ` : "";
-                return `${idStr}${opt.text || opt}`;
-              }) : [],
-              correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
-              marks: 1,
-              difficulty: sq.difficulty || 'Medium',
-              topic: sq.topic || 'General',
-              domain: sq.domain || 'ALGEBRA',
-              blooms: sq.blooms || 'Apply',
-              hasVisualElement: !!sq.diagramBox || !!sq.hasVisualElement,
-              visualElementType: null,
-              visualElementDescription: null,
+              options: Array.isArray(sq.options) && typeof sq.options[0] === 'string'
+                ? sq.options.map((optStr: string, i: number) => `(${i+1}) ${optStr}`)
+                : (sq.options || []).map((opt: any) => `(${opt.id || opt.label || '1'}) ${opt.text || opt}`),
               source: `${file.name}`
             }))
           };
-
-          // Extract images for Math (basic mode, no vision guidance)
-          if (fileImageMapping) {
-            console.log('🖼️ [BULK - SIMPLIFIED MATH] Using pre-extracted images:', fileImageMapping.size);
-          }
-        } else if (useSimplifiedExtraction && subj === 'Physics') {
-          console.log('🚀 [SIMPLIFIED MODE - PHYSICS] Using schema-driven extraction with @google/genai');
-          const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
-          // Convert simplified format to our existing format
-          extractedData = {
-            questions: simpleQuestions.map((sq: any) => ({
-              id: `Q${sq.id}`,
-              text: sq.text,
-              options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
-              correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
-              marks: 1,
-              difficulty: sq.difficulty || 'Medium',
-              topic: sq.topic || 'Physics',
-              domain: sq.domain || 'MECHANICS',
-              blooms: sq.blooms || 'Apply',
-              hasVisualElement: !!sq.hasVisualElement,
-              visualElementType: sq.visualElementType || null,
-              visualElementDescription: sq.visualElementDescription || null,
-              visualBoundingBox: sq.visualBoundingBox || null,
-              source: `${file.name}`
-            }))
-          };
-
-          // Extract images for Physics (use pre-extracted images from line 118)
-          if (fileImageMapping) {
-            console.log('🖼️ [BULK - SIMPLIFIED PHYSICS] Using pre-extracted images:', fileImageMapping.size);
-          }
         } else {
-          // Legacy extraction
-          const extractionPrompt = subj === 'Math'
-            ? generateCleanMathPrompt(selectedGrade)
-            : subj === 'Physics'
-              ? generateCleanPhysicsPrompt(selectedGrade)
-              : subj === 'Biology'
-                ? generateCleanBiologyPrompt(activeExamContext)
-                : `Extract ALL questions verbatim from this ${subj} paper.
+          // 🎯 LEGACY / BULK EXTRACTION FALLBACK
+          const extractionPrompt = `Extract ALL questions verbatim from this ${subj} (${selectedGrade}) paper.
+          RULES:
+          1. SYLLABUS COMPLIANCE: Follow official NCERT Class 12 syllabus for ${subj}.
+          2. MARKING SCHEME: Extract marks verbatim.
+          3. Verbatim Extraction: Copy text exactly as seen in the paper.
+          4. Math Formatting: Wrap ALL mathematical expressions, symbols, and formulas in $ delimiters ($...$ for inline, $$...$$ for display).
+          5. LaTeX Commands: Use standard LaTeX for math (e.g., \\frac{a}{b}, \\sqrt{x}, \\sin\\theta).
+          6. Space Preservation: Ensure spaces are preserved between words. Avoid merging words.
+          7. Visual Elements: Detect if a question has a diagram/table/graph and provide a brief description and location.
+          
+          ${subj === 'Math' ? `SPECIAL: ${generateStreamlinedMathInstructions()}` : subj === 'Physics' ? `SPECIAL: ${generatePhysicsExtractionInstructions()}` : ''}
+          
+          SCHEMA: { "questions": [{
+            "id": "Q1",
+            "text": "The question text with math wrapped in $...$",
+            "options": ["(A) ...", "(B) ..."],
+            "correctOptionIndex": 0-3,
+            "marks": 1,
+            "difficulty": "Easy|Medium|Hard",
+            "topic": "Chapter name",
+            "domain": "Subject domain",
+            "blooms": "Apply",
+            "hasVisualElement": true|false,
+            "visualBoundingBox": { "pageNumber": 1, "x": "10%", "y": "20%", "width": "80%", "height": "30%" }
+          }] }`;
 
-        RULES:
-        1. SYLLABUS COMPLIANCE: Strictly follow the latest official syllabus for ${subj} (${selectedGrade}).
-        2. MARKING SCHEME: Extract marks verbatim. MCQs are usually 1 Mark.
-        3. Verbatim Extraction: Copy text exactly as seen in the paper.
-        4. Math Formatting: Wrap ALL mathematical expressions, symbols, and formulas in $ delimiters ($...$ for inline, $$...$$ for display).
-        5. LaTeX Commands: Use standard LaTeX for math (e.g., \\frac{a}{b}, \\sqrt{x}, \\sin\\theta).
-        6. Space Preservation: Ensure spaces are preserved between words. Avoid merging words.
-        7. Visual Elements: Detect if a question has a diagram/table/graph and provide a brief description and location.
-
-        SCHEMA: { "questions": [{
-          "id": "Q1",
-          "text": "The question text with math wrapped in $...$",
-          "options": ["(A) Option 1", "(B) Option 2", "(C) Option 3", "(D) Option 4"],
-          "correctOptionIndex": 0-3 (Identify from answer key or solve if possible),
-          "marks": 1,
-          "difficulty": "Easy|Medium|Hard",
-          "topic": "Specific chapter name",
-          "chapter": "Specific chapter name",
-          "domain": "Domain name",
-          "hasVisualElement": boolean,
-          "visualElementType": "diagram|table|graph",
-          "visualElementDescription": "Detailed description for the diagram",
-          "visualBoundingBox": { "pageNumber": 1, "x": "10%", "y": "20%", "width": "80%", "height": "30%" }
-        }] }`;
-
-          const result = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]);
-          const data = safeAiParse<any>(result.response.text(), { questions: [] }, true);
+          const result = await withGeminiRetry(() => ai.models.generateContent({
+            model: selectedModel,
+            contents: [{
+              role: "user",
+              parts: [
+                { inlineData: { mimeType, data: base64Data } },
+                { text: extractionPrompt }
+              ]
+            }],
+            config: {
+              responseMimeType: "application/json",
+              temperature: 0.1,
+              maxOutputTokens: 65536
+            }
+          }));
+          const data = safeAiParse<any>(result.text || "{}", { questions: [] }, true);
 
           // 🐛 DEBUG: Log BEFORE Unicode conversion to see raw extraction
           if (data.questions && data.questions.length > 0) {
@@ -314,7 +286,7 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
             try {
               console.log(`🎯 [BULK VISION-GUIDED] ${file.name}: Found ${questionsWithBoundingBoxes.length} questions with bounding boxes`);
 
-              visionGuidedMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
+              visionGuidedMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes, undefined, bulkDetectedLayout);
               console.log(`✅ [BULK VISION-GUIDED] ${file.name}: Extracted images for ${visionGuidedMapping.size} questions`);
             } catch (err) {
               console.warn(`⚠️ [BULK VISION-GUIDED] ${file.name}: Vision-guided extraction failed, using proximity-based:`, err);
@@ -375,8 +347,18 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         "strategy": ["Focus on Topic X due to Y..."] 
       }`;
 
-      const analysisRes = await genModel.generateContent(analysisPrompt);
-      const cumulativeAnalyticData = safeAiParse<any>(analysisRes.response.text(), {}, false);
+      const analysisRes = await withGeminiRetry(() => ai.models.generateContent({
+        model: selectedModel,
+        contents: [{
+          role: "user",
+          parts: [{ text: analysisPrompt }]
+        }],
+        config: {
+          responseMimeType: "application/json",
+          temperature: 0.1
+        }
+      }));
+      const cumulativeAnalyticData = safeAiParse<any>(analysisRes.text || "{}", {}, false);
 
       updatePipelineStatus('analysis', 'complete');
       updatePipelineStatus('skeptic', 'active');
@@ -436,7 +418,8 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         throw new Error("API Key Missing: Please configure VITE_GEMINI_API_KEY in your environment.");
       }
 
-      const genAI = new GoogleGenerativeAI(apiKey);
+      // Vertex AI Centralized Client
+      const ai = getGeminiClient(apiKey);
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve) => {
         reader.onload = () => resolve((reader.result as string).split(',')[1]);
@@ -444,19 +427,38 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
       });
       const base64Data = await base64Promise;
       const mimeType = file.type || 'application/pdf';
-      // Image mapping will be done after Gemini provides bounding boxes
       let imageMapping: any = null;
+      let detectedLayout: 'single' | 'double' = columnLayout;
+      let questionLocs: any[] = [];
+
+      // Pre-detect column layout for PDF papers
+      if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        try {
+          const locs = await extractQuestionLocations(file);
+          questionLocs = locs;
+          if (questionLocs.length >= 3) {
+            const xBuckets: Record<number, number> = {};
+            for (const loc of questionLocs) {
+              const bucket = Math.round(loc.x / 40) * 40;
+              xBuckets[bucket] = (xBuckets[bucket] || 0) + 1;
+            }
+            const topShare = Math.max(...Object.values(xBuckets)) / questionLocs.length;
+            const autoDetected: 'single' | 'double' = topShare > 0.70 ? 'single' : 'double';
+            // Respect manual override if explicitly set to single, else use auto
+            if (columnLayout === 'single') {
+              detectedLayout = 'single';
+            } else {
+              detectedLayout = autoDetected;
+            }
+            console.log(`📐 [LAYOUT DETECT] ${questionLocs.length} locs. Top X-bucket: ${(topShare * 100).toFixed(0)}% → auto:${autoDetected}, manual:${columnLayout} => using:${detectedLayout}`);
+          }
+        } catch (e) {
+          console.warn('⚠️ [LAYOUT DETECT] Failed, using:', columnLayout, e);
+        }
+      }
 
       // --- PHASE 1: PARALLEL NEURAL TRACKS ---
       updatePipelineStatus('analysis', 'active');
-      const genModel = genAI.getGenerativeModel({
-        model: selectedModel,
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.1,
-          maxOutputTokens: 65536
-        }
-      });
 
       // 🎯 EXTRACTION LOGIC
       let extractionData: any;
@@ -567,388 +569,62 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
                   const percent = 70 + (Math.round((idx / total) * 15)); // Use 15% range for images (70% to 85%)
                   setPipelineProgress(percent);
                   setLoadingStage(`Visual Analysis: Processing diagram ${idx + 1} of ${total}...`);
-                }
+                },
+                detectedLayout
               );
               setPipelineProgress(85);
             } else {
               console.log('🖼️ [COMBINED - BASIC] Fallback image extraction...');
 
-              const result = await extractAndMapImages(file);
+              const result = await extractAndMapImages(file, null, detectedLayout);
               imageMapping = result?.mapping;
             }
           } catch (err) {
             console.warn('⚠️ [COMBINED - IMAGE] Failed:', err);
           }
         }
-      }
-      else if (useSimplifiedExtraction && subj === 'Math') {
-        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - MATH] Restoring SUCCESS-MATH_FORMAT_ALL logic');
-        const simpleQuestions = await extractQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
-
-        // Convert the rich Gemini output to our database schema
-        extractionData = {
-          questions: simpleQuestions.map((sq: any, sIdx: number) => {
-            const hasVisual = !!sq.visualBoundingBox || !!sq.hasVisualElement;
-
-            return {
-              id: sq.id ? sq.id.toString() : (sIdx + 1).toString(),
-              question_number: sq.id ? (sq.id.toString().match(/(\d+)$/)?.[1] || (sIdx + 1).toString()) : (sIdx + 1).toString(),
-              page_number: sq.page || 1,
-              text: sq.text,
-              correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
-              options: (sq.options || []).map((opt: any) => {
-                const idStr = opt.id ? `(${opt.id.toLowerCase()}) ` : "";
-                return `${idStr}${opt.text || opt}`;
-              }),
-              marks: 1,
-              difficulty: sq.difficulty || 'Medium',
-              topic: matchToOfficialTopic(sq.chapter || sq.topic || 'Mathematics', 'Math') || 'Mathematics',
-              blooms: sq.blooms || 'Apply',
-              domain: sq.domain || 'Mathematics',
-              chapter: matchToOfficialTopic(sq.chapter || sq.topic || 'General Mathematics', 'Math') || 'General Mathematics',
-              hasVisualElement: hasVisual,
-              visualElementType: hasVisual ? 'diagram' : null,
-              visualBoundingBox: sq.visualBoundingBox || null,
-              visualElementDescription: null
-            };
-          })
-        };
-
-        // Baseline analytic data
-        analyticData = {
-          subject: 'Math',
-          examType: activeExamContext,
-          topicDistribution: { 'General': extractionData.questions.length },
-          performanceMetrics: { overallScore: 0, accuracy: 0 }
-        };
-
-        // --- IMAGE EXTRACTION FOR SIMPLIFIED MATH ---
-        if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
-          try {
-            // Priority 1: Vision-Guided (Using AI-provided bounding boxes)
-            const questionsWithBoxes = extractionData.questions
-              .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
-              .map((q: any) => ({
-                questionNumber: parseInt(q.question_number),
-                boundingBox: q.visualBoundingBox
-              }))
-              .filter((item: any) => item.questionNumber && item.boundingBox);
-
-            if (questionsWithBoxes.length > 0) {
-              console.log('🎯 [SIMPLIFIED MATH - VISION] Using precise AI bounding boxes:', questionsWithBoxes.length);
-
-              imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoxes);
-              console.log('✅ [SIMPLIFIED MATH - VISION] Extracted diagrams for', imageMapping.size, 'questions');
-            } else {
-              // Priority 2: Basic Proximity Fallback (Only if no boxes provided)
-              console.log('🖼️ [SIMPLIFIED MATH - BASIC] Page-Level fallback...');
-
-              const result = await extractAndMapImages(file);
-              imageMapping = result?.mapping;
-              (window as any).rawExtractedImages = result?.rawImages;
-              console.log('✅ [SIMPLIFIED MATH - BASIC] Extracted', (imageMapping?.size || 0), 'images');
-            }
-          } catch (err) {
-            console.warn('⚠️ [SIMPLIFIED MATH - IMAGE] Failed:', err);
-          }
-        }
-      } else if (useSimplifiedExtraction && subj === 'Physics') {
-        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - PHYSICS] Using schema-driven extraction with @google/genai');
-
-        // Pre-detect column layout using PDF text positions (fast, no LLM call)
-        // Single-column: all questions share a narrow X band
-        // Two-column: questions are split into two distinct X bands
-        // NOTE: Answer-key tables (e.g. last page) have many questions at the same Y in a row →
-        //       filter those out before computing X spread.
-        let detectedLayout: 'single' | 'double' = 'double'; // safe default
-        let questionLocs: Awaited<ReturnType<typeof extractQuestionLocations>> = [];
-        try {
-          // extractQuestionLocations already strips answer-key table rows
-          questionLocs = await extractQuestionLocations(file);
-          if (questionLocs.length >= 3) {
-            // Cluster X positions into 40pt buckets; find dominant bucket share.
-            // Single-column: one bucket holds >70% of detections.
-            // Double-column: two significant clusters.
-            const xBuckets: Record<number, number> = {};
-            for (const loc of questionLocs) {
-              const bucket = Math.round(loc.x / 40) * 40;
-              xBuckets[bucket] = (xBuckets[bucket] || 0) + 1;
-            }
-            const topShare = Math.max(...Object.values(xBuckets)) / questionLocs.length;
-            detectedLayout = topShare > 0.70 ? 'single' : 'double';
-            console.log(`📐 [PHYSICS LAYOUT DETECT] ${questionLocs.length} locs. Top X-bucket: ${(topShare * 100).toFixed(0)}% → ${detectedLayout}-column`);
-          }
-        } catch (e) {
-          console.warn('⚠️ [PHYSICS LAYOUT DETECT] Failed, defaulting to double-column', e);
-        }
-
-        const simpleQuestions = await extractPhysicsQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext, undefined, detectedLayout);
-        // Convert simplified format to our existing format
+      } else if (useSimplifiedExtraction) {
+        // 🎯 UNIVERSAL STANDARDIZED EXTRACTION
+        console.log(`🚀 [UNIVERSAL EXTRACTION - SINGLE FILE] Processing ${subj} via standardized pipeline. Model: ${selectedModel}`);
+        const simpleQuestions = await extractPaperStandardized(file, apiKey, selectedModel, subj, activeExamContext, undefined, detectedLayout);
+        
         extractionData = {
           questions: simpleQuestions.map((sq: any) => ({
-            id: `Q${sq.id}`,
-            text: sq.text,
-            options: (sq.options || []).map((opt: any) => `(${opt.id}) ${opt.text}`),
-            correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
-            marks: 1,
-            difficulty: sq.difficulty || 'Medium',
-            topic: matchToOfficialTopic(sq.topic || 'Physics', 'Physics') || 'Physics',
-            domain: sq.domain || 'MECHANICS',
-            blooms: sq.blooms || 'Apply',
-            hasVisualElement: !!sq.hasVisualElement,
-            visualElementType: sq.visualElementType || null,
-            visualElementDescription: sq.visualElementDescription || null,
-            visualBoundingBox: sq.visualBoundingBox || null,
+            ...sq,
+            id: `Q${sq.id}`, // Maintain frontend ID consistency
+            options: Array.isArray(sq.options) && typeof sq.options[0] === 'string'
+              ? sq.options.map((optStr: string, i: number) => `(${i+1}) ${optStr}`)
+              : (sq.options || []).map((opt: any) => `(${opt.id || '1'}) ${opt.text || opt}`),
             source: `${file.name}`
           }))
         };
-
-        // --- IMAGE EXTRACTION FOR SIMPLIFIED PHYSICS ---
-        if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
-          try {
-            if (enableVisionExtraction) {
-              const questionsWithBoundingBoxes = extractionData.questions
-                .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
-                .map((q: any) => {
-                  const qNum = parseInt(q.id.toString().match(/(\d+)$/)?.[1] || '0');
-                  const loc = questionLocs.find(l => l.questionNumber === qNum);
-                  return { questionNumber: qNum, boundingBox: q.visualBoundingBox, questionX: loc?.x };
-                })
-                .filter((item: any) => item.questionNumber && item.boundingBox);
-
-              if (questionsWithBoundingBoxes.length > 0) {
-                console.log('🎯 [SIMPLIFIED PHYSICS - VISION] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
-
-                imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
-                console.log('✅ [SIMPLIFIED PHYSICS - VISION] Extracted', imageMapping.size, 'images');
-              }
-            } else {
-              console.log('🖼️ [SIMPLIFIED PHYSICS - BASIC] Extracting images...');
-              const result = await extractAndMapImages(file);
-              imageMapping = result.mapping;
-              (window as any).rawExtractedImages = result.rawImages;
-              console.log('✅ [SIMPLIFIED PHYSICS - BASIC] Extracted', imageMapping?.size || 0, 'images');
-
-              // Fallback: for questions with Gemini-provided bounding boxes but no bitmap found, use vision-guided extraction
-              const missingVisualQs = extractionData.questions.filter((q: any) => {
-                const qNum = parseInt(q.id.toString().match(/(\d+)$/)?.[1] || '0');
-                if (!q.hasVisualElement || !q.visualBoundingBox || !qNum) return false;
-                if (!imageMapping || !imageMapping.has(qNum)) return true;
-                const existingImgs = imageMapping.get(qNum);
-                // Also fallback if existing bitmap is suspiciously small (< ~4KB base64 = wrong crop)
-                const existingTooSmall = existingImgs && existingImgs.length > 0 &&
-                  (existingImgs[0].imageData?.length || 0) < 5500;
-                // Also fallback if multiple bitmaps found — indicates option-as-images question
-                // (e.g. Q26: 4 option images but PDF bitmap extractor only captures 2-3 of them).
-                // Replace partial bitmaps with the full Gemini bounding-box crop that covers all options.
-                const hasPartialOptionImages = existingImgs && existingImgs.length >= 2;
-                return existingTooSmall || hasPartialOptionImages;
-              });
-              if (missingVisualQs.length > 0) {
-                console.log(`🎯 [SIMPLIFIED PHYSICS - VECTOR FALLBACK] ${missingVisualQs.length} questions with missing images — trying bounding box extraction`);
-                const fallbackBoxes = missingVisualQs.map((q: any) => {
-                  const qNum = parseInt(q.id.toString().match(/(\d+)$/)?.[1] || '0');
-                  const loc = questionLocs.find(l => l.questionNumber === qNum);
-                  return { questionNumber: qNum, boundingBox: q.visualBoundingBox, questionX: loc?.x };
-                }).filter((item: any) => item.questionNumber);
-                try {
-                  const fallbackMapping = await extractImagesByBoundingBoxes(file, fallbackBoxes);
-                  fallbackMapping.forEach((imgs, qNum) => {
-                    if (!imageMapping) imageMapping = new Map();
-                    imageMapping.set(qNum, imgs);
-                  });
-                  console.log(`✅ [SIMPLIFIED PHYSICS - VECTOR FALLBACK] Added ${fallbackMapping.size} vector images`);
-                } catch (fbErr) {
-                  console.warn('⚠️ [SIMPLIFIED PHYSICS - VECTOR FALLBACK] Failed:', fbErr);
-                }
-              }
-            }
-          } catch (err) {
-            console.warn('⚠️ [SIMPLIFIED PHYSICS - IMAGE] Failed:', err);
-          }
-        }
-      } else if (useSimplifiedExtraction && subj === 'Biology') {
-        console.log('🚀 [SIMPLIFIED MODE - SINGLE FILE - BIOLOGY] Using schema-driven extraction with @google/genai');
-        const simpleQuestions = await extractBiologyQuestionsSimplified(file, apiKey, selectedModel, activeExamContext);
-        // Convert simplified format to our existing format
-        extractionData = {
-          questions: simpleQuestions.map((sq: any) => ({
-            id: `Q${sq.id}`,
-            text: sq.text,
-            options: sq.options.map((opt: any) => `(${opt.id}) ${opt.text}`),
-            correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
-            marks: 1,
-            difficulty: sq.difficulty || 'Medium',
-            topic: matchToOfficialTopic(sq.topic || 'Biology', 'Biology') || 'Biology',
-            domain: sq.domain || 'Biotechnology',
-            blooms: sq.blooms || 'Apply',
-            hasVisualElement: !!sq.hasVisualElement,
-            visualElementType: sq.visualElementType || null,
-            visualElementDescription: sq.visualElementDescription || null,
-            visualBoundingBox: sq.visualBoundingBox || null,
-            source: `${file.name}`
-          }))
-        };
-
-        // --- IMAGE EXTRACTION FOR SIMPLIFIED BIOLOGY ---
-        if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
-          try {
-            if (enableVisionExtraction) {
-              const questionsWithBoundingBoxes = extractionData.questions
-                .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
-                .map((q: any) => ({
-                  questionNumber: parseInt(q.id.toString().match(/(\d+)$/)?.[1] || '0'),
-                  boundingBox: q.visualBoundingBox
-                }))
-                .filter((item: any) => item.questionNumber && item.boundingBox);
-
-              if (questionsWithBoundingBoxes.length > 0) {
-                console.log('🎯 [SIMPLIFIED BIOLOGY - VISION] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
-  
-                imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
-                console.log('✅ [SIMPLIFIED BIOLOGY - VISION] Extracted', imageMapping.size, 'images');
-              }
-            } else {
-              console.log('🖼️ [SIMPLIFIED BIOLOGY - BASIC] Extracting images...');
-
-              const result = await extractAndMapImages(file);
-              imageMapping = result.mapping;
-              (window as any).rawExtractedImages = result.rawImages;
-              console.log('✅ [SIMPLIFIED BIOLOGY - BASIC] Extracted', imageMapping?.size || 0, 'images');
-            }
-          } catch (err) {
-            console.warn('⚠️ [SIMPLIFIED BIOLOGY - IMAGE] Failed:', err);
-          }
-        }
-      } else if (useSimplifiedExtraction && subj === 'Chemistry') {
-        console.log('🚀 [SIMPLIFIED MODE - CHEMISTRY] Using schema-driven page-by-page extraction...');
-        const simpleQuestions = await extractChemistryQuestionsSimplified(file, apiKey, selectedModel, subj, activeExamContext);
-        extractionData = {
-          questions: simpleQuestions.map((sq: any) => ({
-            id: `Q${sq.id}`,
-            text: sq.text,
-            options: sq.options?.map((opt: any) => `(${opt.id}) ${opt.text}`) || [],
-            correct_answer: sq.options?.find((o: any) => o.isCorrect)?.id?.toUpperCase() || "",
-            marks: 1,
-            difficulty: sq.difficulty || 'Moderate',
-            topic: matchToOfficialTopic(sq.topic || 'Chemistry', 'Chemistry') || 'Chemistry',
-            domain: sq.domain || 'Physical Chemistry',
-            blooms: sq.blooms || 'Apply',
-            hasVisualElement: !!sq.hasVisualElement,
-            visualElementType: sq.visualElementType || null,
-            visualElementDescription: sq.visualElementDescription || null,
-            visualBoundingBox: sq.visualBoundingBox || null,
-            source: `${file.name}`
-          }))
-        };
-
-        // Image extraction for Chemistry (basic proximity-based)
-        if (mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-          try {
-
-            const result = await extractAndMapImages(file);
-            imageMapping = result.mapping;
-            (window as any).rawExtractedImages = result.rawImages;
-            console.log('✅ [SIMPLIFIED CHEMISTRY - IMAGE] Extracted', imageMapping?.size || 0, 'images');
-          } catch (err) {
-            console.warn('⚠️ [SIMPLIFIED CHEMISTRY - IMAGE] Failed:', err);
-          }
-        }
       } else {
 
-        const extractionPrompt = subj === 'Math'
-          ? generateCleanMathPrompt(selectedGrade)
-          : subj === 'Physics'
-            ? generateCleanPhysicsPrompt(selectedGrade)
-            : subj === 'Biology'
-              ? generateCleanBiologyPrompt(activeExamContext)
-              : subj === 'Chemistry'
-                ? generateCleanChemistryPrompt(selectedGrade)
-                : `Extract ALL questions verbatim from this ${subj} (${selectedGrade}) paper.
-      RULES:
-      1. SYLLABUS COMPLIANCE: Strictly follow the latest official NCERT Class 12 syllabus for ${subj}.
-      2. MARKING SCHEME: Extract marks verbatim. MCQs are usually 1 Mark.
-      3. Verbatim Extraction: Copy text exactly as seen in the paper. Extract what you OBSERVE, not what you EXPECT.
-      4. Math Formatting: Wrap ALL mathematical expressions, symbols, and formulas in $ delimiters ($...$ for inline, $$...$$ for display).
-      5. LaTeX Commands: Use standard LaTeX for math (e.g., \\frac{a}{b}, \\sqrt{x}, \\sin\\theta).
-      6. Space Preservation: Ensure spaces are preserved between words. Avoid merging words.
-      7. Visual Elements: Detect if a question has a diagram/table/graph and provide a brief description and location.
-      ${subj === 'Math' ? `4. CRITICAL MATH NOTATION - READ CAREFULLY:
-
-${generateStreamlinedMathInstructions()}
-` : subj === 'Physics' ? `4. CRITICAL PHYSICS NOTATION - READ CAREFULLY:
-
-${generatePhysicsExtractionInstructions()}
-` : ''}.
-      ${subj === 'Math' || subj === 'Physics' ? '5' : '4'}. Classify each question into the correct NCERT ${selectedGrade} ${subj} domain and chapter.
-      ${subj === 'Math' || subj === 'Physics' ? '6' : '5'}. VISUAL ELEMENT DETECTION WITH PRECISE LOCATION:
-         - If question has a diagram/figure/table/graph nearby OR text mentions "shown"/"following figure":
-           * Set hasVisualElement=true
-           * Provide visualElementDescription="[Detailed description]"
-           * CRITICAL: Provide visualBoundingBox with PERCENTAGE-BASED coordinates from page edges:
-             {
-               "pageNumber": 3,
-               "x": "10%",  (distance from left edge as %)
-               "y": "45%",  (distance from top edge as %)
-               "width": "80%",  (width of diagram as % of page width)
-               "height": "25%"  (height of diagram as % of page height)
-             }
-           * This gives us pixel-perfect extraction of the diagram
-         - If no visual, set hasVisualElement=false
-         ${subj === 'Math' ? `
-         - MATH-SPECIFIC VISUALS: Look for coordinate planes, geometric figures (triangles, circles), 3D diagrams, matrices, number lines, Venn diagrams, tree diagrams (probability), or flowcharts
-         - Set appropriate visualElementType: coordinate-plane, geometric-figure, 3d-diagram, matrix, number-line, venn-diagram, tree-diagram, or flowchart
-         ` : subj === 'Physics' ? `
-         - PHYSICS-SPECIFIC VISUALS: Look for circuit diagrams (resistors, capacitors, batteries, switches), ray diagrams (lenses, mirrors, prisms, light paths), free body diagrams (forces with arrows), wave diagrams (interference patterns, standing waves), field diagrams (electric/magnetic field lines), energy level diagrams (atomic transitions)
-         - Set appropriate visualElementType: circuit-diagram, ray-diagram, free-body-diagram, wave-diagram, field-diagram, or energy-level-diagram
-         ` : ''}
-
-      ${subj === 'Math' || subj === 'Physics' ? '6' : '5'}. CRITICAL: Extract ALL questions from the paper (scan every page, no limit). Use minimal text in descriptions to fit all questions in response.
-
-      ${subj === 'Physics' ? `
-      PHYSICS DOMAINS & CHAPTERS (Class 12 NCERT):
-      - MECHANICS: Circular Motion, Laws of Motion, Work Energy and Power, System of Particles and Rotational Motion, Gravitation, Kinematics, Mechanical Properties of Solids, Mechanical Properties of Fluids, Thermodynamics
-      - ELECTRODYNAMICS: Current Electricity, Moving Charges and Magnetism, Electromagnetic Induction, Alternating Current, Electrostatics, Magnetism and Matter, Electrostatic Potential and Capacitance, Electromagnetic Waves, Semiconductor Electronics
-      - MODERN PHYSICS: Atoms, Nuclei, Dual Nature of Radiation and Matter
-      - OPTICS: Wave Optics, Ray Optics and Optical Instruments
-      - OSCILLATIONS & WAVES: Oscillations, Waves
-      ` : subj === 'Chemistry' ? `
-      CHEMISTRY DOMAINS & CHAPTERS (Class 12 NCERT):
-      - PHYSICAL CHEMISTRY: Solutions, Electrochemistry, Chemical Kinetics, Surface Chemistry, Solid State
-      - ORGANIC CHEMISTRY: Alcohols Phenols and Ethers, Aldehydes Ketones and Carboxylic Acids, Amines, Biomolecules, Polymers, Chemistry in Everyday Life, Haloalkanes and Haloarenes
-      - INORGANIC CHEMISTRY: p-Block Elements, d and f Block Elements, Coordination Compounds, General Principles and Processes of Isolation of Elements
-      ` : subj === 'Math' ? `
-      MATHEMATICS DOMAINS & CHAPTERS (Class 12 NCERT):
-      - ALGEBRA: Relations and Functions, Inverse Trigonometric Functions, Matrices, Determinants, Continuity and Differentiability, Application of Derivatives, Maxima and Minima, Rate of Change, Monotonicity
-      - CALCULUS: Integrals, Indefinite Integration, Definite Integration, Applications of Integrals, Area under Curves, Differential Equations, Variable Separable, Linear Differential Equations, Homogeneous Equations
-      - VECTORS & 3D GEOMETRY: Vectors, Scalar and Vector Products, Dot Product, Cross Product, Scalar Triple Product, Three Dimensional Geometry, Direction Cosines, Direction Ratios, Equation of Line, Equation of Plane, Angle Between Lines, Angle Between Planes, Distance Formulae
-      - LINEAR PROGRAMMING: Linear Programming Problems, Optimization, Feasible Region, Objective Function, Constraints, Graphical Method, Corner Point Method
-      - PROBABILITY: Probability, Conditional Probability, Bayes Theorem, Multiplication Theorem, Independent Events, Random Variables, Probability Distributions, Binomial Distribution, Mean and Variance
-      ` : subj === 'Biology' ? `
-      BIOLOGY DOMAINS & CHAPTERS (Class 12 NCERT):
-      - GENETICS & EVOLUTION: Heredity and Variation, Molecular Basis of Inheritance, Evolution
-      - BIOLOGY IN HUMAN WELFARE: Human Health and Disease, Strategies for Enhancement in Food Production, Microbes in Human Welfare
-      - BIOTECHNOLOGY: Biotechnology Principles and Processes, Biotechnology and its Applications
-      - ECOLOGY: Organisms and Populations, Ecosystem, Biodiversity and Conservation, Environmental Issues
-      - REPRODUCTION: Reproduction in Organisms, Sexual Reproduction in Flowering Plants, Human Reproduction, Reproductive Health
-      ` : ''}
-
-      SCHEMA: { "questions": [{
-        "id": "Q1",
-        "text": "...",
-        "options": ["..."],
-        "marks": 1,
-        "difficulty": "...",
-        "topic": "Same as chapter name OR more specific sub-topic (e.g., 'Differential Equations' or 'Matrices'). NEVER leave empty!",
-        "blooms": "...",
-        "domain": "MECHANICS | ELECTRODYNAMICS | etc. (major domain from above)",
-        "chapter": "Specific chapter name from the list above that best matches this question",
-        "hasVisualElement": true | false,
-        "visualElementType": "diagram" | "table" | "graph" | "illustration" | "chart" | "image" | "coordinate-plane" | "geometric-figure" | "3d-diagram" | "matrix" | "number-line" | "venn-diagram" | "tree-diagram" | "flowchart" | "circuit-diagram" | "ray-diagram" | "free-body-diagram" | "wave-diagram" | "field-diagram" | "energy-level-diagram" (if hasVisualElement is true),
-        "visualElementDescription": "Detailed description of the diagram/table/image content, including all labels, values, and key features. For Math: describe axes, equations, vertices, measurements. For Physics: describe circuit components, ray paths, forces, field directions, etc." (if hasVisualElement is true),
-        "visualElementPosition": "above" | "below" | "inline" | "side" (if hasVisualElement is true),
-        "visualBoundingBox": { "pageNumber": 3, "x": "10%", "y": "45%", "width": "80%", "height": "25%" } (if hasVisualElement is true, percentage coordinates from page edges)
-      }] }`;
+        const extractionPrompt = `Extract ALL questions verbatim from this ${subj} (${selectedGrade}) paper.
+        RULES:
+        1. SYLLABUS COMPLIANCE: Follow official NCERT Class 12 syllabus for ${subj}.
+        2. MARKING SCHEME: Extract marks verbatim.
+        3. Verbatim Extraction: Copy text exactly as seen in the paper.
+        4. Math Formatting: Wrap ALL mathematical expressions, symbols, and formulas in $ delimiters ($...$ for inline, $$...$$ for display).
+        5. LaTeX Commands: Use standard LaTeX for math (e.g., \\frac{a}{b}, \\sqrt{x}, \\sin\\theta).
+        6. Space Preservation: Ensure spaces are preserved between words. Avoid merging words.
+        7. Visual Elements: Detect if a question has a diagram/table/graph and provide a brief description and location.
+        
+        ${subj === 'Math' ? `SPECIAL: ${generateStreamlinedMathInstructions()}` : subj === 'Physics' ? `SPECIAL: ${generatePhysicsExtractionInstructions()}` : ''}
+        
+        SCHEMA: { "questions": [{
+          "id": "Q1",
+          "text": "The question text with math wrapped in $...$",
+          "options": ["(A) ...", "(B) ..."],
+          "correct_answer": "A",
+          "marks": 1,
+          "difficulty": "Easy|Medium|Hard",
+          "topic": "Chapter name",
+          "domain": "Subject domain",
+          "blooms": "Apply",
+          "hasVisualElement": true|false,
+          "visualBoundingBox": { "pageNumber": 1, "x": "10%", "y": "20%", "width": "80%", "height": "30%" }
+        }] }`;
 
         // Track 2: Pedagogical Meta-Analysis (Charts/Summary)
         const analysisPrompt = `Synthesize structural analysis for this ${selectedSubject} paper.
@@ -959,18 +635,45 @@ ${generatePhysicsExtractionInstructions()}
           "bloomsTaxonomy": [{"name": "Remembering", "percentage": 20, "color": "#6366f1"}, ...],
           "topicWeightage": [{"name": "Optics", "marks": 14, "color": "#f59e0b"}, ...],
           "predictiveTopics": [{"topic": "Compound Microscope", "probability": 85, "reason": "High-yield derivation frequency in late-stage board cycles."}],
-          "evolutionNote": "Qualitative insight (max 15 words) on how this paper's rigor or style has evolved compared to past standards (e.g., 'Increasing focus on multi-chapter conceptual fusion' or 'Shift towards calculation-heavy mechanics').",
-          "strategy": ["Prioritize derivation A...", "Logic focus on B..."]
+          "evolutionNote": "Qualitative insight (max 15 words).",
+          "strategy": ["Prioritize derivation A..."]
         }`;
 
-        console.log(`🚀 [${selectedSubject.toUpperCase()} EXTRACTION] Starting ${subj === 'Biology' ? 'cleanBiologyExtractor' : subj === 'Math' ? 'cleanMathExtractor' : subj === 'Physics' ? 'cleanPhysicsExtractor' : 'legacy'} for ${file.name}`);
+        console.log(`🚀 [${selectedSubject.toUpperCase()} EXTRACTION] Starting fallback for ${file.name}`);
         const [extractRes, analysisRes] = await Promise.all([
-          genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, extractionPrompt]),
-          genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, analysisPrompt])
+          withGeminiRetry(() => ai.models.generateContent({
+            model: selectedModel,
+            contents: [{
+              role: "user",
+              parts: [
+                { inlineData: { mimeType, data: base64Data } },
+                { text: extractionPrompt }
+              ]
+            }],
+            config: {
+              responseMimeType: "application/json",
+              temperature: 0.1,
+              maxOutputTokens: 65536
+            }
+          })),
+          withGeminiRetry(() => ai.models.generateContent({
+            model: selectedModel,
+            contents: [{
+              role: "user",
+              parts: [
+                  { inlineData: { mimeType, data: base64Data } },
+                  { text: analysisPrompt }
+              ]
+            }],
+            config: {
+              responseMimeType: "application/json",
+              temperature: 0.1
+            }
+          }))
         ]);
 
-        const rawExtract = extractRes.response.text();
-        const rawAnalysis = analysisRes.response.text();
+        const rawExtract = extractRes.text || "{}";
+        const rawAnalysis = analysisRes.text || "{}";
 
         // Debug: Log raw response length and preview
         console.log('📥 [RAW RESPONSE DEBUG] Extraction response length:', rawExtract.length, 'chars');
@@ -1022,18 +725,7 @@ ${generatePhysicsExtractionInstructions()}
         extractionData.questions = processQuestionsUnicode(extractionData.questions);
         console.log(`✨ [UNICODE CONVERSION] Processed ${extractionData.questions.length} questions for Unicode→LaTeX conversion`);
 
-        // ⭐ VALIDATION: Check for common extraction errors (Math only)
-        if (subj === 'Math') {
-          const validation = validateExtraction(extractionData);
-          console.log(`🔍 [VALIDATION] Questions: ${validation.questionCount}, Valid: ${validation.valid}, Errors: ${validation.errors.length}`);
-
-          if (validation.errors.length > 0) {
-            console.error('❌ [VALIDATION ERRORS]', validation.errors.slice(0, 10)); // Show first 10
-            validation.errors.forEach(err => {
-              console.warn(`  - ${err.questionId} [${err.field}]: ${err.error}`);
-            });
-          }
-        }
+        // Legacy validation removed
 
         // 🐛 DEBUG: Log topic assignments for classification debugging
         const topicSummary = extractionData.questions.slice(0, 10).map((q: any) => ({
@@ -1052,12 +744,12 @@ ${generatePhysicsExtractionInstructions()}
 
       // 🔄 RECURSIVE SECOND PASS: Keep extracting until we have all questions (Math papers typically have 60 questions)
       // SKIP for simplified mode - it extracts all questions in one pass
-      const expectedQuestions = subj === 'Math' ? 60 : 50; // Math = 60, others ~50
+      const expectedQuestions = subj === 'Math' ? 60 : 50; 
       let passNumber = 2;
-      const MAX_PASSES = 5; // Safety limit to prevent infinite loops
+      const MAX_PASSES = 5;
 
       while (
-        !isSimplifiedMode && // Skip recursive passes for both Math AND Physics simplified modes
+        !isSimplifiedMode && 
         extractionData.questions &&
         extractionData.questions.length > 0 &&
         extractionData.questions.length < expectedQuestions &&
@@ -1067,74 +759,65 @@ ${generatePhysicsExtractionInstructions()}
 
         try {
           const lastQNum = extractionData.questions.length;
-
-          // Use CLEAN Math prompt for second pass if subject is Math
           console.log(`🔍 [PASS ${passNumber} DEBUG] Subject: ${selectedSubject}, Using clean Math prompt: ${subj === 'Math'}`);
 
-          const remainingPrompt = subj === 'Math'
-            ? generateCleanMathPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
+          const remainingPrompt = `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${subj} paper.
+          🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
+          Already extracted: Q1-Q${lastQNum}
+          NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
+          DO NOT repeat Q1-Q${lastQNum}
+          
+          ${subj === 'Math' ? `SPECIAL: ${generateStreamlinedMathInstructions()}` : subj === 'Physics' ? `SPECIAL: ${generatePhysicsExtractionInstructions()}` : ''}
+          
+          RULES:
+          1. SYLLABUS COMPLIANCE: Strictly follow the latest official NCERT Class 12 syllabus for ${subj}.
+          2. MARKING SCHEME: Scale depth based on marks provided in the paper.
+          3. Use high fidelity LaTeX for ALL math (wrap in $ delimiters)
+          4. Convert ALL Unicode symbols to LaTeX commands (\\sin, \\cos, \\theta, \\pi, \\int, etc.)
+          5. Use FULL SCHEMA:
+          {
+            "id": "Q${lastQNum + 1}",
+            "text": "...",
+            "options": ["(A) ...", "(B) ..."],
+            "marks": 1,
+            "difficulty": "Easy|Moderate|Hard",
+            "topic": "Specific chapter name",
+            "blooms": "Knowledge|Understand|Apply|Analyze|Evaluate|Create",
+            "domain": "${subj === 'Math' ? 'ALGEBRA|CALCULUS|VECTORS & 3D GEOMETRY|LINEAR PROGRAMMING|PROBABILITY' : subj === 'Physics' ? 'MECHANICS|ELECTRODYNAMICS|MODERN PHYSICS|OPTICS|OSCILLATIONS & WAVES' : 'Domain from subject'}",
+            "chapter": "Specific chapter name from NCERT Class 12 ${selectedSubject} syllabus",
+            "hasVisualElement": true|false,
+            "visualBoundingBox": { "pageNumber": X, "x": "10%", "y": "20%", "width": "80%", "height": "30%" }
+          }`;
 
-Already extracted: Q1-Q${lastQNum}
-NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
-DO NOT repeat Q1-Q${lastQNum}`
-            : subj === 'Physics'
-              ? generateCleanPhysicsPrompt(selectedGrade) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
-
-Already extracted: Q1-Q${lastQNum}
-NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
-DO NOT repeat Q1-Q${lastQNum}`
-              : subj === 'Biology'
-                ? generateCleanBiologyPrompt(activeExamContext) + `\n\n🚨 CRITICAL: PASS ${passNumber} - START from Q${lastQNum + 1}
-
-Already extracted: Q1-Q${lastQNum}
-NOW extract: Q${lastQNum + 1} onwards (ALL remaining questions)
-DO NOT repeat Q1-Q${lastQNum}`
-                : `Extract ALL remaining questions starting from question ${lastQNum + 1} onwards from this ${subj} paper.
-
-CRITICAL RULES:
-1. SYLLABUS COMPLIANCE: Strictly follow the latest official NCERT Class 12 syllabus for ${subj}.
-2. MARKING SCHEME: Scale depth based on marks provided in the paper.
-3. Use high fidelity LaTeX for ALL math (wrap in $ delimiters)
-4. Convert ALL Unicode symbols to LaTeX commands (\\sin, \\cos, \\theta, \\pi, \\int, etc.)
-5. NEVER skip LaTeX conversion - expressions like "xex" must be "xe^x"
-6. CRITICAL TRIG FUNCTIONS: ALWAYS use backslash! Write \\sin, \\cos, \\tan, \\sec, \\csc, \\cot NOT sin, cos, tan
-7. CRITICAL EXPRESSION INTEGRITY: NEVER break expressions across multiple lines or close $ delimiters mid-expression
-   Example WRONG: "$x = e^\\theta$$\\sin\\theta$" or "$x = e^\\theta$\\n$\\sin\\theta$"
-   Example RIGHT: "$x = e^\\theta \\sin\\theta, y = e^\\theta \\cos\\theta$"
-8. CRITICAL SQRT: ALWAYS use \\sqrt{} with curly braces! Write \\sqrt{x}, \\sqrt{2} NOT sqrt x or sqrtx
-9. Use the FULL SCHEMA with ALL fields (especially topic, chapter, domain):
-{
-  "id": "Q${lastQNum + 1}",
-  "text": "... (with proper LaTeX wrapped in $ delimiters)",
-  "options": ["(A) ...", "(B) ...", "(C) ...", "(D) ..."],
-  "marks": 1,
-  "difficulty": "Easy|Moderate|Hard",
-  "topic": "Same as chapter name OR specific sub-topic (e.g., 'Differential Equations', 'Matrices'). NEVER leave empty!",
-  "blooms": "Knowledge|Understand|Apply|Analyze|Evaluate|Create",
-  "domain": "${subj === 'Math' ? 'ALGEBRA|CALCULUS|VECTORS & 3D GEOMETRY|LINEAR PROGRAMMING|PROBABILITY' : subj === 'Physics' ? 'MECHANICS|ELECTRODYNAMICS|MODERN PHYSICS|OPTICS|OSCILLATIONS & WAVES' : 'Domain from subject'}",
-  "chapter": "Specific chapter name from NCERT Class 12 ${selectedSubject} syllabus",
-  "hasVisualElement": true|false,
-  "visualElementType": "diagram"|"table"|"graph"|"coordinate-plane"|"circuit-diagram" (if has visual),
-  "visualElementDescription": "..." (if has visual),
-  "visualBoundingBox": { "pageNumber": X, "x": "10%", "y": "20%", "width": "80%", "height": "30%" } (if has visual)
-}`;
-
-          const remainingRes = await genModel.generateContent([{ inlineData: { mimeType, data: base64Data } }, remainingPrompt]);
-          const remainingData = safeAiParse<any>(remainingRes.response.text(), { questions: [] }, true);
+          const remainingRes = await withGeminiRetry(() => ai.models.generateContent({
+            model: selectedModel,
+            contents: [{
+              role: "user",
+              parts: [
+                { inlineData: { mimeType, data: base64Data } },
+                { text: remainingPrompt }
+              ]
+            }],
+            config: {
+              responseMimeType: "application/json",
+              temperature: 0.1,
+              maxOutputTokens: 65536
+            }
+          }));
+          const remainingData = safeAiParse<any>(remainingRes.text || "{}", { questions: [] }, true);
 
           if (remainingData.questions && remainingData.questions.length > 0) {
-            // ⭐ Convert Unicode to LaTeX for additional pass questions too
             remainingData.questions = processQuestionsUnicode(remainingData.questions);
-            console.log(`✅ [PASS ${passNumber}] Extracted additional ${remainingData.questions.length} questions (Unicode converted)`);
+            console.log(`✅ [PASS ${passNumber}] Extracted additional ${remainingData.questions.length} questions`);
             extractionData.questions.push(...remainingData.questions);
             passNumber++;
           } else {
             console.warn(`⚠️ [PASS ${passNumber}] No more questions extracted, stopping at ${extractionData.questions.length} total`);
-            break; // No more questions found, exit loop
+            break;
           }
         } catch (err) {
           console.error(`❌ [PASS ${passNumber}] Failed:`, err);
-          break; // Exit on error
+          break;
         }
       }
 
@@ -1178,48 +861,49 @@ CRITICAL RULES:
       if ((mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) &&
         extractionData.questions && extractionData.questions.length > 0) {
         try {
-          if (enableVisionExtraction) {
-            // VISION-GUIDED MODE: Use AI-provided bounding boxes for precise extraction
-            // ⚡ PERFORMANCE: Adds 1-2 minutes per upload
-            const questionsWithBoundingBoxes = extractionData.questions
-              .filter((q: any) => q.hasVisualElement && q.visualBoundingBox)
-              .map((q: any) => {
-                const questionNumMatch = q.id?.toString().match(/(\d+)$/);
-                const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
-                return {
-                  questionNumber,
-                  boundingBox: q.visualBoundingBox
-                };
-              })
-              .filter((item: any) => {
-                // Validate: must have question number AND complete bounding box with all fields
-                if (!item.questionNumber) return false;
-                const bb = item.boundingBox;
-                if (!bb) return false;
-                // Check all required fields are present and valid
-                const isValid = bb.pageNumber &&
-                  bb.x && typeof bb.x === 'string' &&
-                  bb.y && typeof bb.y === 'string' &&
-                  bb.width && typeof bb.width === 'string' &&
-                  bb.height && typeof bb.height === 'string';
-                if (!isValid) {
-                  console.warn(`⚠️ [VISION-GUIDED] Q${item.questionNumber} has incomplete bounding box, skipping:`, bb);
-                }
-                return isValid;
+          // Try to build bounding boxes from AI output regardless of global flag (priority fallback)
+          const questionsWithBoundingBoxes: any[] = [];
+          extractionData.questions.forEach((q: any) => {
+            const questionNumMatch = q.id?.toString().match(/(\d+)$/);
+            const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
+            if (!questionNumber) return;
+
+            // Priority: plural visuals array (from Simplified Physics)
+            if (q.visuals && Array.isArray(q.visuals)) {
+              q.visuals.forEach((v: any, vIdx: number) => {
+                const bb = (v.box && Array.isArray(v.box)) ? {
+                  pageNumber: q.pageNumber || v.pageNumber || v.box.pageNumber || 1,
+                  x: (v.box[1]/10).toString() + "%",
+                  y: (v.box[0]/10).toString() + "%",
+                  width: ((v.box[3] - v.box[1])/10).toString() + "%",
+                  height: ((v.box[2] - v.box[0])/10).toString() + "%"
+                } : v.visualBoundingBox || null;
+                
+                if (bb) questionsWithBoundingBoxes.push({ questionNumber, boundingBox: bb, label: v.type || `visual-${vIdx}` });
               });
-
-            if (questionsWithBoundingBoxes.length > 0) {
-              console.log('🎯 [VISION-GUIDED] Found', questionsWithBoundingBoxes.length, 'questions with bounding boxes');
-
-              imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes);
-              console.log('✅ [VISION-GUIDED] Extracted images for', imageMapping.size, 'questions');
-            } else {
-              console.log('ℹ️ [VISION-GUIDED] No bounding boxes provided, skipping image extraction');
+            } else if (q.visualBoundingBox) {
+              questionsWithBoundingBoxes.push({ questionNumber, boundingBox: q.visualBoundingBox });
             }
-          } else if (!imageMapping || (typeof imageMapping.size === 'number' && imageMapping.size === 0) || typeof imageMapping.get !== 'function') {
-            // BASIC MODE: Extract all images from PDF pages (faster, less precise)
+          });
+
+          const hasValidAiCoordinates = questionsWithBoundingBoxes.length > 0;
+
+          if (enableVisionExtraction || hasValidAiCoordinates) {
+            // VISION-GUIDED MODE: Use AI-provided bounding boxes for precise extraction
+            if (questionsWithBoundingBoxes.length > 0) {
+              console.log('🎯 [VISION-GUIDED] Found', questionsWithBoundingBoxes.length, 'visual elements — using AI coordinates for diagram precision');
+              imageMapping = await extractImagesByBoundingBoxes(file, questionsWithBoundingBoxes, undefined, detectedLayout);
+              console.log('✅ [VISION-GUIDED] Extracted images for', imageMapping.size, 'questions');
+            } else if (enableVisionExtraction) {
+              console.log('ℹ️ [VISION-GUIDED] No valid bounding boxes provided, continuing...');
+            }
+          } 
+          
+          // Only do BASIC extraction if we still have no mapping
+          if (!imageMapping || (typeof imageMapping.size === 'number' && imageMapping.size === 0)) {
+            // BASIC MODE: Extract all images from PDF pages & map via text proximity
             console.log('🖼️ [BASIC IMAGE EXTRACTION] Extracting images from PDF pages...');
-            const result = await extractAndMapImages(file);
+            const result = await extractAndMapImages(file, null, detectedLayout);
             imageMapping = result?.mapping;
             (window as any).rawExtractedImages = result?.rawImages;
             console.log('✅ [BASIC IMAGE EXTRACTION] Extracted images for', (imageMapping?.size !== undefined ? imageMapping.size : "0"), 'question pages');
@@ -1411,6 +1095,21 @@ CRITICAL RULES:
               <option key={m.id} value={m.id}>{m.label}</option>
             ))}
           </select>
+          <div className="h-6 w-px bg-slate-200" />
+          <div className="flex bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
+            <button
+              onClick={() => setColumnLayout('single')}
+              className={`px-3 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all ${columnLayout === 'single' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              Single
+            </button>
+            <button
+              onClick={() => setColumnLayout('double')}
+              className={`px-3 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all ${columnLayout === 'double' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              Double
+            </button>
+          </div>
           <div className="h-6 w-px bg-slate-200" />
           <button
             onClick={() => setUseSimplifiedExtraction(!useSimplifiedExtraction)}
