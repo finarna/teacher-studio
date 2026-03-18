@@ -53,10 +53,14 @@ export const OFFICIAL_PHYSICS_TOPICS = [
 ] as const;
 
 /**
- * Official Chemistry Topics (Class 12) - 14 Total
+ * Official Chemistry Topics - 21 Total
  *
- * Source: NEET/JEE/KCET Chemistry Class 12 Syllabus
- * Note: KCET/PUC II have deleted: Solid State, Polymers, Chemistry in Everyday Life
+ * Source: NEET 2026 Official Syllabus (NMC, Dec 22, 2025)
+ * REMOVED from NEET 2026: States of Matter, Hydrogen, s-Block Elements,
+ *   Environmental Chemistry, Surface Chemistry,
+ *   General Principles and Processes of Isolation of Elements,
+ *   Chemistry in Everyday Life
+ * Note: KCET/PUC II additionally remove: Solid State, Polymers
  */
 export const OFFICIAL_CHEMISTRY_TOPICS = [
   // Class 11
@@ -64,21 +68,15 @@ export const OFFICIAL_CHEMISTRY_TOPICS = [
   'Structure of Atom',
   'Classification of Elements and Periodicity in Properties',
   'Chemical Bonding and Molecular Structure',
-  'States of Matter',
   'Thermodynamics',
   'Equilibrium',
   'Redox Reactions',
-  'Hydrogen',
-  's-Block Elements',
   'Organic Chemistry: Some Basic Principles and Techniques',
   'Hydrocarbons',
-  'Environmental Chemistry',
   // Class 12
   'Solutions',
   'Electrochemistry',
   'Chemical Kinetics',
-  'Surface Chemistry',
-  'General Principles and Processes of Isolation of Elements',
   'p-Block Elements',
   'd and f Block Elements',
   'Coordination Compounds',
@@ -87,13 +85,15 @@ export const OFFICIAL_CHEMISTRY_TOPICS = [
   'Aldehydes Ketones and Carboxylic Acids',
   'Amines',
   'Biomolecules',
-  'Chemistry in Everyday Life'
+  'Purification and Characterisation of Organic Compounds'
 ] as const;
 
 /**
- * Official Biology Topics (Class 12) - 12 Total
+ * Official Biology Topics - 30 Total
  *
- * Source: NEET/KCET Biology Class 12 Syllabus
+ * Source: NEET 2026 Official Syllabus (NMC, Dec 22, 2025)
+ * REMOVED from NEET 2026: Transport in Plants, Mineral Nutrition,
+ *   Digestion and Absorption, Environmental Issues
  */
 export const OFFICIAL_BIOLOGY_TOPICS = [
   // Class 11
@@ -107,12 +107,9 @@ export const OFFICIAL_BIOLOGY_TOPICS = [
   'Cell: The Unit of Life',
   'Biomolecules',
   'Cell Cycle and Cell Division',
-  'Transport in Plants',
-  'Mineral Nutrition',
   'Photosynthesis in Higher Plants',
   'Respiration in Plants',
   'Plant Growth and Development',
-  'Digestion and Absorption',
   'Breathing and Exchange of Gases',
   'Body Fluids and Circulation',
   'Excretory Products and Their Elimination',
@@ -132,12 +129,14 @@ export const OFFICIAL_BIOLOGY_TOPICS = [
   'Reproductive Health',
   'Human Health and Disease',
   'Microbes in Human Welfare',
-  'Evolution',
-  'Environmental Issues'
+  'Evolution'
 ] as const;
 
 /**
- * Official Botany Topics (for NEET)
+ * Official Botany Topics (for NEET) - 20 Total
+ *
+ * Source: NEET 2026 Official Syllabus (NMC, Dec 22, 2025)
+ * REMOVED from NEET 2026: Transport in Plants, Mineral Nutrition, Environmental Issues
  */
 export const OFFICIAL_BOTANY_TOPICS = [
   'The Living World',
@@ -148,8 +147,6 @@ export const OFFICIAL_BOTANY_TOPICS = [
   'Cell: The Unit of Life',
   'Biomolecules',
   'Cell Cycle and Cell Division',
-  'Transport in Plants',
-  'Mineral Nutrition',
   'Photosynthesis in Higher Plants',
   'Respiration in Plants',
   'Plant Growth and Development',
@@ -161,17 +158,18 @@ export const OFFICIAL_BOTANY_TOPICS = [
   'Organisms and Populations',
   'Ecosystem',
   'Biodiversity and Conservation',
-  'Environmental Issues',
   'Microbes in Human Welfare'
 ] as const;
 
 /**
- * Official Zoology Topics (for NEET)
+ * Official Zoology Topics (for NEET) - 12 Total
+ *
+ * Source: NEET 2026 Official Syllabus (NMC, Dec 22, 2025)
+ * REMOVED from NEET 2026: Digestion and Absorption
  */
 export const OFFICIAL_ZOOLOGY_TOPICS = [
   'Animal Kingdom',
   'Structural Organisation in Animals',
-  'Digestion and Absorption',
   'Breathing and Exchange of Gases',
   'Body Fluids and Circulation',
   'Excretory Products and Their Elimination',
@@ -318,9 +316,9 @@ export const TOPIC_MAPPING_HINTS: Record<string, Record<string, string>> = {
     'Nernst Equation': 'Electrochemistry',
     'Rate of Reaction': 'Chemical Kinetics',
     'Arrhenius Equation': 'Chemical Kinetics',
-    'Adsorption': 'Surface Chemistry',
-    'Colloids': 'Surface Chemistry',
-    'Metallurgy': 'General Principles and Processes of Isolation of Elements',
+    // Note: Surface Chemistry, Metallurgy/Isolation of Elements, Polymers, Chemistry in
+    // Everyday Life, States of Matter, Hydrogen, s-Block, Environmental Chemistry are
+    // REMOVED from NEET 2026 — do not map to them
     'p-Block': 'p-Block Elements',
     'Transition Elements': 'd and f Block Elements',
     'd-Block': 'd and f Block Elements',
@@ -333,8 +331,7 @@ export const TOPIC_MAPPING_HINTS: Record<string, Record<string, string>> = {
     'Carboxylic Acids': 'Aldehydes Ketones and Carboxylic Acids',
     'Amines': 'Amines',
     'Carbohydrates': 'Biomolecules',
-    'Proteins': 'Biomolecules',
-    'Polymers': 'Chemistry in Everyday Life'
+    'Proteins': 'Biomolecules'
   },
   biology: {
     'Reproduction in Plants': 'Sexual Reproduction in Flowering Plants',

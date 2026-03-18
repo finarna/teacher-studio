@@ -98,6 +98,11 @@ export async function selectQuestionsForTest(
       query = query.eq('exam_context', criteria.examContext);
     }
 
+    // Exclude questions from chapters removed from NEET 2026 syllabus
+    if (criteria.examContext === 'NEET') {
+      query = query.eq('neet_out_of_scope', false);
+    }
+
     // Try to get user scans to filter by ownership (user isolation)
     // NOTE: For subjects like Botany/Zoology from combined NEET papers,
     // the scan.subject is 'Combined', so we must also include combined paper scans.

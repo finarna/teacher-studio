@@ -1537,11 +1537,14 @@ export async function getWeakTopics(req, res) {
     console.log(`⚡️ [PERF] Running bulk analysis for ${topics.length} topics...`);
 
     // 1. Fetch ALL questions for this subject/exam in one go
-    const { data: allQuestions } = await supabaseAdmin
+    let questionsQuery = supabaseAdmin
       .from('questions')
       .select('id, topic')
       .eq('subject', subject)
       .eq('exam_context', examContext);
+    // Exclude chapters removed from NEET 2026 syllabus
+    if (examContext === 'NEET') questionsQuery = questionsQuery.eq('neet_out_of_scope', false);
+    const { data: allQuestions } = await questionsQuery;
 
     // 2. Fetch ALL relevant practice answers for the user in one go
     const allQuestionIds = (allQuestions || []).map(q => q.id);
@@ -1725,22 +1728,63 @@ async function generateTestInBackground({ userId, testName, subject, examContext
             context.generationRules.oracleMode = oracleMode;
           }
         }
-        updateProgress(progressId, 'requesting', `🤖 AI Agent [Strategy 1] generating questions using ${mode} logic...`, 30, { strategy: 'Strategy 1: Full Contextual AI', mode: mode });
+        updateProgress(progressId, 'requesting', `🤖 [Strategy 1] Generating ${questionCount} questions via Full Contextual AI (${mode})...`, 30, {
+          strategy: 'Strategy 1: Full Contextual AI',
+          mode,
+          targetQuestions: questionCount,
+          subject,
+          examContext,
+          topicsLoaded: context.topics?.length || 0,
+          batchCurrent: 0,
+          batchTotal: 0,
+          questionsGenerated: 0
+        });
 
-        console.log(`🤖 Generating ${questionCount} questions (${mode}) with Gemini AI...`);
+        console.log(`🤖 [Strategy 1] Generating ${questionCount} questions (${mode}) with Gemini AI...`);
+        console.log(`📦 Context: ${context.topics?.length} topics, ${context.historicalPatterns?.length} patterns, strategyMode=${mode}`);
         const genStartTime = Date.now();
+
+        let latestBatchInfo = { batchCurrent: 0, batchTotal: 0, questionsGenerated: 0 };
 
         // Generate fresh questions with AI (no corruption, perfect LaTeX)
         const questions = await generateTestQuestions(
           context,
-          process.env.GEMINI_API_KEY
+          process.env.GEMINI_API_KEY,
+          undefined,
+          (info) => {
+            // Server-side batch progress callback — updates progress store and logs each batch
+            latestBatchInfo = { batchCurrent: info.batchIdx, batchTotal: info.totalBatches, questionsGenerated: info.totalSoFar };
+            const pct = 30 + Math.round((info.batchIdx / info.totalBatches) * 45); // 30–75%
+            const msg = `🤖 [Strategy 1] Batch ${info.batchIdx}/${info.totalBatches}: ${info.batchQuestions} questions generated (total: ${info.totalSoFar}) — Topics: ${info.topicNames.join(', ')}`;
+            console.log(msg);
+            updateProgress(progressId, 'requesting', msg, pct, {
+              strategy: 'Strategy 1: Full Contextual AI',
+              mode,
+              targetQuestions: questionCount,
+              subject,
+              examContext,
+              batchCurrent: info.batchIdx,
+              batchTotal: info.totalBatches,
+              questionsGenerated: info.totalSoFar,
+              currentTopics: info.topicNames
+            });
+          }
         );
 
-        console.log(`✅ AI generation completed in ${Date.now() - genStartTime}ms`);
+        const genMs = Date.now() - genStartTime;
+        console.log(`✅ [Strategy 1] AI generation completed in ${genMs}ms — ${questions.length} questions from ${latestBatchInfo.batchTotal} batches`);
 
-        updateProgress(progressId, 'validating', '✅ Validating questions and checking LaTeX formatting...', 80);
+        console.log(`🔍 [Strategy 1] Validation complete: ${questions.length} returned (target was ${questionCount})`);
+        if (questions.length < questionCount) {
+          console.warn(`⚠️  [Strategy 1] Short by ${questionCount - questions.length} question(s) after validation + top-up`);
+        }
+        updateProgress(progressId, 'validating', `✅ [Strategy 1] ${questions.length}/${questionCount} questions validated. Saving to database...`, 80, {
+          strategy: 'Strategy 1: Full Contextual AI',
+          questionsValidated: questions.length,
+          targetQuestions: questionCount
+        });
 
-        // Take only the requested count (AI might generate more)
+        // Take exactly the requested count (generateTestQuestions may return slightly more after top-up)
         finalQuestions = questions.slice(0, questionCount);
 
         updateProgress(progressId, 'validating', '💾 Saving AI questions to database...', 85);
@@ -1792,10 +1836,16 @@ async function generateTestInBackground({ userId, testName, subject, examContext
 
     // ─── Strategy 2: Direct Gemini prompt (no DB config required) ───────────
     if (finalQuestions.length === 0) {
-      updateProgress(progressId, 'requesting', `🤖 AI Agent [Strategy 2] generating questions using ${mode} logic...`, 40, { strategy: 'Strategy 2: Direct Prompt (Fallback)', mode: mode });
+      console.log(`🔀 [Strategy 2] Activating: Strategy 1 produced 0 questions. Falling back to direct Gemini prompt...`);
+      updateProgress(progressId, 'requesting', `🤖 [Strategy 2] Fallback: generating ${questionCount} questions via direct Gemini prompt...`, 40, {
+        strategy: 'Strategy 2: Direct Gemini Prompt (Fallback)',
+        mode,
+        targetQuestions: questionCount,
+        reason: 'Strategy 1 returned 0 questions'
+      });
       const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
       if (GEMINI_KEY) {
-        console.log('🤖 Strategy 2: Direct Gemini generation for custom mock test...');
+        console.log('🤖 [Strategy 2] Direct Gemini generation for custom mock test...');
         try {
           const { GoogleGenerativeAI } = await import('@google/generative-ai');
           const genAI = new GoogleGenerativeAI(GEMINI_KEY);
@@ -1978,7 +2028,12 @@ Return ONLY a valid JSON array:
 
     // ─── Strategy 3: Database question pool (broad fallback) ────────────────
     if (finalQuestions.length === 0) {
-      console.log('📦 Strategy 3: Using database question selection for custom test...');
+      console.log('📦 [Strategy 3] Activating: Both AI strategies failed. Falling back to DB question pool...');
+      updateProgress(progressId, 'requesting', `📦 [Strategy 3] Both AI strategies failed. Fetching from question database...`, 50, {
+        strategy: 'Strategy 3: Database Fallback',
+        reason: 'Strategy 1 + Strategy 2 both returned 0 questions'
+      });
+      console.log('📦 [Strategy 3] Using database question selection for custom test...');
 
       // topics table uses 'name' column
       const { data: topicRows } = await supabaseAdmin
@@ -2000,11 +2055,14 @@ Return ONLY a valid JSON array:
 
       if (scanIds.length > 0 && topicNames.length > 0) {
         // Fetch and filter by topic overlap, difficulty via both 'difficulty' and 'diff' columns
-        const { data: allQs } = await supabaseAdmin
+        let dbQsQuery = supabaseAdmin
           .from('questions')
           .select('*')
           .in('scan_id', scanIds)
           .limit(500);
+        // Exclude chapters removed from NEET 2026 syllabus
+        if (examContext === 'NEET') dbQsQuery = dbQsQuery.eq('neet_out_of_scope', false);
+        const { data: allQs } = await dbQsQuery;
 
         // questions table uses 'topic' (singular TEXT), not 'topics' array
         const pool = (allQs || []).filter(q => {
@@ -2039,11 +2097,13 @@ Return ONLY a valid JSON array:
         }
       } else if (scanIds.length > 0) {
         // No topic filter — just pull any questions for this subject
-        const { data: anyQs } = await supabaseAdmin
+        let anyQsQuery = supabaseAdmin
           .from('questions')
           .select('*')
           .in('scan_id', scanIds)
           .limit(questionCount * 3);
+        if (examContext === 'NEET') anyQsQuery = anyQsQuery.eq('neet_out_of_scope', false);
+        const { data: anyQs } = await anyQsQuery;
         selectedQuestions.push(...(anyQs || []).sort(() => 0.5 - Math.random()).slice(0, questionCount));
       }
 

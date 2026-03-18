@@ -1,6 +1,7 @@
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { AI_CONFIG } from '../config/aiConfigs';
 
 /**
  * AI Paper Auditor (REI v3.0 Phase 1)
@@ -29,10 +30,9 @@ export async function auditPaperHistoricalContext(
     apiKey: string
 ): Promise<PaperAuditResult | null> {
     try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const ai = new GoogleGenAI({ apiKey });
 
-        const prompt = `You are an expert ${examContext} Exam Auditor. 
+        const prompt = `You are an expert ${examContext} Exam Auditor.
 Analyze the following text of the ${year} ${subject} paper to identify the "Evolutionary Intent".
 
 TEXT:
@@ -66,8 +66,11 @@ Return ONLY valid JSON:
   "idsActual": 0.82
 }`;
 
-        const result = await model.generateContent(prompt);
-        const text = result.response.text();
+        const result = await ai.models.generateContent({
+            model: AI_CONFIG.defaultModel,
+            contents: prompt,
+        });
+        const text = result.text ?? '';
         const cleaned = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleaned);
 

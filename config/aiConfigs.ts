@@ -12,7 +12,7 @@ export const AI_CONFIG = {
     extractionModel: 'gemini-3-flash-preview',
 
     // Model for image generation/reasoning
-    visionModel: 'gemini-2.0-flash-exp-image-01',
+    visionModel: 'gemini-3-flash-preview-image-01',
 
     // Alternative models for specific use cases
     models: {

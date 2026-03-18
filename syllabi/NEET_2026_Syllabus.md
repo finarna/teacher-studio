@@ -1,286 +1,172 @@
 # NEET 2026 Official Syllabus
 
-**Official Source**: National Testing Agency (NTA)
-**Release Date**: January 8, 2026
-**Website**: https://nta.ac.in
+**Official Source**: National Medical Commission (NMC) / Under Graduate Medical Education Board (UGMEB)
+**Release Date**: December 22, 2025
+**Website**: https://neet.nta.nic.in
+
+---
 
 ## Exam Pattern
 
-- **Total Questions**: 180 (45 per subject)
+- **Total Questions**: 180 (45 per subject — Section A: 35 compulsory + Section B: 15, attempt any 10)
 - **Duration**: 200 minutes (3 hours 20 minutes)
 - **Subjects**: Physics, Chemistry, Biology (Botany + Zoology)
 - **Marking**: +4 for correct, -1 for incorrect
-- **Class Coverage**: Class 11 (45%) + Class 12 (55%)
+- **Class Coverage**: Class 11 + Class 12
 
 ---
 
-## Physics - Class 12 (14 Chapters)
+## Physics (20 Units — Class 11 + 12)
 
-### Unit 1: Electrostatics
-1. **Electric Charges and Fields**
-   - Coulomb's Law, Electric Field, Electric Dipole
-   - Gauss's Law and applications
-   - **Weightage**: 3-4 questions
+### Class 11 (Units 1–10)
 
-2. **Electrostatic Potential and Capacitance**
-   - Electric Potential, Capacitors, Dielectrics
-   - Energy stored in capacitors
-   - **Weightage**: 3 questions
+| # | Chapter |
+|---|---------|
+| 1 | Physics and Measurement |
+| 2 | Kinematics |
+| 3 | Laws of Motion |
+| 4 | Work, Energy and Power |
+| 5 | Rotational Motion |
+| 6 | Gravitation |
+| 7 | Properties of Solids and Liquids |
+| 8 | Thermodynamics |
+| 9 | Kinetic Theory of Gases |
+| 10 | Oscillations and Waves |
 
-### Unit 2: Current Electricity
-3. **Current Electricity**
-   - Ohm's Law, Kirchhoff's Laws, Wheatstone Bridge
-   - Combination of resistors, cells
-   - **Weightage**: 4-5 questions
+### Class 12 (Units 11–20)
 
-### Unit 3: Magnetic Effects of Current
-4. **Moving Charges and Magnetism**
-   - Biot-Savart Law, Ampere's Law
-   - Force on moving charge, Cyclotron
-   - **Weightage**: 3 questions
-
-5. **Magnetism and Matter**
-   - Bar magnet, Earth's magnetism
-   - Magnetic properties of materials
-   - **Weightage**: 2 questions
-
-### Unit 4: Electromagnetic Induction
-6. **Electromagnetic Induction**
-   - Faraday's Law, Lenz's Law
-   - Motional EMF, Eddy Currents
-   - **Weightage**: 3 questions
-
-7. **Alternating Current**
-   - AC circuits, LCR circuits, Resonance
-   - Power in AC circuits, Transformers
-   - **Weightage**: 3 questions
-
-### Unit 5: Electromagnetic Waves
-8. **Electromagnetic Waves**
-   - EM spectrum, characteristics
-   - **Weightage**: 1 question
-
-### Unit 6: Optics
-9. **Ray Optics and Optical Instruments**
-   - Reflection, Refraction, Lenses, Mirrors
-   - Optical instruments (microscope, telescope)
-   - **Weightage**: 4 questions
-
-10. **Wave Optics**
-    - Interference, Diffraction, Polarization
-    - Young's Double Slit Experiment
-    - **Weightage**: 2 questions
-
-### Unit 7: Dual Nature of Matter
-11. **Dual Nature of Radiation and Matter**
-    - Photoelectric effect, de Broglie waves
-    - **Weightage**: 2 questions
-
-### Unit 8: Atoms and Nuclei
-12. **Atoms**
-    - Bohr's model, Energy levels
-    - **Weightage**: 2 questions
-
-13. **Nuclei**
-    - Nuclear physics, Radioactivity
-    - Nuclear reactions, Binding energy
-    - **Weightage**: 3 questions
-
-### Unit 9: Electronic Devices
-14. **Semiconductor Electronics**
-    - p-n junction, Diode, Transistor
-    - Logic gates
-    - **Weightage**: 2-3 questions
+| # | Chapter |
+|---|---------|
+| 11 | Electrostatics (Electric Charges and Fields; Electrostatic Potential and Capacitance) |
+| 12 | Current Electricity |
+| 13 | Magnetic Effects of Current and Magnetism |
+| 14 | Electromagnetic Induction and Alternating Currents |
+| 15 | Electromagnetic Waves |
+| 16 | Optics (Ray Optics; Wave Optics) |
+| 17 | Dual Nature of Matter and Radiation |
+| 18 | Atoms and Nuclei |
+| 19 | Electronic Devices |
+| 20 | Experimental Skills |
 
 ---
 
-## Chemistry - Class 12 (14 Chapters)
+## Chemistry (20 Units — Class 11 + 12)
 
-### Unit 1: Solutions
-1. **Solutions**
-   - Molarity, Molality, Raoult's Law
-   - Colligative properties
-   - **Weightage**: 4 questions
+> **Note:** The following Class 11 chapters are **NOT** in NEET 2026:
+> States of Matter, Hydrogen, s-Block Elements, Environmental Chemistry
+>
+> The following Class 12 chapters are **NOT** in NEET 2026:
+> Surface Chemistry, General Principles and Processes of Isolation of Elements,
+> Polymers, Chemistry in Everyday Life
 
-### Unit 2: Electrochemistry
-2. **Electrochemistry**
-   - Electrochemical cells, Nernst equation
-   - Conductance, Corrosion
-   - **Weightage**: 4 questions
+### Physical Chemistry
 
-### Unit 3: Chemical Kinetics
-3. **Chemical Kinetics**
-   - Rate of reaction, Order, Rate constant
-   - Arrhenius equation
-   - **Weightage**: 3 questions
+| # | Chapter | Class |
+|---|---------|-------|
+| 1 | Some Basic Concepts in Chemistry | 11 |
+| 2 | Atomic Structure | 11 |
+| 3 | Chemical Bonding and Molecular Structure | 11 |
+| 4 | Chemical Thermodynamics | 11 |
+| 5 | Equilibrium | 11 |
+| 6 | Redox Reactions and Electrochemistry | 11 + 12 |
+| 7 | Chemical Kinetics | 12 |
+| 8 | Solutions | 12 |
 
-### Unit 4: Surface Chemistry
-4. **Surface Chemistry**
-   - Adsorption, Catalysis, Colloids
-   - Emulsions
-   - **Weightage**: 2 questions
+### Inorganic Chemistry
 
-### Unit 5: Metallurgy
-5. **General Principles and Processes of Isolation of Elements**
-   - Occurrence, Extraction methods
-   - Refining
-   - **Weightage**: 2 questions
+| # | Chapter | Class |
+|---|---------|-------|
+| 9 | Classification of Elements and Periodicity in Properties | 11 |
+| 10 | p-Block Elements (Groups 13–18) | 11 + 12 |
+| 11 | d and f Block Elements | 12 |
+| 12 | Coordination Compounds | 12 |
 
-### Unit 6: p-Block Elements
-6. **p-Block Elements**
-   - Group 15, 16, 17, 18 elements
-   - Properties, compounds
-   - **Weightage**: 5 questions
+### Organic Chemistry
 
-### Unit 7: d and f Block Elements
-7. **d and f Block Elements**
-   - Transition metals, Lanthanides, Actinides
-   - Properties, oxidation states
-   - **Weightage**: 3 questions
-
-8. **Coordination Compounds**
-   - Nomenclature, Bonding, Isomerism
-   - Crystal Field Theory
-   - **Weightage**: 4 questions
-
-### Unit 8: Haloalkanes and Haloarenes
-9. **Haloalkanes and Haloarenes**
-   - Nomenclature, Reactions, Mechanisms
-   - **Weightage**: 3 questions
-
-### Unit 9: Alcohols, Phenols, and Ethers
-10. **Alcohols, Phenols and Ethers**
-    - Properties, Reactions
-    - **Weightage**: 3 questions
-
-### Unit 10: Aldehydes, Ketones, and Acids
-11. **Aldehydes, Ketones and Carboxylic Acids**
-    - Preparation, Properties, Reactions
-    - **Weightage**: 4 questions
-
-### Unit 11: Nitrogen Compounds
-12. **Amines**
-    - Preparation, Properties, Diazonium salts
-    - **Weightage**: 2 questions
-
-### Unit 12: Biomolecules
-13. **Biomolecules**
-    - Carbohydrates, Proteins, Vitamins
-    - Nucleic acids
-    - **Weightage**: 3 questions
-
-### Unit 13: Polymers and Chemistry in Everyday Life
-14. **Chemistry in Everyday Life**
-    - Drugs, Detergents
-    - **Weightage**: 2 questions
+| # | Chapter | Class |
+|---|---------|-------|
+| 13 | Some Basic Principles of Organic Chemistry | 11 |
+| 14 | Hydrocarbons | 11 |
+| 15 | Purification and Characterisation of Organic Compounds | 12 |
+| 16 | Haloalkanes and Haloarenes | 12 |
+| 17 | Alcohols, Phenols and Ethers | 12 |
+| 18 | Aldehydes, Ketones and Carboxylic Acids | 12 |
+| 19 | Amines | 12 |
+| 20 | Biomolecules | 12 |
 
 ---
 
-## Biology - Class 12 (12 Chapters)
+## Biology — Botany (20 chapters from Class 11 + 12)
 
-### Botany
+> **Note:** The following chapters are **NOT** in NEET 2026:
+> Transport in Plants, Mineral Nutrition, Environmental Issues
 
-#### Unit 1: Reproduction
-1. **Sexual Reproduction in Flowering Plants**
-   - Flower structure, Pollination, Fertilization
-   - Seed formation
-   - **Weightage**: 5 questions
-
-#### Unit 2: Genetics
-2. **Principles of Inheritance and Variation**
-   - Mendel's laws, Chromosomal theory
-   - **Weightage**: 4 questions
-
-3. **Molecular Basis of Inheritance**
-   - DNA, RNA, Replication, Transcription
-   - Genetic code, Translation
-   - **Weightage**: 5 questions
-
-#### Unit 3: Biotechnology
-4. **Biotechnology: Principles and Processes**
-   - Genetic engineering, PCR, Cloning
-   - **Weightage**: 3 questions
-
-5. **Biotechnology and its Applications**
-   - GM crops, Gene therapy
-   - **Weightage**: 3 questions
-
-#### Unit 4: Ecology
-6. **Organisms and Populations**
-   - Population interactions, Adaptations
-   - **Weightage**: 3 questions
-
-7. **Ecosystem**
-   - Energy flow, Nutrient cycling
-   - **Weightage**: 3 questions
-
-8. **Biodiversity and Conservation**
-   - Biodiversity, Conservation strategies
-   - **Weightage**: 3 questions
-
-### Zoology
-
-#### Unit 5: Human Physiology
-9. **Human Reproduction**
-   - Male/Female reproductive systems
-   - Menstrual cycle, Fertilization
-   - **Weightage**: 4 questions
-
-10. **Reproductive Health**
-    - Birth control, STDs, Infertility
-    - **Weightage**: 2 questions
-
-11. **Human Health and Disease**
-    - Immunity, Vaccines, Cancer, AIDS
-    - **Weightage**: 4 questions
-
-#### Unit 6: Evolution
-12. **Evolution**
-    - Origin of life, Natural selection
-    - Human evolution
-    - **Weightage**: 3 questions
+| # | Chapter | Class |
+|---|---------|-------|
+| 1 | The Living World | 11 |
+| 2 | Biological Classification | 11 |
+| 3 | Plant Kingdom | 11 |
+| 4 | Morphology of Flowering Plants | 11 |
+| 5 | Anatomy of Flowering Plants | 11 |
+| 6 | Cell: The Unit of Life | 11 |
+| 7 | Biomolecules | 11 |
+| 8 | Cell Cycle and Cell Division | 11 |
+| 9 | Photosynthesis in Higher Plants | 11 |
+| 10 | Respiration in Plants | 11 |
+| 11 | Plant Growth and Development | 11 |
+| 12 | Sexual Reproduction in Flowering Plants | 12 |
+| 13 | Principles of Inheritance and Variation | 12 |
+| 14 | Molecular Basis of Inheritance | 12 |
+| 15 | Biotechnology: Principles and Processes | 12 |
+| 16 | Biotechnology and its Applications | 12 |
+| 17 | Organisms and Populations | 12 |
+| 18 | Ecosystem | 12 |
+| 19 | Biodiversity and Conservation | 12 |
+| 20 | Microbes in Human Welfare | 12 |
 
 ---
 
-## Preparation Strategy
+## Biology — Zoology (12 chapters from Class 11 + 12)
 
-### High-Weightage Topics (Focus Areas)
+> **Note:** The following chapter is **NOT** in NEET 2026:
+> Digestion and Absorption
 
-**Physics:**
-- Current Electricity (4-5Q)
-- Ray Optics (4Q)
-- Electrostatics (3-4Q)
-- Nuclei (3Q)
-
-**Chemistry:**
-- p-Block Elements (5Q)
-- Solutions (4Q)
-- Coordination Compounds (4Q)
-- Aldehydes/Ketones (4Q)
-
-**Biology:**
-- Molecular Basis of Inheritance (5Q)
-- Sexual Reproduction in Plants (5Q)
-- Human Reproduction (4Q)
-- Human Health and Disease (4Q)
-
-### Study Hours Allocation
-
-- **Total Study Hours**: 1200 hours (over 12 months)
-- **Physics**: 350 hours
-- **Chemistry**: 350 hours
-- **Biology**: 500 hours
+| # | Chapter | Class |
+|---|---------|-------|
+| 1 | Animal Kingdom | 11 |
+| 2 | Structural Organisation in Animals | 11 |
+| 3 | Breathing and Exchange of Gases | 11 |
+| 4 | Body Fluids and Circulation | 11 |
+| 5 | Excretory Products and Their Elimination | 11 |
+| 6 | Locomotion and Movement | 11 |
+| 7 | Neural Control and Coordination | 11 |
+| 8 | Chemical Coordination and Integration | 11 |
+| 9 | Human Reproduction | 12 |
+| 10 | Reproductive Health | 12 |
+| 11 | Human Health and Disease | 12 |
+| 12 | Evolution | 12 |
 
 ---
 
-## Official Resources
+## Chapters Removed from NEET 2026 (vs. full NCERT)
 
-- **Official Website**: https://nta.ac.in
-- **NCERT Textbooks**: Primary resource
-- **Previous Year Papers**: Available on NTA website
-- **Sample Papers**: Released annually
+| Subject | Chapter Removed |
+|---------|----------------|
+| Chemistry (Class 11) | States of Matter |
+| Chemistry (Class 11) | Hydrogen |
+| Chemistry (Class 11) | s-Block Elements (Alkali & Alkaline Earth Metals) |
+| Chemistry (Class 11) | Environmental Chemistry |
+| Chemistry (Class 12) | Surface Chemistry |
+| Chemistry (Class 12) | General Principles and Processes of Isolation of Elements |
+| Chemistry (Class 12) | Polymers |
+| Chemistry (Class 12) | Chemistry in Everyday Life |
+| Botany (Class 11) | Transport in Plants |
+| Botany (Class 11) | Mineral Nutrition |
+| Biology/Botany (Class 12) | Environmental Issues |
+| Zoology (Class 11) | Digestion and Absorption |
+| Physics (Class 12) | Communication Systems |
 
 ---
 
-**Last Updated**: February 11, 2026
-**Compiled from**: NTA Official Syllabus 2026
+**Last Updated**: March 18, 2026
+**Source**: NMC/UGMEB Official NEET (UG) 2026 Syllabus PDF (ref. U-14023/19/NEET(UGExam)/UGMEB, dated 22-12-2025)

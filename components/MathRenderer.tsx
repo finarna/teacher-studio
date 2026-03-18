@@ -105,7 +105,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({
     // HEURISTIC FIX: Only auto-wrap if the string is short (likely a math option) 
     // or contains high-confidence LaTeX commands.
     // Do NOT wrap long blocks of text (paragraphs) because KaTeX will strip all spaces.
-    const containsHighConfLatex = /\\(frac|sqrt|int|sum|begin|lambda|alpha|beta|gamma|theta|omega|sigma|pi|delta|phi|psi|mu|nu|xi|tau|vec|hat|bar|tilde|int)/.test(processedText);
+    const containsHighConfLatex = /\\(frac|sqrt|int|sum|begin|lambda|alpha|beta|gamma|theta|omega|sigma|pi|delta|phi|psi|mu|nu|xi|tau|vec|hat|bar|tilde|rightarrow|leftarrow|Rightarrow|Leftarrow|uparrow|downarrow|leftrightarrow|to|times|cdot|div|pm|leq|geq|neq|approx|infty|partial|nabla|forall|exists|in|notin|subset|cup|cap)/.test(processedText);
     const containsMathMarkers = /[\^_]|\{|\}/.test(processedText);
     const containsOperators = /[\+\-\=\/\*x<\>\(\)\[\]]/.test(processedText);
     const looksLikeMathVar = /[0-9][A-Z]|[A-Z][0-9]/.test(processedText);
@@ -144,6 +144,14 @@ const MathRenderer: React.FC<MathRendererProps> = ({
         else if (part.startsWith('\\\(')) latex = part.slice(2, -2);
 
         latex = latex.trim();
+
+        // If the content inside $...$ has no LaTeX commands, operators, or math symbols,
+        // it's plain text that the AI mistakenly wrapped in math delimiters.
+        // Wrap it in \text{} to prevent KaTeX from rendering letters as math vars (spaced out).
+        const isPlainText = latex.length > 0 && !/[\\^_\{\}]/.test(latex) && !/[\+\-\*\/\=<>\|]/.test(latex) && !/[0-9]/.test(latex);
+        if (isPlainText && !isDisplay) {
+          latex = `\\text{${latex}}`;
+        }
 
         try {
           const html = window.katex.renderToString(latex, {

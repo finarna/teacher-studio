@@ -201,15 +201,15 @@ const CHEMISTRY_CLASS11_TOPICS = [
   { name: 'Structure of Atom', domain: 'Physical Chemistry', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Quantum numbers, orbital shapes', keyConcepts: ['Orbitals', 'Quantum Numbers', 'Photoelectric Effect'], examWeightage: { NEET: 3, JEE: 3, KCET: 3, CBSE: 4 } },
   { name: 'Classification of Elements and Periodicity in Properties', domain: 'Inorganic Chemistry', difficulty: 'Easy' as const, estimatedHours: 5, description: 'Periodic table, trends', keyConcepts: ['Atomic Radius', 'Electronegativity', 'Ionization Energy'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 2 } },
   { name: 'Chemical Bonding and Molecular Structure', domain: 'Physical Chemistry', difficulty: 'Hard' as const, estimatedHours: 12, description: 'VSEPR, hybridization, MOT', keyConcepts: ['Hybridization', 'VSEPR', 'Molecular Orbitals'], examWeightage: { NEET: 4, JEE: 4, KCET: 4, CBSE: 5 } },
-  { name: 'States of Matter', domain: 'Physical Chemistry', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Gas laws, Dalton\'s law', keyConcepts: ['Gas Laws', 'Liquefaction'], examWeightage: { NEET: 2, JEE: 3, KCET: 2, CBSE: 2 } },
+  { name: 'States of Matter', domain: 'Physical Chemistry', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Gas laws, Dalton\'s law', keyConcepts: ['Gas Laws', 'Liquefaction'], examWeightage: { NEET: 0, JEE: 3, KCET: 2, CBSE: 2 } }, // REMOVED from NEET 2026
   { name: 'Thermodynamics', domain: 'Physical Chemistry', difficulty: 'Hard' as const, estimatedHours: 10, description: 'Enthalpy, entropy, Gibbs energy', keyConcepts: ['Enthalpy', 'Gibbs Free Energy', 'Laws of Thermo'], examWeightage: { NEET: 4, JEE: 5, KCET: 4, CBSE: 4 } },
   { name: 'Equilibrium', domain: 'Physical Chemistry', difficulty: 'Hard' as const, estimatedHours: 14, description: 'Chemical and ionic equilibrium', keyConcepts: ['Le Chateliers Principle', 'pH', 'Buffer Solutions'], examWeightage: { NEET: 4, JEE: 4, KCET: 4, CBSE: 5 } },
   { name: 'Redox Reactions', domain: 'Physical Chemistry', difficulty: 'Easy' as const, estimatedHours: 6, description: 'Oxidation numbers, balancing', keyConcepts: ['Oxidation Number', 'Balancing Equations'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 2 } },
-  { name: 'Hydrogen', domain: 'Inorganic Chemistry', difficulty: 'Easy' as const, estimatedHours: 4, description: 'Isotopes, compounds of hydrogen', keyConcepts: ['Hydrides', 'Hardness of Water'], examWeightage: { NEET: 1, JEE: 1, KCET: 1, CBSE: 2 } },
-  { name: 's-Block Elements', domain: 'Inorganic Chemistry', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Alkali and alkaline earth metals', keyConcepts: ['Reactivity', 'Solubility'], examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 2 } },
+  { name: 'Hydrogen', domain: 'Inorganic Chemistry', difficulty: 'Easy' as const, estimatedHours: 4, description: 'Isotopes, compounds of hydrogen', keyConcepts: ['Hydrides', 'Hardness of Water'], examWeightage: { NEET: 0, JEE: 1, KCET: 1, CBSE: 2 } }, // REMOVED from NEET 2026
+  { name: 's-Block Elements', domain: 'Inorganic Chemistry', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Alkali and alkaline earth metals', keyConcepts: ['Reactivity', 'Solubility'], examWeightage: { NEET: 0, JEE: 2, KCET: 2, CBSE: 2 } }, // REMOVED from NEET 2026
   { name: 'Organic Chemistry: Some Basic Principles and Techniques', domain: 'Organic Chemistry', difficulty: 'Moderate' as const, estimatedHours: 12, description: 'IUPAC, purification, mechanisms', keyConcepts: ['Nomenclature', 'Inductive Effect', 'Resonance'], examWeightage: { NEET: 4, JEE: 4, KCET: 4, CBSE: 5 } },
   { name: 'Hydrocarbons', domain: 'Organic Chemistry', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Alkanes, alkenes, alkynes, aromatics', keyConcepts: ['Aromaticity', 'Addition Reactions', 'Alkyne Preparation'], examWeightage: { NEET: 4, JEE: 4, KCET: 4, CBSE: 5 } },
-  { name: 'Environmental Chemistry', domain: 'Applied Chemistry', difficulty: 'Easy' as const, estimatedHours: 4, description: 'Pollution, types of pollutants', keyConcepts: ['Greenhouse Effect', 'Smog'], examWeightage: { NEET: 1, JEE: 1, KCET: 1, CBSE: 2 } },
+  { name: 'Environmental Chemistry', domain: 'Applied Chemistry', difficulty: 'Easy' as const, estimatedHours: 4, description: 'Pollution, types of pollutants', keyConcepts: ['Greenhouse Effect', 'Smog'], examWeightage: { NEET: 0, JEE: 1, KCET: 1, CBSE: 2 } }, // REMOVED from NEET 2026
   { name: 'General Chemistry', domain: 'General', difficulty: 'Moderate' as const, estimatedHours: 10, description: 'Miscellaneous concepts', keyConcepts: ['General Concepts'], examWeightage: { NEET: 1, JEE: 1, KCET: 1, CBSE: 1 } }
 ];
 
@@ -252,7 +252,7 @@ const CHEMISTRY_CLASS12_TOPICS = [
     estimatedHours: 6,
     description: 'Adsorption, colloids, emulsions, catalysis',
     keyConcepts: ['Adsorption', 'Colloids', 'Emulsions', 'Catalysis'],
-    examWeightage: { NEET: 3, JEE: 3, KCET: 3, PUCII: 3, CBSE: 3 }
+    examWeightage: { NEET: 0, JEE: 3, KCET: 3, PUCII: 3, CBSE: 3 } // REMOVED from NEET 2026
   },
 
   // Inorganic Chemistry
@@ -263,7 +263,7 @@ const CHEMISTRY_CLASS12_TOPICS = [
     estimatedHours: 6,
     description: 'Metallurgy, extraction of metals',
     keyConcepts: ['Metallurgy', 'Concentration', 'Reduction', 'Refining'],
-    examWeightage: { NEET: 2, JEE: 3, KCET: 2, PUCII: 3, CBSE: 3 }
+    examWeightage: { NEET: 0, JEE: 3, KCET: 2, PUCII: 3, CBSE: 3 } // REMOVED from NEET 2026
   },
   {
     name: 'p-Block Elements',
@@ -346,7 +346,7 @@ const CHEMISTRY_CLASS12_TOPICS = [
     estimatedHours: 4,
     description: 'Drugs, medicines, detergents, antioxidants',
     keyConcepts: ['Drugs', 'Antibiotics', 'Analgesics', 'Detergents'],
-    examWeightage: { NEET: 2, JEE: 2, KCET: 2, CBSE: 3 }
+    examWeightage: { NEET: 0, JEE: 2, KCET: 2, CBSE: 3 } // REMOVED from NEET 2026
   }
 ];
 
@@ -364,12 +364,12 @@ const BIOLOGY_CLASS11_TOPICS = [
   { name: 'Cell: The Unit of Life', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Cell structure and functions', keyConcepts: ['Prokaryote', 'Eukaryote', 'Organelles'], examWeightage: { NEET: 4, CBSE: 4 } },
   { name: 'Biomolecules', domain: 'Botany', difficulty: 'Hard' as const, estimatedHours: 10, description: 'Enzymes, proteins, carbs', keyConcepts: ['Enzymes', 'Amino Acids', 'Proteins'], examWeightage: { NEET: 4, CBSE: 4 } },
   { name: 'Cell Cycle and Cell Division', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Mitosis and meiosis', keyConcepts: ['Mitosis', 'Meiosis', 'Cytokinesis'], examWeightage: { NEET: 3, CBSE: 3 } },
-  { name: 'Transport in Plants', domain: 'Botany', difficulty: 'Hard' as const, estimatedHours: 8, description: 'Water and mineral transport', keyConcepts: ['Osmosis', 'Xylem Transport', 'Transpiration'], examWeightage: { NEET: 3, CBSE: 3 } },
-  { name: 'Mineral Nutrition', domain: 'Botany', difficulty: 'Easy' as const, estimatedHours: 5, description: 'Nutrients for plant growth', keyConcepts: ['Nitrogen Cycle', 'Deficiency Symptoms'], examWeightage: { NEET: 2, CBSE: 2 } },
+  { name: 'Transport in Plants', domain: 'Botany', difficulty: 'Hard' as const, estimatedHours: 8, description: 'Water and mineral transport', keyConcepts: ['Osmosis', 'Xylem Transport', 'Transpiration'], examWeightage: { NEET: 0, CBSE: 3 } }, // REMOVED from NEET 2026
+  { name: 'Mineral Nutrition', domain: 'Botany', difficulty: 'Easy' as const, estimatedHours: 5, description: 'Nutrients for plant growth', keyConcepts: ['Nitrogen Cycle', 'Deficiency Symptoms'], examWeightage: { NEET: 0, CBSE: 2 } }, // REMOVED from NEET 2026
   { name: 'Photosynthesis in Higher Plants', domain: 'Botany', difficulty: 'Hard' as const, estimatedHours: 10, description: 'Light and dark reactions', keyConcepts: ['C3 Cycle', 'C4 Cycle', 'Chlorophyll'], examWeightage: { NEET: 4, CBSE: 4 } },
   { name: 'Respiration in Plants', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Glycolysis, TCA cycle', keyConcepts: ['Glycolysis', 'Krebs Cycle', 'ETC'], examWeightage: { NEET: 3, CBSE: 3 } },
   { name: 'Plant Growth and Development', domain: 'Botany', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Phytohormones', keyConcepts: ['Auxin', 'Gibberellin', 'Cytokinin'], examWeightage: { NEET: 3, CBSE: 3 } },
-  { name: 'Digestion and Absorption', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Human digestive system', keyConcepts: ['Stomach', 'Small Intestine', 'Enzymes'], examWeightage: { NEET: 3, CBSE: 3 } },
+  { name: 'Digestion and Absorption', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 7, description: 'Human digestive system', keyConcepts: ['Stomach', 'Small Intestine', 'Enzymes'], examWeightage: { NEET: 0, CBSE: 3 } }, // REMOVED from NEET 2026
   { name: 'Breathing and Exchange of Gases', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 6, description: 'Mechanism of breathing', keyConcepts: ['Alveoli', 'Hemoglobin', 'Respiratory Disorders'], examWeightage: { NEET: 2, CBSE: 2 } },
   { name: 'Body Fluids and Circulation', domain: 'Zoology', difficulty: 'Moderate' as const, estimatedHours: 8, description: 'Human heart and blood', keyConcepts: ['Blood Pressure', 'Cardiac Cycle', 'ECG'], examWeightage: { NEET: 3, CBSE: 3 } },
   { name: 'Excretory Products and Their Elimination', domain: 'Zoology', difficulty: 'Hard' as const, estimatedHours: 8, description: 'Kidney function', keyConcepts: ['Nephron', 'Urea Cycle', 'Micturition'], examWeightage: { NEET: 2, CBSE: 2 } },
@@ -510,7 +510,7 @@ const BIOLOGY_CLASS12_TOPICS = [
     estimatedHours: 6,
     description: 'Air/Water pollution, global warming, ozone depletion',
     keyConcepts: ['Pollution', 'Ozone Layer', 'Global Warming', 'Greenhouse Effect', 'Dobson Unit'],
-    examWeightage: { NEET: 3, CBSE: 3 }
+    examWeightage: { NEET: 0, CBSE: 3 } // REMOVED from NEET 2026
   }
 ];
 

@@ -222,6 +222,7 @@ CREATE TABLE IF NOT EXISTS public.questions (
   year INTEGER,
   question_order INTEGER,
   is_system_question BOOLEAN DEFAULT FALSE,
+  neet_out_of_scope BOOLEAN DEFAULT FALSE, -- TRUE if topic removed from NEET 2026 syllabus (migration 032)
   metadata JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -1070,6 +1071,10 @@ CREATE INDEX IF NOT EXISTS idx_questions_domain ON public.questions(domain);
 CREATE INDEX IF NOT EXISTS idx_questions_pedagogy ON public.questions(pedagogy);
 CREATE INDEX IF NOT EXISTS idx_questions_exam_context ON public.questions(exam_context);
 CREATE INDEX IF NOT EXISTS idx_questions_subject ON public.questions(subject);
+-- Partial index for fast NEET out-of-scope filtering (migration 032)
+CREATE INDEX IF NOT EXISTS idx_questions_neet_out_of_scope
+  ON public.questions (neet_out_of_scope)
+  WHERE neet_out_of_scope = TRUE;
 
 -- Add indexes for flashcards performance
 CREATE INDEX IF NOT EXISTS idx_flashcards_user_id  ON public.flashcards(user_id);
@@ -1139,5 +1144,18 @@ VALUES
 ('NEET', 'Botany', 1.5, 0.93, 0.65, 0.7, 0.6, 0.75),
 ('NEET', 'Zoology', 1.5, 0.93, 0.65, 0.7, 0.6, 0.75)
 ON CONFLICT (exam_context, subject) DO NOTHING;
+
+-- Migration 031: RPC for scan mapping counts (bypasses PostgREST max_rows=1000 limit)
+CREATE OR REPLACE FUNCTION get_scan_mapping_counts(p_scan_ids uuid[])
+RETURNS TABLE(scan_id uuid, mapped_count bigint)
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT q.scan_id, COUNT(DISTINCT tqm.question_id)::bigint AS mapped_count
+  FROM questions q
+  INNER JOIN topic_question_mapping tqm ON tqm.question_id = q.id
+  WHERE q.scan_id = ANY(p_scan_ids)
+  GROUP BY q.scan_id;
+$$;
 
 -- ✅ CONSOLIDATED CLEAN SETUP v6.0 COMPLETE

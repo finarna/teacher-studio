@@ -186,7 +186,8 @@ ${protocol.title}:
 export async function generateTestQuestions(
   context: GenerationContext,
   geminiApiKey: string,
-  totalQuestionsOverride?: number
+  totalQuestionsOverride?: number,
+  onBatchProgress?: (info: { batchIdx: number; totalBatches: number; batchQuestions: number; totalSoFar: number; topicNames: string[] }) => void
 ): Promise<AnalyzedQuestion[]> {
 
   // Apply override so user-selected count is respected
@@ -256,47 +257,117 @@ export async function generateTestQuestions(
   }
   if (currentBatch.length > 0) batches.push(currentBatch);
 
-  console.log(`⚡ Optimized into ${batches.length} generation batches (Batch size limit: ${MAX_QUESTIONS_PER_BATCH})`);
+  // Run batches in parallel groups of PARALLEL_BATCH_SIZE.
+  // Each batch within a group fires concurrently; groups are separated by GROUP_DELAY_MS
+  // to avoid bursting the API RPM limit (gemini-3-flash-preview: 20 RPM free tier).
+  // 3 parallel × 4 groups × ~2s delay ≈ 25–30s vs 60–70s sequential.
+  const PARALLEL_BATCH_SIZE = 3;
+  const GROUP_DELAY_MS = 2000;
 
-  let currentGlobalIndex = 0;
-  const generationPromises = batches.map(async (batch, idx) => {
-    const totalInBatchCount = batch.reduce((sum, b) => sum + b.questionCount, 0);
-    console.log(`🎯 Batch ${idx + 1}: Generating ${totalInBatchCount} questions across ${batch.length} topic segments...`);
+  console.log(`⚡ Optimized into ${batches.length} batches → ${Math.ceil(batches.length / PARALLEL_BATCH_SIZE)} parallel groups of ${PARALLEL_BATCH_SIZE} (Batch size limit: ${MAX_QUESTIONS_PER_BATCH})`);
 
-    // Determine section for this batch (NEET only)
-    // Generation is always per-subject (max 50Q), never 200Q in one call.
-    // For 50Q: SecA = first 35, SecB = next 15 (exact NEET spec)
-    // For custom count n: SecA = first round(n * 35/50), SecB = rest (proportional)
-    let batchSection = 'Section A';
-    if (context.examConfig.examContext === 'NEET') {
-      const totalQ = context.examConfig.totalQuestions;
-      const sectionACount = totalQ >= 50 ? 35 : Math.round(totalQ * 35 / 50);
-      if (currentGlobalIndex >= sectionACount) {
-        batchSection = 'Section B';
-      }
+  const allBatchResults: AnalyzedQuestion[][] = new Array(batches.length);
+
+  // Pre-compute NEET section boundaries (based on cumulative question index)
+  const neetSectionACutoff = (() => {
+    if (context.examConfig.examContext !== 'NEET') return Infinity;
+    const totalQ = context.examConfig.totalQuestions;
+    return totalQ >= 50 ? 35 : Math.round(totalQ * 35 / 50);
+  })();
+
+  // Compute cumulative start index per batch (needed for NEET section assignment)
+  const batchStartIndex: number[] = [];
+  let cumulativeIndex = 0;
+  for (const batch of batches) {
+    batchStartIndex.push(cumulativeIndex);
+    cumulativeIndex += batch.reduce((sum, b) => sum + b.questionCount, 0);
+  }
+
+  for (let groupStart = 0; groupStart < batches.length; groupStart += PARALLEL_BATCH_SIZE) {
+    const groupEnd = Math.min(groupStart + PARALLEL_BATCH_SIZE, batches.length);
+    const groupIndices = Array.from({ length: groupEnd - groupStart }, (_, i) => groupStart + i);
+
+    console.log(`🚀 Group ${Math.floor(groupStart / PARALLEL_BATCH_SIZE) + 1}/${Math.ceil(batches.length / PARALLEL_BATCH_SIZE)}: firing batches [${groupIndices.map(i => i + 1).join(', ')}] in parallel...`);
+
+    await Promise.all(groupIndices.map(async (idx) => {
+      const batch = batches[idx];
+      const totalInBatchCount = batch.reduce((sum, b) => sum + b.questionCount, 0);
+      const batchSection = batchStartIndex[idx] >= neetSectionACutoff ? 'Section B' : 'Section A';
+
+      console.log(`🎯 Batch ${idx + 1}/${batches.length}: ${totalInBatchCount}Q [${batchSection}] — ${batch.map(b => b.topicName).join(', ')}`);
+
+      const result = await generateTopicQuestionsBatch({
+        batchAllocations: batch.map(b => ({ ...b, section: batchSection })),
+        examConfig: context.examConfig,
+        generationRules: context.generationRules,
+        section: batchSection
+      }, geminiApiKey);
+
+      allBatchResults[idx] = result;
+    }));
+
+    // Report progress after each group completes
+    const completedSoFar = allBatchResults.slice(0, groupEnd).flat().length;
+    if (onBatchProgress) {
+      const lastBatch = batches[groupEnd - 1];
+      onBatchProgress({
+        batchIdx: groupEnd,
+        totalBatches: batches.length,
+        batchQuestions: allBatchResults[groupEnd - 1]?.length ?? 0,
+        totalSoFar: completedSoFar,
+        topicNames: lastBatch.map(b => b.topicName)
+      });
     }
 
-    currentGlobalIndex += totalInBatchCount;
+    // Delay between groups to stay within API RPM limits
+    if (groupEnd < batches.length) {
+      await new Promise(resolve => setTimeout(resolve, GROUP_DELAY_MS));
+    }
+  }
 
-    return generateTopicQuestionsBatch({
-      batchAllocations: batch.map(b => ({ ...b, section: batchSection })),
-      examConfig: context.examConfig,
-      generationRules: context.generationRules,
-      section: batchSection
-    }, geminiApiKey);
-  });
-
-  const allBatchResults = await Promise.all(generationPromises);
   const allQuestions = allBatchResults.flat();
 
   const totalGenTime = ((Date.now() - generationStartTime) / 1000).toFixed(1);
   console.log(`⚡ Smart Batching completed in ${totalGenTime}s (${batches.length} batches, ${allQuestions.length} questions)`);
 
-  // Step 4: Final validation and shuffling
+  // Step 4: Final validation
   const validatedQuestions = validateQuestions(allQuestions, context);
-  const shuffled = shuffleArray(validatedQuestions);
+  const targetCount = context.examConfig.totalQuestions;
 
-  console.log(`✅ Generated ${shuffled.length} high-quality questions`);
+  // Step 5: Top-up — regenerate exactly the rejected count (max 1 retry)
+  if (validatedQuestions.length < targetCount && activeAllocations.length > 0) {
+    const deficit = targetCount - validatedQuestions.length;
+    console.log(`🔄 Top-up needed: ${validatedQuestions.length}/${targetCount} passed validation. Regenerating ${deficit} missing question(s)...`);
+
+    // Distribute deficit proportionally across allocations (capped at MAX_QUESTIONS_PER_BATCH per slot)
+    let remaining = deficit;
+    const topupBatch: typeof activeAllocations = [];
+    for (const alloc of activeAllocations) {
+      if (remaining <= 0) break;
+      const take = Math.min(remaining, MAX_QUESTIONS_PER_BATCH);
+      topupBatch.push({ ...alloc, questionCount: take });
+      remaining -= take;
+    }
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const topupResult = await generateTopicQuestionsBatch({
+        batchAllocations: topupBatch.map(b => ({ ...b, section: 'Section A' })),
+        examConfig: context.examConfig,
+        generationRules: context.generationRules,
+        section: 'Section A'
+      }, geminiApiKey);
+
+      const topupValidated = validateQuestions(topupResult, context);
+      console.log(`🔄 Top-up result: ${topupValidated.length}/${deficit} question(s) recovered`);
+      validatedQuestions.push(...topupValidated);
+    } catch (topupErr) {
+      console.warn(`⚠️  Top-up batch failed: ${(topupErr as Error).message}`);
+    }
+  }
+
+  const shuffled = shuffleArray(validatedQuestions);
+  console.log(`✅ Final question count: ${shuffled.length}/${targetCount}`);
 
   return shuffled;
 }
@@ -361,6 +432,9 @@ ${JSON.stringify(historicalSummary, null, 2)}
 AVAILABLE TOPICS:
 ${JSON.stringify(topicsSummary, null, 2)}
 
+TARGET: Predict the distribution for a ${examConfig.totalQuestions}-question ${examConfig.examContext} ${examConfig.subject} paper for ${nextYear}.
+CRITICAL: The sum of ALL expectedQuestionCount values MUST equal exactly ${examConfig.totalQuestions}.
+
 Analyze the historical pattern and perform a "Recursive Concept Evolution" analysis:
 1. Identifying Concepts that are CORE (appear every year).
 2. Identifying Concepts that are SHIFTING (e.g., were easy 3 years ago, now asked with 2-step complexity).
@@ -412,8 +486,23 @@ Return ONLY valid JSON:
       throw new Error('AI response missing topics');
     }
 
-    // Hande if AI returns array instead of object
-    const topicsArr = Array.isArray(prediction) ? prediction : (prediction.topics || []);
+    // Handle if AI returns array instead of object
+    const rawTopics: any[] = Array.isArray(prediction) ? prediction : (prediction.topics || []);
+
+    // Normalize expectedQuestionCount so they sum to examConfig.totalQuestions.
+    // The AI predicts based on historical patterns (e.g. old KCET 60Q papers) and its
+    // raw counts may sum to the wrong total (e.g. 27 instead of 50 for NEET).
+    // Without normalization, the allocation engine scales up by 1.85× causing some topics
+    // to jump to 7–8 questions instead of proportionally distributing the full 50.
+    const rawTotal = rawTopics.reduce((sum, t) => sum + (t.expectedQuestionCount || 0), 0);
+    const topicsArr = rawTotal > 0
+      ? rawTopics.map(t => ({
+          ...t,
+          expectedQuestionCount: (t.expectedQuestionCount / rawTotal) * examConfig.totalQuestions
+        }))
+      : rawTopics;
+
+    console.log(`📐 Prediction normalized: raw total=${rawTotal} → scaled to ${examConfig.totalQuestions} (factor ${rawTotal > 0 ? (examConfig.totalQuestions / rawTotal).toFixed(2) : 'N/A'})`);
 
     return {
       year: nextYear,
@@ -472,9 +561,9 @@ function calculateTopicAllocation(
 
     if (isOracle || mode === 'predictive_mock') {
       // MODE 1: PREDICTIVE/ORACLE (Simulate the real exam 1:1)
-      // Use the AI's predicted count as the primary driver for allocation
-      // Baseline the score against a standard 60-question paper to maintain weightage
-      allocationScore = predictedTopic.expectedQuestionCount / 60;
+      // Normalize expected count against THIS exam's total questions (not hardcoded 60).
+      // KCET=60, NEET=50, JEE=30 — each gets the right proportional weight.
+      allocationScore = predictedTopic.expectedQuestionCount / examConfig.totalQuestions;
       reasons.push(isOracle ? `🔮 Oracle Mode: IDS 1.0 Deterministic Calibration` : `🦅 Predictive Mode: Forced Exam Weightage`);
     } else if (mode === 'adaptive_growth') {
       // MODE 2: ADAPTIVE GROWTH (Surgical fix for student weaknesses)
@@ -564,33 +653,30 @@ function calculateTopicAllocation(
     let assigned = scaled.reduce((sum, a) => sum + a.questionCount, 0);
     const remainder = examConfig.totalQuestions - assigned;
 
-    // Distribute remainder to topics with highest fractional parts
-    if (remainder > 0) {
-      const sorted = scaled
-        .map((a, idx) => ({ ...a, originalIdx: idx, fractional: a.exactCount - a.questionCount }))
-        .sort((a, b) => b.fractional - a.fractional);
+    // Distribute remainder using Largest Remainder Method:
+    // give +1 to topics with the highest fractional parts until the gap is filled.
+    const sortedByFraction = scaled
+      .map((a, idx) => ({ ...a, originalIdx: idx, fractional: a.exactCount - a.questionCount }))
+      .sort((a, b) => b.fractional - a.fractional);
 
-      for (let i = 0; i < remainder; i++) {
-        sorted[i].questionCount++;
-      }
-
-      // Apply back to allocations
-      sorted.forEach(item => {
-        allocations[item.originalIdx].questionCount = item.questionCount;
-      });
+    for (let i = 0; i < remainder; i++) {
+      sortedByFraction[i].questionCount++;
     }
 
-    // Update allocations array with scaled values
-    allocations = scaled.map(s => ({
-      topicId: s.topicId,
-      topicName: s.topicName,
-      topicMetadata: s.topicMetadata,
-      questionCount: s.questionCount,
-      difficultyDistribution: s.difficultyDistribution,
-      studentMastery: s.studentMastery,
-      allocationReason: s.allocationReason,
-      evolutionNote: s.evolutionNote
-    }));
+    // Rebuild allocations in original topic order (important for deterministic batching).
+    // Use sortedByFraction (which has floor + remainder bumps) — NOT scaled (floor only).
+    allocations = sortedByFraction
+      .sort((a, b) => a.originalIdx - b.originalIdx)
+      .map(s => ({
+        topicId: s.topicId,
+        topicName: s.topicName,
+        topicMetadata: s.topicMetadata,
+        questionCount: s.questionCount,
+        difficultyDistribution: s.difficultyDistribution,
+        studentMastery: s.studentMastery,
+        allocationReason: s.allocationReason,
+        evolutionNote: s.evolutionNote
+      }));
   }
 
   // Final verification
@@ -1145,7 +1231,7 @@ function generateStatisticalPrediction(
   year: number
 ): PredictedPattern {
   // Statistical fallback when AI fails
-  const { historicalData, topics } = context;
+  const { historicalData, topics, examConfig } = context;
 
   // Calculate average distribution across all years
   const topicAverages = new Map<string, { count: number; total: number }>();
@@ -1159,9 +1245,15 @@ function generateStatisticalPrediction(
     });
   });
 
+  // Default per-topic count when no historical data: distribute total evenly across topics.
+  // This respects the actual exam total (KCET=60, NEET=50, JEE=30) instead of hardcoding 5.
+  const defaultAvg = topics.length > 0
+    ? examConfig.totalQuestions / topics.length
+    : 5;
+
   const predictedTopics = topics.map(topic => {
     const avg = topicAverages.get(topic.topicId);
-    const avgQuestions = avg ? avg.total / avg.count : 5;
+    const avgQuestions = avg ? avg.total / avg.count : defaultAvg;
 
     return {
       topicId: topic.topicId,

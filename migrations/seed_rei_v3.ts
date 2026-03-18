@@ -38,10 +38,12 @@ async function restoreFullREI() {
         { exam_context: 'KCET', subject: 'Chemistry', total_questions: 60, duration_minutes: 80, marks_per_question: 1, passing_percentage: 33, negative_marking_enabled: false },
         { exam_context: 'KCET', subject: 'Biology', total_questions: 60, duration_minutes: 80, marks_per_question: 1, passing_percentage: 33, negative_marking_enabled: false },
 
-        // NEET (90 Bio, 45 Phys, 45 Chem)
-        { exam_context: 'NEET', subject: 'Biology', total_questions: 90, duration_minutes: 200, marks_per_question: 4, passing_percentage: 50, negative_marking_enabled: true, negative_marking_deduction: -1 },
-        { exam_context: 'NEET', subject: 'Physics', total_questions: 45, duration_minutes: 200, marks_per_question: 4, passing_percentage: 50, negative_marking_enabled: true, negative_marking_deduction: -1 },
-        { exam_context: 'NEET', subject: 'Chemistry', total_questions: 45, duration_minutes: 200, marks_per_question: 4, passing_percentage: 50, negative_marking_enabled: true, negative_marking_deduction: -1 },
+        // NEET (50 per subject: Section A=35 compulsory + Section B=15, attempt any 10)
+        { exam_context: 'NEET', subject: 'Biology', total_questions: 100, duration_minutes: 200, marks_per_question: 4, passing_percentage: 50, negative_marking_enabled: true, negative_marking_deduction: -1 },
+        { exam_context: 'NEET', subject: 'Physics', total_questions: 50, duration_minutes: 200, marks_per_question: 4, passing_percentage: 50, negative_marking_enabled: true, negative_marking_deduction: -1 },
+        { exam_context: 'NEET', subject: 'Chemistry', total_questions: 50, duration_minutes: 200, marks_per_question: 4, passing_percentage: 50, negative_marking_enabled: true, negative_marking_deduction: -1 },
+        { exam_context: 'NEET', subject: 'Botany', total_questions: 50, duration_minutes: 200, marks_per_question: 4, passing_percentage: 50, negative_marking_enabled: true, negative_marking_deduction: -1 },
+        { exam_context: 'NEET', subject: 'Zoology', total_questions: 50, duration_minutes: 200, marks_per_question: 4, passing_percentage: 50, negative_marking_enabled: true, negative_marking_deduction: -1 },
 
         // JEE (30 Questions per subject)
         { exam_context: 'JEE', subject: 'Math', total_questions: 30, duration_minutes: 180, marks_per_question: 4, passing_percentage: 33, negative_marking_enabled: true, negative_marking_deduction: -1 },
@@ -76,12 +78,12 @@ async function restoreFullREI() {
     ];
 
     // Chemistry Topics mapping
+    // NEET 2026: Surface Chemistry, General Principles of Isolation, Chemistry in Everyday Life REMOVED
     const chemistryNames = [
-        'Solutions', 'Electrochemistry', 'Chemical Kinetics', 'Surface Chemistry',
-        'General Principles and Processes of Isolation of Elements', 'p-Block Elements',
+        'Solutions', 'Electrochemistry', 'Chemical Kinetics', 'p-Block Elements',
         'd and f Block Elements', 'Coordination Compounds', 'Haloalkanes and Haloarenes',
         'Alcohols Phenols and Ethers', 'Aldehydes Ketones and Carboxylic Acids', 'Amines',
-        'Biomolecules', 'Chemistry in Everyday Life'
+        'Biomolecules', 'Purification and Characterisation of Organic Compounds'
     ];
 
     // Biology Topics mapping
@@ -91,6 +93,29 @@ async function restoreFullREI() {
         'Biotechnology and its Applications', 'Organisms and Populations', 'Ecosystem',
         'Biodiversity and Conservation', 'Human Reproduction', 'Reproductive Health',
         'Human Health and Disease', 'Microbes in Human Welfare', 'Evolution'
+    ];
+
+    // Botany Topics (NEET split - Class 11 + 12 plant biology)
+    // NEET 2026: Transport in Plants, Mineral Nutrition, Environmental Issues REMOVED
+    const botanyNames = [
+        'The Living World', 'Biological Classification', 'Plant Kingdom',
+        'Morphology of Flowering Plants', 'Anatomy of Flowering Plants',
+        'Cell: The Unit of Life', 'Biomolecules', 'Cell Cycle and Cell Division',
+        'Photosynthesis in Higher Plants', 'Respiration in Plants', 'Plant Growth and Development',
+        'Sexual Reproduction in Flowering Plants', 'Principles of Inheritance and Variation',
+        'Molecular Basis of Inheritance', 'Biotechnology Principles and Processes',
+        'Biotechnology and its Applications', 'Organisms and Populations',
+        'Ecosystem', 'Biodiversity and Conservation', 'Microbes in Human Welfare'
+    ];
+
+    // Zoology Topics (NEET split - Class 11 + 12 animal biology)
+    // NEET 2026: Digestion and Absorption REMOVED
+    const zoologyNames = [
+        'Animal Kingdom', 'Structural Organisation in Animals',
+        'Breathing and Exchange of Gases', 'Body Fluids and Circulation',
+        'Excretory Products and Their Elimination', 'Locomotion and Movement',
+        'Neural Control and Coordination', 'Chemical Coordination and Integration',
+        'Human Reproduction', 'Reproductive Health', 'Human Health and Disease', 'Evolution'
     ];
 
     // Math Topics mapping
@@ -125,6 +150,24 @@ async function restoreFullREI() {
     addMetadata(chemistryNames, 'Chemistry');
     addMetadata(biologyNames, 'Biology');
     addMetadata(mathNames, 'Math');
+
+    // Botany and Zoology are NEET-only splits — seed only for NEET context
+    const addMetadataForContext = (names: string[], subject: string, context: string) => {
+        for (const name of names) {
+            let difficulty = 5;
+            if (['Molecular Basis of Inheritance', 'Neural Control and Coordination'].includes(name)) difficulty = 8;
+            if (['Human Reproduction', 'Principles of Inheritance and Variation'].includes(name)) difficulty = 7;
+            allTopics.push({
+                topic_id: `${name.toLowerCase().replace(/ /g, '_')}_${context.toLowerCase()}_${subject.toLowerCase()}`.substring(0, 50),
+                topic_name: name,
+                subject,
+                exam_context: context,
+                estimated_difficulty: difficulty
+            });
+        }
+    };
+    addMetadataForContext(botanyNames, 'Botany', 'NEET');
+    addMetadataForContext(zoologyNames, 'Zoology', 'NEET');
 
     // Deduplicate to avoid ON CONFLICT errors
     const uniqueTopics = Array.from(new Map(allTopics.map(item => [item.topic_id, item])).values());
@@ -161,6 +204,19 @@ async function restoreFullREI() {
                 strategy_mode: 'predictive_mock'
             });
         }
+    }
+
+    // Botany and Zoology — NEET-only split subjects
+    for (const subject of ['Botany', 'Zoology']) {
+        genRules.push({
+            exam_context: 'NEET',
+            subject,
+            weight_predicted_pattern: 0.5,
+            weight_student_weak_areas: 0.25,
+            weight_curriculum_balance: 0.15,
+            weight_recent_trends: 0.1,
+            strategy_mode: 'predictive_mock'
+        });
     }
 
     for (const rule of genRules) {

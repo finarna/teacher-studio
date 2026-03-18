@@ -201,6 +201,14 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const [isCreatingTest, setIsCreatingTest] = useState(false);
   const [progressMessage, setProgressMessage] = useState<string>('Creating test...');
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
+  const [progressMeta, setProgressMeta] = useState<{
+    strategy?: string;
+    batchCurrent?: number;
+    batchTotal?: number;
+    questionsGenerated?: number;
+    targetQuestions?: number;
+    currentTopics?: string[];
+  } | null>(null);
   const [showForecastExplanation, setShowForecastExplanation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [testHistory, setTestHistory] = useState<PastTestAttempt[]>([]);
@@ -521,6 +529,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
     setIsCreatingTest(true);
     setError(null);
+    setProgressMeta(null);
     setProgressMessage('AI is building your personalised test...');
     setProgressPercentage(5);
 
@@ -578,11 +587,16 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
             pollInterval = null;
           }
           reject(new Error('Test generation timed out. Please try again.'));
-        }, 5 * 60 * 1000);
+        }, 12 * 60 * 1000); // 12 min — covers worst-case sequential generation
 
         pollInterval = setInterval(async () => {
           try {
-            const { data: { session } } = await supabase.auth.getSession();
+            let { data: { session } } = await supabase.auth.getSession();
+            // If session is missing or token close to expiry, refresh it
+            if (!session?.access_token) {
+              const { data: refreshed } = await supabase.auth.refreshSession();
+              session = refreshed.session;
+            }
             const token = session?.access_token;
             const progressUrl = getApiUrl(`/api/learning-journey/generation-progress/${progressId}`);
             const progressRes = await fetch(progressUrl, {
@@ -592,11 +606,37 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
               credentials: 'include'
             });
 
+            if (progressRes.status === 401) {
+              // Token expired mid-poll — force refresh and retry next tick
+              await supabase.auth.refreshSession();
+              return;
+            }
             if (!progressRes.ok) return;
 
             const progressData = await progressRes.json();
             setProgressMessage(progressData.message || 'Generating questions...');
             setProgressPercentage(progressData.percentage || 0);
+
+            // Detailed browser-side logging for every poll tick
+            const meta = progressData.result || {};
+            console.log(
+              `%c[MockTest] ${progressData.step?.toUpperCase() || 'STEP'} ${progressData.percentage}%`,
+              'color: #6366f1; font-weight: bold',
+              `| ${meta.strategy || '?'} | Batch: ${meta.batchCurrent ?? '?'}/${meta.batchTotal ?? '?'}` +
+              ` | Q: ${meta.questionsGenerated ?? '?'}/${meta.targetQuestions ?? '?'}` +
+              (meta.currentTopics?.length ? ` | Topics: ${meta.currentTopics.join(', ')}` : '') +
+              ` | "${progressData.message}"`
+            );
+            if (meta.strategy) {
+              setProgressMeta({
+                strategy: meta.strategy,
+                batchCurrent: meta.batchCurrent,
+                batchTotal: meta.batchTotal,
+                questionsGenerated: meta.questionsGenerated,
+                targetQuestions: meta.targetQuestions,
+                currentTopics: meta.currentTopics
+              });
+            }
 
             if (progressData.step === 'complete' && progressData.result) {
               clearTimeout(safetyTimer);
@@ -1260,14 +1300,33 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                           className="bg-slate-900 rounded-[2rem] p-5 border border-slate-800 shadow-2xl space-y-4"
                         >
                           <div className="flex justify-between items-end">
-                            <div className="space-y-1">
-                              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">{progressMessage}</span>
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                <span className="text-xs font-bold text-slate-400">Smart Engine Active</span>
+                            <div className="space-y-1 flex-1 min-w-0 pr-3">
+                              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block truncate">{progressMessage}</span>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                                {progressMeta?.strategy ? (
+                                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">{progressMeta.strategy}</span>
+                                ) : (
+                                  <span className="text-xs font-bold text-slate-400">Smart Engine Active</span>
+                                )}
                               </div>
+                              {progressMeta && (progressMeta.batchTotal ?? 0) > 0 && (
+                                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                                  <span className="text-[10px] font-mono text-slate-400">
+                                    Batch <span className="text-white font-bold">{progressMeta.batchCurrent}</span>/<span className="text-slate-300">{progressMeta.batchTotal}</span>
+                                  </span>
+                                  <span className="text-[10px] font-mono text-slate-400">
+                                    Questions <span className="text-emerald-400 font-bold">{progressMeta.questionsGenerated}</span>/<span className="text-slate-300">{progressMeta.targetQuestions}</span>
+                                  </span>
+                                </div>
+                              )}
+                              {progressMeta?.currentTopics && progressMeta.currentTopics.length > 0 && (
+                                <div className="text-[9px] text-slate-500 truncate mt-0.5">
+                                  Topics: {progressMeta.currentTopics.join(' · ')}
+                                </div>
+                              )}
                             </div>
-                            <span className="text-2xl font-black text-white font-mono">{progressPercentage}%</span>
+                            <span className="text-2xl font-black text-white font-mono shrink-0">{progressPercentage}%</span>
                           </div>
                           <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                             <motion.div

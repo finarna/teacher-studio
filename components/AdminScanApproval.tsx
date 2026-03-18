@@ -270,6 +270,7 @@ const AdminScanApproval: React.FC = () => {
   };
 
   const loadScans = async () => {
+    console.log('🔄 loadScans called, filterStatus=', filterStatus);
     setLoading(true);
     try {
       let query = supabase
@@ -310,20 +311,20 @@ const AdminScanApproval: React.FC = () => {
 
       const scanIds = completedScans.map(s => s.id);
 
-      const { data: allMappingsData, error: mappingError } = await supabase
-        .from('topic_question_mapping')
-        .select('question_id, questions!inner(scan_id)')
-        .in('questions.scan_id', scanIds);
+      // Use server-side aggregate RPC to count mappings per scan — avoids PostgREST max_rows=1000 limit
+      const { data: mappingCountsData, error: mappingError } = await supabase
+        .rpc('get_scan_mapping_counts', { p_scan_ids: scanIds });
 
+      console.log('🔍 RPC result:', { rows: mappingCountsData?.length, error: mappingError?.message, sample: mappingCountsData?.slice(0, 3) });
       if (mappingError) {
-        console.error('❌ Error fetching mappings:', mappingError);
+        console.error('❌ Error fetching mapping counts:', mappingError);
       }
 
-      const mappingsByScan = (allMappingsData || []).reduce((acc, m: any) => {
-        const scanId = m.questions?.scan_id;
-        if (scanId) acc[scanId] = (acc[scanId] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const mappingsByScan = ((mappingCountsData || []) as { scan_id: string; mapped_count: number }[])
+        .reduce((acc, row) => {
+          acc[row.scan_id] = Number(row.mapped_count);
+          return acc;
+        }, {} as Record<string, number>);
 
       const scansWithCounts = completedScans.map(scan => {
         const dbQuestionCount = (scan as any).questions?.[0]?.count || 0;
