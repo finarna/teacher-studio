@@ -328,7 +328,9 @@ export async function generateTest(req, res) {
         const aiQuestions = await generateTestQuestions(
           context,
           GEMINI_KEY,
-          needed
+          needed,
+          null, // onBatchProgress
+          questionSet?.questions || []
         );
 
         if (Array.isArray(aiQuestions) && aiQuestions.length > 0) {
@@ -411,9 +413,10 @@ ${examContext === 'KCET' ? 'KCET FOCUS: Trickiness, speed-accuracy challenges, a
 REQUIREMENTS:
 1. Topic(s): "${topicNames}"
 2. QUALITY: ZERO "Definition" questions. Every question must be a Scenario or Application problem.
-3. STRUCTURE: 4 options, exactly 1 correct.
-4. SOLUTIONS: Include masterclass analytical steps with detailed "solutionSteps", "examTip", "keyFormulas", and "pitfalls".
-5. DEEP INSIGHTS: Include "masteryMaterial" with AI reasoning, exam patterns, and conceptual foundations.
+3. UNIQUENESS: Every question must be distinct and cover a different conceptual facet. Do NOT repeat the same scenario or numerical values.
+4. STRUCTURE: 4 options, exactly 1 correct.
+5. SOLUTIONS: Include masterclass analytical steps with detailed "solutionSteps", "examTip", "keyFormulas", and "pitfalls".
+6. DEEP INSIGHTS: Include "masteryMaterial" with AI reasoning, exam patterns, and conceptual foundations.
 
 🚨 CRITICAL QUALITY STANDARDS - NO GENERIC CONTENT ALLOWED:
 
@@ -499,12 +502,24 @@ Return ONLY a valid JSON array:
             bloomsLevel: 'application',
             generatedByAI: true,
           }));
+
+          // Deduplicate
+          const uniqueNormalized = [];
+          const seen = new Set();
+          normalizedQuestions.forEach(q => {
+            const norm = q.text?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+            if (norm && !seen.has(norm)) {
+              uniqueNormalized.push(q);
+              seen.add(norm);
+            }
+          });
+
           questionSet = {
-            questions: normalizedQuestions,
+            questions: uniqueNormalized,
             metadata: {
-              totalQuestions: normalizedQuestions.length,
+              totalQuestions: uniqueNormalized.length,
               difficultyBreakdown: { easy: 0, moderate: 0, hard: 0 },
-              topicBreakdown: { [topicNames]: normalizedQuestions.length },
+              topicBreakdown: { [topicNames]: uniqueNormalized.length },
               generatedWithAI: true
             }
           };

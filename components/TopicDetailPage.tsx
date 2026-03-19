@@ -75,36 +75,56 @@ type TabType = 'learn' | 'practice' | 'quiz' | 'flashcards' | 'progress';
  * CORE DATA MAPPING: Normalizes question data from various sources (DB columns, JSONB meta, old schemas)
  */
 const formatAnalyzedQuestion = (q: any): AnalyzedQuestion => {
-  const meta = q.mastery_material || q.masteryMaterial || {};
+  let meta = q.mastery_material || q.masteryMaterial || {};
+  if (typeof meta === 'string') {
+    try { meta = JSON.parse(meta); } catch (e) { meta = {}; }
+  }
+
+  const safeParseArray = (val: any) => {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+      try { return JSON.parse(val); } catch (e) { return []; }
+    }
+    return val || [];
+  };
+
+  const pickBest = (s1?: string, s2?: string, s3?: string, s4?: string, s5?: string) => {
+    const choices = [s1, s2, s3, s4, s5].filter(s => typeof s === 'string' && s.length > 5);
+    if (choices.length === 0) return s1 || s2 || s3 || s4 || s5 || '';
+    return choices.sort((a, b) => b!.length - a!.length)[0];
+  };
 
   const formatted: AnalyzedQuestion = {
     ...q,
     id: q.id || q.question_id || q.questionId,
     text: q.text || q.question_text || '',
-    options: q.options || [],
+    options: safeParseArray(q.options),
     difficulty: (q.difficulty || q.diff || 'Moderate') as 'Easy' | 'Moderate' | 'Hard',
     correctOptionIndex: q.correctOptionIndex ?? q.correct_option_index ?? (q.correctIndex !== undefined ? q.correctIndex : 0),
 
-    // Intelligence Retrieval (Column-first, Meta fallback)
-    aiReasoning: q.ai_reasoning || q.aiReasoning || meta.aiReasoning || meta.ai_reasoning || '',
-    historicalPattern: q.historical_pattern || q.historicalPattern || meta.historicalPattern || meta.historical_pattern || '',
-    predictiveInsight: q.predictive_insight || q.predictiveInsight || meta.predictiveInsight || meta.predictive_insight || '',
-    whyItMatters: q.why_it_matters || q.whyItMatters || meta.whyItMatters || meta.why_it_matters || '',
-    studyTip: q.study_tip || q.studyTip || q.exam_tip || q.examTip || meta.studyTip || meta.examTip || '',
+    // Intelligence Retrieval (Longest String prioritization)
+    aiReasoning: pickBest(q.aiReasoning, q.ai_reasoning, meta.aiReasoning, meta.ai_reasoning, meta.logic),
+    historicalPattern: pickBest(q.historicalPattern, q.historical_pattern, meta.historicalPattern, meta.historical_pattern),
+    predictiveInsight: pickBest(q.predictiveInsight, q.predictive_insight, meta.predictiveInsight, meta.predictive_insight),
+    whyItMatters: pickBest(q.whyItMatters, q.why_it_matters, meta.whyItMatters, meta.why_it_matters),
+    studyTip: pickBest(q.studyTip, q.study_tip, q.examTip, q.exam_tip, meta.studyTip),
 
-    // Structural Data
+    // Structural Data (Array non-empty prioritization)
     marks: q.marks ?? meta.marks ?? 1,
     year: q.year ? String(q.year) : (q.exam_year || meta.year || ''),
-    solutionSteps: (q.solution_steps || q.solutionSteps || meta.solutionSteps || meta.solution_steps || (q.explanation ? [q.explanation] : [])),
-    markingScheme: (q.marking_scheme || q.marking_steps || q.markingScheme || meta.markingSteps || meta.marking_steps || []),
-    keyConcepts: (q.key_concepts || q.keyConcepts || meta.keyConcepts || []),
-    commonMistakes: (q.pitfalls || q.common_mistakes || q.commonMistakes || meta.commonMistakes || []),
-    keyFormulas: (q.key_formulas || q.keyFormulas || meta.keyFormulas || []),
+    solutionSteps: safeParseArray(q.solutionSteps || q.solution_steps || meta.solutionSteps || meta.solution_steps || (q.explanation ? [q.explanation] : [])),
+    markingScheme: safeParseArray(q.markingScheme || q.marking_scheme || q.marking_steps || meta.markingScheme || meta.markingSteps || meta.marking_steps),
+    keyConcepts: safeParseArray(q.keyConcepts || q.key_concepts || meta.keyConcepts),
+    commonMistakes: safeParseArray(q.commonMistakes || q.pitfalls || q.common_mistakes || meta.commonMistakes),
+    keyFormulas: safeParseArray(q.keyFormulas || q.key_formulas || meta.keyFormulas),
 
     // Visuals
-    visualConcept: q.visual_concept || q.visualConcept || meta.visualConcept || '',
-    diagramUrl: q.diagram_url || q.diagramUrl || meta.diagramUrl || '',
-    extractedImages: q.extractedImages || q.extracted_images || (q.diagram_url ? [q.diagram_url] : (meta.diagramUrl ? [meta.diagramUrl] : []))
+    visualConcept: q.visualConcept || q.visual_concept || q.visual_concept_ || meta.visualConcept || meta.visual_concept || '',
+    diagramUrl: q.diagramUrl || q.diagram_url || meta.diagramUrl || '',
+    extractedImages: q.extractedImages || q.extracted_images || (q.diagram_url ? [q.diagram_url] : (meta.diagramUrl ? [meta.diagramUrl] : [])),
+
+    // Hidden meta-spread for deeper insights
+    ...meta
   };
 
   return formatted;
@@ -1369,7 +1389,7 @@ const PracticeTab: React.FC<{
             topic: q.topic || topicResource.topicName,
             domain: q.domain || topicResource.topicName,
             year: q.year || '2025 Prediction',
-            markingSteps: q.markingScheme || q.solutionSteps || [],
+            markingScheme: q.markingScheme || q.solutionSteps || [],
             extractedImages: q.extractedImages || [],
             hasVisualElement: q.hasVisualElement || false
           };
@@ -1482,7 +1502,7 @@ const PracticeTab: React.FC<{
               historicalPattern: q.historicalPattern,
               predictiveInsight: q.predictiveInsight,
               whyItMatters: q.whyItMatters,
-              markingSteps: q.markingSteps
+              markingScheme: q.markingScheme
             }
           };
         });
@@ -1590,7 +1610,8 @@ const PracticeTab: React.FC<{
           subject,
           examContext,
           supabase,
-          apiKey
+          apiKey,
+          AI_CONFIG.defaultModel // Use project's default model (usually Flash)
         );
         if (refined) {
           const formattedRefined = formatAnalyzedQuestion(refined);
@@ -1745,14 +1766,7 @@ const PracticeTab: React.FC<{
 
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto overflow-x-auto scroller-hide">
               <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => setFocusedQuestionId(focusedQuestionId ? null : (filteredQuestions[0]?.id || null))}
-                  className={`px-3 md:px-4 py-2 rounded-xl text-[10px] md:text-[11px] font-black flex items-center gap-1.5 md:gap-2 transition-all border font-outfit uppercase tracking-wider ${focusedQuestionId ? 'bg-purple-600 text-white border-purple-700 shadow-md' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-sm'
-                    }`}
-                >
-                  <Target size={14} />
-                  {focusedQuestionId ? 'Exit Focus' : 'Focus Mode'}
-                </button>
+
 
                 <button
                   onClick={() => setShowGenerateModal(true)}
@@ -1932,13 +1946,11 @@ const PracticeTab: React.FC<{
                     id={`question-${q.id}`}
                     initial={false}
                     animate={{
-                      scale: isFocused ? 1.01 : 1,
-                      opacity: focusedQuestionId && !isFocused ? 0.25 : 1,
-                      boxShadow: isFocused ? '0 30px 60px -15px rgba(0,0,0,0.15)' : '0 10px 15px -3px rgba(0,0,0,0.04)'
+                      scale: 1,
+                      opacity: 1,
+                      boxShadow: '0 10px 15px -3px rgba(0,0,0,0.04)'
                     }}
-                    onClick={() => setFocusedQuestionId(q.id)}
-                    className={`bg-white border transition-all duration-500 rounded-[1.75rem] overflow-hidden group/card relative ${isFocused ? 'border-purple-300' : 'border-slate-200'
-                      }`}
+                    className="bg-white border border-slate-200 transition-all duration-500 rounded-[1.75rem] overflow-hidden group/card relative"
                   >
                     {/* Glassy Status Indicator */}
                     {hasValidated && (
@@ -1946,7 +1958,7 @@ const PracticeTab: React.FC<{
                     )}
 
                     {/* Card Header - Ultra Premium */}
-                    <div className={`px-3 md:px-5 py-3 flex items-start justify-between gap-3 border-b ${isFocused ? 'bg-purple-50/40' : 'bg-slate-50/40'} border-slate-100 relative`}>
+                    <div className="px-3 md:px-5 py-3 flex items-start justify-between gap-3 border-b bg-slate-50/40 border-slate-100 relative">
                       <div className="flex items-start md:items-center gap-3 md:gap-4 flex-1 min-w-0 pr-8">
                         {/* Number Box */}
                         <div className={`w-9 h-9 md:w-11 md:h-11 shrink-0 rounded-[10px] md:rounded-xl flex items-center justify-center transition-all shadow-sm ${hasValidated
@@ -2106,7 +2118,7 @@ const PracticeTab: React.FC<{
                                   {String.fromCharCode(65 + idx)}
                                 </div>
                                 <div className="flex-1 text-base md:text-lg font-semibold text-slate-800 tracking-tight leading-relaxed">
-                                  <RenderWithMath text={option} showOptions={false} />
+                                  <RenderWithMath text={option.replace(/^\s*\([A-D]\)\s*|^\s*[A-D]\)\s*|^\s*[A-D]\.\s*/i, '').trim()} showOptions={false} />
                                 </div>
                                 {isCorrectReveal && <CheckCircle size={20} className="text-emerald-500 shrink-0" />}
                                 {isWrongChoice && <XCircle size={20} className="text-rose-500 shrink-0" />}
@@ -3847,14 +3859,6 @@ const FlashcardsTab: React.FC<{
       });
       const prompt = `You are an elite ${topicResource.examContext} exam coach. Create 12-15 HIGH-YIELD FLASHCARDS for ${topicResource.topicName} in ${topicResource.subject}.
 
-🎯 FLASHCARD FORMAT (NOT theory notes):
-- SHORT, punchy explanations
-- Bullet points for steps
-- Quick recall triggers
-- One clear example
-
-Return ONLY valid JSON array:
-[
   {
     "term": "Concept/Formula (use $ $ for math)",
     "definition": "**FORMULA:** $formula$ where $x$ = variable\\n\\n**WHEN TO USE:** One sentence\\n\\n**QUICK EXAMPLE:** $input$ → $output$ (1 line)\\n\\n**KEY STEPS:**\\n• Step 1\\n• Step 2\\n• Step 3",

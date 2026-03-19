@@ -184,11 +184,26 @@ export async function selectQuestionsForTest(
 
     console.log(`📦 Selection pool: ${allQuestions.length} questions available`);
 
+    // Deduplicate pool by text to avoid repeats if same paper was scanned twice
+    const uniquePool: any[] = [];
+    const seenTexts = new Set<string>();
+    allQuestions.forEach(q => {
+      const normalized = q.text?.toLowerCase().replace(/[^a-z0-9]/g, '') || q.id;
+      if (!seenTexts.has(normalized)) {
+        uniquePool.push(q);
+        seenTexts.add(normalized);
+      }
+    });
+
+    if (uniquePool.length < allQuestions.length) {
+      console.log(`✂️  Removed ${allQuestions.length - uniquePool.length} duplicate questions from total pool`);
+    }
+
     // 6. Group questions by difficulty
     const questionsByDifficulty = {
-      Easy: allQuestions.filter(q => q.difficulty === 'Easy'),
-      Moderate: allQuestions.filter(q => q.difficulty === 'Moderate'),
-      Hard: allQuestions.filter(q => q.difficulty === 'Hard')
+      Easy: uniquePool.filter(q => q.difficulty === 'Easy'),
+      Moderate: uniquePool.filter(q => q.difficulty === 'Moderate'),
+      Hard: uniquePool.filter(q => q.difficulty === 'Hard')
     };
 
     // 7. Calculate target counts per difficulty

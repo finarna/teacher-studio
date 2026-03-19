@@ -22,6 +22,7 @@ export interface SynthesisResult {
     keyFormulas: string[];
     keyConcepts: { name: string; explanation: string }[];
     difficulty: 'Easy' | 'Moderate' | 'Hard';
+    verifiedCorrectOptionIndex?: number;
     historicalPattern?: string;
     historical_pattern?: string;
     predictiveInsight?: string;
@@ -45,12 +46,12 @@ export async function synthesizeQuestionIntelligence(
 
         console.log(`🧠 [SynthesisEngine] Synthesizing for Q ID: ${question.id}`);
 
-        const prompt = `You are an elite ${examContext} examiner and pedagogy expert in ${subject}.
-Topic: ${topicName}
+        const prompt = `You are a world-class ${examContext} examiner and a master of ${subject} pedagogy. 
+Your goal is to transform a simple question into a "High-Yield Mastery Engine".
 
-Analyze this specific question and generate high-yield educational "Deep Intelligence".
+Analyze this question and generate "Deep Intelligence" that an elite student would value. 
 
-QUESTION:
+QUESTION: 
 ${question.text}
 
 OPTIONS:
@@ -59,47 +60,46 @@ ${question.options?.map((opt: string, i: number) => `${String.fromCharCode(65 + 
 CORRECT OPTION INDEX: ${question.correct_option_index ?? 0}
 
 TASK:
-Provide a rigorous, structured analysis. Generic advice like "check your calculations" is STRICTLY FORBIDDEN.
+Provide a rigorous, brutally detailed analysis. Generic advice like "Check calculations" is FORBIDDEN.
 
-1. solutionSteps: Minimum 3 logical steps. Format: "Title ::: Detailed reasoning with math".
-2. aiReasoning: Explain the EXACT psychological trap or conceptual pivot the examiner is testing in THIS specific problem.
-3. historicalPattern: syllabus-specific context. (e.g., "Frequent in KCET 2018-2022, shifted from direct calculation to domain properties in 2024").
-4. predictiveInsight: A specific variation or "next-level" question likely to appear.
-5. whyItMatters: Connect this specific concept to higher-level engineering/medical application (e.g., "Log domain checks are critical in filter stability analysis").
-6. studyTip: A professional "Mastery" shortcut, mnemonic or visualization ritual (The 'Base-Check Ritual').
-7. pitfalls: EXACT conceptual traps in this specific problem. Generic "Calculation errors" or "Rush through" advice is FORBIDDEN and will be rejected. Identify a real mathematical pitfall.
-8. subtopic: A specific, granular subtopic name (3-5 words max) that falls under the main topic "${topicName}".
+1. solutionSteps: Minimum 3 logical steps. Every step must explain the "WHY" not just the "WHAT". Format: "Sub-task title ::: Detailed logic including math $formula$".
+2. aiReasoning: Provide the "Expert Examiner Mindset". Explain the "Psychological Trap". What exactly is the examiner trying to confuse? Is it a unit conversion? A boundary condition? A similar-looking concept? Explain the "Cognitive Pivot".
+3. historicalPattern: Provide the "Syllabus History & Exam Pattern". Syllabus-specific context. (e.g., "Frequent in ${examContext} 2018-2022; shifted in 2024 to test domain properties rather than direct substitution").
+4. predictiveInsight: Provide the "Cycle Predictions". Describe the next logical evolution. "Expect a version of this involving [concept X] in the next cycle."
+5. whyItMatters: Connect to engineering/medical/science reality. "This logic is why control systems in [application] don't fail under pressure."
+6. studyTip: Provide the "Strategic Memory Anchor". A professional "Mastery" shortcut, mnemonic, or "Base-Check Ritual". Must be a specific, actionable mental tool.
+7. pitfalls: Provide the "Trap Vigilance Protocol". Identify the exact mathematical or conceptual traps in THIS problem. Be ultra-specific.
+8. subtopic: Granular subtopic name (3 words max).
+9. keyConcepts: List at least 2 fundamental principles at play, with explanations that link them to the problem.
+10. verifiedCorrectOptionIndex: Rigorously verify if the provided CORRECT OPTION INDEX (${question.correct_option_index ?? 0}) is actually correct based on your derivation. If it is wrong, provide the correct index (0 for A, 1 for B, 2 for C, 3 for D). Explain WHY in your reasoning.
+
+GOLD STANDARD EXAMPLE (Biology):
+aiReasoning: "The examiner leverages the 'Location Ambiguity' trap. Students often confuse Anterior vs Posterior junctions in insect anatomy (e.g., Cockroach midgut). Focus on the 'M-H Junction' mnemonic to distinguish Malpighian tubules from Gastric Caeca."
+historicalPattern: "High-frequency topic since 2012. 2024 trends show a move toward 'Structural Linkage' questions where location is tied to function."
 
 Return ONLY valid JSON:
 {
-  "solutionSteps": [
-    "Identify Domain ::: First determine the range where... $x > 3$",
-    "Evaluate Components ::: Substitute values into... $f(4) = 2(4) = 8$",
-    "Final Logic ::: Sum all results... $f(-2) + f(3) + f(4) = -6 + 9 + 8 = 11$"
-  ],
-  "markingSteps": [{"step": "Correct identification of piecewise boundary", "mark": "1"}],
-  "aiReasoning": "Tests the student's ability to selectively apply piecewise rules without mixing boundary conditions...",
-  "whyItMatters": "Piecewise logic is fundamental to signal processing and algorithmic control loops...",
-  "studyTip": "V-Table Sync: Always draw a small number line and mark boundaries to physically see which function to use.",
-  "commonMistakes": [
-    {
-      "mistake": "Using $x^2$ for $f(3)$",
-      "why": "Mistakenly including boundary value in the inequality",
-      "howToAvoid": "Strictly observe the '=' sign position in piece definitions"
-    }
-  ],
-  "keyFormulas": ["$f(x) = \\begin{cases} ... \\end{cases}$"],
-  "keyConcepts": [{"name": "Piecewise Function Evaluation", "explanation": "Dynamic function selection based on input domain..."}],
+  "solutionSteps": [ "Subtask Title ::: Detailed reasoning $Formula$..." ],
+  "aiReasoning": "Crucial: Deep psychological analysis of the trap. (e.g., 'Examiner focuses on anterior vs posterior junction of midgut to catch students who memorized but didn't visualize anatomy.')",
+  "historicalPattern": "Exam history: 'Topic appears consistently every 2 years; 2024 saw a move toward structural links.')",
+  "predictiveInsight": "Prediction: 'Expect future variants involving Malpighian tubule count or precise junction chemistry.')",
+  "whyItMatters": "Application: 'This anatomical precision is the basis for veterinary surgery logic.')",
+  "studyTip": "Mastery Protocol: 'Always use 'A-P' relative mapping rituals during recall.')",
+  "commonMistakes": [{ "mistake": "Identifying posterior instead of anterior", "why": "Students rush the location mapping", "howToAvoid": "Always sketch the junction mentally first" }],
+  "keyFormulas": ["None"],
+  "keyConcepts": [{ "name": "Insect Anatomy", "explanation": "Structural organisation of junctions." }],
   "difficulty": "Moderate",
-  "historicalPattern": "High frequency in function evaluation blocks; similar logic seen in 2021 Q.12 and 2023 Q.4.",
-  "predictiveInsight": "Expected to evolve into composition of piecewise functions in upcoming cycles."
+  "subtopic": "Animal Tissues",
+  "verifiedCorrectOptionIndex": 0
 }
 
-CRITICAL:
-- Use SINGLE dollar signs for ALL LaTeX: $E=mc^2$ (inline) or $$E=mc^2$$ (display).
-- ONLY double-backslash internal LaTeX COMMANDS inside JSON: "\\\\frac{1}{2}" or "\\\\log".
-- DO NOT use any other delimiters like \( \) or \[ \].
-- NO extra text outside JSON.`;
+RULES:
+- ALWAYS populate every field. DO NOT leave historicalPattern or predictiveInsight empty.
+- Use SINGLE dollar signs for LaTeX: $E=mc^2$.
+- ONLY double-backslash LaTeX COMMANDS: "\\\\frac{1}{2}".
+- NO markdown outside JSON.`;
+
+
 
         const result = await withGeminiRetry(() => ai.models.generateContent({
             model: modelName,
@@ -159,6 +159,7 @@ CRITICAL:
             .from('questions')
             .update({
                 difficulty: finalDifficulty,
+                correct_option_index: synthesis.verifiedCorrectOptionIndex !== undefined ? synthesis.verifiedCorrectOptionIndex : (question.correct_option_index ?? 0),
                 solution_steps: synthesis.solutionSteps,
                 study_tip: synthesis.studyTip,
                 exam_tip: synthesis.studyTip, // Maintain backward compatibility

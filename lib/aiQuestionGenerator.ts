@@ -188,7 +188,8 @@ export async function generateTestQuestions(
   context: GenerationContext,
   geminiApiKey: string,
   totalQuestionsOverride?: number,
-  onBatchProgress?: (info: { batchIdx: number; totalBatches: number; batchQuestions: number; totalSoFar: number; topicNames: string[] }) => void
+  onBatchProgress?: (info: { batchIdx: number; totalBatches: number; batchQuestions: number; totalSoFar: number; topicNames: string[] }) => void,
+  existingQuestions: AnalyzedQuestion[] = []
 ): Promise<AnalyzedQuestion[]> {
 
   // Apply override so user-selected count is respected
@@ -332,7 +333,7 @@ export async function generateTestQuestions(
   console.log(`⚡ Smart Batching completed in ${totalGenTime}s (${batches.length} batches, ${allQuestions.length} questions)`);
 
   // Step 4: Final validation
-  const validatedQuestions = validateQuestions(allQuestions, context);
+  const validatedQuestions = validateQuestions(allQuestions, context, existingQuestions);
   const targetCount = context.examConfig.totalQuestions;
 
   // Step 5: Top-up — regenerate exactly the rejected count (max 1 retry)
@@ -359,7 +360,7 @@ export async function generateTestQuestions(
         section: 'Section A'
       }, geminiApiKey);
 
-      const topupValidated = validateQuestions(topupResult, context);
+      const topupValidated = validateQuestions(topupResult, context, validatedQuestions);
       console.log(`🔄 Top-up result: ${topupValidated.length}/${deficit} question(s) recovered`);
       validatedQuestions.push(...topupValidated);
     } catch (topupErr) {
@@ -774,8 +775,9 @@ QUALITY MANDATE:
 1. ZERO "Definition" questions. Use Scenario-based applications.
 2. Focus on "The Prediction Gap": Create questions that pre-empt trends for ${new Date().getFullYear() + 1}.
 3. MANDATORY SOLUTIONS: Every question MUST have "solutionSteps" (min 2 steps), "studyTip", and "commonMistakes".
-4. LATEX: Use PROPER LaTeX ($...$ inline, $$...$$ display). IMPORTANT: You MUST use DOUBLE BACKSLASHES (e.g., \\\\sum, \\\\sqrt) for all LaTeX commands. THIS IS THE ONLY WAY TO ENSURE VALID JSON. WE WILL REJECT ANY SINGLE BACKSLASHES.
-5. NO direct Theory questions. Focus on speed-tricks and analytical synthesis.
+4. UNIQUENESS & VARIETY: Every question in this batch MUST be distinct. Do NOT repeat the same concept, scenario, or calculation pattern. Vary the numerical values and the cognitive angle (e.g., if one is about 'Maximum Height', the next should be about 'Range' or 'Time of Flight' instead of another 'Maximum Height' with different numbers).
+5. LATEX: Use PROPER LaTeX ($...$ inline, $$...$$ display). IMPORTANT: You MUST use DOUBLE BACKSLASHES (e.g., \\\\sum, \\\\sqrt) for all LaTeX commands. THIS IS THE ONLY WAY TO ENSURE VALID JSON. WE WILL REJECT ANY SINGLE BACKSLASHES.
+6. NO direct Theory questions. Focus on speed-tricks and analytical synthesis.
 
 Return ONLY a valid JSON array:
 [
@@ -1005,7 +1007,8 @@ QUALITY MANDATE:
 2. Every question must be a "Scenario" or "Application".
 3. Use the specific syntax and trickery found in 2024-2025 elite papers.
 4. "THE PREDICTION GAP": Create 1 question in this set that is a 'New Twist' never seen exactly in past papers but logical within current trends.
-5. Ensure solutions are Masterclass-level: explain the 'Why' and 'How to Solve in 30 seconds'.
+5. UNIQUENESS: Ensure all questions are conceptually and numerically distinct. Do NOT repeat the same scenario or values.
+6. Ensure solutions are Masterclass-level: explain the 'Why' and 'How to Solve in 30 seconds'.
 
 TECHNICAL REQUIREMENTS:
 1. Use PROPER LaTeX for ALL math expressions ($...$ inline, $$...$$ display).
@@ -1187,6 +1190,12 @@ function validateQuestion(q: AnalyzedQuestion): ValidationResult {
         errors.push(`Unbalanced LaTeX in option ${String.fromCharCode(65 + idx)}`);
       }
     });
+
+    // Check for duplicate options
+    const uniqueOptions = new Set(q.options.map(o => o?.trim().toLowerCase()));
+    if (uniqueOptions.size < q.options.length) {
+      errors.push('Duplicate options detected');
+    }
   }
 
   return {
@@ -1198,26 +1207,45 @@ function validateQuestion(q: AnalyzedQuestion): ValidationResult {
 /**
  * Validate array of questions and filter out invalid ones
  */
-function validateQuestions(
+export function validateQuestions(
   questions: AnalyzedQuestion[],
-  context: GenerationContext
+  context: GenerationContext,
+  existingQuestions: AnalyzedQuestion[] = []
 ): AnalyzedQuestion[] {
   const validated: AnalyzedQuestion[] = [];
   const rejected: Array<{ question: AnalyzedQuestion; errors: string[] }> = [];
 
+  // Track normalized texts to ensure uniqueness
+  const seenTexts = new Set<string>();
+  
+  // Add already existing questions to the seen set
+  existingQuestions.forEach(q => {
+    const normalizedText = q.text?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+    if (normalizedText) seenTexts.add(normalizedText);
+  });
+
   questions.forEach(q => {
-    const result = validateQuestion(q);
-    if (result.isValid) {
+    const validation = validateQuestion(q);
+    
+    // Similarity check (Normalize: lowercase, remove non-alphanumeric)
+    const normalizedText = q.text?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+    const isTooSimilar = seenTexts.has(normalizedText);
+
+    if (validation.isValid && !isTooSimilar) {
       validated.push(q);
+      seenTexts.add(normalizedText);
     } else {
-      rejected.push({ question: q, errors: result.errors });
+      const errors = [...validation.errors];
+      if (isTooSimilar) errors.push('Question is identical/too similar to another in the set');
+      
+      rejected.push({ question: q, errors });
       console.warn(`❌ Rejected question: ${q.text?.substring(0, 60)}...`);
-      console.warn(`   Errors: ${result.errors.join(', ')}`);
+      console.warn(`   Errors: ${errors.join(', ')}`);
     }
   });
 
   if (rejected.length > 0) {
-    console.warn(`⚠️  ${rejected.length}/${questions.length} questions failed validation`);
+    console.warn(`⚠️  ${rejected.length}/${questions.length} questions failed validation or were duplicates`);
   }
 
   return validated;

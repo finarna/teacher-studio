@@ -17,7 +17,7 @@ import { LoginForm } from './components/LoginForm';
 import { SignupForm } from './components/SignupForm';
 import { supabase } from './lib/supabase';
 import { ProfessorTrainingContract } from './types';
-import { Home, LayoutDashboard, GraduationCap, Bell, Search, User, CheckCircle2, Menu, Map, ScanLine, Sparkles, FileText, ChevronRight, Library, ChevronLeft, LayoutGrid, Zap } from 'lucide-react';
+import { Home, LayoutDashboard, GraduationCap, Bell, Search, User, CheckCircle2, Menu, Map, ScanLine, Sparkles, FileText, ChevronRight, Library, ChevronLeft, LayoutGrid, Zap, Clock, TrendingUp, CheckCircle } from 'lucide-react';
 import { useLearningJourney } from './contexts/LearningJourneyContext';
 import { useIsMobile } from './hooks/useIsMobile';
 import { AppContextProvider } from './contexts/AppContext';
