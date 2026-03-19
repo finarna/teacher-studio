@@ -214,48 +214,73 @@ export async function createQuestions(scanId: string, questions: any[]) {
     return 'Moderate'; // Safe default
   };
 
-  const questionsData = questions.map((q, index) => ({
-    scan_id: scanId,
-    text: q.text,
-    marks: q.marks || 0,
-    difficulty: normalizeDifficulty(q.difficulty),
-    topic: q.topic,
-    domain: q.domain,           // ✅ Now saving domain to its own column
-    blooms: q.blooms,
-    options: q.options,
-    correct_option_index: q.correctOptionIndex,
-    solution_steps: q.solutionSteps || [],
-    exam_tip: q.examTip,
-    visual_concept: q.visualConcept,
-    key_formulas: q.keyFormulas || [],
-    pitfalls: q.pitfalls || [],
-    mastery_material: q.masteryMaterial,
-    has_visual_element: q.hasVisualElement || false,
-    visual_element_type: q.visualElementType,
-    visual_element_description: q.visualElementDescription,
-    visual_element_position: q.visualElementPosition,
-    visual_bounding_box: q.visualBoundingBox,
-    diagram_url: q.diagramUrl,
-    sketch_svg_url: q.sketchSvgUrl,
-    source: q.source,
-    question_order: index,
-    metadata: {
-      ...(q.metadata || {}),
-      // Store app-level ID for sketch_svg_url lookup (questions table uses UUID primary keys)
-      appId: q.id,
-      // Also store chapter, domain at metadata level for downstream consumers
-      chapter: q.chapter || q.topic,
+  const questionsData = questions.map((q, index) => {
+    // 🧬 DETERMINISTIC ID GENERATION:
+    // We derive a stable ID from (scanId + questionOrder) to ensure uniqueness
+    // and prevent duplicates during parallel re-scans or synthesis updates.
+    // If a valid UUID is already provided (e.g. from an existing row), we preserve it.
+    let id = (q.id && q.id.length === 36 && q.id.includes('-')) ? q.id : undefined;
+    
+    if (!id) {
+       // Generate a deterministic hex-based ID compatible with UUID type
+       // format: 8-4-4-4-12
+       // we use the scanId's first 20 chars and the index for the remaining bits
+       const scanBase = scanId.replace(/-/g, '').substring(0, 20);
+       const indexHex = index.toString(16).padStart(12, '0');
+       const raw = (scanBase + indexHex).substring(0, 32);
+       id = [
+         raw.substring(0, 8),
+         raw.substring(8, 12), 
+         raw.substring(12, 16),
+         raw.substring(16, 20),
+         raw.substring(20, 32)
+       ].join('-');
+    }
+
+    return {
+      id,
+      scan_id: scanId,
+      text: q.text,
+      marks: q.marks || 0,
+      difficulty: normalizeDifficulty(q.difficulty),
+      topic: q.topic,
       domain: q.domain,
-      subject: q.subject,
-      year: q.year,
-      exam_context: q.exam_context,
-    },
-  }));
+      blooms: q.blooms,
+      options: q.options,
+      correct_option_index: q.correctOptionIndex,
+      solution_steps: q.solutionSteps || [],
+      exam_tip: q.examTip,
+      visual_concept: q.visualConcept,
+      key_formulas: q.keyFormulas || [],
+      pitfalls: q.pitfalls || [],
+      mastery_material: q.masteryMaterial,
+      has_visual_element: q.hasVisualElement || false,
+      visual_element_type: q.visualElementType,
+      visual_element_description: q.visualElementDescription,
+      visual_element_position: q.visualElementPosition,
+      visual_bounding_box: q.visualBoundingBox,
+      diagram_url: q.diagramUrl,
+      sketch_svg_url: q.sketchSvgUrl,
+      source: q.source,
+      question_order: index,
+      metadata: {
+        ...(q.metadata || {}),
+        appId: q.id,
+        extractedImages: q.extractedImages || [],
+        chapter: q.chapter || q.topic,
+        domain: q.domain,
+        subject: q.subject,
+        section: q.section,
+        year: q.year,
+        exam_context: q.exam_context,
+      },
+    };
+  });
 
 
   const { data, error } = await supabaseAdmin
     .from('questions')
-    .insert(questionsData)
+    .upsert(questionsData, { onConflict: 'id' })
     .select();
 
   if (error) {

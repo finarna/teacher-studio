@@ -67,47 +67,52 @@ const VaultDetailPage: React.FC<VaultDetailPageProps> = ({ scanId, onBack, filte
         subject: scanData.subject,
         examContext: scanData.exam_context,
         analysisData: scanData.analysis_data,
-        year: scanData.year, // Pass year for display name generation
+        year: scanData.year,
+        isCombinedPaper: !!scanData.is_combined_paper, // Ensure this is mapped!
       } as any;
 
       if (filterSubject && mappedScan.analysisData?.questions) {
-        // Single-subject scans: questions have no per-question subject field.
-        // If the scan itself belongs to the requested subject, all questions qualify — skip the filter.
-        const scanSubjectMatches = mappedScan.subject === filterSubject;
-        const isCombined = !!(mappedScan as any).isCombinedPaper;
-        const isNeetSub = mappedScan.examContext === 'NEET' && (filterSubject === 'Botany' || filterSubject === 'Zoology');
+        const isCombined = !!mappedScan.isCombinedPaper;
+        
+        // CRITICAL FIRST STEP: Ensure each question has its true paper order
+        const questionsWithOrder = mappedScan.analysisData.questions.map((q: any, idx: number) => ({
+          ...q,
+          question_order: Number(q.question_order ?? q.questionOrder ?? idx)
+        }));
 
-        const filteredQuestions = (scanSubjectMatches && !isCombined)
-          ? mappedScan.analysisData.questions // All questions belong to this subject
-          : mappedScan.analysisData.questions.filter(
+        // Now filter based on the Hub subject
+        const filteredQuestions = (mappedScan.subject === filterSubject && !isCombined)
+          ? questionsWithOrder
+          : questionsWithOrder.filter(
             (q: any) => {
-              // Direct match on per-question subject
+              // Direct subject tag match (Priority)
               if (q.subject === filterSubject) return true;
-              // Split logic for legacy/Bio questions in combined NEET papers
-              if (isNeetSub && (q.subject === 'Biology' || !q.subject)) {
-                const qNum = q.questionOrder ?? q.index ?? 0;
-                if (filterSubject === 'Botany') return qNum > 100 && qNum <= 150;
-                if (filterSubject === 'Zoology') return qNum > 150 && qNum <= 200;
+              
+              // Positional match for NEET combined scans
+              if (mappedScan.examContext === 'NEET' && isCombined) {
+                const qNum = q.question_order;
+                if (filterSubject === 'Physics') return qNum < 50;
+                if (filterSubject === 'Chemistry') return qNum >= 50 && qNum < 100;
+                if (filterSubject === 'Botany') return qNum >= 100 && qNum < 150;
+                if (filterSubject === 'Zoology') return qNum >= 150 && qNum < 200;
               }
               return false;
             }
           );
+
         mappedScan.analysisData = {
           ...mappedScan.analysisData,
           questions: filteredQuestions
         };
-        console.log(`🔍 [VaultDetailPage] Filtered to ${filteredQuestions.length} questions for subject: ${filterSubject} (scanSubjectMatches=${scanSubjectMatches}, isCombined=${isCombined})`);
       }
 
-      // 5. Transform for TestResultsPage — use filterSubject for display name if available
-      const displayScan = filterSubject
-        ? { ...mappedScan, subject: filterSubject as any }
-        : mappedScan;
-      const transformed = transformScanToAttempt(displayScan, userId, solvedQuestionIds);
+      const transformed = transformScanToAttempt(mappedScan, userId, solvedQuestionIds);
 
       setData({
         scan: mappedScan,
-        ...transformed
+        attempt: transformed.attempt,
+        questions: transformed.questions,
+        responses: transformed.responses,
       });
 
       console.log('🏛️ [VaultDetailPage] Scan & Practice data loaded:', mappedScan.id);

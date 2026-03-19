@@ -52,8 +52,10 @@ export const getGeminiClient = (apiKey?: string) => {
   //
   // SOLUTION: To use your $300 credits with an API Key, we must use `vertexai: false` (AI Studio Endpoint).
   // As long as the API Key was created in the "usdproj" Google Cloud project, it will bill to your credits.
+  // We allow forcing it via VITE_FORCE_VERTEX_AI for users who know what they're doing.
+  const forceVertex = cleanEnv(getEnv('VITE_FORCE_VERTEX_AI') || getEnv('FORCE_VERTEX_AI')) === 'true';
   const options: any = {
-    vertexai: (isBrowser && key) ? false : true 
+    vertexai: forceVertex ? true : (key ? false : true)
   };
 
   if (key) {
@@ -64,7 +66,7 @@ export const getGeminiClient = (apiKey?: string) => {
   }
 
   const client = new GoogleGenAI(options);
-
+  
   // Wrap generateContent to handle model path expansion correctly for the chosen endpoint
   const originalModels = client.models;
   const wrapFunc = (fn: any) => {
@@ -79,6 +81,7 @@ export const getGeminiClient = (apiKey?: string) => {
         } else {
           model = `models/${model}`;
         }
+        // Use debug for path adjustments to avoid console clutter
         console.debug(`🌐 [GEMINI_CLIENT] Path adjusted: ${model} (Vertex: ${currentVertex})`);
       } else if (typeof model === 'string' && model.startsWith('projects/') && !currentVertex) {
         // Strip project path if we switched to AI Studio mode
@@ -93,7 +96,11 @@ export const getGeminiClient = (apiKey?: string) => {
   (client.models as any).generateContent = wrapFunc(originalModels.generateContent);
   (client.models as any).generateContentStream = wrapFunc(originalModels.generateContentStream);
 
-  console.log(`📡 [GEMINI_CLIENT] Initialized for ${isBrowser ? 'Browser' : 'Node.js'} | VertexAI: ${options.vertexai} | Project: ${project}`);
+  // Only log initialization details once to avoid cluttering parallel scan logs
+  if (!(globalThis as any).__GEMINI_INIT_LOGGED__) {
+      console.log(`📡 [GEMINI_CLIENT] Initialized for ${isBrowser ? 'Browser' : 'Node.js'} | VertexAI: ${options.vertexai} | Project: ${project}`);
+      (globalThis as any).__GEMINI_INIT_LOGGED__ = true;
+  }
 
   return client;
 };

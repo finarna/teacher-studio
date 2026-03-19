@@ -45,20 +45,23 @@ export async function autoMapScanQuestions(
     console.log(`📋 [AutoMap] Scan: ${scan.name} (${scan.subject})`);
 
     // 2. Get official topics for this subject
+    const subjectsToLoad = scan.subject === 'Combined' ? (scan.subjects || ['Physics', 'Chemistry', 'Biology']) : [scan.subject];
+    console.log(`📋 [AutoMap] Loading topics for subjects: ${subjectsToLoad.join(', ')}`);
+
     const { data: officialTopics, error: topicsError } = await supabase
       .from('topics')
       .select('id, name, subject')
-      .eq('subject', scan.subject);
+      .in('subject', subjectsToLoad);
 
     if (topicsError) throw topicsError;
     if (!officialTopics || officialTopics.length === 0) {
-      console.log(`⚠️  [AutoMap] No official topics found for ${scan.subject}`);
+      console.log(`⚠️  [AutoMap] No official topics found for subjects: ${subjectsToLoad.join(', ')}`);
       return {
         success: false,
         mapped: 0,
         failed: 0,
         failedTopics: [],
-        error: `No official topics for ${scan.subject}`
+        error: `No official topics found`
       };
     }
 
@@ -73,7 +76,7 @@ export async function autoMapScanQuestions(
     // 3. Get questions from this scan
     const { data: questions, error: questionsError } = await supabase
       .from('questions')
-      .select('id, topic')
+      .select('id, topic, subject, question_order')
       .eq('scan_id', scanId);
 
     if (questionsError) throw questionsError;
@@ -95,10 +98,22 @@ export async function autoMapScanQuestions(
     const failedTopics = new Set<string>();
 
     for (const question of questions) {
+      // Determine subject for this question
+      let qSubj = question.subject || scan.subject;
+      
+      // Fallback inference for NEET Combined if subject was unspecified
+      if (qSubj === 'Combined' && scan.exam_context === 'NEET') {
+         const qNum = question.question_order + 1;
+         if (qNum <= 50) qSubj = 'Physics';
+         else if (qNum <= 100) qSubj = 'Chemistry';
+         else if (qNum <= 150) qSubj = 'Botany';
+         else qSubj = 'Zoology';
+      }
+
       // Use smart matching to find official topic
       const officialTopicName = matchToOfficialTopic(
         question.topic,
-        scan.subject as Subject
+        qSubj as Subject
       );
 
       if (!officialTopicName) {
@@ -118,11 +133,11 @@ export async function autoMapScanQuestions(
       // Create mapping
       const { error: mappingError } = await supabase
         .from('topic_question_mapping')
-        .insert({
+        .upsert({
           topic_id: topicId,
           question_id: question.id,
           confidence: 1.0
-        });
+        }, { onConflict: 'topic_id,question_id' });
 
       if (mappingError) {
         // Ignore duplicate errors (23505 = unique violation)

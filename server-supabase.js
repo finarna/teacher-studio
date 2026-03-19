@@ -10,6 +10,9 @@
  * API Compatibility: Maintains backward compatibility with original endpoints
  */
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import Redis from 'ioredis';
@@ -240,8 +243,8 @@ function transformApiScanToDb(apiScan) {
   // Extract year from filename (e.g., "KCET 2022 Biology.pdf" → "2022")
   const extractYearFromFilename = (name) => {
     if (!name) return null;
-    // Match 4-digit year (1900-2099)
-    const yearMatch = name.match(/\b(19|20)\d{2}\b/);
+    // Match 4-digit year (1900-2099) - flex regex to handle underscores or spaces
+    const yearMatch = name.match(/(19|20)\d{2}/);
     return yearMatch ? yearMatch[0] : null;
   };
 
@@ -298,29 +301,41 @@ async function getCachedScan(scanId, userId) {
 
   // Load questions
   const { data: questions } = await getScanQuestions(scanId);
+  const originalQuestions = dbScan.analysis_data?.questions || [];
+
   if (questions && apiScan.analysisData) {
-    apiScan.analysisData.questions = questions.map((q) => ({
-      id: q.id,
-      text: q.text,
-      marks: q.marks,
-      difficulty: q.difficulty,
-      topic: q.topic,
-      blooms: q.blooms,
-      options: q.options,
-      correctOptionIndex: q.correct_option_index,
-      solutionSteps: q.solution_steps,
-      examTip: q.exam_tip,
-      visualConcept: q.visual_concept,
-      keyFormulas: q.key_formulas,
-      pitfalls: q.pitfalls,
-      masteryMaterial: q.mastery_material,
-      hasVisualElement: q.has_visual_element,
-      visualElementType: q.visual_element_type,
-      visualElementDescription: q.visual_element_description,
-      diagramUrl: q.diagram_url,
-      sketchSvg: q.sketch_svg_url,
-      source: q.source,
-    }));
+    apiScan.analysisData.questions = questions.map((q, idx) => {
+      const qIdx = q.question_order !== null ? q.question_order : idx;
+      const originalQ = originalQuestions[qIdx];
+
+      return {
+        id: q.id,
+        text: q.text,
+        marks: q.marks,
+        difficulty: q.difficulty,
+        topic: q.topic,
+        blooms: q.blooms,
+        options: q.options,
+        correctOptionIndex: q.correct_option_index,
+        solutionSteps: q.solution_steps,
+        examTip: q.exam_tip,
+        visualConcept: q.visual_concept,
+        keyFormulas: q.key_formulas,
+        pitfalls: q.pitfalls,
+        masteryMaterial: q.mastery_material,
+        hasVisualElement: q.has_visual_element,
+        visualElementType: q.visual_element_type,
+        visualElementDescription: q.visual_element_description,
+        diagramUrl: q.diagram_url,
+        questionOrder: qIdx,
+        extractedImages: q.metadata?.extractedImages || originalQ?.extractedImages || [],
+        appId: q.metadata?.appId || originalQ?.id || q.id,
+        subject: q.subject || q.metadata?.subject || originalQ?.subject,
+        section: q.section || q.metadata?.section || originalQ?.section || 'A',
+        source: q.source,
+      };
+    });
+    apiScan.isCombinedPaper = !!dbScan.is_combined_paper;
   }
 
   // Cache in Redis (7 days TTL)
@@ -765,7 +780,7 @@ app.post('/api/scans', async (req, res) => {
           });
         }
 
-        // Delete existing questions first (cascade)
+        // Delete existing questions first (cascade) to prevent duplicates on re-scan
         await supabaseAdmin.from('questions').delete().eq('scan_id', apiScan.id);
 
         // Transform questions to include subject, exam_context, and year
@@ -944,11 +959,16 @@ app.post('/api/scans', async (req, res) => {
         // Sync scan data to AI generator tables (for learning from past papers)
         console.log(`🤖 Syncing scan data to AI generator tables...`);
         const { syncScanToAITables } = await import('./lib/syncScanToAITables.ts');
-        const syncResult = await syncScanToAITables(supabaseAdmin, apiScan.id);
-        if (syncResult.success) {
-          console.log(`✅ AI tables updated: ${syncResult.message}`);
-        } else {
-          console.warn(`⚠️  AI table sync: ${syncResult.message}`);
+        
+        const subjectsToSync = apiScan.subject === 'Combined' ? (apiScan.subjects || ['Physics', 'Chemistry', 'Biology']) : [apiScan.subject];
+        
+        for (const subj of subjectsToSync) {
+          const syncResult = await syncScanToAITables(supabaseAdmin, apiScan.id, subj);
+          if (syncResult.success) {
+            console.log(`✅ AI tables updated for ${subj}: ${syncResult.message}`);
+          } else {
+            console.warn(`⚠️  AI table sync for ${subj}: ${syncResult.message}`);
+          }
         }
       }
     }
@@ -1023,7 +1043,8 @@ app.put('/api/scans/:id', async (req, res) => {
     // Update questions if provided
     if (apiScan.analysisData?.questions && apiScan.analysisData.questions.length > 0) {
       // Delete existing questions first (cascade)
-      await supabaseAdmin.from('questions').delete().eq('scan_id', scanId);
+      // STABLE UPSERT: No longer deleting questions to preserve identity/mappings
+      // await supabaseAdmin.from('questions').delete().eq('scan_id', scanId);
 
       // Create new questions
       await createQuestions(scanId, apiScan.analysisData.questions);
@@ -2467,6 +2488,18 @@ app.post('/api/learning-journey/ai-summary', async (req, res) => {
 
 // ============================================================================
 
+// DEBUG ENDPOINT FOR AI CONFIGURATION
+app.get('/debug-ai', (req, res) => {
+  const keySnippet = (process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '').substring(0, 10);
+  res.json({
+    FORCE_VERTEX_AI: process.env.FORCE_VERTEX_AI,
+    VITE_FORCE_VERTEX_AI: process.env.VITE_FORCE_VERTEX_AI,
+    KEY_SNIPPET: keySnippet + '...',
+    NODE_ENV: process.env.NODE_ENV,
+    TIMESTAMP: new Date().toISOString()
+  });
+});
+
 /**
  * 404 Handler
  */
@@ -2514,6 +2547,7 @@ app.use((req, res) => {
 // =====================================================
 // START SERVER
 // =====================================================
+
 app.listen(port, '0.0.0.0', () => {
   console.log('\n' + '='.repeat(60));
   console.log('🚀 plus2AI Vault Server (Supabase Edition)');

@@ -97,8 +97,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({
 
     // Normalized text to handle common AI extraction quirks
     let processedText = safeText
-      .replace(/\\\\n/g, '\n')
-      .replace(/\\\\/g, '\\');
+      .replace(/\\\\n/g, '\n');
 
     const hasMathDelimiters = /\$|\\\[|\\\(/.test(processedText);
 
@@ -148,8 +147,10 @@ const MathRenderer: React.FC<MathRendererProps> = ({
         // If the content inside $...$ has no LaTeX commands, operators, or math symbols,
         // it's plain text that the AI mistakenly wrapped in math delimiters.
         // Wrap it in \text{} to prevent KaTeX from rendering letters as math vars (spaced out).
-        const isPlainText = latex.length > 0 && !/[\\^_\{\}]/.test(latex) && !/[\+\-\*\/\=<>\|]/.test(latex) && !/[0-9]/.test(latex);
-        if (isPlainText && !isDisplay) {
+        // CRITICAL FIX: Do NOT wrap single letters or common math variables (e.g. f, x, y) 
+        // as they should be rendered as math vars.
+        const needsTextWrapping = latex.length > 2 && !/[\\^_\{\}]/.test(latex) && !/[\+\-\*\/\=<>\|]/.test(latex) && !/[0-9]/.test(latex);
+        if (needsTextWrapping && !isDisplay) {
           latex = `\\text{${latex}}`;
         }
 

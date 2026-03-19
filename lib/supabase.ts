@@ -13,19 +13,35 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Environment variables (set in .env.local)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Helper to get environment variables across Vite and Node.js
+const getEnv = (name: string) => {
+  // Check Vite import.meta.env
+  try {
+    const metaEnv = (import.meta as any).env;
+    if (metaEnv && metaEnv[name]) return metaEnv[name];
+  } catch (e) {
+    // import.meta might not be available
+  }
+  // Check Node.js process.env
+  if (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process.env) {
+    if ((globalThis as any).process.env[name]) return (globalThis as any).process.env[name];
+  }
+  return undefined;
+};
+
+// Environment variables
+const supabaseUrl = getEnv('VITE_SUPABASE_URL') || getEnv('SUPABASE_URL');
+const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('SUPABASE_ANON_KEY');
 
 // Validate configuration
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase configuration. Please check .env.local file.');
-  console.error('Required: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
-
-  // Provide helpful error for development
-  throw new Error(
-    'Supabase configuration missing. Follow SUPABASE_SETUP_GUIDE.md to set up your project.'
-  );
+  // If we're on the server, we might be using the service role client instead for some tasks
+  if (typeof window === 'undefined') {
+    console.warn('⚠️ Client-side Supabase config missing. Server-side parts should use supabaseAdmin where possible.');
+  } else {
+    console.error('Missing Supabase configuration. Required: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+    throw new Error('Supabase configuration missing.');
+  }
 }
 
 /**

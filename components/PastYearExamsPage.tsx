@@ -175,8 +175,9 @@ const PastYearExamsPage: React.FC<PastYearExamsPageProps> = ({
       // 🚀 OPTIMIZATION: Use bare minimum processing for the grid
       const resolvedYearData = Object.entries(scansByYear).map(([year, scans]) => {
         const scansWithAnalysis = scans.map(scan => {
-          // Use standard per-exam question counts (analysis_data not fetched to avoid payload bloat)
-          const questionsCount = examContext === 'NEET' ? 45 : 60;
+          // Use standard per-exam question counts
+          let questionsCount = examContext === 'NEET' ? 50 : 60;
+          if (scan.is_combined_paper && examContext === 'NEET') questionsCount = 200;
 
           return {
             ...scan,

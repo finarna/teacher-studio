@@ -71,16 +71,22 @@ export async function syncScanToAITables(
         // FILTER BY SUBJECT for targetSubject sync or combined paper splits
         let qSubj = q.subject || (is_combined_paper ? null : scan.subject);
 
-        // NEET Legacy Subject Inference for sync
-        if ((!qSubj || qSubj === 'Biology') && exam_context === 'NEET' && (finalSubject === 'Botany' || finalSubject === 'Zoology' || finalSubject === 'Biology')) {
+        // NEET Legacy Subject Inference for sync if not explicitly set
+        if (!qSubj && exam_context === 'NEET') {
           const idParts = (q.id || '').toString().split(/[^0-9]/).filter(Boolean);
           const qNum = idParts.length > 0 ? parseInt(idParts[idParts.length - 1]) : (idx + 1);
-          if (qNum > 100 && qNum <= 150) qSubj = 'Botany';
-          else if (qNum > 150) qSubj = 'Zoology';
-          else if (qNum <= 100) qSubj = qNum > 50 ? 'Chemistry' : 'Physics';
+          if (qNum <= 50) qSubj = 'Physics';
+          else if (qNum <= 100) qSubj = 'Chemistry';
+          else if (qNum <= 150) qSubj = 'Botany';
+          else qSubj = 'Zoology';
         }
 
+        // If target subject is set and doesn't match the question's subject, skip
         if (finalSubject && qSubj && qSubj !== finalSubject) return false;
+        
+        // If it's a combined paper sync for a specific subject, but the question has NO subject, skip
+        if (is_combined_paper && finalSubject !== 'Combined' && !qSubj) return false;
+        
         return true;
       });
     } else {

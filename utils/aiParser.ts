@@ -58,7 +58,7 @@ export const repairJson = (raw: string): string => {
             }
             if (char === '\\') {
                 escape = true;
-                repaired += char;
+                repaired += '\\\\';
                 continue;
             }
             if (char === '"') {
@@ -323,16 +323,6 @@ export const safeAiParse = <T>(raw: string, fallback: T, normalize: boolean = fa
                 if (match) {
                     try {
                         let captured = match[0].trim();
-                        // If it doesn't end with ] or }, it's likely truncated
-                        if (!captured.endsWith(']') && !captured.endsWith('}')) {
-                            const lastBrace = captured.lastIndexOf('}');
-                            const lastBracket = captured.lastIndexOf(']');
-                            const lastOk = Math.max(lastBrace, lastBracket);
-                            if (lastOk !== -1) {
-                                captured = captured.substring(0, lastOk + 1);
-                            }
-                        }
-
                         const partialStr = captured.startsWith('[') || captured.startsWith('{') ? captured : '{' + captured + '}';
                         const finalRepair = repairJson(partialStr);
                         let partialObj = JSON.parse(finalRepair);

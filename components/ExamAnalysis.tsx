@@ -198,28 +198,55 @@ const ExamAnalysis: React.FC<ExamAnalysisProps> = ({ onBack, scan, onUpdateScan,
 
   // Main questions source that merges metadata from scan and large sketches from questionSketches state
   const questions = React.useMemo((): AnalyzedQuestion[] => {
-    // NEW: Filter by subject if it's a combined paper, UNLESS the global subject is 'Combined'
+    // NEW: Filter by subject if it's a combined paper and we're in a subject-specific view
+    const isSubjectSpecificView = activeSubject && !['All', 'Combined'].includes(activeSubject);
+    
+    // Use raw questions directly - filtering is handled by the render/logic if needed
     let filteredItems = rawQuestions;
-    if (scan?.isCombinedPaper && scan?.subject !== 'Combined') {
-      filteredItems = rawQuestions.filter(q => (q as any).subject === activeSubject);
-    }
-
+    
     return filteredItems.map((q, idx) => {
-      // DYNAMIC UPGRADE: Handle legacy 'Biology' tags for existing NEET scans
-      let inferredSubject = q.subject || scan?.subject;
-      if (inferredSubject === 'Biology' && scan?.examContext === 'NEET') {
-        // Precise extraction: Take the numeric part (e.g., from "1510-101" -> "101")
-        const idParts = (q.id || '').split(/[^0-9]/).filter(Boolean);
-        const qNum = idParts.length > 0 ? parseInt(idParts[idParts.length - 1]) : (idx + 1);
 
-        if (qNum > 100 && qNum <= 150) inferredSubject = 'Botany' as any;
-        else if (qNum > 150) inferredSubject = 'Zoology' as any;
+      // DYNAMIC UPGRADE: Handle 'Biology' or 'Combined' tags for NEET scans
+      let inferredSubject = q.subject || scan?.subject;
+      let inferredSection = q.section || 'Section A';
+      
+      // Multi-layer fallback for question position (numeric identifying key)
+      const qAny = q as any;
+      const qOrder = Number(qAny.questionOrder ?? qAny.question_order ?? qAny.index ?? idx);
+      
+      const isCombined = !!scan?.isCombinedPaper || rawQuestions.length > 100 || scan?.subject === 'Combined';
+
+      // Ensure subject tagging trigger is robust for NEET
+      const needsInference = scan?.examContext === 'NEET' &&
+        (!inferredSubject || inferredSubject === 'Combined' || inferredSubject === 'Biology');
+
+      if (isCombined && needsInference) {
+        if (qOrder < 50) { 
+          inferredSubject = 'Physics' as any;
+          inferredSection = qOrder < 35 ? 'Section A' : 'Section B';
+        }
+        else if (qOrder >= 50 && qOrder < 100) {
+          inferredSubject = 'Chemistry' as any;
+          const subIdx = qOrder - 50;
+          inferredSection = subIdx < 35 ? 'Section A' : 'Section B';
+        }
+        else if (qOrder >= 100 && qOrder < 150) {
+          inferredSubject = 'Botany' as any;
+          const subIdx = qOrder - 100;
+          inferredSection = subIdx < 35 ? 'Section A' : 'Section B';
+        }
+        else if (qOrder >= 150) {
+          inferredSubject = 'Zoology' as any;
+          const subIdx = qOrder - 150;
+          inferredSection = subIdx < 35 ? 'Section A' : 'Section B';
+        }
       }
 
       return {
         ...q,
         subject: inferredSubject as Subject,
-        sketchSvg: questionSketches[q.id] || q.sketchSvg || q.sketchSvgUrl
+        section: inferredSection as any,
+        sketchSvg: questionSketches[q.id] || questionSketches[qAny.appId] || q.sketchSvg || q.sketchSvgUrl
       };
     });
   }, [rawQuestions, questionSketches, scan?.isCombinedPaper, scan?.subject, scan?.examContext, activeSubject]);
@@ -368,7 +395,7 @@ Schema: {
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
       const model = genAI.getGenerativeModel({
         model: selectedModel,
-        generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
+        generationConfig: { responseMimeType: "application/json", temperature: 0.1, maxOutputTokens: 4096 }
       });
 
       // Find questions that need syncing:
@@ -580,14 +607,24 @@ Schema: {
       const batchUrls: Record<string, string> = {};
 
       // 1. Generate images in parallel using Promise.allSettled
-      await Promise.allSettled(batch.map(async (question) => {
+      await Promise.allSettled(batch.map(async (question: any) => {
         try {
-          console.log(`🎨 Generating visual note for ${question.id}...`);
+          // DYNAMIC INFERENCE: Determine the specific subject for NEET combined papers
+          let inferredSubj = question.subject || scan.subject;
+          if (scan.examContext === 'NEET' && (inferredSubj === 'Combined' || inferredSubj === 'Biology' || !inferredSubj)) {
+            const qOrder = Number(question.questionOrder ?? question.question_order ?? 0);
+            if (qOrder < 50) inferredSubj = 'Physics';
+            else if (qOrder >= 50 && qOrder < 100) inferredSubj = 'Chemistry';
+            else if (qOrder >= 100 && qOrder < 150) inferredSubj = 'Botany';
+            else if (qOrder >= 150) inferredSubj = 'Zoology';
+          }
+
+          console.log(`🎨 Generating visual note for ${question.id} [${inferredSubj}]...`);
           const result = await generateSketch(
             selectedImageModel,
             question.visualConcept || question.topic,
             question.text,
-            question.subject || scan.subject,
+            inferredSubj,
             apiKey,
             (status) => console.log(`📊 ${question.id}: ${status}`),
             scan.examContext
@@ -1822,7 +1859,7 @@ Schema: {
                           <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
                             {/* Left - Question Info */}
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-bold text-slate-900">{selectedQ.id}</span>
+                              <span className="text-sm font-black text-slate-900 uppercase tracking-tight">Question {questions.indexOf(selectedQ) + 1}</span>
                               <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-semibold rounded">
                                 {selectedQ.marks}M
                               </span>
@@ -2252,7 +2289,7 @@ Schema: {
               <div className="p-6">
                 <div className="mb-4">
                   <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-1">Visual Learning Note</h3>
-                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">Question ID: {enlargedVisualNote.questionId}</p>
+                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">Question: {questions.findIndex(q => q.id === enlargedVisualNote.questionId) + 1}</p>
                 </div>
                 <div className="overflow-auto max-h-[calc(90vh-120px)]">
                   <img
@@ -2267,7 +2304,7 @@ Schema: {
           </div>
         )}
       </div>
-    </div >
+    </div>
   );
 };
 

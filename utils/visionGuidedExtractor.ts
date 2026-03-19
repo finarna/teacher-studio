@@ -44,7 +44,7 @@ function parsePercentage(value: string | number, pageSize?: number): number {
   if (raw <= 1.0) return raw;
   if (raw <= 1000) return raw / 1000; // Gemini Native Scale priority
   if (pageSize && raw > 1000) return raw / pageSize;
-  return raw / 1000; 
+  return raw / 1000;
 }
 
 export interface ExtractedVisualImage {
@@ -69,7 +69,7 @@ export async function extractImagesByBoundingBoxes(
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const imageMap = new Map<number, ExtractedVisualImage[]>();
-  
+
   const pageCache = new Map<number, { canvas: HTMLCanvasElement; viewport: any }>();
 
   for (let i = 0; i < questionVisuals.length; i++) {
@@ -83,12 +83,12 @@ export async function extractImagesByBoundingBoxes(
       if (!pageCache.has(pNum)) {
         const page = await pdf.getPage(pNum);
         const viewport = page.getViewport({ scale: 4.0 }); // Increased to 4x for extreme clarity
-        
+
         const renderCanvas = document.createElement('canvas');
         const renderContext = renderCanvas.getContext('2d', { alpha: false });
         renderCanvas.width = viewport.width;
         renderCanvas.height = viewport.height;
-        
+
         if (renderContext) {
           renderContext.fillStyle = 'white';
           renderContext.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
@@ -114,16 +114,16 @@ export async function extractImagesByBoundingBoxes(
         let normalizedQX = questionX;
         if (questionX <= 1.0) normalizedQX = questionX * pageW;
         else if (questionX <= 100.0) normalizedQX = (questionX / 100) * pageW;
-        
+
         const isRightCol = normalizedQX >= (pageW * 0.50);
 
         // We only "snap" if Gemini is completely in the wrong side or the box is massive
         if (isRightCol && xFrac + wFrac < 0.40) {
-            xFrac = 0.52; // Fallback to right side
-            wFrac = 0.45;
+          xFrac = 0.52; // Fallback to right side
+          wFrac = 0.45;
         } else if (!isRightCol && xFrac > 0.60) {
-            xFrac = 0.02; // Fallback to left side
-            wFrac = 0.45;
+          xFrac = 0.02; // Fallback to left side
+          wFrac = 0.45;
         }
       } else {
         wFrac = Math.min(wFrac, 1.0 - xFrac);
@@ -132,7 +132,7 @@ export async function extractImagesByBoundingBoxes(
       // Broader padding for bilingual/handwritten-style scans
       const padW = 0.04; // 4%
       const padH = 0.05; // 5%
-      
+
       xFrac = Math.max(0, xFrac - padW / 2);
       wFrac = Math.min(1.0 - xFrac, wFrac + padW);
       yFrac = Math.max(0, yFrac - padH / 2);
@@ -140,17 +140,17 @@ export async function extractImagesByBoundingBoxes(
 
       const xPercent = Math.max(0, Math.min(xFrac, 0.99));
       const yPercent = Math.max(0, Math.min(yFrac, 0.99));
-      const widthPercent  = Math.max(0.01, Math.min(wFrac, 1.0 - xPercent));
+      const widthPercent = Math.max(0.01, Math.min(wFrac, 1.0 - xPercent));
       const heightPercent = Math.max(0.01, Math.min(hFrac, 1.0 - yPercent));
 
       // SANITY: Enforce minimum pixels (prevent noise crops)
       const minPixelDim = 80;
       let widthPixel = Math.floor(viewport.width * widthPercent);
       let heightPixel = Math.floor(viewport.height * heightPercent);
-      
+
       if (widthPixel < minPixelDim || heightPixel < minPixelDim) {
-         widthPixel = Math.max(widthPixel, minPixelDim);
-         heightPixel = Math.max(heightPixel, minPixelDim);
+        widthPixel = Math.max(widthPixel, minPixelDim);
+        heightPixel = Math.max(heightPixel, minPixelDim);
       }
 
       const xPixel = Math.floor(viewport.width * xPercent);

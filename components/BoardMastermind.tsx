@@ -481,6 +481,14 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           });
         }, 3000);
 
+        // [NEW] Start raw image extraction in parallel for fallbacks
+        import('../utils/pdfImageExtractor').then(({ extractImagesFromPDF }) => {
+            extractImagesFromPDF(file).then(imgs => {
+                (window as any).rawExtractedImages = imgs;
+                console.log(`🖼️ [COMBINED FALLBACK] Pre-loaded ${imgs.length} raw images for mapping.`);
+            });
+        });
+
         // extractCombinedPaper is statically imported at top of file
         const combinedQuestions = await extractCombinedPaper(
           file, apiKey, selectedModel, activeExamContext as 'NEET' | 'JEE', (stage) => setLoadingStage(stage)
@@ -589,14 +597,29 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
         const simpleQuestions = await extractPaperStandardized(file, apiKey, selectedModel, subj, activeExamContext, undefined, detectedLayout);
         
         extractionData = {
-          questions: simpleQuestions.map((sq: any) => ({
-            ...sq,
-            id: `Q${sq.id}`, // Maintain frontend ID consistency
-            options: Array.isArray(sq.options) && typeof sq.options[0] === 'string'
-              ? sq.options.map((optStr: string, i: number) => `(${i+1}) ${optStr}`)
-              : (sq.options || []).map((opt: any) => `(${opt.id || '1'}) ${opt.text || opt}`),
-            source: `${file.name}`
-          }))
+          questions: simpleQuestions.map((sq: any, index: number) => {
+            // 🧬 DETERMINISTIC ID GENERATION:
+            // Derived from filename + index to ensure stability during the scan session
+            const safeName = file.name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 20);
+            const indexHex = index.toString(16).padStart(12, '0');
+            const stableId = [
+              safeName.padEnd(8, '0').substring(0, 8),
+              extractionId.padStart(4, '0'),
+              '4000',
+              '8000',
+              indexHex
+            ].join('-');
+
+            return {
+              ...sq,
+              id: stableId, 
+              appId: `Q${sq.id}`, 
+              options: Array.isArray(sq.options) && typeof sq.options[0] === 'string'
+                ? sq.options.map((optStr: string, i: number) => `(${i+1}) ${optStr}`)
+                : (sq.options || []).map((opt: any) => `(${opt.id || '1'}) ${opt.text || opt}`),
+              source: `${file.name}`
+            };
+          })
         };
       } else {
 
@@ -864,8 +887,18 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
           // Try to build bounding boxes from AI output regardless of global flag (priority fallback)
           const questionsWithBoundingBoxes: any[] = [];
           extractionData.questions.forEach((q: any) => {
-            const questionNumMatch = q.id?.toString().match(/(\d+)$/);
-            const questionNumber = questionNumMatch ? parseInt(questionNumMatch[1]) : null;
+            // Priority 1: Use appId (extract 45 from Q45)
+            // Priority 2: Use original numeric suffix from stable ID
+            let questionNumber: number | null = null;
+            
+            const appIdMatch = q.appId?.match(/(\d+)/);
+            if (appIdMatch) {
+              questionNumber = parseInt(appIdMatch[1]);
+            } else {
+              const idMatch = q.id?.toString().match(/(\d+)(?!.*\d)/);
+              if (idMatch) questionNumber = parseInt(idMatch[1]);
+            }
+
             if (!questionNumber) return;
 
             // Priority: plural visuals array (from Simplified Physics)
@@ -937,20 +970,41 @@ const BoardMastermind: React.FC<BoardMastermindProps> = ({ onNavigate, recentSca
 
           // Merge extracted images if available
           if (imageMapping) {
-            const questionNumMatch = q.id?.match(/(\d+)(?!.*\d)/);
-            if (questionNumMatch) {
-              const questionNum = parseInt(questionNumMatch[1]);
+            // Priority 1: Use appId (extract 45 from Q45)
+            // Priority 2: Use original numeric suffix from stable ID
+            let questionNum: number | null = null;
+            
+            const appIdMatch = q.appId?.match(/(\d+)/);
+            if (appIdMatch) {
+              questionNum = parseInt(appIdMatch[1]);
+            } else {
+              const idMatch = q.id?.toString().match(/(\d+)(?!.*\d)/);
+              if (idMatch) questionNum = parseInt(idMatch[1]);
+            }
+
+            if (questionNum !== null) {
 
               // 🛡️ DEFENSIVE: Check if imageMapping is a Map with .get function
               let images = (typeof imageMapping.get === 'function') ? imageMapping.get(questionNum) : null;
 
-              // 💡 FALLBACK: Page-Level Lock (Page 6 graph lock)
+              // 💡 FALLBACK 1: Question Number Matching from Text if ID is UUID
+              if ((!images || images.length === 0) && q.hasVisualElement) {
+                const textMatch = q.text?.match(/^(?:Question|Q)[\s\.]?(\d+)/i) || q.text?.match(/^(\d+)\s*[\.\)]/);
+                if (textMatch) {
+                    const fallbackNum = parseInt(textMatch[1]);
+                    images = (typeof imageMapping.get === 'function') ? imageMapping.get(fallbackNum) : null;
+                    if (images) console.log(`🎯 [IMAGE FALLBACK] Q${questionNum} matched via text-ID: ${fallbackNum}`);
+                }
+              }
+
+              // 💡 FALLBACK 2: Page-Level Lock (Page 6 graph lock)
               // If spatial mapping failed but AI detected a visual element, 
               // grab ANY images from that specific page.
               if ((!images || images.length === 0) && q.hasVisualElement && (window as any).rawExtractedImages) {
-                const pageImages = ((window as any).rawExtractedImages as any[]).filter(img => img.pageNum === q.page_number);
+                const pageNum = q.page_number || q.pageNumber || (q.visualBoundingBox?.pageNumber);
+                const pageImages = ((window as any).rawExtractedImages as any[]).filter(img => img.pageNum === pageNum);
                 if (pageImages.length > 0) {
-                  console.log(`🎯 [IMAGE FALLBACK] Q${questionNum} Page-Level Lock: Found ${pageImages.length} images on page ${q.page_number}`);
+                  console.log(`🎯 [IMAGE FALLBACK] Q${questionNum} Page-Level Lock: Found ${pageImages.length} images on page ${pageNum}`);
                   images = pageImages;
                 }
               }

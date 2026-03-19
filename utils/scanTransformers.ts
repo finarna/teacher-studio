@@ -41,7 +41,37 @@ export const transformScanToAttempt = (
     questions: AnalyzedQuestion[];
     responses: TestResponse[];
 } => {
-    const questions = scan.analysisData?.questions || [];
+    const isCombined = !!(scan as any).isCombinedPaper || (scan.analysisData?.questions?.length || 0) > 100 || scan.subject === 'Combined';
+    
+    // INFER SUBJECTS/SECTIONS FOR NEET COMBINED PAPERS
+    const rawQuestions = scan.analysisData?.questions || [];
+    const questions: AnalyzedQuestion[] = rawQuestions.map((q: any, idx: number) => {
+        let inferredSubject = q.subject || scan.subject;
+        let inferredSection = q.section || 'Section A';
+        const qOrder = Number(q.question_order ?? q.questionOrder ?? idx);
+
+        if (scan.examContext === 'NEET' && isCombined && (!inferredSubject || inferredSubject === 'Combined' || inferredSubject === 'Biology')) {
+            if (qOrder < 50) {
+                inferredSubject = 'Physics';
+                inferredSection = qOrder < 35 ? 'Section A' : 'Section B';
+            } else if (qOrder >= 50 && qOrder < 100) {
+                inferredSubject = 'Chemistry';
+                inferredSection = (qOrder - 50) < 35 ? 'Section A' : 'Section B';
+            } else if (qOrder >= 100 && qOrder < 150) {
+                inferredSubject = 'Botany';
+                inferredSection = (qOrder - 100) < 35 ? 'Section A' : 'Section B';
+            } else if (qOrder >= 150) {
+                inferredSubject = 'Zoology';
+                inferredSection = (qOrder - 150) < 35 ? 'Section A' : 'Section B';
+            }
+        }
+
+        return {
+            ...q,
+            subject: inferredSubject,
+            section: inferredSection
+        };
+    });
 
     // Calculate paper insights
     const totalMarks = questions.reduce((sum: number, q: any) => sum + (Number(q.marks) || 1), 0);
@@ -95,10 +125,10 @@ export const transformScanToAttempt = (
             bloomsDistribution,
             topDomains
         },
-        aiReport: scan.analysisData?.ai_report ? {
+        aiReport: (scan.analysisData?.ai_report && !((scan as any).isCombinedPaper && scan.subject !== 'Combined')) ? {
             ...scan.analysisData.ai_report,
             isBlueprint: true
-        } : {
+        } : (scan.analysisData?.summary ? {
             verdict: scan.analysisData?.summary || "Official paper analysis for " + scan.name,
             strengths: (scan.analysisData?.trends || []).map((t: any) => ({
                 title: t.title,
@@ -112,7 +142,7 @@ export const transformScanToAttempt = (
                 ? scan.analysisData.strategy.join('\n')
                 : (scan.analysisData?.strategy || "No strategy defined for this paper."),
             isBlueprint: true
-        },
+        } : null), // Return null if nothing meaningful to show, forcing re-fetch in PerformanceAnalysis
         createdAt: new Date(scan.timestamp)
     };
 

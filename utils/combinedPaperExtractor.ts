@@ -161,6 +161,7 @@ export async function extractCombinedPaper(
 
             return {
                 id: qNum.toString(),
+                question_number: qNum.toString(),
                 subject: subj,
                 section: section,
                 text: q.text || '',
@@ -172,7 +173,7 @@ export async function extractCombinedPaper(
                 blooms: q.blooms || 'Understand',
                 hasVisualElement: !!q.hasVisualElement,
                 visualBoundingBox: q.visualBoundingBox || null
-            } as AnalyzedQuestion;
+            } as any;
         });
     } catch (error) {
         console.error("❌ [MEGA-SCAN] Critical Error:", error);

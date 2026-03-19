@@ -31,7 +31,7 @@ echo "========================================" >> $FRONTEND_LOG
 echo "  Frontend started at $(TS)" >> $FRONTEND_LOG
 echo "========================================" >> $FRONTEND_LOG
 
-cd /home/mgm/teacher-studio
+cd "$(dirname "$0")"
 
 # Start backend (tsx server)
 nohup bash -c "PORT=$BACKEND_PORT npx tsx server-supabase.js 2>&1 | while IFS= read -r line; do echo \"\$(date '+%H:%M:%S') \$line\" | tee -a $COMBINED_LOG; done" > $BACKEND_LOG 2>&1 &

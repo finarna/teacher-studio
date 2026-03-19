@@ -1,6 +1,7 @@
 import { getGeminiClient, withGeminiRetry } from '../utils/geminiClient';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AI_CONFIG } from '../config/aiConfigs';
+import { safeAiParse } from '../utils/aiParser';
 
 /**
  * INTELLIGENCE SYNTHESIS ENGINE
@@ -111,19 +112,15 @@ CRITICAL:
                 temperature: 0.1
             }
         }));
-        let text = (result.text || "{}").trim();
-
-        // Clean up potential markdown formatting
-        if (text.startsWith('```json')) {
-            text = text.replace(/```json\s*/, '').replace(/```\s*$/, '');
-        } else if (text.startsWith('```')) {
-            text = text.replace(/```\s*/, '').replace(/```\s*$/, '');
+        
+        const text = (result.text || "{}").trim();
+        const cleaned = text.replace(/```json|```/g, '').trim();
+        const synthesis = safeAiParse<SynthesisResult>(cleaned, {} as any);
+        
+        if (!synthesis || !synthesis.solutionSteps) {
+            console.error('❌ [SynthesisEngine] Failed to parse AI response as valid synthesis JSON');
+            return null;
         }
-
-        // Pre-parse sanitation for LaTeX backslashes
-        // Fix cases where AI uses single backslash for LaTeX in JSON (invalid)
-        const sanitizedText = text.replace(/(?<!\\)\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})/g, '\\\\');
-        const synthesis: SynthesisResult = JSON.parse(sanitizedText);
 
         // Sanitize difficulty for DB constraint
         let finalDifficulty: 'Easy' | 'Moderate' | 'Hard' = 'Moderate';
@@ -244,21 +241,33 @@ export async function synthesizeScanIntelligence(
 
         let successCount = 0;
         for (const q of questions) {
-            const topicName = q.topic || 'General';
-            const result = await synthesizeQuestionIntelligence(
-                q,
-                topicName,
-                scan.subject,
-                scan.exam_context,
-                supabase,
-                apiKey,
-                modelName
-            );
+            try {
+                const topicName = q.topic || 'General';
+                const result = await synthesizeQuestionIntelligence(
+                    q,
+                    topicName,
+                    scan.subject,
+                    scan.exam_context,
+                    supabase,
+                    apiKey,
+                    modelName
+                );
 
-            if (result) successCount++;
+                if (result) successCount++;
 
-            // Artificial delay to prevent rate limiting (Gemini free tier has low RPM)
-            await new Promise(r => setTimeout(r, 1000));
+                // Artificial delay to prevent rate limiting
+                await new Promise(r => setTimeout(r, 1000));
+            } catch (innerError: any) {
+                const errorText = innerError?.message?.toLowerCase() || "";
+                console.error(`❌ [SynthesisEngine] Question loop error: ${innerError.message}`);
+                
+                // CRITICAL: Stop the entire scan synthesis if the key is expired
+                if (errorText.includes("expired") || errorText.includes("401") || errorText.includes("invalid_argument")) {
+                    console.error('⛔ [SynthesisEngine] FATAL: API Key is invalid or expired. ABORTING SCAN SYNTHESIS.');
+                    break; 
+                }
+                // Otherwise continue to next question
+            }
         }
 
         console.log(`✅ [SynthesisEngine] Scan synthesis complete. Success: ${successCount}/${questions.length}`);

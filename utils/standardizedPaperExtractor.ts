@@ -65,6 +65,24 @@ const getSubjectInstructions = (subject: string): string => {
 };
 
 /**
+ * Renders a specific PDF page as a high-resolution base64 image string 
+ * for isolated AI processing (prevents "multi-page noise").
+ */
+async function renderPdfPageAsBase64(pdf: any, pageNumber: number): Promise<string> {
+  const page = await pdf.getPage(pageNumber);
+
+  const viewport = page.getViewport({ scale: 4.0 }); // High-res for accuracy
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d')!;
+  canvas.height = viewport.height;
+  canvas.width = viewport.width;
+
+  await page.render({ canvasContext: context, viewport }).promise;
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+  return dataUrl.split(',')[1];
+}
+
+/**
  * Main Universal Extraction Logic
  */
 export async function extractPaperStandardized(
@@ -79,18 +97,19 @@ export async function extractPaperStandardized(
 
   const ai = getGeminiClient(apiKey);
   const fileBuffer = await file.arrayBuffer();
-  
+
   // 📄 Phase 1: Detect Page Count for Parallel Chunking
   let totalPages = 1;
+  let pdfInstance: any;
   try {
-    const pdf = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
-    totalPages = pdf.numPages;
+    const loadingTask = pdfjsLib.getDocument({ data: fileBuffer });
+    pdfInstance = await loadingTask.promise;
+    totalPages = pdfInstance.numPages;
     console.log(`📄 [UNIVERSAL_SCAN] PDF detected with ${totalPages} pages.`);
   } catch (err) {
     console.warn('⚠️ [UNIVERSAL_SCAN] Failed to detect page count, falling back to sequential.', err);
   }
 
-  const base64 = await fileToBase64(file);
   const isNeetBio = examContext.toUpperCase().includes('NEET') && subject.toLowerCase() === 'biology';
   const expectedCount = isNeetBio ? 90 : (examContext.toUpperCase().includes('KCET') ? 60 : 50);
 
@@ -98,23 +117,22 @@ export async function extractPaperStandardized(
   onProgress?.(0, expectedCount, 0);
 
   const subjectHint = getSubjectInstructions(subject);
-  
+
   // ⚡ Phase 2: Parallel Page-by-Page Processing
   const processPage = async (pageNumber: number) => {
     const pagePrompt = `
 You are a high-speed expert ${subject} digitizer.
-TASK: Extract ALL questions from PAGE ${pageNumber} of this PDF.
+TASK: Extract ALL questions from this IMAGE of PAGE ${pageNumber}.
 
 STRICT COMPLETENESS RULE:
-- You MUST extract EVERY numbered question on this page (usually ~10 questions).
-- DO NOT SKIP ANY. If there are 10 questions, return 10 objects.
-- Ignore headers, footers, and general instructions. Start from the first question number you see.
+- You MUST extract EVERY numbered question visible in this image.
+- DO NOT SKIP ANY. There are usually ~10 questions per page.
 - Format: English text. Wrap ALL math/symbols in $...$.
 
 ${columnLayout === 'double' ? 'STRATEGY: Two-column layout. Scan LEFT column first (top-to-bottom), then RIGHT column.' : 'STRATEGY: Single column layout. Scan top-to-bottom.'}
 
 PROPERTIES:
-- id: number (The question number as printed on the page)
+- id: number (The question number)
 - text: English text. Wrap notation in $...$.
 - pageNumber: ${pageNumber}
 - options: 4 strings.
@@ -131,20 +149,24 @@ ${subjectHint}
 `.trim();
 
     try {
+      // Isolating the page as an image to ensure the AI focus is 100% on this specific page
+      // We pass the already loaded pdfInstance to avoid re-reading and detaching the buffer
+      const pageImageBase64 = await renderPdfPageAsBase64(pdfInstance, pageNumber);
+
       const response = await withGeminiRetry(() => ai.models.generateContent({
-          model: modelName,
-          contents: [{
-              role: "user",
-              parts: [
-                  { inlineData: { mimeType: "application/pdf", data: base64 } },
-                  { text: pagePrompt }
-              ]
-          }],
-          config: {
-              responseMimeType: "application/json",
-              temperature: 0.1,
-              maxOutputTokens: 20480 
-          }
+        model: modelName,
+        contents: [{
+          role: "user",
+          parts: [
+            { inlineData: { mimeType: "image/jpeg", data: pageImageBase64 } },
+            { text: pagePrompt }
+          ]
+        }],
+        config: {
+          responseMimeType: "application/json",
+          temperature: 0.1,
+          maxOutputTokens: 20480
+        }
       }));
 
       const rawText = response.text || "{}";
@@ -162,24 +184,21 @@ ${subjectHint}
     const results = await Promise.all(pagePromises);
     const allQuestions = results.flat();
 
-    // Deduplicate by ID
-    const seenIds = new Map();
-    for (const q of allQuestions) {
-      const qId = q.id?.toString();
-      if (!qId) continue;
-      if (!seenIds.has(qId) || (q.text?.length > seenIds.get(qId).text?.length)) {
-        seenIds.set(qId, q);
-      }
-    }
-    const dedupedQuestions = Array.from(seenIds.values());
-    dedupedQuestions.sort((a, b) => (parseInt(a.id) || 0) - (parseInt(b.id) || 0));
+    // ABSOLUTE MODE: Keep every question extracted (Zero Deduplication)
+    // This ensures we never lose data due to filtering logic.
+    const dedupedQuestions = allQuestions.filter(q => q && q.text && q.text.length > 5);
+    // Sort by extracted page number then by original ID if possible
+    dedupedQuestions.sort((a, b) => {
+      if (a.pageNumber !== b.pageNumber) return (a.pageNumber || 0) - (b.pageNumber || 0);
+      return (parseInt(a.id) || 0) - (parseInt(b.id) || 0);
+    });
 
     onProgress?.(expectedCount, expectedCount, dedupedQuestions.length);
 
     const cleanQuestions = dedupedQuestions.map((q, idx) => {
       const visuals = q.visuals || [];
       if (q.hasVisualElement && visuals.length === 0 && q.box) {
-         visuals.push({ pageNumber: q.pageNumber, box: q.box, type: 'diagram' });
+        visuals.push({ pageNumber: q.pageNumber, box: q.box, type: 'diagram' });
       }
 
       const primaryBox = (visuals.length > 0) ? visuals[0].box : null;
