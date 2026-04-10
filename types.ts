@@ -440,7 +440,7 @@ export interface TopicActivity {
   metadata?: Record<string, any>;
 }
 
-export type TestType = 'topic_quiz' | 'subject_test' | 'full_mock';
+export type TestType = 'topic_quiz' | 'subject_test' | 'full_mock' | 'custom_mock';
 export type TestStatus = 'in_progress' | 'completed' | 'abandoned';
 
 export interface TestAttempt {
@@ -483,6 +483,7 @@ export interface TestAttempt {
     topDomains: { name: string; marks: number }[];
   };
 
+  testConfig?: Record<string, any>;
   createdAt: Date;
   completedAt?: Date;
 }

@@ -182,6 +182,42 @@ async function authenticate(req, res, next) {
   }
 }
 
+// Admin Check Middleware
+async function isAdmin(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: 'Auth required' });
+  
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('role')
+    .eq('id', req.user.id)
+    .single();
+
+  if (profile?.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: Admin only' });
+  }
+  next();
+}
+
+// =====================================================
+// ADMIN ROUTES
+// =====================================================
+app.post('/api/admin/create-user', authenticate, isAdmin, async (req, res) => {
+  try {
+    const { email, password, full_name, role, plan_id, status, validity_date, invite } = req.body;
+    
+    // Call the helper in lib/supabaseServer.ts
+    const { adminCreateUser } = await import('./lib/supabaseServer.js');
+    const { data, error } = await adminCreateUser({
+      email, password, full_name, role, plan_id, status, validity_date, invite
+    });
+
+    if (error) throw error;
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Apply auth middleware to all /api/* routes
 app.use('/api', authenticate);
 
@@ -2202,7 +2238,7 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
     // ── DEBUG STEP 2: Filter by custom_mock only ──
     let query = supabaseAdmin
       .from('test_attempts')
-      .select('id, test_name, subject, exam_context, percentage, raw_score, marks_obtained, marks_total, total_questions, questions_attempted, status, created_at, completed_at, duration_minutes, total_duration, topic_analysis, time_analysis')
+      .select('id, test_name, test_type, subject, exam_context, percentage, raw_score, marks_obtained, marks_total, total_questions, questions_attempted, status, created_at, completed_at, duration_minutes, total_duration, topic_analysis, time_analysis, test_config')
       .eq('user_id', userId)
       .eq('test_type', 'custom_mock')
       .eq('status', 'completed')   // ← only show properly submitted tests
@@ -2232,6 +2268,7 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
 
     const mappedAttempts = (attempts || []).map(a => ({
       id: a.id,
+      testType: a.test_type,
       testName: a.test_name,
       subject: a.subject,
       examContext: a.exam_context,
@@ -2248,6 +2285,7 @@ app.get('/api/learning-journey/mock-history', async (req, res) => {
       totalDuration: a.total_duration,
       topicAnalysis: a.topic_analysis,
       timeAnalysis: a.time_analysis,
+      testConfig: a.test_config,
     }));
 
     console.log('[mock-history] STEP3 — sending', mappedAttempts.length, 'attempts to client');

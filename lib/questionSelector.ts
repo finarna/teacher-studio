@@ -243,7 +243,7 @@ export async function selectQuestionsForTest(
     if (selectedQuestions.length < criteria.totalQuestions) {
       const remaining = criteria.totalQuestions - selectedQuestions.length;
       const selectedIds = new Set(selectedQuestions.map(q => q.id));
-      const availableQuestions = allQuestions.filter(q => !selectedIds.has(q.id));
+      const availableQuestions = uniquePool.filter(q => !selectedIds.has(q.id));
 
       selectedQuestions.push(
         ...selectBestQuestions(availableQuestions, remaining)

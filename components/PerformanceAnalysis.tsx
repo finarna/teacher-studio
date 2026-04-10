@@ -11,6 +11,8 @@ import {
   CheckCircle2,
   XCircle,
   Sparkles,
+  ShieldCheck,
+  Shield,
   BarChart3,
   Activity,
   Loader2,
@@ -27,8 +29,11 @@ import {
   FileText,
   Workflow,
   MousePointer2,
-  Table as TableIcon
+  Table as TableIcon,
+  Activity as ActivityIcon,
+  CircleStop
 } from 'lucide-react';
+import { DetailedTestCard } from './ui/DetailedTestCard';
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell
@@ -426,6 +431,36 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
   };
   const performance = getPerformance();
 
+  // ── PREPARE DETAILED PERFORMANCE DATA (Shadcn ScreenTime Pattern) ──
+  const detailedPerformanceData = useMemo(() => {
+    // 1. Time Series Bar Data: Bin questions into 20 segments to show time trend
+    const bucketCount = 20;
+    const bins = new Array(bucketCount).fill(0);
+    if (responses.length > 0) {
+      const qPerBucket = Math.max(1, Math.ceil(responses.length / bucketCount));
+      responses.forEach((r, idx) => {
+        const binIdx = Math.min(bucketCount - 1, Math.floor(idx / qPerBucket));
+        bins[binIdx] += (r.timeSpent || 0);
+      });
+    }
+
+    // 2. Top Topics Performance (List on the right)
+    const sortedTopics = [...topicArray].sort((a, b) => b.accuracy - a.accuracy);
+    const topPerformers = sortedTopics.slice(0, 3).map(t => ({
+      icon: t.accuracy >= 80 ? <ShieldCheck size={14} className="text-emerald-400" /> : <Shield size={14} className="text-indigo-400" />,
+      name: t.topic,
+      duration: `${t.correct}/${t.total} Correct`,
+      accuracy: t.accuracy
+    }));
+
+    return {
+      totalTimeMinutes: Math.floor(totalTime / 60),
+      totalTimeSeconds: totalTime % 60,
+      bins,
+      topPerformers
+    };
+  }, [responses, totalTime, topicArray]);
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -593,6 +628,35 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                     : `${attempt.subject} • ${attempt.examContext} • ${new Date(attempt.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`
                   }
                 </p>
+                {/* Category Badge */}
+                {(attempt.testConfig?.strategyMode || attempt.testType === 'custom_mock') && (
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    {(attempt.testConfig?.strategyMode === 'predictive_mock') && (
+                        <div className="flex items-center gap-1 text-[8px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 uppercase tracking-widest shadow-sm">
+                          <ShieldCheck size={10} />
+                          Real Exam Type
+                        </div>
+                    )}
+                    {(attempt.testConfig?.strategyMode === 'hybrid' || (!attempt.testConfig?.strategyMode && (attempt.testType === 'custom_mock' || !attempt.testType))) && (
+                        <div className="flex items-center gap-1 text-[8px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 uppercase tracking-widest shadow-sm">
+                          <Zap size={10} />
+                          Smart Mix
+                        </div>
+                    )}
+                    {attempt.testConfig?.strategyMode === 'adaptive_growth' && (
+                        <div className="flex items-center gap-1 text-[8px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 uppercase tracking-widest shadow-sm">
+                          <Target size={10} />
+                          Fix Weak Spots
+                        </div>
+                    )}
+                    {attempt.testConfig?.oracleMode?.enabled && (
+                        <div className="flex items-center gap-1 text-[8px] font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100 uppercase tracking-widest shadow-sm">
+                          <Sparkles size={10} />
+                          Peak Simulation
+                        </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -929,6 +993,37 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
               </div>
             )}
 
+            {/* Detailed Analytics Logic (BoardMaster Mastery Dashboard) */}
+            {!isVaultMode && responses.length > 0 && (
+              <div className="mb-6 shrink-0">
+                <DetailedTestCard
+                  title="Session Intelligence"
+                  mainMetric={{
+                    label: "Accuracy",
+                    value: `${percentage}%`,
+                    icon: <Target size={14} className="text-white" />,
+                    color: percentage >= 75 ? "bg-emerald-500 text-emerald-500" : percentage >= 50 ? "bg-indigo-500 text-indigo-500" : "bg-rose-500 text-rose-500"
+                  }}
+                  stats={[
+                    { label: "Questions", value: `${correctAnswers}/${questions.length}`, icon: <ShieldCheck size={14} className="text-indigo-400" />, color: "bg-indigo-400 text-indigo-400" },
+                    { label: "Time Taken", value: formatTime(totalTime), icon: <Clock size={14} className="text-amber-400" />, color: "bg-amber-400 text-amber-400" },
+                    { label: "Avg Speed", value: `${avgTimePerQuestion}s/q`, icon: <Zap size={14} className="text-purple-400" />, color: "bg-purple-400 text-purple-400" }
+                  ]}
+                  history={detailedPerformanceData.bins}
+                  historyLabel="Energy & Confidence Index over test duration"
+                  breakdown={topicArray.slice(0, 4).map(t => ({
+                    label: t.topic,
+                    value: t.accuracy,
+                    icon: <Activity size={12} className="text-white" />,
+                    color: t.accuracy >= 75 ? "bg-emerald-500 text-emerald-500" : t.accuracy >= 50 ? "bg-indigo-500 text-indigo-500" : "bg-rose-500 text-rose-500"
+                  }))}
+                  breakdownLabel="Internal Knowledge Matrix"
+                  observation={aiSummary?.verdict?.split('.')[0] || "Your performance metadata is being indexed for strategic guidance..."}
+                  className="max-w-none shadow-2xl"
+                />
+              </div>
+            )}
+
             {/* AI Mastermind Box */}
             <div className="bg-white border-2 border-slate-100 rounded-3xl p-3.5 md:p-4 shadow-md relative overflow-hidden shrink-0">
               <div className="absolute top-0 right-0 w-96 h-96 bg-primary-500/5 blur-[120px] rounded-full pointer-events-none" />
@@ -947,7 +1042,7 @@ const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
                     </div>
                   </div>
                   <button
-                    onClick={fetchAISummary}
+                    onClick={() => fetchAISummary()}
                     disabled={isLoadingAI}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[10px] font-black text-slate-700 transition-all active:scale-95 shadow-sm"
                   >

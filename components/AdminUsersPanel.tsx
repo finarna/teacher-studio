@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Users, Shield, Zap, Search, Eye, Filter } from 'lucide-react';
+import { Users, Shield, Zap, Search, Eye, Filter, UserPlus, X, Key, Calendar, CreditCard, Loader2 } from 'lucide-react';
 import { useToast } from './ToastNotification';
 import { useAuth } from './AuthProvider';
 
@@ -14,12 +14,57 @@ interface Profile {
 }
 
 export const AdminUsersPanel: React.FC = () => {
+  const { userProfile } = useAuth();
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: '',
+    password: '',
+    full_name: '',
+    role: 'student' as 'student' | 'teacher' | 'admin',
+    plan_id: '9cc415e2-81c8-4f65-8ded-fd13e3e8903e',
+    status: 'active' as any,
+    validity_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    invite: true
+  });
+
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'teacher' | 'student'>('all');
   const { showToast } = useToast();
-  const { userProfile } = useAuth();
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsCreating(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch('/api/admin/create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify(newUser)
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error?.message || 'Provisioning failed');
+
+      showToast(`Identity Provisioned: ${newUser.email}`, 'success');
+      setShowCreateModal(false);
+      setNewUser({
+        email: '', password: '', full_name: '', role: 'student',
+        plan_id: 'trial', status: 'trial', validity_date: '', invite: true
+      });
+      fetchUsers();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   useEffect(() => {
     if (userProfile?.role === 'admin') {
@@ -94,7 +139,14 @@ export const AdminUsersPanel: React.FC = () => {
                className="pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all font-medium"
              />
            </div>
-           <select 
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-all shadow-sm"
+            >
+              <UserPlus size={16} />
+              Provision User
+            </button>
+            <select 
              className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none font-bold text-slate-700"
              value={roleFilter}
              onChange={e => setRoleFilter(e.target.value as any)}
@@ -173,6 +225,96 @@ export const AdminUsersPanel: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+               <h3 className="font-black text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                 <UserPlus size={18} className="text-indigo-600" />
+                 Provision New Identity
+               </h3>
+               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600">
+                 <X size={20} />
+               </button>
+            </div>
+            
+            <form onSubmit={handleCreateUser} className="p-6 overflow-y-auto space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Identity / Email</label>
+                    <input required type="email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="john@doe.com" />
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Display Name</label>
+                    <input required type="text" value={newUser.full_name} onChange={e => setNewUser({...newUser, full_name: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="John Doe" />
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 border-t border-slate-50 pt-4">
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Clearance Role</label>
+                    <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value as any})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold">
+                       <option value="student">Student</option>
+                       <option value="teacher">Teacher</option>
+                       <option value="admin">Admin</option>
+                    </select>
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Service Plan</label>
+                    <select value={newUser.plan_id} onChange={e => setNewUser({...newUser, plan_id: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold">
+                       <option value="9cc415e2-81c8-4f65-8ded-fd13e3e8903e">Free (Direct Access)</option>
+                       <option value="ad70663e-00b0-4af8-aa0d-1e0f70c2fa67">KCET+PUC Aspirant</option>
+                       <option value="128d9ff9-d918-4c7c-a653-1a3fdc614386">NEET Achiever</option>
+                       <option value="182781e2-fc19-4ffe-aea7-3d132a6484da">JEE Champion</option>
+                       <option value="36f6f079-859e-409a-b7c2-92bdd82746da">Ultimate Scholar</option>
+                    </select>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Subscription Status</label>
+                    <select value={newUser.status} onChange={e => setNewUser({...newUser, status: e.target.value as any})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold">
+                       <option value="active">Active</option>
+                       <option value="trial">Trial</option>
+                       <option value="inactive">Inactive</option>
+                    </select>
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Validity Date (Expiry)</label>
+                    <input type="date" value={newUser.validity_date} onChange={e => setNewUser({...newUser, validity_date: e.target.value})} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold" />
+                 </div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-xl space-y-3">
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                       <input type="checkbox" checked={newUser.invite} onChange={e => setNewUser({...newUser, invite: e.target.checked})} className="w-4 h-4" />
+                       <span className="text-[11px] font-bold text-slate-700">Send Supabase Invitation email</span>
+                    </div>
+                 </div>
+                 {!newUser.invite && (
+                    <div className="space-y-1">
+                       <label className="text-[10px] font-bold text-slate-400 uppercase">Manual Node Password</label>
+                       <div className="relative">
+                          <input type="text" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold" placeholder="Leave blank for random" />
+                          <Key size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300" />
+                       </div>
+                    </div>
+                 )}
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                 <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase">Cancel</button>
+                 <button type="submit" disabled={isCreating} className="flex-[2] py-3 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
+                    {isCreating ? <Loader2 className="animate-spin" size={16} /> : 'Create/Onboard Identity'}
+                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

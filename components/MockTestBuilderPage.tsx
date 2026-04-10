@@ -1,4 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+/** 
+ * Utility for combining Tailwind classes
+ */
+function cn(...classes: (string | undefined | null | boolean)[]) {
+  return classes.filter(Boolean).join(' ');
+}
 import {
   ChevronLeft,
   ChevronRight,
@@ -53,9 +59,12 @@ import {
   Database,
   Compass,
   Hash,
-  MinusCircle
+  MinusCircle,
+  BarChart3,
+  Waves
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DetailedTestCard } from './ui/DetailedTestCard';
 import ComplexityMatrix from './ComplexityMatrix';
 import type { Subject, ExamContext, TopicResource, TestAttempt, AnalyzedQuestion } from '../types';
 import { supabase } from '../lib/supabase';
@@ -113,6 +122,7 @@ interface TopicAnalysisEntry {
 
 interface PastTestAttempt {
   id: string;
+  testType: string;
   testName: string;
   subject: string;
   examContext: string;
@@ -129,6 +139,11 @@ interface PastTestAttempt {
   totalDuration: number | null;
   topicAnalysis: TopicAnalysisEntry[] | null;
   timeAnalysis: Record<string, number> | null;
+  testConfig: {
+    strategyMode?: StrategyMode;
+    oracleMode?: any;
+    [key: string]: any;
+  } | null;
 }
 
 // REI v3.0 UI THEME MAPPINGS
@@ -690,6 +705,70 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
         return dateB - dateA;
       });
   }, [testHistory]);
+
+  const aggregateAnalysis = React.useMemo(() => {
+    if (testHistory.length === 0) return { 
+      scoreHistory: Array(20).fill(0), 
+      questionsSolved: 0, 
+      accuracyTrend: 0,
+      dailyStreak: 0,
+      subjectBreakdown: [] 
+    };
+    
+    // 1. Score History (Percentage trend across last 20 tests)
+    const scoreHistory = Array(20).fill(0);
+    const recentTests = [...testHistory]
+      .filter(t => t.percentage != null)
+      .sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime())
+      .slice(-20);
+    recentTests.forEach((t, i) => {
+      scoreHistory[i] = t.percentage || 0;
+    });
+
+    // 2. Metrics
+    const questionsSolved = testHistory.reduce((s, t) => s + (t.questionsAttempted || 0), 0);
+    
+    // Trend: Avg of last 3 vs total avg (using sorted history for recency)
+    const totalAvg = completed.length > 0 ? (completed.reduce((s, t) => s + (t.percentage || 0), 0) / completed.length) : 0;
+    const last3Avg = sortedHistory.length >= 3 ? (sortedHistory.slice(0, 3).reduce((s, t) => s + (t.percentage || 0), 0) / 3) : totalAvg;
+    const accuracyTrend = Math.round(last3Avg - totalAvg);
+
+    // Streak
+    const completionDates = [...new Set(testHistory
+      .filter(t => t.completedAt)
+      .map(t => new Date(t.completedAt!).toDateString())
+    )];
+    const dailyStreak = completionDates.length; // Simplified streak calculation
+
+    // 3. Subject Breakdown
+    const subMap: Record<string, { total: number; count: number }> = {};
+    testHistory.forEach(t => {
+      if (t.subject && t.percentage != null) {
+        if (!subMap[t.subject]) subMap[t.subject] = { total: 0, count: 0 };
+        subMap[t.subject].total += t.percentage;
+        subMap[t.subject].count += 1;
+      }
+    });
+
+    const subjectBreakdown = Object.entries(subMap).map(([subject, stats]) => ({
+      subject,
+      accuracy: Math.round(stats.total / stats.count),
+      icon: <Activity size={14} className="text-white" />,
+      color: subject === 'Biology' ? 'bg-emerald-500 text-emerald-500' :
+             subject === 'Mathematics' ? 'bg-indigo-500 text-indigo-500' :
+             subject === 'Physics' ? 'bg-rose-500 text-rose-500' :
+             'bg-amber-500 text-amber-500'
+    }));
+
+    return { 
+      scoreHistory, 
+      questionsSolved, 
+      accuracyTrend, 
+      dailyStreak, 
+      subjectBreakdown 
+    };
+  }, [testHistory, completed, sortedHistory]);
+
 
   return (
     <div className="min-h-screen bg-[#fafbfc] font-inter pb-20 relative overflow-hidden">
@@ -1351,35 +1430,42 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
               <div className="container mx-auto max-w-7xl px-4">
                 <div className="space-y-10">
                   {/* Global Analytics Dashboard */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[
-                      { label: 'Tests Completed', value: completed.length, icon: <CheckCircle2 size={28} />, color: 'emerald' },
-                      { label: 'Average Score', value: avgScore === null ? '...' : `${avgScore}%`, icon: <Activity size={28} />, color: 'indigo' },
-                      { label: 'Best Performance', value: bestScore === null ? '...' : `${bestScore}%`, icon: <Trophy size={28} />, color: 'amber' }
-                    ].map((stat, idx) => (
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        key={stat.label}
-                        className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex items-center gap-6 group hover:shadow-xl transition-shadow"
-                      >
-                        <div className={`w-16 h-16 rounded-2xl bg-${stat.color}-50 flex items-center justify-center text-${stat.color}-600 shadow-inner`}>
-                          {stat.icon}
-                        </div>
-                        <div>
-                          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">{stat.label}</span>
-                          <span className="text-3xl font-bold text-slate-900 font-outfit">{stat.value}</span>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
+
+                  {/* Performance Analytics Detail Card (Design by 21st.dev) */}
+                  {testHistory.length > 0 && (
+                    <DetailedTestCard
+                      title="Global Mock Mastery"
+                      mainMetric={{
+                        label: "Avg Accuracy",
+                        value: `${avgScore || 0}%`,
+                        trend: aggregateAnalysis.accuracyTrend,
+                        icon: <Target size={14} className="text-emerald-400" />,
+                        color: "bg-emerald-400 text-emerald-400"
+                      }}
+                      stats={[
+                        { label: "Tests taken", value: completed.length, icon: <Trophy size={14} className="text-purple-400" />, color: "bg-purple-400 text-purple-400" },
+                        { label: "Solved", value: aggregateAnalysis.questionsSolved.toLocaleString(), icon: <ShieldCheck size={14} className="text-indigo-400" />, color: "bg-indigo-400 text-indigo-400" },
+                        { label: "Streak", value: `${aggregateAnalysis.dailyStreak} Days`, icon: <Zap size={14} className="text-amber-400" />, color: "bg-amber-400 text-amber-400" }
+                      ]}
+                      history={aggregateAnalysis.scoreHistory}
+                      historyLabel="Score trajectory (Last 20 Tests)"
+                      breakdown={aggregateAnalysis.subjectBreakdown.map(s => ({
+                         label: s.subject,
+                         value: s.accuracy,
+                         icon: s.icon,
+                         color: s.color
+                      }))}
+                      breakdownLabel="Subject Mastery Deck"
+                      observation={avgScore && avgScore >= 75 ? "Your global mock performance is in the elite bracket. Focus on maintaining consistency in your weakest subject." : "Growth identified. Increasing your mock frequency will sharpen your response speed significantly."}
+                      className="max-w-none mb-6"
+                    />
+                  )}
 
                   {/* Historical Records Section */}
                   <div className="space-y-6">
                     <div className="flex items-center justify-between px-2">
                       <h3 className="text-2xl font-bold text-slate-900 font-outfit">Detailed History</h3>
-                      <span className="px-4 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-slate-500 uppercase tracking-widest border border-slate-200">{testHistory.length} Records Found</span>
+                      <span className="px-4 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-slate-500 uppercase tracking-widest border border-slate-200">{testHistory.length} {testHistory.length === 1 ? 'Record' : 'Records'} Found</span>
                     </div>
 
                     {isLoadingHistory ? (
@@ -1388,59 +1474,113 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                         <span className="text-sm font-bold text-slate-400">Finding Your Past Results...</span>
                       </div>
                     ) : sortedHistory.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 gap-2.5">
                         {sortedHistory.map((attempt) => {
                           const isCompleted = attempt.status === 'completed';
                           const pct = attempt.percentage ?? 0;
-                          const scoreColor = pct >= 80 ? 'emerald' : pct >= 50 ? 'amber' : 'rose';
+                          const scoreLevel = pct >= 80 ? 'elite' : pct >= 50 ? 'solid' : 'critical';
+                          const colorMap = {
+                            elite: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+                            solid: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+                            critical: 'text-rose-600 bg-rose-50 border-rose-100'
+                          }[scoreLevel];
+
+                          // Calculated Stats
+                          const correctCount = Math.round((pct / 100) * attempt.totalQuestions);
+                          const attemptedCount = attempt.questionsAttempted || 0;
+                          const incorrectCount = Math.max(0, attemptedCount - correctCount);
+                          const skippedCount = Math.max(0, attempt.totalQuestions - attemptedCount);
 
                           return (
                             <motion.button
-                              whileHover={{ y: -4 }}
-                              whileTap={{ scale: 0.98 }}
+                              whileHover={{ x: 4, backgroundColor: '#fdfdff' }}
+                              whileTap={{ scale: 0.995 }}
                               key={attempt.id}
                               onClick={() => isCompleted && onViewTestResults(attempt.id)}
                               disabled={!isCompleted}
-                              className={`group p-6 rounded-[2rem] border transition-all text-left flex flex-col gap-6 ${isCompleted ? 'bg-white border-slate-100 hover:border-indigo-600 shadow-sm hover:shadow-xl' : 'bg-slate-50 border-transparent opacity-60'}`}
+                              className={cn(
+                                "group p-3 md:p-4 rounded-2xl border transition-all text-left flex items-center gap-4",
+                                isCompleted ? "bg-white border-slate-100 shadow-sm hover:shadow-md" : "bg-slate-50 border-transparent opacity-60"
+                              )}
                             >
-                              <div className="flex items-start justify-between w-full">
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <span className="px-2 py-1 bg-indigo-50 border border-indigo-100 rounded text-[10px] font-bold text-indigo-600 uppercase tracking-widest">{attempt.examContext || 'MOCK'}</span>
-                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{attempt.subject}</span>
-                                  </div>
-                                  <h4 className="text-lg font-bold text-slate-900 leading-tight line-clamp-2">{attempt.testName}</h4>
-                                </div>
+                              {/* Performance Score Box */}
+                              <div className={cn(
+                                "w-12 h-12 md:w-14 md:h-14 rounded-xl border flex flex-col items-center justify-center shrink-0 transition-transform group-hover:scale-105",
+                                colorMap
+                              )}>
                                 {isCompleted ? (
-                                  <div className={`text-3xl font-bold font-mono text-${scoreColor}-600`}>{Math.round(pct)}%</div>
+                                  <>
+                                    <span className="text-base md:text-lg font-black font-outfit leading-none">{Math.round(pct)}%</span>
+                                    <span className="text-[6.5px] md:text-[7.5px] font-black uppercase tracking-widest mt-0.5 opacity-80">{scoreLevel}</span>
+                                  </>
                                 ) : (
-                                  <div className="flex items-center gap-3 text-xs font-bold text-amber-500 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100 animate-pulse">
-                                    <Loader2 size={14} className="animate-spin" />
-                                    PREPARING
-                                  </div>
+                                   <Loader2 size={16} className="animate-spin text-amber-500" />
                                 )}
                               </div>
 
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl">
-                                  <Clock size={14} className="text-slate-400" />
-                                  <span className="text-xs font-bold text-slate-600">{attempt.durationMinutes}m</span>
+                              {/* Core Info */}
+                              <div className="flex-[1.5] min-w-0 flex flex-col gap-0.5 md:gap-1">
+                                <div className="flex items-center gap-2">
+                                   <span className="px-1.5 py-0.5 bg-slate-100 rounded text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest border border-slate-200">{attempt.examContext || 'MOCK'}</span>
+                                   <span className="text-[9px] md:text-[10px] font-black text-indigo-500 uppercase tracking-widest truncate">{attempt.subject}</span>
                                 </div>
-                                <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl">
-                                  <Target size={14} className="text-slate-400" />
-                                  <span className="text-xs font-bold text-slate-600">{attempt.totalQuestions} Questions</span>
+                                <h4 className="text-sm md:text-base font-black text-slate-900 truncate pr-4">{attempt.testName}</h4>
+                                <div className="flex items-center gap-3 mt-0.5">
+                                   <div className="flex items-center gap-1">
+                                      <Clock size={10} className="text-slate-400" />
+                                      <span className="text-[10px] font-bold text-slate-500">{attempt.durationMinutes}m</span>
+                                   </div>
+                                   <div className="flex items-center gap-1">
+                                      <Target size={10} className="text-slate-400" />
+                                      <span className="text-[10px] font-bold text-slate-500">{attempt.totalQuestions} Qs</span>
+                                   </div>
                                 </div>
                               </div>
 
-                              <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
-                                <div className="flex flex-col">
-                                  <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Completed On</span>
-                                  <span className="text-xs font-bold text-slate-500">{attempt.completedAt ? new Date(attempt.completedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Processing...'}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm group-hover:translate-x-1 transition-transform">
-                                  View Report
-                                  <ArrowRight size={16} />
-                                </div>
+                              {/* Stats Center (Fills the gap) */}
+                              <div className="hidden lg:flex flex-1 flex-col items-center justify-center gap-2 px-8 border-x border-slate-50">
+                                 <div className="flex items-center gap-4">
+                                    <div className="flex flex-col items-center">
+                                       <span className="text-[7px] font-black text-emerald-500 uppercase tracking-widest">Correct</span>
+                                       <span className="text-xs font-black text-slate-900">{correctCount}</span>
+                                    </div>
+                                    <div className="w-px h-6 bg-slate-100" />
+                                    <div className="flex flex-col items-center">
+                                       <span className="text-[7px] font-black text-rose-500 uppercase tracking-widest">Wrong</span>
+                                       <span className="text-xs font-black text-slate-900">{incorrectCount}</span>
+                                    </div>
+                                    <div className="w-px h-6 bg-slate-100" />
+                                    <div className="flex flex-col items-center">
+                                       <span className="text-[7px] font-black text-slate-300 uppercase tracking-widest">Skipped</span>
+                                       <span className="text-xs font-black text-slate-900">{skippedCount}</span>
+                                    </div>
+                                 </div>
+                                 {/* Mini Accuracy Bar */}
+                                 <div className="w-full max-w-[120px] h-1 bg-slate-100 rounded-full overflow-hidden flex">
+                                    <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${(correctCount / attempt.totalQuestions) * 100 || 0}%` }} />
+                                    <div className="h-full bg-rose-400 transition-all duration-1000" style={{ width: `${(incorrectCount / attempt.totalQuestions) * 100 || 0}%` }} />
+                                 </div>
+                              </div>
+
+                              {/* Strategy Pill (Visible on md+) */}
+                              <div className="hidden md:flex flex-col items-end gap-1 px-4 min-w-[120px]">
+                                 <span className="text-[7px] font-black text-slate-300 uppercase tracking-widest">Intelligence Mode</span>
+                                 <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg border border-slate-100 text-[8px] font-black uppercase tracking-wider text-indigo-500 italic">
+                                    {attempt.testConfig?.strategyMode === 'predictive_mock' && <><ShieldCheck size={10} className="text-rose-500/70" /> Real Exam</>}
+                                    {(attempt.testConfig?.strategyMode === 'hybrid' || (!attempt.testConfig?.strategyMode && (attempt.testType === 'custom_mock' || !attempt.testType))) && <><Zap size={10} className="text-indigo-500/70" /> Smart Mix</>}
+                                    {attempt.testConfig?.strategyMode === 'adaptive_growth' && <><Target size={10} className="text-amber-500/70" /> Weak Spots</>}
+                                 </div>
+                              </div>
+
+                              {/* Recorded Date */}
+                              <div className="hidden sm:flex flex-col items-end gap-0.5 shrink-0 px-4 border-l border-slate-100">
+                                 <span className="text-[7px] font-black text-slate-300 uppercase tracking-widest">Recorded</span>
+                                 <span className="text-[10px] font-bold text-slate-500">{attempt.completedAt ? new Date(attempt.completedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '...'}</span>
+                              </div>
+
+                              {/* Arrow Action */}
+                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 group-hover:bg-indigo-600 group-hover:text-white transition-all shrink-0">
+                                 <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                               </div>
                             </motion.button>
                           );

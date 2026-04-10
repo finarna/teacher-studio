@@ -43,6 +43,7 @@ interface TestInterfaceProps {
 interface QuestionResponse {
   questionId: string;
   selectedOption?: number;
+  isCorrect?: boolean;
   markedForReview: boolean;
   timeSpent: number;
 }
@@ -68,6 +69,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
         map.set(resp.questionId, {
           questionId: resp.questionId,
           selectedOption: resp.selectedOption,
+          isCorrect: resp.isCorrect,
           markedForReview: resp.markedForReview,
           timeSpent: resp.timeSpent || 0
         });
@@ -288,12 +290,12 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   // Review mode stats
   const correctCount = isReviewMode ? questions.filter(q => {
     const r = responses.get(q.id);
-    return r?.selectedOption !== undefined && r.selectedOption === q.correctOptionIndex;
+    return r?.isCorrect === true;
   }).length : 0;
 
   const incorrectCount = isReviewMode ? questions.filter(q => {
     const r = responses.get(q.id);
-    return r?.selectedOption !== undefined && r.selectedOption !== q.correctOptionIndex;
+    return r?.isCorrect === false && r?.selectedOption !== undefined;
   }).length : 0;
 
   const skippedCount = isReviewMode ? questions.filter(q => {
@@ -344,7 +346,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
       if (!question) return 'unattempted';
 
       if (response?.selectedOption === undefined) return 'skipped';
-      return response.selectedOption === question.correctOptionIndex ? 'correct' : 'incorrect';
+      return response.isCorrect ? 'correct' : 'incorrect';
     }
 
     // Take mode: show answered/marked/unattempted (combines not-answered and not-visited)
@@ -623,8 +625,9 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                       {opts.length > 0 && (
                         <div className="grid grid-cols-1 gap-3 mb-6">
                           {opts.map((option, idx) => {
-                            const isSelected = responses.get(currentQuestion.id)?.selectedOption === idx;
-                            const isCorrect = currentQuestion.correctOptionIndex === idx;
+                            const resp = responses.get(currentQuestion.id);
+                            const isSelected = resp?.selectedOption === idx;
+                            const isCorrect = (resp?.isCorrect === true && isSelected) || (currentQuestion.correctOptionIndex === idx);
                             const optionLabel = String.fromCharCode(65 + idx);
                             const optImg: string | undefined = optionImgs[idx];
 
@@ -822,12 +825,15 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                       <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-50/40 blur-[120px] rounded-full pointer-events-none" />
 
                       {/* Solution Steps - High-Contrast Timeline */}
-                      {currentQuestion.solutionSteps && currentQuestion.solutionSteps.length > 0 && (
+                      {(() => {
+                        const steps = currentQuestion.solutionSteps || (currentQuestion as any).solution_steps || [];
+                        if (!steps || steps.length === 0) return null;
+                        return (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
                           <div className="space-y-1 sm:space-y-1.5">
-                            {currentQuestion.solutionSteps.map((step: any, idx: number) => (
+                            {steps.map((step: any, idx: number) => (
                               <div key={idx} className="group flex gap-3 sm:gap-4 relative">
-                                {idx < currentQuestion.solutionSteps.length - 1 && (
+                                {idx < steps.length - 1 && (
                                   <div className="absolute top-9 sm:top-10 bottom-[-4px] sm:bottom-[-6px] left-[16px] sm:left-[20px] w-[2px] bg-gradient-to-b from-slate-100 via-white/0 to-transparent group-hover:from-indigo-200 transition-all duration-500" />
                                 )}
                                 <div className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-[0.85rem] sm:rounded-[1rem] bg-white border-2 border-slate-100 flex items-center justify-center text-xs font-black text-slate-900 shadow-sm group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-800 transition-all duration-500">
@@ -847,12 +853,23 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                             ))}
                           </div>
                         </div>
-                      )}
+                        );
+                      })()}
 
                       {/* AI Intelligence Matrix - Enhanced Mastery Material */}
-                      {currentQuestion.masteryMaterial && (
+                      {(() => {
+                        let mastery = currentQuestion.masteryMaterial || (currentQuestion as any).mastery_material;
+                        if (typeof mastery === 'string') {
+                          try {
+                            mastery = JSON.parse(mastery);
+                          } catch (e) {
+                            mastery = null;
+                          }
+                        }
+                        if (!mastery) return null;
+                        return (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8 pt-8 border-t border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                          {currentQuestion.masteryMaterial.coreConcept && (
+                          {(mastery.coreConcept || mastery.core_concept) && (
                             <div className="relative p-5 sm:p-6 rounded-[1.75rem] bg-gradient-to-br from-emerald-50/50 to-white border border-emerald-100/50 group overflow-hidden">
                               <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
                                 <Target size={60} />
@@ -865,11 +882,11 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                               </div>
                               <div className="text-[15px] font-black text-emerald-950 mb-1.5 font-outfit">The Teacher's Insight</div>
                               <div className="text-[13px] text-emerald-900/70 leading-relaxed font-instrument font-medium">
-                                <RenderWithMath text={currentQuestion.masteryMaterial.coreConcept} showOptions={false} />
+                                <RenderWithMath text={mastery.coreConcept || mastery.core_concept} showOptions={false} />
                               </div>
                             </div>
                           )}
-                          {currentQuestion.masteryMaterial.logic && (
+                          {(mastery.logic || mastery.ai_reasoning || mastery.aiReasoning) && (
                             <div className="relative p-5 sm:p-6 rounded-[1.75rem] bg-gradient-to-br from-indigo-50/50 to-white border border-indigo-100/50 group overflow-hidden">
                               <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
                                 <Zap size={60} />
@@ -882,65 +899,73 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                               </div>
                               <div className="text-[15px] font-black text-indigo-950 mb-1.5 font-outfit">Coach's Thinking Flow</div>
                               <div className="text-[13px] text-indigo-900/70 leading-relaxed font-instrument font-medium">
-                                <RenderWithMath text={currentQuestion.masteryMaterial.logic} showOptions={false} />
+                                <RenderWithMath text={mastery.logic || mastery.ai_reasoning || mastery.aiReasoning} showOptions={false} />
                               </div>
                             </div>
                           )}
                         </div>
-                      )}
+                        );
+                      })()}
 
                       {/* Tactical Insights Hub - Balanced Sizing */}
-                      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 pb-12">
-                        {currentQuestion.examTip && (
-                          <div className="relative p-3.5 bg-gradient-to-br from-amber-50 to-white rounded-[1.25rem] border border-amber-200/40 shadow-xl shadow-amber-900/5 overflow-hidden group">
-                            <div className="absolute top-2.5 right-2.5 text-amber-500 opacity-20 group-hover:scale-125 transition-all duration-500">
-                              <Sparkles size={16} />
-                            </div>
-                            <div className="flex items-center gap-2 mb-2 text-amber-900 font-black text-[9px] uppercase tracking-[0.25em]">
-                              <div className="w-5 h-5 bg-amber-100 rounded-lg flex items-center justify-center">
-                                <TrendingUp size={10} className="text-amber-600" />
+                      {(() => {
+                        const tip = currentQuestion.examTip || (currentQuestion as any).exam_tip || currentQuestion.studyTip || (currentQuestion as any).study_tip;
+                        const pitfalls = currentQuestion.pitfalls || [];
+                        if (!tip && pitfalls.length === 0) return null;
+                        return (
+                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 pb-12">
+                          {tip && (
+                            <div className="relative p-3.5 bg-gradient-to-br from-amber-50 to-white rounded-[1.25rem] border border-amber-200/40 shadow-xl shadow-amber-900/5 overflow-hidden group">
+                              <div className="absolute top-2.5 right-2.5 text-amber-500 opacity-20 group-hover:scale-125 transition-all duration-500">
+                                <Sparkles size={16} />
                               </div>
-                              Pro Strategy for Exam Day
-                            </div>
-                            <div className="text-[12px] text-amber-950 font-instrument font-black leading-snug">
-                              <RenderWithMath text={currentQuestion.examTip} showOptions={false} />
-                            </div>
-                          </div>
-                        )}
-
-                        {currentQuestion.pitfalls && currentQuestion.pitfalls.length > 0 && (
-                          <div className="relative p-3.5 bg-gradient-to-br from-rose-50 to-white rounded-[1.25rem] border border-rose-200/40 shadow-xl shadow-rose-900/5 overflow-hidden group">
-                            <div className="flex items-center gap-2 mb-3 text-rose-900 font-black text-[9px] uppercase tracking-[0.25em]">
-                              <div className="w-5 h-5 bg-rose-100 rounded-lg flex items-center justify-center">
-                                <CircleAlert size={10} className="text-rose-600" />
-                              </div>
-                              Common Exam Pitfalls
-                            </div>
-                            <div className="space-y-3">
-                              {currentQuestion.pitfalls.slice(0, 2).map((pitfall: any, idx: number) => (
-                                <div key={idx} className="relative p-2.5 bg-white/50 backdrop-blur-sm rounded-xl border border-rose-100/50 group-hover:bg-white transition-colors duration-500">
-                                  {typeof pitfall === 'string' ? (
-                                    <div className="text-[11px] font-bold text-rose-950 font-instrument">
-                                      <RenderWithMath text={pitfall} showOptions={false} />
-                                    </div>
-                                  ) : (
-                                    <div className="space-y-2">
-                                      <div className="flex gap-2.5">
-                                        <div className="shrink-0 w-4 h-4 bg-rose-500 text-white rounded flex items-center justify-center text-[8px] font-black">X</div>
-                                        <div className="text-[11px] font-black text-rose-950 leading-tight"><RenderWithMath text={pitfall.mistake} /></div>
-                                      </div>
-                                      <div className="pl-6 text-[9px] text-rose-900/60 font-black uppercase tracking-widest flex items-center gap-2">
-                                        <div className="w-3 h-[1px] bg-rose-200" />
-                                        Fix: {pitfall.howToAvoid}
-                                      </div>
-                                    </div>
-                                  )}
+                              <div className="flex items-center gap-2 mb-2 text-amber-900 font-black text-[9px] uppercase tracking-[0.25em]">
+                                <div className="w-5 h-5 bg-amber-100 rounded-lg flex items-center justify-center">
+                                  <TrendingUp size={10} className="text-amber-600" />
                                 </div>
-                              ))}
+                                Pro Strategy for Exam Day
+                              </div>
+                              <div className="text-[12px] text-amber-950 font-instrument font-black leading-snug">
+                                <RenderWithMath text={tip} showOptions={false} />
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </div>
+                          )}
+  
+                          {pitfalls.length > 0 && (
+                            <div className="relative p-3.5 bg-gradient-to-br from-rose-50 to-white rounded-[1.25rem] border border-rose-200/40 shadow-xl shadow-rose-900/5 overflow-hidden group">
+                              <div className="flex items-center gap-2 mb-3 text-rose-900 font-black text-[9px] uppercase tracking-[0.25em]">
+                                <div className="w-5 h-5 bg-rose-100 rounded-lg flex items-center justify-center">
+                                  <CircleAlert size={10} className="text-rose-600" />
+                                </div>
+                                Common Exam Pitfalls
+                              </div>
+                              <div className="space-y-3">
+                                {pitfalls.slice(0, 2).map((pitfall: any, idx: number) => (
+                                  <div key={idx} className="relative p-2.5 bg-white/50 backdrop-blur-sm rounded-xl border border-rose-100/50 group-hover:bg-white transition-colors duration-500">
+                                    {typeof pitfall === 'string' ? (
+                                      <div className="text-[11px] font-bold text-rose-950 font-instrument">
+                                        <RenderWithMath text={pitfall} showOptions={false} />
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-2">
+                                        <div className="flex gap-2.5">
+                                          <div className="shrink-0 w-4 h-4 bg-rose-500 text-white rounded flex items-center justify-center text-[8px] font-black">X</div>
+                                          <div className="text-[11px] font-black text-rose-950 leading-tight"><RenderWithMath text={pitfall.mistake} /></div>
+                                        </div>
+                                        <div className="pl-6 text-[9px] text-rose-900/60 font-black uppercase tracking-widest flex items-center gap-2">
+                                          <div className="w-3 h-[1px] bg-rose-200" />
+                                          Fix: {pitfall.howToAvoid}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

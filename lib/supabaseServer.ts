@@ -499,4 +499,87 @@ export async function checkDatabaseConnection() {
   }
 }
 
+export async function adminCreateUser(userData: {
+  email: string;
+  password?: string;
+  full_name: string;
+  role: 'admin' | 'teacher' | 'student';
+  plan_id?: string;
+  status?: 'active' | 'inactive' | 'trial';
+  validity_date?: string;
+  invite?: boolean;
+}) {
+  const { 
+    email, 
+    password = crypto.randomUUID(), 
+    full_name, 
+    role, 
+    plan_id = 'trial',
+    status = 'trial',
+    validity_date,
+    invite = false
+  } = userData;
+
+  let authUser;
+  let authError;
+
+  if (invite) {
+    const result = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      data: { full_name, role }
+    });
+    authUser = result.data;
+    authError = result.error;
+  } else {
+    const result = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name, role }
+    });
+    authUser = result.data;
+    authError = result.error;
+  }
+
+  if (authError || !authUser.user) {
+    return { error: authError };
+  }
+
+  const userId = authUser.user.id;
+
+  // 1. Update Profile (including validity)
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from('profiles')
+    .upsert({
+      id: userId,
+      email,
+      full_name,
+      role,
+      subscription_status: status as any,
+      subscription_end_date: validity_date || null,
+      updated_at: new Date().toISOString()
+    })
+    .select()
+    .single();
+
+  // 2. Update Subscription Record
+  await supabaseAdmin
+    .from('subscriptions')
+    .upsert({
+      user_id: userId,
+      plan_id,
+      status,
+      current_period_end: validity_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+
+  // 3. Update legacy table
+  await supabaseAdmin
+    .from('users')
+    .upsert({
+      id: userId, email, full_name, role, updated_at: new Date().toISOString()
+    });
+
+  return { data: { user: authUser.user, profile }, error: null };
+}
+
 export default supabaseAdmin;

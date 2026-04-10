@@ -1169,6 +1169,7 @@ export async function getTestResults(req, res) {
       aiReport: attempt.ai_report,
       createdAt: attempt.created_at,
       completedAt: attempt.completed_at,
+      testConfig: attempt.test_config,
     };
 
     // Map responses to frontend format
@@ -2145,6 +2146,8 @@ Return ONLY a valid JSON array:
           difficultyMix,
           questionCount,
           durationMinutes,
+          strategyMode,
+          oracleMode: oracleModeEnabled ? oracleMode : undefined,
           questions: questionsSnapshot // ← snapshot for review fallback
         }
       })
