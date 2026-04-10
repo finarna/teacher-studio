@@ -153,7 +153,7 @@ ${subjectHint}
       // We pass the already loaded pdfInstance to avoid re-reading and detaching the buffer
       const pageImageBase64 = await renderPdfPageAsBase64(pdfInstance, pageNumber);
 
-      const response = await withGeminiRetry(() => ai.models.generateContent({
+      const stream = await withGeminiRetry(() => ai.models.generateContentStream({
         model: modelName,
         contents: [{
           role: "user",
@@ -169,7 +169,11 @@ ${subjectHint}
         }
       }));
 
-      const rawText = response.text || "{}";
+      let rawText = '';
+      for await (const chunk of stream) {
+        rawText += chunk.text || '';
+      }
+      if (!rawText) rawText = '{}';
       const data = safeAiParse<any>(rawText, { questions: [] }, true);
       console.log(`⚡ [PAGE ${pageNumber}] Processed: Extracted ${data.questions?.length || 0} questions.`);
       return data.questions || [];

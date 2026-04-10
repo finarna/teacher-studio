@@ -24,14 +24,16 @@ export async function extractCombinedPaper(
     const base64 = btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''));
     const mimeType = 'application/pdf';
 
+    // Don't hardcode — let the model extract whatever is in the paper
+    // Used only for progress display and post-scan logging
     const expectedCount = examContext === 'NEET' ? 200 : 90;
 
-    onProgress?.(`Extracting ALL ${expectedCount} questions from ${examContext} paper (Mega-Scan active)...`);
+    onProgress?.(`Extracting ALL questions from ${examContext} paper (Mega-Scan active)...`);
 
     // Interactive message rotation for long-running LLM requests
     const messages = [
         `Analyzing ${examContext} paper structure...`,
-        `Extracting ${expectedCount} questions and options...`,
+        `Extracting all questions and options...`,
         `Processing two-column bilingual layout...`,
         `Identifying NTA Section A/B boundaries...`,
         `Detecting figures and visual bounding boxes...`,
@@ -74,6 +76,7 @@ export async function extractCombinedPaper(
       6. DATA INTEGRITY: Extract exactly ${expectedCount} questions. If a question spans across a column or page boundary, merge it into a single clean object.
       7. NOISE REDUCTION: Ignore the paper code (e.g., Q1, A2, etc.) and page footers. Go straight to the numbered questions.
       8. TOPIC PRECISION: Assign the official NCERT Chapter name (e.g., 'Moving Charges and Magnetism') to each question.
+      9. COMPLETENESS MANDATE: You MUST output ALL ${expectedCount} questions. Do NOT close the JSON array until you have emitted every single question. If you stop early, the scan fails. Continue generating until all ${expectedCount} items are in the array.
 
       JSON SCHEMA:
       {
@@ -96,7 +99,11 @@ export async function extractCombinedPaper(
     `;
 
     try {
-        const result = await withGeminiRetry(() => ai.models.generateContent({
+        let responseText = '';
+        let finishReason: string | undefined;
+        let tokenCount: number | undefined;
+
+        const stream = await withGeminiRetry(() => ai.models.generateContentStream({
             model: modelName,
             contents: [{
                 role: "user",
@@ -112,10 +119,14 @@ export async function extractCombinedPaper(
             }
         }));
 
-        const responseText = result.text || "{}";
-        const candidate = result.candidates?.[0];
-        const finishReason = candidate?.finishReason;
-        const tokenCount = result.usageMetadata?.candidatesTokenCount;
+        for await (const chunk of stream) {
+            const chunkText = chunk.text || '';
+            responseText += chunkText;
+            const candidate = chunk.candidates?.[0];
+            if (candidate?.finishReason) finishReason = candidate.finishReason;
+            if (chunk.usageMetadata?.candidatesTokenCount) tokenCount = chunk.usageMetadata.candidatesTokenCount;
+        }
+
         console.log(`📥 [MEGA-SCAN] Received ${responseText.length} chars | finishReason: ${finishReason} | outputTokens: ${tokenCount}. Repairing JSON...`);
 
         // Use our battle-tested safeAiParse from aiParser.ts

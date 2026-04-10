@@ -42,16 +42,21 @@ export const repairJson = (raw: string): string => {
 
         if (inString) {
             if (escape) {
-                // CRITICAL FIX: Only treat \" and \\ as JSON escapes
-                // DO NOT treat \f, \n, \t, \r, \b as JSON escapes because they conflict with LaTeX commands
-                // (e.g., \frac, \theta, \tan, \nabla, etc.)
-                if (char === '"' || char === '\\') {
-                    // Valid JSON escapes: \" and \\
-                    repaired += char;
+                // When we saw `\`, we preemptively added `\\` to repaired.
+                // Now decide what to do based on the following char:
+                if (char === '"') {
+                    // \" = escaped quote inside string.
+                    // Undo the preemptive \\ and emit \" so the string stays open.
+                    repaired = repaired.slice(0, -2);
+                    repaired += '\\"';
+                } else if (char === '\\') {
+                    // \\ = literal backslash. The preemptive \\ is already correct — add nothing.
+                    // Result: \\ in repaired → parsed as single \ ✓
                 } else {
-                    // Everything else is LaTeX - escape the backslash
-                    // Turn \frac into \\frac so JSON.parse gives us \frac (not form-feed!)
-                    repaired += '\\' + char;
+                    // LaTeX command: \hat, \vec, \sin, \pi, \frac, etc.
+                    // Preemptive \\ is the correct escape — just append the letter.
+                    // \hat → \\hat in repaired → parsed as \hat ✓
+                    repaired += char;
                 }
                 escape = false;
                 continue;

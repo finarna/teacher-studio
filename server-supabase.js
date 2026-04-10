@@ -1042,9 +1042,8 @@ app.put('/api/scans/:id', async (req, res) => {
 
     // Update questions if provided
     if (apiScan.analysisData?.questions && apiScan.analysisData.questions.length > 0) {
-      // Delete existing questions first (cascade)
-      // STABLE UPSERT: No longer deleting questions to preserve identity/mappings
-      // await supabaseAdmin.from('questions').delete().eq('scan_id', scanId);
+      // Always delete before re-inserting to prevent accumulation across multiple syncs
+      await supabaseAdmin.from('questions').delete().eq('scan_id', scanId);
 
       // Create new questions
       await createQuestions(scanId, apiScan.analysisData.questions);
