@@ -1,0 +1,52 @@
+{
+  "version": "16.0",
+  "subject": "Physics",
+  "exam": "NEET",
+  "identities": [
+    {
+      "id": "ID-NP-001",
+      "name": "Dimensional Homogeneity Traps",
+      "logic": "Predicting the dimensions of obscure constants like Stefan's constant or Coefficient of Viscosity.",
+      "high_yield": true,
+      "confidence": 0.98
+    },
+    {
+      "id": "ID-NP-002",
+      "name": "Graph Interpretation-Slope/Area",
+      "logic": "Interpreting work done from P-V diagrams or Acceleration from V-t graphs. Focusing on 'Cyclic' vs 'Non-cyclic' processes.",
+      "high_yield": true,
+      "confidence": 0.96
+    },
+    {
+      "id": "ID-NP-003",
+      "name": "Semiconductor - Logic Gate Fusion",
+      "logic": "NAND/NOR as universal gates. Using de Morgan's theorems to simplify complex gate combinations.",
+      "high_yield": true,
+      "confidence": 0.95
+    },
+    {
+      "id": "ID-NP-004",
+      "name": "Optics - Focal Length in Medium",
+      "logic": "Calculating lens power shift when immersed in a medium of different refractive index. Lens Maker's Formula application.",
+      "high_yield": true,
+      "confidence": 0.94
+    },
+    {
+      "id": "ID-NP-005",
+      "name": "Rayleigh Criterion - Resolution",
+      "logic": "Limit of resolution for Microscope vs Telescope. Focusing on 'wavelength dependency'.",
+      "high_yield": true,
+      "confidence": 0.92
+    }
+  ],
+  "traps": [
+    {
+      "name": "Significant Figures",
+      "description": "Calculation where the answer must follow rules of significant figures for addition vs multiplication."
+    },
+    {
+      "name": "Mass of Electron neglect",
+      "description": "Common trap in Photoelectric effect or Atomic physics where 'mass' is mentioned but not needed, or vice-versa."
+    }
+  ]
+}

@@ -265,7 +265,8 @@ export async function loadGenerationRules(
         daysSinceLastAttempt: 30,
         maxRepetitionAllowed: 2
       },
-      strategyMode: 'hybrid'
+      strategyMode: 'hybrid',
+      difficultyMix: { easy: 33, moderate: 33, hard: 34 }
     };
   }
 
@@ -286,7 +287,8 @@ export async function loadGenerationRules(
       daysSinceLastAttempt: data.days_since_last_attempt,
       maxRepetitionAllowed: data.max_repetition_allowed
     },
-    strategyMode: data.strategy_mode || 'hybrid'
+    strategyMode: data.strategy_mode || 'hybrid',
+    difficultyMix: data.difficulty_mix || { easy: 33, moderate: 33, hard: 34 }
   };
 }
 
@@ -299,7 +301,8 @@ export async function loadGenerationContext(
   userId: string,
   examContext: ExamContext,
   subject: Subject,
-  selectedTopicNames?: string[]
+  selectedTopicNames?: string[],
+  difficultyOverride?: { easy: number; moderate: number; hard: number }
 ): Promise<GenerationContext> {
   console.log(`📦 Loading generation context for ${examContext} ${subject}...`);
   if (selectedTopicNames && selectedTopicNames.length > 0) {
@@ -327,6 +330,17 @@ export async function loadGenerationContext(
   // Inject Oracle Calibration into Generation Rules
   if (oracleCalibration) {
     console.log(`🧠 [REI v3.0] Oracle Forecast Detected: Rigor Velocity ${oracleCalibration.rigorVelocity}x`);
+    
+    // Update exam config with forecasted difficulty if not manually overridden
+    if (oracleCalibration.difficultyProfile) {
+      if (!difficultyOverride) {
+        examConfig.difficultyProfile = oracleCalibration.difficultyProfile;
+        generationRules.difficultyMix = oracleCalibration.difficultyProfile;
+      } else {
+        generationRules.difficultyMix = difficultyOverride;
+      }
+    }
+
     // Provide the forecast metadata, but don't force 'enabled' unless already set or requested
     generationRules.oracleMode = {
       enabled: generationRules.oracleMode?.enabled || false,
@@ -334,6 +348,12 @@ export async function loadGenerationContext(
       directives: oracleCalibration.directives,
       boardSignature: oracleCalibration.boardSignature
     };
+  }
+
+  // Apply manual difficulty override if provided
+  if (difficultyOverride) {
+    console.log(`⚖️  Applying Manual Difficulty Override: E:${difficultyOverride.easy} M:${difficultyOverride.moderate} H:${difficultyOverride.hard}`);
+    examConfig.difficultyProfile = difficultyOverride;
   }
 
   // Filter topics if user selected specific ones (by topic ID or name)

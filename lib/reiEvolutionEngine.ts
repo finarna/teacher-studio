@@ -24,22 +24,23 @@ export interface ForecastedCalibration {
         trapDensity: number;
         linguisticLoad: number;
         speedRequirement: number;
+        difficultyProfile?: {
+            easy: number;
+            moderate: number;
+            hard: number;
+        };
     };
     idsTarget: number;
     directives: string[];
     boardSignature: 'SYNTHESIZER' | 'LOGICIAN' | 'INTIMIDATOR' | 'ANCHOR' | 'DEFAULT';
 }
 
-/**
- * The "Predictive Oracle" Logic
- * Chained logic to compute the 2026 forecast based on historical gradients.
- */
 export async function getForecastedCalibration(
     examContext: ExamContext,
     subject: Subject
 ): Promise<ForecastedCalibration> {
     // 1. Fetch historical pattern from the Auditor's findings
-    const { data: historicalData, error } = await supabase
+    const { data: historicalData } = await supabase
         .from('exam_historical_patterns')
         .select('*')
         .eq('exam_context', examContext)
@@ -47,15 +48,38 @@ export async function getForecastedCalibration(
         .order('year', { ascending: false })
         .limit(5);
 
+    // 2. Fetch the Master Audited Calibration (Primary Source of Truth)
+    const { data: universalCalibration } = await supabase
+        .from('ai_universal_calibration')
+        .select('*')
+        .eq('exam_type', examContext)
+        .eq('subject', subject)
+        .eq('target_year', 2026)
+        .single();
+
     // Fallback to static "Blueprint" if no historical data exists
     const baseline = getBaselineProfile(examContext);
 
     // If NO data at all, return flat fallback
     if (!historicalData || historicalData.length === 0) {
+        if (universalCalibration) {
+             return {
+                examContext, subject, targetYear: 2026,
+                rigorVelocity: universalCalibration.rigor_velocity || 1.0,
+                difficultyProfile: baseline.profile,
+                intentSignature: {
+                    synthesis: universalCalibration.intent_signature?.synthesis || baseline.signature.synthesis,
+                    trapDensity: universalCalibration.intent_signature?.trapDensity || baseline.signature.trapDensity,
+                    linguisticLoad: universalCalibration.intent_signature?.linguisticLoad || baseline.signature.linguisticLoad,
+                    speedRequirement: universalCalibration.intent_signature?.speedRequirement || baseline.signature.speedRequirement
+                },
+                idsTarget: universalCalibration.intent_signature?.idsTarget || 0.9,
+                directives: universalCalibration.calibration_directives || [],
+                boardSignature: (universalCalibration.board_signature as any) || 'SYNTHESIZER'
+            };
+        }
         return {
-            examContext,
-            subject,
-            targetYear: 2026,
+            examContext, subject, targetYear: 2026,
             rigorVelocity: 1.0,
             difficultyProfile: baseline.profile,
             intentSignature: baseline.signature,
@@ -65,9 +89,34 @@ export async function getForecastedCalibration(
         };
     }
 
-    // 2. Perform Recursive Rigor Gradient Analysis
-    // If length >= 2, we use real gradients. If length == 1, we use a "System Anchor" (Theoretical 2020)
     let recent = historicalData[0];
+
+    // 🏆 MASTER OVERRIDE: If universal calibration exists, use it!
+    if (universalCalibration) {
+        console.log(`🧠 [REI v16.0] Master Audit Detected for ${examContext} ${subject}`);
+        return {
+            examContext,
+            subject,
+            targetYear: 2026,
+            rigorVelocity: universalCalibration.rigor_velocity || 1.0,
+            difficultyProfile: {
+                easy: universalCalibration.intent_signature?.difficultyProfile?.easy || universalCalibration.difficulty_easy_pct || recent.difficulty_easy_pct || 40,
+                moderate: universalCalibration.intent_signature?.difficultyProfile?.moderate || universalCalibration.difficulty_moderate_pct || recent.difficulty_moderate_pct || 40,
+                hard: universalCalibration.intent_signature?.difficultyProfile?.hard || universalCalibration.difficulty_hard_pct || recent.difficulty_hard_pct || 20
+            },
+            intentSignature: {
+                synthesis: universalCalibration.intent_signature?.synthesis || 0.8,
+                trapDensity: universalCalibration.intent_signature?.trapDensity || 0.6,
+                linguisticLoad: universalCalibration.intent_signature?.linguisticLoad || 0.5,
+                speedRequirement: universalCalibration.intent_signature?.speedRequirement || 0.9,
+                // v16.1: Load difficulty from JSON if columns missing
+                difficultyProfile: universalCalibration.intent_signature?.difficultyProfile
+            },
+            idsTarget: universalCalibration.intent_signature?.idsTarget || universalCalibration.ids_target || 0.9,
+            directives: universalCalibration.calibration_directives || [],
+            boardSignature: (universalCalibration.board_signature as any) || 'SYNTHESIZER'
+        };
+    }
     let previous;
     let effectiveHistory = [...historicalData];
 
@@ -116,34 +165,32 @@ export async function getForecastedCalibration(
     // Use effectiveHistory to include anchor if necessary
     const directives = extractDirectivesFromNotes(effectiveHistory, examContext, subject, rigorDrift);
 
-    // 7. Resolve Intent Signature (Inherit from latest scan or fallback to baseline)
-    const intentSignature = recent.intent_signature || {
-        synthesis: config?.synthesis_weight || baseline.signature.synthesis,
-        trapDensity: config?.trap_density_weight || baseline.signature.trapDensity,
-        linguisticLoad: config?.linguistic_load_weight || baseline.signature.linguisticLoad,
-        speedRequirement: config?.speed_requirement_weight || baseline.signature.speedRequirement
-    };
-
-    const calibration = {
+    // 5. Final Forecast Synthesis
+    // We prioritize the audited config baseline if available
+    return {
         examContext,
         subject,
         targetYear: 2026,
-        rigorVelocity: Number(rigorVelocity.toFixed(2)),
+        rigorVelocity: config?.rigor_drift_multiplier || Number(rigorVelocity.toFixed(2)),
         difficultyProfile: {
             easy: forecastedEasy,
             moderate: forecastedModerate,
-            hard: Math.round(forecastedHard)
+            hard: forecastedHard
         },
-        intentSignature,
-        idsTarget: idsBaseline,
-        directives,
-        boardSignature: recent.board_signature || baseline.boardSignature
+        intentSignature: {
+            synthesis: config?.synthesis_weight || baseline.signature.synthesis,
+            trapDensity: config?.trap_density_weight || baseline.signature.trapDensity,
+            linguisticLoad: config?.linguistic_load_weight || baseline.signature.linguisticLoad,
+            speedRequirement: config?.speed_requirement_weight || baseline.signature.speedRequirement
+        },
+        idsTarget: config?.ids_baseline || 0.9,
+        directives: [
+            recent.evolution_note || "Standard Evolution",
+            `Target IDS: ${config?.ids_baseline || 0.9}`,
+            `Rigor Target: ${config?.rigor_drift_multiplier || 1.0}x`
+        ],
+        boardSignature: (recent.board_signature as any) || 'SYNTHESIZER'
     };
-
-    // 8. Persist the "Processed Intelligence"
-    await saveForecastedCalibration(calibration);
-
-    return calibration;
 }
 
 /**
@@ -172,8 +219,13 @@ export async function getStrategicBriefing(
         intentSignature: data.intent_signature,
         directives: data.calibration_directives || [],
         boardSignature: data.board_signature as any,
-        idsTarget: data.intent_signature?.synthesis || 0.9, // Approximation if not stored separately
-        difficultyProfile: { easy: 0, moderate: 0, hard: 0 } // Not stored in this table currently
+        // v16.1: Load IDS and Difficulty from the JSON/Columns
+        idsTarget: data.intent_signature?.idsTarget || data.ids_target || 0.9,
+        difficultyProfile: {
+            easy: data.difficulty_easy_pct || data.intent_signature?.difficultyProfile?.easy || 40,
+            moderate: data.difficulty_moderate_pct || data.intent_signature?.difficultyProfile?.moderate || 40,
+            hard: data.difficulty_hard_pct || data.intent_signature?.difficultyProfile?.hard || 20
+        }
     };
 }
 
@@ -181,7 +233,7 @@ export async function getStrategicBriefing(
  * Persist the Oracle's findings to the ai_universal_calibration table
  * This stores the "Processed Intelligence" (REI v3.0 Phase 2 Output)
  */
-async function saveForecastedCalibration(calibration: ForecastedCalibration) {
+export async function saveForecastedCalibration(calibration: ForecastedCalibration) {
     try {
         const { error } = await supabase
             .from('ai_universal_calibration')
@@ -190,7 +242,11 @@ async function saveForecastedCalibration(calibration: ForecastedCalibration) {
                 subject: calibration.subject,
                 target_year: calibration.targetYear,
                 rigor_velocity: calibration.rigorVelocity,
-                intent_signature: calibration.intentSignature,
+                intent_signature: {
+                    ...calibration.intentSignature,
+                    idsTarget: calibration.idsTarget,
+                    difficultyProfile: calibration.difficultyProfile
+                },
                 calibration_directives: calibration.directives,
                 board_signature: calibration.boardSignature,
                 updated_at: new Date().toISOString()
@@ -270,7 +326,7 @@ function getBaselineProfile(exam: ExamContext) {
             boardSignature: 'INTIMIDATOR'
         },
         KCET: {
-            profile: { easy: 40, moderate: 40, hard: 20 },
+            profile: { easy: 33, moderate: 42, hard: 25 },  // Competitive flagship distribution
             signature: { synthesis: 0.4, trapDensity: 0.5, linguisticLoad: 0.4, speedRequirement: 0.9 },
             boardSignature: 'SYNTHESIZER'
         },

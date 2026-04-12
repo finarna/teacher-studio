@@ -1,0 +1,59 @@
+{
+  "version": "16.0",
+  "subject": "Biology",
+  "exam": "NEET",
+  "identities": [
+    {
+      "id": "ID-NB-001",
+      "name": "NCERT Direct Line Affirmation",
+      "logic": "Questions using exact sentences from NCERT where one word is swapped (e.g., 'primary' vs 'secondary').",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NB-002",
+      "name": "Matching Column Precision",
+      "logic": "Multi-category matching (Disease-Causative Agent-Vector). NEET often focuses on obscure protozoans.",
+      "high_yield": true,
+      "confidence": 0.98
+    },
+    {
+      "id": "ID-NB-003",
+      "name": "Assertion-Reasoning (A-R) Mechanism",
+      "logic": "Evaluating if 'R' explains 'A'. Trap: Both are true but R is just a related fact, not the explanation.",
+      "high_yield": true,
+      "confidence": 0.95
+    },
+    {
+      "id": "ID-NB-004",
+      "name": "Biotech Tools - Restriction Endonucleases",
+      "logic": "EcoRI recognition sequences and 'Sticky Ends' logic. Calculating fragment counts for linear vs circular DNA.",
+      "high_yield": true,
+      "confidence": 0.96
+    },
+    {
+      "id": "ID-NB-005",
+      "name": "Human Physiology - Regulatory Loops",
+      "logic": "Negative feedback loops of Hormones (ADH, RAAS mechanism). Focus on 'increase in blood pressure' vs 'decrease'.",
+      "high_yield": true,
+      "confidence": 0.94
+    },
+    {
+      "id": "ID-NB-006",
+      "name": "Botanical Taxonomy Exceptions",
+      "logic": "Exceptions in Gymnosperms and Pteridophytes (Heterspory). Focus on 'Salvinia and Selaginella'.",
+      "high_yield": true,
+      "confidence": 0.97
+    }
+  ],
+  "traps": [
+    {
+      "name": "Incorrect vs Correct Statement",
+      "description": "Asking 'How many of the above are INCORRECT?' forcing the student to re-read every statement carefully."
+    },
+    {
+      "name": "Anatomy Label Flip",
+      "description": "Flipping labels of Ventral vs Dorsal surfaces in diagrams."
+    }
+  ]
+}

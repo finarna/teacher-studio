@@ -102,9 +102,8 @@ const MathRenderer: React.FC<MathRendererProps> = ({
     const hasMathDelimiters = /\$|\\\[|\\\(/.test(processedText);
 
     // HEURISTIC FIX: Only auto-wrap if the string is short (likely a math option) 
-    // or contains high-confidence LaTeX commands.
-    // Do NOT wrap long blocks of text (paragraphs) because KaTeX will strip all spaces.
-    const containsHighConfLatex = /\\(frac|sqrt|int|sum|begin|lambda|alpha|beta|gamma|theta|omega|sigma|pi|delta|phi|psi|mu|nu|xi|tau|vec|hat|bar|tilde|rightarrow|leftarrow|Rightarrow|Leftarrow|uparrow|downarrow|leftrightarrow|to|times|cdot|div|pm|leq|geq|neq|approx|infty|partial|nabla|forall|exists|in|notin|subset|cup|cap)/.test(processedText);
+    // or contains explicit backslashed LaTeX commands.
+    const containsHighConfLatex = /\\(frac|sqrt|int|sum|begin|alpha|beta|gamma|theta|omega|sigma|pi|delta|phi|psi|mu|nu|xi|tau|vec|hat|bar|tilde|rightarrow|leftarrow|Rightarrow|Leftarrow|uparrow|downarrow|leftrightarrow|to|times|cdot|div|pm|leq|geq|neq|approx|infty|partial|nabla|forall|exists|in|notin|subset|cup|cap|log|sin|cos|tan)/.test(processedText);
     const containsMathMarkers = /[\^_]|\{|\}/.test(processedText);
     const containsOperators = /[\+\-\=\/\*x<\>\(\)\[\]]/.test(processedText);
     const looksLikeMathVar = /[0-9][A-Z]|[A-Z][0-9]/.test(processedText);
@@ -199,7 +198,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({
  * Just renders text with math delimiters
  */
 export const RenderWithMath: React.FC<{
-  text: any; // Allow anything for robustness
+  text: any;
   className?: string;
   showOptions?: boolean;
   serif?: boolean;
@@ -208,8 +207,7 @@ export const RenderWithMath: React.FC<{
   compact?: boolean;
 }> = ({ text, className = '', serif = false }) => {
   if (text === null || text === undefined) return null;
-
-  return <MathRenderer text={text} className={`${className} ${serif ? 'font-serif' : ''}`} />;
+  return <MathRenderer text={text} className={`${className} ${serif ? 'font-serif' : ''} leading-relaxed`} />;
 };
 
 /**

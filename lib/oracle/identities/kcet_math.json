@@ -1,0 +1,113 @@
+{
+  "subject": "Mathematics",
+  "exam": "KCET",
+  "version": "16.0",
+  "audit_ref": "KCET-2023-FORENSIC",
+  "identities": [
+    {
+      "id": "KCET-M-ID-001",
+      "identity_name": "Limit-Continuity Seam",
+      "logic": "Targeting piecewise functions where limit exists but f(a) is undefined. Recurrent in 2021/2022/2023 papers.",
+      "high_yield": true,
+      "confidence": 0.95
+    },
+    {
+      "id": "KCET-M-ID-002",
+      "identity_name": "Definite Integral Symmetry",
+      "logic": "Application of f(x) = f(a+b-x) in trigonometric integrals. High frequency in Section B.",
+      "high_yield": true,
+      "confidence": 0.98
+    },
+    {
+      "id": "KCET-M-ID-003",
+      "identity_name": "Triple Vector Coplanarity",
+      "logic": "Scalar triple product det=0 for coplanar vectors. Primary 3D Geometry trap.",
+      "high_yield": true,
+      "confidence": 0.92
+    },
+    {
+      "id": "KCET-M-ID-004",
+      "identity_name": "Inverse Circular Fusion",
+      "logic": "Combining sin^-1 and cos^-1 properties with algebraic constraints.",
+      "high_yield": true,
+      "confidence": 0.88
+    },
+    {
+      "id": "KCET-M-ID-005",
+      "identity_name": "Adjoint Determinant Property",
+      "logic": "det(adj A) = |A|^(n-1). Standard KCET efficiency shortcut.",
+      "high_yield": true,
+      "confidence": 1.0
+    },
+    {
+      "id": "KCET-M-ID-006",
+      "identity_name": "Matrix Symmetry Invariance",
+      "logic": "Properties of (A+A') as symmetric and (A-A') as skew-symmetric.",
+      "high_yield": true,
+      "confidence": 0.94
+    },
+    {
+      "id": "KCET-M-ID-007",
+      "identity_name": "Linear Programming Optimality",
+      "logic": "Corner point method efficiency for feasible region bounded by 3+ constraints.",
+      "high_yield": true,
+      "confidence": 0.90
+    },
+    {
+      "id": "KCET-M-ID-008",
+      "identity_name": "Diff Eq Integrating Factor",
+      "logic": "Linear first-order equations with IF = e^(integral P dx). High frequency in calculus section.",
+      "high_yield": true,
+      "confidence": 0.96
+    },
+    {
+      "id": "KCET-M-ID-009",
+      "identity_name": "Parabola-Line Area",
+      "logic": "Area between y^2=4ax and y=mx. Direct formula applications are common.",
+      "high_yield": true,
+      "confidence": 0.94
+    },
+    {
+      "id": "KCET-M-ID-010",
+      "identity_name": "Hyperbola Eccentricity Relation",
+      "logic": "Relationship between e and b^2/a^2 for rectangular vs standard hyperbolas.",
+      "high_yield": true,
+      "confidence": 0.85
+    },
+    {
+      "id": "KCET-M-ID-011",
+      "identity_name": "Complex Unity Roots",
+      "logic": "Sum and product of cube roots of unity (1+w+w^2=0). Recurring algebraic shortcut.",
+      "high_yield": true,
+      "confidence": 0.97
+    },
+    {
+      "id": "KCET-M-ID-012",
+      "identity_name": "Probability Bayes Reverse",
+      "logic": "Conditional probability where P(A|B) is required from P(B|A). Core stochastic trap.",
+      "high_yield": true,
+      "confidence": 0.93
+    },
+    {
+      "id": "KCET-M-ID-013",
+      "identity_name": "Binomial Variance Constraint",
+      "logic": "Relationship between Mean (np) and Variance (npq) in board distributions.",
+      "high_yield": true,
+      "confidence": 0.89
+    },
+    {
+      "id": "KCET-M-ID-014",
+      "identity_name": "Differentiation Parametric Seam",
+      "logic": "dy/dx for x=f(t), y=g(t). Targeting second-order d^2y/dx^2 traps.",
+      "high_yield": true,
+      "confidence": 0.91
+    },
+    {
+      "id": "KCET-M-ID-015",
+      "identity_name": "Relation Transitive Trap",
+      "logic": "Reflexive/Symmetric/Transitive checks where 'None of these' is a common board trap.",
+      "high_yield": true,
+      "confidence": 0.90
+    }
+  ]
+}

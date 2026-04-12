@@ -374,13 +374,27 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
   };
 
   const exitTest = () => {
-    setState(prev => ({
-      ...prev,
-      currentView: 'topic_detail',
-      currentTest: null,
-      currentTestQuestions: [],
-      currentTestResponses: []
-    }));
+    setState(prev => {
+      // Determine the best return view
+      let returnView: ViewType = 'subject_menu';
+
+      if (prev.selectedTopicId) {
+        returnView = 'topic_detail';
+      } else if (prev.selectedSubject) {
+        // If we were in a mock test (no topic), go back to mock builder or menu
+        returnView = 'mock_builder';
+      } else if (prev.selectedTrajectory) {
+        returnView = 'subject';
+      }
+
+      return {
+        ...prev,
+        currentView: returnView,
+        currentTest: null,
+        currentTestQuestions: [],
+        currentTestResponses: []
+      };
+    });
   };
 
   const viewPastTestResults = async (attemptId: string) => {
@@ -508,12 +522,13 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
       const { data } = await response.json();
       const progressMap = {} as Record<Subject, SubjectProgress>;
       (data || []).forEach((item: any) => {
-        progressMap[item.subject as Subject] = {
-          overallMastery: item.overallMastery,
-          topicsTotal: item.totalTopics,
-          topicsMastered: item.topicsWithQuestions, // Set B aggregator uses topicsWithQuestions
-          totalQuestionsAttempted: item.totalQuestions,
-          overallAccuracy: item.overallAccuracy ?? 0
+        const subKey = item.subject as Subject;
+        progressMap[subKey] = {
+          overallMastery: item.overallMastery ?? item.overall_mastery ?? 0,
+          topicsTotal: item.topicsTotal ?? item.total_topics ?? item.totalTopics ?? 0,
+          topicsMastered: item.topicsMastered ?? item.topics_with_questions ?? item.topicsWithQuestions ?? 0,
+          totalQuestionsAttempted: item.totalQuestionsAttempted ?? item.total_questions ?? item.totalQuestions ?? 0,
+          overallAccuracy: item.overallAccuracy ?? item.overall_accuracy ?? 0
         } as any;
       });
       setState(prev => ({ ...prev, subjectProgress: progressMap, isLoading: false }));

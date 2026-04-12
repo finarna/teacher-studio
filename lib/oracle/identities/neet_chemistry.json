@@ -1,0 +1,52 @@
+{
+  "version": "16.0",
+  "subject": "Chemistry",
+  "exam": "NEET",
+  "identities": [
+    {
+      "id": "ID-NC-001",
+      "name": "Hybridization & Shape Prediction",
+      "logic": "VSEPR theory applied to Xenon fluorides and interhalogen compounds. Trap: Lone pair placement in Bent vs See-saw.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NC-002",
+      "name": "Nernst Equation - pH dependence",
+      "logic": "Calculating E_cell when H+ concentration is varied. Linking Electrochemistry with Ionic Equilibrium.",
+      "high_yield": true,
+      "confidence": 0.96
+    },
+    {
+      "id": "ID-NC-003",
+      "name": "Named Organic Reactions - Yield Priority",
+      "logic": "Identifying primary products for Reimer-Tiemann, Kolbe's, and Williamson Synthesis. Focus on phenolic derivatives.",
+      "high_yield": true,
+      "confidence": 0.98
+    },
+    {
+      "id": "ID-NC-004",
+      "name": "Hard-Soft Acid Base (HSAB) basics",
+      "logic": "Predicting stability of complexes. Focus on F- vs I- ligand substitutions.",
+      "high_yield": true,
+      "confidence": 0.92
+    },
+    {
+      "id": "ID-NC-005",
+      "name": "Biomolecules - Linkage Types",
+      "logic": "Glycosidic vs Peptide vs Phosphodiester. Identifying the specific atoms involved in the bond (e.g., C1-C4).",
+      "high_yield": true,
+      "confidence": 0.97
+    }
+  ],
+  "traps": [
+    {
+      "name": "Enthalpy of Atomization",
+      "description": "Confusing standard enthalpy of formation with enthalpy of atomization for transition elements."
+    },
+    {
+      "name": "Oxidation State vs Covalency",
+      "description": "Asking for 'Covalency' of Al in [Al(H2O)6]3+ vs its oxidation state."
+    }
+  ]
+}

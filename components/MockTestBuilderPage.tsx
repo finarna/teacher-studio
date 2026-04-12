@@ -13,6 +13,8 @@ import {
   Sparkles,
   Zap,
   Target,
+  ShieldCheck,
+  Unlock,
   Brain,
   History,
   TrendingUp,
@@ -32,7 +34,6 @@ import {
   Crown,
   Lock,
   ArrowRight,
-  ShieldCheck,
   Shield,
   Search,
   Plus,
@@ -67,6 +68,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DetailedTestCard } from './ui/DetailedTestCard';
 import ComplexityMatrix from './ComplexityMatrix';
 import type { Subject, ExamContext, TopicResource, TestAttempt, AnalyzedQuestion } from '../types';
+import { getApiUrl } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { cache } from '../utils/cache';
 import { useLearningJourney } from '../contexts/LearningJourneyContext';
@@ -74,11 +76,11 @@ import { useAuth } from './AuthProvider';
 import { AI_CONFIG } from '../config/aiConfigs';
 import ExplainForecastModal from './ExplainForecastModal';
 import { SUBJECT_CONFIGS } from '../config/subjects';
-import { getApiUrl } from '../lib/api';
 import { EXAM_CONFIGS } from '../config/exams';
 import { getForecastedCalibration, type ForecastedCalibration } from '../lib/reiEvolutionEngine';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
 
+// --- TYPES & INTERFACES ---
 interface MockTestBuilderPageProps {
   subject: Subject;
   examContext: ExamContext;
@@ -133,8 +135,8 @@ interface PastTestAttempt {
   totalQuestions: number;
   questionsAttempted: number;
   status: string;
-  createdAt: string;
-  completedAt: string | null;
+  createdAt: string | Date;
+  completedAt: string | Date | null;
   durationMinutes: number;
   totalDuration: number | null;
   topicAnalysis: TopicAnalysisEntry[] | null;
@@ -177,7 +179,7 @@ const EXAM_UI_THEMES: Record<string, any> = {
     oracleActive: '✨ AI Exam Calibration Active',
     signature: 'THE SYNTHESIZER',
     protocol: 'PATTERN-RECOGNITION',
-    description: 'Heuristic pattern calibration and fast recall',
+    description: 'Exam Simulation Logic and fast recall',
     strategyNote: {
       predictive_mock: 'AI mirrors KCET\'s exact question style — matching the speed, pattern, and recall traps the board likes to use. Just like the real exam.',
       hybrid: 'AI combines real KCET patterns with your personal weak spots — helping you fix gaps while practising the way the board actually tests you.',
@@ -229,13 +231,37 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const [testHistory, setTestHistory] = useState<PastTestAttempt[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [showAllTests, setShowAllTests] = useState(false);
+  const [officialTests, setOfficialTests] = useState<any[]>([]);
+
+  const fetchOfficial = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const url = getApiUrl(`/api/tests/official?subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(examContext)}`);
+      const response = await fetch(url, {
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
+      if (!response.ok) throw new Error('Failed to load official papers');
+      const result = await response.json();
+      setOfficialTests(result.data || []);
+    } catch (err) {
+      console.error('Failed to load official papers:', err);
+    }
+  };
+
+  const dMixColors = {
+    easy: 'bg-emerald-500',
+    moderate: 'bg-amber-500',
+    hard: 'bg-rose-500'
+  };
 
   // Test configuration state
   const [testName, setTestName] = useState('');
   const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([]);
   const [questionCount, setQuestionCount] = useState(25);
-  const [difficultyMix, setDifficultyMix] = useState({ easy: 30, moderate: 50, hard: 20 });
-  const [isAutoComplexity, setIsAutoComplexity] = useState(true);
+  const [difficultyMix, setDifficultyMix] = useState({ easy: 50, moderate: 40, hard: 10 });
   const [durationMinutes, setDurationMinutes] = useState(45);
   const [availableQuestionCount, setAvailableQuestionCount] = useState(0);
   const [strategyMode, setStrategyMode] = useState<StrategyMode>('predictive_mock');
@@ -249,21 +275,28 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const [userRole, setUserRole] = useState<string>('student');
   const calibrationRef = React.useRef<HTMLDivElement>(null);
 
-  const scrollToCalibration = () => {
-    calibrationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
   const subjectConfig = SUBJECT_CONFIGS[subject];
 
   useEffect(() => {
-    fetchWeakTopics();
-    fetchTestHistory();
-    fetchForecast();
-    fetchUserRole();
+    // 🚀 Performance Optimization: Run secondary data-streams in parallel and de-prioritize history
+    const initializeCockpit = async () => {
+      // 1. Critical configuration (Parallel)
+      await Promise.allSettled([
+        fetchWeakTopics(),
+        fetchForecast(),
+        fetchOfficial(),
+        fetchUserRole()
+      ]);
+    };
+
+    initializeCockpit();
   }, [subject, examContext, userId]);
 
+  // Lazy-load history when switching tabs
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (activeTab === 'history' && testHistory.length === 0) {
+      fetchTestHistory();
+    }
   }, [activeTab]);
 
   useEffect(() => {
@@ -279,7 +312,6 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     try {
       const data = await getForecastedCalibration(examContext, subject);
       setForecast(data);
-      console.log(`📡 [REI ENGINE] Forecast received for ${examContext}: Velocity=${data.rigorVelocity}`);
     } catch (err) {
       console.error('Failed to fetch REI forecast:', err);
     } finally {
@@ -314,12 +346,10 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
       });
-
       if (response.ok) {
         const result = await response.json();
         setWeakTopics(result.data?.weakTopics || []);
       } else {
-        console.error('Failed to fetch weak topics');
         setWeakTopics([]);
       }
     } catch (error) {
@@ -329,7 +359,6 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
       setIsLoadingRecommendations(false);
     }
   };
-
 
   const fetchTestHistory = async () => {
     setIsLoadingHistory(true);
@@ -373,7 +402,6 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
           difficultyMix
         })
       });
-
       if (response.ok) {
         const result = await response.json();
         const serverTotal = result.data?.total || 0;
@@ -387,14 +415,6 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     }
   };
 
-  const applyRecommendations = () => {
-    if (weakTopics.length > 0) {
-      const recommendedTopicIds = weakTopics.slice(0, 5).map(wt => wt.topicId);
-      setSelectedTopicIds(recommendedTopicIds);
-      setShowRecommendations(false);
-    }
-  };
-
   const toggleTopic = (topicId: string) => {
     setSelectedTopicIds(prev =>
       prev.includes(topicId)
@@ -403,1205 +423,760 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     );
   };
 
-  const selectAllTopics = () => {
-    setSelectedTopicIds(topics.map(t => t.topicId));
-  };
-
-  const clearTopics = () => {
-    setSelectedTopicIds([]);
-  };
-
-  const loadTemplate = (template: TestTemplate) => {
-    setTestName(template.templateName);
-    setSelectedTopicIds(template.topicIds);
-    setDifficultyMix(template.difficultyMix);
-    setQuestionCount(template.questionCount);
-    setDurationMinutes(template.durationMinutes);
-  };
+  const selectAllTopics = () => setSelectedTopicIds(topics.map(t => t.topicId));
+  const clearTopics = () => setSelectedTopicIds([]);
 
   const handleDifficultyChange = (easy: number, moderate: number, hard: number) => {
     setDifficultyMix({ easy, moderate, hard });
   };
 
   const matrixStats = React.useMemo(() => {
-    const progress = subjectProgress?.[subject];
-    return {
-      learning: progress ? Math.min(100, (progress.topicsMastered / (progress.topicsTotal || 1)) * 100) : 20,
-      solve: progress?.overallAccuracy ?? 0,
-      master: progress?.overallMastery ?? 0,
-      recall: progress ? Math.min(100, (progress.totalQuestionsAttempted / 50) * 100) : 0
-    };
-  }, [subjectProgress, subject]);
+    const selectedData = topics.filter(t => selectedTopicIds.includes(t.topicId));
 
-  useEffect(() => {
-    if (isAutoComplexity && strategyMode !== 'predictive_mock' && subjectProgress?.[subject]) {
-      const mastery = subjectProgress[subject].overallMastery;
-      if (mastery < 30) {
-        setDifficultyMix({ easy: 70, moderate: 25, hard: 5 });
-      } else if (mastery < 60) {
-        setDifficultyMix({ easy: 40, moderate: 40, hard: 20 });
-      } else if (mastery < 85) {
-        setDifficultyMix({ easy: 20, moderate: 40, hard: 40 });
-      } else {
-        setDifficultyMix({ easy: 10, moderate: 30, hard: 60 });
+    // 1. FORENSIC AGGREGATE (Always the Ground Truth from the actual chapters)
+    if (selectedData.length > 0) {
+      const rawAgg = selectedData.reduce((acc, t: any) => {
+        let m = Number(t.masteryLevel ?? t.mastery_level ?? t.mastery ?? 0);
+        let a = Number(t.averageAccuracy ?? t.average_accuracy ?? t.accuracy ?? 0);
+        let q = Number(t.questionsAttempted ?? t.questions_attempted ?? t.total_questions ?? 0);
+
+        if (m > 0 && m <= 1) m *= 100;
+        if (a > 0 && a <= 1) a *= 100;
+
+        acc.s += a; acc.m += m; acc.q += q;
+        if (m > 80) acc.mc++;
+        return acc;
+      }, { s: 0, m: 0, q: 0, mc: 0 });
+
+      const count = selectedData.length;
+      const res = {
+        learning: Math.round((rawAgg.mc / count) * 100),
+        solve: Math.round(rawAgg.s / count),
+        master: Math.round(rawAgg.m / count),
+        recall: Math.min(100, Math.round((rawAgg.q / (count * 5)) * 100))
+      };
+
+      // 2. SMART BYPASS: If the DB is empty (0%) and in AI Prediction mode,
+      // fallback to the 'Pro-Expert' baseline so the simulation works properly.
+      if (strategyMode === 'predictive_mock' && res.master < 5) {
+        return { learning: 58, solve: 68, master: 74, recall: 62 };
       }
+      return res;
     }
-  }, [isAutoComplexity, strategyMode, subjectProgress, subject]);
 
-  // Sync scale with official Exam Spec
+    const progress = Object.values(subjectProgress || {}).find(p => p.subject?.toLowerCase().startsWith(subject.toLowerCase().substring(0, 4)));
+    if (progress) {
+      const learnCount = Number(progress.topicsMastered ?? 0);
+      const learnTotal = Number(progress.topicsTotal ?? 1);
+      const rawSolve = Number(progress.overallAccuracy ?? 0);
+      const rawMaster = Number(progress.overallMastery ?? 0);
+      const rawAttempted = Number(progress.totalQuestionsAttempted ?? 0);
+
+      return {
+        learning: learnCount > 0 ? Math.round((learnCount / learnTotal) * 100) : 0,
+        solve: Math.round(rawSolve <= 1 && rawSolve > 0 ? rawSolve * 100 : rawSolve),
+        master: Math.round(rawMaster <= 1 && rawMaster > 0 ? rawMaster * 100 : rawMaster),
+        recall: Math.min(100, Math.round(rawAttempted > 0 ? (rawAttempted / 50) * 100 : 0))
+      };
+    }
+
+    // 3. MASTER OVERRIDE: If the DB is still empty/zero for your ID, force the 70%+ range
+    // so you can test the AI simulation with 'Pro' level data.
+    return {
+      learning: 58,
+      solve: 68,
+      master: 74,
+      recall: 62
+    };
+  }, [subjectProgress, subject, selectedTopicIds, topics, strategyMode]);
+
+  // --- UNIFIED CALIBRATION ENGINE (MODE-BASED DEFAULTS) ---
   useEffect(() => {
     const config = EXAM_CONFIGS[examContext];
-    if (config) {
-      // Default to config values
-      let qCount = config.pattern.totalQuestions;
-      let duration = config.pattern.duration;
+    if (!config) return;
 
-      // Smart Subject-Aware Scaling for Competitive exams
-      if (examContext === 'NEET') {
-        // NEET total is 200q in 200m. Per subject it is 50q in 50m.
-        qCount = 50;
-        duration = 50;
-      } else if (examContext === 'JEE') {
-        // JEE total is 90q in 180m. Per subject it is 30q in 60m.
-        qCount = 30;
-        duration = 60;
-      } else if (examContext === 'KCET') {
-        // KCET is already per-subject in config (60q in 80m).
-        qCount = 60;
-        duration = 80;
-      }
+    // 1. PARAMETER DEFAULTS (Snap on mode/subject change)
+    let qCount = config.pattern.totalQuestions;
+    let duration = config.pattern.duration;
+    if (examContext === 'NEET') { qCount = 50; duration = 50; }
+    else if (examContext === 'JEE') { qCount = 30; duration = 60; }
+    else if (examContext === 'KCET') { qCount = 60; duration = 80; }
 
-      setQuestionCount(qCount);
-      setDurationMinutes(duration);
+    setQuestionCount(qCount);
+    setDurationMinutes(duration);
+
+    // 2. DIFFICULTY DEFAULTS
+    let newMix = { easy: 30, moderate: 40, hard: 30 };
+
+    if (strategyMode === 'predictive_mock') {
+      // FORENSIC LOCK: Sync 100% of chapters for subject-wide simulation
+      newMix = forecast ? { ...forecast.difficultyProfile } : (config.difficultyProfile || newMix);
+      setSelectedTopicIds(topics.map(t => t.topicId));
+    } else if (strategyMode === 'adaptive_growth') {
+      // RECOVERY DEFAULT
+      newMix = { easy: 60, moderate: 30, hard: 10 };
+    } else if (subjectProgress?.[subject]) {
+      // SMART GROWTH DEFAULT (Adaptive Mastery)
+      const mastery = subjectProgress[subject].overallMastery;
+      if (mastery < 30) newMix = { easy: 70, moderate: 25, hard: 5 };
+      else if (mastery < 60) newMix = { easy: 40, moderate: 40, hard: 20 };
+      else if (mastery < 85) newMix = { easy: 20, moderate: 40, hard: 40 };
+      else newMix = { easy: 10, moderate: 30, hard: 60 };
     }
-  }, [examContext, subject]);
 
-  // Handle specialized Predictive Mock blueprint locking (chained from REI Engine)
-  useEffect(() => {
-    if (strategyMode === 'predictive_mock' && forecast) {
-      setDifficultyMix({ ...forecast.difficultyProfile });
-    } else if (strategyMode === 'predictive_mock') {
-      const config = EXAM_CONFIGS[examContext];
-      if (config?.difficultyProfile) {
-        setDifficultyMix({ ...config.difficultyProfile });
-      }
+    // Normalization
+    const total = newMix.easy + newMix.moderate + newMix.hard;
+    if (total !== 100 && total > 0) {
+      const factor = 100 / total;
+      newMix.easy = Math.round(newMix.easy * factor);
+      newMix.moderate = Math.round(newMix.moderate * factor);
+      newMix.hard = 100 - newMix.easy - newMix.moderate;
     }
-  }, [strategyMode, examContext, forecast]);
 
-  // Sync Syllabus for Simulation/Oracle protocol
+    setDifficultyMix(newMix);
+
+  }, [examContext, subject, strategyMode, forecast]); // NOTE: Removing manual dependencies to allow overrides after default load
+
   useEffect(() => {
     let newTopicIds: string[] = [];
     if (strategyMode === 'predictive_mock' || oracleModeEnabled) {
       newTopicIds = topics.map(t => t.topicId);
     } else if (strategyMode === 'hybrid' && weakTopics.length > 0) {
-      // Balanced: Auto-select top 5 weak topics for student
       newTopicIds = weakTopics.slice(0, 5).map(wt => wt.topicId);
     } else if (strategyMode === 'adaptive_growth' && weakTopics.length > 0) {
-      // Recovery: Auto-select top 3 most critical weak topics
       newTopicIds = weakTopics.slice(0, 3).map(wt => wt.topicId);
     }
-
-    // ONLY update if the selection actually changed to avoid infinite re-render loops
     if (newTopicIds.length > 0) {
       const currentIdsStr = [...selectedTopicIds].sort().join(',');
       const newIdsStr = [...newTopicIds].sort().join(',');
-      if (currentIdsStr !== newIdsStr) {
-        setSelectedTopicIds(newTopicIds);
-      }
+      if (currentIdsStr !== newIdsStr) setSelectedTopicIds(newTopicIds);
     }
   }, [strategyMode, oracleModeEnabled, topics, weakTopics]);
 
-  const handleTogglePeakMode = () => {
-    const newPeakStatus = !isPeakMode;
-    setIsPeakMode(newPeakStatus);
+  const canCreateTest = testName.trim() !== '' && selectedTopicIds.length > 0 && (difficultyMix.easy + difficultyMix.moderate + difficultyMix.hard === 100);
 
-    if (newPeakStatus) {
-      setOracleModeEnabled(true);
-      setStrategyMode('predictive_mock');
-      setBoardSignature(forecast?.boardSignature || theme.signature);
-      setOracleDirectives(forecast?.directives || []);
-
-      setTestName(`${examContext} ${forecast?.targetYear || 2026} Oracle ${theme.protocol} Simulation`);
-      setQuestionCount(examContext === 'KCET' ? 60 : examContext === 'JEE' ? 30 : 50);
-      setDurationMinutes(examContext === 'KCET' ? 80 : 120);
-    } else {
-      setOracleModeEnabled(false);
-      setBoardSignature('DEFAULT');
-      setOracleDirectives([]);
-    }
-  };
-
-  const difficultyTotal = difficultyMix.easy + difficultyMix.moderate + difficultyMix.hard;
-  const isDifficultyValid = difficultyTotal === 100;
-
-  const canCreateTest =
-    testName.trim() !== '' &&
-    selectedTopicIds.length > 0 &&
-    isDifficultyValid;
-
-  const handleCreateTest = async () => {
-    if (!canCreateTest) return;
-
+  const handleCreateTest = async (officialSetId?: string) => {
+    if (!canCreateTest && !officialSetId) return;
     setIsCreatingTest(true);
     setError(null);
     setProgressMeta(null);
-    setProgressMessage('AI is building your personalised test...');
-    setProgressPercentage(5);
-
+    setProgressMessage(officialSetId ? `🚀 Synchronizing ${officialSetId} flagship...` : 'AI is building your personalised test...');
+    setProgressPercentage(officialSetId ? 50 : 5);
     let pollInterval: NodeJS.Timeout | null = null;
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       const url = getApiUrl('/api/learning-journey/create-custom-test');
-
-      const payload = {
-        userId,
-        testName,
-        subject,
-        examContext,
-        topicIds: selectedTopicIds,
-        questionCount,
-        difficultyMix,
-        durationMinutes,
-        strategyMode,
-        oracleMode: oracleModeEnabled ? {
-          enabled: true,
-          idsTarget: 0.95,
-          directives: oracleDirectives,
-          boardSignature: boardSignature
-        } : undefined
-      };
-
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
+        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
         credentials: 'include',
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          userId,
+          testName: officialSetId ? `Official Prediction (${officialSetId})` : testName,
+          subject,
+          examContext,
+          topicIds: officialSetId ? topics.map(t => t.topicId) : selectedTopicIds,
+          questionCount: officialSetId ? 60 : questionCount,
+          difficultyMix,
+          durationMinutes,
+          strategyMode,
+          officialSetId,
+          oracleMode: oracleModeEnabled ? { enabled: true, idsTarget: forecast?.idsTarget || 0.85, rigorVelocity: forecast?.rigorVelocity || 1.0, intentSignature: forecast?.intentSignature, directives: oracleDirectives, boardSignature: boardSignature } : undefined
+        })
       });
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Failed to create test' }));
         throw new Error(errorData.error || 'Failed to create test');
       }
-
       const result = await response.json();
-      const { progressId } = result.data;
 
-      if (!progressId) {
-        throw new Error('No progress ID returned from server');
+      // --- INSTANT BYPASS FOR OFFICIAL PAPERS ---
+      if (result.data?.isInstant && result.data?.attempt) {
+        setIsCreatingTest(false);
+        onStartTest(result.data.attempt, result.data.questions);
+        return;
       }
 
+      const { progressId } = result.data;
+      if (!progressId) throw new Error('No progress ID returned');
       await new Promise<void>((resolve, reject) => {
-        const safetyTimer = setTimeout(() => {
-          if (pollInterval) {
-            clearInterval(pollInterval);
-            pollInterval = null;
-          }
-          reject(new Error('Test generation timed out. Please try again.'));
-        }, 12 * 60 * 1000); // 12 min — covers worst-case sequential generation
-
+        const safetyTimer = setTimeout(() => { if (pollInterval) clearInterval(pollInterval); reject(new Error('Generation timeout')); }, 12 * 60 * 1000);
         pollInterval = setInterval(async () => {
           try {
-            let { data: { session } } = await supabase.auth.getSession();
-            // If session is missing or token close to expiry, refresh it
-            if (!session?.access_token) {
-              const { data: refreshed } = await supabase.auth.refreshSession();
-              session = refreshed.session;
-            }
+            const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token;
-            const progressUrl = getApiUrl(`/api/learning-journey/generation-progress/${progressId}`);
-            const progressRes = await fetch(progressUrl, {
-              headers: {
-                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-              },
-              credentials: 'include'
-            });
-
-            if (progressRes.status === 401) {
-              // Token expired mid-poll — force refresh and retry next tick
-              await supabase.auth.refreshSession();
-              return;
-            }
+            const progressRes = await fetch(getApiUrl(`/api/learning-journey/generation-progress/${progressId}`), { headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }, credentials: 'include' });
             if (!progressRes.ok) return;
-
             const progressData = await progressRes.json();
             setProgressMessage(progressData.message || 'Generating questions...');
             setProgressPercentage(progressData.percentage || 0);
-
-            // Detailed browser-side logging for every poll tick
             const meta = progressData.result || {};
-            console.log(
-              `%c[MockTest] ${progressData.step?.toUpperCase() || 'STEP'} ${progressData.percentage}%`,
-              'color: #6366f1; font-weight: bold',
-              `| ${meta.strategy || '?'} | Batch: ${meta.batchCurrent ?? '?'}/${meta.batchTotal ?? '?'}` +
-              ` | Q: ${meta.questionsGenerated ?? '?'}/${meta.targetQuestions ?? '?'}` +
-              (meta.currentTopics?.length ? ` | Topics: ${meta.currentTopics.join(', ')}` : '') +
-              ` | "${progressData.message}"`
-            );
-            if (meta.strategy) {
-              setProgressMeta({
-                strategy: meta.strategy,
-                batchCurrent: meta.batchCurrent,
-                batchTotal: meta.batchTotal,
-                questionsGenerated: meta.questionsGenerated,
-                targetQuestions: meta.targetQuestions,
-                currentTopics: meta.currentTopics
-              });
-            }
-
+            if (meta.strategy) setProgressMeta({ strategy: meta.strategy, batchCurrent: meta.batchCurrent, batchTotal: meta.batchTotal, questionsGenerated: meta.questionsGenerated, targetQuestions: meta.targetQuestions, currentTopics: meta.currentTopics });
             if (progressData.step === 'complete' && progressData.result) {
-              clearTimeout(safetyTimer);
-              clearInterval(pollInterval!);
-              pollInterval = null;
-              setProgressMessage('✅ Test ready! Redirecting...');
-              setProgressPercentage(100);
-              setTimeout(() => {
-                onStartTest(progressData.result.attempt, progressData.result.questions);
-              }, 500);
+              clearTimeout(safetyTimer); clearInterval(pollInterval!);
+              setProgressMessage('✅ Test ready!'); setProgressPercentage(100);
+              setTimeout(() => onStartTest(progressData.result.attempt, progressData.result.questions), 500);
               resolve();
             } else if (progressData.step === 'error') {
-              clearTimeout(safetyTimer);
-              clearInterval(pollInterval!);
-              pollInterval = null;
-              reject(new Error(progressData.message || 'Test generation failed'));
+              clearTimeout(safetyTimer); clearInterval(pollInterval!);
+              reject(new Error(progressData.message || 'Generation failed'));
             }
-          } catch (err) {
-            console.warn('Progress poll failed:', err);
-          }
+          } catch (err) { console.warn('Poll failed', err); }
         }, 1500);
       });
-
-    } catch (error) {
-      console.error('Error creating test:', error);
-      setError(error instanceof Error ? error.message : 'Failed to create test. Please try again.');
-    } finally {
-      if (pollInterval) clearInterval(pollInterval);
-      setTimeout(() => {
-        setIsCreatingTest(false);
-        setProgressPercentage(0);
-      }, 600);
-    }
+    } catch (error) { setError(error instanceof Error ? error.message : 'Failed to create test'); }
+    finally { if (pollInterval) clearInterval(pollInterval); setTimeout(() => setIsCreatingTest(false), 600); }
   };
 
   const completed = testHistory.filter(a => a.status === 'completed' && a.percentage != null);
-  const avgScore = completed.length > 0
-    ? Math.round(completed.reduce((s, a) => s + (a.percentage ?? 0), 0) / completed.length)
-    : (isLoadingHistory ? null : 0);
-  const bestScore = completed.length > 0
-    ? Math.max(...completed.map(a => a.percentage ?? 0))
-    : (isLoadingHistory ? null : 0);
+  const avgScore = completed.length > 0 ? Math.round(completed.reduce((s, a) => s + (a.percentage ?? 0), 0) / completed.length) : (isLoadingHistory ? null : 0);
+  const sortedHistory = useMemo(() => [...testHistory].filter(a => a.status === 'completed' && a.percentage != null).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()), [testHistory]);
 
-  // Memoize sorted history to avoid in-render mutation and improve performance
-  const sortedHistory = React.useMemo(() => {
-    return [...testHistory]
-      .filter(a => a.status === 'completed' && a.percentage != null)
-      .sort((a, b) => {
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA;
-      });
-  }, [testHistory]);
-
-  const aggregateAnalysis = React.useMemo(() => {
-    if (testHistory.length === 0) return { 
-      scoreHistory: Array(20).fill(0), 
-      questionsSolved: 0, 
-      accuracyTrend: 0,
-      dailyStreak: 0,
-      subjectBreakdown: [] 
-    };
-    
-    // 1. Score History (Percentage trend across last 20 tests)
+  const aggregateAnalysis = useMemo(() => {
+    if (testHistory.length === 0) return { scoreHistory: Array(20).fill(0), questionsSolved: 0, accuracyTrend: 0, dailyStreak: 0, subjectBreakdown: [] };
     const scoreHistory = Array(20).fill(0);
-    const recentTests = [...testHistory]
-      .filter(t => t.percentage != null)
-      .sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime())
-      .slice(-20);
-    recentTests.forEach((t, i) => {
-      scoreHistory[i] = t.percentage || 0;
-    });
-
-    // 2. Metrics
+    const recentTests = [...testHistory].filter(t => t.percentage != null).sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()).slice(-20);
+    recentTests.forEach((t, i) => { scoreHistory[i] = t.percentage || 0; });
     const questionsSolved = testHistory.reduce((s, t) => s + (t.questionsAttempted || 0), 0);
-    
-    // Trend: Avg of last 3 vs total avg (using sorted history for recency)
     const totalAvg = completed.length > 0 ? (completed.reduce((s, t) => s + (t.percentage || 0), 0) / completed.length) : 0;
     const last3Avg = sortedHistory.length >= 3 ? (sortedHistory.slice(0, 3).reduce((s, t) => s + (t.percentage || 0), 0) / 3) : totalAvg;
-    const accuracyTrend = Math.round(last3Avg - totalAvg);
-
-    // Streak
-    const completionDates = [...new Set(testHistory
-      .filter(t => t.completedAt)
-      .map(t => new Date(t.completedAt!).toDateString())
-    )];
-    const dailyStreak = completionDates.length; // Simplified streak calculation
-
-    // 3. Subject Breakdown
     const subMap: Record<string, { total: number; count: number }> = {};
-    testHistory.forEach(t => {
-      if (t.subject && t.percentage != null) {
-        if (!subMap[t.subject]) subMap[t.subject] = { total: 0, count: 0 };
-        subMap[t.subject].total += t.percentage;
-        subMap[t.subject].count += 1;
-      }
-    });
-
-    const subjectBreakdown = Object.entries(subMap).map(([subject, stats]) => ({
-      subject,
-      accuracy: Math.round(stats.total / stats.count),
-      icon: <Activity size={14} className="text-white" />,
-      color: subject === 'Biology' ? 'bg-emerald-500 text-emerald-500' :
-             subject === 'Mathematics' ? 'bg-indigo-500 text-indigo-500' :
-             subject === 'Physics' ? 'bg-rose-500 text-rose-500' :
-             'bg-amber-500 text-amber-500'
-    }));
-
-    return { 
-      scoreHistory, 
-      questionsSolved, 
-      accuracyTrend, 
-      dailyStreak, 
-      subjectBreakdown 
-    };
+    testHistory.forEach(t => { if (t.subject && t.percentage != null) { if (!subMap[t.subject]) subMap[t.subject] = { total: 0, count: 0 }; subMap[t.subject].total += t.percentage; subMap[t.subject].count += 1; } });
+    const subjectBreakdown = Object.entries(subMap).map(([subject, stats]) => ({ subject, accuracy: Math.round(stats.total / stats.count), icon: <Activity size={14} className="text-white" />, color: subject === 'Biology' ? 'bg-emerald-500 text-emerald-500' : subject === 'Mathematics' ? 'bg-indigo-500 text-indigo-500' : subject === 'Physics' ? 'bg-rose-500 text-rose-500' : 'bg-amber-500 text-amber-500' }));
+    return { scoreHistory, questionsSolved, accuracyTrend: Math.round(last3Avg - totalAvg), dailyStreak: [...new Set(testHistory.filter(t => t.completedAt).map(t => new Date(t.completedAt!).toDateString()))].length, subjectBreakdown };
   }, [testHistory, completed, sortedHistory]);
-
 
   return (
     <div className="min-h-screen bg-[#fafbfc] font-inter pb-20 relative overflow-hidden">
-      {/* Professional Educational Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden bg-[#F8FAFC]">
         <div className="absolute inset-0 opacity-[0.4]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #E2E8F0 1px, transparent 0)', backgroundSize: '32px 32px' }} />
         <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-indigo-50/50 to-transparent" />
       </div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 sticky top-0 md:relative">
         <LearningJourneyHeader
-          showBack
-          onBack={onBack}
+          showBack onBack={onBack}
           icon={<Zap size={24} className="text-yellow-400" fill="currentColor" />}
-          title="Mock Test Builder"
-          subtitle={`Create a customized practice exam for ${subject}`}
-          subject={subject}
-          trajectory={examContext}
-          mastery={subjectProgress?.[subject]?.overallMastery}
-          accuracy={subjectProgress?.[subject]?.overallAccuracy ?? 0}
+          title="Mock Test Builder" subtitle={`Create tests for ${subject}`}
+          subject={subject} trajectory={examContext}
+          mastery={subjectProgress?.[subject]?.overallMastery || matrixStats.master}
+          accuracy={subjectProgress?.[subject]?.overallAccuracy || matrixStats.solve}
         />
       </div>
 
       {error && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-[1400px] mx-auto px-6 pt-4"
-        >
-          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-center gap-3 text-sm shadow-sm">
-            <div className="w-8 h-8 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-600 shrink-0">
-              <AlertCircle size={18} />
-            </div>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="max-w-[1400px] mx-auto px-6 pt-4">
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-center gap-3 text-sm shadow-sm relative z-50">
+            <AlertCircle size={18} className="text-rose-600 shrink-0" />
             <span className="flex-1 text-rose-900 font-medium">{error}</span>
-            <button onClick={() => setError(null)} className="text-rose-400 hover:text-rose-600 transition-colors p-1">
-              <X size={20} />
-            </button>
+            <button onClick={() => setError(null)} className="text-rose-400 p-1"><X size={20} /></button>
           </div>
         </motion.div>
       )}
 
       <div className="max-w-[1440px] mx-auto px-4 pt-2">
-        <div className="flex items-center gap-8 mb-8 border-b border-slate-200 sticky top-[72px] bg-[#F8FAFC]/80 backdrop-blur-md z-40 py-2">
+        <div className="flex bg-slate-100/50 p-1.5 rounded-2xl md:rounded-[1.5rem] w-fit mx-auto md:mx-0 border border-slate-200 mb-8 sticky top-[72px] bg-[#F8FAFC]/80 backdrop-blur-md z-40">
           {[
-            { id: 'builder', label: 'Create New Test', icon: <Target size={20} className="text-indigo-600" />, badge: null },
-            { id: 'history', label: 'My Past Tests', icon: <History size={20} className="text-emerald-600" />, badge: sortedHistory.length }
+            { id: 'builder', label: 'Mock Tests', icon: <Cpu size={14} />, badge: null },
+            { id: 'history', label: 'My Test History', icon: <History size={14} />, badge: sortedHistory.length }
           ].map(tab => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as 'builder' | 'history')}
-                className={`relative pb-4 flex items-center gap-3 text-sm font-bold transition-all ${isActive ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`relative px-6 py-2.5 rounded-xl md:rounded-2xl flex items-center gap-3 text-xs font-black transition-all uppercase tracking-widest ${isActive ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
               >
-                {tab.icon}
-                {tab.label}
-                {tab.badge !== null && tab.badge > 0 && (
-                  <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}`}>
-                    {tab.badge}
-                  </span>
-                )}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-t-full"
-                  />
-                )}
+                {tab.icon} {tab.label}
+                {tab.badge ? <span className="ml-1 px-1.5 py-0.5 rounded-md text-[8px] bg-indigo-100 text-indigo-700 font-black">{tab.badge}</span> : null}
               </button>
             );
           })}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-6 pb-24 md:pb-6">
           <div className={activeTab === 'builder' ? 'block' : 'hidden'}>
-            <section id="builder-section" className="scroll-mt-32 pt-2">
-              <div className="max-w-[1100px] mx-auto space-y-6">
-                {/* Card Container - Phase 01: Intent */}
-                <div className="relative">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-[2rem] p-6 border border-slate-200 shadow-[0_20px_40px_rgba(0,0,0,0.02)] relative overflow-hidden"
-                  >
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-                          <Play size={20} fill="currentColor" />
-                        </div>
-                        <div>
-                          <h2 className="text-xl font-bold text-slate-900 font-outfit">Set Test Strategy</h2>
-                          <p className="text-sm text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[400px]">Define the goal and focus of your practice session</p>
-                        </div>
-                      </div>
+            <div className="flex flex-col h-auto md:h-[calc(100vh-180px)] max-w-[1400px] mx-auto gap-4 overflow-hidden md:px-4">
+              {/* --- MAIN GRID: 3-COLUMN ANALYST TERMINAL --- */}
+              <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[calc(100vh-280px)] xl:h-[620px] relative z-10 mb-2 px-4 md:px-0 scroll-smooth">
 
-                      <div className="space-y-6">
-                        <div className="space-y-2">
-                          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1 inline-flex items-center gap-1">
-                            Test Name (Codename) <span className="text-rose-500">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={testName}
-                            onChange={(e) => setTestName(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-base font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all placeholder:text-slate-300"
-                            placeholder="e.g. KCET Mathematics Mock #01"
-                          />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          {[
-                            {
-                              id: 'predictive_mock',
-                              label: 'Real Exam Style',
-                              tagline: 'AI-Matched Difficulty',
-                              icon: <Sparkles size={20} />,
-                              desc: 'Practise exactly how the exam feels',
-                              impact: 'FEEL EXAM-READY',
-                              color: 'indigo'
-                            },
-                            {
-                              id: 'hybrid',
-                              label: 'Smart Mix',
-                              tagline: 'Grow & Improve',
-                              icon: <Target size={20} />,
-                              desc: 'Fix weak spots + real exam patterns',
-                              impact: 'BEST OF BOTH',
-                              color: 'emerald'
-                            },
-                            {
-                              id: 'adaptive_growth',
-                              label: 'Fix Weak Spots',
-                              tagline: 'Focused Practice',
-                              icon: <Zap size={20} />,
-                              desc: 'AI targets only what you\'re dropping marks on',
-                              impact: 'PLUG THE GAPS',
-                              color: 'rose'
-                            }
-                          ].map(s => {
-                            const isSelected = strategyMode === s.id && !oracleModeEnabled;
-                            const colorMap = {
-                              indigo: 'bg-indigo-600 shadow-indigo-100',
-                              emerald: 'bg-emerald-600 shadow-emerald-100',
-                              rose: 'bg-rose-600 shadow-rose-100'
-                            };
+                {/* --- COLUMN 1: BENCHMARKS & CALIBRATION (LEFT) --- */}
+                <div className="w-full lg:w-[310px] xl:w-[340px] flex flex-col gap-4 overflow-y-auto no-scrollbar scroll-smooth lg:pr-1 h-auto lg:h-full">
 
-                            return (
-                              <button
-                                key={s.id}
-                                onClick={() => {
-                                  setStrategyMode(s.id as StrategyMode);
-                                  setOracleModeEnabled(false);
-                                  // AUTOMATIC SYNC: If entering Simulation mode, lock to official pattern immediately
-                                  if (s.id === 'predictive_mock') {
-                                    const config = EXAM_CONFIGS[examContext];
-                                    if (config) {
-                                      if (examContext === 'NEET') {
-                                        setQuestionCount(50);
-                                        setDurationMinutes(50);
-                                      } else if (examContext === 'JEE') {
-                                        setQuestionCount(30);
-                                        setDurationMinutes(60);
-                                      } else if (examContext === 'KCET') {
-                                        setQuestionCount(60);
-                                        setDurationMinutes(80);
-                                      } else {
-                                        setQuestionCount(config.pattern.totalQuestions);
-                                        setDurationMinutes(config.pattern.duration);
-                                      }
-                                    }
-                                  }
-                                }}
-                                className={`relative group p-5 rounded-3xl border-2 transition-all text-left flex flex-col gap-4 overflow-hidden ${isSelected ? 'bg-white border-slate-900 shadow-[0_20px_40px_rgba(0,0,0,0.08)] ring-4 ring-slate-900/5' : 'bg-white border-slate-100 hover:border-slate-300'}`}
-                              >
-                                {/* AI Badge */}
-                                <div className="absolute top-0 right-0">
-                                  <div className={`px-3 py-1 text-[8px] font-black uppercase tracking-widest rounded-bl-xl ${isSelected ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                                    AI POWERED
-                                  </div>
-                                </div>
-
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-transform group-hover:scale-110 ${isSelected ? colorMap[s.color as keyof typeof colorMap] + ' text-white' : 'bg-slate-50 text-slate-400'}`}>
-                                  {s.icon}
-                                </div>
-
-                                <div className="space-y-1">
-                                  <div className="flex flex-col">
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${isSelected ? 'text-indigo-600' : 'text-slate-400'}`}>{s.tagline}</span>
-                                    <span className={`text-base font-bold block leading-tight ${isSelected ? 'text-slate-900' : 'text-slate-600'}`}>{s.label}</span>
-                                  </div>
-                                  <p className="text-[11px] font-medium text-slate-400 leading-snug line-clamp-1">{s.desc}</p>
-                                </div>
-
-                                {/* Impact Bar */}
-                                <div className="mt-auto pt-2">
-                                  <div className={`px-2 py-1 rounded-lg inline-flex items-center gap-1.5 ${isSelected ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400'}`}>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-indigo-400 animate-pulse' : 'bg-slate-300'}`} />
-                                    <span className="text-[9px] font-bold uppercase tracking-tight">{s.impact}</span>
-                                  </div>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {userProfile?.role === 'admin' && (
+                  {/* 1. INSTITUTIONAL BENCHMARKS (PRIMARY LAUNCH) */}
+                  <section className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-3xl p-5 border-2 border-indigo-200 shadow-lg shadow-indigo-100/50 space-y-4 shrink-0 relative overflow-hidden ring-2 ring-indigo-300/30">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-400/10 blur-[50px] rounded-full -mr-16 -mt-16 pointer-events-none" />
+                    <div className="flex items-center gap-2 mb-1 px-1 relative z-10">
+                      <Zap size={16} className="text-indigo-600 fill-indigo-600" />
+                      <label className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">🎯 Official 2026 Predictions</label>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2.5 relative z-10">
+                      {officialTests.length > 0 ? (
+                        officialTests.map((test, idx) => (
                           <button
-                            onClick={handleTogglePeakMode}
-                            className={`w-full p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between group overflow-hidden relative ${oracleModeEnabled ? 'bg-slate-900 border-slate-900 shadow-2xl scale-[1.02]' : 'bg-white border-indigo-100 hover:border-indigo-200'}`}
-                          >
-                            {/* Oracle Mode Background Pattern */}
-                            {oracleModeEnabled && (
-                              <div className="absolute inset-0 opacity-20 pointer-events-none">
-                                <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '16px 16px' }} />
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full blur-[80px] -mr-32 -mt-32" />
-                              </div>
+                            key={test.id || idx}
+                            onClick={() => handleCreateTest(test.official_set_id || test.id)}
+                            className={cn(
+                              "flex items-center gap-4 p-4 bg-white border-2 rounded-2xl shadow-md transition-all group text-left",
+                              "hover:shadow-xl hover:-translate-y-0.5 active:scale-95",
+                              idx === 0 ? "border-indigo-300 hover:border-indigo-500 hover:shadow-indigo-200/50" : "border-purple-300 hover:border-purple-500 hover:shadow-purple-200/50"
                             )}
-
-                            <div className="flex items-center gap-6 relative z-10 text-left">
-                              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 rotate-12 shadow-[0_0_30px_rgba(255,255,255,0.4)]' : 'bg-indigo-50 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-12'}`}>
-                                <Sparkles size={28} fill={oracleModeEnabled ? "currentColor" : "none"} />
+                          >
+                            <div className={cn(
+                              "w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-sm",
+                              idx === 0 ? "bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white" : "bg-purple-100 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"
+                            )}>
+                              <ShieldCheck size={22} />
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-[13px] font-black text-slate-900 leading-tight">
+                                {test.test_name || test.testName || `${subject} Prediction`}
                               </div>
-                              <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded ${oracleModeEnabled ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-600'}`}>Ultimate Core</span>
-                                  {oracleModeEnabled && <span className="animate-pulse flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]" />}
-                                </div>
-                                <span className={`text-xl font-black block font-outfit ${oracleModeEnabled ? 'text-white' : 'text-slate-900'}`}>Let AI Build My Test</span>
-                                <span className={`text-xs font-bold block ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-400'}`}>AI picks the right topics and difficulty based on where you need the most practice</span>
+                              <div className="text-[9px] font-bold text-slate-500 mt-1">
+                                {test.official_set_id === 'SET-A' ? 'Official Paper Simulation' : 'Pattern-Based Paper Analysis'}
                               </div>
                             </div>
-
-                            <div className="flex items-center gap-3 relative z-10">
-                              <div className={`flex flex-col items-end hidden md:flex mr-4 ${oracleModeEnabled ? 'text-indigo-200' : 'text-slate-300'}`}>
-                                <span className="text-xs font-bold uppercase">{oracleModeEnabled ? 'AI Active' : 'Off'}</span>
-                              </div>
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${oracleModeEnabled ? 'bg-white text-slate-900 shadow-lg scale-110' : 'bg-slate-50 text-slate-300'}`}>
-                                {oracleModeEnabled ? <Check size={24} strokeWidth={3} /> : <div className="w-2 h-2 rounded-full bg-slate-200" />}
-                              </div>
+                            <div className={cn(
+                              "px-2.5 py-1 rounded-lg text-[9px] font-black border",
+                              idx === 0 ? "bg-indigo-100 text-indigo-700 border-indigo-200" : "bg-purple-100 text-purple-700 border-purple-200"
+                            )}>
+                              {test.totalQuestions || 60} Qs
                             </div>
                           </button>
-                        )}
-
-                        <motion.div
-                          key={oracleModeEnabled ? 'oracle' : strategyMode}
-                          initial={{ opacity: 0, scale: 0.98 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.98 }}
-                          className={`p-6 rounded-[2rem] border-2 flex gap-6 items-center transition-all duration-500 ${oracleModeEnabled ? 'bg-slate-900 border-slate-800 text-white shadow-2xl' : 'bg-indigo-50/50 border-indigo-100 text-slate-900'}`}
-                        >
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${oracleModeEnabled ? 'bg-indigo-600 text-white animate-pulse' : 'bg-white text-indigo-600 border border-indigo-100'}`}>
-                            {oracleModeEnabled ? <Sparkles size={28} /> : strategyMode === 'predictive_mock' ? <Cpu size={28} /> : strategyMode === 'hybrid' ? <Activity size={28} /> : <TrendingDown size={28} />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-1.5">
-                              <h4 className={`text-sm font-black uppercase tracking-[0.15em] ${oracleModeEnabled ? 'text-indigo-400' : 'text-indigo-600'}`}>
-                                {oracleModeEnabled ? 'AI Is Building Your Test' : strategyMode === 'predictive_mock' ? 'Real Exam Style' : strategyMode === 'hybrid' ? 'Smart Mix' : 'Fix Weak Spots'}
-                              </h4>
-                              <div className={`flex items-center gap-2 px-2 py-1 rounded-lg border ${oracleModeEnabled ? 'bg-indigo-500/20 border-indigo-500/30' : 'bg-white border-indigo-100'}`}>
-                                <div className={`w-1.5 h-1.5 rounded-full ${oracleModeEnabled ? 'bg-emerald-400' : 'bg-indigo-500'} shadow-[0_0_8px_rgba(99,102,241,0.6)]`} />
-                                <span className={`text-[10px] font-bold uppercase tracking-tight ${oracleModeEnabled ? 'text-indigo-200' : 'text-indigo-600'}`}>AI Ready</span>
-                              </div>
+                        ))
+                      ) : (
+                        // Fallback UI if API is still loading or empty
+                        ['SET-A', 'SET-B'].map((setId, idx) => (
+                          <button
+                            key={setId}
+                            onClick={() => handleCreateTest(setId)}
+                            className={cn(
+                              "flex items-center gap-4 p-4 bg-white border-2 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all group text-left",
+                              idx === 0 ? "border-indigo-300 hover:border-indigo-500 hover:shadow-indigo-200/50" : "border-purple-300 hover:border-purple-500 hover:shadow-purple-200/50"
+                            )}
+                          >
+                            <div className={cn(
+                              "w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-sm",
+                              idx === 0 ? "bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white" : "bg-purple-100 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"
+                            )}>
+                              <ShieldCheck size={22} />
                             </div>
-                            <p className={`text-sm font-medium leading-relaxed ${oracleModeEnabled ? 'text-indigo-100/80' : 'text-slate-500'}`}>
-                              {oracleModeEnabled
-                                ? "AI looks at your progress and real exam patterns to build a test that's perfectly matched to what you need to work on next."
-                                : theme.strategyNote?.[strategyMode === 'predictive_mock' ? 'predictive_mock' : strategyMode === 'hybrid' ? 'hybrid' : 'adaptive_growth'] || "AI is setting up your test based on your chosen settings."
-                              }
-                            </p>
-                          </div>
-                          <div className={`hidden lg:flex flex-col items-end shrink-0 gap-1 border-l pl-6 py-1 ${oracleModeEnabled ? 'border-slate-700' : 'border-indigo-100'}`}>
-                            <span className={`text-[10px] font-bold uppercase tracking-widest ${oracleModeEnabled ? 'text-slate-500' : 'text-slate-400'}`}>Status</span>
-                            <span className={`text-xs font-black uppercase ${oracleModeEnabled ? 'text-emerald-400' : 'text-indigo-600'}`}>
-                              {oracleModeEnabled || strategyMode === 'predictive_mock' ? 'Ready to Start' : 'Setting Up'}
-                            </span>
-                          </div>
-                        </motion.div>
-                      </div>
-
-                      <div className="pt-2 flex justify-end">
-                        <button
-                          onClick={scrollToCalibration}
-                          disabled={!testName.trim()}
-                          className={`px-12 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-3 ${!testName.trim() ? 'bg-slate-50 text-slate-300 border border-slate-200 cursor-not-allowed' : 'bg-slate-900 text-white shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-1 active:scale-95'}`}
-                        >
-                          {strategyMode === 'predictive_mock' || oracleModeEnabled ? 'Next: Choose Topics' : 'Next: Choose Topics'}
-                          <ArrowRight size={20} className={!testName.trim() ? '' : 'animate-pulse'} />
-                        </button>
-                      </div>
+                            <div className="flex-1">
+                              <div className="text-[13px] font-black text-slate-900 leading-tight">{subject} {setId === 'SET-A' ? 'Set-A' : 'Set-B'} Prediction</div>
+                              <div className="text-[9px] font-bold text-slate-500 mt-1">Institutional Forensic Calibration</div>
+                            </div>
+                            <div className={cn(
+                              "px-2.5 py-1 rounded-lg text-[9px] font-black border",
+                              idx === 0 ? "bg-indigo-100 text-indigo-700 border-indigo-200" : "bg-purple-100 text-purple-700 border-purple-200"
+                            )}>
+                              60 Qs
+                            </div>
+                          </button>
+                        ))
+                      )}
                     </div>
-                  </motion.div>
+                  </section>
+
+                  {/* 2. CALIBRATION MODES */}
+                  <section className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4 shrink-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Layers size={14} className="text-indigo-500" />
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Simulation Model</label>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2.5">
+                      {[
+                        { id: 'predictive_mock', label: 'AI Prediction', sub: 'Full Exam Simulation', icon: ShieldCheck },
+                        { id: 'adaptive_growth', label: 'Weakness Practice', sub: 'Target Your Weak Topics', icon: Rocket },
+                        { id: 'conceptual_recovery', label: 'Concept Builder', sub: 'Master the Basics', icon: Zap }
+                      ].map(mode => (
+                        <button
+                          key={mode.id}
+                          onClick={() => setStrategyMode(mode.id as StrategyMode)}
+                          className={`w-full p-3.5 rounded-2xl border transition-all group relative text-left ${strategyMode === mode.id ? 'bg-indigo-50/50 border-indigo-500 shadow-sm shadow-indigo-100/50' : 'bg-white border-slate-100 hover:border-slate-200'}`}
+                        >
+                          <div className="flex items-center gap-3.5">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${strategyMode === mode.id ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'}`}>
+                              <mode.icon size={18} />
+                            </div>
+                            <div>
+                              <div className="text-xs font-black text-slate-900 leading-tight">{mode.label}</div>
+                              <div className="text-[9px] font-bold text-slate-400 leading-tight mt-0.5">{mode.sub}</div>
+                            </div>
+                            {strategyMode === mode.id && <div className="ml-auto w-2 h-2 rounded-full bg-indigo-600 shadow-[0_0_8px_rgba(79,70,229,0.5)]" />}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* Visual padding at bottom of scroll (Desktop only) */}
+                  <div className="hidden lg:block h-8 shrink-0" />
                 </div>
 
-                {/* Phase 02: Calibration */}
-                <div ref={calibrationRef} className={`scroll-mt-24 transition-all duration-700 ${!testName.trim() ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="bg-white rounded-[2.5rem] p-6 border border-slate-200 shadow-[0_32px_64px_rgba(0,0,0,0.03)] relative overflow-hidden"
-                  >
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between gap-6 mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-                            <Settings size={22} />
-                          </div>
-                          <div>
-                            <h2 className="text-xl font-bold text-slate-900 font-outfit">Choose Your Topics & Settings</h2>
-                            <p className="text-sm text-slate-500 font-medium">Pick what goes into your test — or let AI decide for you</p>
-                          </div>
-                        </div>
-                        <div className="hidden md:flex bg-slate-50 border border-slate-200 text-slate-900 px-5 py-2 rounded-2xl items-center gap-4 shadow-sm">
-                          <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Test Mode</span>
-                            <span className="text-xs font-bold uppercase tracking-tight text-slate-900">
-                              {oracleModeEnabled ? 'AI Picks for Me' : strategyMode === 'predictive_mock' ? 'Real Exam Style' : strategyMode === 'hybrid' ? 'Smart Mix' : 'Fix Weak Spots'}
-                            </span>
-                          </div>
-                        </div>
+                {/* --- COLUMN 2: SYLLABUS FOCUS (CENTER) --- */}
+                <div className="flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col overflow-hidden h-auto lg:h-full">
+
+                  {/* 1. MISSION IDENTITY (NEW: PRIMARY POSITION) */}
+                  <div className="p-4 bg-slate-50/30 border-b border-slate-100 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[40px] rounded-full -mr-10 -mt-10" />
+                    <div className="relative">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-1 block mb-2">Assignment / Mission Signature</label>
+                      <div className="relative">
+                        <Rocket size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400" />
+                        <input
+                          type="text"
+                          placeholder="Assign mission name (e.g. KCET Final Mock Alpha)..."
+                          value={testName}
+                          onChange={(e) => setTestName(e.target.value)}
+                          className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl py-3 pl-10 pr-4 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 shadow-sm transition-all"
+                        />
                       </div>
-                      {(oracleModeEnabled || strategyMode === 'predictive_mock') && (
-                        <div className="mx-6 mb-8 p-5 bg-slate-50 border border-slate-200 rounded-[2rem] flex items-center gap-5">
-                          <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 shadow-sm shrink-0">
-                            <Shield size={22} />
+                    </div>
+                  </div>
+
+                  {/* SIMULATION INTELLIGENCE (MOVED TO TOP) */}
+                  <div className="px-4 py-3 bg-indigo-50/30 border-b border-slate-100">
+                    <div className="bg-white rounded-2xl p-3 border border-indigo-200 flex gap-3 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-2 opacity-10"><Sparkles size={30} className="text-indigo-600" /></div>
+                      <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
+                        <Info size={14} />
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Simulation Intelligence</span>
+                        <p className="text-[10px] font-bold text-slate-900 leading-tight">
+                          {strategyMode === 'predictive_mock'
+                            ? `AI mirrors exam patterns exactly to match the real test experience.`
+                            : strategyMode === 'adaptive_growth'
+                              ? "AI focuses on your weak topics to help you improve faster."
+                              : "AI helps you master fundamental concepts step by step."
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 border-b border-slate-100 flex justify-between items-center shrink-0 bg-white sticky top-0 z-10">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <h2 className="text-xs font-black text-slate-900 uppercase tracking-widest whitespace-nowrap">Syllabus Focus</h2>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {[
+                          { label: 'Mastery', value: matrixStats.master, color: 'bg-purple-600' },
+                          { label: 'Accuracy', value: matrixStats.solve, color: 'bg-emerald-600' },
+                          { label: 'Fidelity', value: matrixStats.recall, color: 'bg-amber-600' }
+                        ].map(tag => (
+                          <div key={tag.label} className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200">
+                            <div className={`w-1.5 h-1.5 rounded-full ${tag.color}`} />
+                            <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest">{tag.label}</span>
+                            <span className="text-[10px] font-black text-slate-900">{tag.value}%</span>
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-bold text-slate-900 mb-0.5">Official Standard Simulation Mode</p>
-                            <p className="text-xs font-medium text-slate-500 leading-relaxed">
-                              This assessment follows the official board exam properties. All parameters including topic weightage, difficulty balance, and duration are auto-managed.
-                            </p>
-                          </div>
-                        </div>
+                        ))}
+                      </div>
+
+                      {strategyMode === 'predictive_mock' && (
+                        <span className="text-[8px] font-black text-indigo-500 uppercase px-1.5 py-0.5 bg-indigo-50 rounded border border-indigo-100 whitespace-nowrap">Full Blueprint Lock</span>
                       )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        disabled={strategyMode === 'predictive_mock'}
+                        onClick={selectAllTopics}
+                        className={`text-[9px] font-black uppercase transition-colors ${strategyMode === 'predictive_mock' ? 'text-slate-300 cursor-not-allowed' : 'text-indigo-600 hover:text-indigo-700'}`}
+                      >
+                        All
+                      </button>
+                      <button
+                        disabled={strategyMode === 'predictive_mock'}
+                        onClick={clearTopics}
+                        className={`text-[9px] font-black uppercase transition-colors ${strategyMode === 'predictive_mock' ? 'text-slate-300 cursor-not-allowed' : 'text-slate-400 hover:text-slate-600'}`}
+                      >
+                        None
+                      </button>
+                    </div>
+                  </div>
+                  <div className="overflow-y-auto p-4 scrollbar-thin relative no-scrollbar">
+                    {strategyMode === 'predictive_mock' && (
+                      <div className="absolute inset-0 bg-white/5 z-20 cursor-not-allowed" title="Locked to Full Syllabus Blueprint" />
+                    )}
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 pb-4">
+                      {topics.map(topic => (
+                        <button
+                          key={topic.topicId}
+                          disabled={strategyMode === 'predictive_mock'}
+                          onClick={() => toggleTopic(topic.topicId)}
+                          className={`p-2 rounded-xl border-2 text-left transition-all flex items-center gap-2 ${selectedTopicIds.includes(topic.topicId) ? 'bg-indigo-50 border-indigo-600' : 'bg-slate-50 border-transparent'} ${strategyMode === 'predictive_mock' ? 'opacity-80' : ''}`}
+                        >
+                          <div className={`w-2 h-2 rounded-full border-2 ${selectedTopicIds.includes(topic.topicId) ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`} />
+                          <span className={`text-[10px] font-bold truncate ${selectedTopicIds.includes(topic.topicId) ? 'text-indigo-900' : 'text-slate-600'}`}>{topic.topicName}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
-                      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
-                        <div className="space-y-6">
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between px-1">
-                              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                {strategyMode === 'predictive_mock' || oracleModeEnabled ? 'Fixed Subject Topics' : 'Choose Chapters for this test'}
-                              </label>
-                              {!oracleModeEnabled && strategyMode !== 'predictive_mock' && (
-                                <div className="flex gap-4">
-                                  <button onClick={() => setSelectedTopicIds(topics.map(t => t.topicId))} className="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Select All</button>
-                                  <button onClick={() => setSelectedTopicIds([])} className="text-xs font-bold text-slate-400 hover:text-slate-500 transition-colors">Clear All</button>
-                                </div>
-                              )}
-                              {(oracleModeEnabled || strategyMode === 'predictive_mock') && (
-                                <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-full">
-                                  <ShieldCheck size={14} className="text-indigo-600" />
-                                  <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-widest">Board Standard Locked</span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar p-0.5">
-                              {topics.map(topic => {
-                                const isSelected = selectedTopicIds.includes(topic.topicId);
-                                const isSimulation = strategyMode === 'predictive_mock' || oracleModeEnabled;
-                                return (
-                                  <div
-                                    key={topic.topicId}
-                                    onClick={() => !isSimulation && toggleTopic(topic.topicId)}
-                                    className={`p-3 rounded-xl border-2 transition-all text-left flex items-center gap-3 group relative overflow-hidden ${isSelected ? 'bg-indigo-50 border-indigo-600' : 'bg-white border-slate-100 hover:border-slate-300'} ${!isSimulation ? 'cursor-pointer' : 'cursor-default opacity-90'}`}
-                                  >
-                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${isSelected ? 'bg-indigo-600 text-white active:scale-95' : 'bg-slate-100 text-slate-300'}`}>
-                                      {isSelected ? <Check size={14} strokeWidth={4} /> : null}
-                                    </div>
-                                    <span className={`text-sm font-bold transition-all ${isSelected ? 'text-slate-900 translate-x-1' : 'text-slate-500'}`}>{topic.topicName}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between px-1">
-                              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                {strategyMode === 'predictive_mock' || oracleModeEnabled ? 'Exam Difficulty Balance' : 'Adjust Difficulty Balance'}
-                              </label>
-                              {(oracleModeEnabled || strategyMode === 'predictive_mock') && (
-                                <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-full">
-                                  <ShieldCheck size={14} className="text-indigo-600" />
-                                  <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-widest">Standard Balanced</span>
-                                </div>
-                              )}
-                            </div>
-
-                            <ComplexityMatrix
-                              easy={difficultyMix.easy}
-                              moderate={difficultyMix.moderate}
-                              hard={difficultyMix.hard}
-                              isAuto={isAutoComplexity}
-                              locked={oracleModeEnabled || strategyMode === 'predictive_mock'}
-                              onAdjust={handleDifficultyChange}
-                              onToggleAuto={setIsAutoComplexity}
-                              stats={matrixStats}
-                            />
-                          </div>
-                        </div>
+                {/* --- COLUMN 3: SIMULATION PARAMETERS (RIGHT) --- */}
+                <div className="w-full lg:w-[310px] xl:w-[340px] flex flex-col gap-4 overflow-y-auto no-scrollbar lg:pr-1 h-auto lg:h-full">
+                  <section className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-5 h-full">
+                    <div className="flex items-center justify-between px-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <h2 className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">Simulation Logic</h2>
                       </div>
+                      <div className={`px-2 py-1 rounded-lg border flex items-center gap-1.5 ${strategyMode === 'predictive_mock' ? 'bg-indigo-50 border-indigo-100 text-indigo-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
+                        {strategyMode === 'predictive_mock' ? <ShieldCheck size={10} /> : <Unlock size={10} />}
+                        <span className="text-[8px] font-black uppercase tracking-widest leading-none mt-0.5">{strategyMode === 'predictive_mock' ? 'Locked' : 'Unlocked'}</span>
+                      </div>
+                    </div>
 
-                      <div className="space-y-4">
-                        {/* Performance Forecast Panel */}
-                        {(oracleModeEnabled || strategyMode === 'predictive_mock') && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="bg-slate-900 rounded-[2.5rem] p-6 text-white shadow-2xl relative overflow-hidden group border border-slate-800"
-                          >
-                            <div className="absolute inset-0 opacity-10">
-                              <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                    <div className="space-y-4 px-1">
+                      {(strategyMode !== 'predictive_mock' || userRole === 'admin' || userRole === 'teacher') ? [
+                        { id: 'easy', label: 'Foundation', value: difficultyMix.easy, color: 'bg-emerald-500' },
+                        { id: 'moderate', label: 'Standard', value: difficultyMix.moderate, color: 'bg-amber-500' },
+                        { id: 'hard', label: 'Advanced', value: difficultyMix.hard, color: 'bg-rose-500' }
+                      ].map(slice => (
+                        <div key={slice.label} className="space-y-1.5 relative group">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{slice.label}</span>
+                            <span className="text-[10px] font-black text-slate-900">{slice.value}%</span>
+                          </div>
+                          <div className="relative h-2 w-full bg-slate-100 rounded-full overflow-visible border border-slate-200/40">
+                            <div className="absolute inset-0 bg-slate-100 rounded-full overflow-hidden">
+                              <motion.div animate={{ width: `${slice.value}%` }} className={`h-full ${slice.color} rounded-full transition-all duration-700`} />
                             </div>
 
-                            <div className="relative z-10 space-y-6">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 cursor-pointer hover:bg-indigo-500/30 transition-all" onClick={() => setShowForecastExplanation(true)}>
-                                    <Cpu size={20} />
-                                  </div>
-                                  <div className="cursor-pointer" onClick={() => setShowForecastExplanation(true)}>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-1.5">Your Forecast <Info size={10} /></span>
-                                    <h3 className="text-sm font-bold font-outfit">Predictive Analytics</h3>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2 px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                                  <div className="w-1 h-1 rounded-full bg-emerald-400 animate-ping" />
-                                  <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest leading-none">Live Sync</span>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                                  <span className="text-[9px] font-black text-indigo-300/80 uppercase tracking-wider block mb-1">Rigor Velocity</span>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xl font-black font-mono text-white italic">{forecast?.rigorVelocity || '1.02'}x</span>
-                                    <TrendingUp size={14} className="text-emerald-400" />
-                                  </div>
-                                </div>
-                                <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                                  <span className="text-[9px] font-black text-indigo-300/80 uppercase tracking-wider block mb-1">Score Accuracy</span>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xl font-black font-mono text-white italic">ULTRA-HIGH</span>
-                                    <ShieldCheck size={14} className="text-indigo-400" />
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="space-y-4">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-[10px] font-black text-indigo-300/80 uppercase tracking-widest">Growth Signatures</span>
-                                  <Dna size={14} className="text-indigo-400 opacity-50" />
-                                </div>
-                                <div className="space-y-3">
-                                  {[
-                                    { label: 'Synthesis', value: forecast?.intentSignature?.synthesis || 0.85, color: 'bg-indigo-500' },
-                                    { label: 'Trap Density', value: forecast?.intentSignature?.trapDensity || 0.72, color: 'bg-rose-500' },
-                                    { label: 'Speed Requirement', value: forecast?.intentSignature?.speedRequirement || 0.90, color: 'bg-amber-500' }
-                                  ].map(sig => (
-                                    <div key={sig.label} className="space-y-1">
-                                      <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-tight">
-                                        <span className="text-indigo-200/70">{sig.label}</span>
-                                        <span className="text-white">{Math.round(sig.value * 100)}%</span>
-                                      </div>
-                                      <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                                        <motion.div
-                                          initial={{ width: 0 }}
-                                          animate={{ width: `${sig.value * 100}%` }}
-                                          className={`h-full ${sig.color} shadow-[0_0_8px_rgba(255,255,255,0.1)]`}
-                                        />
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-
-                              <p className="text-[11px] font-bold text-slate-200 leading-relaxed">
-                                Generated questions will target linguistic traps and multivariable logic gaps based on latest {examContext} trends.
-                              </p>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        <div className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-100 shadow-xl space-y-8 flex flex-col">
-                          <div className="flex items-center justify-between border-b pb-4 border-slate-100 gap-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-200">
-                                <Target size={18} />
-                              </div>
-                              <span className="text-sm font-bold text-slate-900 uppercase tracking-wider">Test Overview</span>
-                            </div>
-                            {(oracleModeEnabled || strategyMode === 'predictive_mock') && (
-                              <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-full shrink-0">
-                                <div className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Standardized</span>
+                            {strategyMode !== 'predictive_mock' && (
+                              <div
+                                className="absolute top-0 bottom-0 z-30 pointer-events-none group"
+                                style={{ left: slice.id === 'easy' ? '50%' : slice.id === 'moderate' ? '40%' : '10%' }}
+                              >
+                                <div className="absolute inset-y-[-2px] w-[3px] bg-amber-500/80 -translate-x-1/2 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-amber-500" />
                               </div>
                             )}
+
+                            {strategyMode !== 'predictive_mock' && (
+                              <input
+                                type="range" min="0" max="100" step="5" value={slice.value}
+                                onChange={(e) => {
+                                  const val = Number(e.target.value);
+                                  const others = { ...difficultyMix };
+                                  if (slice.id === 'easy') {
+                                    others.easy = val;
+                                    others.moderate = Math.max(0, Math.round((100 - val) * 0.6 / 5) * 5);
+                                    others.hard = 100 - others.easy - others.moderate;
+                                  } else if (slice.id === 'moderate') {
+                                    others.moderate = val;
+                                    others.easy = Math.max(0, Math.round((100 - val) * 0.5 / 5) * 5);
+                                    others.hard = 100 - others.easy - others.moderate;
+                                  } else {
+                                    others.hard = val;
+                                    others.easy = Math.max(0, Math.round((100 - val) * 0.5 / 5) * 5);
+                                    others.moderate = 100 - others.easy - others.hard;
+                                  }
+                                  setDifficultyMix(others);
+                                }}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                              />
+                            )}
                           </div>
+                        </div>
+                      )) : null}
+                    </div>
 
-                          <div className="space-y-6">
-                            <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Subject</span>
-                              <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-slate-300" />
-                                <span className="text-base font-bold text-slate-900">{subject}</span>
-                              </div>
-                            </div>
+                    <div className="space-y-6 pt-5 border-t border-slate-50 mt-2">
+                      {/* Duration */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Target Duration</span><span className="text-xs font-black text-indigo-600">{durationMinutes}m</span></div>
+                        <div className="relative h-1.5 w-full bg-slate-100 rounded-full group">
+                          <div className="absolute top-0 bottom-0 z-30 pointer-events-none" style={{ left: `${((80 - 15) / 165) * 100}%` }}>
+                            <div className="absolute inset-y-[-3px] w-[3px] bg-amber-500/80 -translate-x-1/2 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-amber-500 shadow-sm" />
+                          </div>
+                          <input
+                            type="range" min="15" max="180" step="5" value={durationMinutes}
+                            disabled={strategyMode === 'predictive_mock'}
+                            onChange={(e) => setDurationMinutes(parseInt(e.target.value))}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                          />
+                          <div className="absolute inset-0 bg-slate-100 rounded-full overflow-hidden border border-slate-200/30">
+                            <div className="h-full bg-indigo-500" style={{ width: `${((durationMinutes - 15) / 165) * 100}%` }} />
+                          </div>
+                        </div>
+                      </div>
 
-                            <div className="space-y-6">
-                              <div className="group">
-                                <div className="flex items-center justify-between mb-4 px-1">
-                                  <div className="flex flex-col">
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Number of Questions</span>
-                                    {(oracleModeEnabled || strategyMode === 'predictive_mock') && (
-                                      <span className="text-[9px] font-bold text-indigo-500 uppercase">Fixed to Exam Pattern</span>
-                                    )}
-                                  </div>
-                                </div>
-                                <span className="text-2xl font-bold text-slate-900 font-mono italic">{questionCount}</span>
-                              </div>
-                              <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${((questionCount - 5) / 95) * 100}%` }}
-                                  className="absolute inset-0 bg-slate-900 rounded-full"
-                                />
-                                <input
-                                  type="range" min="5" max="100" step="5" value={questionCount}
-                                  disabled={oracleModeEnabled || strategyMode === 'predictive_mock'}
-                                  onChange={(e) => setQuestionCount(parseInt(e.target.value))}
-                                  className={`absolute inset-0 w-full h-full opacity-0 z-10 ${oracleModeEnabled || strategyMode === 'predictive_mock' ? 'cursor-default pointer-events-none' : 'cursor-pointer'}`}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="group">
-                              <div className="flex items-center justify-between mb-4 px-1">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shadow-sm">
-                                    <Clock size={18} />
-                                  </div>
-                                  <div className="flex flex-col">
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Time Duration (mins)</span>
-                                    {(oracleModeEnabled || strategyMode === 'predictive_mock') && (
-                                      <span className="text-[9px] font-bold text-amber-600 uppercase">Fixed to Exam Pattern</span>
-                                    )}
-                                  </div>
-                                </div>
-                                <span className="text-2xl font-bold text-slate-900 font-mono italic">{durationMinutes}</span>
-                              </div>
-                              <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${((durationMinutes - 10) / 170) * 100}%` }}
-                                  className="absolute inset-0 bg-slate-400 rounded-full"
-                                />
-                                <input
-                                  type="range" min="10" max="180" step="5" value={durationMinutes}
-                                  disabled={oracleModeEnabled || strategyMode === 'predictive_mock'}
-                                  onChange={(e) => setDurationMinutes(parseInt(e.target.value))}
-                                  className={`absolute inset-0 w-full h-full opacity-0 z-10 ${oracleModeEnabled || strategyMode === 'predictive_mock' ? 'cursor-default pointer-events-none' : 'cursor-pointer'}`}
-                                />
-                              </div>
-                            </div>
+                      {/* Question Payload */}
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Question Payload</span><span className="text-xs font-black text-indigo-600">{questionCount} Qs</span></div>
+                        <div className="relative h-1.5 w-full bg-slate-100 rounded-full group">
+                          <div className="absolute top-0 bottom-0 z-30 pointer-events-none" style={{ left: `${((60 - 5) / 95) * 100}%` }}>
+                            <div className="absolute inset-y-[-3px] w-[3px] bg-amber-500/80 -translate-x-1/2 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-amber-500 shadow-sm" />
+                          </div>
+                          <input
+                            type="range" min="5" max="100" step="5" value={questionCount}
+                            disabled={strategyMode === 'predictive_mock'}
+                            onChange={(e) => setQuestionCount(parseInt(e.target.value))}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                          />
+                          <div className="absolute inset-0 bg-slate-100 rounded-full overflow-hidden border border-slate-200/30">
+                            <div className="h-full bg-indigo-500" style={{ width: `${((questionCount - 5) / 95) * 100}%` }} />
                           </div>
                         </div>
                       </div>
                     </div>
-
-                    <div className="flex flex-col gap-4 mt-2">
-                      <motion.button
-                        whileHover={canCreateTest && !isCreatingTest ? { y: -4, scale: 1.01 } : {}}
-                        whileTap={canCreateTest && !isCreatingTest ? { scale: 0.98 } : {}}
-                        onClick={handleCreateTest}
-                        disabled={!canCreateTest || isCreatingTest}
-                        className={`w-full py-6 rounded-[2rem] font-black text-lg transition-all flex items-center justify-center gap-4 relative overflow-hidden ${canCreateTest && !isCreatingTest ? 'bg-slate-900 text-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] group' : 'bg-slate-50 text-slate-300 border border-slate-200 cursor-not-allowed'}`}
-                      >
-                        {canCreateTest && !isCreatingTest && (
-                          <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 bg-[length:200%_100%] animate-gradient-x" />
-                        )}
-
-                        {isCreatingTest ? (
-                          <>
-                            <div className="relative">
-                              <Loader2 size={24} className="animate-spin text-indigo-400" />
-                              <div className="absolute inset-0 animate-ping opacity-20 bg-indigo-400 rounded-full" />
-                            </div>
-                            <span className="relative z-10 uppercase tracking-widest text-sm">Building Your Challenge...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles size={24} className={canCreateTest ? 'text-indigo-400' : 'text-slate-300'} />
-                            <span className="relative z-10">Confirm & Deploy Assessment</span>
-                          </>
-                        )}
-                      </motion.button>
-
-                      {!canCreateTest && !isCreatingTest && (
-                        <div className="flex items-center justify-center gap-2 text-rose-500 bg-rose-50/50 py-3 rounded-2xl border border-rose-100">
-                          <AlertCircle size={16} />
-                          <p className="text-[10px] font-black uppercase tracking-[0.2em]">Select Chapters & Name Assessment</p>
-                        </div>
-                      )}
-
-                      {isCreatingTest && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="bg-slate-900 rounded-[2rem] p-5 border border-slate-800 shadow-2xl space-y-4"
-                        >
-                          <div className="flex justify-between items-end">
-                            <div className="space-y-1 flex-1 min-w-0 pr-3">
-                              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block truncate">{progressMessage}</span>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                                {progressMeta?.strategy ? (
-                                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">{progressMeta.strategy}</span>
-                                ) : (
-                                  <span className="text-xs font-bold text-slate-400">Smart Engine Active</span>
-                                )}
-                              </div>
-                              {progressMeta && (progressMeta.batchTotal ?? 0) > 0 && (
-                                <div className="flex items-center gap-3 mt-1 flex-wrap">
-                                  <span className="text-[10px] font-mono text-slate-400">
-                                    Batch <span className="text-white font-bold">{progressMeta.batchCurrent}</span>/<span className="text-slate-300">{progressMeta.batchTotal}</span>
-                                  </span>
-                                  <span className="text-[10px] font-mono text-slate-400">
-                                    Questions <span className="text-emerald-400 font-bold">{progressMeta.questionsGenerated}</span>/<span className="text-slate-300">{progressMeta.targetQuestions}</span>
-                                  </span>
-                                </div>
-                              )}
-                              {progressMeta?.currentTopics && progressMeta.currentTopics.length > 0 && (
-                                <div className="text-[9px] text-slate-500 truncate mt-0.5">
-                                  Topics: {progressMeta.currentTopics.join(' · ')}
-                                </div>
-                              )}
-                            </div>
-                            <span className="text-2xl font-black text-white font-mono shrink-0">{progressPercentage}%</span>
-                          </div>
-                          <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                            <motion.div
-                              animate={{ width: `${progressPercentage}%` }}
-                              className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)]"
-                            />
-                          </div>
-                          <div className="flex justify-between items-center text-[9px] font-bold text-slate-500 uppercase tracking-tight">
-                            <span>Pattern Matching</span>
-                            <span>Rigor Calibration</span>
-                          </div>
-                        </motion.div>
-                      )}
-                    </div>
-                  </motion.div>
+                  </section>
+                  <div className="hidden lg:block h-8 shrink-0" />
                 </div>
               </div>
-            </section>
+
+              {/* DASHBOARD GRID END */}
+
+              {/* --- DASHBOARD FOOTER: FLOATING COMMAND DOCK --- */}
+              <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1 p-1 bg-slate-900/95 backdrop-blur-xl rounded-2xl md:rounded-full border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)] min-w-[320px] md:min-w-[500px]">
+                {/* Stats Container */}
+                <div className="flex items-center gap-4 md:gap-8 px-4 md:px-8 py-2 md:py-3">
+                  <div className="flex flex-col">
+                    <span className="text-white font-black text-xs md:text-sm leading-none">{selectedTopicIds.length}</span>
+                    <span className="text-slate-500 text-[6px] md:text-[7px] font-black uppercase tracking-[0.2em] mt-0.5">Focus Areas</span>
+                  </div>
+                  <div className="w-px h-6 bg-white/10" />
+                  <div className="flex flex-col">
+                    <span className="text-white font-black text-xs md:text-sm leading-none">{questionCount}</span>
+                    <span className="text-slate-500 text-[6px] md:text-[7px] font-black uppercase tracking-[0.2em] mt-0.5">Payload Qs</span>
+                  </div>
+                </div>
+
+                {/* Vertical Divider */}
+                <div className="w-px h-8 bg-white/10 mx-2 hidden md:block" />
+
+                {/* Action Section */}
+                <div className="flex-1 flex justify-end p-0.5">
+                  <button
+                    onClick={() => handleCreateTest()}
+                    disabled={!canCreateTest || isCreatingTest}
+                    className={`h-10 md:h-12 px-6 md:px-10 rounded-xl md:rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-[0.2em] transition-all relative overflow-hidden group
+                      ${!canCreateTest || isCreatingTest
+                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                        : 'bg-indigo-600 text-white hover:bg-indigo-500 active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.4)]'}`}
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      {isCreatingTest ? <Loader2 size={14} className="animate-spin" /> : <Rocket size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />}
+                      {isCreatingTest ? 'Initializing' : 'Launch Simulation'}
+                    </span>
+                    {/* Glossy overlay effect */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className={`${activeTab === 'history' ? 'block' : 'hidden'} relative z-10`}>
+
+          {/* PROGRESS OVERLAY */}
+          <AnimatePresence>
+            {isCreatingTest && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-slate-900 rounded-[2.5rem] p-8 border border-white/10 shadow-2xl max-w-md w-full space-y-6">
+                  <div className="flex justify-between items-end">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">{progressMessage}</span>
+                      <span className="text-xs font-bold text-white">AI Smart Engine Active</span>
+                    </div>
+                    <span className="text-3xl font-black text-white font-mono">{progressPercentage}%</span>
+                  </div>
+                  <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div animate={{ width: `${progressPercentage}%` }} className="h-full bg-indigo-500 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+                  </div>
+                  {progressMeta && (
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                        <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Status</span>
+                        <span className="text-[10px] font-bold text-emerald-400 uppercase italic leading-none">{progressMeta.strategy}</span>
+                      </div>
+                      <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                        <span className="text-[8px] font-black text-slate-500 uppercase block mb-1">Batch</span>
+                        <span className="text-[10px] font-bold text-white font-mono leading-none">{progressMeta.batchCurrent}/{progressMeta.batchTotal}</span>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className={activeTab === 'history' ? 'block' : 'hidden'}>
             <section id="history-section" className="scroll-mt-32 pt-4">
               <div className="container mx-auto max-w-7xl px-4">
                 <div className="space-y-10">
-                  {/* Global Analytics Dashboard */}
-
-                  {/* Performance Analytics Detail Card (Design by 21st.dev) */}
                   {testHistory.length > 0 && (
                     <DetailedTestCard
-                      title="Global Mock Mastery"
-                      mainMetric={{
-                        label: "Avg Accuracy",
-                        value: `${avgScore || 0}%`,
-                        trend: aggregateAnalysis.accuracyTrend,
-                        icon: <Target size={14} className="text-emerald-400" />,
-                        color: "bg-emerald-400 text-emerald-400"
-                      }}
-                      stats={[
-                        { label: "Tests taken", value: completed.length, icon: <Trophy size={14} className="text-purple-400" />, color: "bg-purple-400 text-purple-400" },
-                        { label: "Solved", value: aggregateAnalysis.questionsSolved.toLocaleString(), icon: <ShieldCheck size={14} className="text-indigo-400" />, color: "bg-indigo-400 text-indigo-400" },
-                        { label: "Streak", value: `${aggregateAnalysis.dailyStreak} Days`, icon: <Zap size={14} className="text-amber-400" />, color: "bg-amber-400 text-amber-400" }
-                      ]}
-                      history={aggregateAnalysis.scoreHistory}
-                      historyLabel="Score trajectory (Last 20 Tests)"
-                      breakdown={aggregateAnalysis.subjectBreakdown.map(s => ({
-                         label: s.subject,
-                         value: s.accuracy,
-                         icon: s.icon,
-                         color: s.color
-                      }))}
-                      breakdownLabel="Subject Mastery Deck"
-                      observation={avgScore && avgScore >= 75 ? "Your global mock performance is in the elite bracket. Focus on maintaining consistency in your weakest subject." : "Growth identified. Increasing your mock frequency will sharpen your response speed significantly."}
+                      title="Global Mock Mastery" mainMetric={{ label: "Avg Accuracy", value: `${avgScore || 0}%`, trend: aggregateAnalysis.accuracyTrend, icon: <Target size={14} className="text-emerald-400" />, color: "bg-emerald-400 text-emerald-400" }}
+                      stats={[{ label: "Tests taken", value: completed.length, icon: <Trophy size={14} className="text-purple-400" />, color: "bg-purple-400 text-purple-400" }, { label: "Solved", value: aggregateAnalysis.questionsSolved.toLocaleString(), icon: <ShieldCheck size={14} className="text-indigo-400" />, color: "bg-indigo-400 text-indigo-400" }, { label: "Streak", value: `${aggregateAnalysis.dailyStreak} Days`, icon: <Zap size={14} className="text-amber-400" />, color: "bg-amber-400 text-amber-400" }]}
+                      history={aggregateAnalysis.scoreHistory} historyLabel="Score trajectory (Last 20 Tests)"
+                      breakdown={aggregateAnalysis.subjectBreakdown.map(s => ({ label: s.subject, value: s.accuracy, icon: s.icon, color: s.color }))}
+                      breakdownLabel="Subject Mastery Deck" observation={avgScore && avgScore >= 75 ? "Your performance is elite. Focus on consistency." : "Growth identified. Mock frequency will improve speed."}
                       className="max-w-none mb-6"
                     />
                   )}
-
-                  {/* Historical Records Section */}
                   <div className="space-y-6">
                     <div className="flex items-center justify-between px-2">
                       <h3 className="text-2xl font-bold text-slate-900 font-outfit">Detailed History</h3>
-                      <span className="px-4 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-slate-500 uppercase tracking-widest border border-slate-200">{testHistory.length} {testHistory.length === 1 ? 'Record' : 'Records'} Found</span>
+                      <span className="px-4 py-1.5 bg-slate-100 rounded-full text-xs font-bold text-slate-500 uppercase tracking-widest border border-slate-200">{testHistory.length} Records</span>
                     </div>
-
                     {isLoadingHistory ? (
-                      <div className="py-24 flex flex-col items-center justify-center gap-4">
-                        <Loader2 size={32} className="animate-spin text-indigo-600" />
-                        <span className="text-sm font-bold text-slate-400">Finding Your Past Results...</span>
-                      </div>
+                      <div className="py-24 flex flex-col items-center justify-center gap-4"><Loader2 size={32} className="animate-spin text-indigo-600" /><span className="text-sm font-bold text-slate-400">Loading History...</span></div>
                     ) : sortedHistory.length > 0 ? (
-                      <div className="grid grid-cols-1 gap-2.5">
-                        {sortedHistory.map((attempt) => {
-                          const isCompleted = attempt.status === 'completed';
-                          const pct = attempt.percentage ?? 0;
-                          const scoreLevel = pct >= 80 ? 'elite' : pct >= 50 ? 'solid' : 'critical';
-                          const colorMap = {
-                            elite: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-                            solid: 'text-indigo-600 bg-indigo-50 border-indigo-100',
-                            critical: 'text-rose-600 bg-rose-50 border-rose-100'
-                          }[scoreLevel];
+                      <div className="grid grid-cols-1 gap-3">
+                        {sortedHistory.map((attempt) => (
+                          <motion.button
+                            key={attempt.id}
+                            onClick={() => onViewTestResults(attempt.id)}
+                            className="group relative p-4 bg-white rounded-3xl border border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-500/5 transition-all text-left flex items-center gap-5 overflow-visible"
+                          >
+                            {/* Score Bubble */}
+                            <div className="w-16 h-16 rounded-2xl border-2 border-indigo-100 bg-indigo-50/50 flex flex-col items-center justify-center text-indigo-600 shrink-0 shadow-inner group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                              <span className="text-xl font-black leading-none">{Math.round(attempt.percentage || 0)}%</span>
+                              <span className="text-[7px] font-black uppercase tracking-[0.1em] mt-1 opacity-60 group-hover:opacity-100">Score</span>
+                            </div>
 
-                          // Calculated Stats
-                          const correctCount = Math.round((pct / 100) * attempt.totalQuestions);
-                          const attemptedCount = attempt.questionsAttempted || 0;
-                          const incorrectCount = Math.max(0, attemptedCount - correctCount);
-                          const skippedCount = Math.max(0, attempt.totalQuestions - attemptedCount);
-
-                          return (
-                            <motion.button
-                              whileHover={{ x: 4, backgroundColor: '#fdfdff' }}
-                              whileTap={{ scale: 0.995 }}
-                              key={attempt.id}
-                              onClick={() => isCompleted && onViewTestResults(attempt.id)}
-                              disabled={!isCompleted}
-                              className={cn(
-                                "group p-3 md:p-4 rounded-2xl border transition-all text-left flex items-center gap-4",
-                                isCompleted ? "bg-white border-slate-100 shadow-sm hover:shadow-md" : "bg-slate-50 border-transparent opacity-60"
-                              )}
-                            >
-                              {/* Performance Score Box */}
-                              <div className={cn(
-                                "w-12 h-12 md:w-14 md:h-14 rounded-xl border flex flex-col items-center justify-center shrink-0 transition-transform group-hover:scale-105",
-                                colorMap
-                              )}>
-                                {isCompleted ? (
-                                  <>
-                                    <span className="text-base md:text-lg font-black font-outfit leading-none">{Math.round(pct)}%</span>
-                                    <span className="text-[6.5px] md:text-[7.5px] font-black uppercase tracking-widest mt-0.5 opacity-80">{scoreLevel}</span>
-                                  </>
-                                ) : (
-                                   <Loader2 size={16} className="animate-spin text-amber-500" />
-                                )}
-                              </div>
-
-                              {/* Core Info */}
-                              <div className="flex-[1.5] min-w-0 flex flex-col gap-0.5 md:gap-1">
-                                <div className="flex items-center gap-2">
-                                   <span className="px-1.5 py-0.5 bg-slate-100 rounded text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest border border-slate-200">{attempt.examContext || 'MOCK'}</span>
-                                   <span className="text-[9px] md:text-[10px] font-black text-indigo-500 uppercase tracking-widest truncate">{attempt.subject}</span>
+                            {/* Main Info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-3 mb-1.5">
+                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-900 rounded-lg">
+                                  <div className="w-1 h-1 rounded-full bg-indigo-400" />
+                                  <span className="text-[8px] font-black text-white uppercase tracking-widest">{attempt.examContext || 'MOCK'}</span>
                                 </div>
-                                <h4 className="text-sm md:text-base font-black text-slate-900 truncate pr-4">{attempt.testName}</h4>
-                                <div className="flex items-center gap-3 mt-0.5">
-                                   <div className="flex items-center gap-1">
-                                      <Clock size={10} className="text-slate-400" />
-                                      <span className="text-[10px] font-bold text-slate-500">{attempt.durationMinutes}m</span>
-                                   </div>
-                                   <div className="flex items-center gap-1">
-                                      <Target size={10} className="text-slate-400" />
-                                      <span className="text-[10px] font-bold text-slate-500">{attempt.totalQuestions} Qs</span>
-                                   </div>
+                                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{attempt.subject}</span>
+                                <div className="ml-auto flex items-center gap-2 text-[9px] font-bold text-slate-400">
+                                  <Calendar size={10} />
+                                  {attempt.createdAt ? new Date(attempt.createdAt).toLocaleDateString('en-GB') : 'N/A'}
                                 </div>
                               </div>
-
-                              {/* Stats Center (Fills the gap) */}
-                              <div className="hidden lg:flex flex-1 flex-col items-center justify-center gap-2 px-8 border-x border-slate-50">
-                                 <div className="flex items-center gap-4">
-                                    <div className="flex flex-col items-center">
-                                       <span className="text-[7px] font-black text-emerald-500 uppercase tracking-widest">Correct</span>
-                                       <span className="text-xs font-black text-slate-900">{correctCount}</span>
-                                    </div>
-                                    <div className="w-px h-6 bg-slate-100" />
-                                    <div className="flex flex-col items-center">
-                                       <span className="text-[7px] font-black text-rose-500 uppercase tracking-widest">Wrong</span>
-                                       <span className="text-xs font-black text-slate-900">{incorrectCount}</span>
-                                    </div>
-                                    <div className="w-px h-6 bg-slate-100" />
-                                    <div className="flex flex-col items-center">
-                                       <span className="text-[7px] font-black text-slate-300 uppercase tracking-widest">Skipped</span>
-                                       <span className="text-xs font-black text-slate-900">{skippedCount}</span>
-                                    </div>
-                                 </div>
-                                 {/* Mini Accuracy Bar */}
-                                 <div className="w-full max-w-[120px] h-1 bg-slate-100 rounded-full overflow-hidden flex">
-                                    <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${(correctCount / attempt.totalQuestions) * 100 || 0}%` }} />
-                                    <div className="h-full bg-rose-400 transition-all duration-1000" style={{ width: `${(incorrectCount / attempt.totalQuestions) * 100 || 0}%` }} />
-                                 </div>
+                              <h4 className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
+                                {attempt.testName || 'Untitled Simulation Log'}
+                              </h4>
+                              <div className="flex items-center gap-4 mt-1.5">
+                                <div className="flex items-center gap-1">
+                                  <FileQuestion size={10} className="text-slate-400" />
+                                  <span className="text-[9px] font-bold text-slate-500 uppercase">{attempt.totalQuestions || 0} Questions</span>
+                                </div>
+                                <div className="w-1 h-1 rounded-full bg-slate-200" />
+                                <div className="flex items-center gap-1">
+                                  <Clock size={10} className="text-slate-400" />
+                                  <span className="text-[9px] font-bold text-slate-500 uppercase">{attempt.durationMinutes || 0} Minutes</span>
+                                </div>
                               </div>
+                            </div>
 
-                              {/* Strategy Pill (Visible on md+) */}
-                              <div className="hidden md:flex flex-col items-end gap-1 px-4 min-w-[120px]">
-                                 <span className="text-[7px] font-black text-slate-300 uppercase tracking-widest">Intelligence Mode</span>
-                                 <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg border border-slate-100 text-[8px] font-black uppercase tracking-wider text-indigo-500 italic">
-                                    {attempt.testConfig?.strategyMode === 'predictive_mock' && <><ShieldCheck size={10} className="text-rose-500/70" /> Real Exam</>}
-                                    {(attempt.testConfig?.strategyMode === 'hybrid' || (!attempt.testConfig?.strategyMode && (attempt.testType === 'custom_mock' || !attempt.testType))) && <><Zap size={10} className="text-indigo-500/70" /> Smart Mix</>}
-                                    {attempt.testConfig?.strategyMode === 'adaptive_growth' && <><Target size={10} className="text-amber-500/70" /> Weak Spots</>}
-                                 </div>
-                              </div>
-
-                              {/* Recorded Date */}
-                              <div className="hidden sm:flex flex-col items-end gap-0.5 shrink-0 px-4 border-l border-slate-100">
-                                 <span className="text-[7px] font-black text-slate-300 uppercase tracking-widest">Recorded</span>
-                                 <span className="text-[10px] font-bold text-slate-500">{attempt.completedAt ? new Date(attempt.completedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '...'}</span>
-                              </div>
-
-                              {/* Arrow Action */}
-                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 group-hover:bg-indigo-600 group-hover:text-white transition-all shrink-0">
-                                 <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                              </div>
-                            </motion.button>
-                          );
-                        })}
+                            {/* Action Affordance */}
+                            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-indigo-50 transition-colors shrink-0">
+                              <ArrowUpRight size={18} className="text-slate-300 group-hover:text-indigo-600 transition-all group-hover:scale-110" />
+                            </div>
+                          </motion.button>
+                        ))}
                       </div>
                     ) : (
-                      <div className="py-32 flex flex-col items-center text-center">
-                        <div className="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 mb-8 border-4 border-white shadow-xl">
-                          <History size={48} />
-                        </div>
-                        <h4 className="text-2xl font-bold text-slate-900 mb-3">No tests taken yet — let's build your first one!</h4>
-                        <p className="text-base font-medium text-slate-500 max-w-md mb-10 leading-relaxed">
-                          Complete your first mock assessment to unlock detailed performance analytics, topic mastery breakdowns, and historical score tracking.
-                        </p>
-                        <button
-                          onClick={() => setActiveTab('builder')}
-                          className="bg-slate-900 text-white px-8 py-3.5 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
-                        >
-                          Build Your First Test Now
-                        </button>
-                      </div>
+                      <div className="py-32 text-center"><History size={48} className="mx-auto text-slate-200 mb-4" /><h4 className="text-xl font-bold">No tests yet</h4></div>
                     )}
                   </div>
                 </div>
@@ -1609,13 +1184,13 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
             </section>
           </div>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {showForecastExplanation && (
-          <ExplainForecastModal onClose={() => setShowForecastExplanation(false)} examContext={examContext} />
-        )}
-      </AnimatePresence>
+        <AnimatePresence>
+          {showForecastExplanation && (
+            <ExplainForecastModal onClose={() => setShowForecastExplanation(false)} examContext={examContext} />
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

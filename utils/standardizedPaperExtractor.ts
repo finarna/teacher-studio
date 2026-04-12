@@ -56,6 +56,14 @@ const getSubjectInstructions = (subject: string): string => {
       return `
       BIOLOGY NOTATION RULES:
       - Scientific names must be in italics ($\\textit{Homo sapiens}$).
+      - Math/Chemical formulas: Wrap in LaTeX ($CO_2$, $H_2O$).
+      - Match-the-following tables: Use compact array format wrapped in $$...$$:
+        $$\\begin{array}{ll}
+        \\text{A. Item 1} & \\text{I. Match 1} \\\\
+        \\text{B. Item 2} & \\text{II. Match 2} \\\\
+        \\text{C. Item 3} & \\text{III. Match 3}
+        \\end{array}$$
+      - CRITICAL: NO \\hline, NO borders (|), NO pipes, NO \\begin{tabular} - just content in array format.
       - Detect histological slides, anatomical diagrams, phylogenetic trees, and genetic cross charts.
       - Maintain high verbatim fidelity for classification and taxonomy.
       `;

@@ -96,6 +96,18 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   const currentQuestion = questions[currentQuestionIndex];
   const testYear = currentQuestion?.year || currentQuestion?.exam_year || (attempt.createdAt ? new Date(attempt.createdAt).getFullYear().toString() : '');
 
+  // Debug: Log current question fields (only first question to avoid spam)
+  if (currentQuestion && currentQuestionIndex === 0) {
+    console.log('[TestInterface] Question 1 Fields:', {
+      id: currentQuestion.id,
+      aiReasoning: currentQuestion.aiReasoning,
+      historicalPattern: currentQuestion.historicalPattern,
+      examTip: currentQuestion.examTip,
+      masteryMaterial: currentQuestion.masteryMaterial,
+      allKeys: Object.keys(currentQuestion)
+    });
+  }
+
   // Guard: If no current question, show error state
   if (!currentQuestion) {
     return (
@@ -305,10 +317,9 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
   // Format time
   const formatTime = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
+    const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${minutes} min ${secs.toString().padStart(2, '0')} sec`;
   };
 
   // Enhanced Timer Colors & UI States
@@ -866,40 +877,150 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                             mastery = null;
                           }
                         }
-                        if (!mastery) return null;
+
+                        // Collect all available intelligence fields
+                        const aiReasoning = currentQuestion.aiReasoning || mastery?.logic || mastery?.ai_reasoning || mastery?.aiReasoning;
+                        const coreConcept = mastery?.coreConcept || mastery?.core_concept;
+                        const memoryTrigger = mastery?.memoryTrigger || mastery?.memory_trigger;
+                        const historicalPattern = currentQuestion.historicalPattern || mastery?.historicalPattern || mastery?.historical_pattern;
+                        const visualPrompt = mastery?.visualPrompt || mastery?.visual_prompt;
+                        const commonTrap = mastery?.commonTrap || mastery?.common_trap;
+                        const whyItMatters = currentQuestion.whyItMatters || mastery?.whyItMatters || mastery?.why_it_matters;
+                        const predictiveInsight = currentQuestion.predictiveInsight || mastery?.predictiveInsight || mastery?.predictive_insight;
+
+                        const hasAnyContent = aiReasoning || coreConcept || memoryTrigger || historicalPattern || visualPrompt || commonTrap || whyItMatters || predictiveInsight;
+                        if (!hasAnyContent) return null;
+
                         return (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8 pt-8 border-t border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                          {(mastery.coreConcept || mastery.core_concept) && (
-                            <div className="relative p-5 sm:p-6 rounded-[1.75rem] bg-gradient-to-br from-emerald-50/50 to-white border border-emerald-100/50 group overflow-hidden">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-8 border-t border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                          {coreConcept && (
+                            <div className="relative p-4 sm:p-5 rounded-[1.5rem] bg-gradient-to-br from-emerald-50/50 to-white border border-emerald-100/50 group overflow-hidden">
                               <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
                                 <Target size={60} />
                               </div>
-                              <div className="flex items-center gap-2.5 mb-3 text-emerald-800">
-                                <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                  <Target size={14} className="fill-emerald-500 text-emerald-600" />
+                              <div className="flex items-center gap-2.5 mb-2.5 text-emerald-800">
+                                <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                  <Target size={12} className="fill-emerald-500 text-emerald-600" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-900/60">Core Mental Model</span>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-900/60">Core Mental Model</span>
                               </div>
-                              <div className="text-[15px] font-black text-emerald-950 mb-1.5 font-outfit">The Teacher's Insight</div>
-                              <div className="text-[13px] text-emerald-900/70 leading-relaxed font-instrument font-medium">
-                                <RenderWithMath text={mastery.coreConcept || mastery.core_concept} showOptions={false} />
+                              <div className="text-[14px] font-black text-emerald-950 mb-1.5 font-outfit">Teacher's Insight</div>
+                              <div className="text-[12px] text-emerald-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={coreConcept} showOptions={false} />
                               </div>
                             </div>
                           )}
-                          {(mastery.logic || mastery.ai_reasoning || mastery.aiReasoning) && (
-                            <div className="relative p-5 sm:p-6 rounded-[1.75rem] bg-gradient-to-br from-indigo-50/50 to-white border border-indigo-100/50 group overflow-hidden">
+
+                          {aiReasoning && (
+                            <div className="relative p-4 sm:p-5 rounded-[1.5rem] bg-gradient-to-br from-indigo-50/50 to-white border border-indigo-100/50 group overflow-hidden">
+                              <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
+                                <Brain size={60} />
+                              </div>
+                              <div className="flex items-center gap-2.5 mb-2.5 text-indigo-800">
+                                <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                  <Brain size={12} className="text-indigo-600" />
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-900/60">AI Strategy</span>
+                              </div>
+                              <div className="text-[14px] font-black text-indigo-950 mb-1.5 font-outfit">Intelligent Reasoning</div>
+                              <div className="text-[12px] text-indigo-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={aiReasoning} showOptions={false} />
+                              </div>
+                            </div>
+                          )}
+
+                          {memoryTrigger && (
+                            <div className="relative p-4 sm:p-5 rounded-[1.5rem] bg-gradient-to-br from-purple-50/50 to-white border border-purple-100/50 group overflow-hidden">
                               <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
                                 <Zap size={60} />
                               </div>
-                              <div className="flex items-center gap-2.5 mb-3 text-indigo-800">
-                                <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
-                                  <Zap size={14} className="fill-indigo-500 text-indigo-600" />
+                              <div className="flex items-center gap-2.5 mb-2.5 text-purple-800">
+                                <div className="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center">
+                                  <Zap size={12} className="fill-purple-500 text-purple-600" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-900/60">Deductive Logic</span>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-purple-900/60">Memory Trick</span>
                               </div>
-                              <div className="text-[15px] font-black text-indigo-950 mb-1.5 font-outfit">Coach's Thinking Flow</div>
-                              <div className="text-[13px] text-indigo-900/70 leading-relaxed font-instrument font-medium">
-                                <RenderWithMath text={mastery.logic || mastery.ai_reasoning || mastery.aiReasoning} showOptions={false} />
+                              <div className="text-[14px] font-black text-purple-950 mb-1.5 font-outfit">Quick Recall</div>
+                              <div className="text-[12px] text-purple-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={memoryTrigger} showOptions={false} />
+                              </div>
+                            </div>
+                          )}
+
+                          {historicalPattern && (
+                            <div className="relative p-4 sm:p-5 rounded-[1.5rem] bg-gradient-to-br from-blue-50/50 to-white border border-blue-100/50 group overflow-hidden">
+                              <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity">
+                                <TrendingUp size={60} />
+                              </div>
+                              <div className="flex items-center gap-2.5 mb-2.5 text-blue-800">
+                                <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center">
+                                  <TrendingUp size={12} className="text-blue-600" />
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-900/60">Pattern Recognition</span>
+                              </div>
+                              <div className="text-[14px] font-black text-blue-950 mb-1.5 font-outfit">Historical Trend</div>
+                              <div className="text-[12px] text-blue-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={historicalPattern} showOptions={false} />
+                              </div>
+                            </div>
+                          )}
+
+                          {visualPrompt && (
+                            <div className="relative p-4 sm:p-5 rounded-[1.5rem] bg-gradient-to-br from-pink-50/50 to-white border border-pink-100/50 group overflow-hidden">
+                              <div className="flex items-center gap-2.5 mb-2.5 text-pink-800">
+                                <div className="w-6 h-6 rounded-lg bg-pink-100 flex items-center justify-center">
+                                  <Sparkles size={12} className="text-pink-600" />
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-pink-900/60">Visual Aid</span>
+                              </div>
+                              <div className="text-[14px] font-black text-pink-950 mb-1.5 font-outfit">Mental Picture</div>
+                              <div className="text-[12px] text-pink-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={visualPrompt} showOptions={false} />
+                              </div>
+                            </div>
+                          )}
+
+                          {commonTrap && (
+                            <div className="relative p-4 sm:p-5 rounded-[1.5rem] bg-gradient-to-br from-orange-50/50 to-white border border-orange-100/50 group overflow-hidden">
+                              <div className="flex items-center gap-2.5 mb-2.5 text-orange-800">
+                                <div className="w-6 h-6 rounded-lg bg-orange-100 flex items-center justify-center">
+                                  <AlertTriangle size={12} className="text-orange-600" />
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-900/60">Common Trap</span>
+                              </div>
+                              <div className="text-[14px] font-black text-orange-950 mb-1.5 font-outfit">Watch Out!</div>
+                              <div className="text-[12px] text-orange-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={commonTrap} showOptions={false} />
+                              </div>
+                            </div>
+                          )}
+
+                          {whyItMatters && (
+                            <div className="relative p-4 sm:p-5 rounded-[1.5rem] bg-gradient-to-br from-cyan-50/50 to-white border border-cyan-100/50 group overflow-hidden">
+                              <div className="flex items-center gap-2.5 mb-2.5 text-cyan-800">
+                                <div className="w-6 h-6 rounded-lg bg-cyan-100 flex items-center justify-center">
+                                  <Info size={12} className="text-cyan-600" />
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-900/60">Relevance</span>
+                              </div>
+                              <div className="text-[14px] font-black text-cyan-950 mb-1.5 font-outfit">Why It Matters</div>
+                              <div className="text-[12px] text-cyan-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={whyItMatters} showOptions={false} />
+                              </div>
+                            </div>
+                          )}
+
+                          {predictiveInsight && (
+                            <div className="relative p-4 sm:p-5 rounded-[1.5rem] bg-gradient-to-br from-violet-50/50 to-white border border-violet-100/50 group overflow-hidden">
+                              <div className="flex items-center gap-2.5 mb-2.5 text-violet-800">
+                                <div className="w-6 h-6 rounded-lg bg-violet-100 flex items-center justify-center">
+                                  <Sparkles size={12} className="text-violet-600" />
+                                </div>
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-violet-900/60">Prediction</span>
+                              </div>
+                              <div className="text-[14px] font-black text-violet-950 mb-1.5 font-outfit">Future Insight</div>
+                              <div className="text-[12px] text-violet-900/70 leading-relaxed font-instrument font-medium">
+                                <RenderWithMath text={predictiveInsight} showOptions={false} />
                               </div>
                             </div>
                           )}
@@ -911,7 +1032,13 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                       {(() => {
                         const tip = currentQuestion.examTip || (currentQuestion as any).exam_tip || currentQuestion.studyTip || (currentQuestion as any).study_tip;
                         const pitfalls = currentQuestion.pitfalls || [];
-                        if (!tip && pitfalls.length === 0) return null;
+                        const commonMistakes = currentQuestion.commonMistakes || (currentQuestion as any).common_mistakes || [];
+                        const keyFormulas = currentQuestion.keyFormulas || (currentQuestion as any).key_formulas || [];
+                        const thingsToRemember = currentQuestion.thingsToRemember || (currentQuestion as any).things_to_remember || [];
+
+                        const hasAnyTactical = tip || pitfalls.length > 0 || commonMistakes.length > 0 || keyFormulas.length > 0 || thingsToRemember.length > 0;
+                        if (!hasAnyTactical) return null;
+
                         return (
                         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 pb-12">
                           {tip && (
@@ -930,8 +1057,49 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                               </div>
                             </div>
                           )}
-  
-                          {pitfalls.length > 0 && (
+
+                          {keyFormulas.length > 0 && (
+                            <div className="relative p-3.5 bg-gradient-to-br from-green-50 to-white rounded-[1.25rem] border border-green-200/40 shadow-xl shadow-green-900/5 overflow-hidden group">
+                              <div className="flex items-center gap-2 mb-3 text-green-900 font-black text-[9px] uppercase tracking-[0.25em]">
+                                <div className="w-5 h-5 bg-green-100 rounded-lg flex items-center justify-center">
+                                  <Zap size={10} className="text-green-600 fill-green-600" />
+                                </div>
+                                Key Formulas
+                              </div>
+                              <div className="space-y-2">
+                                {keyFormulas.map((formula: string, idx: number) => (
+                                  <div key={idx} className="p-2.5 bg-white/60 rounded-lg border border-green-100/50 text-[11px] font-bold text-green-950">
+                                    <RenderWithMath text={formula} showOptions={false} />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {thingsToRemember.length > 0 && (
+                            <div className="relative p-3.5 bg-gradient-to-br from-purple-50 to-white rounded-[1.25rem] border border-purple-200/40 shadow-xl shadow-purple-900/5 overflow-hidden group">
+                              <div className="flex items-center gap-2 mb-3 text-purple-900 font-black text-[9px] uppercase tracking-[0.25em]">
+                                <div className="w-5 h-5 bg-purple-100 rounded-lg flex items-center justify-center">
+                                  <Lightbulb size={10} className="text-purple-600" />
+                                </div>
+                                Things to Remember
+                              </div>
+                              <div className="space-y-2">
+                                {thingsToRemember.map((item: string, idx: number) => (
+                                  <div key={idx} className="flex gap-2">
+                                    <div className="shrink-0 w-4 h-4 rounded-full bg-purple-500 text-white flex items-center justify-center text-[9px] font-black mt-0.5">
+                                      {idx + 1}
+                                    </div>
+                                    <div className="flex-1 text-[11px] font-bold text-purple-950 leading-tight">
+                                      <RenderWithMath text={item} showOptions={false} />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {(pitfalls.length > 0 || commonMistakes.length > 0) && (
                             <div className="relative p-3.5 bg-gradient-to-br from-rose-50 to-white rounded-[1.25rem] border border-rose-200/40 shadow-xl shadow-rose-900/5 overflow-hidden group">
                               <div className="flex items-center gap-2 mb-3 text-rose-900 font-black text-[9px] uppercase tracking-[0.25em]">
                                 <div className="w-5 h-5 bg-rose-100 rounded-lg flex items-center justify-center">
@@ -940,26 +1108,50 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                                 Common Exam Pitfalls
                               </div>
                               <div className="space-y-3">
-                                {pitfalls.slice(0, 2).map((pitfall: any, idx: number) => (
-                                  <div key={idx} className="relative p-2.5 bg-white/50 backdrop-blur-sm rounded-xl border border-rose-100/50 group-hover:bg-white transition-colors duration-500">
-                                    {typeof pitfall === 'string' ? (
-                                      <div className="text-[11px] font-bold text-rose-950 font-instrument">
-                                        <RenderWithMath text={pitfall} showOptions={false} />
-                                      </div>
-                                    ) : (
+                                {commonMistakes.length > 0 ? (
+                                  commonMistakes.slice(0, 3).map((mistake: any, idx: number) => (
+                                    <div key={idx} className="relative p-2.5 bg-white/50 backdrop-blur-sm rounded-xl border border-rose-100/50 group-hover:bg-white transition-colors duration-500">
                                       <div className="space-y-2">
                                         <div className="flex gap-2.5">
                                           <div className="shrink-0 w-4 h-4 bg-rose-500 text-white rounded flex items-center justify-center text-[8px] font-black">X</div>
-                                          <div className="text-[11px] font-black text-rose-950 leading-tight"><RenderWithMath text={pitfall.mistake} /></div>
+                                          <div className="text-[11px] font-black text-rose-950 leading-tight">
+                                            <RenderWithMath text={mistake.mistake} showOptions={false} />
+                                          </div>
                                         </div>
-                                        <div className="pl-6 text-[9px] text-rose-900/60 font-black uppercase tracking-widest flex items-center gap-2">
-                                          <div className="w-3 h-[1px] bg-rose-200" />
-                                          Fix: {pitfall.howToAvoid}
+                                        {mistake.why && (
+                                          <div className="pl-6 text-[10px] text-rose-800/70 font-medium italic">
+                                            <RenderWithMath text={mistake.why} showOptions={false} />
+                                          </div>
+                                        )}
+                                        <div className="pl-6 text-[9px] text-emerald-700 font-black uppercase tracking-widest flex items-center gap-2">
+                                          <div className="w-3 h-[1px] bg-emerald-300" />
+                                          Fix: <RenderWithMath text={mistake.howToAvoid} showOptions={false} />
                                         </div>
                                       </div>
-                                    )}
-                                  </div>
-                                ))}
+                                    </div>
+                                  ))
+                                ) : (
+                                  pitfalls.slice(0, 3).map((pitfall: any, idx: number) => (
+                                    <div key={idx} className="relative p-2.5 bg-white/50 backdrop-blur-sm rounded-xl border border-rose-100/50 group-hover:bg-white transition-colors duration-500">
+                                      {typeof pitfall === 'string' ? (
+                                        <div className="text-[11px] font-bold text-rose-950 font-instrument">
+                                          <RenderWithMath text={pitfall} showOptions={false} />
+                                        </div>
+                                      ) : (
+                                        <div className="space-y-2">
+                                          <div className="flex gap-2.5">
+                                            <div className="shrink-0 w-4 h-4 bg-rose-500 text-white rounded flex items-center justify-center text-[8px] font-black">X</div>
+                                            <div className="text-[11px] font-black text-rose-950 leading-tight"><RenderWithMath text={pitfall.mistake} showOptions={false} /></div>
+                                          </div>
+                                          <div className="pl-6 text-[9px] text-rose-900/60 font-black uppercase tracking-widest flex items-center gap-2">
+                                            <div className="w-3 h-[1px] bg-rose-200" />
+                                            Fix: {pitfall.howToAvoid}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))
+                                )}
                               </div>
                             </div>
                           )}

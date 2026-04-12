@@ -19,6 +19,9 @@ import {
 import { loadGenerationContext } from '../lib/examDataLoader.ts';
 import { generateTestQuestions } from '../lib/aiQuestionGenerator.ts';
 import { AI_CONFIG } from '../config/aiConfigs';
+import { randomUUID } from 'crypto';
+import path from 'path';
+import fs from 'fs';
 
 // =====================================================
 // PROGRESS TRACKING FOR AI GENERATION
@@ -81,10 +84,10 @@ function updateProgress(progressId, step, message, percentage, result = null) {
   if (result) entry.result = result;
   generationProgress.set(progressId, entry);
 
-  // Auto-cleanup after 5 minutes
+  // Auto-cleanup after 5 minutes (unref ensures it doesn't block process exit)
   setTimeout(() => {
     generationProgress.delete(progressId);
-  }, 5 * 60 * 1000);
+  }, 5 * 60 * 1000).unref();
 }
 
 export async function getGenerationProgress(req, res) {
@@ -1465,9 +1468,19 @@ export async function getStudyStreak(req, res) {
  * GET /api/learning-journey/weak-topics
  * Analyze user progress and identify weak topics using AI
  */
+// cache for weak topics to prevent expensive recalculations
+const weakTopicsCache = new Map();
+
 export async function getWeakTopics(req, res) {
   try {
     const { userId, subject, examContext } = req.query;
+
+    const cacheKey = `${userId}:${subject}:${examContext}`;
+    const cached = weakTopicsCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < 5 * 60 * 1000)) {
+      console.log(`⚡️ [CACHE HIT] Returning cached weak topics for ${subject}`);
+      return res.json({ success: true, data: { weakTopics: cached.data } });
+    }
 
     if (!userId || userId === 'anonymous') {
       return res.status(401).json({ error: 'Authentication required' });
@@ -1596,6 +1609,8 @@ export async function getWeakTopics(req, res) {
     // Take top 10 weak topics
     const topWeakTopics = weakTopics.slice(0, 10);
 
+    weakTopicsCache.set(cacheKey, { timestamp: Date.now(), data: topWeakTopics });
+
     res.json({
       success: true,
       data: {
@@ -1633,7 +1648,7 @@ function assignNEETSections(questions, totalCount, subjectName) {
   }));
 }
 
-async function generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId, strategyMode, oracleMode }) {
+export async function generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId, strategyMode, oracleMode }) {
   // Check if AI generation is enabled (requires GEMINI_API_KEY)
   let useAIGeneration = !!(process.env.GEMINI_API_KEY && examContext && subject);
 
@@ -1683,7 +1698,8 @@ async function generateTestInBackground({ userId, testName, subject, examContext
           userId,
           examContext,
           subject,
-          selectedTopicNames  // Pass topic names to filter generation
+          selectedTopicNames,  // Pass topic names to filter generation
+          difficultyMix        // Pass difficulty override if present
         );
 
         console.log(`✅ Context loaded in ${Date.now() - aiStartTime}ms`);
@@ -1694,7 +1710,11 @@ async function generateTestInBackground({ userId, testName, subject, examContext
         if (context.generationRules) {
           context.generationRules.strategyMode = mode;
           if (oracleMode) {
-            context.generationRules.oracleMode = oracleMode;
+            context.generationRules.oracleMode = {
+              ...(context.generationRules.oracleMode || {}),
+              ...oracleMode
+            };
+            console.log(`🧠 [REI v3.0] Merged Oracle Mode: enabled=${context.generationRules.oracleMode.enabled}, idsTarget=${context.generationRules.oracleMode.idsTarget}`);
           }
         }
         updateProgress(progressId, 'requesting', `🤖 [Strategy 1] Generating ${questionCount} questions via Full Contextual AI (${mode})...`, 30, {
@@ -2147,7 +2167,7 @@ Return ONLY a valid JSON array:
           questionCount,
           durationMinutes,
           strategyMode,
-          oracleMode: oracleModeEnabled ? oracleMode : undefined,
+          oracleMode: oracleMode?.enabled ? oracleMode : undefined,
           questions: questionsSnapshot // ← snapshot for review fallback
         }
       })
@@ -2199,255 +2219,432 @@ Return ONLY a valid JSON array:
     };
 
     // Store result in progress map so the polling client can retrieve it
-    updateProgress(progressId, 'complete', '✅ Test ready! Redirecting...', 100, {
+    const resultPayload = {
       attempt: mappedAttempt,
       questions: finalQuestions,
       templateId
-    });
+    };
+
+    updateProgress(progressId, 'complete', '✅ Test ready! Redirecting...', 100, resultPayload);
 
     console.log(`✅ Background generation complete for progressId=${progressId}`);
+    return resultPayload;
   } catch (error) {
     console.error('❌ Error in background test generation:', error);
     updateProgress(progressId, 'error', error.message || 'Failed to create test', 0);
+    throw error;
   }
+}
+
+/**
+ * Helper to prepare an official test attempt by loading a context-aware flagship paper
+ */
+async function prepareOfficialTest(userId, setId, supabase, subject, examContext) {
+  let questions = [];
+  const subjectLower = (subject?.toLowerCase() || 'math').replace('mathematics', 'math');
+  const isMath = subjectLower === 'math';
+  const isPhysics = subjectLower === 'physics';
+  const isChem = subjectLower === 'chemistry' || subjectLower === 'chem';
+  const isBio = subjectLower === 'biology' || subjectLower === 'bio';
+
+  let nId = setId.toUpperCase();
+  let normalizedSetId = 'SET-A';
+  if (nId.includes('SET-B') || nId.endsWith('-B') || nId.endsWith('_B') || nId.includes('SET_B')) normalizedSetId = 'SET-B';
+
+  let sourceName = `PLUS2AI OFFICIAL ${subject.toUpperCase()} PREDICTION 2026: ${normalizedSetId}`;
+  
+  try {
+    let sourceFile;
+    if (isMath) {
+      sourceFile = normalizedSetId === 'SET-B' ? 'flagship_final_b.json' : 'flagship_final.json';
+    } else if (isPhysics) {
+      sourceFile = normalizedSetId === 'SET-B' ? 'flagship_physics_final_b.json' : 'flagship_physics_final.json';
+    } else if (isChem) {
+      sourceFile = normalizedSetId === 'SET-B' ? 'flagship_chemistry_final_b.json' : 'flagship_chemistry_final.json';
+    } else if (isBio) {
+      sourceFile = normalizedSetId === 'SET-B' ? 'flagship_biology_final_b.json' : 'flagship_biology_final.json';
+    }
+    
+    if (sourceFile) {
+      const filePath = path.join(process.cwd(), sourceFile);
+      if (fs.existsSync(filePath)) {
+        const rawData = fs.readFileSync(filePath, 'utf8');
+        const sourceData = JSON.parse(rawData);
+        questions = sourceData.test_config?.questions || sourceData.questions || [];
+        sourceName = sourceData.test_name || sourceName;
+        console.log(`✅ [Flagship Bypass] Loaded ${questions.length} from ${sourceFile}`);
+      }
+    }
+  } catch (e) {
+    console.error(`❌ [Flagship Bypass] Resolution failed for ${setId}:`, e.message);
+  }
+
+  if (questions.length === 0) {
+    throw new Error(`The official ${setId} paper for ${subject} (${examContext}) could not be loaded.`);
+  }
+
+  // Create real DB attempt for tracking
+  const { data: attempt, error: attemptError } = await supabaseAdmin
+    .from('test_attempts')
+    .insert({
+      user_id: userId,
+      test_type: 'custom_mock',
+      test_name: sourceName,
+      exam_context: examContext || 'KCET',
+      subject: subject || (isMath ? 'Mathematics' : isPhysics ? 'Physics' : isChem ? 'Chemistry' : 'Biology'),
+      total_questions: questions.length,
+      duration_minutes: 80,
+      start_time: new Date().toISOString(),
+      status: 'in_progress',
+      test_config: { questions, is_official: true, setId: normalizedSetId, isOfficialPrediction: true }
+    })
+    .select()
+    .single();
+
+  if (attemptError) throw attemptError;
+  return { attempt, questions, isInstant: true };
 }
 
 /**
  * POST /api/learning-journey/create-custom-test
- * Validates the request, responds immediately with a progressId, then
- * runs AI generation + DB writes asynchronously to avoid gateway timeouts.
  */
 export async function createCustomTest(req, res) {
   try {
-    const {
-      userId,
-      testName,
-      subject,
-      examContext,
-      topicIds,
-      questionCount,
-      difficultyMix,
-      durationMinutes,
-      saveAsTemplate,
-      strategyMode,
-      oracleMode
-    } = req.body;
+    const { userId, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, oracleMode, officialSetId } = req.body;
 
-    if (!userId || userId === 'anonymous') {
-      return res.status(401).json({ error: 'Authentication required' });
+    if (!userId || userId === 'anonymous') return res.status(401).json({ error: 'Authentication required' });
+
+    // --- OFFICIAL SET BYPASS ---
+    if (officialSetId) {
+      try {
+        const result = await prepareOfficialTest(userId, officialSetId, supabaseAdmin, subject, examContext);
+        return res.json({ success: true, data: result });
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
     }
 
-    const total = (difficultyMix?.easy || 0) + (difficultyMix?.moderate || 0) + (difficultyMix?.hard || 0);
-    if (total !== 100) {
-      return res.status(400).json({ error: 'Difficulty mix must total 100%' });
-    }
-
-    console.log(`🎯 Creating custom test "${testName}" - ${questionCount} questions`);
-
-    const { randomUUID } = await import('crypto');
     const progressId = randomUUID();
-
-    // Respond immediately — prevents 504 gateway timeout during AI generation
-    updateProgress(progressId, 'analyzing', '🎯 Analyzing your performance and past exam patterns...', 5);
     res.json({ success: true, data: { progressId } });
 
-    // Fire-and-forget background generation
-    generateTestInBackground({ userId, testName, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId, strategyMode, oracleMode })
-      .catch(err => {
-        console.error('❌ Unhandled background generation error:', err);
-        updateProgress(progressId, 'error', err.message || 'Failed to create test', 0);
-      });
+    generateTestInBackground({ userId, testName: `${subject} Mock Test`, subject, examContext, topicIds, questionCount, difficultyMix, durationMinutes, saveAsTemplate, progressId, oracleMode })
+      .catch(err => updateProgress(progressId, 'error', err.message, 0));
 
   } catch (error) {
     console.error('❌ Error creating custom test:', error);
-    if (!res.headersSent) {
-      res.status(500).json({ error: 'Failed to create custom test', message: error.message });
-    }
+    if (!res.headersSent) res.status(500).json({ error: error.message });
   }
 }
 
-/**
- * GET /api/learning-journey/test-templates
- * Get user's saved test templates
- */
-export async function getTestTemplates(req, res) {
-  try {
-    const { userId, subject, examContext } = req.query;
+  /**
+   * GET /api/learning-journey/test-templates
+   * Get user's saved test templates
+   */
+  export async function getTestTemplates(req, res) {
+    try {
+      const { userId, subject, examContext } = req.query;
 
-    if (!userId || userId === 'anonymous') {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-
-    const { data: templates, error } = await supabaseAdmin
-      .from('test_templates')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('subject', subject)
-      .eq('exam_context', examContext)
-      .order('last_used_at', { ascending: false });
-
-    if (error) throw error;
-
-    res.json({
-      success: true,
-      data: {
-        templates: templates || []
+      if (!userId || userId === 'anonymous') {
+        return res.status(401).json({ error: 'Authentication required' });
       }
-    });
-  } catch (error) {
-    console.error('❌ Error fetching test templates:', error);
-    res.status(500).json({
-      error: 'Failed to fetch test templates',
-      message: error.message
-    });
-  }
-}
 
-/**
- * POST /api/learning-journey/count-available-questions
- * Count available questions matching specified criteria
- */
-export async function countAvailableQuestions(req, res) {
-  try {
-    const {
-      subject,
-      examContext,
-      topicIds,
-      difficultyMix
-    } = req.body;
+      const { data: templates, error } = await supabaseAdmin
+        .from('test_templates')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('subject', subject)
+        .eq('exam_context', examContext)
+        .order('last_used_at', { ascending: false });
 
-    if (!subject || !examContext || !topicIds || topicIds.length === 0) {
-      return res.status(400).json({ error: 'Missing required parameters' });
-    }
+      if (error) throw error;
 
-    console.log(`🔢 Counting available questions for ${subject} (${examContext})`);
-
-    // Get topic names for these IDs
-    // topics table uses 'name' column (not 'topic_name')
-    const { data: topicsData } = await supabaseAdmin
-      .from('topics')
-      .select('name')
-      .in('id', topicIds);
-
-    const topicNames = topicsData?.map(t => t.name).filter(Boolean) || [];
-
-    // Check if AI generation is enabled - if so we have essentially infinite questions
-    // Check both GEMINI_API_KEY and VITE_GEMINI_API_KEY (same as generateTest strategy)
-    const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-    const useAIGeneration = !!(GEMINI_KEY && examContext && subject);
-
-    if (useAIGeneration) {
-      console.log(`🤖 AI generation is enabled -> Reporting virtually infinite question capacity`);
-
-      // Calculate realistic max based on number of topics selected
-      const topicsMultiplier = Math.max(1, topicNames.length);
-      const totalAvailable = topicsMultiplier * 300; // E.g., 300 questions per topic capacity
-
-      return res.json({
+      res.json({
         success: true,
         data: {
-          total: totalAvailable,
-          byDifficulty: {
-            easy: Math.floor(totalAvailable * 0.3),
-            moderate: Math.floor(totalAvailable * 0.5),
-            hard: Math.floor(totalAvailable * 0.2)
-          },
-          isAIGenerated: true
+          templates: templates || []
         }
       });
+    } catch (error) {
+      console.error('❌ Error fetching test templates:', error);
+      res.status(500).json({
+        error: 'Failed to fetch test templates',
+        message: error.message
+      });
     }
+  }
 
-    // fallback to actual DB counts if AI generation is off
+  /**
+   * POST /api/learning-journey/count-available-questions
+   * Count available questions matching specified criteria
+   */
+  export async function countAvailableQuestions(req, res) {
+    try {
+      const {
+        subject,
+        examContext,
+        topicIds,
+        difficultyMix
+      } = req.body;
 
-    // Get system scans for this subject
-    const { data: scans } = await supabaseAdmin
-      .from('scans')
-      .select('id')
-      .eq('is_system_scan', true)
-      .eq('subject', subject)
-      .eq('exam_context', examContext);
+      if (!subject || !examContext || !topicIds || topicIds.length === 0) {
+        return res.status(400).json({ error: 'Missing required parameters' });
+      }
 
-    const scanIds = scans?.map(s => s.id) || [];
+      console.log(`🔢 Counting available questions for ${subject} (${examContext})`);
 
-    if (scanIds.length === 0) {
-      return res.json({
+      // Get topic names for these IDs
+      // topics table uses 'name' column (not 'topic_name')
+      const { data: topicsData } = await supabaseAdmin
+        .from('topics')
+        .select('name')
+        .in('id', topicIds);
+
+      const topicNames = topicsData?.map(t => t.name).filter(Boolean) || [];
+
+      // Check if AI generation is enabled - if so we have essentially infinite questions
+      // Check both GEMINI_API_KEY and VITE_GEMINI_API_KEY (same as generateTest strategy)
+      const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+      const useAIGeneration = !!(GEMINI_KEY && examContext && subject);
+
+      if (useAIGeneration) {
+        console.log(`🤖 AI generation is enabled -> Reporting virtually infinite question capacity`);
+
+        // Calculate realistic max based on number of topics selected
+        const topicsMultiplier = Math.max(1, topicNames.length);
+        const totalAvailable = topicsMultiplier * 300; // E.g., 300 questions per topic capacity
+
+        return res.json({
+          success: true,
+          data: {
+            total: totalAvailable,
+            byDifficulty: {
+              easy: Math.floor(totalAvailable * 0.3),
+              moderate: Math.floor(totalAvailable * 0.5),
+              hard: Math.floor(totalAvailable * 0.2)
+            },
+            isAIGenerated: true
+          }
+        });
+      }
+
+      // fallback to actual DB counts if AI generation is off
+
+      // Get system scans for this subject
+      const { data: scans } = await supabaseAdmin
+        .from('scans')
+        .select('id')
+        .eq('is_system_scan', true)
+        .eq('subject', subject)
+        .eq('exam_context', examContext);
+
+      const scanIds = scans?.map(s => s.id) || [];
+
+      if (scanIds.length === 0) {
+        return res.json({
+          success: true,
+          data: {
+            total: 0,
+            byDifficulty: { easy: 0, moderate: 0, hard: 0 },
+            isAIGenerated: false
+          }
+        });
+      }
+
+      // Count questions by difficulty
+      const counts = { easy: 0, moderate: 0, hard: 0 };
+
+      // questions table uses: 'difficulty' (not 'diff'), 'topic' singular TEXT (not 'topics' array)
+      // Count Easy questions
+      let easyQuery = supabaseAdmin
+        .from('questions')
+        .select('id', { count: 'exact', head: true })
+        .in('scan_id', scanIds)
+        .eq('difficulty', 'Easy');
+      if (topicNames.length > 0) easyQuery = easyQuery.in('topic', topicNames);
+      const { count: easyCount } = await easyQuery;
+      counts.easy = easyCount || 0;
+
+      // Count Moderate questions
+      let modQuery = supabaseAdmin
+        .from('questions')
+        .select('id', { count: 'exact', head: true })
+        .in('scan_id', scanIds)
+        .eq('difficulty', 'Moderate');
+      if (topicNames.length > 0) modQuery = modQuery.in('topic', topicNames);
+      const { count: moderateCount } = await modQuery;
+      counts.moderate = moderateCount || 0;
+
+      // Count Hard questions
+      let hardQuery = supabaseAdmin
+        .from('questions')
+        .select('id', { count: 'exact', head: true })
+        .in('scan_id', scanIds)
+        .eq('difficulty', 'Hard');
+      if (topicNames.length > 0) hardQuery = hardQuery.in('topic', topicNames);
+      const { count: hardCount } = await hardQuery;
+      counts.hard = hardCount || 0;
+
+      const total = counts.easy + counts.moderate + counts.hard;
+
+      res.json({
         success: true,
         data: {
-          total: 0,
-          byDifficulty: { easy: 0, moderate: 0, hard: 0 },
+          total,
+          byDifficulty: counts,
           isAIGenerated: false
         }
       });
+    } catch (error) {
+      console.error('❌ Error counting available questions:', error);
+      res.status(500).json({
+        error: 'Failed to count questions',
+        message: error.message
+      });
     }
-
-    // Count questions by difficulty
-    const counts = { easy: 0, moderate: 0, hard: 0 };
-
-    // questions table uses: 'difficulty' (not 'diff'), 'topic' singular TEXT (not 'topics' array)
-    // Count Easy questions
-    let easyQuery = supabaseAdmin
-      .from('questions')
-      .select('id', { count: 'exact', head: true })
-      .in('scan_id', scanIds)
-      .eq('difficulty', 'Easy');
-    if (topicNames.length > 0) easyQuery = easyQuery.in('topic', topicNames);
-    const { count: easyCount } = await easyQuery;
-    counts.easy = easyCount || 0;
-
-    // Count Moderate questions
-    let modQuery = supabaseAdmin
-      .from('questions')
-      .select('id', { count: 'exact', head: true })
-      .in('scan_id', scanIds)
-      .eq('difficulty', 'Moderate');
-    if (topicNames.length > 0) modQuery = modQuery.in('topic', topicNames);
-    const { count: moderateCount } = await modQuery;
-    counts.moderate = moderateCount || 0;
-
-    // Count Hard questions
-    let hardQuery = supabaseAdmin
-      .from('questions')
-      .select('id', { count: 'exact', head: true })
-      .in('scan_id', scanIds)
-      .eq('difficulty', 'Hard');
-    if (topicNames.length > 0) hardQuery = hardQuery.in('topic', topicNames);
-    const { count: hardCount } = await hardQuery;
-    counts.hard = hardCount || 0;
-
-    const total = counts.easy + counts.moderate + counts.hard;
-
-    res.json({
-      success: true,
-      data: {
-        total,
-        byDifficulty: counts,
-        isAIGenerated: false
-      }
-    });
-  } catch (error) {
-    console.error('❌ Error counting available questions:', error);
-    res.status(500).json({
-      error: 'Failed to count questions',
-      message: error.message
-    });
   }
-}
 
-// Export all handlers
-export const learningJourneyHandlers = {
-  getTopics,
-  getTopicResources,
-  updateTopicProgress,
-  recordActivity,
-  generateTest,
-  submitTest,
-  getTestResults,
-  getTestHistory,
-  getSubjectProgress,
-  getTrajectoryProgress,
-  getWeakTopics,
-  createCustomTest,
-  getTestTemplates,
-  countAvailableQuestions,
-  getGenerationProgress
-};
+  /**
+   * GET /api/tests/official
+   * Fetch official flagship papers (visible to all users)
+   */
+  export async function getOfficialTests(req, res) {
+    try {
+      const { subject, examContext } = req.query;
+
+      // 🚀 [MISSION CRITICAL] Load Local Flagship Files as "Virtual Blueprints"
+      // Flagship papers are ONLY stored locally, NOT in the database
+      const sortedBaseline = [];
+      // --- UNIVERSAL SUBJECT-AWARE VIRTUAL BLUEPRINT INJECTION ---
+      const subjectLower = subject?.toLowerCase() || '';
+      const isMath = subjectLower === 'mathematics' || subjectLower === 'math';
+      const isPhysics = subjectLower === 'physics';
+      const isChem = subjectLower === 'chemistry';
+      const isBio = subjectLower === 'biology';
+
+      if (isMath || isPhysics || isChem || isBio) {
+        let flagships = [];
+        const prefix = isMath ? 'MATH' : isPhysics ? 'PHYSICS' : isChem ? 'CHEM' : 'BIO';
+        
+        if (isMath) {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_final.json', label: 'Math Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_final_b.json', label: 'Math Set-B Prediction' }
+          ];
+        } else if (isPhysics) {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_physics_final.json', label: 'Physics Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_physics_final_b.json', label: 'Physics Set-B Prediction' }
+          ];
+        } else if (isChem) {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_chemistry_final.json', label: 'Chemistry Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_chemistry_final_b.json', label: 'Chemistry Set-B Prediction' }
+          ];
+        } else if (isBio) {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_biology_final.json', label: 'Biology Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_biology_final_b.json', label: 'Biology Set-B Prediction' }
+          ];
+        }
+
+        const normalizedSubject = isMath ? 'Mathematics' : isPhysics ? 'Physics' : isChem ? 'Chemistry' : 'Biology';
+
+        for (const set of flagships) {
+          try {
+            const filePath = path.join(process.cwd(), set.file);
+            if (fs.existsSync(filePath)) {
+              sortedBaseline.push({
+                id: `virtual-${subjectLower}-${set.id.toLowerCase()}`,
+                test_name: set.label,
+                subject: normalizedSubject,
+                exam_context: examContext || 'KCET',
+                status: 'completed',
+                total_questions: 60,
+                duration_minutes: 80,
+                created_at: new Date().toISOString(),
+                is_virtual: true,
+                official_set_id: `${prefix}-${set.id}`, // Locked subject-specific set ID
+                label: set.label
+              });
+            }
+          } catch (e) {
+            console.error(`Failed to inject virtual flagship ${set.id}:`, e);
+          }
+        }
+      }
+
+      // --- Aggressive Forensic Deduplication ---
+      const unique = [];
+      const seenOfficialSets = new Set();
+      const seenNames = new Set();
+
+      // Sort: Virtual/Official Blueprints FIRST, then by Date
+      const sorted = sortedBaseline.sort((a, b) => {
+        if (a.is_virtual && !b.is_virtual) return -1;
+        if (!a.is_virtual && b.is_virtual) return 1;
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      });
+
+      sorted.forEach(item => {
+        const name = (item.testName || item.test_name || '').toUpperCase();
+        
+        // Identify the "Set" (A or B)
+        let setType = 'CUSTOM';
+        if (item.official_set_id?.includes('SET-B') || item.setId?.includes('SET-B') || name.includes('SET-B') || name.includes('SET B')) {
+          setType = 'SET-B';
+        } else if (item.official_set_id?.includes('SET-A') || item.setId?.includes('SET-A') || name.includes('SET-A') || name.includes('SET A')) {
+          setType = 'SET-A';
+        }
+
+        if (setType !== 'CUSTOM') {
+          // Force EXACTLY ONE card per Set Type (SET-A, SET-B)
+          if (!seenOfficialSets.has(setType)) {
+            seenOfficialSets.add(setType);
+            unique.push({
+              ...item,
+              testName: item.test_name || item.testName,
+              durationMinutes: item.duration_minutes || 80,
+              totalQuestions: item.total_questions || 60,
+              isOfficialBlueprint: true
+            });
+          }
+        } else if (!seenNames.has(name)) {
+          seenNames.add(name);
+          unique.push({
+            ...item,
+            testName: item.test_name,
+            durationMinutes: item.duration_minutes,
+            totalQuestions: item.total_questions
+          });
+        }
+      });
+
+      res.json({
+        success: true,
+        data: unique
+      });
+    } catch (error) {
+      console.error('❌ Error fetching official tests:', error);
+      res.status(500).json({ error: 'Failed to load official prediction papers' });
+    }
+  }
+
+  // Export all handlers
+  export const learningJourneyHandlers = {
+    getTopics,
+    getTopicResources,
+    updateTopicProgress,
+    recordActivity,
+    generateTest,
+    submitTest,
+    getTestResults,
+    getTestHistory,
+    getSubjectProgress,
+    getTrajectoryProgress,
+    getWeakTopics,
+    createCustomTest,
+    getTestTemplates,
+    countAvailableQuestions,
+    getGenerationProgress,
+    getOfficialTests
+  };

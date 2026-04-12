@@ -48,7 +48,8 @@ import {
   getStudyStreak,
   createCustomTest,
   countAvailableQuestions,
-  getGenerationProgress
+  getGenerationProgress,
+  getOfficialTests
 } from './api/learningJourneyEndpoints.js';
 import {
   getHistoricalTrends,
@@ -1731,6 +1732,12 @@ app.get('/api/tests/:attemptId/results', getTestResults);
  * Get user's test history
  */
 app.get('/api/tests/history', getTestHistory);
+
+/**
+ * GET /api/tests/official
+ * Get official flagship prediction papers
+ */
+app.get('/api/tests/official', getOfficialTests);
 
 /**
  * GET /api/progress/subject/:subject/:examContext

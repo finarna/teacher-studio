@@ -1,0 +1,59 @@
+{
+  "version": "16.0",
+  "subject": "Chemistry",
+  "exam": "KCET",
+  "identities": [
+    {
+      "id": "ID-C-001",
+      "name": "Transition Metal Color Logic",
+      "logic": "Predicting color based on d-d transitions and unpaired electrons. Trap: Sc3+ and Zn2+ which are colorless.",
+      "high_yield": true,
+      "confidence": 0.98
+    },
+    {
+      "id": "ID-C-002",
+      "name": "Colligative Property Van't Hoff Fusion",
+      "logic": "ΔTb = kb * m * i. Linking boiling point elevation with degree of dissociation.",
+      "high_yield": true,
+      "confidence": 0.95
+    },
+    {
+      "id": "ID-C-003",
+      "name": "Aldol vs Cannizzaro Discrimination",
+      "logic": "Presence of alpha-hydrogen vs no alpha-hydrogen. Common trap involving benzaldehyde vs acetaldehyde mixtures.",
+      "high_yield": true,
+      "confidence": 0.96
+    },
+    {
+      "id": "ID-C-004",
+      "name": "Crystal Field Splitting Energy (CFSE)",
+      "logic": "Δo vs P. Predicting high spin vs low spin for octahedral complexes. KCET favors Co(III) and Fe(II) complexes.",
+      "high_yield": true,
+      "confidence": 0.92
+    },
+    {
+      "id": "ID-C-005",
+      "name": "Solubility Product (Ksp) Common Ion Trap",
+      "logic": "Calculating solubility in the presence of a common ion from a strong electrolyte. Quadratic vs Approximation logic.",
+      "high_yield": true,
+      "confidence": 0.94
+    },
+    {
+      "id": "ID-C-006",
+      "name": "Inorganic Order of Radii/IE/EA",
+      "logic": "Exceptional trends in Group 13 and Group 16. Comparing EA of Cl vs F is a staple.",
+      "high_yield": true,
+      "confidence": 0.98
+    }
+  ],
+  "traps": [
+    {
+      "name": "Concentration Unit Trap",
+      "description": "Using Normality (N) instead of Molarity (M) in titration calculations without adjusting for n-factor."
+    },
+    {
+      "name": "Stereoisomer Count",
+      "description": "Asking for 'Number of optical isomers' vs 'Total stereoisomers' (including meso)."
+    }
+  ]
+}

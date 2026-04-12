@@ -1,0 +1,8 @@
+{
+  "engine_version": "4.0",
+  "rigor_drift_multiplier": 1.72,
+  "ids_baseline": 0.85,
+  "intent_learning_rate": 0.25,
+  "volatility_factor": 1.15,
+  "last_updated": "2026-04-10T16:29:00Z"
+}

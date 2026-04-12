@@ -32,11 +32,16 @@ const getEnv = (name: string) => {
 // Environment variables
 const supabaseUrl = getEnv('VITE_SUPABASE_URL') || getEnv('SUPABASE_URL');
 const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('SUPABASE_ANON_KEY');
+const supabaseServiceKey = getEnv('SUPABASE_SERVICE_ROLE_KEY');
+
+// Determine which key to use (service role for server/scripts, anon for browser)
+const isServer = typeof window === 'undefined';
+const supabaseKey = isServer ? (supabaseServiceKey || supabaseAnonKey) : supabaseAnonKey;
 
 // Validate configuration
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseKey) {
   // If we're on the server, we might be using the service role client instead for some tasks
-  if (typeof window === 'undefined') {
+  if (isServer) {
     console.warn('⚠️ Client-side Supabase config missing. Server-side parts should use supabaseAdmin where possible.');
   } else {
     console.error('Missing Supabase configuration. Required: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
@@ -51,7 +56,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
  * - Session persistence (localStorage)
  * - Auth state changes
  */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl!, supabaseKey!, {
   auth: {
     // Auto-refresh tokens when they expire
     autoRefreshToken: true,

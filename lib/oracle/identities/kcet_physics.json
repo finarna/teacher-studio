@@ -1,0 +1,77 @@
+{
+  "version": "16.0",
+  "subject": "Physics",
+  "exam": "KCET",
+  "identities": [
+    {
+      "id": "ID-P-001",
+      "name": "Gauss's Law Flux Linkage",
+      "logic": "Total electric flux through a closed surface is Q/epsilon_0. Common trap: ignoring partial charges or non-enclosed charges.",
+      "high_yield": true,
+      "confidence": 0.96
+    },
+    {
+      "id": "ID-P-002",
+      "name": "Drift Velocity-Current Bridge",
+      "logic": "I = nAev_d. Relationship between mobility and relaxation time is a recurring KCET favorite.",
+      "high_yield": true,
+      "confidence": 0.94
+    },
+    {
+      "id": "ID-P-003",
+      "name": "Biot-Savart Toroid Symmetry",
+      "logic": "Magnetic field inside a toroid B = μ₀nI. Outside is 0. KCET tests the 'ideal vs real' toroid assumption.",
+      "high_yield": false,
+      "confidence": 0.88
+    },
+    {
+      "id": "ID-P-004",
+      "name": "Lenz's Law Polarity Trap",
+      "logic": "Induced EMF direction always opposes the change in flux. Used for direction-based MCQ traps.",
+      "high_yield": true,
+      "confidence": 0.98
+    },
+    {
+      "id": "ID-P-005",
+      "name": "Snell's Law Critical Angle Mapping",
+      "logic": "sin(c) = 1/n. Relationship between refractive index and wavelength (Cauchy's formula) is high yield.",
+      "high_yield": true,
+      "confidence": 0.92
+    },
+    {
+      "id": "ID-P-006",
+      "name": "De-Broglie Duality Shift",
+      "logic": "lambda = h/p = h/sqrt(2mE). Predicting wavelength change for different ions (e.g., Proton vs Alpha) is a staple.",
+      "high_yield": true,
+      "confidence": 0.95
+    },
+    {
+      "id": "ID-P-007",
+      "name": "Half-Life Decay Persistence",
+      "logic": "N = N0 e^(-lambda*t). Quick shortcuts for 1/2, 1/4, 1/8 levels without logarithmic expansion.",
+      "high_yield": true,
+      "confidence": 0.90
+    },
+    {
+      "id": "ID-P-008",
+      "name": "Logic Gate Boolean Synthesis",
+      "logic": "De Morgan's Laws for NAND/NOR gate reductions. KCET often masks simple gates with complex diode wiring.",
+      "high_yield": true,
+      "confidence": 0.97
+    }
+  ],
+  "traps": [
+    {
+      "name": "Unit-Scaling Obfuscation",
+      "description": "Mixing cm, micro-Farad, and MHz in a single calculation to bait standard values."
+    },
+    {
+      "name": "Ideal vs Real Transitions",
+      "description": "Ignoring internal resistance in EMF questions when external resistance is low."
+    },
+    {
+      "name": "Geometrical Approximation Error",
+      "description": "Using paraxial ray assumptions in Ray Optics where the object distance is large."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "userId": "13282202-5251-4c94-b5ef-95c273378262",
+  "testName": "PLUS2AI OFFICIAL PREDICTION 2026: KCET MATH (SET-A)",
+  "subject": "Math",
+  "examContext": "KCET",
+  "topicIds": ["becf0c71-0e1f-4d3b-bc34-725fd6ff0803", "b7dc917a-5207-4eed-8819-d1fba229ede2", "ac538e60-a06d-4179-bb2f-0838bfcf5ee8", "b91c8423-e322-4a27-94a2-a2e9e4fb38fe", "602f9cac-faa5-4d32-b2f4-38aa9c6482bf", "cbf6b426-d0b8-48a9-86c4-6516b78745bf", "04c891b1-a583-4742-9994-68df4a1d616e", "35e0f27b-bc94-4123-a883-026bb5c7b8be", "ffb4793c-99ad-4dd1-a775-45ccb4a6ae94", "f2d20e9c-b20b-4386-9f3c-d6c457317fdc", "77cdade6-69c3-4af8-9608-ae33e7be5b96", "49e9bae6-b453-44cc-b77a-9bc4a3a3d7ab", "0a03c900-214b-4b99-9589-a1f6bbcc07c2"],
+  "questionCount": 60,
+  "difficultyMix": { "easy": 30, "moderate": 50, "hard": 20 },
+  "durationMinutes": 80,
+  "strategyMode": "predictive_mock",
+  "oracleMode": {
+    "enabled": true,
+    "idsTarget": 0.82,
+    "rigorVelocity": 0.5,
+    "boardSignature": "SYNTHESIZER",
+    "directives": "Focus on high-yield board patterns from 2021-2024. Prioritize Trig-Calculus fusion."
+  }
+}

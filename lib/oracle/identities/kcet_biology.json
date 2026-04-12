@@ -1,0 +1,59 @@
+{
+  "version": "16.0",
+  "subject": "Biology",
+  "exam": "KCET",
+  "identities": [
+    {
+      "id": "ID-B-001",
+      "name": "Floral Formula Mapping",
+      "logic": "Correct identification of Solanaceae vs Fabaceae symbols. Trap: Zygomorphic vs Actinomorphic symbols.",
+      "high_yield": true,
+      "confidence": 0.98
+    },
+    {
+      "id": "ID-B-002",
+      "name": "NCERT Paragraph Diagram Anchors",
+      "logic": "Labeling questions for Spermatozoon, Embryo Sac, or Nucleosome wrapping. Focus on non-obvious labels.",
+      "high_yield": true,
+      "confidence": 0.96
+    },
+    {
+      "id": "ID-B-003",
+      "name": "Genetic Cross Probability (F2)",
+      "logic": "Predicting ratios for Dihybrid cross exceptions (Epistasis, Incomplete Dominance).",
+      "high_yield": true,
+      "confidence": 0.94
+    },
+    {
+      "id": "ID-B-004",
+      "name": "Microbial Commercial Products",
+      "logic": "Cyclosporin A vs Statins. Matching the microbe name with the specific bioactive molecule.",
+      "high_yield": true,
+      "confidence": 0.98
+    },
+    {
+      "id": "ID-B-005",
+      "name": "Ecosystem Energy Flow 10% Rule",
+      "logic": "Calculating biomass or energy transfer across 4 trophic levels. Predict the top carnivore level.",
+      "high_yield": true,
+      "confidence": 0.92
+    },
+    {
+      "id": "ID-B-006",
+      "name": "Hormones of Menstrual Cycle peaks",
+      "logic": "Identifying peaks of LH, FSH, Estrogen, and Progesterone. Trap: LH surge triggers ovulation.",
+      "high_yield": true,
+      "confidence": 0.97
+    }
+  ],
+  "traps": [
+    {
+      "name": "Assertion Reasoning Linguistic Noise",
+      "description": "Using 'Not' or 'Neither' in the Reason statement to confuse a correct fact with a correct explanation."
+    },
+    {
+      "name": "Binomial Nomenclature Case",
+      "description": "Asking to identify the 'correctly printed' name (Italicization and Capitalization rules)."
+    }
+  ]
+}
