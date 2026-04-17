@@ -1,0 +1,255 @@
+{
+  "version": "REI v16.17 (2026-04-13T11:20:00Z)",
+  "subject": "Math",
+  "exam": "KCET",
+  "identities": [
+    {
+      "id": "MAT-001",
+      "name": "Set Theory De-Morgan",
+      "topic": "Sets",
+      "logic": "Application of (A u B)' = A' n B'. Forensic Marker: Intersection cardinality questions involving 'exactly two' of three sets. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025 | Disc_2021",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-002",
+      "name": "Inverse Function Existence",
+      "topic": "Relations & Functions",
+      "logic": "One-one and Onto (bijective) mapping requirements. Forensic Marker: Finding domain/range for piecewise defined functions. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.3872016127472318
+    },
+    {
+      "id": "MAT-003",
+      "name": "Trig Compound Expansion",
+      "topic": "Trigonometric Functions",
+      "logic": "Sum/Product transformations (sin C + sin D). Forensic Marker: Eliminating redundant trig terms to find a constant value. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-004",
+      "name": "Complex Omega Properties",
+      "topic": "Complex Numbers",
+      "logic": "Calculating powers of cube roots of unity. Forensic Marker: Algebraic reduction of expressions like (1 + omega - omega^2)^n. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025 | Disc_2021",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-005",
+      "name": "Quadratic Root Formation",
+      "topic": "Complex Numbers",
+      "logic": "Constructing equations from alpha/beta roots. Forensic Marker: Roots in arithmetic or geometric progression. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025 | Disc_2021",
+      "high_yield": false,
+      "confidence": 0.5211852959745239
+    },
+    {
+      "id": "MAT-006",
+      "name": "Linear Inequality Intersection",
+      "topic": "Linear Inequalities",
+      "logic": "Finding common region for system of inequations. Forensic Marker: Boundary inclusion/exclusion traps (open vs closed intervals). [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.94
+    },
+    {
+      "id": "MAT-007",
+      "name": "Circular Arrangement PC",
+      "topic": "Permutations & Combinations",
+      "logic": "(n-1)! arrangements with fixed positions. Forensic Marker: Selection of items where at least one specific item is included. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.4149143205076343
+    },
+    {
+      "id": "MAT-008",
+      "name": "Binomial Constant Term",
+      "topic": "Binomial Theorem",
+      "logic": "Finding term independent of variable x. Forensic Marker: Ratio of successive coefficients in (1+x)^n expansion. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7008148873398655
+    },
+    {
+      "id": "MAT-009",
+      "name": "AP-GP Common Term",
+      "topic": "Sequences & Series",
+      "logic": "Determining terms appearing in both series. Forensic Marker: Sum to n terms of HP or mixed sequences (AGP). [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.46744388201041126
+    },
+    {
+      "id": "MAT-010",
+      "name": "Parallel Distance Locus",
+      "topic": "Straight Lines",
+      "logic": "Distance between ax + by + c1 = 0 and ax + by + c2 = 0. Forensic Marker: Equations of internal/external bisectors. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.8459934221468592
+    },
+    {
+      "id": "MAT-011",
+      "name": "Hyperbola Conjugate Axis",
+      "topic": "Conic Sections",
+      "logic": "Finding eccentricity 'e' and focal coordinates. Forensic Marker: Relationship between axes lengths for rectangular hyperbolas. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
+    },
+    {
+      "id": "MAT-012",
+      "name": "Limit Trigonometric Squeeze",
+      "topic": "Limits & Derivatives",
+      "logic": "[sin x / x] = 1. Forensic Marker: Continuous extension of functions at x = 0. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.5324847873662398
+    },
+    {
+      "id": "MAT-013",
+      "name": "Mean Deviation Dispersion",
+      "topic": "Statistics",
+      "logic": "Calculation of Variance for grouped and ungrouped data. Forensic Marker: Effect of step-deviation on final coefficients. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-014",
+      "name": "Multiplication Prob Lemma",
+      "topic": "Probability",
+      "logic": "P(A n B) = P(A)P(B|A). Forensic Marker: Drawing items 'without replacement' vs 'with replacement' traps. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-015",
+      "name": "Inverse Trig Domain Map",
+      "topic": "Inverse Trig Functions",
+      "logic": "Principal value branch calculation (e.g. sin^-1(sin 2pi/3)). Forensic Marker: Composition functions like tan(cos^-1 x). [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
+    },
+    {
+      "id": "MAT-016",
+      "name": "Matrix Adjoint Property",
+      "topic": "Matrices",
+      "logic": "Calculating |adj A| = |A|^(n-1). Forensic Marker: Symmetric vs Skew-Symmetric matrix decomposition. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-017",
+      "name": "Determinant Scalar Property",
+      "topic": "Determinants",
+      "logic": "|kA| = k^n |A|. Forensic Marker: Using R1 = R1 + kR2 transormations to find unknown factors. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-018",
+      "name": "Continuity Point Evaluation",
+      "topic": "Continuity & Differentiability",
+      "logic": "Finding unknown 'k' to make function continuous. Forensic Marker: Differentiability check for |x| or [x] functions. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
+    },
+    {
+      "id": "MAT-019",
+      "name": "Chain Rule Composition",
+      "topic": "Continuity & Differentiability",
+      "logic": "Differentiating log(sin x) or e^(cos x). Forensic Marker: Logarithmic differentiation for y = f(x)^g(x) forms. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.4314365977971776
+    },
+    {
+      "id": "MAT-020",
+      "name": "Tangent Slope Orthogonality",
+      "topic": "Application of Derivatives",
+      "logic": "Finding points where tangent is parallel to X-axis. Forensic Marker: Normal line equation through a non-curve point. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-021",
+      "name": "L'Hopital's Optimization",
+      "topic": "Application of Derivatives",
+      "logic": "Rate of change of volume/surface area (Spheres/Cones). Forensic Marker: Decreasing vs Increasing intervals via f'(x). [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
+    },
+    {
+      "id": "MAT-022",
+      "name": "Integration Special Forms",
+      "topic": "Integrals",
+      "logic": "1 / (x^2 + a^2) and related square root forms. Forensic Marker: Partial fraction decomposition for rational functions. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-023",
+      "name": "King Property Integrals",
+      "topic": "Integrals",
+      "logic": "[0 to a] f(x)dx = [0 to a] f(a-x)dx. Forensic Marker: Evaluating periodic functions over specific integer intervals. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.3751136457338028
+    },
+    {
+      "id": "MAT-024",
+      "name": "Area Parabola Intersection",
+      "topic": "Application of Integrals",
+      "logic": "Area between y^2 = 4ax and x^2 = 4by. Forensic Marker: Area in first quadrant vs total enclosed area. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-025",
+      "name": "Linear Diff Eq Solution",
+      "topic": "Differential Equations",
+      "logic": "Integrating factor (IF) calculation e^[Integral P dx]. Forensic Marker: Formation of equation from general solution primitives. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-026",
+      "name": "Vector Projection Scalarity",
+      "topic": "Vector Algebra",
+      "logic": "(A.B) / |B|. Forensic Marker: Perpendicularity condition (A.B = 0) and collinearity checks. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-027",
+      "name": "3D Line Skew Distance",
+      "topic": "3D Geometry",
+      "logic": "|(b1 x b2).(a2-a1)| / |b1 x b2|. Forensic Marker: Angle between two lines in Cartesian vs Vector form. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.5752323240291659
+    },
+    {
+      "id": "MAT-028",
+      "name": "3D Plane Normal Dist",
+      "topic": "3D Geometry",
+      "logic": "Distance of origin from Ax + By + Cz + D = 0. Forensic Marker: Plane passing through three non-collinear points. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.5290572452512755
+    },
+    {
+      "id": "MAT-029",
+      "name": "LPP Corner Point Method",
+      "topic": "Linear Programming",
+      "logic": "Maximizing Z = ax + by. Forensic Marker: Unbounded region solutions and redundant constraints. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "MAT-030",
+      "name": "Bayes Posterior Mapping",
+      "topic": "Probability",
+      "logic": "Selection from multiple urns/bins. Forensic Marker: Probability of defective item given it came from Machine X. [Evolved: 2025: The 2025 paper demonstrates a significant shift toward 'Statement-based' verification (Statement I and II), moving away from pure computational drills. There is a heightened emphasis on Matrix properties (MAT-016) and Probability logic (MAT-014), requiring students to synthesize multiple properties rather than applying single-step formulas.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.6623028227651222
+    }
+  ],
+  "traps": [],
+  "calibration": {
+    "ids_target": 0.945,
+    "status": "CALIBRATED_2021_2025",
+    "updated_at": "2026-04-14T14:41:59.922Z",
+    "final_match_rate": 0.6658333333333333,
+    "total_iterations": 7
+  }
+}

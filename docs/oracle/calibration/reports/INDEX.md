@@ -1,0 +1,212 @@
+# Calibration Reports
+
+**Purpose:** Generated reports from the KCET Math calibration run (2021-2025)
+
+**Location:** `docs/oracle/calibration/reports/`
+
+**Generated:** 2026-04-14 20:11:59
+
+---
+
+## Files in This Directory
+
+### 1. KCET_MATH_CALIBRATION_REPORT_2021_2025.md
+**Type:** Main Summary Report
+**Size:** 7.8 KB
+**Purpose:** Executive summary of entire calibration (all years)
+
+**What's inside:**
+- Executive Summary (overall metrics)
+- Year-by-Year Results Table (IHR, Match Rate, Iterations)
+- Final Calibrated Parameters (engine config)
+- Top 10 High-Confidence Identities (≥75%)
+- Low-Confidence Identities (<40%)
+- Identity Bank Evolution (confidence gainers/losers)
+- Topic Distribution Analysis (coverage trends)
+- Validation Metrics (system confidence, stability)
+- Recommendations for 2026
+
+**When to read:**
+- ✅ To get high-level overview of calibration results
+- ✅ To see which identities are high-yield for 2026
+- ✅ To understand final calibrated parameters
+- ✅ To review system confidence and recommendations
+
+**Key Metrics:**
+- Average Match Rate: 62.7%
+- Identity Hit Rate (2025): 79.2%
+- System Confidence: 66.4%
+- Total Iterations: 7
+
+---
+
+### 2. KCET_MATH_2022_ITERATION_LOG.md
+**Type:** Per-Year Detailed Log
+**Size:** 11 KB
+**Purpose:** Detailed iteration history for Year 2022
+
+**What's inside:**
+- Final Match Rate: 58.3%
+- Total Iterations: 3
+- Iteration-by-iteration metrics (match rate, IHR per iteration)
+- Parameter changes per iteration (which identities adjusted, by how much)
+- Best iteration analysis
+
+**When to read:**
+- ✅ To understand how 2022 calibration converged
+- ✅ To see which parameters changed most in 2022
+- ✅ To debug calibration behavior for this year
+
+**Key Results:**
+- Best iteration: #2 (58.8% match rate)
+- IHR: 58.3%
+- 24 identities adjusted
+
+---
+
+### 3. KCET_MATH_2023_ITERATION_LOG.md
+**Type:** Per-Year Detailed Log
+**Size:** 14 KB
+**Purpose:** Detailed iteration history for Year 2023
+
+**What's inside:**
+- Final Match Rate: 59.6%
+- Total Iterations: 2
+- Iteration-by-iteration metrics
+- Parameter changes per iteration
+- Improvement over 2022
+
+**When to read:**
+- ✅ To see how system improved from 2022
+- ✅ To understand faster convergence (2 iterations vs 3)
+- ✅ To analyze parameter evolution
+
+**Key Results:**
+- Best iteration: #1 (60.1% match rate)
+- IHR: 62.5% (+4.2% from 2022)
+- Fast convergence
+
+---
+
+### 4. KCET_MATH_2024_ITERATION_LOG.md
+**Type:** Per-Year Detailed Log
+**Size:** 13 KB
+**Purpose:** Detailed iteration history for Year 2024
+
+**What's inside:**
+- Final Match Rate: 66.4%
+- Total Iterations: 1
+- Single-iteration convergence analysis
+- Major performance jump analysis
+
+**When to read:**
+- ✅ To understand why system converged in 1 iteration
+- ✅ To see the major IHR improvement (+8.3%)
+- ✅ To analyze parameter stability
+
+**Key Results:**
+- IHR: 70.8% (+8.3% from 2023)
+- Ultra-fast convergence (1 iteration)
+- Parameters stabilizing
+
+---
+
+### 5. KCET_MATH_2025_ITERATION_LOG.md
+**Type:** Per-Year Detailed Log
+**Size:** 13 KB
+**Purpose:** Detailed iteration history for Year 2025
+
+**What's inside:**
+- Final Match Rate: 66.6%
+- Total Iterations: 1
+- IHR: 79.2% (just 0.8% from 80% target!)
+- Final parameter state
+
+**When to read:**
+- ✅ To see the final calibrated state
+- ✅ To understand peak performance (79.2% IHR)
+- ✅ To verify system maturity
+
+**Key Results:**
+- **IHR: 79.2%** 🎯 (+8.4% from 2024)
+- Single iteration convergence
+- System fully matured
+
+---
+
+## Quick Reference Guide
+
+### "I want to see..."
+
+**Overall calibration success:**
+→ Read: `KCET_MATH_CALIBRATION_REPORT_2021_2025.md`
+
+**Which identities to focus on for 2026:**
+→ Read: `KCET_MATH_CALIBRATION_REPORT_2021_2025.md` → "Top 10 High-Confidence Identities"
+
+**How calibration improved year-over-year:**
+→ Read: `KCET_MATH_CALIBRATION_REPORT_2021_2025.md` → "Year-by-Year Results Table"
+
+**Detailed parameter changes for a specific year:**
+→ Read: `KCET_MATH_{year}_ITERATION_LOG.md`
+
+**Why convergence was faster in later years:**
+→ Compare: `KCET_MATH_2022_ITERATION_LOG.md` (3 iterations) vs `KCET_MATH_2025_ITERATION_LOG.md` (1 iteration)
+
+**Final calibrated parameters:**
+→ Read: `KCET_MATH_CALIBRATION_REPORT_2021_2025.md` → "Final Calibrated Parameters"
+
+---
+
+## Metrics Summary (All Reports)
+
+### Year-by-Year Progression
+
+| Year | Report File | IHR | Match Rate | Iterations |
+|------|-------------|-----|------------|------------|
+| 2022 | KCET_MATH_2022_ITERATION_LOG.md | 58.3% | 58.8% | 3 |
+| 2023 | KCET_MATH_2023_ITERATION_LOG.md | 62.5% | 60.1% | 2 |
+| 2024 | KCET_MATH_2024_ITERATION_LOG.md | 70.8% | 66.8% | 1 |
+| 2025 | KCET_MATH_2025_ITERATION_LOG.md | 79.2% | 66.6% | 1 |
+
+### Overall Performance
+- **Average Match Rate:** 62.7%
+- **Final IHR:** 79.2% (0.8% from 80% target)
+- **System Confidence:** 66.4%
+- **Total Iterations:** 7
+- **Avg Iterations/Year:** 1.8
+
+---
+
+## Report Generation
+
+These reports were automatically generated by `calibrationReporter.ts` during the calibration run.
+
+**To regenerate reports:**
+```bash
+# Re-run full calibration
+npx tsx docs/oracle/calibration/scripts/kcet_math_iterative_calibration_2021_2025.ts
+```
+
+**To generate custom reports:**
+```typescript
+import { generateCalibrationReport, generateYearIterationLog } from './scripts/calibrationReporter';
+
+await generateCalibrationReport(results, 'custom_report.md');
+await generateYearIterationLog(yearResults, 2026, 'year_2026_log.md');
+```
+
+---
+
+## Reference
+
+**Generated By:** `calibrationReporter.ts`
+**Source Data:** 2021-2025 KCET Math actual papers (Supabase database)
+**Calibration Method:** Iterative RWC with multi-dimensional question comparison
+
+---
+
+**Category:** Reports
+**Total Files:** 5
+**Total Size:** ~59 KB
+**Status:** ✅ Final (2026-04-14)

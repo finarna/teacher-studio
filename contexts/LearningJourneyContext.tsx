@@ -167,7 +167,7 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
       ...prev,
       selectedSubject: subject,
       currentView: 'subject_menu',
-      isLoading: true
+      // We don't set isLoading: true here to prevent blocking the UI transition to the SubjectMenuPage
     }));
     setViewHistory(prev => [...prev, 'subject_menu']);
 
@@ -186,16 +186,12 @@ export const LearningJourneyProvider: React.FC<LearningJourneyProviderProps> = (
         setState(prev => ({
           ...prev,
           topics: result.data || [],
-          isLoading: false,
           error: null
         }));
       }
     } catch (error) {
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: error instanceof Error ? error.message : 'Failed to load topics'
-      }));
+      console.error('Background fetch of topics failed:', error);
+      // We purposefully don't set global error here to not ruin the user experience on a background prefetch
     }
   };
 

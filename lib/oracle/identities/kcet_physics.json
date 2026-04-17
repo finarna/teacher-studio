@@ -1,77 +1,272 @@
 {
-  "version": "16.0",
+  "version": "16.13 (Peak-Drift Restoration)",
   "subject": "Physics",
   "exam": "KCET",
   "identities": [
     {
-      "id": "ID-P-001",
-      "name": "Gauss's Law Flux Linkage",
-      "logic": "Total electric flux through a closed surface is Q/epsilon_0. Common trap: ignoring partial charges or non-enclosed charges.",
-      "high_yield": true,
-      "confidence": 0.96
+      "id": "PHY-001",
+      "name": "Dimensional Consistent Formula",
+      "topic": "Units & Measurements",
+      "logic": "Relating physical quantities via [M][L][T] power matching. Forensic Marker: Use of non-standard constants (e.g., G, epsilon_0) to test dimension memory. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
     },
     {
-      "id": "ID-P-002",
-      "name": "Drift Velocity-Current Bridge",
-      "logic": "I = nAev_d. Relationship between mobility and relaxation time is a recurring KCET favorite.",
-      "high_yield": true,
-      "confidence": 0.94
+      "id": "PHY-002",
+      "name": "Rectilinear Motion Kinematics",
+      "topic": "Motion in a Straight Line",
+      "logic": "V-T graph area for displacement. Forensic Marker: Instantaneous vs average velocity traps in multi-stage motion. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7099999999999999
     },
     {
-      "id": "ID-P-003",
-      "name": "Biot-Savart Toroid Symmetry",
-      "logic": "Magnetic field inside a toroid B = μ₀nI. Outside is 0. KCET tests the 'ideal vs real' toroid assumption.",
+      "id": "PHY-003",
+      "name": "Vector Projection-Resultant",
+      "topic": "Motion in a Plane",
+      "logic": "Resolution of velocity components in projectile motion. Forensic Marker: Speed at highest point vs initial speed ratio. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-004",
+      "name": "Newtonian Force Equilibrium",
+      "topic": "Laws of Motion",
+      "logic": "Resolving F=ma for connected bodies/pulleys. Forensic Marker: Inclusion of pseudo-force in non-inertial frames. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
       "confidence": 0.88
     },
     {
-      "id": "ID-P-004",
-      "name": "Lenz's Law Polarity Trap",
-      "logic": "Induced EMF direction always opposes the change in flux. Used for direction-based MCQ traps.",
-      "high_yield": true,
-      "confidence": 0.98
+      "id": "PHY-005",
+      "name": "Work-Energy Theorem",
+      "topic": "Work, Energy & Power",
+      "logic": "Equating net work to KE change. Forensic Marker: Questions combining spring potential and kinetic energy transitions. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
     },
     {
-      "id": "ID-P-005",
-      "name": "Snell's Law Critical Angle Mapping",
-      "logic": "sin(c) = 1/n. Relationship between refractive index and wavelength (Cauchy's formula) is high yield.",
-      "high_yield": true,
-      "confidence": 0.92
+      "id": "PHY-006",
+      "name": "Center of Mass Dynamics",
+      "topic": "System of Particles",
+      "logic": "Locating COM for cut-out sections (e.g., disc with circular hole). Forensic Marker: Shifts in COM position. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
     },
     {
-      "id": "ID-P-006",
-      "name": "De-Broglie Duality Shift",
-      "logic": "lambda = h/p = h/sqrt(2mE). Predicting wavelength change for different ions (e.g., Proton vs Alpha) is a staple.",
-      "high_yield": true,
-      "confidence": 0.95
+      "id": "PHY-007",
+      "name": "Moment of Inertia Symmetry",
+      "topic": "Rotational Motion",
+      "logic": "Parallel/Perpendicular axis theorems. Forensic Marker: Calculating MOI for composite rigid bodies (e.g., square of rods). [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.43
     },
     {
-      "id": "ID-P-007",
-      "name": "Half-Life Decay Persistence",
-      "logic": "N = N0 e^(-lambda*t). Quick shortcuts for 1/2, 1/4, 1/8 levels without logarithmic expansion.",
-      "high_yield": true,
-      "confidence": 0.90
+      "id": "PHY-008",
+      "name": "Universal Gravitation Variation",
+      "topic": "Gravitation",
+      "logic": "g variation with altitude and depth. Forensic Marker: Matching height and depth for same g value. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.59
     },
     {
-      "id": "ID-P-008",
-      "name": "Logic Gate Boolean Synthesis",
-      "logic": "De Morgan's Laws for NAND/NOR gate reductions. KCET often masks simple gates with complex diode wiring.",
-      "high_yield": true,
-      "confidence": 0.97
+      "id": "PHY-009",
+      "name": "Hooke's Law Elasticity",
+      "topic": "Mechanical Properties of Solids",
+      "logic": "Stress-Strain proportionality. Forensic Marker: Energy stored per unit volume (1/2 * Stress * Strain). [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.84
+    },
+    {
+      "id": "PHY-010",
+      "name": "Bernoulli's Bernoulli Effect",
+      "topic": "Mechanical Properties of Fluids",
+      "logic": "Speed-Pressure flux in pipes. Forensic Marker: Venturimeter and lift on airplane wings conceptual checks. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.8799999999999999
+    },
+    {
+      "id": "PHY-011",
+      "name": "Thermal Conductivity Rate",
+      "topic": "Thermal Properties of Matter",
+      "logic": "Steady-state heat flow through rods in series/parallel. Forensic Marker: Calculation of junction temperatures. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.59
+    },
+    {
+      "id": "PHY-012",
+      "name": "First Law Thermodynamics",
+      "topic": "Thermodynamics",
+      "logic": "dU = dQ - dW. Forensic Marker: Isothermal vs Adiabatic slope comparisons in P-V diagrams. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.84
+    },
+    {
+      "id": "PHY-013",
+      "name": "Kinetic Theory RMS Speed",
+      "topic": "Kinetic Theory",
+      "logic": "Root Mean Square speed dependence on Molar Mass. Forensic Marker: Comparing H2 vs O2 speeds at same T. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.59
+    },
+    {
+      "id": "PHY-014",
+      "name": "SHM Phase & Energy",
+      "topic": "Oscillations",
+      "logic": "Displacement, velocity and acceleration phase differences. Forensic Marker: Time to reach half-amplitude. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-015",
+      "name": "Doppler Shift Frequency",
+      "topic": "Waves",
+      "logic": "Frequency changes for source moving towards/away. Forensic Marker: Echo/Reflected frequency from moving wall. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-016",
+      "name": "Gauss's Law Electric Flux",
+      "topic": "Electric Charges & Fields",
+      "logic": "Integral of E.dA = q/eps. Forensic Marker: Flux through one face of a cube vs total flux. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.43
+    },
+    {
+      "id": "PHY-017",
+      "name": "Capacitor Energy Synthesis",
+      "topic": "Electrostatic Potential",
+      "logic": "Charge conservation in parallel capacitors. Forensic Marker: Energy loss during capacitor reconnection. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-018",
+      "name": "Potentiometer-Bridge Logic",
+      "topic": "Current Electricity",
+      "logic": "Null deflection balancing length. Forensic Marker: Effect of series resistance in the driver circuit on sensitivity. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-019",
+      "name": "Lorentz Force Cyclotron",
+      "topic": "Moving Charges & Magnetism",
+      "logic": "Magnetic force F=qvB. Forensic Marker: Time period independence of speed and radius. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
+    },
+    {
+      "id": "PHY-020",
+      "name": "Dip & Earth's Magnetism",
+      "topic": "Magnetism & Matter",
+      "logic": "Horizontal vs Vertical components (Bv/Bh). Forensic Marker: True vs Apparent dip in different vertical planes. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
+    },
+    {
+      "id": "PHY-021",
+      "name": "Faraday-Lenz Mutual Flux",
+      "topic": "EMI",
+      "logic": "Induced current polarity and magnitude. Forensic Marker: Motional EMF in a rotating rod. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.8399999999999999
+    },
+    {
+      "id": "PHY-022",
+      "name": "LCR Power & Quality",
+      "topic": "Alternating Current",
+      "logic": "Phase angle (phi) and Power Factor (cos phi). Forensic Marker: Wattless current in pure L or C circuits. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-023",
+      "name": "EM Wave Radiation Pressure",
+      "topic": "EM Waves",
+      "logic": "E/B ratio and energy density. Forensic Marker: Identifying wave properties for specific spectrum ranges (X-ray vs UV). [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
+    },
+    {
+      "id": "PHY-024",
+      "name": "Combined Lens Power",
+      "topic": "Ray Optics",
+      "logic": "Effective focal length of thin lenses in contact. Forensic Marker: Displacement method for focal length. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-025",
+      "name": "YDSE Fringe Visibility",
+      "topic": "Wave Optics",
+      "logic": "Beta = lambda*D/d. Forensic Marker: Angular fringe width shift when submerged in liquid. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-026",
+      "name": "Photoelectric Einstein Eq",
+      "topic": "Dual Nature",
+      "logic": "Stopping potential vs frequency intercepts. Forensic Marker: Linear relationship vs intensity saturation. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-027",
+      "name": "Bohr Orbit Energy Levels",
+      "topic": "Atoms",
+      "logic": "En = -13.6 Z^2/n^2. Forensic Marker: Ratio of wavelengths for H-spectrum transitions (Lyman vs Balmer). [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-028",
+      "name": "Radioactive Decay Half-Life",
+      "topic": "Nuclei",
+      "logic": "N = N0 (1/2)^n. Forensic Marker: Mean life vs Half-life and activity after 'n' half-lives. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    },
+    {
+      "id": "PHY-029",
+      "name": "PN Junction Logic Gates",
+      "topic": "Semiconductors",
+      "logic": "Depletion layer width in forward/reverse bias. Forensic Marker: NAND/NOR as universal gate combinations. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
+    },
+    {
+      "id": "PHY-030",
+      "name": "Signal Modulation Index",
+      "topic": "Communication Systems",
+      "logic": "Carrier vs Signal frequency AM. Forensic Marker: Line of sight (LOS) distance of antennas. [Evolved: 2025: The 2025 paper demonstrates a shift towards 'Visual-Conceptual Mapping' by increasing the frequency of graphical interpretation questions (resistivity-temperature, SHM energy, and magnetic field variations). There is a notable inclusion of experimental physics parameters (travelling microscope readings and galvanometer figure of merit), indicating a move to bridge the gap between laboratory practice and theoretical assessment.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
+      "high_yield": false,
+      "confidence": 0.35
     }
   ],
-  "traps": [
-    {
-      "name": "Unit-Scaling Obfuscation",
-      "description": "Mixing cm, micro-Farad, and MHz in a single calculation to bait standard values."
+  "traps": [],
+  "calibration": {
+    "ids_target": 0.680,
+    "rigor_velocity": 1.6817,
+    "status": "CALIBRATED_2021_2025_REI_V17",
+    "updated_at": "2026-04-17T10:30:00.000Z",
+    "final_match_rate": 0.645,
+    "average_match_rate": 0.616,
+    "system_confidence": 0.636,
+    "total_iterations": 9,
+    "question_type_profile": {
+      "conceptual": 77,
+      "graph_analysis": 15,
+      "experimental": 6,
+      "numerical_problem": 1,
+      "diagram_based": 1,
+      "formula_application": 0
     },
-    {
-      "name": "Ideal vs Real Transitions",
-      "description": "Ignoring internal resistance in EMF questions when external resistance is low."
-    },
-    {
-      "name": "Geometrical Approximation Error",
-      "description": "Using paraxial ray assumptions in Ray Optics where the object distance is large."
+    "board_signature": "CONCEPTUAL_GRAPHER",
+    "difficulty_profile": {
+      "easy": 30,
+      "moderate": 50,
+      "hard": 20
     }
-  ]
+  }
 }

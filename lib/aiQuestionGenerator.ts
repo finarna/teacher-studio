@@ -828,12 +828,110 @@ ORACLE MANDATE:
 - Anchor all questions to the High-Yield identities provided in the context.
 - Maintain the calibrated IDS Target and Board Signature.` : '';
 
-  const difficultyMandate = targetDifficulty 
-    ? `MANDATORY DIFFICULTY TARGET: 
+  const difficultyMandate = targetDifficulty
+    ? `MANDATORY DIFFICULTY TARGET:
 Every single question in this batch MUST be classified as "${targetDifficulty}".
 Failure to adhere to this will result in calibration failure. DO NOT vary difficulty within this batch.`
     : `DIFFICULTY TARGETS (PER TOPIC):
 ${topicsText}`;
+
+  // QUESTION TYPE MANDATE (REI v17 - from actual KCET 2021-2025 analysis)
+  let questionTypeMandate = '';
+
+  if (isOracle && examConfig.examContext === 'KCET' && examConfig.subject === 'Math') {
+    questionTypeMandate = `
+QUESTION TYPE DISTRIBUTION (CRITICAL - Based on KCET 2021-2025 Analysis):
+This is the ACTUAL KCET pattern. Follow this distribution STRICTLY for ${totalInBatch} questions:
+
+1. PROPERTY-BASED (69% = ${Math.round(totalInBatch * 0.69)} questions):
+   - Greatest Integer Function [x] properties and integrals
+   - Matrix properties (symmetric, skew-symmetric, adjoint, rank)
+   - Inverse trigonometric identities and domain/range
+   - Theorem applications (Rolle's, LMVT, Monotonicity)
+   - Relations (reflexive, symmetric, transitive, equivalence)
+   - Function properties (bijective, injective, surjective)
+   - Determinant properties, Eigenvalues
+   - Continuity and Differentiability properties
+   Example: "If [x]^2 - 5[x] + 6 = 0, where [x] denotes GIF, then..."
+   Example: "For matrix A with |A|=4, if B=2·adj(A), then |B|=?"
+
+2. WORD PROBLEMS (19% = ${Math.round(totalInBatch * 0.19)} questions):
+   - Rectangle/square perimeter and area constraints
+   - Set theory with finite elements (subsets, relations)
+   - Probability with balls/cards (red/black scenarios)
+   - Function pre-images and mappings
+   - Age/distance/speed problems (minimal)
+   Example: "Rectangle length = 5×breadth. Minimum perimeter ≥ 180 cm. Find area."
+   Example: "Box with m red and n black balls. Probability of drawing..."
+
+3. COMPUTATIONAL (8% = ${Math.round(totalInBatch * 0.08)} questions):
+   - Direct limit evaluation
+   - Definite integral computation
+   - Derivative calculation
+   - Determinant value
+   Example: "lim(x→π/4) [√2·cos(x) - 1] / [cot(x) - 1] = ?"
+   Example: "∫[0 to 1] log(1/x - 1) dx = ?"
+
+4. PATTERN RECOGNITION (2% = ${Math.round(totalInBatch * 0.02)} questions):
+   - Binomial coefficient patterns
+   - Series summation formulas
+   - GP/AP term relationships
+   Example: "In expansion of (1+x)^n, C₁/C₀ + 2·C₂/C₁ + ... = ?"
+
+5. ABSTRACT (2% = ${Math.round(totalInBatch * 0.02)} questions):
+   - Conceptual questions without numerical computation
+   - Statement-reason type
+   Example: "Which statement is true about symmetric matrices?"
+
+CRITICAL: Do NOT generate too many word problems (common AI mistake). KCET is 69% property-based!`;
+  } else if (isOracle && examConfig.examContext === 'KCET' && examConfig.subject === 'Physics') {
+    questionTypeMandate = `
+QUESTION TYPE DISTRIBUTION (CRITICAL - Based on KCET 2021-2025 Analysis):
+This is the ACTUAL KCET Physics pattern. Follow this distribution STRICTLY for ${totalInBatch} questions:
+
+1. CONCEPTUAL (77% = ${Math.round(totalInBatch * 0.77)} questions):
+   - Laws and principles (Newton's laws, Ohm's law, Faraday's law)
+   - Direction of vectors (force, velocity, magnetic field, torque)
+   - Property identification (characteristics of waves, materials, particles)
+   - "Which of the following" conceptual questions
+   - Cause-effect relationships ("What produces...", "Due to...")
+   - Statement verification (true/false about laws)
+   Example: "A ceiling fan rotating clockwise. Direction of angular velocity is..."
+   Example: "Which of the following produces electromagnetic waves?"
+   Example: "According to Lenz's law, the induced current..."
+
+2. GRAPH ANALYSIS (15% = ${Math.round(totalInBatch * 0.15)} questions):
+   - I-V characteristic curves (for conductors at different temperatures)
+   - Variation graphs (R vs f, X_L vs f, X_C vs f in LCR circuits)
+   - v-t and a-t graphs (kinematics)
+   - Energy vs position graphs (SHM, potential energy)
+   - Resistivity-temperature variations
+   Example: "The I-V graph for a conductor at 100°C and 400°C shows..."
+   Example: "In an LCR circuit, variation of X_L and X_C with frequency..."
+
+3. EXPERIMENTAL (6% = ${Math.round(totalInBatch * 0.06)} questions):
+   - Laboratory apparatus (galvanometer, metre bridge, potentiometer)
+   - Measurement techniques (vernier caliper, screw gauge, travelling microscope)
+   - Experimental observations and readings
+   - Determination procedures (resistance, focal length, figure of merit)
+   Example: "In an experiment to determine resistance using metre bridge..."
+   Example: "Travelling microscope reading for focal length determination..."
+
+4. NUMERICAL PROBLEM (1% = ${Math.round(totalInBatch * 0.01)} questions):
+   - Direct calculation with given values
+   - Ratio computations
+   - Very minimal - KCET Physics is NOT calculation-heavy!
+   Example: "60W, 120V bulb connected to 220V. Required series resistance?"
+
+5. DIAGRAM-BASED (1% = ${Math.round(totalInBatch * 0.01)} questions):
+   - Ray diagram interpretation
+   - Circuit diagram analysis
+   Example: "In the circuit diagram shown, the equivalent resistance..."
+
+CRITICAL INSIGHT: KCET Physics is 92% understanding-based (77% conceptual + 15% graph analysis).
+Do NOT generate calculation-heavy numerical problems - that's NOT the KCET pattern!
+Focus on conceptual clarity, law applications, and graph interpretations.`;
+  }
 
   const prompt = `You are a World-Class Entrance Exam Question Architect for ${examConfig.examContext} ${examConfig.subject}.
 BOARD EVALUATOR PERSONA: ${boardSignature} (Adopt this personality in question framing)
@@ -847,6 +945,7 @@ ${oracleMandate}
 Generate a total of ${totalInBatch} ULTIMATE-RIGOR MCQ questions.
 
 ${difficultyMandate}
+${questionTypeMandate}
 
 SECTION TARGET: ${targetSection} (MANDATORY: Assign this to every question)
 

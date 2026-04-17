@@ -395,7 +395,7 @@ const AppContent: React.FC = () => {
       console.log(`🔄 Syncing scan to Supabase: ${scan.id}`, {
         subject: scan.subject,
         questionCount: scan.analysisData?.questions?.length,
-        questionsWithSketches: scan.analysisData?.questions?.filter(q => q.sketchSvg || (q.images && q.images.length > 0)).length || 0
+        questionsWithSketches: scan.analysisData?.questions?.filter(q => q.sketchSvg || (q.extractedImages && q.extractedImages.length > 0)).length || 0
       });
 
       // CRITICAL: Strip large topic sketch data to avoid 413 Content Too Large errors

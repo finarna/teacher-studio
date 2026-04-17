@@ -29,6 +29,13 @@ export interface ForecastedCalibration {
             moderate: number;
             hard: number;
         };
+        questionTypeProfile?: {
+            word_problem: number;
+            pattern_recognition: number;
+            computational: number;
+            property_based: number;
+            abstract: number;
+        };
     };
     idsTarget: number;
     directives: string[];
@@ -93,7 +100,14 @@ export async function getForecastedCalibration(
 
     // 🏆 MASTER OVERRIDE: If universal calibration exists, use it!
     if (universalCalibration) {
-        console.log(`🧠 [REI v16.0] Master Audit Detected for ${examContext} ${subject}`);
+        console.log(`🧠 [REI v17.0] Master Audit Detected for ${examContext} ${subject}`);
+
+        // REI v17: Include question type profile if available
+        const hasQuestionTypeProfile = universalCalibration.intent_signature?.questionTypeProfile;
+        if (hasQuestionTypeProfile) {
+            console.log(`   ✅ Question Type Profile Detected (Property-Based: ${hasQuestionTypeProfile.property_based}%, Word: ${hasQuestionTypeProfile.word_problem}%)`);
+        }
+
         return {
             examContext,
             subject,
@@ -110,7 +124,9 @@ export async function getForecastedCalibration(
                 linguisticLoad: universalCalibration.intent_signature?.linguisticLoad || 0.5,
                 speedRequirement: universalCalibration.intent_signature?.speedRequirement || 0.9,
                 // v16.1: Load difficulty from JSON if columns missing
-                difficultyProfile: universalCalibration.intent_signature?.difficultyProfile
+                difficultyProfile: universalCalibration.intent_signature?.difficultyProfile,
+                // v17.0: Load question type profile (REI enhancement for KCET pattern matching)
+                questionTypeProfile: universalCalibration.intent_signature?.questionTypeProfile
             },
             idsTarget: universalCalibration.intent_signature?.idsTarget || universalCalibration.ids_target || 0.9,
             directives: universalCalibration.calibration_directives || [],
@@ -136,7 +152,7 @@ export async function getForecastedCalibration(
     }
 
     // DRIFT CALCULATION: Delta in "Extreme Rigor" (Hard %)
-    const rigorDrift = (recent.difficulty_hard_pct || 20) - (previous.difficulty_hard_pct || 20);
+    const rigorDrift = (recent.difficulty_hard_pct ?? 20) - (previous.difficulty_hard_pct ?? 20);
 
     // RWC (Recursive Weight Correction) logic:
     // Acceleration Factor: If hard Qs are increasing, forecast predicts a "Rigor Spike"
@@ -156,7 +172,7 @@ export async function getForecastedCalibration(
 
     // 5. Chain to Mock Test Params (Complexity Matrix)
     // Dynamic forecast for 2026 based on the 2-year gradient
-    const forecastedHard = Math.min(65, Math.max(15, (recent.difficulty_hard_pct || 20) + (rigorDrift * driftMultiplier)));
+    const forecastedHard = Math.min(65, Math.max(15, (recent.difficulty_hard_pct ?? 20) + (rigorDrift * driftMultiplier)));
     const remaining = 100 - forecastedHard;
     const forecastedEasy = Math.round(remaining * (baseline.profile.easy / (baseline.profile.easy + baseline.profile.moderate)));
     const forecastedModerate = 100 - forecastedHard - forecastedEasy;
