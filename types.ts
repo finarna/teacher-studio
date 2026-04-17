@@ -270,6 +270,14 @@ export interface AnalyzedQuestion {
   imageUrl?: string;           // Diagram image cropped from PDF page (e.g. Biology extractor's cropDiagram())
   subject?: Subject;            // NEW: Added for combined paper question-level filtering
   section?: string;            // NEW: Added for NEET/JEE Section A/B support
+  identityId?: string;         // For AI Oracle Calibration
+  questionType?: string;       // NEW: Question type classification (theory_conceptual, property_based, etc.)
+  metadata?: {                 // NEW: Additional metadata for REI v17 calibration
+    identityId?: string;
+    questionType?: string;
+    idsValue?: number;
+    [key: string]: any;
+  };
 }
 
 

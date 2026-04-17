@@ -209,7 +209,7 @@ export function LoginForm({ onSwitchToSignup, onSuccess }: LoginFormProps) {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-6">
-          © 2024 plus2AI Vault. All rights reserved.
+          © 2026 <span style={{ color: '#0a1a16' }}>plus2</span><span style={{ color: '#ff7f50' }}>AI</span> AI mocktest. All rights reserved.
         </p>
       </div>
     </div>

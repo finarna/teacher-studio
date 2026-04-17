@@ -1,8 +1,8 @@
 # KCET Math 2024 - Iteration Log
 
-**Final Match Rate:** 65.5%
-**Total Iterations:** 2
-**Generated:** 2026-04-17T05:44:54.919Z
+**Final Match Rate:** 54.0%
+**Total Iterations:** 3
+**Generated:** 2026-04-17T11:24:37.790Z
 
 ---
 
@@ -11,168 +11,148 @@
 ### Iteration 1
 
 - **Match Rate:** 23.3%
-- **Average Score:** 37.5%
-- **Timestamp:** 2026-04-17T05:20:53.064Z
+- **Average Score:** 49.7%
+- **Timestamp:** 2026-04-17T10:50:29.350Z
 
 **Parameter Changes:**
 
 ```json
 {
   "identities": {
-    "PHY-016": {
+    "CHM-021": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-009": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-014": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-007": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-001": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-015": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-025": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-004": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-019": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-012": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-013": {
       "old": 0.4,
       "new": 0.35000000000000003,
       "change": -0.05
     },
-    "PHY-027": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-014": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-020": {
+    "CHM-020": {
       "old": 0.4,
       "new": 0.35000000000000003,
       "change": -0.05
     },
-    "PHY-024": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-004": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-006": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-022": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-019": {
+    "CHM-023": {
       "old": 0.4,
       "new": 0.35000000000000003,
       "change": -0.05
     },
-    "PHY-013": {
+    "CHM-017": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-005": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-018": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-022": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-008": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-016": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-026": {
+      "old": 0.4,
+      "new": 0.48000000000000004,
+      "change": 0.08
+    },
+    "CHM-030": {
       "old": 0.4,
       "new": 0.35000000000000003,
       "change": -0.05
     },
-    "PHY-015": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-009": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-001": {
+    "CHM-029": {
       "old": 0.4,
       "new": 0.35000000000000003,
       "change": -0.05
     },
-    "PHY-026": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-008": {
+    "CHM-002": {
       "old": 0.4,
       "new": 0.35000000000000003,
       "change": -0.05
     },
-    "PHY-003": {
+    "CHM-011": {
       "old": 0.4,
       "new": 0.48000000000000004,
       "change": 0.08
     },
-    "PHY-012": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-017": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-018": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-029": {
+    "CHM-028": {
       "old": 0.4,
       "new": 0.35000000000000003,
       "change": -0.05
     },
-    "PHY-010": {
+    "CHM-027": {
       "old": 0.4,
       "new": 0.52,
       "change": 0.12
-    },
-    "PHY-030": {
-      "old": 0.4,
-      "new": 0.35000000000000003,
-      "change": -0.05
-    },
-    "PHY-023": {
-      "old": 0.4,
-      "new": 0.35000000000000003,
-      "change": -0.05
-    },
-    "PHY-011": {
-      "old": 0.4,
-      "new": 0.35000000000000003,
-      "change": -0.05
-    },
-    "PHY-025": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-021": {
-      "old": 0.4,
-      "new": 0.52,
-      "change": 0.12
-    },
-    "PHY-005": {
-      "old": 0.4,
-      "new": 0.35000000000000003,
-      "change": -0.05
-    },
-    "PHY-028": {
-      "old": 0.4,
-      "new": 0.48000000000000004,
-      "change": 0.08
-    },
-    "PHY-002": {
-      "old": 0.4,
-      "new": 0.52,
-      "change": 0.12
-    },
-    "PHY-007": {
-      "old": 0.4,
-      "new": 0.35000000000000003,
-      "change": -0.05
     }
   },
-  "rigorDrift": -0.011666666666666665,
+  "rigorDrift": -0.016666666666666666,
   "intent": {
-    "synthesisWeight": -0.03266666666666662
+    "synthesisWeight": -0.006000000000000005
   },
   "idsBaseline": 0.028333333333333335
 }
@@ -182,171 +162,470 @@
 
 ### Iteration 2
 
-- **Match Rate:** 25.0%
-- **Average Score:** 44.8%
-- **Timestamp:** 2026-04-17T05:37:35.884Z
+- **Match Rate:** 20.0%
+- **Average Score:** 47.6%
+- **Timestamp:** 2026-04-17T10:53:15.758Z
 
 **Parameter Changes:**
 
 ```json
 {
   "identities": {
-    "PHY-012": {
-      "old": 0.76,
-      "new": 0.84,
+    "CHM-016": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
       "change": 0.08
     },
-    "PHY-030": {
-      "old": 0.35,
+    "CHM-014": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-024": {
+      "old": 0.4,
+      "new": 0.35000000000000003,
+      "change": -0.05
+    },
+    "CHM-004": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-018": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-022": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-015": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-001": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-009": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-019": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-025": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-005": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-023": {
+      "old": 0.35000000000000003,
       "new": 0.35,
       "change": -0.05
     },
-    "PHY-024": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-016": {
-      "old": 0.35,
-      "new": 0.43,
-      "change": 0.08
-    },
-    "PHY-007": {
-      "old": 0.35,
-      "new": 0.43,
-      "change": 0.08
-    },
-    "PHY-019": {
-      "old": 0.35,
+    "CHM-013": {
+      "old": 0.35000000000000003,
       "new": 0.35,
       "change": -0.05
     },
-    "PHY-015": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-008": {
-      "old": 0.51,
-      "new": 0.59,
-      "change": 0.08
-    },
-    "PHY-001": {
-      "old": 0.35,
+    "CHM-028": {
+      "old": 0.35000000000000003,
       "new": 0.35,
       "change": -0.05
     },
-    "PHY-003": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
+    "CHM-017": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
       "change": 0.08
     },
-    "PHY-027": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-020": {
-      "old": 0.35,
-      "new": 0.35,
-      "change": -0.05
-    },
-    "PHY-004": {
-      "old": 0.76,
-      "new": 0.88,
+    "CHM-008": {
+      "old": 0.48000000000000004,
+      "new": 0.6000000000000001,
       "change": 0.12
     },
-    "PHY-011": {
-      "old": 0.51,
-      "new": 0.59,
-      "change": 0.08
-    },
-    "PHY-018": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-025": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-028": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-017": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-029": {
-      "old": 0.35,
+    "CHM-029": {
+      "old": 0.35000000000000003,
       "new": 0.35,
       "change": -0.05
     },
-    "PHY-006": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
+    "CHM-021": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
       "change": 0.08
     },
-    "PHY-013": {
-      "old": 0.51,
-      "new": 0.59,
+    "CHM-003": {
+      "old": 0.4,
+      "new": 0.35000000000000003,
+      "change": -0.05
+    },
+    "CHM-026": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
       "change": 0.08
     },
-    "PHY-022": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-021": {
-      "old": 0.7599999999999999,
-      "new": 0.8399999999999999,
-      "change": 0.08
-    },
-    "PHY-026": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-023": {
-      "old": 0.35,
+    "CHM-020": {
+      "old": 0.35000000000000003,
       "new": 0.35,
       "change": -0.05
     },
-    "PHY-002": {
-      "old": 0.7599999999999999,
-      "new": 0.7099999999999999,
-      "change": -0.05
+    "CHM-007": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
     },
-    "PHY-010": {
-      "old": 0.7599999999999999,
-      "new": 0.8799999999999999,
+    "CHM-012": {
+      "old": 0.48000000000000004,
+      "new": 0.56,
+      "change": 0.08
+    },
+    "CHM-027": {
+      "old": 0.52,
+      "new": 0.6,
+      "change": 0.08
+    },
+    "CHM-011": {
+      "old": 0.48000000000000004,
+      "new": 0.6000000000000001,
       "change": 0.12
     },
-    "PHY-005": {
-      "old": 0.35,
+    "CHM-030": {
+      "old": 0.35000000000000003,
       "new": 0.35,
       "change": -0.05
-    },
-    "PHY-014": {
-      "old": 0.72,
-      "new": 0.7999999999999999,
-      "change": 0.08
-    },
-    "PHY-009": {
-      "old": 0.72,
-      "new": 0.84,
-      "change": 0.12
     }
   },
-  "rigorDrift": -0.006666666666666668,
+  "rigorDrift": -0.020000000000000004,
   "intent": {
-    "synthesisWeight": -0.0333333333333333
+    "synthesisWeight": -0.005333333333333301
   },
-  "idsBaseline": 0.027500000000000004
+  "idsBaseline": 0.030000000000000006
+}
+```
+
+---
+
+### Iteration 3
+
+- **Match Rate:** 13.3%
+- **Average Score:** 33.4%
+- **Timestamp:** 2026-04-17T11:10:55.721Z
+
+**Parameter Changes:**
+
+```json
+{
+  "identities": {
+    "CHM-017": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-001": {
+      "old": 0.7999999999999999,
+      "new": 0.7499999999999999,
+      "change": -0.05
+    },
+    "CHM-009": {
+      "old": 0.7999999999999999,
+      "new": 0.9199999999999999,
+      "change": 0.12
+    },
+    "CHM-019": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-005": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-023": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    },
+    "CHM-021": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-014": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-016": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-011": {
+      "old": 0.84,
+      "new": 0.7899999999999999,
+      "change": -0.05
+    },
+    "CHM-030": {
+      "old": 0.35,
+      "new": 0.47,
+      "change": 0.12
+    },
+    "CHM-004": {
+      "old": 0.7999999999999999,
+      "new": 0.7499999999999999,
+      "change": -0.05
+    },
+    "CHM-013": {
+      "old": 0.43,
+      "new": 0.51,
+      "change": 0.08
+    },
+    "CHM-027": {
+      "old": 0.8399999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.12
+    },
+    "CHM-022": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-002": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    },
+    "CHM-026": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-015": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-018": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-024": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    },
+    "CHM-020": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    },
+    "CHM-007": {
+      "old": 0.7999999999999999,
+      "new": 0.9199999999999999,
+      "change": 0.12
+    },
+    "CHM-012": {
+      "old": 0.7999999999999999,
+      "new": 0.7499999999999999,
+      "change": -0.05
+    },
+    "CHM-008": {
+      "old": 0.71,
+      "new": 0.6599999999999999,
+      "change": -0.05
+    },
+    "CHM-025": {
+      "old": 0.7999999999999999,
+      "new": 0.8799999999999999,
+      "change": 0.08
+    },
+    "CHM-028": {
+      "old": 0.43,
+      "new": 0.51,
+      "change": 0.08
+    },
+    "CHM-029": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    }
+  },
+  "rigorDrift": -0.018333333333333333,
+  "intent": {
+    "synthesisWeight": -0.011999999999999955
+  },
+  "idsBaseline": 0.03333333333333334
+}
+```
+
+---
+
+### Iteration 4
+
+- **Match Rate:** 15.0%
+- **Average Score:** 33.6%
+- **Timestamp:** 2026-04-17T11:13:06.030Z
+
+**Parameter Changes:**
+
+```json
+{
+  "identities": {
+    "CHM-029": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    },
+    "CHM-030": {
+      "old": 0.47,
+      "new": 0.59,
+      "change": 0.12
+    },
+    "CHM-005": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-014": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-011": {
+      "old": 0.7899999999999999,
+      "new": 0.7399999999999999,
+      "change": -0.05
+    },
+    "CHM-021": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-004": {
+      "old": 0.7499999999999999,
+      "new": 0.6999999999999998,
+      "change": -0.05
+    },
+    "CHM-015": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-018": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-025": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-023": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    },
+    "CHM-013": {
+      "old": 0.51,
+      "new": 0.59,
+      "change": 0.08
+    },
+    "CHM-024": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    },
+    "CHM-007": {
+      "old": 0.9199999999999999,
+      "new": 0.99,
+      "change": 0.12
+    },
+    "CHM-019": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-022": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-009": {
+      "old": 0.9199999999999999,
+      "new": 0.99,
+      "change": 0.08
+    },
+    "CHM-001": {
+      "old": 0.7499999999999999,
+      "new": 0.6999999999999998,
+      "change": -0.05
+    },
+    "CHM-012": {
+      "old": 0.7499999999999999,
+      "new": 0.6999999999999998,
+      "change": -0.05
+    },
+    "CHM-017": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-020": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    },
+    "CHM-016": {
+      "old": 0.8799999999999999,
+      "new": 0.99,
+      "change": 0.12
+    },
+    "CHM-002": {
+      "old": 0.35,
+      "new": 0.35,
+      "change": -0.05
+    },
+    "CHM-026": {
+      "old": 0.8799999999999999,
+      "new": 0.9599999999999999,
+      "change": 0.08
+    },
+    "CHM-028": {
+      "old": 0.51,
+      "new": 0.63,
+      "change": 0.12
+    },
+    "CHM-027": {
+      "old": 0.9599999999999999,
+      "new": 0.99,
+      "change": 0.12
+    },
+    "CHM-008": {
+      "old": 0.6599999999999999,
+      "new": 0.6099999999999999,
+      "change": -0.05
+    }
+  },
+  "rigorDrift": -0.020000000000000004,
+  "intent": {
+    "synthesisWeight": -0.012666666666666604
+  },
+  "idsBaseline": 0.0325
 }
 ```
 
@@ -356,63 +635,63 @@
 
 | Q# | Generated Identity | Actual Identity | Overall Score | Match | Discrepancies |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | PHY-026 | PHY-026 | 54.1% | ❌ | Topic mismatch: Generated=Dual Nature, Actual=Dual Nature of Radiation and Matter; Adjacent difficulty: Generated=Hard, Actual=Moderate |
-| 2 | PHY-012 | PHY-012 | 83.1% | ✅ |  |
-| 3 | PHY-015 | PHY-015 | 82.7% | ✅ |  |
-| 4 | PHY-023 | PHY-028 | 22.3% | ❌ | Identity mismatch: Generated=PHY-023, Actual=PHY-028; Topic mismatch: Generated=EM Waves, Actual=Nuclei |
-| 5 | PHY-027 | PHY-027 | 75.8% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate |
-| 6 | PHY-005 | PHY-015 | 22.0% | ❌ | Identity mismatch: Generated=PHY-005, Actual=PHY-015; Topic mismatch: Generated=Work, Energy & Power, Actual=Electromagnetic Waves |
-| 7 | PHY-022 | PHY-022 | 81.9% | ✅ |  |
-| 8 | PHY-021 | PHY-021 | 62.2% | ❌ | Topic mismatch: Generated=EMI, Actual=Semiconductor Electronics |
-| 9 | PHY-003 | PHY-003 | 74.0% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate |
-| 10 | PHY-020 | PHY-024 | 22.4% | ❌ | Identity mismatch: Generated=PHY-020, Actual=PHY-024; Topic mismatch: Generated=Magnetism & Matter, Actual=Ray Optics and Optical Instruments |
-| 11 | PHY-013 | PHY-013 | 52.1% | ❌ | Topic mismatch: Generated=Kinetic Theory, Actual=Kinetic Theory of Gases; Adjacent difficulty: Generated=Moderate, Actual=Easy |
-| 12 | PHY-021 | PHY-021 | 61.7% | ❌ | Topic mismatch: Generated=EMI, Actual=Semiconductor Electronics |
-| 13 | PHY-004 | PHY-004 | 75.7% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate |
-| 14 | PHY-017 | PHY-017 | 64.6% | ❌ | Topic mismatch: Generated=Electrostatic Potential, Actual=Electrostatic Potential and Capacitance |
-| 15 | PHY-004 | PHY-007 | 22.0% | ❌ | Identity mismatch: Generated=PHY-004, Actual=PHY-007; Topic mismatch: Generated=Laws of Motion, Actual=Electromagnetic Induction |
-| 16 | PHY-030 | PHY-024 | 21.7% | ❌ | Identity mismatch: Generated=PHY-030, Actual=PHY-024; Topic mismatch: Generated=Communication Systems, Actual=Ray Optics and Optical Instruments |
-| 17 | PHY-016 | PHY-016 | 62.1% | ❌ | Topic mismatch: Generated=Electric Charges & Fields, Actual=Electric Charges and Fields |
-| 18 | PHY-027 | PHY-027 | 74.4% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate |
-| 19 | PHY-023 | PHY-017 | 22.7% | ❌ | Identity mismatch: Generated=PHY-023, Actual=PHY-017; Topic mismatch: Generated=EM Waves, Actual=Electrostatic Potential and Capacitance |
-| 20 | PHY-022 | PHY-022 | 73.2% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
-| 21 | PHY-025 | PHY-025 | 83.1% | ✅ |  |
-| 22 | PHY-025 | PHY-025 | 77.2% | ✅ | Different solution approach |
-| 23 | PHY-010 | PHY-010 | 75.8% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate |
-| 24 | PHY-014 | PHY-014 | 51.1% | ❌ | Topic mismatch: Generated=Oscillations, Actual=Oscillations (Simple Harmonic Motion); Adjacent difficulty: Generated=Moderate, Actual=Easy |
-| 25 | PHY-017 | PHY-018 | 23.1% | ❌ | Identity mismatch: Generated=PHY-017, Actual=PHY-018; Topic mismatch: Generated=Electrostatic Potential, Actual=Current Electricity |
-| 26 | PHY-001 | PHY-015 | 22.0% | ❌ | Identity mismatch: Generated=PHY-001, Actual=PHY-015; Topic mismatch: Generated=Units & Measurements, Actual=Electric Charges and Fields |
-| 27 | PHY-005 | PHY-021 | 22.4% | ❌ | Identity mismatch: Generated=PHY-005, Actual=PHY-021; Topic mismatch: Generated=Work, Energy & Power, Actual=Semiconductor Electronics |
-| 28 | PHY-029 | PHY-018 | 21.6% | ❌ | Identity mismatch: Generated=PHY-029, Actual=PHY-018; Topic mismatch: Generated=Semiconductors, Actual=Current Electricity |
-| 29 | PHY-026 | PHY-026 | 54.3% | ❌ | Topic mismatch: Generated=Dual Nature, Actual=Dual Nature of Radiation and Matter; Adjacent difficulty: Generated=Hard, Actual=Moderate |
-| 30 | PHY-028 | PHY-028 | 81.3% | ✅ |  |
-| 31 | PHY-009 | PHY-009 | 74.4% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate |
-| 32 | PHY-030 | PHY-028 | 21.6% | ❌ | Identity mismatch: Generated=PHY-030, Actual=PHY-028; Topic mismatch: Generated=Communication Systems, Actual=Moving Charges and Magnetism |
-| 33 | PHY-011 | PHY-011 | 74.6% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate |
-| 34 | PHY-028 | PHY-028 | 71.7% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate; Different solution approach |
-| 35 | PHY-028 | PHY-028 | 53.7% | ❌ | Topic mismatch: Generated=Nuclei, Actual=Electromagnetic Induction; Adjacent difficulty: Generated=Hard, Actual=Moderate |
-| 36 | PHY-020 | PHY-003 | 22.0% | ❌ | Identity mismatch: Generated=PHY-020, Actual=PHY-003; Topic mismatch: Generated=Magnetism & Matter, Actual=Motion in a Plane |
-| 37 | PHY-001 | PHY-011 | 21.5% | ❌ | Identity mismatch: Generated=PHY-001, Actual=PHY-011; Topic mismatch: Generated=Units & Measurements, Actual=Electric Charges and Fields |
-| 38 | PHY-009 | PHY-018 | 21.7% | ❌ | Identity mismatch: Generated=PHY-009, Actual=PHY-018; Topic mismatch: Generated=Mechanical Properties of Solids, Actual=Current Electricity |
-| 39 | PHY-029 | PHY-018 | 21.9% | ❌ | Identity mismatch: Generated=PHY-029, Actual=PHY-018; Topic mismatch: Generated=Semiconductors, Actual=Current Electricity |
-| 40 | PHY-002 | PHY-021 | 21.2% | ❌ | Identity mismatch: Generated=PHY-002, Actual=PHY-021; Topic mismatch: Generated=Motion in a Straight Line, Actual=Semiconductor Electronics |
-| 41 | PHY-008 | PHY-008 | 78.0% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate |
-| 42 | PHY-024 | PHY-024 | 60.2% | ❌ | Topic mismatch: Generated=Ray Optics, Actual=Ray Optics and Optical Instruments; Different solution approach |
-| 43 | PHY-018 | PHY-018 | 82.2% | ✅ |  |
-| 44 | PHY-015 | PHY-015 | 60.8% | ❌ | Topic mismatch: Generated=Waves, Actual=Moving Charges and Magnetism |
-| 45 | PHY-015 | PHY-015 | 59.2% | ❌ | Topic mismatch: Generated=Waves, Actual=Magnetism and Matter; Different solution approach |
-| 46 | PHY-018 | PHY-018 | 80.6% | ✅ |  |
-| 47 | PHY-004 | PHY-015 | 21.2% | ❌ | Identity mismatch: Generated=PHY-004, Actual=PHY-015; Topic mismatch: Generated=Laws of Motion, Actual=Units and Measurements |
-| 48 | PHY-014 | PHY-007 | 21.7% | ❌ | Identity mismatch: Generated=PHY-014, Actual=PHY-007; Topic mismatch: Generated=Oscillations, Actual=Moving Charges and Magnetism |
-| 49 | PHY-018 | PHY-011 | 21.6% | ❌ | Identity mismatch: Generated=PHY-018, Actual=PHY-011; Topic mismatch: Generated=Current Electricity, Actual=Magnetism and Matter |
-| 50 | PHY-024 | PHY-024 | 53.6% | ❌ | Topic mismatch: Generated=Ray Optics, Actual=Ray Optics and Optical Instruments; Adjacent difficulty: Generated=Moderate, Actual=Easy |
-| 51 | PHY-007 | PHY-007 | 59.4% | ❌ | Topic mismatch: Generated=Rotational Motion, Actual=Electric Charges and Fields; Different solution approach |
-| 52 | PHY-008 | PHY-022 | 21.1% | ❌ | Identity mismatch: Generated=PHY-008, Actual=PHY-022; Topic mismatch: Generated=Gravitation, Actual=Alternating Current |
-| 53 | PHY-019 | PHY-006 | 21.3% | ❌ | Identity mismatch: Generated=PHY-019, Actual=PHY-006; Topic mismatch: Generated=Moving Charges & Magnetism, Actual=System of Particles and Rotational Motion |
-| 54 | PHY-004 | PHY-011 | 20.4% | ❌ | Identity mismatch: Generated=PHY-004, Actual=PHY-011; Topic mismatch: Generated=Laws of Motion, Actual=Moving Charges and Magnetism |
-| 55 | PHY-015 | PHY-016 | 19.7% | ❌ | Identity mismatch: Generated=PHY-015, Actual=PHY-016; Topic mismatch: Generated=Waves, Actual=Electromagnetic Induction |
-| 56 | PHY-006 | PHY-006 | 47.4% | ❌ | Topic mismatch: Generated=System of Particles, Actual=System of Particles and Rotational Motion; Difficulty mismatch: Generated=Easy, Actual=Hard |
-| 57 | PHY-018 | PHY-011 | 14.0% | ❌ | Identity mismatch: Generated=PHY-018, Actual=PHY-011; Topic mismatch: Generated=Current Electricity, Actual=Work, Energy and Power |
-| 58 | PHY-028 | PHY-028 | 43.9% | ❌ | Topic mismatch: Generated=Nuclei, Actual=Electric Charges and Fields; Difficulty mismatch: Generated=Hard, Actual=Easy |
-| 59 | PHY-012 | PHY-025 | 14.0% | ❌ | Identity mismatch: Generated=PHY-012, Actual=PHY-025; Topic mismatch: Generated=Thermodynamics, Actual=Wave Optics |
-| 60 | PHY-019 | PHY-016 | 10.4% | ❌ | Identity mismatch: Generated=PHY-019, Actual=PHY-016; Topic mismatch: Generated=Moving Charges & Magnetism, Actual=Magnetism and Matter |
+| 1 | CHM-011 | CHM-030 | 21.3% | ❌ | Identity mismatch: Generated=CHM-011, Actual=CHM-030; Topic mismatch: Generated=Redox Reactions, Actual=Environmental Chemistry |
+| 2 | CHM-009 | CHM-009 | 59.3% | ❌ | Topic mismatch: Generated=Equilibrium, Actual=Equilibrium (Ionic Equilibrium); Different solution approach |
+| 3 | CHM-008 | CHM-019 | 22.0% | ❌ | Identity mismatch: Generated=CHM-008, Actual=CHM-019; Topic mismatch: Generated=Thermodynamics, Actual=p-Block Elements (Group 14) |
+| 4 | CHM-024 | CHM-021 | 13.8% | ❌ | Identity mismatch: Generated=CHM-024, Actual=CHM-021; Topic mismatch: Generated=Aldehydes & Ketones, Actual=Aldehydes, Ketones and Carboxylic Acids |
+| 5 | CHM-014 | CHM-014 | 59.3% | ❌ | Topic mismatch: Generated=Solid State, Actual=The Solid State; Different solution approach |
+| 6 | CHM-026 | CHM-026 | 63.5% | ❌ | Difficulty mismatch: Generated=Hard, Actual=Easy; Different solution approach |
+| 7 | CHM-013 | CHM-013 | 60.0% | ❌ | Topic mismatch: Generated=Hydrocarbons, Actual=Hydrocarbons and Haloalkanes |
+| 8 | CHM-019 | CHM-019 | 58.4% | ❌ | Topic mismatch: Generated=p-Block Elements, Actual=The p-Block Elements; Different solution approach |
+| 9 | CHM-015 | CHM-015 | 79.8% | ✅ | Different solution approach |
+| 10 | CHM-025 | CHM-025 | 71.4% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate; Different solution approach |
+| 11 | CHM-001 | CHM-017 | 19.4% | ❌ | Identity mismatch: Generated=CHM-001, Actual=CHM-017; Topic mismatch: Generated=Basic Concepts, Actual=Chemical Kinetics |
+| 12 | CHM-002 | CHM-021 | 20.3% | ❌ | Identity mismatch: Generated=CHM-002, Actual=CHM-021; Topic mismatch: Generated=Atomic Structure, Actual=Structure of Atom |
+| 13 | CHM-007 | CHM-007 | 73.5% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate |
+| 14 | CHM-001 | CHM-016 | 19.4% | ❌ | Identity mismatch: Generated=CHM-001, Actual=CHM-016; Topic mismatch: Generated=Basic Concepts, Actual=Electrochemistry |
+| 15 | CHM-005 | CHM-005 | 59.5% | ❌ | Topic mismatch: Generated=Chemical Bonding, Actual=Chemical Bonding and Molecular Structure |
+| 16 | CHM-019 | CHM-019 | 51.7% | ❌ | Topic mismatch: Generated=p-Block Elements, Actual=The p-Block Elements; Adjacent difficulty: Generated=Moderate, Actual=Easy |
+| 17 | CHM-023 | CHM-021 | 13.0% | ❌ | Identity mismatch: Generated=CHM-023, Actual=CHM-021; Topic mismatch: Generated=Alcohols & Phenols, Actual=General Principles and Processes of Isolation of Elements |
+| 18 | CHM-017 | CHM-017 | 79.7% | ✅ | Different solution approach |
+| 19 | CHM-021 | CHM-021 | 81.5% | ✅ | Different solution approach |
+| 20 | CHM-015 | CHM-015 | 79.7% | ✅ | Different solution approach |
+| 21 | CHM-017 | CHM-017 | 72.3% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy |
+| 22 | CHM-012 | CHM-022 | 19.4% | ❌ | Identity mismatch: Generated=CHM-012, Actual=CHM-022; Topic mismatch: Generated=Organic Chemistry Basics, Actual=Haloalkanes and Haloarenes |
+| 23 | CHM-030 | CHM-021 | 12.6% | ❌ | Identity mismatch: Generated=CHM-030, Actual=CHM-021; Topic mismatch: Generated=Environmental, Actual=Coordination Compounds |
+| 24 | CHM-023 | CHM-021 | 12.1% | ❌ | Identity mismatch: Generated=CHM-023, Actual=CHM-021; Topic mismatch: Generated=Alcohols & Phenols, Actual=Alcohols, Phenols and Ethers |
+| 25 | CHM-016 | CHM-016 | 80.5% | ✅ |  |
+| 26 | CHM-020 | CHM-021 | 19.6% | ❌ | Identity mismatch: Generated=CHM-020, Actual=CHM-021; Topic mismatch: Generated=d & f Block Elements, Actual=Qualitative Analysis of Basic Radicals |
+| 27 | CHM-009 | CHM-027 | 20.1% | ❌ | Identity mismatch: Generated=CHM-009, Actual=CHM-027; Topic mismatch: Generated=Equilibrium, Actual=Polymers |
+| 28 | CHM-008 | CHM-015 | 20.5% | ❌ | Identity mismatch: Generated=CHM-008, Actual=CHM-015; Topic mismatch: Generated=Thermodynamics, Actual=Solutions |
+| 29 | CHM-017 | CHM-017 | 71.1% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy |
+| 30 | CHM-004 | CHM-021 | 19.6% | ❌ | Identity mismatch: Generated=CHM-004, Actual=CHM-021; Topic mismatch: Generated=Classification, Actual=Hydrogen |
+| 31 | CHM-002 | CHM-021 | 19.6% | ❌ | Identity mismatch: Generated=CHM-002, Actual=CHM-021; Topic mismatch: Generated=Atomic Structure, Actual=The d-and f-Block Elements |
+| 32 | CHM-007 | CHM-025 | 18.9% | ❌ | Identity mismatch: Generated=CHM-007, Actual=CHM-025; Topic mismatch: Generated=States of Matter, Actual=Amines |
+| 33 | CHM-024 | CHM-028 | 12.6% | ❌ | Identity mismatch: Generated=CHM-024, Actual=CHM-028; Topic mismatch: Generated=Aldehydes & Ketones, Actual=Chemistry in Everyday Life |
+| 34 | CHM-002 | CHM-027 | 19.6% | ❌ | Identity mismatch: Generated=CHM-002, Actual=CHM-027; Topic mismatch: Generated=Atomic Structure, Actual=Polymers |
+| 35 | CHM-012 | CHM-014 | 18.9% | ❌ | Identity mismatch: Generated=CHM-012, Actual=CHM-014; Topic mismatch: Generated=Organic Chemistry Basics, Actual=The Solid State |
+| 36 | CHM-001 | CHM-019 | 18.8% | ❌ | Identity mismatch: Generated=CHM-001, Actual=CHM-019; Topic mismatch: Generated=Basic Concepts, Actual=The p-Block Elements |
+| 37 | CHM-001 | CHM-021 | 19.5% | ❌ | Identity mismatch: Generated=CHM-001, Actual=CHM-021; Topic mismatch: Generated=Basic Concepts, Actual=Organic Chemistry - Some Basic Principles and Techniques |
+| 38 | CHM-022 | CHM-022 | 59.7% | ❌ | Topic mismatch: Generated=Haloalkanes, Actual=Haloalkanes and Haloarenes |
+| 39 | CHM-001 | CHM-019 | 19.7% | ❌ | Identity mismatch: Generated=CHM-001, Actual=CHM-019; Topic mismatch: Generated=Basic Concepts, Actual=The p-Block Elements |
+| 40 | CHM-014 | CHM-014 | 50.2% | ❌ | Topic mismatch: Generated=Solid State, Actual=The Solid State; Adjacent difficulty: Generated=Moderate, Actual=Easy |
+| 41 | CHM-015 | CHM-015 | 72.3% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
+| 42 | CHM-001 | CHM-021 | 19.4% | ❌ | Identity mismatch: Generated=CHM-001, Actual=CHM-021; Topic mismatch: Generated=Basic Concepts, Actual=Alcohols, Phenols and Ethers |
+| 43 | CHM-021 | CHM-021 | 71.2% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
+| 44 | CHM-004 | CHM-018 | 20.0% | ❌ | Identity mismatch: Generated=CHM-004, Actual=CHM-018; Topic mismatch: Generated=Classification, Actual=Surface Chemistry |
+| 45 | CHM-026 | CHM-026 | 64.6% | ❌ | Difficulty mismatch: Generated=Hard, Actual=Easy; Different solution approach |
+| 46 | CHM-004 | CHM-018 | 19.2% | ❌ | Identity mismatch: Generated=CHM-004, Actual=CHM-018; Topic mismatch: Generated=Classification, Actual=Surface Chemistry |
+| 47 | CHM-020 | CHM-016 | 18.8% | ❌ | Identity mismatch: Generated=CHM-020, Actual=CHM-016; Topic mismatch: Generated=d & f Block Elements, Actual=Electrochemistry |
+| 48 | CHM-018 | CHM-018 | 79.1% | ✅ |  |
+| 49 | CHM-007 | CHM-028 | 19.6% | ❌ | Identity mismatch: Generated=CHM-007, Actual=CHM-028; Topic mismatch: Generated=States of Matter, Actual=Chemistry in Everyday Life |
+| 50 | CHM-017 | CHM-022 | 17.9% | ❌ | Identity mismatch: Generated=CHM-017, Actual=CHM-022; Topic mismatch: Generated=Chemical Kinetics, Actual=Haloalkanes and Haloarenes |
+| 51 | CHM-005 | CHM-021 | 18.5% | ❌ | Identity mismatch: Generated=CHM-005, Actual=CHM-021; Topic mismatch: Generated=Chemical Bonding, Actual=s-Block Elements (Group 1) |
+| 52 | CHM-025 | CHM-021 | 4.2% | ❌ | Identity mismatch: Generated=CHM-025, Actual=CHM-021; Topic mismatch: Generated=Amines, Actual=The d-and f-Block Elements |
+| 53 | CHM-015 | CHM-021 | 10.7% | ❌ | Identity mismatch: Generated=CHM-015, Actual=CHM-021; Topic mismatch: Generated=Solutions, Actual=General Principles and Processes of Isolation of Elements |
+| 54 | CHM-007 | CHM-022 | 18.3% | ❌ | Identity mismatch: Generated=CHM-007, Actual=CHM-022; Topic mismatch: Generated=States of Matter, Actual=Haloalkanes and Haloarenes |
+| 55 | CHM-022 | CHM-021 | 11.0% | ❌ | Identity mismatch: Generated=CHM-022, Actual=CHM-021; Topic mismatch: Generated=Haloalkanes, Actual=The d-and f-Block Elements |
+| 56 | CHM-011 | CHM-021 | 10.7% | ❌ | Identity mismatch: Generated=CHM-011, Actual=CHM-021; Topic mismatch: Generated=Redox Reactions, Actual=Alcohols, Phenols and Ethers |
+| 57 | CHM-018 | CHM-021 | 10.1% | ❌ | Identity mismatch: Generated=CHM-018, Actual=CHM-021; Topic mismatch: Generated=Surface Chemistry, Actual=Aldehydes, Ketones and Carboxylic Acids |
+| 58 | CHM-029 | CHM-026 | 2.6% | ❌ | Identity mismatch: Generated=CHM-029, Actual=CHM-026; Topic mismatch: Generated=Metallurgy, Actual=Biomolecules |
+| 59 | CHM-028 | CHM-021 | 2.6% | ❌ | Identity mismatch: Generated=CHM-028, Actual=CHM-021; Topic mismatch: Generated=Everyday Life, Actual=Aldehydes, Ketones and Carboxylic Acids |
+| 60 | CHM-001 | CHM-019 | 17.2% | ❌ | Identity mismatch: Generated=CHM-001, Actual=CHM-019; Topic mismatch: Generated=Basic Concepts, Actual=The p-Block Elements |

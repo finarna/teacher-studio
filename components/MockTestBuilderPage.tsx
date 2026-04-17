@@ -62,7 +62,8 @@ import {
   Hash,
   MinusCircle,
   BarChart3,
-  Waves
+  Waves,
+  Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DetailedTestCard } from './ui/DetailedTestCard';
@@ -79,6 +80,8 @@ import { SUBJECT_CONFIGS } from '../config/subjects';
 import { EXAM_CONFIGS } from '../config/exams';
 import { getForecastedCalibration, type ForecastedCalibration } from '../lib/reiEvolutionEngine';
 import LearningJourneyHeader from './learning-journey/LearningJourneyHeader';
+import { QuestionPaperTemplate } from './QuestionPaperTemplate';
+import { getPredictedPapers, PaperSet } from '../utils/predictedPapersData';
 
 // --- TYPES & INTERFACES ---
 interface MockTestBuilderPageProps {
@@ -273,6 +276,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   const [forecast, setForecast] = useState<ForecastedCalibration | null>(null);
   const [isLoadingForecast, setIsLoadingForecast] = useState(false);
   const [userRole, setUserRole] = useState<string>('student');
+  const [selectedPaperForPrint, setSelectedPaperForPrint] = useState<PaperSet | null>(null);
   const calibrationRef = React.useRef<HTMLDivElement>(null);
 
   const subjectConfig = SUBJECT_CONFIGS[subject];
@@ -628,6 +632,29 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     } catch (error) { setError(error instanceof Error ? error.message : 'Failed to create test'); }
     finally { if (pollInterval) clearInterval(pollInterval); setTimeout(() => setIsCreatingTest(false), 600); }
   };
+  
+
+  const handleDownloadPaper = (setId: string) => {
+    const allPapers = getPredictedPapers();
+    
+    // Aggressive normalization: Extract core set name (e.g., "MATH-SET-A" -> "A")
+    const lastSegment = setId.split('-').pop() || setId;
+    const normalizedSetId = lastSegment.toUpperCase().trim();
+
+    const match = allPapers.find(p => {
+      const pSetName = p.setName.toUpperCase().trim();
+      return pSetName === normalizedSetId && 
+             p.subject.toLowerCase().includes(subject.toLowerCase().substring(0, 4));
+    });
+    
+    if (match) {
+      setSelectedPaperForPrint(match);
+      setTimeout(() => {
+        window.print();
+        setSelectedPaperForPrint(null);
+      }, 1200);
+    }
+  };
 
   const completed = testHistory.filter(a => a.status === 'completed' && a.percentage != null);
   const avgScore = completed.length > 0 ? Math.round(completed.reduce((s, a) => s + (a.percentage ?? 0), 0) / completed.length) : (isLoadingHistory ? null : 0);
@@ -649,7 +676,9 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
 
   return (
     <div className="min-h-screen bg-[#fafbfc] font-inter pb-20 relative overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden bg-[#F8FAFC]">
+      {/* 🚀 ULTIMATE PRINT FIX: Wrap EVERYTHING except the printable area */}
+      <div className={selectedPaperForPrint ? "no-print" : ""}>
+        <div className="fixed inset-0 pointer-events-none overflow-hidden bg-[#F8FAFC]">
         <div className="absolute inset-0 opacity-[0.4]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #E2E8F0 1px, transparent 0)', backgroundSize: '32px 32px' }} />
         <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-b from-indigo-50/50 to-transparent" />
       </div>
@@ -737,11 +766,25 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                 {test.official_set_id === 'SET-A' ? 'Official Paper Simulation' : 'Pattern-Based Paper Analysis'}
                               </div>
                             </div>
-                            <div className={cn(
-                              "px-2.5 py-1 rounded-lg text-[9px] font-black border",
-                              idx === 0 ? "bg-indigo-100 text-indigo-700 border-indigo-200" : "bg-purple-100 text-purple-700 border-purple-200"
-                            )}>
-                              {test.totalQuestions || 60} Qs
+                            <div className="flex flex-col items-end gap-2">
+                              <div className={cn(
+                                "px-2.5 py-1 rounded-lg text-[9px] font-black border",
+                                idx === 0 ? "bg-indigo-100 text-indigo-700 border-indigo-200" : "bg-purple-100 text-purple-700 border-purple-200"
+                              )}>
+                                {test.totalQuestions || 60} Qs
+                              </div>
+                              {userRole !== 'student' && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownloadPaper(test.official_set_id || test.id);
+                                  }}
+                                  className="p-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shadow-sm"
+                                  title="Download PDF"
+                                >
+                                  <Download size={14} />
+                                </button>
+                              )}
                             </div>
                           </button>
                         ))
@@ -766,11 +809,25 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                               <div className="text-[13px] font-black text-slate-900 leading-tight">{subject} {setId === 'SET-A' ? 'Set-A' : 'Set-B'} Prediction</div>
                               <div className="text-[9px] font-bold text-slate-500 mt-1">Institutional Forensic Calibration</div>
                             </div>
-                            <div className={cn(
-                              "px-2.5 py-1 rounded-lg text-[9px] font-black border",
-                              idx === 0 ? "bg-indigo-100 text-indigo-700 border-indigo-200" : "bg-purple-100 text-purple-700 border-purple-200"
-                            )}>
-                              60 Qs
+                            <div className="flex flex-col items-end gap-2">
+                              <div className={cn(
+                                "px-2.5 py-1 rounded-lg text-[9px] font-black border",
+                                idx === 0 ? "bg-indigo-100 text-indigo-700 border-indigo-200" : "bg-purple-100 text-purple-700 border-purple-200"
+                              )}>
+                                60 Qs
+                              </div>
+                              {userRole !== 'student' && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDownloadPaper(setId);
+                                  }}
+                                  className="p-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shadow-sm"
+                                  title="Download PDF"
+                                >
+                                  <Download size={14} />
+                                </button>
+                              )}
                             </div>
                           </button>
                         ))
@@ -1191,6 +1248,19 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
           )}
         </AnimatePresence>
       </div>
+      </div>
+
+      {selectedPaperForPrint && (
+        <div className="print-area print-section">
+          <QuestionPaperTemplate
+            title={selectedPaperForPrint.title}
+            subject={selectedPaperForPrint.subject}
+            questions={selectedPaperForPrint.questions}
+            setName={selectedPaperForPrint.setName}
+          />
+        </div>
+      )}
+
     </div>
   );
 };

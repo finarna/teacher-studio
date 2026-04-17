@@ -12,6 +12,7 @@ import {
   ChevronRight,
   LogOut,
   User,
+  FileText,
   Map,
   CheckCircle2,
   X,
@@ -94,6 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onL
     { id: 'approval', label: 'Review & Publish', icon: CheckCircle2 },
     { id: 'analysis', label: 'Exam Intelligence', icon: Library },
     { id: 'questions', label: 'Question Bank', icon: FileQuestion },
+    { id: 'mock_downloads', label: 'Official Papers', icon: FileText },
     { id: 'recall', label: 'Rapid Recall', icon: BrainCircuit },
     { id: 'gallery', label: 'Sketch Notes', icon: Palette },
     { id: 'profile', label: 'My Profile', icon: User },
@@ -238,7 +240,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onL
             </div>
             {!isCollapsed && (
               <div className="animate-in fade-in duration-500">
-                <h1 className="font-black text-slate-900 tracking-tight font-outfit text-xl leading-none uppercase italic">plus<span className="text-accent-600">2AI</span></h1>
+                <h1 className="font-black tracking-tight font-outfit text-xl leading-none uppercase italic">
+                  <span style={{ color: '#0a1a16' }}>plus2</span>
+                  <span style={{ color: '#ff7f50' }}>AI</span>
+                </h1>
                 <span className="text-[9px] font-black text-slate-400 tracking-[0.25em] uppercase mt-1 block">Learning Platform</span>
               </div>
             )}

@@ -1778,6 +1778,25 @@ export async function generateTestInBackground({ userId, testName, subject, exam
 
         updateProgress(progressId, 'validating', '💾 Saving AI questions to database...', 85);
 
+        // Map questions to identities
+        try {
+          const { mapQuestionToIdentity } = await import('../lib/identityMapper.ts');
+          console.log(`🧬 Mapping ${finalQuestions.length} questions to identities...`);
+          finalQuestions.forEach(q => {
+            if (q.topic && !q.identityId) {
+              q.identityId = mapQuestionToIdentity(q.topic, subject, examContext, {
+                minConfidence: 0.5,
+                preferHighYield: true
+              });
+            }
+          });
+          const assignedCount = finalQuestions.filter(q => q.identityId).length;
+          console.log(`🧬 Identity mapping: ${assignedCount}/${finalQuestions.length} questions assigned`);
+        } catch (mapError) {
+          console.warn(`⚠️  Identity mapping failed:`, mapError.message);
+          // Continue without identity mapping
+        }
+
         // Get or create AI scan for these questions
         const aiScanId = await getOrCreateAIScan(supabaseAdmin, subject, examContext, userId);
 
@@ -1799,7 +1818,12 @@ export async function generateTestInBackground({ userId, testName, subject, exam
           source: q.source || `AI-Generated (${examContext})`,
           exam_context: examContext,
           subject: subject,
-          scan_id: aiScanId  // Use AI scan instead of null
+          scan_id: aiScanId,  // Use AI scan instead of null
+          metadata: {
+            questionType: q.questionType || null,
+            identityId: q.identityId || null,
+            ...(q.metadata || {})
+          }
         }));
 
         const { error: insertError } = await supabaseAdmin

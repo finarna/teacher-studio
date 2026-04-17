@@ -11,6 +11,7 @@ import { getGeminiClient, withGeminiRetry } from '../utils/geminiClient';
  */
 
 import type { ExamContext, Subject, AnalyzedQuestion } from '../types';
+export type { AnalyzedQuestion };
 import { AI_CONFIG } from '../config/aiConfigs';
 import { cleanJsonResponse } from './aiParserUtils';
 import fs from 'fs';
@@ -788,7 +789,8 @@ async function generateTopicQuestionsBatch(params: {
   batchAllocations: (TopicAllocation & { section: string })[],
   context: GenerationContext,
   geminiApiKey: string,
-  targetDifficulty?: 'Easy' | 'Moderate' | 'Hard'
+  targetDifficulty?: 'Easy' | 'Moderate' | 'Hard',
+  difficultyDistribution?: { easy: number; moderate: number; hard: number }
 }): Promise<AnalyzedQuestion[]> {
 
   const { batchAllocations, context, geminiApiKey, targetDifficulty } = params;
@@ -980,6 +982,7 @@ Return ONLY a valid JSON array:
     "marks": ${examConfig.marksPerQuestion === 'variable' ? '1' : examConfig.marksPerQuestion},
     "difficulty": "Easy|Moderate|Hard",
     "topic": "Must match one of the topic names above",
+    "questionType": "theory_conceptual|property_based|reaction_based|calculation|structure_based|application",
     "blooms": "Understand|Apply|Analyze|Evaluate",
     "solutionSteps": [
       "Step Title ::: Detailed explanation with reasoning (4-5 steps minimum, use LaTeX for math)"
@@ -1065,6 +1068,7 @@ Return ONLY a valid JSON array:
           marks: q.marks || examConfig.marksPerQuestion,
           difficulty: targetDifficulty || q.difficulty || 'Moderate',
           topic: q.topic,
+          questionType: q.questionType || q.question_type || undefined,
           subject: examConfig.subject, // Unified Metadata
           examContext: examConfig.examContext, // Unified Metadata
           blooms: q.blooms || 'Apply',

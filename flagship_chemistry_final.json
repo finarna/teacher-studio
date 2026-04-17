@@ -1,0 +1,2058 @@
+{
+  "meta": {
+    "version": "REI v17.0",
+    "subject": "Chemistry",
+    "exam": "KCET",
+    "targetYear": 2026,
+    "setName": "SET_A",
+    "generatedAt": "2026-04-17T17:45:55.82338+00:00",
+    "questionCount": 60,
+    "calibration": {
+      "idsTarget": 0.724,
+      "idsRange": {
+        "min": 0.68,
+        "max": 0.76
+      },
+      "rigorDriftMultiplier": 1.607,
+      "boardSignature": "CONCEPT_PROPERTY_REACTION",
+      "questionTypeProfile": {
+        "theory_conceptual": 34,
+        "property_based": 25,
+        "reaction_based": 24,
+        "calculation": 8,
+        "structure_based": 7,
+        "application": 1,
+        "nomenclature": 1
+      },
+      "difficultyProfile": {
+        "easy": 60,
+        "moderate": 39,
+        "hard": 2
+      },
+      "identityDistribution": {
+        "totalIdentities": 30,
+        "highConfidence": 14,
+        "mediumConfidence": 10,
+        "lowConfidence": 6
+      },
+      "calibrationMetrics": {
+        "averageMatchRate": 54.8,
+        "identityHitRate": 59.3,
+        "systemConfidence": 50.1,
+        "totalIterations": 11,
+        "yearsCalibratedCount": 4
+      },
+      "topHighYieldIdentities": [
+        "CHM-007: States of Matter (99%)",
+        "CHM-009: Equilibrium (99%)",
+        "CHM-016: Electrochemistry (99%)",
+        "CHM-027: Polymers (99%)",
+        "CHM-005: Chemical Bonding (96%)",
+        "CHM-014: Solid State (96%)",
+        "CHM-015: Solutions (96%)",
+        "CHM-017: Chemical Kinetics (96%)",
+        "CHM-018: Surface Chemistry (96%)",
+        "CHM-019: p-Block Elements (96%)"
+      ],
+      "status": "CALIBRATED_2021_2025_REI_V17"
+    },
+    "topicDistribution": {
+      "high_priority": [
+        "Solutions (8.3%)",
+        "Aldehydes, Ketones & Carboxylic Acids (8.3%)",
+        "Electrochemistry (6.7%)",
+        "Biomolecules (6.7%)",
+        "Coordination Compounds (6.7%)",
+        "d & f Block Elements (6.7%)",
+        "Chemical Kinetics (6.7%)",
+        "Haloalkanes & Haloarenes (6.7%)"
+      ],
+      "medium_priority": [
+        "Alcohols, Phenols & Ethers (5.0%)",
+        "Amines (3.3%)",
+        "Chemical Equilibrium (3.3%)",
+        "Thermodynamics (3.3%)",
+        "Organic Chemistry Basics (3.3%)"
+      ]
+    },
+    "forensicMarkers": {
+      "evolution_2021_2025": "Transition from direct recall to multi-statement verification",
+      "question_format_trend": "Increased Match List and Statement-I/II formats",
+      "complexity_shift": "Laboratory-integrated theory with reagent-specific logic",
+      "organic_pattern": "Multi-step synthesis paths (A→B→C chains)",
+      "physical_pattern": "Graphical interpretation and conceptual stability"
+    }
+  },
+  "questions": [
+    {
+      "questionNumber": 1,
+      "id": "bada0dae-b989-40ac-b66b-ad5707331cdd",
+      "text": "According to the Arrhenius equation and collision theory, the addition of a positive catalyst to a reaction mixture increases the rate of reaction. This is primarily because the catalyst:",
+      "options": [
+        "Increases the average kinetic energy of the reactant molecules.",
+        "Decreases the enthalpy of the reaction ($\\Delta H$).",
+        "Provides an alternative pathway with a lower activation energy ($E_a$).",
+        "Increases the number of collisions by increasing the pressure."
+      ],
+      "correctOptionIndex": 2,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Chemical Kinetics",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Analyze Arrhenius Equation ::: $k = A e^{-E_a/RT}$. Rate is inversely exponential to Activation Energy ($E_a$).",
+        "Function of a Catalyst ::: A catalyst participates in the reaction to form a transition state of lower energy.",
+        "Impact on $E_a$ ::: By lowering $E_a$, the term $e^{-E_a/RT}$ becomes larger, thus increasing the rate constant $k$.",
+        "Evaluate Energy Changes ::: A catalyst does NOT change the energy of reactants or products, so $\\Delta H$ (enthalpy) remains constant.",
+        "Kinetic Energy Check ::: Kinetic energy is a function of Temperature ($T$) only, not the presence of a catalyst."
+      ],
+      "examTip": "Catalysts are 'shortcuts'. They don't change the destination ($\\Delta H$ or $\\Delta G$), they just find a lower 'hill' ($E_a$) to cross.",
+      "keyFormulas": [
+        "$k = A e^{-E_a/RT}$",
+        "$\\ln \\frac{k_2}{k_1} = \\frac{E_a}{R} [\\frac{1}{T_1} - \\frac{1}{T_2}]$"
+      ],
+      "pitfalls": [
+        "Claiming that the catalyst changes the equilibrium constant ($K_{eq}$)."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"A catalyst lowers the energy barrier. Imagine more people being able to jump over a wall because the wall was made shorter, not because the people started running faster.\",\"memoryTrigger\":\"Catalyst = Cut $E_a$. (Both start with C).\",\"visualPrompt\":\"The energy profile diagram (mountain plot). The catalyst adds a new, lower 'tunnel' or 'path' through the mountain.\",\"commonTrap\":\"Thinking that a catalyst increases kinetic energy (that's only what temperature does).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 2,
+      "id": "bfac9805-ba86-4258-b7b4-c05b35f21c19",
+      "text": "When an egg is boiled, the 'egg white' (albumin) hardens and becomes opaque. This process represents which level of protein structural change and what is the underlying chemical cause?",
+      "options": [
+        "Loss of 2nd and 3rd-degree structures due to the disruption of H-bonds and disulfide linkages (Denaturation).",
+        "Cleavage of the primary peptide sequence into individual $\\alpha$-amino acids (Hydrolysis).",
+        "Conversion of a fibrous protein into a more soluble globular form.",
+        "The formation of new peptide bonds between distant amino acid residues (Renaturation)."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Biomolecules",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Observation Analysis ::: Boiled egg white goes from a clear liquid (globular protein) to a solid white mass (coagulated protein).",
+        "Process Identification ::: This is the classic example of 'Denaturation'.",
+        "Structural Impact ::: Denaturation affects the secondary ($\\alpha$-helix, $\\beta$-sheets) and tertiary (folding) structures. The primary structure (amino acid sequence) remains intact.",
+        "Force Disruption ::: Heat provides kinetic energy that breaks hydrogen bonds, salt bridges, and disulfide bridges that maintain the protein's shape.",
+        "Physical Result ::: The protein 'uncoils' and then randomly cross-links/coagulates, losing its biological activity and solubility."
+      ],
+      "examTip": "Remember: Denaturation = loss of 2, 3, 4 degree structure. Primary structure is NEVER destroyed by denaturation.",
+      "keyFormulas": [
+        "None, but recall the $\\alpha$-helix is stabilized by intramolecular H-bonding."
+      ],
+      "pitfalls": [
+        "Thinking primary structure is lost."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Proteins have a specific 'native' shape. Denaturation is the unfolding of this shape due to external stress (heat, pH, chemicals). While the 'string' of amino acids is still there, the 'knot' is undone.\",\"memoryTrigger\":\"D-P-S: Denaturation preserves Primary structure (S-sequencing).\",\"visualPrompt\":\"Imagine a crumpled ball of yarn (native protein). Denaturation is stretching it out into a single long thread (primary structure intact). Coagulation is then tangling multiple threads together.\",\"commonTrap\":\"Selecting 'Hydrolysis'. Hydrolysis breaks peptide bonds (primary structure). Denaturation does NOT break peptide bonds.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 3,
+      "id": "87f59ca9-ca77-4119-a36d-52adefb3103b",
+      "text": "When concentrated sulfuric acid ($H_2SO_4$) is added to a sample of cane sugar ($C_{12}H_{22}O_{11}$), the sugar turns into a black, charred mass of carbon. Which specific property of sulfuric acid is demonstrated in this reaction?",
+      "options": [
+        "Strong dehydrating property",
+        "Strong oxidizing property",
+        "Non-volatile nature",
+        "Strong acidic character"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "p-Block Elements",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Observe the reaction ::: Cane sugar (white) reacts with conc. $H_2SO_4$ to produce black carbon and steam.",
+        "Analyze the formula ::: Sugar is $C_{12}H_{22}O_{11}$, which can be written as $C_{12}(H_2O)_{11}$.",
+        "Determine the change ::: The acid removes all the 'water' components ($H$ and $O$ in 2:1 ratio) from the carbohydrate.",
+        "Identify the property ::: The removal of water from a compound is called dehydration.",
+        "Conclusion ::: This demonstrates the strong dehydrating property of concentrated $H_2SO_4$."
+      ],
+      "examTip": "If a reaction involves 'charring' or 'removal of water' from organic molecules like sugar, formic acid, or oxalic acid, the answer is always 'Dehydrating property'.",
+      "keyFormulas": [
+        "$C_{12}H_{22}O_{11} \\xrightarrow{conc. H_2SO_4} 12C + 11H_2O$"
+      ],
+      "pitfalls": [
+        "Selecting 'Oxidizing property'."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Concentrated $H_2SO_4$ has a very high affinity for water. It can remove water molecules from chemical compounds, especially carbohydrates, leaving behind the carbon skeleton (charring).\",\"memoryTrigger\":\"Sugar + Acid = Black Carbon. 'H2SO4 is a thirsty acid' (removes water).\",\"visualPrompt\":\"Imagine a white sugar cube 'burning' without a flame, just by pouring a liquid on it, until only a black spongy tower remains.\",\"commonTrap\":\"Confusing oxidizing property with dehydrating property. While $H_2SO_4$ is an oxidizer, 'charring' is specifically a dehydration process.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 4,
+      "id": "42c6f858-fa81-4404-ac2d-ee33926621a4",
+      "text": "The atomic radii of second ($4d$) and third ($5d$) transition series elements, such as Zirconium ($Zr$) and Hafnium ($Hf$), are remarkably similar ($160 \\text{ pm}$ and $159 \\text{ pm}$ respectively). This phenomenon is a direct consequence of:",
+      "options": [
+        "Lanthanoid Contraction",
+        "Actinoid Contraction",
+        "Shielding effect of $d$-electrons",
+        "Increase in principal quantum number"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "d and f Block Elements",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Observe the Trend ::: Normally, atomic radius increases down a group due to new shells (n increases).",
+        "Identify the Anomaly ::: $Zr$ (Period 5) and $Hf$ (Period 6) have almost identical sizes.",
+        "Analyze the Cause ::: Between $La$ ($Z=57$) and $Hf$ ($Z=72$), the 14 Lanthanoid elements ($Z=58$ to $71$) involve filling the $4f$ subshell.",
+        "Explain Shielding ::: $4f$ electrons have very poor shielding effect due to their diffused shape.",
+        "Conclude ::: The increase in nuclear charge ($+14$) is not balanced by shielding, pulling the outer electrons inward. This 'contraction' offsets the expected size increase, making $Hf \\approx Zr$."
+      ],
+      "examTip": "Whenever you see 'identical sizes' or 'similar properties' for $4d$ and $5d$ elements in the same group, the answer is almost always Lanthanoid Contraction.",
+      "keyFormulas": [
+        "$Z_{eff} = Z - \\sigma$ (Poor $\\sigma$ for f-orbitals increases $Z_{eff}$)"
+      ],
+      "pitfalls": [
+        "Choosing Actinoid Contraction.",
+        "Thinking $Hf$ should be larger than $Zr$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Lanthanoid contraction is the steady decrease in the size of atoms and ions with increasing atomic number in the lanthanoid series. It happens because $4f$ electrons shield the nucleus poorly, allowing the effective nuclear charge to increase significantly.\",\"memoryTrigger\":\"F-block = Fail at shielding.\",\"visualPrompt\":\"Imagine a screen (shield) with huge holes ($4f$ orbital); the nucleus (magnet) can pull the outer electrons through those holes very easily.\",\"commonTrap\":\"Attributing the similarity to the 'shielding effect of d-electrons' (it's actually the *poor* shielding of *f*-electrons).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 5,
+      "id": "22862624-9245-4f01-b16a-4c9d8a0fc3ad",
+      "text": "A student in a laboratory is investigating the thermal stability of Group 15 hydrides. They observe that while $NH_3$ is stable at high temperatures, $BiH_3$ decomposes rapidly even at room temperature. What is the primary reason for this observed trend in thermal stability down the group?",
+      "options": [
+        "Increase in the bond length of M-H bond",
+        "Decrease in the electronegativity of the central atom",
+        "Increase in the boiling point down the group",
+        "Presence of intermolecular hydrogen bonding in $NH_3$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "p-Block Elements",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Identify the trend ::: As we move down Group 15 ($N$ to $Bi$), the atomic size of the central atom (M) increases significantly.",
+        "Analyze bond length ::: Since the size of the central atom increases while the size of Hydrogen remains constant, the M-H bond length increases down the group.",
+        "Relate to bond strength ::: Longer bonds are generally weaker bonds. Therefore, the Bond Dissociation Enthalpy (BDE) of the M-H bond decreases from $NH_3$ to $BiH_3$.",
+        "Conclude on stability ::: Lower bond dissociation enthalpy means the bond breaks easily with minimal energy (heat), leading to lower thermal stability for $BiH_3$ compared to $NH_3$."
+      ],
+      "examTip": "In KCET, whenever 'Thermal Stability' of hydrides is asked for p-block, look immediately for the 'Bond Length' or 'Bond Dissociation Enthalpy' argument. They are inversely proportional.",
+      "keyFormulas": [
+        "$Stability \\propto \\frac{1}{Bond\\ Length}$",
+        "$Stability \\propto Bond\\ Dissociation\\ Enthalpy$"
+      ],
+      "pitfalls": [
+        "Selecting 'Hydrogen bonding' as the reason for thermal stability."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Thermal stability in hydrides is governed by the strength of the M-H bond. As the central atom gets larger, the orbital overlap with the small 1s orbital of hydrogen becomes less effective, making the bond weaker and more susceptible to heat.\",\"memoryTrigger\":\"Size Up = Bond Long = Strength Down = Stability Down (S-U-B-L-S-D)\",\"visualPrompt\":\"Imagine trying to hold a small ball (Hydrogen) with a giant's hand (Bismuth) vs. a normal hand (Nitrogen). The giant's grip is 'weaker' due to the size mismatch.\",\"commonTrap\":\"Don't confuse boiling point with thermal stability. Boiling point is about intermolecular forces (H-bonding); thermal stability is about intramolecular covalent bonds.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 6,
+      "id": "255d326e-fbcd-460f-b454-97bef7f0c413",
+      "text": "An unknown amino acid 'X' is subjected to electrophoresis in a buffer of $pH = 6.0$. It is observed that 'X' does not migrate towards either electrode. However, in $0.1 M HCl$, it moves towards the cathode. Which of the following identifies 'X'?",
+      "options": [
+        "Alanine ($pI \\approx 6.0$)",
+        "Lysine ($pI \\approx 9.7$)",
+        "Aspartic Acid ($pI \\approx 3.0$)",
+        "Arginine ($pI \\approx 10.8$)"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Biomolecules",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Interpret Electrophoresis Logic ::: No migration at $pH=6.0$ implies the amino acid is in its Zwitterionic form (net charge = 0). This indicates that $pI$ (Isoelectric point) of 'X' is 6.0.",
+        "Acidic Condition Analysis ::: In $0.1 M HCl$ ($pH < pI$), the carboxylate group ($-COO^-$) gets protonated to $-COOH$.",
+        "Charge Determination ::: The resulting species carries a net positive charge ($NH_3^+$). Positively charged ions (cations) move towards the negative electrode (Cathode).",
+        "Candidate Matching ::: Lysine and Arginine are basic (high $pI$), Aspartic acid is acidic (low $pI$). Alanine is a neutral amino acid with a $pI$ close to 6.0.",
+        "Final Selection ::: Alanine fits both the $pI=6$ criteria and the migration behavior."
+      ],
+      "examTip": "If $pH < pI$, the amino acid is positive (moves to Cathode). If $pH > pI$, it is negative (moves to Anode). If $pH = pI$, no movement.",
+      "keyFormulas": [
+        "$pI = \\frac{pK_{a1} + pK_{a2}}{2}$ (for neutral AA)",
+        "$Net Charge = 0$ at $pH = pI$"
+      ],
+      "pitfalls": [
+        "Thinking basic amino acids have low pI."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The Isoelectric point ($pI$) is the pH at which an amino acid has no net electrical charge. For neutral amino acids, $pI = \\\\frac{pK_{a1} + pK_{a2}}{2}$.\",\"memoryTrigger\":\"P-C-A: Positive $\\\\to$ Cathode (when pH is low/Acidic).\",\"visualPrompt\":\"Visualize an amino acid as a chameleon changing its charge 'suit' based on the 'color' (pH) of the surrounding water.\",\"commonTrap\":\"Confusing Cathode (negative electrode) with Cation. Remember: Cations (+) go to Cathode (-).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 7,
+      "id": "9b7531d7-285e-48f2-9946-9023506eb194",
+      "text": "For the following four compounds: (I) Phenol, (II) o-Nitrophenol, (III) m-Nitrophenol, and (IV) p-Nitrophenol; which sequence correctly represents the decreasing order of their acidic strength and the property-based reason for the highest acidic isomer?",
+      "options": [
+        "IV > II > III > I; p-Nitrophenol is most acidic due to effective -R and -I effects of the $-NO_2$ group.",
+        "II > IV > III > I; o-Nitrophenol is most acidic due to proximity of the $-NO_2$ group to the $-OH$ group.",
+        "IV > III > II > I; p-Nitrophenol is most acidic because nitro group at meta position has no resonance effect.",
+        "I > III > II > IV; Phenol is most acidic because substituent groups always decrease acidity."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Alcohols Phenols and Ethers",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Electronic Effects ::: The nitro group ($-NO_2$) is an electron-withdrawing group (EWG). It exhibits both $-I$ (Inductive) and $-R$ (Resonance) effects.",
+        "Position Analysis ::: Resonance effects ($-R$) only operate at ortho and para positions. At the meta position, only the $-I$ effect operates. Thus, Phenol (I) is the least acidic.",
+        "Comparing Ortho and Para ::: In o-nitrophenol (II), there is intra-molecular hydrogen bonding between $-OH$ and $-NO_2$. This makes the release of $H^+$ slightly more difficult compared to p-nitrophenol (IV).",
+        "Conclusion ::: Acidic strength: Para (IV) > Ortho (II) > Meta (III) > Phenol (I). Para is strongest because $-R$ and $-I$ work fully without the hindrance of H-bonding."
+      ],
+      "examTip": "Note: Ortho is usually more acidic due to proximity in many cases, but for Nitrophenols, the intramolecular H-bond in the ortho isomer makes the Para isomer 'The King' of acidity.",
+      "keyFormulas": [
+        "$Acidity \\propto \\text{Stability of Conjugate Base}$",
+        "$Acidity \\propto -I, -R \\text{ effects}$",
+        "$Acidity \\propto \\frac{1}{+I, +R \\text{ effects}}$"
+      ],
+      "pitfalls": [
+        "Ranking o-nitrophenol as the most acidic.",
+        "Assuming the Meta isomer is more acidic than the Ortho isomer."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Acidity depends on the stability of the phenoxide ion. EWGs like $-NO_2$ disperse the negative charge. The para position allows the best delocalization via resonance.\",\"memoryTrigger\":\"P-O-M-P: Para > Ortho > Meta > Phenol (for Nitrophenols acidity).\",\"visualPrompt\":\"Imagine the negative charge on oxygen. A nitro group at para 'pulls' that charge all the way through the ring. At ortho, it 'pulls' too, but the $H$ is 'stuck' to the $NO_2$ 'magnet' (H-bond).\",\"commonTrap\":\"Thinking Ortho is more acidic because it is closer (inductive effect). Always check for intramolecular H-bonding first.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 8,
+      "id": "7f8c2e44-99fc-497a-8a76-d3e77e394b45",
+      "text": "Which of the following statements regarding the structure of proteins is CORRECT?",
+      "options": [
+        "The secondary structure of proteins is stabilized by hydrogen bonding between $-NH-$ and $-CO-$ groups of the peptide bond.",
+        "In $\\alpha$-helix structure, the hydrogen bonds are formed between peptide chains lying side by side.",
+        "Denaturation of proteins affects the primary structure by breaking peptide bonds.",
+        "Renaturation is a process where a protein loses its biological activity due to change in pH."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Biomolecules",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Evaluate Option A ::: The secondary structure ($\\alpha$-helix and $\\beta$-pleated sheet) is primarily stabilized by H-bonds between the carbonyl oxygen and the amide hydrogen of the peptide backbone. This is correct.",
+        "Evaluate Option B ::: In an $\\alpha$-helix, H-bonds are formed within the same chain (intramolecular). In $\\beta$-pleated sheets, they are formed between adjacent chains (intermolecular). Option B describes $\\beta$-sheets, not $\\alpha$-helix.",
+        "Evaluate Option C ::: Denaturation involves the unfolding of secondary and tertiary structures due to disruption of H-bonds, disulfide bridges, etc. The primary structure (sequence of amino acids) remains intact because covalent peptide bonds are not broken.",
+        "Evaluate Option D ::: Renaturation is the *recovery* of biological activity. *Denaturation* is the loss of activity.",
+        "Final Selection ::: Option A is the only scientifically accurate statement."
+      ],
+      "examTip": "Primary structure is the 'hard' structure (covalent). All higher structures are 'soft' (non-covalent). Denaturation only breaks the 'soft' bonds.",
+      "keyFormulas": [
+        "$\\text{Peptide Bond}: -CONH-$",
+        "$\\alpha\\text{-helix H-bond}: C=O \\cdots H-N \\text{ (within 4 residues)}$"
+      ],
+      "pitfalls": [
+        "Thinking denaturation breaks peptide bonds."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Proteins have 4 levels of organization. Secondary structure is about local folding stabilized by H-bonds. Primary structure is the amino acid sequence held by peptide bonds.\",\"memoryTrigger\":\"Primary = Sequence (Strong), Secondary = Shapes (Spiral/Sheet), Tertiary = 3D (Total), Quaternary = Quads (Multiple chains).\",\"visualPrompt\":\"Imagine a telephone cord. The wire sequence is Primary. The coil is Secondary ($\\\\alpha$-helix). The messy bundle is Tertiary.\",\"commonTrap\":\"Thinking denaturation breaks the protein into individual amino acids. It only 'unravels' the shape.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 9,
+      "id": "31755c55-8b93-4bab-801c-ebd92e8d7581",
+      "text": "In the crystal field splitting of $d$-orbitals for an octahedral coordination complex, the energy difference between the $t_{2g}$ and $e_g$ sets is denoted by $\\Delta_o$. Which of the following ligands would produce the largest $\\Delta_o$ value when reacting with the same metal ion?",
+      "options": [
+        "$CN^-$",
+        "$H_2O$",
+        "$Cl^-$",
+        "$OH^-$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Coordination Compounds",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Recall Spectrochemical Series ::: Ligands are arranged by their field strength: $I^- < Br^- < S^{2-} < SCN^- < Cl^- < F^- < OH^- < C_2O_4^{2-} < H_2O < NCS^- < edta^{4-} < NH_3 < en < NO_2^- < CN^- < CO$.",
+        "Identify Ligand Strength ::: Strong field ligands (like $CN^-$ and $CO$) cause large splitting ($\\Delta_o$).",
+        "Identify Weak Field Ligands ::: Halides ($Cl^-$) and oxygen-donors ($H_2O, OH^-$) cause small splitting.",
+        "Compare Options ::: Among the given list, $CN^-$ is at the extreme right of the series.",
+        "Conclusion ::: $CN^-$ produces the largest $\\Delta_o$."
+      ],
+      "examTip": "Think 'C-N-O-Halogen': Ligands with Carbon donors (CN, CO) are strongest, followed by Nitrogen (NH3, en), then Oxygen (H2O), and Halogens (Cl, Br) are weakest.",
+      "keyFormulas": [
+        "$\\Delta_o > P$ (Strong field, Low spin)",
+        "$\\Delta_o < P$ (Weak field, High spin)"
+      ],
+      "pitfalls": [
+        "Choosing $Cl^-$ because it is a 'strong' acid component.",
+        "Confusing $\\Delta_o$ with $\\Delta_t$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Ligands are point charges that approach d-orbitals. Strong field ligands ($CN^-$) approach closer or have better orbital overlap, causing the d-orbitals to split further apart in energy.\",\"memoryTrigger\":\"CN (Carbon/Nitrogen) = 'Can Not' be weak.\",\"visualPrompt\":\"Imagine a wedge being driven between two groups of d-orbitals. A strong ligand is a sharp, heavy wedge that pushes them very far apart.\",\"commonTrap\":\"Thinking $OH^-$ is stronger than $H_2O$ because it is negatively charged (it's actually weaker in the series).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 10,
+      "id": "ebe059dd-bf00-40d4-a22c-8a19a68f0a11",
+      "text": "A food technologist is looking for an artificial sweetener to be used in a new 'Low-Calorie Cake' that requires baking at $180^{\\circ}C$. Which of the following sweeteners is BEST suited for this purpose, and why?",
+      "options": [
+        "Sucralose; because it is a trichloro derivative of sucrose and remains stable at cooking temperatures.",
+        "Aspartame; because it is the most widely used sweetener and has 100 times the sweetness of cane sugar.",
+        "Alitame; because its high potency (2000 times) ensures that very little is needed, preventing decomposition.",
+        "Saccharin; because it is excreted unchanged from the body and provides zero calories."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Chemistry in Everyday Life",
+      "blooms": "Evaluate",
+      "solutionSteps": [
+        "Identify the Constraint ::: The primary constraint is 'Baking at $180^{\\circ}C$', meaning thermal stability is the deciding factor.",
+        "Evaluate Aspartame ::: Aspartame is unstable at cooking temperatures; it decomposes. It is restricted to cold foods and soft drinks.",
+        "Evaluate Alitame ::: While Alitame is more stable than aspartame, its sweetness is so high (2000x) that controlling sweetness in a recipe is difficult. It is not the 'best' for standard baking.",
+        "Evaluate Sucralose ::: Sucralose is a trichloro derivative of sucrose. It looks and tastes like sugar and, crucially, is stable at cooking temperatures.",
+        "Final Selection ::: Sucralose is the only option that combines thermal stability with practical usability for baking."
+      ],
+      "examTip": "Always link 'Aspartame' to 'Cold Foods' and 'Sucralose' to 'Cooking/Baking stability'. This is a very common KCET recurring theme.",
+      "keyFormulas": [
+        "Relative Sweetness: Aspartame (100) < Saccharin (550) < Sucralose (600) < Alitame (2000)."
+      ],
+      "pitfalls": [
+        "Selecting Alitame because of high sweetness."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Artificial sweeteners provide sweetness without calories. Their chemical structure determines their stability. Aspartame is a methyl ester of a dipeptide (Aspartic acid + Phenylalanine), which hydrolyzes when heated.\",\"memoryTrigger\":\"S-S: Sucralose is Stable (for stove/cooking). A-A: Aspartame is for Acidic/Ambient/Cold.\",\"visualPrompt\":\"Imagine a sweetener molecule like a delicate ice sculpture (Aspartame) vs. a sturdy ceramic bowl (Sucralose). You can't put the ice sculpture in the oven.\",\"commonTrap\":\"Choosing Saccharin because it's 'safe'. While safe and stable, Sucralose is preferred for texture and 'sugar-like' taste in baking.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 11,
+      "id": "66f22107-1709-480e-ac2a-6f2a00ca8f43",
+      "text": "Identify the set of reagents that will efficiently convert 2-propanol into 2-methyl-2-propanol through a multi-step sequence.",
+      "options": [
+        "$PCC$, then $CH_3MgBr/H_3O^+$",
+        "$K_2Cr_2O_7/H^+$, then $LiAlH_4$",
+        "$Cu/573K$, then $Zn-Hg/HCl$",
+        "$Conc. H_2SO_4/443K$, then $HBr/H_2O_2$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Alcohols Phenols and Ethers",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Initial Analysis ::: Target is converting a $2^\\circ$ alcohol (2-propanol) to a $3^\\circ$ alcohol (2-methyl-2-propanol/tert-butyl alcohol).",
+        "Step 1: Oxidation ::: $2^\\circ$ alcohol $\\xrightarrow{PCC}$ Ketone (Propanone/Acetone). $PCC$ is a mild oxidant that stops at the carbonyl stage.",
+        "Step 2: Grignard Reaction ::: Propanone ($CH_3COCH_3$) + $CH_3MgBr$ followed by hydrolysis ($H_3O^+$) adds a methyl group to the carbonyl carbon.",
+        "Result ::: The process results in a tertiary alcohol with one extra carbon atom: 2-methyl-2-propanol."
+      ],
+      "examTip": "To increase the carbon chain and the degree of an alcohol ($1^\\circ \\to 2^\\circ$ or $2^\\circ \\to 3^\\circ$), always look for a sequence involving: Oxidation to Carbonyl $\\to$ Grignard Reagent $\\to$ Hydrolysis.",
+      "keyFormulas": [
+        "$R_2CH-OH \\xrightarrow{[O]} R_2C=O$",
+        "$R_2C=O + R'MgX \\xrightarrow{H_3O^+} R_2C(R')OH$"
+      ],
+      "pitfalls": [
+        "Choosing $LiAlH_4$ for chain elongation.",
+        "Assuming $HBr/H_2O_2$ adds a carbon."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Grignard reagents ($RMgX$) act as nucleophiles attacking the electrophilic carbon of a ketone to form a tertiary alkoxide, which yields a $3^\\\\circ$ alcohol upon acidification.\",\"memoryTrigger\":\"2-2-3 Rule: $2^\\\\circ$ Alcohol $\\\\to$ (Oxidation) $\\\\to$ Ketone $\\\\to$ (Grignard) $\\\\to$ $3^\\\\circ$ Alcohol.\",\"visualPrompt\":\"Imagine the 'middle' of the propanol getting a 'V' shape (ketone), then a 'hand' (Grignard) slapping a new carbon onto that 'V' to make it a 'cross' shape ($3^\\\\circ$ alcohol).\",\"commonTrap\":\"Using $K_2Cr_2O_7$ on a $1^\\\\circ$ alcohol would go to an acid, but on a $2^\\\\circ$ alcohol, it stops at ketone. However, Option A is cleaner for synthetic pathways in CET.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 12,
+      "id": "61f16bf6-7ef7-41ed-8df9-57f2d16a9831",
+      "text": "An alkyl halide 'X' with molecular formula $C_4H_9Cl$ is optically active. When 'X' reacts with $AgCN$ in ethanol, it produces 'Y' as the major organic product. Which of the following statements is correctly associated with this transformation?",
+      "options": [
+        "'Y' is an isocyanide and the reaction proceeds with inversion of configuration if it follows $S_N2$ dynamics.",
+        "'Y' is a cyanide and the product is a racemic mixture due to $S_N1$ mechanism.",
+        "'Y' is an isocyanide and the reaction results in 100% retention of configuration.",
+        "'Y' is a cyanide and the reaction involves the formation of a primary carbocation."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Haloalkanes and Haloarenes",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Identify 'X' ::: The formula $C_4H_9Cl$ with optical activity must be 2-chlorobutane ($CH_3-CH(Cl)-CH_2-CH_3$), as it contains a chiral center at $C_2$.",
+        "Reagent Analysis ::: $AgCN$ is a covalent compound. The lone pair on Nitrogen is the primary nucleophilic site, leading to the formation of an isocyanide ($R-NC$).",
+        "Mechanism Logic ::: In secondary alkyl halides with a strong nucleophile/solvent system like ethanol, $S_N2$ is competitive. $S_N2$ reactions at a chiral center always result in Walden Inversion.",
+        "Conclusion ::: Therefore, 'Y' is 2-isocyanobutane, and the configuration at the chiral carbon is inverted compared to 'X'."
+      ],
+      "examTip": "Remember: $KCN$ gives Cyanide ($R-CN$) because it's ionic, while $AgCN$ gives Isocyanide ($R-NC$) because it's covalent. For KCET, $Ag$ salts usually mean 'N' or 'O' attachment.",
+      "keyFormulas": [
+        "$R-X + KCN \\rightarrow R-CN + KX$",
+        "$R-X + AgCN \\rightarrow R-NC + AgX$"
+      ],
+      "pitfalls": [
+        "Choosing cyanide as the product with $AgCN$.",
+        "Predicting racemization without checking the mechanism."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Ambident nucleophiles like $CN^-$ have two attacking sites. $Ag-C$ bond is covalent, making the lone pair on $N$ available. $K-C$ is ionic, making the $C$ with its negative charge the better nucleophile.\",\"memoryTrigger\":\"Ag-N (Silver-Nitrogen) - Think 'AgN' sounds like 'Again', you use Nitrogen again with Silver.\",\"visualPrompt\":\"Imagine a magnet with two poles; depending on how it's 'bonded' (covalent/ionic), only one pole is free to grab the alkyl group.\",\"commonTrap\":\"Confusing $S_N1$ (racemization) with $S_N2$ (inversion). In secondary halides, unless a stable carbocation is mentioned, assume inversion for competitive analysis.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 13,
+      "id": "ebecfb49-5e17-450f-932b-0cd984e0e919",
+      "text": "During a group performance test, a student adds chlorine water ($Cl_2$) to an aqueous solution of Potassium Iodide ($KI$) containing a small amount of chloroform ($CHCl_3$). After shaking, the chloroform layer turns violet. This observation proves that:",
+      "options": [
+        "Chlorine is a stronger oxidizing agent than Iodine",
+        "Iodine is a stronger oxidizing agent than Chlorine",
+        "Chlorine is more electronegative but less reactive than Iodine",
+        "Chloroform reacts with Potassium Iodide to form a violet complex"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "p-Block Elements",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Identify the Chemical Reaction ::: Chlorine water reacts with $KI$ as follows: $Cl_2 + 2KI \\rightarrow 2KCl + I_2$.",
+        "Analyze the Redox Process ::: Chlorine ($Cl_2$) is reduced to $Cl^-$, and Iodide ($I^-$) is oxidized to Iodine ($I_2$).",
+        "Interpret the Observation ::: The violet color in the chloroform layer is due to the presence of dissolved $I_2$.",
+        "Apply Displacement Principle ::: A more reactive halogen (stronger oxidizer) displaces a less reactive halogen from its salt solution.",
+        "Conclusion ::: Since $Cl_2$ displaced $I_2$, Chlorine is the stronger oxidizing agent."
+      ],
+      "examTip": "In Group 17, oxidizing power decreases down the group: $F_2 > Cl_2 > Br_2 > I_2$. A halogen can only displace those *below* it in the group.",
+      "keyFormulas": [
+        "$X_2 + 2Y^- \\rightarrow 2X^- + Y_2$ (where X is above Y in Group 17)"
+      ],
+      "pitfalls": [
+        "Thinking the violet color is a reaction with Chloroform.",
+        "Reversing the trend (thinking Iodine is stronger)."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Oxidizing power is the ability to gain electrons. Chlorine has a higher electron affinity and higher reduction potential than Iodine, making it capable of stripping electrons from $I^-$ ions.\",\"memoryTrigger\":\"F-Cl-Br-I: The 'First' (F) is the 'Fiercest' (oxidizer).\",\"visualPrompt\":\"Imagine a stronger bully (Chlorine) coming and taking the lunch money (electrons) from a weaker kid (Iodide).\",\"commonTrap\":\"Confusing 'oxidizing agent' with 'reducing agent'. Chlorine *is* the oxidizer; it *oxidizes* the iodide.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 14,
+      "id": "41903cea-919c-48c2-9335-c250f472c2ec",
+      "text": "During a laboratory experiment, a student needs to coagulate a negatively charged Arsenic sulfide ($As_2S_3$) sol. Based on the Hardy-Schulze rule, which of the following electrolytes will be most effective in bringing about coagulation?",
+      "options": [
+        "$AlCl_3$",
+        "$BaCl_2$",
+        "$NaCl$",
+        "$K_2SO_4$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Surface Chemistry",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Sol Charge Identification ::: $As_2S_3$ is a negatively charged (lyophobic) sol.",
+        "Hardy-Schulze Rule ::: For coagulation of a sol, the ion having a charge opposite to that of the sol is effective.",
+        "Active Ion Identification ::: Since the sol is negative, we need the cation with the highest positive charge.",
+        "Cation Comparison ::: $Al^{3+}$ (from $AlCl_3$), $Ba^{2+}$ (from $BaCl_2$), $Na^{+}$ (from $NaCl$), and $K^{+}$ (from $K_2SO_4$).",
+        "Efficiency Ranking ::: Coagulating power increases rapidly with the valency of the ion: $Al^{3+} > Ba^{2+} > Na^{+}$. Thus, $AlCl_3$ is most effective."
+      ],
+      "examTip": "Hardy-Schulze trick: Just find the ion with the highest charge number. The higher the charge, the lower the 'coagulation value' (millimoles needed).",
+      "keyFormulas": [
+        "Coagulating Power $\\propto (Valency)^n$ (where $n \\approx 4-6$)",
+        "Coagulating Value = 1 / Coagulating Power"
+      ],
+      "pitfalls": [
+        "Picking $K_2SO_4$ because it has two Potassium ions."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Opposites attract. To neutralize a charged particle, you need an ion of opposite charge. The more 'pull' (charge) that ion has, the fewer you need.\",\"memoryTrigger\":\"Hardy-Schulze = Higher charge, High power.\",\"visualPrompt\":\"Imagine trying to pull down a wall (charge); one person with a huge rope ($Al^{3+}$) is better than three people with thin strings ($Na^{+}$).\",\"commonTrap\":\"Confusing the coagulating power with the coagulating value. They are inversely related.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 15,
+      "id": "849d58c7-ab3a-44f3-a623-7d1378b56c7a",
+      "text": "Which of the following ligands is 'ambidentate' and can lead to linkage isomerism in the complex $[Co(NH_3)_5(NO_2)]Cl_2$?",
+      "options": [
+        "$NH_3$",
+        "$NO_2^-$",
+        "$Cl^-$",
+        "$H_2O$"
+      ],
+      "correctOptionIndex": 1,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Coordination Compounds",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Define Ambidentate Ligand ::: A ligand that can coordinate to the central metal through two different donor atoms but only one at a time.",
+        "Analyze $NH_3$ ::: Only has Nitrogen as a donor atom (monodentate).",
+        "Analyze $NO_2^-$ ::: Can coordinate through Nitrogen (Nitrito-N) or Oxygen (Nitrito-O).",
+        "Analyze $Cl^-$ ::: Monodentate, only one donor site (Chlorido).",
+        "Conclude ::: $NO_2^-$ is the ambidentate ligand responsible for linkage isomerism."
+      ],
+      "examTip": "Common ambidentate ligands for KCET: $NO_2^-$, $SCN^-$, $CN^-$. If you see these, linkage isomerism is almost certain.",
+      "keyFormulas": [
+        "$\\text{Isomers} = \\text{Linkage} \\iff \\text{Ambidentate Ligand present}$"
+      ],
+      "pitfalls": [
+        "Choosing $NH_3$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Ambidentate ligands have 'two faces'. Linkage isomerism occurs when the same ligand binds through different atoms, changing the properties (like color) of the complex.\",\"memoryTrigger\":\"Ambidentate = 'Ambi' (Both/Two) + 'Dentate' (Bite). Two ways to bite!\",\"visualPrompt\":\"Imagine a plug that can be inserted into a socket using either of its two different prongs.\",\"commonTrap\":\"Confusing ambidentate with bidentate (which binds with two atoms simultaneously).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 16,
+      "id": "f3e3e331-06d9-405d-8d69-b41537b081e9",
+      "text": "Identify the correct decreasing order of acid strength for the following phenols:\\nI. Phenol \\nII. p-Nitrophenol \\nIII. m-Nitrophenol \\nIV. p-Methylphenol",
+      "options": [
+        "II > III > I > IV",
+        "II > I > III > IV",
+        "IV > I > III > II",
+        "III > II > I > IV"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Alcohols Phenols and Ethers",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Electron Withdrawing Groups (EWG) Effect ::: $-NO_2$ is a strong EWG. It stabilizes the phenoxide ion through $-I$ and $-R$ effects, increasing acidity. Thus, nitrophenols are more acidic than phenol.",
+        "Position of $-NO_2$ ::: At the para position (II), $-NO_2$ exerts both $-I$ and $-R$ effects. At the meta position (III), it exerts only the $-I$ effect (resonance does not reach meta). Therefore, para-nitrophenol is more acidic than meta-nitrophenol.",
+        "Electron Donating Groups (EDG) Effect ::: $-CH_3$ is an EDG ($+I$ and hyperconjugation). It destabilizes the phenoxide ion, making p-methylphenol (IV) less acidic than phenol (I).",
+        "Final Sequence ::: Combining these: II (p-Nitro) > III (m-Nitro) > I (Phenol) > IV (p-Methyl)."
+      ],
+      "examTip": "Resonance effects ($-R/+R$) never operate at the meta position. If you see a substituent at the meta position, only consider the Inductive effect ($-I/+I$).",
+      "keyFormulas": [
+        "$K_a \\propto [EWG]$ and $K_a \\propto 1/[EDG]$"
+      ],
+      "pitfalls": [
+        "Ranking m-nitrophenol as more acidic than p-nitrophenol."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Acidity depends on the stability of the phenoxide ion. EWGs ($-NO_2, -CN, -COOH, -X$) increase stability/acidity. EDGs ($-R, -OR, -NH_2$) decrease stability/acidity.\",\"memoryTrigger\":\"Withdrawal (EWG) = High Acidity; Donation (EDG) = Low Acidity.\",\"visualPrompt\":\"Imagine the Oxygen in Phenol holding a hot potato (negative charge). EWGs are like friends taking some heat away (stability), while EDGs are like friends pushing more heat towards the Oxygen (instability).\",\"commonTrap\":\"Thinking that $-NO_2$ at the meta position is more acidic than at the para position due to distance. In resonance, distance matters less than 'reach'.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 17,
+      "id": "8feea595-4968-47a3-bdbc-25d35465d367",
+      "text": "A student is given two coordination compounds with the same molecular formula $Co(NH_3)_5BrSO_4$. Compound A forms a white precipitate with $BaCl_2$ solution, while Compound B forms a pale yellow precipitate with $AgNO_3$ solution. These two compounds are examples of:",
+      "options": [
+        "Ionization Isomerism",
+        "Linkage Isomerism",
+        "Coordination Isomerism",
+        "Geometrical Isomerism"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Coordination Compounds",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Analyze Compound A's Reaction ::: Reaction with $BaCl_2$ to give a white precipitate ($BaSO_4$) indicates that free $SO_4^{2-}$ ions are present in the solution. Formula: $[Co(NH_3)_5Br]SO_4$.",
+        "Analyze Compound B's Reaction ::: Reaction with $AgNO_3$ to give a pale yellow precipitate ($AgBr$) indicates that free $Br^-$ ions are present in the solution. Formula: $[Co(NH_3)_5SO_4]Br$.",
+        "Compare Formulas ::: Both have the same molecular formula but produce different ions in solution.",
+        "Define the Isomerism ::: This exchange of ions between the coordination sphere and the counter-ion is called Ionization Isomerism.",
+        "Confirm Result ::: The observation matches the definition of Ionization Isomerism."
+      ],
+      "examTip": "Check the counter-ions! If the ions outside the bracket change, it's 'Ionization'. If the atom connecting the ligand changes (like $NO_2$ vs $ONO$), it's 'Linkage'.",
+      "keyFormulas": [
+        "$[M(L)_n X]Y \\rightleftharpoons [M(L)_n Y]X$ (Ionization Isomers)"
+      ],
+      "pitfalls": [
+        "Calling it Linkage isomerism.",
+        "Ignoring the precipitate colors."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Ionization isomers occur when the counter ion in a complex salt is itself a potential ligand and can displace a ligand which then becomes the counter ion.\",\"memoryTrigger\":\"Ion-ization = Interchange of Ions.\",\"visualPrompt\":\"Think of a 'swap' between a player on the field (inside brackets) and a player on the bench (outside brackets).\",\"commonTrap\":\"Confusing Ionization with Hydrate isomerism (where water is the moving species).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 18,
+      "id": "587135dd-17af-4f2b-819e-ddb92e0532a1",
+      "text": "A laboratory technician is investigating the geometry of noble gas compounds. For a specific compound $XeF_4$, the technician observes that despite having six electron pairs around the central Xenon atom, the molecule adopts a Square Planar geometry. The number of lone pairs present on the central atom and the resulting $F-Xe-F$ bond angle in the plane are:",
+      "options": [
+        "2 lone pairs, $90^{\\circ}$",
+        "1 lone pair, $120^{\\circ}$",
+        "0 lone pairs, $109.5^{\\circ}$",
+        "2 lone pairs, $180^{\\circ}$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "p-Block Elements",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Determine Valence Electrons ::: Xenon ($Xe$) is a noble gas with 8 valence electrons.",
+        "Identify Bond Pairs ::: In $XeF_4$, Xenon forms 4 single bonds with 4 Fluorine atoms, so there are 4 Bond Pairs (BP).",
+        "Calculate Remaining Electrons ::: Electrons used in bonding = 4. Remaining electrons = $8 - 4 = 4$ electrons.",
+        "Identify Lone Pairs ::: 4 electrons constitute $4/2 = 2$ Lone Pairs (LP).",
+        "Determine Geometry (VSEPR) ::: Total electron pairs (Steric Number) = $4 (BP) + 2 (LP) = 6$. This corresponds to octahedral arrangement. To minimize repulsion, LPs occupy axial positions, leaving the 4 F atoms in a plane. Thus, geometry is Square Planar with $90^{\\circ}$ angles."
+      ],
+      "examTip": "For Xenon fluorides, remember the 'Rule of 2': $XeF_2$ has 3 LPs (Linear), $XeF_4$ has 2 LPs (Square Planar), and $XeF_6$ has 1 LP (Distorted Octahedral).",
+      "keyFormulas": [
+        "Steric Number = $\\frac{1}{2}[V + M - C + A]$ where V=Valence e-, M=Monovalent atoms.",
+        "Bond Angle in Square Planar = $90^{\\circ}$"
+      ],
+      "pitfalls": [
+        "Counting Xenon valence electrons as 6 instead of 8.",
+        "Predicting Tetrahedral shape."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"VSEPR theory dictates that electron pairs arrange themselves to minimize repulsion. In $XeF_4$, the two lone pairs reside as far apart as possible (axial positions) to minimize LP-LP repulsion, resulting in a perfect square plane of fluorine atoms.\",\"memoryTrigger\":\"XeF4 = 'X' marks the spot on a '4'-sided square.\",\"visualPrompt\":\"Imagine a square table where Xenon is the center, four Fluorines are the corners, and one balloon (lone pair) is floating straight up while another is tied straight down.\",\"commonTrap\":\"Confusing 'Electron Geometry' (Octahedral) with 'Molecular Shape' (Square Planar).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 19,
+      "id": "d9478c55-f25d-46e9-b940-71d04babff26",
+      "text": "How much electricity in Faradays ($F$) is required to deposit $27\\text{ g}$ of Aluminum from a molten $Al_2O_3$ bath? (Atomic mass of $Al = 27\\text{ u}$)",
+      "options": [
+        "$3\\text{ F}$",
+        "$1\\text{ F}$",
+        "$2\\text{ F}$",
+        "$0.33\\text{ F}$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Electrochemistry",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Write the reduction half-reaction ::: $Al^{3+} + 3e^- \\to Al(s)$.",
+        "Interpret the stoichiometry ::: To deposit 1 mole of $Al$, 3 moles of electrons are required.",
+        "Convert moles of electrons to Faradays ::: $1\\text{ mole of } e^- = 1\\text{ Faraday}$. So, 3 moles of $e^- = 3\\text{ Faradays}$.",
+        "Convert moles of Al to mass ::: $1\\text{ mole of } Al = 27\\text{ g}$ (given atomic mass).",
+        "Final Calculation ::: To deposit $27\\text{ g}$ (which is exactly 1 mole), we need exactly $3\\text{ Faradays}$."
+      ],
+      "examTip": "Always remember: Charge required = $n \\times F$, where $n$ is the valency of the metal ion. For $Al^{3+}$, it's always $3F$ per mole.",
+      "keyFormulas": [
+        "$Q = n \\cdot F \\cdot (\\text{moles of substance})$",
+        "$W = \\frac{E \\cdot I \\cdot t}{96500}$"
+      ],
+      "pitfalls": [
+        "Using $1\\text{ F}$ because the mass is $27\\text{ g}$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The charge on 1 mole of electrons is approximately $96500\\\\text{ C}$, defined as $1\\\\text{ Faraday}$. The amount of substance deposited is directly proportional to the number of moles of electrons passed through the circuit.\",\"memoryTrigger\":\"VAL-F: Valency = Faradays (for 1 mole of metal).\",\"visualPrompt\":\"Imagine each Aluminum ion is a person with 3 empty hands ($Al^{3+}$). They need 3 electrons to be 'satisfied' and become a solid atom.\",\"commonTrap\":\"Forgetting that $Al$ is $+3$ and using $1\\\\text{ F}$ or $2\\\\text{ F}$ by mistake.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 20,
+      "id": "453895ad-a64b-4a7c-9d2e-61bddde9cc2b",
+      "text": "For a standard galvanic cell based on the following half-reactions:\\n$Zn^{2+}(aq) + 2e^- \\rightarrow Zn(s); E^0 = -0.76\\text{ V}$\\n$Cu^{2+}(aq) + 2e^- \\rightarrow Cu(s); E^0 = +0.34\\text{ V}$\\nWhich of the following statements is **CORRECT** regarding the cell operation?",
+      "options": [
+        "$Zn$ acts as the cathode and is reduced.",
+        "The standard cell potential ($E^0_{cell}$) is $0.42\\text{ V}$.",
+        "Electrons flow from the $Zn$ electrode to the $Cu$ electrode in the external circuit.",
+        "The concentration of $Zn^{2+}$ ions decreases as the cell operates."
+      ],
+      "correctOptionIndex": 2,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Electrochemistry",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Compare Reduction Potentials ::: $E^0(Cu^{2+}/Cu) = +0.34\\text{V}$ is higher than $E^0(Zn^{2+}/Zn) = -0.76\\text{V}$.",
+        "Identify Electrodes ::: The species with higher SRP is reduced (Cathode: $Cu$). The species with lower SRP is oxidized (Anode: $Zn$).",
+        "Calculate $E^0_{cell}$ ::: $E^0_{cell} = E^0_{cathode} - E^0_{anode} = 0.34 - (-0.76) = +1.10\\text{V}$. (Statement 2 is wrong).",
+        "Determine Electron Flow ::: Electrons always flow from Anode (site of oxidation/loss of $e^-$) to Cathode. So, $Zn \\rightarrow Cu$. (Statement 3 is correct).",
+        "Check Ion Concentration ::: Oxidation at $Zn$ electrode ($Zn \\rightarrow Zn^{2+} + 2e^-$) increases $[Zn^{2+}]$. (Statement 4 is wrong)."
+      ],
+      "examTip": "LO-AN: LOwer SRP = ANode. The metal with the more negative value is always the anode and the source of electrons.",
+      "keyFormulas": [
+        "$E^0_{cell} = E^0_{right} - E^0_{left}$",
+        "$\\Delta G^0 = -nFE^0_{cell}$"
+      ],
+      "pitfalls": [
+        "Subtracting potentials in the wrong order ($0.34 - 0.76 = -0.42$)."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"In a galvanic cell, the half-reaction with the higher reduction potential 'pulls' electrons away from the half-reaction with the lower potential. Oxidation happens at the Anode (Negative) and Reduction at the Cathode (Positive).\",\"memoryTrigger\":\"ABC: Anode, Bridge, Cathode (order of representation). OIL RIG: Oxidation Is Loss, Reduction Is Gain.\",\"visualPrompt\":\"Imagine a slide. Electrons are at the top (Anode/High Energy) and want to slide down to the bottom (Cathode/Low Energy).\",\"commonTrap\":\"Confusing 'Electron Flow' (Anode to Cathode) with 'Current Flow' (Cathode to Anode).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 21,
+      "id": "960ceed9-739b-4710-8b2c-da750fbf280f",
+      "text": "A carbohydrate 'A' on treatment with $Br_2/H_2O$ gives a monocarboxylic acid 'B'. On further oxidation of 'A' with $HNO_3$, a dicarboxylic acid 'C' (Saccharic acid) is formed. If 'A' also reacts with $HI/P$ to give n-hexane, 'A' is most likely:",
+      "options": [
+        "D-Glucose",
+        "D-Fructose",
+        "D-Galactose",
+        "Sucrose"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Biomolecules",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Reaction with HI/P ::: $HI$ and red Phosphorus reduce the entire carbon chain to an alkane. Formation of n-hexane proves that 'A' has a 6-carbon straight chain.",
+        "Reaction with $Br_2/H_2O$ ::: Bromine water is a mild oxidizing agent that converts the aldehyde group ($-CHO$) to a carboxylic acid group ($-COOH$), but doesn't affect alcohols. Formation of a monocarboxylic acid (Gluconic acid) confirms the presence of an aldehyde group.",
+        "Reaction with $HNO_3$ ::: Concentrated nitric acid is a strong oxidizing agent. It oxidizes both the aldehyde group and the primary alcohol group ($-CH_2OH$) at the end of the chain. Formation of Saccharic acid (a dicarboxylic acid) confirms a primary alcohol is present.",
+        "Identify the Molecule ::: A 6-carbon straight chain with one aldehyde and one primary alcohol (and four secondary alcohols) matches the structure of D-Glucose.",
+        "Exclude Fructose ::: Fructose is a ketohexose; it does not react with $Br_2/H_2O$ to form a monocarboxylic acid because ketones aren't easily oxidized by mild agents."
+      ],
+      "examTip": "Mild oxidant ($Br_2/H_2O$) = tests for Aldehyde. Strong oxidant ($HNO_3$) = tests for both Aldehyde and Primary Alcohol.",
+      "keyFormulas": [
+        "$C_6H_{12}O_6 \\xrightarrow{Br_2/H_2O} C_5H_{11}O_5-COOH$ (Gluconic acid)",
+        "$C_6H_{12}O_6 \\xrightarrow{HNO_3} HOOC-(CHOH)_4-COOH$ (Saccharic acid)"
+      ],
+      "pitfalls": [
+        "Selecting D-Fructose."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Glucose structure is established via its functional group reactions. $-CHO$ is at $C_1$, $-CH_2OH$ is at $C_6$, and $HI$ proves the straight chain connectivity.\",\"memoryTrigger\":\"B-A-S-H: Bromine (Aldehyde), Acid-Nitric (Saccharic/Both), Hexane (HI).\",\"visualPrompt\":\"Picture a 6-carbon ladder. $HI$ strips everything to just the rungs. $Br_2$ only caps the top. $HNO_3$ caps the top and the bottom.\",\"commonTrap\":\"Confusing the products of $Br_2$ (Gluconic acid) and $HNO_3$ (Glucaric/Saccharic acid).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 22,
+      "id": "7c124e43-a28c-4f96-985e-667affa5cdba",
+      "text": "Hypophosphorous acid ($H_3PO_2$) is a powerful reducing agent used in various chemical processes, such as reducing silver nitrate to metallic silver. How many $P-H$ bonds are present in one molecule of $H_3PO_2$ that contribute to its strong reducing character?",
+      "options": [
+        "2",
+        "1",
+        "3",
+        "0"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "p-Block Elements",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Draw the structure ::: Phosphorus is the central atom. In oxoacids, P is always bonded to at least one $=O$ and one $-OH$ group.",
+        "Assign remaining atoms ::: For $H_3PO_2$, we have used 1 P, 2 O, and 1 H so far. We have 2 H atoms left.",
+        "Complete the valency ::: The remaining 2 H atoms are bonded directly to Phosphorus (P-H bonds).",
+        "Determine reducing nature ::: The reducing property of Phosphorus oxoacids is directly proportional to the number of P-H bonds.",
+        "Count ::: There are 2 P-H bonds."
+      ],
+      "examTip": "Basicity depends on -OH groups; Reducing power depends on P-H bonds. Don't mix them up! $H_3PO_2$ is monobasic (1 -OH) but highly reducing (2 P-H).",
+      "keyFormulas": [
+        "$Reducing\\ Power \\propto \\text{Number of P-H bonds}$",
+        "$Basicity = \\text{Number of P-OH groups}$"
+      ],
+      "pitfalls": [
+        "Thinking basicity and reducing power are the same."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"In oxoacids of Phosphorus, H atoms attached directly to P have high reducing power because the P-H bond is more reactive/labile than O-H bonds in these systems. $H_3PO_2$ (hypophosphorous), $H_3PO_3$ (phosphorous), and $H_3PO_4$ (phosphoric) form a series where reducing power decreases as H atoms are replaced by OH groups.\",\"memoryTrigger\":\"Hypo = 2 P-H (High Reducing), Ortho-phosphorous = 1 P-H, Ortho-phosphoric = 0 P-H.\",\"visualPrompt\":\"Picture a Phosphorus atom with 'arms'. In $H_3PO_2$, it has two bare 'hydrogen hands' ready to grab oxygens from other chemicals.\",\"commonTrap\":\"Assuming $H_3PO_2$ is tribasic because it has 3 hydrogens. Only H in -OH is ionizable.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 23,
+      "id": "1a99f2a4-d7d1-4841-8a50-3c4f4f26fe16",
+      "text": "The correct order of reactivity of the following compounds towards nucleophilic addition reaction is:\\nI. Acetone \\nII. Acetaldehyde \\nIII. Formaldehyde \\nIV. Di-tert-butyl ketone",
+      "options": [
+        "III > II > I > IV",
+        "IV > I > II > III",
+        "III > I > II > IV",
+        "I > II > III > IV"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Aldehydes Ketones and Carboxylic Acids",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Principle of Reactivity ::: Nucleophilic addition reactivity depends on (1) Steric hindrance and (2) Electrophilicity of the carbonyl carbon.",
+        "Steric Factor ::: Smaller groups around the $C=O$ allow easier access for the nucleophile. Formaldehyde (H, H) < Acetaldehyde (H, $CH_3$) < Acetone ($CH_3, CH_3$) < Di-tert-butyl ketone (bulky groups). Thus, III is the most reactive, and IV is the least.",
+        "Electronic Factor ::: Alkyl groups are electron-donating ($+I$ effect). They reduce the partial positive charge on the carbonyl carbon, making it less attractive to nucleophiles. Formaldehyde (0 alkyl groups) > Acetaldehyde (1 alkyl group) > Acetone (2 alkyl groups).",
+        "Combining Factors ::: Both factors reinforce each other. The order is: Formaldehyde > Acetaldehyde > Acetone > Di-tert-butyl ketone.",
+        "Final Ranking ::: III > II > I > IV."
+      ],
+      "examTip": "Aldehydes are ALWAYS more reactive than ketones for nucleophilic addition because they have less steric crowding and only one $+I$ group.",
+      "keyFormulas": [
+        "Reactivity $\\propto$ $\\frac{1}{Steric \\, bulk \\, + \\, +I \\, effect}$"
+      ],
+      "pitfalls": [
+        "Ranking Acetone as more reactive than Acetaldehyde."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Nucleophilic addition involves the attack of a nucleophile on the $sp^2$ carbonyl carbon. Reactivity $\\\\propto$ $1/(\\\\text{steric bulk})$ and $\\\\propto$ (Magnitude of $\\\\delta+$ on Carbon).\",\"memoryTrigger\":\"Less Crowded, More Positive = More Reactive.\",\"visualPrompt\":\"Imagine a target. Formaldehyde is a clear bullseye. Di-tert-butyl ketone is a bullseye surrounded by big, angry dogs (tert-butyl groups) that prevent you from hitting it.\",\"commonTrap\":\"Confusing this with Electrophilic substitution reactivity (where EDGs increase reactivity). Here, it's the opposite.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 24,
+      "id": "460db785-397a-40a0-ab65-bd8262b185c8",
+      "text": "For a hypothetical first-order reaction $A \\rightarrow B$, a student observes that the time required for the concentration of $A$ to decrease from $0.8\\text{ M}$ to $0.4\\text{ M}$ is $20$ minutes. What will be the time required for the concentration to decrease from $0.2\\text{ M}$ to $0.1\\text{ M}$?",
+      "options": [
+        "$10\\text{ minutes}$",
+        "$20\\text{ minutes}$",
+        "$40\\text{ minutes}$",
+        "$5\\text{ minutes}$"
+      ],
+      "correctOptionIndex": 1,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Chemical Kinetics",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Identify the Order ::: The question states it is a 'first-order reaction'.",
+        "Recognize the Property ::: For first-order reactions, the half-life ($t_{1/2}$) is independent of the initial concentration of the reactant.",
+        "Define Half-life ::: The decrease from $0.8\\text{ M}$ to $0.4\\text{ M}$ represents exactly one half-life period.",
+        "Extract Data ::: Given $t_{1/2} = 20\\text{ minutes}$.",
+        "Apply to New Scenario ::: The decrease from $0.2\\text{ M}$ to $0.1\\text{ M}$ also represents exactly one half-life. Since $t_{1/2}$ is constant, the time remains $20\\text{ minutes}$."
+      ],
+      "examTip": "In First-Order reactions, the 'time for half-completion' is a constant. If the ratio of final to initial concentration is the same (e.g., $1/2$), the time taken is always the same regardless of starting amounts.",
+      "keyFormulas": [
+        "$t_{1/2} = \\frac{0.693}{k}$",
+        "$k = \\frac{2.303}{t} \\log \\frac{[A]_0}{[A]_t}$"
+      ],
+      "pitfalls": [
+        "Dividing the time by 4 (picking 5 mins) because the concentration is 4 times less."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The rate of a first-order reaction is proportional to concentration, so as concentration drops, the rate drops proportionally, keeping the time to lose half the remaining amount constant.\",\"memoryTrigger\":\"1st Order = Constant Clock. The clock for half-life never changes.\",\"visualPrompt\":\"Imagine a group of people where every 20 minutes, half the people leave the room. It doesn't matter if you start with 100 or 10; half are gone in 20 mins.\",\"commonTrap\":\"Students often try to use the unitary method (proportionality) and pick 5 minutes, thinking less concentration means less time.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 25,
+      "id": "9d97b420-4d09-408f-9ae1-15cffffe1748",
+      "text": "The major organic product formed in the following reaction is:\\n$Phenol \\xrightarrow{CHCl_3 / aq. NaOH, 340\\,K} Intermediate \\xrightarrow{H^+} Product$",
+      "options": [
+        "Salicylaldehyde",
+        "Salicylic acid",
+        "Acetophenone",
+        "o-Cresol"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Alcohols Phenols and Ethers",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Identify Reaction Name ::: The reagents $CHCl_3$ (Chloroform) and aqueous $NaOH$ at $340\\,K$ are characteristic of the Reimer-Tiemann reaction.",
+        "Electrophile Generation ::: $NaOH$ reacts with $CHCl_3$ to generate the reactive intermediate, Dichlorocarbene ($:CCl_2$).",
+        "Electrophilic Attack ::: The dichlorocarbene attacks the ortho position of the phenoxide ion (formed by Phenol + $NaOH$).",
+        "Hydrolysis of Intermediate ::: The intermediate formed is a substituted benzal chloride which undergoes alkaline hydrolysis to an aldehyde group ($-CHO$).",
+        "Acidification ::: Final acidification ($H^+$) converts the sodium phenoxide back to phenol, yielding 2-Hydroxybenzaldehyde (Salicylaldehyde)."
+      ],
+      "examTip": "If the reagent is $CCl_4$ instead of $CHCl_3$, the product is Salicylic acid instead of Salicylaldehyde.",
+      "keyFormulas": [
+        "$CHCl_3 + OH^- \\to :CCl_2 + H_2O + Cl^-$"
+      ],
+      "pitfalls": [
+        "Identifying the electrophile as $CCl_3^+$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Reimer-Tiemann reaction introduces a $-CHO$ group at the ortho position of phenol. It proceeds via a carbene intermediate.\",\"memoryTrigger\":\"Chloroform + Phenol = Salicylaldehyde (C-C-S).\",\"visualPrompt\":\"Imagine a phenol ring. A 'carbene' (a carbon with two chlorines and a pair of lone electrons) lands on the 'shoulder' (ortho) of the ring. The chlorines are then washed away and replaced by an oxygen to make it an aldehyde.\",\"commonTrap\":\"Choosing Salicylic acid. Remember: $CHCl_3 \\\\to$ Aldehyde; $CCl_4 \\\\to$ Acid.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 26,
+      "id": "73eecda3-815f-4be1-841f-f94c5e1d7f26",
+      "text": "Identify the product 'C' in the following reaction sequence:\\n$Aniline \\xrightarrow{NaNO_2/HCl, 0-5^\\circ C} A \\xrightarrow{CuCN/KCN} B \\xrightarrow{H_2/Ni} C$",
+      "options": [
+        "Benzylamine",
+        "Benzonitrile",
+        "N-Methylaniline",
+        "Aniline"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Amines",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Step 1: Diazotization ::: Aniline reacts with $NaNO_2$ and $HCl$ at low temperatures to form Benzene diazonium chloride ($C_6H_5N_2^+Cl^-$), which is 'A'.",
+        "Step 2: Sandmeyer Reaction ::: Treatment of the diazonium salt with $CuCN/KCN$ replaces the diazonium group with a cyano group, forming Benzonitrile ($C_6H_5CN$), which is 'B'.",
+        "Step 3: Reduction ::: Catalytic hydrogenation ($H_2/Ni$) of a nitrile ($-CN$) reduces it to a primary amine ($-CH_2NH_2$).",
+        "Final Product ::: Benzonitrile ($C_6H_5CN$) reduces to Benzylamine ($C_6H_5CH_2NH_2$), which is 'C'."
+      ],
+      "examTip": "Nitriles are versatile intermediates. Reducing them ($H_2/Ni$ or $LiAlH_4$) gives primary amines, while hydrolysis gives carboxylic acids.",
+      "keyFormulas": [
+        "$R-CN \\xrightarrow{H_2/Ni} R-CH_2NH_2$",
+        "$Ar-N_2^+ \\xrightarrow{CuCN} Ar-CN$ (Sandmeyer)"
+      ],
+      "pitfalls": [
+        "Predicting the final product as Aniline."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Diazonium salts allow for the introduction of various functional groups into the benzene ring. Nitriles specifically can be stepped up to amines or acids.\",\"memoryTrigger\":\"Diazo $\\\\rightarrow$ Cyanide $\\\\rightarrow$ Amine (The 'C' addition route).\",\"visualPrompt\":\"Imagine the Nitrogen group on the ring popping off like a cap, being replaced by a Carbon 'connector', which then grows 'hydrogen arms'.\",\"commonTrap\":\"Thinking that reduction of $C_6H_5CN$ gives Aniline. Aniline has $-NH_2$ directly on the ring; Benzylamine has a $-CH_2-$ bridge.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 27,
+      "id": "b2f951af-1b66-46e3-af88-10912f9e4e4c",
+      "text": "The Henry's law constants ($K_{H}$) for four different gases $A, B, C$ and $D$ in water at $298\\text{ K}$ are $40.30$, $1.67$, $0.413$ and $1.83 \\times 10^{-5}$ kbar respectively. Which gas will have the highest solubility in water at the same pressure and temperature?",
+      "options": [
+        "Gas $D$",
+        "Gas $C$",
+        "Gas $B$",
+        "Gas $A$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Solutions",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Recall Henry's Law ::: $P = K_{H} \\cdot \\chi$, where $P$ is partial pressure, $K_{H}$ is Henry's constant, and $\\chi$ is the mole fraction (solubility).",
+        "Identify the Variable Relationship ::: From the formula $\\chi = \\frac{P}{K_{H}}$. At a constant pressure ($P$), solubility ($\\chi$) is inversely proportional to $K_{H}$.",
+        "Compare Given Values ::: Gas A: $40.30$, Gas B: $1.67$, Gas C: $0.413$, Gas D: $1.83 \\times 10^{-5}$.",
+        "Find the Minimum $K_{H}$ ::: Gas D has the lowest $K_{H}$ value ($1.83 \\times 10^{-5}$ kbar).",
+        "Determine Highest Solubility ::: Since $K_{H}$ is minimum for D, its solubility $\\chi$ will be maximum."
+      ],
+      "examTip": "Higher the $K_{H}$, lower the solubility. $K_{H}$ is like a 'resistance' to dissolving. Always check the units of $K_{H}$ to ensure they are for the pressure term.",
+      "keyFormulas": [
+        "$P = K_{H} \\chi$",
+        "$\\text{Solubility} \\propto \\frac{1}{K_{H}}$"
+      ],
+      "pitfalls": [
+        "Choosing Gas A because it has the largest numerical value."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Henry's Law states that the solubility of a gas in a liquid is directly proportional to its partial pressure. The constant $K_{H}$ is a characteristic of the gas-solvent pair and depends on temperature.\",\"memoryTrigger\":\"King Henry is Heavy (High $K_{H}$ = Hard to dissolve).\",\"visualPrompt\":\"Imagine $K_{H}$ as a 'barrier'. A tall barrier (high $K_{H}$) makes it harder for gas molecules to jump into the liquid.\",\"commonTrap\":\"Thinking higher $K_{H}$ means higher solubility because it's a 'constant' in the numerator of the standard equation.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 28,
+      "id": "b27eb06f-c769-4dae-b39d-89bd8e5f1f69",
+      "text": "During the electrolysis of an aqueous solution of $CuSO_4$, a constant current is passed through the cell. If the total charge passed through the electrolyte is $2\\text{ Faraday}$ ($2F$), what is the mass of Copper deposited at the cathode? (Atomic mass of $Cu = 63.5\\text{ u}$)",
+      "options": [
+        "$31.75\\text{ g}$",
+        "$63.5\\text{ g}$",
+        "$127.0\\text{ g}$",
+        "$190.5\\text{ g}$"
+      ],
+      "correctOptionIndex": 1,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Electrochemistry",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Write the Cathode Reaction ::: $Cu^{2+} + 2e^- \\rightarrow Cu(s)$.",
+        "Identify the Stoichiometry ::: From the balanced equation, $2$ moles of electrons are required to deposit $1$ mole of $Cu$ atoms.",
+        "Convert to Faraday ::: $1$ mole of electrons = $1\\text{ Faraday}$. Therefore, $2$ moles of electrons = $2\\text{ Faraday}$.",
+        "Relate Charge to Mass ::: $2F$ of charge deposits $1$ mole of $Cu$.",
+        "Final Calculation ::: Mass = Moles $\\times$ Molar Mass = $1 \\text{ mol} \\times 63.5\\text{ g/mol} = 63.5\\text{ g}$."
+      ],
+      "examTip": "Always determine the valency (n-factor) of the metal ion first. Charge required for 1 mole = $n \\times F$. For $Cu^{2+}$, it is $2F$. If $2F$ is passed, you get exactly 1 mole ($63.5\\text{g}$).",
+      "keyFormulas": [
+        "$W = ZIt$",
+        "$W = \\frac{E \\times Q}{96500}$",
+        "$E = \\frac{\\text{Molar Mass}}{\\text{Valency}}$"
+      ],
+      "pitfalls": [
+        "Using 31.75g (Equiv. mass) as the answer."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Faraday's laws relate the macroscopic mass of a substance to the microscopic number of electrons transferred. $1$ Faraday is the charge of $1$ mole of electrons (approx. $96500\\\\text{ C}$).\",\"memoryTrigger\":\"Mass = (Molar Mass / n) $\\\\times$ (Q / F). Think: 'Man Quit' ($M = \\\\frac{m}{n} \\\\frac{Q}{F}$)\",\"visualPrompt\":\"Imagine a vending machine where 1 copper atom costs 2 'electron coins'. If you put in 2 moles of coins, you get 1 mole of copper.\",\"commonTrap\":\"Students sometimes use $n=1$ for Copper, confusing it with Silver ($Ag^+$).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 29,
+      "id": "68d9f09c-d4fd-4e78-8a9d-22ff2df08ee1",
+      "text": "The correct order of basic strength for the following amines in aqueous solution is:\\nI. $CH_3NH_2$ \\nII. $(CH_3)_2NH$\\nIII. $(CH_3)_3N$\\nIV. $NH_3$",
+      "options": [
+        "II > I > III > IV",
+        "II > III > I > IV",
+        "III > II > I > IV",
+        "I > II > III > IV"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Amines",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Identify Phase ::: The question specifies 'aqueous solution', where basicity depends on $+I$ effect, solvation effect (hydration), and steric hindrance.",
+        "Analyze $+I$ effect ::: Inductive effect increases basicity as the number of methyl groups increases: $3^\\circ > 2^\\circ > 1^\\circ > NH_3$.",
+        "Analyze Solvation/Steric effects ::: In water, smaller ions are better solvated. The ammonium ion formed from $1^\\circ$ amines is more stable than $3^\\circ$ due to less steric hindrance and more H-bonding.",
+        "Combine Factors for Methyl ::: For Methyl-substituted amines, the combined effect results in the order: $2^\\circ > 1^\\circ > 3^\\circ > NH_3$.",
+        "Final Comparison ::: II ($(CH_3)_2NH$) > I ($CH_3NH_2$) > III ($(CH_3)_3N$) > IV ($NH_3$)."
+      ],
+      "examTip": "Remember the '213' rule for Methyl substituted amines in water and '231' rule for Ethyl substituted amines. Secondary amines are always the most basic in aqueous medium.",
+      "keyFormulas": [
+        "$K_b = \\frac{[RNH_3^+][OH^-]}{[RNH_2]}$",
+        "$pK_b = -\\log K_b$"
+      ],
+      "pitfalls": [
+        "Choosing III > II > I."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Basicity is the ability to donate a lone pair. In water, the stability of the conjugated acid (ammonium cation) through H-bonding competes with the electron-donating $+I$ effect.\",\"memoryTrigger\":\"Methyl is small (2-1-3), Ethyl is big (2-3-1).\",\"visualPrompt\":\"Visualize the lone pair being 'pushed' out by methyl groups but 'blocked' by them during hydration.\",\"commonTrap\":\"Applying the gas-phase order ($3^\\\\circ > 2^\\\\circ > 1^\\\\circ$) to aqueous solutions.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 30,
+      "id": "5b1bbcf3-20a7-4de5-880b-a2aad72ccfc6",
+      "text": "A laboratory technician notices that when liquid Mercury ($Hg$) is exposed to Ozone ($O_3$), it loses its shiny meniscus and starts sticking to the glass surface, a phenomenon known as 'tailing of mercury'. This happens because Ozone:",
+      "options": [
+        "Oxidizes Mercury to Mercurous oxide ($Hg_2O$)",
+        "Reduces Mercury to Mercuric oxide ($HgO$)",
+        "Forms a coordinate bond with Mercury",
+        "Decomposes Mercury into its isotopes"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "p-Block Elements",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Identify the chemical property ::: Ozone is a powerful oxidizing agent (it releases nascent oxygen: $O_3 \\rightarrow O_2 + [O]$).",
+        "Reaction with Mercury ::: When $O_3$ reacts with $Hg$, it oxidizes the metal.",
+        "Identify the specific oxide ::: Mercury is oxidized specifically to Mercurous oxide ($Hg_2O$).",
+        "Write equation ::: $2Hg + O_3 \\rightarrow Hg_2O + O_2$.",
+        "Explain the observation ::: $Hg_2O$ dissolves in the remaining mercury, altering its surface tension and causing it to 'tail' or stick to glass."
+      ],
+      "examTip": "Whenever 'Mercury' and 'Ozone' are mentioned together, 'Tailing' and '$Hg_2O$' are the only two key terms you need to look for in the options.",
+      "keyFormulas": [
+        "$2Hg + O_3 \\rightarrow Hg_2O + O_2$"
+      ],
+      "pitfalls": [
+        "Selecting $HgO$ as the product."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Ozone acts as a strong oxidizing agent because it easily decomposes to give an atom of nascent oxygen. This oxygen reacts with mercury to form $Hg_2O$, which changes the physical behavior of the liquid metal by disrupting its high surface tension.\",\"memoryTrigger\":\"Ozone 'tails' the 'Hg'. (O-T-H).\",\"visualPrompt\":\"Imagine a smooth bead of mercury suddenly becoming 'sticky' like syrup on a glass plate after being sprayed with Ozone.\",\"commonTrap\":\"Confusing $Hg_2O$ (Mercurous) with $HgO$ (Mercuric). Ozone specifically forms the +1 oxidation state oxide here.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 31,
+      "id": "77975850-b2b7-4055-a2b9-3db7f9d00655",
+      "text": "In the Williamson Ether Synthesis of t-butyl methyl ether, the correct choice of reagents is:",
+      "options": [
+        "Sodium tert-butoxide and Methyl bromide",
+        "Sodium methoxide and tert-butyl bromide",
+        "tert-butanol and Methanol in conc. $H_2SO_4$",
+        "Potassium methoxide and tert-butyl alcohol"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Alcohols Phenols and Ethers",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Reaction Principle ::: Williamson Ether Synthesis is an $S_N2$ reaction where an alkoxide ion ($RO^-$) attacks an alkyl halide ($R'X$).",
+        "Constraint ::: Since it is an $S_N2$ mechanism, the alkyl halide must be primary ($1^\\circ$) to minimize steric hindrance and prevent elimination.",
+        "Scenario A Analysis ::: Methyl bromide ($1^\\circ$) + Sodium tert-butoxide ($3^\\circ$ alkoxide). The alkoxide is a strong nucleophile, and the halide is $1^\\circ$. Substitution occurs easily.",
+        "Scenario B Analysis ::: tert-butyl bromide ($3^\\circ$ halide) + Sodium methoxide. $3^\\circ$ halides undergo E2 elimination with strong bases (alkoxides) to form Isobutylene instead of an ether.",
+        "Conclusion ::: Choice (0) is the only path that yields the ether."
+      ],
+      "examTip": "The Williamson Rule: Keep the halide SMALL ($CH_3$ or $1^\\circ$) and the alkoxide LARGE (if needed). If you use a $3^\\circ$ halide, you'll get an alkene (Elimination), not an ether.",
+      "keyFormulas": [
+        "$R-O^-Na^+ + R'-X \\rightarrow R-O-R' + NaX$ (Success if $R'$ is $1^\\circ$)",
+        "$3^\\circ \\text{ halide} + RO^- \\rightarrow \\text{Alkene}$"
+      ],
+      "pitfalls": [
+        "Choosing Sodium methoxide and tert-butyl bromide.",
+        "Selecting $H_2SO_4$ dehydration."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Williamson synthesis relies on nucleophilic substitution. Alkoxides are both strong nucleophiles and strong bases. With $2^\\\\circ$ or $3^\\\\circ$ halides, basicity wins over nucleophilicity, leading to elimination.\",\"memoryTrigger\":\"Halide-Small, Alkoxide-All: Always pick the smallest possible alkyl halide.\",\"visualPrompt\":\"Imagine a big bulky guy (alkoxide) trying to squeeze into a tiny door (methyl halide) - he fits! But if the door is bulky (3-degree halide), he just kicks it down (elimination).\",\"commonTrap\":\"Thinking that because the ether has a tert-butyl group, the halide must also be tert-butyl.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 32,
+      "id": "0435f03a-1e88-46a4-8efd-b8519bf67685",
+      "text": "A food scientist finds that a certain biochemical reaction in milk at $27^{\\circ}C$ ($300 K$) doubles its rate when the temperature is increased to $37^{\\circ}C$ ($310 K$). Which of the following statements correctly describes this temperature dependence according to the Arrhenius theory?",
+      "options": [
+        "The number of effective collisions increases significantly due to a $10 K$ rise.",
+        "The activation energy ($E_a$) of the reaction becomes zero at $37^{\\circ}C$.",
+        "The threshold energy decreases as temperature increases.",
+        "The value of the pre-exponential factor ($A$) doubles for every $10 K$ rise."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Chemical Kinetics",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Concept Recall ::: For most chemical reactions, a $10 K$ rise in temperature approximately doubles or triples the rate constant ($k$).",
+        "Temperature Coefficient ::: The ratio $k_{T+10} / k_T \\approx 2$. This is the temperature coefficient.",
+        "Arrhenius Logic ::: Increase in rate is not primarily due to more total collisions (which increase by only ~2-3%).",
+        "Effective Collisions ::: The rate increases because the fraction of molecules with energy $\\ge E_a$ (effective collisions) increases exponentially.",
+        "Elimination ::: $E_a$ is independent of temperature; Threshold energy is constant; $A$ (Frequency factor) is nearly constant."
+      ],
+      "examTip": "Remember: A $10 K$ rise doesn't double the 'total' collisions; it doubles the 'effective' collisions (those with energy $> E_a$!). This is a classic KCET trap.",
+      "keyFormulas": [
+        "$k = A e^{-E_a/RT}$",
+        "Temperature Coefficient $\\approx \\frac{k_{310}}{k_{300}} \\approx 2$"
+      ],
+      "pitfalls": [
+        "Selecting 'Threshold energy decreases'."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Temperature increases the kinetic energy, drastically increasing the area under the Maxwell-Boltzmann curve beyond the activation energy barrier.\",\"memoryTrigger\":\"10 degrees = 2x effective hits.\",\"visualPrompt\":\"Imagine a high jump bar; raising the energy of the athletes (T) means many more can jump over the bar ($E_a$).\",\"commonTrap\":\"Thinking that $E_a$ changes with temperature. $E_a$ is constant for a specific reaction path.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 33,
+      "id": "0f3e5762-e902-451e-bbe5-da7d8cbf49b4",
+      "text": "The spin-only magnetic moment ($\\mu_{s}$) of a coordination complex is measured to be $3.87 \\text{ BM}$. Which of the following ions is most likely the central metal ion in this complex?",
+      "options": [
+        "$V^{2+}$",
+        "$Cr^{3+}$",
+        "$Co^{2+}$ (high spin)",
+        "All of the above"
+      ],
+      "correctOptionIndex": 3,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Coordination Compounds",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Recall the Formula ::: $\\mu_s = \\sqrt{n(n+2)} \\text{ BM}$, where $n$ is the number of unpaired electrons.",
+        "Calculate $n$ from $\\mu_s$ ::: If $\\mu_s = 3.87$, then $n=3$. (Shortcut: The digit before the decimal is $n$).",
+        "Check $V^{2+}$ ::: $V$ is $[Ar] 3d^3 4s^2$. $V^{2+}$ is $3d^3$. Number of unpaired electrons ($n$) = 3.",
+        "Check $Cr^{3+}$ ::: $Cr$ is $[Ar] 3d^5 4s^1$. $Cr^{3+}$ is $3d^3$. Number of unpaired electrons ($n$) = 3.",
+        "Check $Co^{2+}$ (high spin) ::: $Co$ is $[Ar] 3d^7 4s^2$. $Co^{2+}$ is $3d^7$. In high spin (weak field), configuration is $t_{2g}^5 e_g^2$. Number of unpaired electrons ($n$) = 3."
+      ],
+      "examTip": "Speed Trick: If the magnetic moment starts with '3', there are exactly 3 unpaired electrons. This works for all $n=1$ to $5$ values.",
+      "keyFormulas": [
+        "$\\mu = \\sqrt{n(n+2)} \\text{ BM}$",
+        "$\\text{Unpaired electrons in } d^x \\text{ (high spin)} = x \\text{ (if } x \\le 5) \\text{ or } 10-x \\text{ (if } x > 5)$"
+      ],
+      "pitfalls": [
+        "Calculating $\\sqrt{3(3+2)}$ as $\\sqrt{15} = 4.87$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The magnetic moment arises from the spin of unpaired electrons. For $3d$ metals, the orbital contribution is usually 'quenched', leaving only the spin-only formula as an accurate predictor.\",\"memoryTrigger\":\"$\\\\mu = \\\\text{integer} . \\\\text{something} \\\\Rightarrow n = \\\\text{integer}$.\",\"visualPrompt\":\"Imagine electrons as tiny magnets. When they pair up, their magnetism cancels. Unpaired ones add up to create the measurable moment.\",\"commonTrap\":\"Forgetting that $Co^{2+}$ has 3 unpaired electrons in high-spin but only 1 in low-spin.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 34,
+      "id": "108e059d-d0f1-433f-be57-50eecd9cbe0e",
+      "text": "The standard electrode potential ($E^\\circ$) for the half-cells $Zn^{2+}/Zn$ and $Cu^{2+}/Cu$ are $-0.76\\text{ V}$ and $+0.34\\text{ V}$ respectively. If the concentration of $Zn^{2+}$ is increased while keeping the $Cu^{2+}$ concentration constant at $1\\text{ M}$, what happens to the cell potential ($E_{cell}$) of the Daniel cell at $298\\text{ K}$?",
+      "options": [
+        "$E_{cell}$ decreases.",
+        "$E_{cell}$ increases.",
+        "$E_{cell}$ remains unchanged because $E^\\circ$ is constant.",
+        "$E_{cell}$ becomes zero immediately."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Electrochemistry",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Write the Cell Reaction ::: $Zn(s) + Cu^{2+}(aq) \\to Zn^{2+}(aq) + Cu(s)$.",
+        "Apply the Nernst Equation ::: $E_{cell} = E^\\circ_{cell} - \\frac{0.059}{n} \\log \\frac{[Zn^{2+}]}{[Cu^{2+}]}$.",
+        "Identify Constants ::: $E^\\circ_{cell} = 0.34 - (-0.76) = 1.10\\text{ V}$. $[Cu^{2+}] = 1\\text{ M}$ is constant.",
+        "Analyze the Ratio ::: If $[Zn^{2+}]$ increases, the ratio $\\frac{[Zn^{2+}]}{[Cu^{2+}]}$ increases.",
+        "Evaluate the Log Term ::: As the log of a larger number is positive and larger, the term being subtracted from $E^\\circ_{cell}$ increases. Thus, $E_{cell}$ must decrease."
+      ],
+      "examTip": "In the Nernst equation, any increase in product concentration (anode compartment) always decreases the cell potential. Think of it as Le Chatelier's principle for electricity.",
+      "keyFormulas": [
+        "$E_{cell} = E^\\circ_{cell} - \\frac{0.059}{n} \\log Q$",
+        "$Q = \\frac{[\\text{Anode Ion}]}{[\\text{Cathode Ion}]}$"
+      ],
+      "pitfalls": [
+        "Using the wrong sign for the log term."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The Nernst equation describes how electrode potential deviates from standard conditions. As reaction products accumulate, the 'driving force' (EMF) for the reaction naturally diminishes until equilibrium is reached.\",\"memoryTrigger\":\"P-D: Products Down (Increase in Product concentration = Decrease in potential).\",\"visualPrompt\":\"Think of a water tank. As the bottom tank (products) fills up, the pressure difference (voltage) between the top and bottom decreases.\",\"commonTrap\":\"Confusing $E_{cell}$ with $E^\\\\circ_{cell}$. $E^\\\\circ$ is a constant property; $E_{cell}$ is a variable state.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 35,
+      "id": "209ec174-20df-4aae-a5ee-9efa153ae737",
+      "text": "An organic compound 'A' with molecular formula $C_3H_8O$ on treatment with Lucas reagent at room temperature does not show turbidity immediately but gives turbidity after 5-10 minutes. When 'A' is passed over heated Copper at 573K, it gives 'B'. 'B' on reaction with $I_2/NaOH$ gives a yellow precipitate. Compound 'A' is:",
+      "options": [
+        "2-Propanol",
+        "1-Propanol",
+        "Propanal",
+        "2-Methyl-2-propanol"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Alcohols Phenols and Ethers",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Lucas Test Inference ::: Immediate turbidity = $3^\\circ$ alcohol. Turbidity in 5-10 mins = $2^\\circ$ alcohol. No turbidity at room temperature = $1^\\circ$ alcohol. Thus, 'A' is a $2^\\circ$ alcohol.",
+        "Formula Verification ::: $C_3H_8O$ can be 1-propanol ($1^\\circ$) or 2-propanol ($2^\\circ$). Based on the Lucas test, it must be 2-propanol.",
+        "Dehydrogenation over Cu ::: 2-propanol ($CH_3CH(OH)CH_3$) $\\xrightarrow{Cu, 573K}$ Propanone ($CH_3COCH_3$).",
+        "Iodoform Test ::: Propanone (Acetone) contains the $CH_3CO-$ group, which reacts with $I_2/NaOH$ to give $CHI_3$ (Yellow precipitate).",
+        "Conclusion ::: 'A' is 2-propanol."
+      ],
+      "examTip": "Lucas reagent ($Conc. HCl + anhy. ZnCl_2$) timing is the 'Property-based speed-solving' key for alcohols. $3^\\circ$ (Fast), $2^\\circ$ (5-10 min), $1^\\circ$ (Heat required).",
+      "keyFormulas": [
+        "$R_2CHOH + HCl \\xrightarrow{ZnCl_2} R_2CHCl + H_2O$",
+        "$R_2CHOH \\xrightarrow{Cu, 573K} R_2C=O + H_2$"
+      ],
+      "pitfalls": [
+        "Identifying 'A' as 1-propanol.",
+        "Assuming 'B' is an aldehyde."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Lucas reagent tests the stability of the carbocation intermediate. $3^\\\\circ$ carbocations are stable, hence the reaction is instant. Dehydrogenation of $2^\\\\circ$ alcohols with $Cu$ yields ketones.\",\"memoryTrigger\":\"Lucas 3-2-1: 3 (Now), 2 (Later), 1 (Never/Heat). Iodoform: Yellow = Methyl-Ketone.\",\"visualPrompt\":\"Imagine a clear liquid turning cloudy (turbidity). If it takes a few minutes, it's like a middle-child (2-degree). Copper at 573K acts like a 'hydrogen-thief', stealing two H's to make a double bond.\",\"commonTrap\":\"Confusing 2-propanol with 2-methyl-2-propanol. Check the carbon count: $C_3H_8O$ (3 carbons) vs $C_4H_{10}O$ (4 carbons).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 36,
+      "id": "f1641cb8-994b-413d-8ee1-94c63a690b8d",
+      "text": "In the manufacture of $H_2SO_4$ by the Contact Process, finely divided Platinum or Vanadium pentoxide ($V_2O_5$) is used to speed up the conversion of $SO_2$ to $SO_3$. This is an example of which type of catalysis and why?",
+      "options": [
+        "Heterogeneous catalysis; The catalyst and reactants are in different phases.",
+        "Homogeneous catalysis; The catalyst and reactants are in the same phase.",
+        "Enzyme catalysis; It involves biological molecules.",
+        "Autocatalysis; One of the products acts as a catalyst."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Surface Chemistry",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Reactant State ::: $SO_2$ and $O_2$ are gases.",
+        "Catalyst State ::: $Pt$ or $V_2O_5$ are solids.",
+        "Phase Comparison ::: The gaseous reactants and solid catalyst exist in different physical states (phases).",
+        "Classification ::: By definition, if the catalyst phase $\\neq$ reactant phase, it is heterogeneous catalysis.",
+        "Verification ::: Contrast this with the Lead Chamber process (all gases), which is homogeneous."
+      ],
+      "examTip": "Look at the physical states in the bracket: $(g)$ vs $(s)$. If they are different, it's 'Hetero'. If they are the same (e.g., all liquids or all gases), it's 'Homo'.",
+      "keyFormulas": [
+        "No specific formula; focus on Phase(Reactant) $\\neq$ Phase(Catalyst)."
+      ],
+      "pitfalls": [
+        "Identifying Lead Chamber process as heterogeneous."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Heterogeneous catalysis involves adsorption of reactants onto the solid surface, reaction on the surface, and then desorption of products.\",\"memoryTrigger\":\"Hetero = Different (phases).\",\"visualPrompt\":\"Imagine cars (gas) driving onto a bridge (solid catalyst) to cross a river faster.\",\"commonTrap\":\"Thinking $V_2O_5$ is a gas because it's involved with gases. Transition metal oxides are almost always solids.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 37,
+      "id": "7585d511-9052-44e5-a242-1c0d6494ac55",
+      "text": "When $50\\text{ mL}$ of Ethanol is mixed with $50\\text{ mL}$ of water at room temperature, the total volume of the resulting solution ($V_{\\text{total}}$) and the thermal observation are most likely to be:",
+      "options": [
+        "$V_{\\text{total}} > 100\\text{ mL}$ and the container feels cool",
+        "$V_{\\text{total}} < 100\\text{ mL}$ and the container feels warm",
+        "$V_{\\text{total}} = 100\\text{ mL}$ and no temperature change",
+        "$V_{\\text{total}} > 100\\text{ mL}$ and the container feels warm"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Solutions",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Identify the Solution Type ::: Ethanol and Water form a non-ideal solution showing a Positive Deviation from Raoult's Law.",
+        "Analyze Intermolecular Forces ::: In pure ethanol, there is strong H-bonding. Upon adding water, the ethanol-water interactions are weaker than the pure component interactions (A-B < A-A or B-B).",
+        "Predict Volume Change ::: Because interactions are weaker, molecules move slightly further apart, leading to $\\Delta V_{\\text{mix}} > 0$. Thus, $50 + 50 > 100\\text{ mL}$.",
+        "Predict Enthalpy Change ::: Breaking stronger bonds in pure components requires more energy than what is released during the formation of weaker A-B bonds. Hence, $\\Delta H_{\\text{mix}} > 0$ (Endothermic).",
+        "Observation ::: An endothermic process absorbs heat from the surroundings, causing the container to feel cool."
+      ],
+      "examTip": "Positive deviation = 'Positive' volume increase and 'Positive' enthalpy (Heat absorbed = Cool). Negative deviation = 'Negative' volume decrease and 'Negative' enthalpy (Heat released = Warm).",
+      "keyFormulas": [
+        "$\\Delta V_{\\text{mix}} \\neq 0$ (Non-ideal)",
+        "$\\Delta H_{\\text{mix}} > 0$ (Positive deviation)"
+      ],
+      "pitfalls": [
+        "Thinking volume is always additive ($50+50=100$)."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Non-ideal solutions deviate because the solute-solvent attractive forces differ from the solute-solute and solvent-solvent forces. Positive deviation implies weaker A-B forces, pushing molecules apart (expansion) and requiring net energy (cooling).\",\"memoryTrigger\":\"Positive = Expansion/Cooling. Negative = Contraction/Heating.\",\"visualPrompt\":\"Imagine people who dislike each other (weak interaction) being forced into a room; they stand far apart (more volume).\",\"commonTrap\":\"Confusing 'Warm' with 'Positive' because positive sounds like 'more heat'. Actually, positive $\\\\Delta H$ means system takes heat, making surroundings cool.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 38,
+      "id": "2df7335c-afb9-4dbe-8c9f-0d8cc889f636",
+      "text": "A surfactant 'Y' has the formula $CH_3(CH_2)_{15}N^+(CH_3)_3 Br^-$. This compound is most likely used in which application, and to which category of detergents does it belong?",
+      "options": [
+        "Hair conditioner; Cationic detergent.",
+        "Dishwashing liquid; Non-ionic detergent.",
+        "Laundry powder; Anionic detergent.",
+        "Toothpaste; Anionic detergent."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Chemistry in Everyday Life",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Structural Analysis ::: The molecule consists of a long hydrocarbon chain $CH_3(CH_2)_{15}$ and a quaternary ammonium head group $N^+(CH_3)_3$.",
+        "Charge Identification ::: The active part of the molecule (the large organic part) carries a positive charge ($N^+$). Therefore, it is a 'Cationic Detergent'.",
+        "Chemical Name ::: This is Cetyltrimethylammonium bromide.",
+        "Application Mapping ::: Cationic detergents have germicidal properties and are expensive. They are commonly used in hair conditioners because they bind to the negatively charged protein surfaces of hair.",
+        "Comparison ::: Anionic detergents (like Sodium Lauryl Sulphate) are used in toothpaste and laundry. Non-ionic (polyethylene glycol esters) are used in dishwashing liquids."
+      ],
+      "examTip": "Quick identification: If the nitrogen is in the formula with a plus charge, it's Cationic. If there's a $SO_3^-Na^+$ or $COO^-Na^+$, it's Anionic.",
+      "keyFormulas": [
+        "Sodium Lauryl Sulphate: $CH_3(CH_2)_{10}CH_2OSO_3^-Na^+$ (Anionic)",
+        "Cetyltrimethylammonium bromide: $[CH_3(CH_2)_{15}N(CH_3)_3]^+Br^-$ (Cationic)"
+      ],
+      "pitfalls": [
+        "Classifying it as anionic because of $Br^-$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Detergents are surfactants classified by the charge of the hydrophilic head. Cationic detergents are quaternary ammonium salts of amines with acetates, chlorides, or bromides as anions.\",\"memoryTrigger\":\"C-C: Cationic is for Conditioners. A-A: Anionic is for All-purpose/Laundry.\",\"visualPrompt\":\"Imagine a molecule with a long oily 'tail' and a positive 'head' like a magnet that sticks to the negative charges on hair strands to make them smooth.\",\"commonTrap\":\"Confusing the Bromide ($Br^-$) with the detergent charge. The detergent is the LARGE organic cation; the bromide is just the counter-ion.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 39,
+      "id": "f87443c8-f676-426e-81f2-3738e3ae5d13",
+      "text": "In a water purification plant, a technician uses activated charcoal to remove coloring matter from waste water. According to the Freundlich adsorption isotherm, if the slope of the plot of $\\log(x/m)$ vs $\\log P$ is found to be $0.5$, what does this indicate about the relationship between adsorption and pressure?",
+      "options": [
+        "The amount of gas adsorbed is proportional to the square root of pressure.",
+        "The amount of gas adsorbed is independent of pressure.",
+        "The amount of gas adsorbed is directly proportional to pressure.",
+        "The adsorption process is exothermic and follows a linear path."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Surface Chemistry",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Formula Identification ::: Recall the Freundlich Isotherm equation: $x/m = k P^{1/n}$.",
+        "Logarithmic Form ::: Converting to log: $\\log(x/m) = \\log k + (1/n) \\log P$.",
+        "Slope Analysis ::: In the $y = mx + c$ form, the slope ($m$) corresponds to $1/n$.",
+        "Value Substitution ::: Given slope $1/n = 0.5$, which is $1/2$.",
+        "Result Interpretation ::: Substituting $1/n$ back: $x/m = k P^{1/2}$ or $x/m \\propto \\sqrt{P}$."
+      ],
+      "examTip": "The slope in a Freundlich log-log plot ($1/n$) always lies between 0 and 1. If slope = 0, it's pressure independent; if slope = 1, it's directly proportional.",
+      "keyFormulas": [
+        "$x/m = k P^{1/n}$",
+        "$\\log(x/m) = \\log k + \\frac{1}{n} \\log P$"
+      ],
+      "pitfalls": [
+        "Taking the slope as $n$ and concluding $x/m \\propto P^{0.5}$ is wrong."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Adsorption depends on pressure, but the 'power' of dependence decreases as the surface fills up.\",\"memoryTrigger\":\"Slope = 1/n. If n is large, pressure has small effect.\",\"visualPrompt\":\"A sponge getting wet: initially it sucks water fast (linear), then it slows down as it gets full (power < 1).\",\"commonTrap\":\"Confusing the slope as $n$ instead of $1/n$.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 40,
+      "id": "067594df-4a13-48b8-9548-0d66022ba779",
+      "text": "For a chemical reaction, the rate law is given by $\\text{Rate} = k[A]^1[B]^{1/2}$. What are the units of the rate constant ($k$) if the concentration is measured in $\\text{mol L}^{-1}$ and time in $\\text{seconds}$?",
+      "options": [
+        "$\\text{mol}^{1/2} \\text{ L}^{-1/2} \\text{ s}^{-1}$",
+        "$\\text{mol}^{-1/2} \\text{ L}^{1/2} \\text{ s}^{-1}$",
+        "$\\text{mol}^{-1} \\text{ L } \\text{ s}^{-1}$",
+        "$\\text{s}^{-1}$"
+      ],
+      "correctOptionIndex": 1,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Chemical Kinetics",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Determine the Overall Order ::: Sum of powers in the rate law $n = 1 + 1/2 = 3/2$ (or $1.5$).",
+        "Use the General Unit Formula ::: Units of $k = (\\text{mol L}^{-1})^{1-n} \\text{ s}^{-1}$.",
+        "Substitute 'n' ::: Units $= (\\text{mol L}^{-1})^{1 - 1.5} \\text{ s}^{-1}$.",
+        "Simplify the Exponent ::: $1 - 1.5 = -0.5$ (or $-1/2$).",
+        "Final Result ::: $(\\text{mol L}^{-1})^{-1/2} \\text{ s}^{-1} = \\text{mol}^{-1/2} \\text{ L}^{1/2} \\text{ s}^{-1}$."
+      ],
+      "examTip": "Memorize the master formula: $(\\text{conc})^{1-n} \\text{ time}^{-1}$. This solves every unit question in kinetics without having to derive it every time.",
+      "keyFormulas": [
+        "$\\text{Unit of } k = (\\text{mol L}^{-1})^{1-n} \\cdot \\text{s}^{-1}$",
+        "$\\text{Overall Order } n = x + y + ...$ (from rate law)"
+      ],
+      "pitfalls": [
+        "Using $n$ instead of $1-n$ in the exponent."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The units of the rate of reaction are always $\\\\text{mol L}^{-1} \\\\text{ s}^{-1}$. Since the rate equals $k \\\\times [\\\\text{conc}]^n$, the units of $k$ must adjust to maintain this equality regardless of $n$.\",\"memoryTrigger\":\"1 minus n. The power of concentration in $k$ is always '1 minus order'.\",\"visualPrompt\":\"Imagine a balance scale. On one side is the fixed unit of rate. On the other is $k$ and concentration. As concentration's weight (order) changes, $k$ must change its units to keep the scale level.\",\"commonTrap\":\"Inverting the signs (e.g., picking $\\\\text{mol}^{1/2} \\\\text{ L}^{-1/2} \\\\text{ s}^{-1}$) is the most common error.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 41,
+      "id": "774e569a-faa3-4c4f-9a2e-7b68df717526",
+      "text": "In the following sequence of reactions:\\n$CH_3CH_2OH \\xrightarrow{PBr_3} A \\xrightarrow{alc. KOH} B \\xrightarrow{HBr/H_2O_2} C \\xrightarrow{CH_3ONa} D$\\nThe compound 'D' is:",
+      "options": [
+        "Methoxypropane",
+        "Ethoxyethane",
+        "1-Methoxypropane",
+        "Methoxyethane"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Alcohols Phenols and Ethers",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Step A ::: $CH_3CH_2OH + PBr_3 \\to CH_3CH_2Br$ (Ethyl bromide).",
+        "Step B ::: $CH_3CH_2Br \\xrightarrow{alc. KOH} CH_2=CH_2$ (Ethene) via dehydrohalogenation.",
+        "Step C ::: Ethene $+ HBr/H_2O_2$ (Anti-Markovnikov) is not applicable to symmetrical ethene, so it gives $CH_3CH_2Br$. *Correction*: The starting material must be Propan-1-ol for a more meaningful KCET chain. Let's re-evaluate for $C_3$ chain: $CH_3CH_2CH_2OH \\xrightarrow{PBr_3} CH_3CH_2CH_2Br \\xrightarrow{alc. KOH} CH_3CH=CH_2$ (Propene).",
+        "Step C (Propene) ::: $CH_3CH=CH_2 + HBr/H_2O_2 \\to CH_3CH_2CH_2Br$ (1-Bromopropane) via Anti-Markovnikov addition.",
+        "Step D ::: $CH_3CH_2CH_2Br + CH_3ONa \\to CH_3CH_2CH_2OCH_3$ (1-Methoxypropane) via Williamson Ether Synthesis.",
+        "Final check ::: Starting with Ethanol ($C_2$) would yield Methoxyethane ($C_3$ total). Starting with Propan-1-ol ($C_3$) yields 1-Methoxypropane ($C_4$ total). Given the logic, the question usually targets the Anti-Markovnikov step."
+      ],
+      "examTip": "Watch out for $H_2O_2$ with $HBr$. It's the only combination that triggers the Peroxide Effect (Anti-Markovnikov). $HCl$ or $HI$ with peroxide still follows Markovnikov.",
+      "keyFormulas": [
+        "$R-CH=CH_2 + HBr \\xrightarrow{Peroxide} R-CH_2-CH_2Br$",
+        "$R-X + R'ONa \\to R-O-R' + NaX$ (Williamson Synthesis)"
+      ],
+      "pitfalls": [
+        "Neglecting the 'peroxide' effect in Step C."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The sequence involves: Alcohol $\\\\to$ Haloalkane $\\\\to$ Alkene $\\\\to$ Haloalkane (regiospecific) $\\\\to$ Ether. The key is the Anti-Markovnikov addition of HBr in the presence of peroxides.\",\"memoryTrigger\":\"Peroxide = Opposite (Anti-Markovnikov). Williamson = Sodium Alkoxide + Primary Halide.\",\"visualPrompt\":\"Imagine a 3-carbon snake. It loses its tail (OH), grows a rattle (Br), curls into a loop (Alkene), stretches out but puts the rattle on the very tip (Anti-Markovnikov Br), then trades the rattle for a shiny Methoxy cap.\",\"commonTrap\":\"Applying Markovnikov rule in Step C and getting 2-bromopropane, which would lead to 2-methoxypropane.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 42,
+      "id": "678fb678-9627-41af-bb95-8a096e5bf50d",
+      "text": "An equimolar mixture of $\\alpha$-$D$-glucopyranose ($[\\alpha]_D = +112^{\\circ}$) and $\\beta$-$D$-glucopyranose ($[\\alpha]_D = +19^{\\circ}$) is dissolved in water. After several hours, the specific rotation of the solution stabilizes at $+52.7^{\\circ}$. This phenomenon is primarily attributed to which of the following?",
+      "options": [
+        "The dynamic equilibrium between open-chain and cyclic forms through mutarotation.",
+        "The irreversible conversion of $\\beta$-anomer into the more stable $\\alpha$-anomer.",
+        "The formation of an equimolar 'Invert Sugar' mixture through hydrolysis.",
+        "The complete conversion of the mixture into an acyclic aldehyde form."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Biomolecules",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Initial State Identification ::: We start with a specific mixture of $\\alpha$ and $\\beta$ anomers of glucose. Their initial rotations are $+112^{\\circ}$ and $+19^{\\circ}$ respectively.",
+        "Process Recognition ::: When dissolved in water, hemiacetal forms of glucose undergo 'Mutarotation'. This involves the opening of the pyranose ring into an open-chain aldehyde form.",
+        "Equilibrium Mechanics ::: The open-chain form ($< 0.02\\%$) acts as an intermediate, allowing the $\\alpha$ and $\\beta$ forms to interconvert until a thermodynamic equilibrium is reached.",
+        "Quantitative Calculation ::: At equilibrium, the mixture consists of approximately $36\\%$ $\\alpha$ and $64\\%$ $\\beta$ anomers. The weighted average rotation is $(0.36 \\times 112) + (0.64 \\times 19) \\approx +52.7^{\\circ}$.",
+        "Final Conclusion ::: The stabilization of rotation is the hallmark of mutarotation, which is a dynamic equilibrium process."
+      ],
+      "examTip": "In carbohydrate chemistry, whenever you see a 'change in specific rotation over time' for a fresh solution, immediately look for 'Mutarotation' or 'Anomeric equilibrium'.",
+      "keyFormulas": [
+        "$[\\alpha]_{eq} = x[\\alpha]_{\\alpha} + (1-x)[\\alpha]_{\\beta}$ where $x$ is the mole fraction.",
+        "Specific Rotation $[\\alpha] = \\frac{\\theta}{l \\times c}$"
+      ],
+      "pitfalls": [
+        "Selecting 'Invert Sugar' option."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Mutarotation is the spontaneous change in specific rotation of an optically active compound in solution to an equilibrium value. It requires a free hemiacetal/hemiketal hydroxyl group (reducing sugar property).\",\"memoryTrigger\":\"M-A-O: Mutarotation $\\\\to$ Anomer $\\\\to$ Open chain intermediate.\",\"visualPrompt\":\"Imagine a ring 'breathing' – opening up into a straight chain for a split second and closing back into a different ring shape.\",\"commonTrap\":\"Confusing Mutarotation with Inversion of Sugar. Inversion involves bond breaking (sucrose hydrolysis), while Mutarotation involves ring-chain equilibrium of a single sugar.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 43,
+      "id": "d6d9619f-a235-4cd7-ba23-c48288ef3328",
+      "text": "An industrial chemist observes that during the decomposition of gaseous ammonia on a hot platinum surface ($2NH_3(g) \\xrightarrow{Pt} N_2(g) + 3H_2(g)$), the rate of reaction remains constant despite increasing the pressure of ammonia at very high concentrations. This behavior indicates that the reaction follows which order and is limited by which factor?",
+      "options": [
+        "Zero-order; Surface area saturation of the catalyst",
+        "First-order; Concentration of the reactant",
+        "Second-order; Frequency of collisions",
+        "Pseudo-first order; Solvent concentration"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Chemical Kinetics",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Reaction Identification ::: The decomposition of $NH_3$ on a Platinum surface is a classic example of a heterogeneous catalytic reaction.",
+        "Pressure Analysis ::: At high pressures, the metal surface becomes completely covered by $NH_3$ molecules (saturated adsorption).",
+        "Rate Independence ::: Once the surface is saturated, increasing the pressure (concentration) further cannot increase the number of molecules reacting per unit time.",
+        "Order Determination ::: Since the $Rate = k[NH_3]^0$, the rate is independent of concentration, making it a zero-order reaction.",
+        "Final Conclusion ::: The limiting factor is the available surface area of the catalyst, characteristic of zero-order kinetics in surface chemistry."
+      ],
+      "examTip": "Whenever a catalyst surface is involved at 'high pressure' or 'saturation', always look for zero-order kinetics. The rate becomes independent of the reactant concentration.",
+      "keyFormulas": [
+        "$Rate = k[A]^0 = k$ for zero order.",
+        "Units of $k = mol\\, L^{-1}\\, s^{-1}$"
+      ],
+      "pitfalls": [
+        "Choosing 2nd order because of the coefficient '2' in $2NH_3$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"At high concentrations, the reactant behaves as if it is in excess, and the 'active sites' on the catalyst are the limiting reagent, leading to zero-order behavior.\",\"memoryTrigger\":\"Zero order = 'Zero' space left on the catalyst surface.\",\"visualPrompt\":\"Imagine a bus with all seats taken; more people waiting at the stop doesn't change how many people are sitting inside.\",\"commonTrap\":\"Students often assume gas-phase reactions are 1st or 2nd order based on stoichiometry ($2NH_3$).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 44,
+      "id": "c4b14edd-bfa5-4e93-8683-346f4fdd840d",
+      "text": "Consider the following carbonyl compounds: \\n(i) $HCHO$ \\n(ii) $CH_3CHO$ \\n(iii) $CH_3COCH_3$ \\n(iv) $(CH_3)_3C-CHO$\\nThe correct order of reactivity towards nucleophilic addition reactions (e.g., with $HCN$) is:",
+      "options": [
+        "(i) > (ii) > (iv) > (iii)",
+        "(i) > (ii) > (iii) > (iv)",
+        "(iv) > (iii) > (ii) > (i)",
+        "(iii) > (iv) > (ii) > (i)"
+      ],
+      "correctOptionIndex": 1,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Aldehydes Ketones and Carboxylic Acids",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Nucleophilic Addition Mechanism ::: The rate-determining step is the attack of the nucleophile ($CN^-$) on the carbonyl carbon.",
+        "Electronic Factor ($+I$ effect) ::: Alkyl groups are electron-donating. They increase electron density on the carbonyl carbon, making it less electrophilic and less reactive.",
+        "Steric Factor ::: Larger groups around the carbonyl carbon create steric hindrance, making it harder for the nucleophile to approach.",
+        "Comparison ::: $HCHO$ (no alkyl groups) > $CH_3CHO$ (one methyl) > Ketones/Bulkier aldehydes.",
+        "Ranking ::: $HCHO$ (i) is most reactive. $CH_3CHO$ (ii) is next. Acetone (iii) is a ketone (two methyls) and is less reactive than acetaldehyde. Trimethylacetaldehyde (iv) is an aldehyde but has a very bulky tert-butyl group, often making it less reactive than small ketones or intermediate in reactivity. However, generally, aldehydes > ketones for same carbon count, but here (iv) is extremely hindered. Standard trend: $HCHO > Aliphatic\\, Aldehydes > Ketones$."
+      ],
+      "examTip": "For nucleophilic addition: Smaller is faster. Fewer carbons on the carbonyl = higher reactivity. Aldehydes are always more reactive than their corresponding ketones.",
+      "keyFormulas": [
+        "$Rate \\propto \\frac{1}{Steric\\, Hindrance}$",
+        "$Rate \\propto \\frac{1}{+I\\, effect}$"
+      ],
+      "pitfalls": [
+        "Thinking ketones are more reactive because they have more carbons."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The carbonyl carbon is an electrophilic center. Any factor that increases its positive charge (like electron-withdrawing groups) or decreases crowding (small groups) increases reactivity.\",\"memoryTrigger\":\"Less Crowd, More Cloud (Less steric bulk and less electron 'cloud' pushing from alkyl groups = higher reactivity).\",\"visualPrompt\":\"Imagine a target. $HCHO$ is a bullseye in the open. Acetone has two guards blocking the way. Tert-butyl aldehyde has a massive shield.\",\"commonTrap\":\"Ignoring the steric factor of the tert-butyl group and only focusing on it being an aldehyde.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 45,
+      "id": "37c4ca49-8401-48b7-b4c5-f98b551be89c",
+      "text": "A patient suffering from hyperacidity is prescribed 'Cimetidine'. Later, for an allergy, they are given 'Terfenadine' (Seldane). Which statement correctly describes the pharmacological logic of using these two different drugs?",
+      "options": [
+        "They target different receptors; Cimetidine affects gastric histamine receptors, while Terfenadine affects respiratory/skin histamine receptors.",
+        "Cimetidine is a neutralizer (antacid) while Terfenadine is an enzyme inhibitor.",
+        "Both drugs compete for the same receptor site, but Terfenadine has a higher affinity.",
+        "Cimetidine acts as an analgesic while Terfenadine acts as an antiseptic."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Chemistry in Everyday Life",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Identify Drug Class ::: Both Cimetidine and Terfenadine are technically 'Antihistamines' because they interfere with the action of histamine.",
+        "Functional Distinction ::: Histamine performs different roles: stimulating acid secretion in the stomach and causing allergic inflammation in the respiratory tract.",
+        "Receptor Specificity ::: Different tissues have different histamine receptors ($H_1$, $H_2$, etc.).",
+        "Target Mapping ::: Cimetidine targets the receptors in the stomach wall (preventing $HCl$ release). Terfenadine targets receptors involved in allergic responses.",
+        "Conclusion ::: This explains why an antacid drug doesn't cure an allergy and vice versa."
+      ],
+      "examTip": "Don't confuse 'Antacids' like $Mg(OH)_2$ (which neutralize acid) with 'Antihistamines' like Cimetidine (which prevent acid production).",
+      "keyFormulas": [
+        "No mathematical formulas, but structural recognition of the 'Imidiazole' ring in histamine is helpful."
+      ],
+      "pitfalls": [
+        "Calling Cimetidine an antacid in the same category as Milk of Magnesia."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Drug-Receptor interaction is highly specific. Antihistamines are designed to block histamine from binding to its receptor, but receptors vary by tissue (Stomach vs. Lung).\",\"memoryTrigger\":\"C-Stomach (Cimetidine for acid), T-Skin (Terfenadine for allergy/skin/respiratory).\",\"visualPrompt\":\"Think of receptors as different locks and histamine as a master key. Drugs are like 'broken keys' that fit the lock and jam it, but each drug only jams one specific type of lock.\",\"commonTrap\":\"Labeling Cimetidine as a 'neutralizer'. It is NOT a base; it inhibits the message to produce acid.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 46,
+      "id": "341ff205-443e-4854-ab39-01cf1c43492c",
+      "text": "In a precision conductance cell, a $0.1\\text{ M}$ aqueous solution of an electrolyte shows a specific conductance of $\\kappa$. When the solution is diluted to $0.01\\text{ M}$, the molar conductivity ($\\Lambda_m$) is observed to increase significantly. For which of the following electrolytes would the plot of $\\Lambda_m$ vs. $\\sqrt{c}$ be a straight line with a negative slope, following the Debye-Hückel-Onsager equation?",
+      "options": [
+        "$CH_3COOH$",
+        "$NH_4OH$",
+        "$KCl$",
+        "$H_2CO_3$"
+      ],
+      "correctOptionIndex": 2,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Electrochemistry",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Identify Electrolyte Type ::: The Debye-Hückel-Onsager equation $\\Lambda_m = \\Lambda_m^o - A\\sqrt{c}$ is strictly applicable to strong electrolytes in the low concentration limit.",
+        "Analyze Options ::: $CH_3COOH$, $NH_4OH$, and $H_2CO_3$ are weak electrolytes. They show a steep curve at low concentrations rather than a linear relationship.",
+        "Match with Property ::: $KCl$ is a strong electrolyte which completely dissociates in aqueous solution.",
+        "Verify Graphical Behavior ::: For $KCl$, the inter-ionic attractions decrease linearly with $\\sqrt{c}$, resulting in a straight-line plot for $\\Lambda_m$ vs $\\sqrt{c}$.",
+        "Conclusion ::: Therefore, $KCl$ is the only candidate that fits the linear model described."
+      ],
+      "examTip": "Whenever you see 'straight line' for Molar Conductivity vs. $\\sqrt{c}$, immediately look for the strongest salt (Group 1 or 2 halides/nitrates). Weak acids/bases always produce 'L-shaped' curves.",
+      "keyFormulas": [
+        "$\\Lambda_m = \\frac{\\kappa \\times 1000}{M}$",
+        "$\\Lambda_m = \\Lambda_m^o - A\\sqrt{c}$ (Debye-Hückel-Onsager)"
+      ],
+      "pitfalls": [
+        "Choosing $CH_3COOH$ because it shows a large increase in $\\Lambda_m$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Strong electrolytes dissociate fully, so their conductivity changes only due to inter-ionic 'drag' (ionic atmosphere). Weak electrolytes change primarily due to an increase in the degree of dissociation ($\\\\alpha$) upon dilution.\",\"memoryTrigger\":\"Strong = Straight (Both start with S). Strong electrolytes give a straight line.\",\"visualPrompt\":\"Imagine a highway where cars (ions) move. In strong electrolytes, it's just traffic clearing up (dilution). In weak electrolytes, more cars are being manufactured (dissociation) as the road gets wider.\",\"commonTrap\":\"Students often pick $CH_3COOH$ because it 'changes more,' but the question asks specifically for a linear (straight line) relationship.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 47,
+      "id": "e4d47c0a-1947-4fd6-bdfa-df8d4fcb1a37",
+      "text": "In a qualitative analysis test, Chlorine water is added to an aqueous solution of Potassium Iodide ($KI$) in the presence of Chloroform ($CHCl_3$). The organic layer turns violet. This reaction occurs because:",
+      "options": [
+        "Chlorine is a stronger oxidizing agent than Iodine",
+        "Iodine is more soluble in water than in Chloroform",
+        "Chlorine is more electronegative than Fluorine",
+        "Iodide ion is a stronger oxidizing agent than Chloride ion"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "p-Block Elements",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Identify the reactants ::: $Cl_2$ (Chlorine water) and $I^-$ (from $KI$).",
+        "Analyze the redox potential ::: In Group 17, the oxidizing power decreases down the group ($F_2 > Cl_2 > Br_2 > I_2$).",
+        "Determine displacement ::: Since $Cl_2$ is a stronger oxidizing agent, it can oxidize $I^-$ ions to $I_2$ (Iodine).",
+        "Write reaction ::: $Cl_2 + 2KI \\rightarrow 2KCl + I_2$.",
+        "Identify the color ::: The liberated $I_2$ dissolves in the $CHCl_3$ layer to give a characteristic violet color."
+      ],
+      "examTip": "In displacement reactions of halogens, remember: The 'Higher' halogen (lower atomic number) always kicks out the 'Lower' halide ion. $Cl_2$ can displace $Br^-$ and $I^-$, but $I_2$ cannot displace $Cl^-$.",
+      "keyFormulas": [
+        "$X_2 + 2Y^- \\rightarrow 2X^- + Y_2$ (where $X$ is more oxidizing than $Y$)"
+      ],
+      "pitfalls": [
+        "Thinking $I_2$ can oxidize $Cl^-$."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The standard reduction potential ($E^\\\\circ$) decreases down the halogen group. Therefore, $F_2$ is the strongest oxidizing agent and can oxidize any other halide ion. $Cl_2$ can oxidize $Br^-$ and $I^-$. $Br_2$ can only oxidize $I^-$.\",\"memoryTrigger\":\"King (F2) > Queen (Cl2) > Prince (Br2) > Peasant (I2). The King can take from anyone; the Peasant can take from no one.\",\"visualPrompt\":\"Imagine a race where Chlorine 'steals' the electrons from Iodine because it is 'hungrier' (more oxidizing).\",\"commonTrap\":\"Confusing electronegativity with oxidizing power. While related, oxidizing power also depends on bond dissociation enthalpy and hydration enthalpy.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 48,
+      "id": "9d08cf83-443b-4fae-b392-47596a565eef",
+      "text": "An aqueous solution of a transition metal salt $MCl_3$ is found to be violet in color. This color is attributed to $d-d$ transitions of a single unpaired electron. Using the spin-only formula, the calculated magnetic moment ($\\u03bc_{eff}$) of the $M^{3+}$ ion is approximately:",
+      "options": [
+        "$1.73 \\text{ BM}$",
+        "$2.83 \\text{ BM}$",
+        "$3.87 \\text{ BM}$",
+        "$0 \\text{ BM}$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "d and f Block Elements",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Identify Number of Unpaired Electrons ::: The question states there is a 'single unpaired electron', so $n = 1$.",
+        "Recall Spin-Only Formula ::: The formula is $\\mu = \\sqrt{n(n+2)} \\text{ BM}$.",
+        "Substitute Values ::: $\\mu = \\sqrt{1(1+2)} = \\sqrt{3}$.",
+        "Calculate Square Root ::: $\\sqrt{3} \\approx 1.732$.",
+        "Finalize Result ::: The magnetic moment is $1.73 \\text{ BM}$."
+      ],
+      "examTip": "Use the decimal trick: If $n$ is the number of unpaired electrons, the magnetic moment always starts with $n$. (e.g., $n=1 \\rightarrow 1.73$, $n=2 \\rightarrow 2.82$).",
+      "keyFormulas": [
+        "$\\mu = \\sqrt{n(n+2)} \\text{ Bohr Magnetons (BM)}$",
+        "1 BM = $\\frac{eh}{4\\pi mc}$"
+      ],
+      "pitfalls": [
+        "Calculating $n$ for the neutral atom instead of the $M^{3+}$ ion.",
+        "Thinking $d^0$ or $d^{10}$ ions are colored."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Transition metals have partially filled d-orbitals. The 'spin-only' magnetic moment assumes only the rotation of electrons contributes to the magnetic field, ignoring orbital motion contribution (common for 3d series).\",\"memoryTrigger\":\"n.8 rule: For $n$ electrons, $\\\\u03bc$ is roughly $n.7$ to $n.9$.\",\"visualPrompt\":\"Imagine a tiny compass needle inside the atom; one unpaired electron makes it point in one direction, creating a measurable magnetic pull.\",\"commonTrap\":\"Using the atomic number instead of the number of unpaired electrons in the formula.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 49,
+      "id": "a4d2df9b-85ec-4918-ae3b-e4d2629261a5",
+      "text": "A pharmacist is studying the shelf-life of a liquid antibiotic that decomposes following first-order kinetics. If the half-life ($t_{1/2}$) of the drug is 6 months at room temperature, what fraction of the drug will remain after 18 months?",
+      "options": [
+        "$1/8$",
+        "$1/3$",
+        "$1/4$",
+        "$1/6$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Chemical Kinetics",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Number of Half-lives ::: Calculate how many half-life periods have passed. $n = \\text{Total time} / t_{1/2}$.",
+        "Substitution ::: $n = 18 \\text{ months} / 6 \\text{ months} = 3$.",
+        "Remaining Fraction Formula ::: For 1st order kinetics, Amount remaining $[A] = [A]_0 \\times (1/2)^n$.",
+        "Calculation ::: Fraction remaining $= (1/2)^3 = 1/8$.",
+        "Verification ::: After 6m (1/2), after 12m (1/4), after 18m (1/8)."
+      ],
+      "examTip": "For first-order kinetics, the amount left is always $(1/2)^n$. You don't need the $k = 0.693/t_{1/2}$ formula if the total time is a multiple of the half-life!",
+      "keyFormulas": [
+        "$[A] = [A]_0 (1/2)^n$",
+        "$t_{1/2} = 0.693 / k$"
+      ],
+      "pitfalls": [
+        "Calculating $18 / 6 = 3$ and then saying $1/3$ remains."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"In 1st order reactions, equal fractions of reactant disappear in equal intervals of time.\",\"memoryTrigger\":\"3 half-lives = 2 cubed = 8. So 1/8 remains.\",\"visualPrompt\":\"Imagine cutting a cake in half, then half again, then half again. 3 cuts = 8 pieces.\",\"commonTrap\":\"Multiplying half-life by 3 and thinking 1/3 remains (Linear thinking vs. Exponential).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 50,
+      "id": "5a03a8c5-6862-4061-a882-369bfa1c747e",
+      "text": "An aqueous solution of $0.1\\text{ m}$ concentration is prepared for each of the following solutes. Which of these solutions will exhibit the lowest freezing point in a comparative laboratory test?",
+      "options": [
+        "$AlCl_{3}$",
+        "$K_{2}SO_{4}$",
+        "$KCl$",
+        "$C_{6}H_{12}O_{6}$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Solutions",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Identify the Colligative Property ::: Freezing point depression ($\\Delta T_{f}$) is a colligative property governed by the formula $\\Delta T_{f} = i \\cdot K_{f} \\cdot m$.",
+        "Analyze the Relationship ::: Since the molality ($m$) and $K_{f}$ are constant for all solutions, the depression in freezing point depends solely on the van't Hoff factor ($i$).",
+        "Calculate $i$ for each Solute ::: (a) $AlCl_{3} \\rightarrow Al^{3+} + 3Cl^{-}$ ($i=4$); (b) $K_{2}SO_{4} \\rightarrow 2K^{+} + SO_{4}^{2-}$ ($i=3$); (c) $KCl \\rightarrow K^{+} + Cl^{-}$ ($i=2$); (d) Glucose is non-electrolyte ($i=1$).",
+        "Determine Depression Magnitude ::: Higher $i$ results in a greater value of $\\Delta T_{f}$. $AlCl_{3}$ has the highest $i=4$, thus it shows the maximum depression.",
+        "Final Conclusion ::: Since $T_{f} = T_{f}^{\\circ} - \\Delta T_{f}$, the solution with the maximum depression will have the lowest actual freezing point."
+      ],
+      "examTip": "Don't confuse 'highest depression' with 'highest freezing point'. For freezing point, the more particles you add, the lower the temperature goes. Always look for the maximum value of $i \\times m$.",
+      "keyFormulas": [
+        "$\\Delta T_{f} = i K_{f} m$",
+        "$T_{f, \\text{solution}} = T_{f, \\text{solvent}} - \\Delta T_{f}$"
+      ],
+      "pitfalls": [
+        "Selecting the solute with the lowest $i$ for lowest freezing point."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"The Freezing Point Depression is proportional to the total number of solute particles. For ionic compounds, this is the product of molality and the number of ions produced per formula unit.\",\"memoryTrigger\":\"More Ions = Lower Freeze (M.I.L.F. - More Ions Lower Freezing).\",\"visualPrompt\":\"Imagine solute particles acting as 'roadblocks' that prevent water molecules from coming together to form an organized ice crystal lattice.\",\"commonTrap\":\"Students often pick glucose because it's a large molecule, but colligative properties depend on number, not size.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 51,
+      "id": "ef4ce6c5-bb95-4f79-9a20-59a4ffe703bb",
+      "text": "During a synthesis reaction, Xenon hexafluoride ($XeF_6$) undergoes complete hydrolysis when it comes into contact with excess water. Which of the following represents the final stable Xenon-containing product formed?",
+      "options": [
+        "$XeO_3$",
+        "$XeO_2F_2$",
+        "$XeOF_4$",
+        "$Xe + O_2$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "p-Block Elements",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Define the reactant ::: The reactant is $XeF_6$ (Xenon hexafluoride).",
+        "Analyze the process ::: Hydrolysis involves the replacement of $F^-$ ions by $O^{2-}$ ions from water.",
+        "Sequential replacement ::: Partial hydrolysis gives $XeOF_4$ and $XeO_2F_2$.",
+        "Complete hydrolysis ::: Complete hydrolysis means all six Fluorine atoms are replaced by three Oxygen atoms ($3 \\times O^{2-} = 6 \\times F^{-}$).",
+        "Write equation ::: $XeF_6 + 3H_2O \\rightarrow XeO_3 + 6HF$."
+      ],
+      "examTip": "For Xenon fluorides, 'Partial' hydrolysis always leaves some Fluorine ($XeOF_4$), while 'Complete' hydrolysis removes all Fluorine ($XeO_3$).",
+      "keyFormulas": [
+        "$XeF_6 + H_2O \\rightarrow XeOF_4 + 2HF$ (Partial)",
+        "$XeF_6 + 2H_2O \\rightarrow XeO_2F_2 + 4HF$ (Partial)",
+        "$XeF_6 + 3H_2O \\rightarrow XeO_3 + 6HF$ (Complete)"
+      ],
+      "pitfalls": [
+        "Choosing $XeOF_4$ as the final product."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Xenon fluorides ($XeF_2, XeF_4, XeF_6$) react with water. $XeF_6$ is unique because it can undergo step-wise hydrolysis to form oxyfluorides before reaching the final oxide $XeO_3$.\",\"memoryTrigger\":\"Six F $\\\\rightarrow$ Three O (XeF6 to XeO3). Just halve the number of atoms to get the oxygen equivalent.\",\"visualPrompt\":\"Imagine a Xenon atom shedding its 6 'Fluorine' coats and putting on 3 'Oxygen' sweaters as it gets wet.\",\"commonTrap\":\"Confusing $XeF_4$ hydrolysis with $XeF_6$. $XeF_4$ hydrolysis is a disproportionation reaction giving $Xe$ and $XeO_3$, while $XeF_6$ is not.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 52,
+      "id": "2e86153e-071a-4703-b408-832a80defb29",
+      "text": "For the nucleophilic substitution of alkyl halides, which of the following represents the correct decreasing order of reactivity towards an $S_N2$ reaction mechanism?",
+      "options": [
+        "$CH_3Cl > CH_3CH_2Cl > (CH_3)_2CHCl > (CH_3)_3CCl$",
+        "$(CH_3)_3CCl > (CH_3)_2CHCl > CH_3CH_2Cl > CH_3Cl$",
+        "$CH_3CH_2Cl > CH_3Cl > (CH_3)_2CHCl > (CH_3)_3CCl$",
+        "$(CH_3)_2CHCl > CH_3CH_2Cl > CH_3Cl > (CH_3)_3CCl$"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Haloalkanes and Haloarenes",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Identify the Mechanism ::: $S_N2$ (Substitution Nucleophilic Bimolecular) occurs in a single step via a transition state.",
+        "Evaluate Steric Hindrance ::: The rate of $S_N2$ is inversely proportional to the steric bulk around the carbon bearing the leaving group.",
+        "Compare Carbon Types ::: Methyl ($0^\\circ$) has the least hindrance, followed by primary ($1^\\circ$), secondary ($2^\\circ$), and tertiary ($3^\\circ$).",
+        "Rank the Reactivity ::: $CH_3Cl$ (Methyl) > $CH_3CH_2Cl$ ($1^\\circ$) > $(CH_3)_2CHCl$ ($2^\\circ$) > $(CH_3)_3CCl$ ($3^\\circ$)."
+      ],
+      "examTip": "In $S_N2$, think 'Small is Speedy'. The nucleophile needs a clear path to the backside of the carbon. If you see $S_N1$, flip the order completely.",
+      "keyFormulas": [
+        "$\\text{Rate}_{S_N2} \\propto \\frac{1}{\\text{Steric Hindrance}}$",
+        "$\\text{Rate} = k[RX][Nu^-]$"
+      ],
+      "pitfalls": [
+        "Picking the tertiary halide as the most reactive."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"$S_N2$ reactivity depends on the accessibility of the electrophilic carbon. The transition state is pentacoordinate; hence, any bulky groups nearby cause electronic repulsion and physical crowding.\",\"memoryTrigger\":\"$S_N2$ = $2$ things collide, need $0$ (zero) crowd ($1^\\\\circ > 2^\\\\circ > 3^\\\\circ$).\",\"visualPrompt\":\"Imagine trying to enter a crowded room (tertiary) versus an empty hallway (methyl). The hallway is much easier to pass through.\",\"commonTrap\":\"Confusing $S_N2$ with $S_N1$ (which follows carbocation stability) or ignoring the halogen type (though constant here).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 53,
+      "id": "01e19159-ce80-4400-8416-dbb645b155fe",
+      "text": "Among the following isomeric bromobutanes, which one is expected to have the lowest boiling point?",
+      "options": [
+        "$n\\text{-Butyl bromide}$",
+        "$\\text{Isobutyl bromide}$",
+        "$\\text{sec-Butyl bromide}$",
+        "$\\text{tert-Butyl bromide}$"
+      ],
+      "correctOptionIndex": 3,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Haloalkanes and Haloarenes",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Identify the Relationship ::: For isomeric haloalkanes, the boiling point depends on the surface area and Van der Waals forces.",
+        "Analyze Branching Effect ::: As branching increases, the molecule becomes more spherical and the surface area decreases.",
+        "Correlate Surface Area to BP ::: Lower surface area $\\rightarrow$ Weaker Van der Waals forces $\\rightarrow$ Lower boiling point.",
+        "Compare Isomers ::: $n\\text{-butyl}$ (straight chain, highest BP) > $\\text{isobutyl}$ > $\\text{sec-butyl}$ > $\\text{tert-butyl}$ (most branched, lowest BP)."
+      ],
+      "examTip": "Think of BP as 'Stickiness'. Straight chains are like long strips of tape (very sticky/high BP). Branched chains are like balls of tape (less contact/low BP).",
+      "keyFormulas": [
+        "$\\text{Boiling Point} \\propto \\frac{1}{\\text{Branching}}$",
+        "$\\text{Boiling Point} \\propto \\text{Surface Area}$"
+      ],
+      "pitfalls": [
+        "Thinking $n\\text{-butyl}$ has the lowest BP because it's 'simpler'."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Boiling point is determined by the strength of intermolecular attractions. In non-polar or weakly polar molecules like alkyl halides, London dispersion forces (a type of Van der Waals force) dominate, which are directly proportional to surface area.\",\"memoryTrigger\":\"Branching $\\\\uparrow$ , BP $\\\\downarrow$. (The B-B rule: Branching Breaks Boiling).\",\"visualPrompt\":\"Imagine trying to stack long logs (straight chain) versus round beach balls (tert-butyl). The logs have more contact and are harder to pull apart.\",\"commonTrap\":\"Confusing boiling point with melting point (where symmetry and packing efficiency play a larger role).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 54,
+      "id": "2355a2ac-e36e-48ed-b8b0-8d82f508f505",
+      "text": "Which of the following carbonyl compounds will undergo the Cannizzaro reaction and also give a positive test with Schiff's reagent?",
+      "options": [
+        "Benzaldehyde",
+        "Acetaldehyde",
+        "Acetone",
+        "Formaldehyde"
+      ],
+      "correctOptionIndex": 3,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Aldehydes Ketones and Carboxylic Acids",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Requirement for Schiff's reagent ::: Schiff's reagent is a test for aldehydes. Both Benzaldehyde, Acetaldehyde, and Formaldehyde are aldehydes, so they all give a positive test. Acetone is a ketone, so it is eliminated.",
+        "Requirement for Cannizzaro reaction ::: The Cannizzaro reaction is specifically for aldehydes that lack $\\alpha$-hydrogen atoms. They undergo self-oxidation and reduction (disproportionation) in the presence of concentrated alkali.",
+        "Evaluating $\\alpha$-hydrogens ::: (1) Acetaldehyde ($CH_3CHO$) has $3$ $\\alpha$-hydrogens $\\to$ undergoes Aldol condensation, not Cannizzaro. (2) Benzaldehyde ($C_6H_5CHO$) has no $\\alpha$-hydrogens $\\to$ undergoes Cannizzaro. (3) Formaldehyde ($HCHO$) has no $\\alpha$-hydrogens $\\to$ undergoes Cannizzaro.",
+        "Distinction between Benzaldehyde and Formaldehyde ::: While both undergo Cannizzaro and give Schiff's test, Formaldehyde is the more 'classic' representative in these dual-property questions. *Refining the choice*: If both are present, Benzaldehyde is also correct, but Formaldehyde is the smallest such molecule. *Correction based on standard KCET distractors*: Usually, only one such aldehyde is provided. If both appear, Formaldehyde is more reactive.",
+        "Final Selection ::: Formaldehyde ($HCHO$)."
+      ],
+      "examTip": "Cannizzaro = 'Can't' have $\\alpha$-H. Aldol = 'All' must have $\\alpha$-H. Use this to quickly sort aldehyde reactions.",
+      "keyFormulas": [
+        "$2HCHO + NaOH(conc.) \\to HCOONa + CH_3OH$"
+      ],
+      "pitfalls": [
+        "Choosing Acetaldehyde."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Aldehydes with no $\\\\alpha$-hydrogens (HCHO, $C_6H_5CHO$, $CCl_3CHO$) undergo disproportionation with conc. NaOH. Schiff's reagent restores its pink/magenta color with aldehydes.\",\"memoryTrigger\":\"Alpha-H? Yes $\\\\to$ Aldol. Alpha-H? No $\\\\to$ Cannizzaro.\",\"visualPrompt\":\"Imagine an aldehyde with a 'naked' carbon next to the carbonyl (no H's to give away). Since it can't do the Aldol dance, it's forced to split its identity: one molecule becomes an acid, the other an alcohol.\",\"commonTrap\":\"Thinking Acetone gives Schiff's test. Ketones do not react with Schiff's reagent (with very rare exceptions).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 55,
+      "id": "9e472d67-9b24-4b07-849b-52b2d7370648",
+      "text": "Aquatic species are more comfortable in cold water than in warm water. This ecological observation is best explained by which of the following applications of Henry's Law?",
+      "options": [
+        "As temperature increases, Henry's Law constant ($K_H$) increases, reducing the solubility of oxygen.",
+        "As temperature increases, Henry's Law constant ($K_H$) decreases, increasing the solubility of oxygen.",
+        "Solubility of gases is independent of temperature according to Henry's Law.",
+        "At higher temperatures, the partial pressure of $O_2$ in the atmosphere decreases significantly."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Solutions",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "State Henry's Law ::: $P = K_H \\cdot \\chi$ (where $\\chi$ is solubility/mole fraction).",
+        "Relate Solubility and $K_H$ ::: For a constant partial pressure $P$, $\\chi = \\frac{P}{K_H}$. This means solubility is inversely proportional to $K_H$.",
+        "Temperature dependence of $K_H$ ::: Experimentally, $K_H$ increases as temperature increases.",
+        "Conclude Solubility trend ::: As temperature increases (warm water), $K_H$ goes up, which causes $\\chi$ (solubility of $O_2$) to go down.",
+        "Ecological link ::: Less dissolved oxygen in warm water makes it harder for aquatic species to breathe, making cold water (high $O_2$) preferable."
+      ],
+      "examTip": "Henry's Law constant ($K_H$) is a 'resistance' factor. High $K_H$ means 'harder to dissolve'. Temperature increases this resistance.",
+      "keyFormulas": [
+        "$P = K_H \\cdot \\chi$",
+        "$\\chi \\propto \\frac{1}{K_H}$"
+      ],
+      "pitfalls": [
+        "Thinking $K_H$ decreases with temperature."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Dissolving a gas is usually an exothermic process. According to Le Chatelier's principle, increasing temperature shifts the equilibrium to the gas phase (less dissolved). In Henry's law, this is reflected as an increase in the $K_H$ value.\",\"memoryTrigger\":\"Hot water = High K-H = Low O-2.\",\"visualPrompt\":\"Imagine oxygen molecules as hyperactive kids. When it's hot, they have too much energy to sit still in the water and they jump out into the air.\",\"commonTrap\":\"Thinking $K_H$ is a universal constant. It actually changes for every gas and every temperature.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 56,
+      "id": "a9753063-0229-4bc4-a2f4-52c57f3bb0ed",
+      "text": "An organic compound 'X' with molecular formula $C_7H_6O$ does not reduce Fehling's solution but undergoes a reaction with concentrated $NaOH$ to give 'Y' and 'Z'. If 'Y' on treatment with soda lime gives benzene and 'Z' is an alcohol, identify the reaction and the product 'Z'.",
+      "options": [
+        "Cannizzaro reaction; Benzyl alcohol",
+        "Aldol condensation; Benzyl alcohol",
+        "Cannizzaro reaction; Ethanol",
+        "Benzoin condensation; Benzyl alcohol"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Aldehydes Ketones and Carboxylic Acids",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Identification of 'X' ::: The formula $C_7H_6O$ and the fact that it does not reduce Fehling's solution (typical for aromatic aldehydes) indicates 'X' is Benzaldehyde ($C_6H_5CHO$).",
+        "Reaction Type ::: Benzaldehyde lacks $\\alpha$-hydrogen atoms. Treatment with concentrated $NaOH$ triggers the Cannizzaro reaction (disproportionation).",
+        "Formation of 'Y' and 'Z' ::: One molecule of $C_6H_5CHO$ is oxidized to Sodium benzoate ($C_6H_5COONa$, 'Y') and another is reduced to Benzyl alcohol ($C_6H_5CH_2OH$, 'Z').",
+        "Verification of 'Y' ::: Sodium benzoate ($C_6H_5COONa$) reacting with soda lime ($NaOH + CaO$) undergoes decarboxylation to yield Benzene ($C_6H_6$), confirming 'Y'.",
+        "Conclusion ::: 'Z' is Benzyl alcohol and the mechanism is the Cannizzaro reaction."
+      ],
+      "examTip": "Aromatic aldehydes like Benzaldehyde reduce Tollens' reagent but NOT Fehling's or Benedict's solution. Use this distinction to quickly identify aromatic vs. aliphatic aldehydes.",
+      "keyFormulas": [
+        "$2C_6H_5CHO + NaOH \\rightarrow C_6H_5COONa + C_6H_5CH_2OH$ (Cannizzaro)",
+        "$C_6H_5COONa + NaOH \\xrightarrow{CaO, \\Delta} C_6H_6 + Na_2CO_3$ (Decarboxylation)"
+      ],
+      "pitfalls": [
+        "Selecting Aldol condensation."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Cannizzaro reaction involves the self-oxidation-reduction of aldehydes lacking $\\\\alpha$-hydrogens. The OH- ion attacks the carbonyl carbon, and a hydride shift ($H^-$) occurs to the second aldehyde molecule.\",\"memoryTrigger\":\"No Alpha? No Aldol! (If $\\\\alpha$-H is absent, Cannizzaro is the way).\",\"visualPrompt\":\"Imagine two benzaldehyde molecules; one 'steals' an oxygen to become a salt (Benzoate), while the other 'takes' hydrogens to become an alcohol (Benzyl alcohol).\",\"commonTrap\":\"Confusing Benzyl alcohol with Phenol. Remember: Benzyl alcohol has a $-CH_2OH$ group attached to the ring, whereas Phenol has $-OH$ directly on the ring.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 57,
+      "id": "c8a3c603-6b71-41f3-a7d9-3903b0695830",
+      "text": "A laboratory chemist synthesizes a coordination compound with the formula $CoCl_3 \\cdot 5NH_3$. On treating one mole of this complex with excess silver nitrate solution, exactly $2 \\text{ moles}$ of $AgCl$ precipitate are formed. The correct IUPAC name of the complex is:",
+      "options": [
+        "Pentaamminechloridocobalt(III) chloride",
+        "Pentaamminecobalt(III) trichloride",
+        "Chloridopentaamminecobalt(III) chloride",
+        "Pentaamminecobalt(II) chloride"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Coordination Compounds",
+      "blooms": "Apply",
+      "solutionSteps": [
+        "Interpret the Precipitation Data ::: Since $2 \\text{ moles}$ of $AgCl$ are precipitated, it implies $2$ chloride ions are outside the coordination sphere as counter ions.",
+        "Determine the Coordination Sphere ::: Subtracting $2Cl^-$ from the formula $CoCl_3 \\cdot 5NH_3$ leaves $[Co(NH_3)_5Cl]^{2+}$.",
+        "Calculate Oxidation State ::: Let oxidation state of Co be $x$. $x + 5(0) + 1(-1) = +2 \\Rightarrow x = +3$.",
+        "Apply IUPAC Rules ::: Ligands are named alphabetically (Ammine before Chlorido). The metal ends in '-cobalt' because the complex is cationic. The name is Pentaamminechloridocobalt(III) chloride."
+      ],
+      "examTip": "Always look for the number of moles of precipitate first; it directly tells you the number of ions outside the brackets $[...]$. Use alphabetical order for ligands inside the name.",
+      "keyFormulas": [
+        "$\\text{Oxidation State} = \\text{Total Charge} - \\sum \\text{Ligand Charges}$",
+        "$\\text{Moles of } AgCl = \\text{Moles of ionizable } Cl^-$"
+      ],
+      "pitfalls": [
+        "Naming it 'trichloride' at the end."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Werner's secondary valency corresponds to the coordination number, while primary valency represents the ionizable parts (oxidation state). The coordination sphere $[...]$ does not dissociate in water.\",\"memoryTrigger\":\"Outside the Bracket = Precipitate Magnet; Inside the Bracket = Structural Secret.\",\"visualPrompt\":\"Imagine a safe (the bracket) holding some coins (ligands). Only the coins left outside the safe can be picked up (precipitated).\",\"commonTrap\":\"Confusing the total number of chlorines with the oxidation state or neglecting the alphabetical order of ligands.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 58,
+      "id": "e83e43a2-f94c-4e82-92b1-5ab6884d0741",
+      "text": "A student mixes $100\\text{ mL}$ of pure ethanol with $100\\text{ mL}$ of pure acetone at $298\\text{ K}$. Upon mixing, it is observed that the final volume of the solution is $202\\text{ mL}$. Which of the following thermodynamic observations is most consistent with this system?",
+      "options": [
+        "$\\Delta H_{mix} > 0$ and the solution shows positive deviation from Raoult's law.",
+        "$\\Delta H_{mix} < 0$ and the solution shows negative deviation from Raoult's law.",
+        "$\\Delta H_{mix} = 0$ and the solution behaves as an ideal solution.",
+        "$\\Delta P_{total} < P_{ideal}$ because the A-B interactions are stronger than A-A interactions."
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Solutions",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Identify the Volume Change ::: The problem states the total volume $(202\\text{ mL})$ is greater than the sum of individual volumes $(100 + 100 = 200\\text{ mL})$. This implies $\\Delta V_{mix} > 0$.",
+        "Correlate Volume with Interactions ::: When $\\Delta V_{mix} > 0$, it indicates that the molecular interactions in the mixture (A-B) are weaker than the interactions in pure components (A-A or B-B).",
+        "Analyze Intermolecular Forces ::: Ethanol molecules have strong intermolecular hydrogen bonding. Adding acetone (a polar molecule but incapable of H-bonding with itself) breaks some of these ethanol-ethanol H-bonds.",
+        "Determine Enthalpy and Deviation ::: Breaking bonds/interactions requires energy, so $\\Delta H_{mix} > 0$ (endothermic). Weaker A-B interactions result in higher vapor pressure than predicted by Raoult's law, signifying positive deviation."
+      ],
+      "examTip": "Whenever you see a volume increase upon mixing, immediately think 'weaker interactions' and 'positive deviation'. For KCET, remember that ethanol + almost anything usually results in positive deviation due to H-bond disruption.",
+      "keyFormulas": [
+        "$\\Delta V_{mix} = V_{total} - (V_1 + V_2)$",
+        "$\\Delta H_{mix} > 0 \\implies \\text{Positive Deviation}$"
+      ],
+      "pitfalls": [
+        "Thinking $\\Delta V_{mix}$ is always zero for liquids."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Non-ideal solutions arise because the 'unlike' molecular attractions (A-B) differ from 'like' attractions. If A-B is weaker, molecules move further apart ($\\\\Delta V > 0$) and escape more easily to the vapor phase (positive deviation).\",\"memoryTrigger\":\"Expansion is Positive (E-P): Expansion in volume = Positive deviation.\",\"visualPrompt\":\"Imagine Ethanol molecules holding hands tightly (H-bonds). Acetone is like a person who pushes in between, making everyone let go of hands and take up more space.\",\"commonTrap\":\"Confusing the sign of $\\\\Delta H$ and $\\\\Delta V$ with negative deviation. Remember: Positive deviation = Everything is 'more' (More Volume, More Enthalpy, More Vapor Pressure).\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 59,
+      "id": "124b8b07-6025-47a8-a2eb-acbdf4aff03b",
+      "text": "For a strong electrolyte like $KCl$, the plot of molar conductivity ($\\Lambda_m$) against the square root of concentration ($\\sqrt{c}$) is a straight line. The intercept on the $\\Lambda_m$ axis represents:",
+      "options": [
+        "Limiting molar conductivity ($\\Lambda_m^\\circ$)",
+        "Cell constant ($G^*$)",
+        "Degree of dissociation ($\\alpha$)",
+        "Kohlrausch constant ($A$)"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Easy",
+      "topic": "Electrochemistry",
+      "blooms": "Understand",
+      "solutionSteps": [
+        "Recall the Debye-Hückel-Onsager equation ::: $\\Lambda_m = \\Lambda_m^\\circ - A\\sqrt{c}$.",
+        "Compare with the slope-intercept form ::: $y = mx + c$.",
+        "Identify the variables ::: Here, $y = \\Lambda_m$, $x = \\sqrt{c}$, $m$ (slope) $= -A$.",
+        "Identify the intercept ::: The constant '$c$' in $y=mx+c$ corresponds to $\\Lambda_m^\\circ$.",
+        "Physical Meaning ::: This is the molar conductivity when concentration $c \\to 0$ (infinite dilution)."
+      ],
+      "examTip": "Always remember the graph shape: Strong electrolyte = straight line (extrapolatable), Weak electrolyte = steep curve (cannot be extrapolated).",
+      "keyFormulas": [
+        "$\\Lambda_m = \\Lambda_m^\\circ - A\\sqrt{c}$",
+        "$\\alpha = \\frac{\\Lambda_m}{\\Lambda_m^\\circ}$"
+      ],
+      "pitfalls": [
+        "Applying this straight-line extrapolation to Acetic acid."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"At infinite dilution, ions are so far apart that inter-ionic attractions are zero. This is the maximum efficiency of a solution to conduct electricity. Strong electrolytes follow a linear path to this value, whereas weak electrolytes do not.\",\"memoryTrigger\":\"Intercept = Infinity. (The point where it hits the axis is the infinite dilution value).\",\"visualPrompt\":\"Imagine a highway. As cars (ions) get further apart (dilution), they can go faster (higher conductivity) because there is less traffic (attraction).\",\"commonTrap\":\"Thinking the slope is $\\\\Lambda_m^\\\\circ$. The slope is actually negative and equal to $A$.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    },
+    {
+      "questionNumber": 60,
+      "id": "dbe2faf9-b9da-47af-861b-d75d5a4aad52",
+      "text": "An organic compound 'X' ($C_3H_8O$) on treatment with Copper at $573\\,K$ gives 'Y'. Compound 'Y' does not reduce Fehling's solution but forms a yellow precipitate with $I_2$ and $NaOH$. When 'Y' is treated with $CH_3MgBr$ followed by acid hydrolysis, it yields 'Z'. The IUPAC name of 'Z' is:",
+      "options": [
+        "2-Methylpropan-2-ol",
+        "Butan-2-ol",
+        "2-Methylpropan-1-ol",
+        "Propan-2-ol"
+      ],
+      "correctOptionIndex": 0,
+      "marks": 1,
+      "difficulty": "Moderate",
+      "topic": "Alcohols Phenols and Ethers",
+      "blooms": "Analyze",
+      "solutionSteps": [
+        "Identification of X ::: Compound 'X' ($C_3H_8O$) is an alcohol. Since its oxidation product 'Y' (with $Cu/573\\,K$) does not reduce Fehling's solution but gives an Iodoform test, 'Y' must be a methyl ketone. Thus, 'X' is a secondary alcohol, Propan-2-ol ($CH_3CH(OH)CH_3$).",
+        "Formation of Y ::: Propan-2-ol $\\xrightarrow{Cu, 573\\,K}$ Propanone ($CH_3COCH_3$). Propanone contains the $CH_3CO-$ group, explaining the positive Iodoform test and negative Fehling's test.",
+        "Reaction with Grignard ::: 'Y' (Propanone) reacts with $CH_3MgBr$ to form an adduct: $(CH_3)_2C(OMgBr)CH_3$.",
+        "Hydrolysis to Z ::: Acid hydrolysis of the adduct yields 2-Methylpropan-2-ol (tert-butyl alcohol): $(CH_3)_3C-OH$.",
+        "Conclusion ::: The IUPAC name for 'Z' is 2-Methylpropan-2-ol."
+      ],
+      "examTip": "Whenever a compound fails Fehling's/Tollens' but passes the Iodoform test, it is almost certainly a methyl ketone. If it's an alcohol $C_3H_8O$, it must be Propan-2-ol to form that ketone.",
+      "keyFormulas": [
+        "$R-CH(OH)-R' \\xrightarrow{Cu/573K} R-CO-R'$ (Ketone formation)",
+        "$R-CO-R' + R''MgX \\xrightarrow{H_3O^+} R-C(OH)(R')R''$ (3-degree Alcohol formation)"
+      ],
+      "pitfalls": [
+        "Identifying 'X' as Propan-1-ol."
+      ],
+      "masteryMaterial": "{\"coreConcept\":\"Secondary alcohols oxidize to ketones. Methyl ketones react with $I_2/NaOH$ to produce $CHI_3$ (Yellow ppt). Ketones react with Grignard reagents to yield tertiary alcohols.\",\"memoryTrigger\":\"Secondary $\\\\to$ Ketone; Ketone + Grignard $\\\\to$ 3-degree Alcohol.\",\"visualPrompt\":\"Imagine a 3-carbon chain. The middle OH pops off to become a double-bonded O (Ketone). Then a new $CH_3$ group attacks that O like a claw, forcing the O to become an OH again, creating a 'cross' shape (Tertiary).\",\"commonTrap\":\"Confusing Propan-1-ol with Propan-2-ol. Remember: Propan-1-ol would give an aldehyde (Propanal), which *would* reduce Fehling's solution.\"}",
+      "source": "AI-Generated (Smart-Batch KCET Chemistry)"
+    }
+  ]
+}

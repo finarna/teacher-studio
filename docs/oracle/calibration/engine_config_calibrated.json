@@ -1,13 +1,13 @@
 {
   "engine_version": "4.0",
-  "rigor_drift_multiplier": 1.6633333333333333,
-  "ids_baseline": 0.95,
+  "rigor_drift_multiplier": 1.6066666666666667,
+  "ids_baseline": 1,
   "intent_learning_rate": 0.25,
   "volatility_factor": 1.15,
   "solve_tension_multiplier": 1.12,
   "projection_buffer": 1.05,
-  "synthesis_weight": 0.22800000000000006,
+  "synthesis_weight": 0.2580000000000001,
   "trap_weight": 0.3,
-  "last_updated": "2026-04-17T05:44:54.921Z",
+  "last_updated": "2026-04-17T11:24:37.791Z",
   "calibration_note": "Calibrated using iterative RWC (2021-2025)"
 }

@@ -9,7 +9,7 @@
       "topic": "Basic Concepts",
       "logic": "Mass-Mass and Mole-Mole calculations. Forensic Marker: Excess reagent determination in titration/combustion scenarios. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.6999999999999998
     },
     {
       "id": "CHM-002",
@@ -17,7 +17,7 @@
       "topic": "Atomic Structure",
       "logic": "Rydberg formula for spectral lines. Forensic Marker: Transition ratios between Lyman and Paschen series. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "CHM-003",
@@ -25,7 +25,7 @@
       "topic": "Atomic Structure",
       "logic": "Filling of d-orbitals (half-filled/full-filled). Forensic Marker: Anomalous configurations in Cu and Cr atoms. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "CHM-004",
@@ -33,7 +33,7 @@
       "topic": "Classification",
       "logic": "Effective nuclear charge and shielding. Forensic Marker: Shift in IE for Nitrogen vs Oxygen due to half-filled stability. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.6999999999999998
     },
     {
       "id": "CHM-005",
@@ -41,7 +41,7 @@
       "topic": "Chemical Bonding",
       "logic": "Hybridization and lone pair repulsion. Forensic Marker: T-shape and See-saw geometry in interhalogens (ClF3, SF4). [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-006",
@@ -49,7 +49,7 @@
       "topic": "Chemical Bonding",
       "logic": "Energy level diagrams for homonuclear molecules. Forensic Marker: Predicting paramagnetic nature for O2 and B2 ions. [Evolved: 2024: The 2024 paper demonstrates a transition from isolated conceptual testing to reagent-heavy synthesis paths and property-based identification. There is a marked increase in questions requiring the identification of specific industrial alloys (Misch metal), biological hormones (Adrenaline), and multi-step organic transformations (Ethylene to Benzene), emphasizing a 'memory-to-application' speed-run rather than deep derivation.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.52
     },
     {
       "id": "CHM-007",
@@ -57,7 +57,7 @@
       "topic": "States of Matter",
       "logic": "Pressure and Volume corrections (a and b). Forensic Marker: Conditions for liquefaction and critical constants (Tc, Pc). [Evolved: 2024: The 2024 paper demonstrates a transition from isolated conceptual testing to reagent-heavy synthesis paths and property-based identification. There is a marked increase in questions requiring the identification of specific industrial alloys (Misch metal), biological hormones (Adrenaline), and multi-step organic transformations (Ethylene to Benzene), emphasizing a 'memory-to-application' speed-run rather than deep derivation.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.99
     },
     {
       "id": "CHM-008",
@@ -65,7 +65,7 @@
       "topic": "Thermodynamics",
       "logic": "Delta G = Delta H - T Delta S. Forensic Marker: Temperature dependence of spontaneity for exothermic/endothermic reactions. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.6099999999999999
     },
     {
       "id": "CHM-009",
@@ -73,7 +73,7 @@
       "topic": "Equilibrium",
       "logic": "Relationship Kp = Kc(RT)^dn. Forensic Marker: Effect of inert gas addition at constant volume vs pressure. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.99
     },
     {
       "id": "CHM-010",
@@ -89,7 +89,7 @@
       "topic": "Redox Reactions",
       "logic": "Identifying oxidizing/reducing agents. Forensic Marker: Balancing disproportionation reactions in alkaline medium. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.7399999999999999
     },
     {
       "id": "CHM-012",
@@ -97,7 +97,7 @@
       "topic": "Organic Chemistry Basics",
       "logic": "IUPAC nomenclature priority. Forensic Marker: Identifying Metamerism in ethers and Tautomerism in carbonyls. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.6999999999999998
     },
     {
       "id": "CHM-013",
@@ -105,7 +105,7 @@
       "topic": "Hydrocarbons",
       "logic": "Electrophilic addition to alkenes. Forensic Marker: Anti-Markovnikov peroxide effect (Kharasch effect) checks. [Evolved: 2024: The 2024 paper demonstrates a transition from isolated conceptual testing to reagent-heavy synthesis paths and property-based identification. There is a marked increase in questions requiring the identification of specific industrial alloys (Misch metal), biological hormones (Adrenaline), and multi-step organic transformations (Ethylene to Benzene), emphasizing a 'memory-to-application' speed-run rather than deep derivation.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.59
     },
     {
       "id": "CHM-014",
@@ -113,7 +113,7 @@
       "topic": "Solid State",
       "logic": "Calculating 'z' for BCC/FCC (2 and 4). Forensic Marker: Schottky vs Frenkel defects in ionic solids (AgBr exceptions). [Evolved: 2024: The 2024 paper demonstrates a transition from isolated conceptual testing to reagent-heavy synthesis paths and property-based identification. There is a marked increase in questions requiring the identification of specific industrial alloys (Misch metal), biological hormones (Adrenaline), and multi-step organic transformations (Ethylene to Benzene), emphasizing a 'memory-to-application' speed-run rather than deep derivation.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-015",
@@ -121,7 +121,7 @@
       "topic": "Solutions",
       "logic": "Positive vs Negative deviation from ideality. Forensic Marker: Maximum and Minimum boiling azeotrope identification. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-016",
@@ -129,7 +129,7 @@
       "topic": "Electrochemistry",
       "logic": "Mass deposited m = ZIt. Forensic Marker: Molar conductivity variation with dilution (Kohlrausch Law). [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.99
     },
     {
       "id": "CHM-017",
@@ -137,7 +137,7 @@
       "topic": "Chemical Kinetics",
       "logic": "log(k2/k1) = Ea/2.303R [T2-T1/T1T2]. Forensic Marker: Order determination from rate-concentration data tables. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-018",
@@ -145,7 +145,7 @@
       "topic": "Surface Chemistry",
       "logic": "Physical vs Chemical adsorption. Forensic Marker: Coagulation power and Hardy-Schulze rule applications. [Evolved: 2024: The 2024 paper demonstrates a transition from isolated conceptual testing to reagent-heavy synthesis paths and property-based identification. There is a marked increase in questions requiring the identification of specific industrial alloys (Misch metal), biological hormones (Adrenaline), and multi-step organic transformations (Ethylene to Benzene), emphasizing a 'memory-to-application' speed-run rather than deep derivation.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-019",
@@ -153,7 +153,7 @@
       "topic": "p-Block Elements",
       "logic": "Basicity of H3PO3 vs H3PO4. Forensic Marker: Structural features of silicates and Xenon fluorides (XeF4, XeF6). [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-020",
@@ -161,7 +161,7 @@
       "topic": "d & f Block Elements",
       "logic": "Variable oxidation states and spin-only magnet moment. Forensic Marker: Chromate-Dichromate interconversion pH dependence. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "CHM-021",
@@ -169,7 +169,7 @@
       "topic": "Coordination Compounds",
       "logic": "Strong vs Weak field ligands. Forensic Marker: High-spin vs Low-spin octahedral complexes (d4-d7). [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-022",
@@ -177,7 +177,7 @@
       "topic": "Haloalkanes",
       "logic": "Tertiary vs Primary halide reactivity. Forensic Marker: Walden inversion vs Racemization in walden paths. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-023",
@@ -185,7 +185,7 @@
       "topic": "Alcohols & Phenols",
       "logic": "Acidity of phenols vs alcohols. Forensic Marker: Reimer-Tiemann and Kolbe reaction product identification. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "CHM-024",
@@ -193,7 +193,7 @@
       "topic": "Aldehydes & Ketones",
       "logic": "Aldol vs Cannizzaro (alpha-H presence). Forensic Marker: Tollens and Fehling test sensitivity for aromatic aldehydes. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "CHM-025",
@@ -201,7 +201,7 @@
       "topic": "Amines",
       "logic": "Primary, Secondary, Tertiary amine pKb trends. Forensic Marker: Carbylamine reaction for primary amines. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-026",
@@ -209,7 +209,7 @@
       "topic": "Biomolecules",
       "logic": "Reducing vs Non-reducing sugars (Sucrose). Forensic Marker: Denaturation of proteins and DNA double helix base pairing. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.9599999999999999
     },
     {
       "id": "CHM-027",
@@ -217,7 +217,7 @@
       "topic": "Polymers",
       "logic": "Buna-S, Nylon 6,6 and Bakelite formation. Forensic Marker: Addition vs Condensation polymerization classification. [Evolved: 2025: The 2025 paper demonstrates a transition from direct recall to multi-statement verification and reagent-specific logic. There is a noticeable increase in 'Match List' and 'Statement-I/II' formats, forcing students to evaluate four to five sub-concepts per question. The inclusion of specific qualitative analysis steps (Sodium fusion, Group reagents) indicates a shift toward laboratory-integrated theory.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.99
     },
     {
       "id": "CHM-028",
@@ -225,7 +225,7 @@
       "topic": "Everyday Life",
       "logic": "Analgesics, Tranquilizers and Antibiotics. Forensic Marker: Broad spectrum vs Narrow spectrum identification. [Evolved: 2024: The 2024 paper demonstrates a transition from isolated conceptual testing to reagent-heavy synthesis paths and property-based identification. There is a marked increase in questions requiring the identification of specific industrial alloys (Misch metal), biological hormones (Adrenaline), and multi-step organic transformations (Ethylene to Benzene), emphasizing a 'memory-to-application' speed-run rather than deep derivation.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.63
     },
     {
       "id": "CHM-029",
@@ -233,7 +233,7 @@
       "topic": "Metallurgy",
       "logic": "Froth floatation and Zone refining. Forensic Marker: Ellingham diagrams for metal oxide reductions. [Evolved: 2024: The 2024 paper demonstrates a transition from isolated conceptual testing to reagent-heavy synthesis paths and property-based identification. There is a marked increase in questions requiring the identification of specific industrial alloys (Misch metal), biological hormones (Adrenaline), and multi-step organic transformations (Ethylene to Benzene), emphasizing a 'memory-to-application' speed-run rather than deep derivation.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "CHM-030",
@@ -241,7 +241,7 @@
       "topic": "Environmental",
       "logic": "Classical vs Photochemical smog components. Forensic Marker: BOD levels and water pollution indices. [Evolved: 2023: The 2023 paper demonstrates a transition from pure rote recall to 'Process-Chain Recognition'. There is a marked increase in multi-step organic sequences (A->B->C) and a heavy reliance on matching-type questions to cover a broader syllabus range within the same time constraint. Physical chemistry has evolved to prioritize graphical interpretation (Freundlich) and conceptual stability (Catalyst effects) over brute-force calculation.] | Discovery_2022 | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2022 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.59
     }
   ],
   "traps": [],
@@ -250,6 +250,9 @@
     "ids_target": 0.97,
     "rigor_vel": "1.15x",
     "pcs": "50.0%",
-    "status": "PEAK_INTENSITY_RECLAIMED"
+    "status": "CALIBRATED_2021_2025",
+    "updated_at": "2026-04-17T11:24:37.791Z",
+    "final_match_rate": 0.5112962962962964,
+    "total_iterations": 11
   }
 }

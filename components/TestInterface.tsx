@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import type { AnalyzedQuestion, TestAttempt, TestResponse, ExamContext } from '../types';
 import { RenderWithMath } from './MathRenderer';
+import RichMarkdownRenderer from './RichMarkdownRenderer';
 import { getExamConfig } from '../config/exams';
 
 interface TestInterfaceProps {
@@ -575,7 +576,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               <div className="px-5 py-4 flex-1">
                 <div className="bg-slate-50/40 border border-slate-100/50 rounded-[2rem] p-5 mb-5 group-hover/card:bg-slate-50/60 transition-colors duration-500">
                   <div className="text-lg sm:text-xl font-bold text-slate-700 leading-relaxed tracking-tight font-outfit">
-                    <RenderWithMath text={currentQuestion.text} showOptions={false} />
+                    <RichMarkdownRenderer text={currentQuestion.text} textSize="text-lg sm:text-xl" />
                   </div>
                 </div>
 
@@ -688,13 +689,13 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                                     />
                                     {option && option.trim() && option.trim() !== optionLabel && (
                                       <div className={`text-xs font-outfit ${!isReviewMode ? 'text-slate-500' : (isCorrect || isSelected ? 'text-slate-600' : 'text-slate-400')}`}>
-                                        <RenderWithMath text={option} showOptions={false} />
+                                        <RichMarkdownRenderer text={option} />
                                       </div>
                                     )}
                                   </div>
                                 ) : (
                                   <div className={`flex-1 font-outfit font-semibold text-[15px] sm:text-[16px] tracking-tight ${!isReviewMode ? 'text-slate-600' : (isCorrect || isSelected ? 'text-slate-700' : 'text-slate-400')}`}>
-                                    <RenderWithMath text={option} showOptions={false} />
+                                    <RichMarkdownRenderer text={option} />
                                   </div>
                                 )}
 

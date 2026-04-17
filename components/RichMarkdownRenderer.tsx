@@ -17,9 +17,10 @@ import React, { useEffect, useState } from 'react';
 interface RichMarkdownRendererProps {
   text: string;
   className?: string;
+  textSize?: string; // e.g. 'text-lg'
 }
 
-const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, className = '' }) => {
+const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, className = '', textSize = 'text-sm' }) => {
   const [isKatexLoaded, setIsKatexLoaded] = useState(false);
 
   // Poll for KaTeX availability
@@ -40,13 +41,18 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
   }, []);
 
   const renderContent = () => {
-    // CRITICAL FIX: Extract and protect math expressions BEFORE splitting by lines
-    // This prevents multi-line math from being broken up
     const mathPlaceholders: { [key: string]: string } = {};
     let placeholderCounter = 0;
 
+    // CRITICAL FIX: Normalize line breaks. Handle literal \n or \\n strings
+    // as well as real newlines.
+    let processedText = text
+      .replace(/\\n/g, '\n')
+      .replace(/\\\\n/g, '\n');
+
     // Extract all math expressions and replace with placeholders
-    let protectedText = text.replace(/(\$\$[\s\S]*?\$\$|\$[^\$\n]+?\$)/g, (match) => {
+    // Expanded regex to catch $$, $, \[, \], \(, \)
+    let protectedText = processedText.replace(/(\$\$[\s\S]*?\$\$|\$[^\$\n]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
       const placeholder = `__MATH_PLACEHOLDER_${placeholderCounter}__`;
       mathPlaceholders[placeholder] = match;
       placeholderCounter++;
@@ -129,7 +135,7 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
         elements.push(
           <ul key={`ul-${i}`} className="list-disc list-inside my-2 space-y-1">
             {listItems.map((item, idx) => (
-              <li key={idx} className="text-sm">
+              <li key={idx} className={textSize}>
                 {renderInline(item, mathPlaceholders)}
               </li>
             ))}
@@ -150,7 +156,7 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
         elements.push(
           <ol key={`ol-${i}`} className="list-decimal list-inside my-2 space-y-1">
             {listItems.map((item, idx) => (
-              <li key={idx} className="text-sm">
+              <li key={idx} className={textSize}>
                 {renderInline(item, mathPlaceholders)}
               </li>
             ))}
@@ -168,11 +174,20 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
       }
 
       // Regular paragraph
-      elements.push(
-        <p key={`p-${i}`} className="text-sm leading-relaxed my-1">
-          {renderInline(line, mathPlaceholders)}
-        </p>
-      );
+      const isComponentInline = className.includes('inline');
+      if (i === 0 && isComponentInline) {
+        elements.push(
+          <span key={`p-${i}`} className={`${textSize} leading-relaxed font-outfit text-slate-700`}>
+            {renderInline(line, mathPlaceholders)}
+          </span>
+        );
+      } else {
+        elements.push(
+          <div key={`p-${i}`} className={`${textSize} leading-relaxed my-1.5 font-outfit text-slate-700`}>
+            {renderInline(line, mathPlaceholders)}
+          </div>
+        );
+      }
       i++;
     }
 
@@ -242,13 +257,17 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
     }
 
     // Handle math first
-    const mathRegex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g;
+    // Expanded regex to catch $$, $, \[, \], \(, \)
+    const mathRegex = /(\$\$[\s\S]*?\$\$|\$[^\s\n\$][^\$]*?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g;
     const parts = processedText.split(mathRegex);
 
     return parts.map((part, index) => {
-      // Display Math $$...$$
-      if (part.startsWith('$$') && part.endsWith('$$') && isKatexLoaded) {
-        const latex = part.slice(2, -2).trim();
+      // Display Math $$...$$ or \[...\]
+      const isDisplay = (part.startsWith('$$') && part.endsWith('$$')) || (part.startsWith('\\\[') && part.endsWith('\\\]'));
+      const isInline = !isDisplay && ((part.startsWith('$') && part.endsWith('$')) || (part.startsWith('\\\(') && part.endsWith('\\\)')));
+
+      if (isDisplay && isKatexLoaded) {
+        const latex = (part.startsWith('$$') ? part.slice(2, -2) : part.slice(2, -2)).trim();
         try {
           const html = (window as any).katex.renderToString(latex, {
             throwOnError: false,
@@ -272,9 +291,9 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
         }
       }
 
-      // Inline Math $...$
-      if (part.startsWith('$') && part.endsWith('$') && part.length > 2 && isKatexLoaded) {
-        const latex = part.slice(1, -1).trim();
+      // Inline Math $...$ or \(...\)
+      if (isInline && isKatexLoaded) {
+        const latex = (part.startsWith('$') ? part.slice(1, -1) : part.slice(2, -2)).trim();
         try {
           const html = (window as any).katex.renderToString(latex, {
             throwOnError: false,
@@ -313,7 +332,13 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
     return <span dangerouslySetInnerHTML={{ __html: text }} />;
   };
 
-  return (
+  const isComponentInline = className.includes('inline');
+
+  return isComponentInline ? (
+    <span className={`rich-markdown inline ${className}`}>
+      {renderContent()}
+    </span>
+  ) : (
     <div className={`rich-markdown ${className}`}>
       {renderContent()}
     </div>

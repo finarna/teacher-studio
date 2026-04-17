@@ -584,7 +584,7 @@ async function calibrateYear(
     solution: Array.isArray(q.solution_steps) ? q.solution_steps.join('\n') : '',
     solutionSteps: Array.isArray(q.solution_steps) ? q.solution_steps : [],
     conceptTags: [q.topic].filter(Boolean)
-  }));
+  })) as unknown as AnalyzedQuestion[];
 
   // Iterative calibration loop
   let state = { ...initialState, year };

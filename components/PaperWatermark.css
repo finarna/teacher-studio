@@ -1,0 +1,288 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PLUS2AI PROFESSIONAL QUESTION PAPER STYLES
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+    @page {
+        margin: 2cm;
+        size: A4;
+    }
+
+    /* ══════════════ SURGICAL SHELL NEUTRALIZATION ══════════════ 
+       We explicitly deactivate the layout properties of the 
+       app shell (Sidebar, Main, etc.) to restore natural flow.
+    */
+    html, body, #root, #root > div, .app-shell, main, 
+    .flex, .flex-1, .flex-col, 
+    .h-screen, .h-full, .min-h-screen,
+    .overflow-hidden, .overflow-y-auto, .overflow-auto,
+    .fixed.inset-0, .absolute.inset-0 {
+        display: block !important;
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        float: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+    }
+
+    /* Standard "Hide Everything" trick */
+    body {
+        visibility: hidden !important;
+        background: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        counter-reset: page;
+    }
+
+    /* Re-enable only the printable area and its children */
+    .print-section, .print-section * {
+        visibility: visible !important;
+    }
+
+    .print-section {
+        display: block !important;
+        position: relative !important; /* REQUIRED FOR MULTI-PAGE FLOW */
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        z-index: 1 !important;
+    }
+
+    /* ══════════════ REPEATING BRANDING ELEMENTS ══════════════ */
+    body {
+        visibility: hidden !important;
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        counter-reset: page;
+    }
+
+    .paper-watermark {
+        display: none !important; /* Hide legacy div */
+    }
+
+    .paper-footer {
+        position: fixed !important; /* Truly repeat on every page */
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: white !important;
+        padding: 0.5cm 1.5cm !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        border-top: 1px solid #e2e8f0 !important;
+        visibility: visible !important;
+        z-index: 100 !important;
+    }
+
+    /* DYNAMIC PAGE COUNTER */
+    .page-number::after {
+        counter-increment: page;
+        content: counter(page);
+    }
+
+    .paper-container {
+        overflow: visible !important;
+        height: auto !important;
+        /* PRO PATTERN: High-density SVG Watermark that repeats on every physical page */
+        /* Features dual-text offset paths for maximal coverage across core sections */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Ctext x='100' y='100' font-size='24' font-weight='900' fill='rgba(0,0,0,0.04)' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle' transform='rotate(-45 100 100)'%3EPlus2AI Proprietary%3C/text%3E%3Ctext x='300' y='300' font-size='24' font-weight='900' fill='rgba(0,0,0,0.04)' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle' transform='rotate(-45 300 300)'%3EPlus2AI Proprietary%3C/text%3E%3C/svg%3E") !important;
+        background-repeat: repeat !important;
+        background-color: white !important;
+        position: static !important;
+        margin: 0 auto !important;
+    }
+
+    .paper-header {
+        margin-bottom: 2.5rem !important;
+        padding-top: 0.5rem !important;
+    }
+
+    .exam-meta {
+        font-size: 10pt !important;
+        gap: 0.6rem !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}
+
+.paper-container {
+    font-family: 'Inter', 'Roboto', sans-serif;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 2rem;
+    background: white;
+    color: #1a1a1a;
+    position: relative;
+    overflow: hidden; /* For watermark containment */
+}
+
+/* ══════════════ WATERMARK ══════════════ */
+.paper-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 8rem;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.03);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+    letter-spacing: 0.5rem;
+}
+
+/* ══════════════ HEADER ══════════════ */
+.paper-header {
+    border-bottom: 2px solid #000;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 10;
+}
+
+.paper-brand {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.brand-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    color: #0a1a16; /* Dark Deep Blakish Green */
+}
+
+.brand-text span {
+    color: #ff7f50; /* Coral from design system */
+}
+
+.exam-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    font-weight: 600;
+}
+
+.reg-no-box {
+    border: 1px solid #000;
+    padding: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.reg-no-box .box {
+    width: 20px;
+    height: 25px;
+    border: 1px solid #000;
+}
+
+/* ══════════════ INSTRUCTIONS ══════════════ */
+.paper-instructions {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    border-radius: 8px;
+}
+
+.paper-instructions h3 {
+    margin-top: 0;
+    text-transform: uppercase;
+    font-size: 1rem;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 0.5rem;
+}
+
+/* ══════════════ QUESTIONS ══════════════ */
+.questions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    position: relative;
+    z-index: 10;
+}
+
+.question-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid-page !important;
+    margin-bottom: 3.5rem; /* Increased spacing to prevent clipping near bottom */
+    display: block !important;
+    orphans: 3;
+    widows: 3;
+}
+
+.question-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+@media print {
+    .options-grid {
+        display: grid !important; /* Restore professional 2-column layout */
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.75rem !important;
+        margin-top: 0.5rem;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .option {
+        display: flex !important; /* Restore side-by-side label alignment */
+        align-items: baseline !important;
+        gap: 0.5rem !important;
+        margin-bottom: 0.5rem;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.option {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    font-size: 1rem;
+}
+
+.option-letter {
+    font-weight: 700;
+    min-width: 1.5rem;
+}
+
+/* ══════════════ PAGINATION ══════════════ */
+.paper-footer {
+    margin-top: 3rem;
+    border-top: 1px solid #cbd5e1;
+    padding-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #64748b;
+}

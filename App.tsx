@@ -30,6 +30,7 @@ import { getApiUrl } from './lib/api';
 import { LearningJourneyProvider } from './contexts/LearningJourneyContext';
 import LearningJourneyApp from './components/LearningJourneyApp';
 import AdminScanApproval from './components/AdminScanApproval';
+import { MockTestDashboard } from './components/MockTestDashboard';
 
 /**
  * Authentication Gate Component
@@ -846,6 +847,7 @@ const AppShell: React.FC<{
               )}
 
               {activeView === 'approval' && <AdminScanApproval />}
+              {activeView === 'mock_downloads' && <MockTestDashboard onBack={() => setGodModeView('mastermind')} />}
 
               {activeView === 'analysis' && (
                 <ExamAnalysis
@@ -982,6 +984,10 @@ const AppShell: React.FC<{
                   <button onClick={() => setGodModeView('scanning')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'scanning' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}>
                     <ScanLine size={20} className={activeView === 'scanning' ? 'fill-primary-50' : ''} />
                     <span className="text-[9px] font-black uppercase tracking-wider">Scan</span>
+                  </button>
+                  <button onClick={() => setGodModeView('mock_downloads')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'mock_downloads' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}>
+                    <FileText size={20} className={activeView === 'mock_downloads' ? 'fill-primary-50' : ''} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">PDFs</span>
                   </button>
                   <button onClick={() => setGodModeView('learning_journey')} className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-all ${activeView === 'learning_journey' ? 'text-primary-600 scale-105' : 'text-slate-400'}`}>
                     <Map size={20} className={activeView === 'learning_journey' ? 'fill-primary-50' : ''} />

@@ -48,8 +48,9 @@ export default function LandingNav({ onGetStarted }: LandingNavProps) {
               <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">P</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">
-                plus2AI
+              <span className="text-xl font-black tracking-tight">
+                <span style={{ color: '#0a1a16' }}>plus2</span>
+                <span style={{ color: '#ff7f50' }}>AI</span>
               </span>
             </button>
           </div>

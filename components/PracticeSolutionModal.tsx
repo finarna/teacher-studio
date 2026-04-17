@@ -5,6 +5,7 @@ import {
   Layers, AlertTriangle, Info, FileText
 } from 'lucide-react';
 import { RenderWithMath } from './MathRenderer';
+import RichMarkdownRenderer from './RichMarkdownRenderer';
 import type { AnalyzedQuestion } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -90,7 +91,7 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({
                 <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Question Context</div>
                    <div className="text-base md:text-lg font-bold text-slate-900 leading-relaxed font-outfit">
-                      <RenderWithMath text={question.text} />
+                      <RichMarkdownRenderer text={question.text} textSize="text-base md:text-lg" />
                    </div>
                 </div>
 
@@ -115,7 +116,7 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({
                                {item.title || `STEP ${idx + 1}`}
                             </div>
                             <div className={`text-[15px] md:text-[17px] leading-relaxed ${idx === steps.length - 1 ? 'font-bold text-slate-900' : 'font-medium text-slate-800'}`}>
-                               <RenderWithMath text={item.step} />
+                               <RichMarkdownRenderer text={item.step} textSize="text-[15px] md:text-[17px]" />
                             </div>
                          </div>
                       </motion.div>
@@ -142,8 +143,8 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({
                       <div className="space-y-3">
                          {question.keyFormulas.map((formula, idx) => (
                            <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 transition-all hover:bg-white hover:shadow-md">
-                              <div className="text-sm md:text-base font-bold text-center">
-                                 <RenderWithMath text={formula} />
+                              <div className="text-sm md:text-base font-bold text-center text-slate-800">
+                                 <RichMarkdownRenderer text={formula} textSize="text-sm md:text-base" />
                               </div>
                            </div>
                          ))}
@@ -159,8 +160,8 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({
                          <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center"><Lightbulb size={16} /></div>
                          <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-200">Memory Tip</h3>
                       </div>
-                      <div className="text-[14px] md:text-[16px] font-bold leading-relaxed italic border-l-4 border-indigo-500 pl-4">
-                         <RenderWithMath text={(question as any).studyTip || (question as any).tip || (question as any).whyItMatters} />
+                      <div className="text-[14px] md:text-[16px] font-bold leading-relaxed italic border-l-4 border-indigo-500 pl-4 text-indigo-100">
+                         <RichMarkdownRenderer text={(question as any).studyTip || (question as any).tip || (question as any).whyItMatters} textSize="text-[14px] md:text-[16px]" />
                       </div>
                    </div>
                 ) : null}
@@ -177,7 +178,7 @@ const PracticeSolutionModal: React.FC<PracticeSolutionModalProps> = ({
                            <div key={i} className="flex gap-3 items-start bg-white/60 p-3 rounded-xl border border-rose-200/50">
                               <div className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-2 shrink-0" />
                               <div className="text-[13px] md:text-[14px] font-bold text-rose-900 leading-snug">
-                                 <RenderWithMath text={typeof m === 'object' ? m.mistake || m.pitfall : m} />
+                                 <RichMarkdownRenderer text={typeof m === 'object' ? m.mistake || m.pitfall : m} textSize="text-[13px] md:text-[14px]" />
                               </div>
                            </div>
                          ))}

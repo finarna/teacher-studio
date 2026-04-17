@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { RenderWithMath, DerivationStep } from './MathRenderer';
+import RichMarkdownRenderer from './RichMarkdownRenderer';
 import { Scan, AnalyzedQuestion } from '../types';
 import { cache } from '../utils/cache';
 import { useAppContext } from '../contexts/AppContext';
@@ -1285,7 +1286,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                         {/* Question Body */}
                         <div className="px-5 py-6">
                           <div className="text-xl font-bold text-slate-900 leading-relaxed mb-6">
-                            <RenderWithMath text={q.text} showOptions={false} />
+                            <RichMarkdownRenderer text={q.text} textSize="text-xl" />
                           </div>
 
                           {/* MCQ Options - 2 per row */}
@@ -1343,7 +1344,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
 
                                     {/* Option Text */}
                                     <div className="flex-1 text-sm font-medium text-slate-800 pt-1.5">
-                                      <RenderWithMath text={option} showOptions={false} />
+                                      <RichMarkdownRenderer text={option} />
                                     </div>
 
                                     {/* Floating Checkmark for Correct Answer */}
@@ -1389,7 +1390,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                                     <h4 className="text-[10px] font-bold text-blue-900 uppercase mb-1">Visual Element</h4>
                                     {q.visualElementDescription && (
                                       <div className="text-xs font-medium text-slate-700 mb-2">
-                                        <RenderWithMath text={q.visualElementDescription} showOptions={false} />
+                                        <RichMarkdownRenderer text={q.visualElementDescription} />
                                       </div>
                                     )}
                                     {q.extractedImages && q.extractedImages.length > 0 && (
@@ -1562,7 +1563,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                                   </span>
                                 </div>
                                 <div className="text-sm text-slate-700 leading-relaxed">
-                                  <RenderWithMath text={item.step} showOptions={false} />
+                                  <RichMarkdownRenderer text={item.step} />
                                 </div>
                               </div>
                             </div>
@@ -1596,7 +1597,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                                 {activeQuestion.visualElementDescription && idx === 0 && (
                                   <div className="px-4 py-2 bg-slate-50 border-t border-slate-200">
                                     <div className="text-xs text-slate-600">
-                                      <RenderWithMath text={activeQuestion.visualElementDescription} showOptions={false} serif={false} />
+                                      <RichMarkdownRenderer text={activeQuestion.visualElementDescription} />
                                     </div>
                                   </div>
                                 )}
@@ -1687,7 +1688,7 @@ const VisualQuestionBank: React.FC<VisualQuestionBankProps> = ({ recentScans = [
                                   {idx + 1}
                                 </div>
                                 <div className="leading-relaxed">
-                                  <RenderWithMath text={item} showOptions={false} />
+                                  <RichMarkdownRenderer text={item} />
                                 </div>
                               </li>
                             ))}
