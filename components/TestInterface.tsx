@@ -85,7 +85,11 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   const [showNavigator, setShowNavigator] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [showQuitConfirm, setShowQuitConfirm] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(attempt.durationMinutes * 60);
+  
+  // Failsafe: Default to 80 minutes if durationMinutes is missing or NaN
+  const initialDuration = Number(attempt.durationMinutes) || (attempt as any).duration_minutes || 80;
+  const [timeRemaining, setTimeRemaining] = useState(initialDuration * 60);
+  
   const [showMasteryBriefing, setShowMasteryBriefing] = useState(false);
   const [showEnlargedSketch, setShowEnlargedSketch] = useState(false);
   const [enlargedImageUrl, setEnlargedImageUrl] = useState<string | null>(null);
@@ -96,6 +100,29 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
   const currentQuestion = questions[currentQuestionIndex];
   const testYear = currentQuestion?.year || currentQuestion?.exam_year || (attempt.createdAt ? new Date(attempt.createdAt).getFullYear().toString() : '');
+
+  // Diagnostics: Log attempt data to identify mapping issues
+  useEffect(() => {
+    console.log('🧪 [TestInterface] Attempt Data:', {
+      id: attempt.id,
+      durationMinutes: attempt.durationMinutes,
+      duration_minutes: (attempt as any).duration_minutes,
+      status: attempt.status,
+      testName: attempt.testName,
+      isReviewMode,
+      initialDurationCalculated: initialDuration
+    });
+  }, [attempt.id, isReviewMode]);
+
+  // Sync timer if duration becomes available later (e.g. state update)
+  useEffect(() => {
+    if (isNaN(timeRemaining) || timeRemaining === 0) {
+      const newDuration = Number(attempt.durationMinutes) || (attempt as any).duration_minutes;
+      if (newDuration && !isNaN(newDuration)) {
+        setTimeRemaining(newDuration * 60);
+      }
+    }
+  }, [attempt.durationMinutes, (attempt as any).duration_minutes]);
 
   // Debug: Log current question fields (only first question to avoid spam)
   if (currentQuestion && currentQuestionIndex === 0) {

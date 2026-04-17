@@ -1276,13 +1276,32 @@ export async function getTestHistory(req, res) {
     }
 
     const { data: attempts, error } = await query;
-
     if (error) throw error;
+
+    // Map DB snake_case to frontend camelCase for each attempt
+    const mappedAttempts = (attempts || []).map(attempt => ({
+      id: attempt.id,
+      userId: attempt.user_id,
+      testType: attempt.test_type,
+      testName: attempt.test_name,
+      examContext: attempt.exam_context,
+      subject: attempt.subject,
+      topicId: attempt.topic_id,
+      totalQuestions: attempt.total_questions,
+      durationMinutes: attempt.duration_minutes,
+      startTime: attempt.start_time,
+      endTime: attempt.end_time,
+      status: attempt.status,
+      questionsAttempted: attempt.questions_attempted || 0,
+      createdAt: attempt.created_at,
+      rawScore: attempt.raw_score,
+      percentage: attempt.percentage
+    }));
 
     res.json({
       success: true,
-      attempts,
-      count: attempts.length
+      attempts: mappedAttempts,
+      count: mappedAttempts.length
     });
   } catch (error) {
     console.error('❌ Error fetching test history:', error);
@@ -2326,7 +2345,26 @@ async function prepareOfficialTest(userId, setId, supabase, subject, examContext
     .single();
 
   if (attemptError) throw attemptError;
-  return { attempt, questions, isInstant: true };
+
+  // Map DB snake_case to frontend camelCase for attempt
+  const mappedAttempt = {
+    id: attempt.id,
+    userId: attempt.user_id,
+    testType: attempt.test_type,
+    testName: attempt.test_name,
+    examContext: attempt.exam_context,
+    subject: attempt.subject,
+    topicId: attempt.topic_id,
+    totalQuestions: attempt.total_questions,
+    durationMinutes: attempt.duration_minutes,
+    startTime: attempt.start_time,
+    status: attempt.status,
+    questionsAttempted: attempt.questions_attempted || 0,
+    createdAt: attempt.created_at,
+    testConfig: attempt.test_config
+  };
+
+  return { attempt: mappedAttempt, questions, isInstant: true };
 }
 
 /**

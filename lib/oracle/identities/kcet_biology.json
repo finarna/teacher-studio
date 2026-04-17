@@ -9,7 +9,7 @@
       "topic": "Living World",
       "logic": "Scientific naming rules. Forensic Marker: Distinguishing Family (-aceae) from Order (-ales) in botanical nomenclature. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     },
     {
       "id": "BIO-002",
@@ -17,7 +17,7 @@
       "topic": "Biological Classification",
       "logic": "Whittaker's classification criteria. Forensic Marker: Chrysophytes vs Dinoflagellates and Phycomycetes vs Ascomycetes cell wall differences. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.68
     },
     {
       "id": "BIO-003",
@@ -25,7 +25,7 @@
       "topic": "Plant Kingdom",
       "logic": "Gametophyte dominance. Forensic Marker: Sporophyte parasitic nature and Prothallus features in Pteridophytes. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.68
     },
     {
       "id": "BIO-004",
@@ -33,7 +33,7 @@
       "topic": "Animal Kingdom",
       "logic": "Diploblastic vs Triploblastic layers. Forensic Marker: Water vascular system in Echinoderms and Choanocytes in Porifera. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     },
     {
       "id": "BIO-005",
@@ -41,7 +41,7 @@
       "topic": "Morphology of Plants",
       "logic": "Standardized symbols for Actinomorphic/Zygomorphic. Forensic Marker: Placentation types (Axile, Parietal, Marginal) in ovary cross-sections. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-006",
@@ -49,7 +49,7 @@
       "topic": "Anatomy of Plants",
       "logic": "Xylem and Phloem arrangement. Forensic Marker: Radial vs Conjoint-closed bundles in Monocot vs Dicot stems. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-007",
@@ -57,7 +57,7 @@
       "topic": "Structural Org in Animals",
       "logic": "Gap junctions and tight junctions. Forensic Marker: Identifying Compound epithelium locations like skin and salivary ducts. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-008",
@@ -65,7 +65,7 @@
       "topic": "Cell: Unit of Life",
       "logic": "ER-Golgi-Lysosome pathway. Forensic Marker: Mitochondria/Chloroplast as semi-autonomous units with 70S ribosomes. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-009",
@@ -73,7 +73,7 @@
       "topic": "Biomolecules",
       "logic": "Primary/Secondary protein structures. Forensic Marker: Identifying reducing sugars via Fehling's vs Non-reducing (Sucrose). [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.68
     },
     {
       "id": "BIO-010",
@@ -81,7 +81,7 @@
       "topic": "Cell Cycle",
       "logic": "Synapsis and Crossing over. Forensic Marker: Identifying Pachytene and Diakinesis phases in chromosome micrograph descriptions. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.76
     },
     {
       "id": "BIO-011",
@@ -89,7 +89,7 @@
       "topic": "Transport in Plants",
       "logic": "Psi_w = Psi_s + Psi_p. Forensic Marker: Plasmolysis and Imbibition effects on seed germination. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.68
     },
     {
       "id": "BIO-012",
@@ -97,7 +97,7 @@
       "topic": "Mineral Nutrition",
       "logic": "Nitrosomonas and Nitrobacter roles. Forensic Marker: Deficiency symptoms (Chlorosis vs Necrosis) and specific mobile elements. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     },
     {
       "id": "BIO-013",
@@ -105,7 +105,7 @@
       "topic": "Photosynthesis",
       "logic": "Non-cyclic photophosphorylation. Forensic Marker: Kranz anatomy and PEP-carboxylase efficiency in C4 plants (Maize/Sorghum). [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-014",
@@ -113,7 +113,7 @@
       "topic": "Respiration in Plants",
       "logic": "Glucose to Pyruvate pathway. Forensic Marker: RQ values for Fats vs Carbohydrates vs Organic acids. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-015",
@@ -121,7 +121,7 @@
       "topic": "Plant Growth",
       "logic": "Basin-Sigmoid curve. Forensic Marker: Abscisic acid (ABA) as stress hormone vs Gibberellins role in bolting. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-016",
@@ -129,7 +129,7 @@
       "topic": "Digestion",
       "logic": "Substrate-specific breakdowns. Forensic Marker: Role of Succus entericus and bile salts in fat emulsification. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-017",
@@ -137,7 +137,7 @@
       "topic": "Breathing",
       "logic": "TV, ERV, IRV and VC summations. Forensic Marker: Oxy-hemoglobin dissociation curve shift due to Temperature and PCO2. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-018",
@@ -145,7 +145,7 @@
       "topic": "Body Fluids",
       "logic": "SA-Node to AV-Node conduction. Forensic Marker: Interpretation of P-wave and QRS complex duration for heart diagnostics. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.68
     },
     {
       "id": "BIO-019",
@@ -153,7 +153,7 @@
       "topic": "Excretion",
       "logic": "Descending vs Ascending Henle loops. Forensic Marker: ADH and RAAS mechanism for water conservation. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-020",
@@ -161,7 +161,7 @@
       "topic": "Locomotion",
       "logic": "H-zone and I-band changes. Forensic Marker: Calcium ion role in Troponin binding during sliding filament contraction. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-021",
@@ -169,7 +169,7 @@
       "topic": "Neural Control",
       "logic": "Depolarization electricals (Na/K pump). Forensic Marker: Difference between Rods/Cones and Auditory transmission in Cochlea. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     },
     {
       "id": "BIO-022",
@@ -177,7 +177,7 @@
       "topic": "Chemical Coordination",
       "logic": "Hypothalamus and Pituitary hormones. Forensic Marker: Identifying Hormone groups (Steroids vs Proteins) and secondary messengers. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-023",
@@ -185,7 +185,7 @@
       "topic": "Sexual Repro Plants",
       "logic": "Megasporogenesis path. Forensic Marker: Apomixis and Polyembryony in Citrus and Mango. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-024",
@@ -193,7 +193,7 @@
       "topic": "Human Reproduction",
       "logic": "Meiotic arrest and ovulation timing. Forensic Marker: Role of LH-surge and Progesterone in Pregnancy maintenance. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     },
     {
       "id": "BIO-025",
@@ -201,7 +201,7 @@
       "topic": "Reproductive Health",
       "logic": "IUDs vs Oral pills. Forensic Marker: Identifying ZIFT and GIFT as assisted reproductive technologies (ART). [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     },
     {
       "id": "BIO-026",
@@ -209,7 +209,7 @@
       "topic": "Inheritance",
       "logic": "Exceptions to Independent Assortment. Forensic Marker: Pedigree analysis for Hemophilia vs Sickle Cell Anemia. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     },
     {
       "id": "BIO-027",
@@ -217,7 +217,7 @@
       "topic": "Molecular Basis",
       "logic": "5' to 3' replication path. Forensic Marker: Identifying Leading vs Lagging strands and Lac Operon regulatory elements. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-028",
@@ -225,7 +225,7 @@
       "topic": "Evolution",
       "logic": "Morphology vs Function. Forensic Marker: Convergent evolution (Analogy) vs Divergent evolution (Homology) proofs. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     },
     {
       "id": "BIO-029",
@@ -233,7 +233,7 @@
       "topic": "Human Health",
       "logic": "IgA, IgM, IgG classes. Forensic Marker: Distinguishing Benign from Malignant tumors and Viral Life Cycle (HIV). [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     },
     {
       "id": "BIO-030",
@@ -241,7 +241,7 @@
       "topic": "Food Production",
       "logic": "Multiple Ovulation Embryo Transfer. Forensic Marker: Inbreeding depression and its elimination via outcrossing. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.68
     },
     {
       "id": "BIO-031",
@@ -249,7 +249,7 @@
       "topic": "Biotechnology Principles",
       "logic": "Denaturation, Annealing, Extension. Forensic Marker: Role of Restriction enzymes (EcoRI) and Palindromic sequences. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-032",
@@ -257,7 +257,7 @@
       "topic": "Biotech Applications",
       "logic": "Btk toxin mechanism. Forensic Marker: RNA interference (RNAi) as a defense mechanism in tobacco plants. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-033",
@@ -265,7 +265,7 @@
       "topic": "Organisms & Populations",
       "logic": "S-shaped vs J-shaped curves. Forensic Marker: Commensalism vs Mutualism vs Parasitism interaction examples. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.35
     },
     {
       "id": "BIO-034",
@@ -273,7 +273,7 @@
       "topic": "Ecosystem",
       "logic": "10% energy transfer rule. Forensic Marker: Inverted pyramid of biomass in sea and Detritus vs Grazing food chains. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.68
     },
     {
       "id": "BIO-035",
@@ -281,7 +281,7 @@
       "topic": "Biodiversity",
       "logic": "In-situ vs Ex-situ. Forensic Marker: Identifying Hotspots and Sacred Groves as conservation strategies. [Evolved: 2025: The 2025 paper demonstrates a high reliance on 'Match the Column' and 'Statement-based' formats to ensure comprehensive syllabus coverage within the 60-minute window. There is a subtle increase in observational and diagram-based identification questions compared to previous years, shifting the focus from pure rote memorization to visual-conceptual recognition.] | Discovery_2023 | Discovery_2024 | Discovery_2025 | Disc_2023 | Disc_2024 | Disc_2025",
       "high_yield": false,
-      "confidence": 0.4
+      "confidence": 0.64
     }
   ],
   "traps": [],
@@ -290,6 +290,9 @@
     "ids_target": 0.803,
     "rigor_vel": "1.50x",
     "pcs": "50.0%",
-    "status": "PEAK_INTENSITY_RECLAIMED"
+    "status": "CALIBRATED_2022_2025",
+    "updated_at": "2026-04-17T19:54:02.893Z",
+    "final_match_rate": 0.5069047619047619,
+    "total_iterations": 6
   }
 }
