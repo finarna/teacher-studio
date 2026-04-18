@@ -327,7 +327,7 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
     text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
     // Inline code `text`
-    text = text.replace(/`(.*?)`/g, '<code class="bg-slate-200 px-1 py-0.5 rounded text-xs font-mono">$1</code>');
+    text = text.replace(/`(.*?)`/g, '<code class="px-1 py-0.5 rounded-sm font-semibold border-none" style="background-color: transparent !important; color: inherit !important;">$1</code>');
 
     return <span dangerouslySetInnerHTML={{ __html: text }} />;
   };

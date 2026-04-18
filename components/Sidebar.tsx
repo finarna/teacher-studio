@@ -211,7 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onNavigate, userName, onL
         />
       )}
       <div className={`
-        fixed md:relative top-0 left-0 h-screen bg-white border-r border-slate-200 flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out z-[90] font-instrument
+        fixed md:relative top-0 left-0 h-screen bg-white border-r border-slate-200 flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out z-[90] font-instrument no-print
         ${isCollapsed ? 'md:w-20' : 'md:w-64'}
         w-64 md:translate-x-0
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}

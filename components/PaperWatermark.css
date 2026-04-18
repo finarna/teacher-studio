@@ -1,288 +1,240 @@
-/* ═══════════════════════════════════════════════════════════════════
-   PLUS2AI PROFESSIONAL QUESTION PAPER STYLES
-   ═══════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   Plus2AI - Official Exam Paper Stylesheet
+   ══════════════════════════════════════════════════════════════════ */
 
-@media print {
-    @page {
-        margin: 2cm;
-        size: A4;
-    }
+@page {
+  size: A4;
+  margin: 1.5cm 2cm;
+}
 
-    /* ══════════════ SURGICAL SHELL NEUTRALIZATION ══════════════ 
-       We explicitly deactivate the layout properties of the 
-       app shell (Sidebar, Main, etc.) to restore natural flow.
-    */
-    html, body, #root, #root > div, .app-shell, main, 
-    .flex, .flex-1, .flex-col, 
-    .h-screen, .h-full, .min-h-screen,
-    .overflow-hidden, .overflow-y-auto, .overflow-auto,
-    .fixed.inset-0, .absolute.inset-0 {
-        display: block !important;
-        height: auto !important;
-        min-height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-        position: static !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        float: none !important;
-        border: none !important;
-        box-shadow: none !important;
-        justify-content: flex-start !important;
-        align-items: flex-start !important;
-    }
+:root {
+  --plus2-black: #0a1a16;
+  --plus2-coral: #ff7f50;
+}
 
-    /* Standard "Hide Everything" trick */
-    body {
-        visibility: hidden !important;
-        background: white !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        counter-reset: page;
-    }
-
-    /* Re-enable only the printable area and its children */
-    .print-section, .print-section * {
-        visibility: visible !important;
-    }
-
-    .print-section {
-        display: block !important;
-        position: relative !important; /* REQUIRED FOR MULTI-PAGE FLOW */
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: white !important;
-        z-index: 1 !important;
-    }
-
-    /* ══════════════ REPEATING BRANDING ELEMENTS ══════════════ */
-    body {
-        visibility: hidden !important;
-        background-color: white !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        counter-reset: page;
-    }
-
-    .paper-watermark {
-        display: none !important; /* Hide legacy div */
-    }
-
-    .paper-footer {
-        position: fixed !important; /* Truly repeat on every page */
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        background: white !important;
-        padding: 0.5cm 1.5cm !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        border-top: 1px solid #e2e8f0 !important;
-        visibility: visible !important;
-        z-index: 100 !important;
-    }
-
-    /* DYNAMIC PAGE COUNTER */
-    .page-number::after {
-        counter-increment: page;
-        content: counter(page);
-    }
-
-    .paper-container {
-        overflow: visible !important;
-        height: auto !important;
-        /* PRO PATTERN: High-density SVG Watermark that repeats on every physical page */
-        /* Features dual-text offset paths for maximal coverage across core sections */
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Ctext x='100' y='100' font-size='24' font-weight='900' fill='rgba(0,0,0,0.04)' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle' transform='rotate(-45 100 100)'%3EPlus2AI Proprietary%3C/text%3E%3Ctext x='300' y='300' font-size='24' font-weight='900' fill='rgba(0,0,0,0.04)' font-family='sans-serif' text-anchor='middle' dominant-baseline='middle' transform='rotate(-45 300 300)'%3EPlus2AI Proprietary%3C/text%3E%3C/svg%3E") !important;
-        background-repeat: repeat !important;
-        background-color: white !important;
-        position: static !important;
-        margin: 0 auto !important;
-    }
-
-    .paper-header {
-        margin-bottom: 2.5rem !important;
-        padding-top: 0.5rem !important;
-    }
-
-    .exam-meta {
-        font-size: 10pt !important;
-        gap: 0.6rem !important;
-    }
-
-    .no-print {
-        display: none !important;
-    }
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
 }
 
 .paper-container {
-    font-family: 'Inter', 'Roboto', sans-serif;
-    max-width: 210mm;
-    margin: 0 auto;
-    padding: 2rem;
-    background: white;
-    color: #1a1a1a;
-    position: relative;
-    overflow: hidden; /* For watermark containment */
+  background-color: #fff;
+  width: 21cm;
+  min-height: 29.7cm;
+  margin: 0 auto;
+  padding: 0;
+  position: relative;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1a1a1a;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  
+  /* TILED WATERMARK EVERYWHERE */
+  background-image: url("data:image/svg+xml,%3Csvg width='400' height='450' viewBox='0 0 400 450' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='200' y='225' fill='%230a1a16' fill-opacity='0.1' font-family='Arial' font-size='22' font-weight='900' transform='rotate(-35, 200, 225)' text-anchor='middle'%3EPlus2AI OFFICIAL PATTERN SIMULATION %E2%80%A2 2026 %3C/text%3E%3C/svg%3E");
+  background-repeat: repeat;
+  padding-bottom: 45mm; /* Aggressive gutter to prevent footer overlap */
 }
 
-/* ══════════════ WATERMARK ══════════════ */
-.paper-watermark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-45deg);
-    font-size: 8rem;
-    font-weight: 900;
-    color: rgba(0, 0, 0, 0.03);
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 0;
-    user-select: none;
-    letter-spacing: 0.5rem;
-}
-
-/* ══════════════ HEADER ══════════════ */
+/* Header Sections */
 .paper-header {
-    border-bottom: 2px solid #000;
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
-    position: relative;
-    z-index: 10;
+  padding: 2cm 2cm 1rem 2cm;
+  border-bottom: 2px solid var(--plus2-black);
 }
 
 .paper-brand {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 0.5rem;
 }
 
 .brand-text {
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: -0.05em;
-    color: #0a1a16; /* Dark Deep Blakish Green */
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 28pt;
+  text-transform: uppercase;
+  font-style: italic;
+  color: var(--plus2-black);
+  letter-spacing: -1px;
 }
 
 .brand-text span {
-    color: #ff7f50; /* Coral from design system */
+  color: var(--plus2-coral);
+}
+
+.serial-number {
+  font-size: 10pt;
+  color: #444;
 }
 
 .exam-meta {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #000;
+  padding: 0.75rem 1rem;
+  background-color: #fafafa;
+}
+
+.meta-item {
+  font-size: 10.5pt;
+  margin-bottom: 0.2rem;
 }
 
 .reg-no-box {
-    border: 1px solid #000;
-    padding: 0.5rem;
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
+  display: flex;
+  gap: 0;
 }
 
 .reg-no-box .box {
-    width: 20px;
-    height: 25px;
-    border: 1px solid #000;
+  width: 24px;
+  height: 32px;
+  border: 1.5px solid #000;
+  margin-left: -1.5px;
+  background: white;
 }
 
-/* ══════════════ INSTRUCTIONS ══════════════ */
+/* Instructions Box */
 .paper-instructions {
-    background: #f8fafc;
-    padding: 1.5rem;
-    border: 1px solid #e2e8f0;
-    margin-bottom: 2rem;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    border-radius: 8px;
+  margin: 1rem 2cm 2.5rem 2cm;
+  border: 1.5px solid #000;
+  padding: 1rem 1.5rem;
+  font-size: 10pt;
 }
 
 .paper-instructions h3 {
-    margin-top: 0;
-    text-transform: uppercase;
-    font-size: 1rem;
-    border-bottom: 1px solid #cbd5e1;
-    padding-bottom: 0.5rem;
+  margin: 0 0 0.75rem 0;
+  font-size: 11pt;
+  font-weight: 900;
+  text-align: center;
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.4rem;
 }
 
-/* ══════════════ QUESTIONS ══════════════ */
+.paper-instructions ol {
+  padding-left: 1.25rem;
+  margin: 0;
+}
+
+.paper-instructions li {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Question Grid */
 .questions-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    position: relative;
-    z-index: 10;
+  padding: 0 2cm 4rem 2cm;
 }
 
 .question-item {
-    page-break-inside: avoid !important;
-    break-inside: avoid-page !important;
-    margin-bottom: 3.5rem; /* Increased spacing to prevent clipping near bottom */
-    display: block !important;
-    orphans: 3;
-    widows: 3;
+  margin-bottom: 2rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Math Sections - Simplified for Visual Flattening Logic */
+.katex {
+  font-family: KaTeX_Main, Times New Roman, serif !important;
+}
+
+.katex .mfrac .frac-line {
+  border-bottom-width: 1px !important;
 }
 
 .question-text {
-    font-size: 1.1rem;
-    font-weight: 500;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-}
-
-@media print {
-    .options-grid {
-        display: grid !important; /* Restore professional 2-column layout */
-        grid-template-columns: 1fr 1fr !important;
-        gap: 0.75rem !important;
-        margin-top: 0.5rem;
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-    }
-    
-    .option {
-        display: flex !important; /* Restore side-by-side label alignment */
-        align-items: baseline !important;
-        gap: 0.5rem !important;
-        margin-bottom: 0.5rem;
-        break-inside: avoid !important;
-        page-break-inside: avoid !important;
-    }
+  font-size: 11pt;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+  line-height: 1.5;
 }
 
 .options-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 2rem;
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
 }
-
 .option {
-    display: flex;
-    gap: 0.5rem;
-    align-items: baseline;
-    font-size: 1rem;
+  display: flex;
+  gap: 0.6rem;
+  font-size: 11pt;
+  align-items: flex-start;
 }
 
 .option-letter {
-    font-weight: 700;
-    min-width: 1.5rem;
+  font-weight: 700;
+  color: #000;
 }
 
-/* ══════════════ PAGINATION ══════════════ */
+/* Footer Section */
 .paper-footer {
-    margin-top: 3rem;
-    border-top: 1px solid #cbd5e1;
-    padding-top: 1rem;
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: #64748b;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem 2cm;
+  border-top: 1px solid #000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 8.5pt;
+  background-color: #fff;
+  color: #333;
+}
+
+.footer-disclaimer {
+  max-width: 60%;
+  font-size: 8pt;
+  line-height: 1.2;
+}
+
+.page-number::after {
+  content: counter(page);
+}
+
+/* ══════════════ PRINT OPTIMIZATIONS ══════════════ */
+
+@media print {
+  /* nuke everything except the paper */
+  body > *:not(.print-section) {
+    display: none !important;
+  }
+  
+  #root > *:not(.print-section) {
+    display: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background-color: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .paper-container {
+    width: 100%;
+    box-shadow: none;
+    margin: 0;
+    min-height: 100vh;
+    visibility: visible !important;
+  }
+
+  .print-section {
+    position: static !important;
+    display: block !important;
+    visibility: visible !important;
+    z-index: 9999 !important;
+  }
+
+  .paper-footer {
+    position: fixed;
+    bottom: 0;
+  }
 }

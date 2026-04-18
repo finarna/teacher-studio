@@ -933,6 +933,72 @@ This is the ACTUAL KCET Physics pattern. Follow this distribution STRICTLY for $
 CRITICAL INSIGHT: KCET Physics is 92% understanding-based (77% conceptual + 15% graph analysis).
 Do NOT generate calculation-heavy numerical problems - that's NOT the KCET pattern!
 Focus on conceptual clarity, law applications, and graph interpretations.`;
+  } else if (isOracle && examConfig.examContext === 'KCET' && examConfig.subject === 'Biology') {
+    questionTypeMandate = `
+QUESTION TYPE DISTRIBUTION (CRITICAL - Based on KCET 2022-2025 Analysis):
+This is the ACTUAL KCET Biology pattern. Follow this distribution STRICTLY for ${totalInBatch} questions:
+
+1. FACTUAL_CONCEPTUAL (61% = ${Math.round(totalInBatch * 0.61)} questions):
+   - Direct factual recall (definitions, names, parts, functions)
+   - Identification questions ("What is...", "Which of the following...")
+   - Single-fact verification without complex reasoning
+   - Structure/organelle function questions
+   - Process identification (photosynthesis steps, cell cycle phases)
+   Example: "The hormone responsible for inducing seed dormancy is..."
+   Example: "Which of the following is found only in plant cells?"
+   Example: "The primary function of the Loop of Henle is..."
+
+2. DIAGRAM_BASED (11% = ${Math.round(totalInBatch * 0.11)} questions):
+   - Label diagrams or identify structures
+   - Visual interpretation of biological structures
+   - Flowcharts or life cycle diagrams
+   - Anatomical structures identification
+   Example: "In the diagram of the human heart shown, identify the chamber marked 'X'..."
+   Example: "The structure labeled in the neuron diagram is responsible for..."
+
+3. MATCH_COLUMN (8% = ${Math.round(totalInBatch * 0.08)} questions):
+   - Pairing items from two columns
+   - Matching organisms with characteristics
+   - Correlating structures with functions
+   - Scientists with discoveries
+   Example: "Match the following diseases in Column I with their causative agents in Column II..."
+
+4. STATEMENT_BASED (8% = ${Math.round(totalInBatch * 0.08)} questions):
+   - True/false statement verification
+   - Assertion-Reason format
+   - "Which of the following statements is correct?"
+   - Multiple statement evaluation
+   Example: "Consider the following statements: (I) DNA replication is semiconservative. (II) Okazaki fragments..."
+
+5. REASONING (6% = ${Math.round(totalInBatch * 0.06)} questions):
+   - "Why" or "How" questions requiring explanation
+   - Mechanism understanding
+   - Process reasoning
+   - Cause-effect relationships
+   Example: "Why does the lac operon shut down in the presence of glucose?"
+   Example: "Explain how crossing over increases genetic variation..."
+
+6. APPLICATION (5% = ${Math.round(totalInBatch * 0.05)} questions):
+   - Real-world scenarios (disease, agriculture, biotechnology)
+   - Clinical or practical applications
+   - Examples of biological concepts
+   - Use cases or applications
+   Example: "A patient with Type 1 diabetes requires insulin injections because..."
+   Example: "Bt cotton is resistant to bollworms due to..."
+
+CRITICAL: KCET Biology is 61% factual recall. Focus on straightforward questions testing knowledge.
+Do NOT over-complicate with multi-step reasoning. Most questions are direct fact-checking.`;
+  }
+
+  // Determine questionType schema based on subject
+  let questionTypeSchema = 'theory_conceptual|property_based|reaction_based|calculation|structure_based|application'; // Default: Chemistry
+
+  if (examConfig.subject === 'Math') {
+    questionTypeSchema = 'property_based|word_problem|computational|pattern_recognition|abstract';
+  } else if (examConfig.subject === 'Physics') {
+    questionTypeSchema = 'conceptual|graph_analysis|experimental|numerical_problem|diagram_based';
+  } else if (examConfig.subject === 'Biology') {
+    questionTypeSchema = 'factual_conceptual|diagram_based|match_column|statement_based|reasoning|application';
   }
 
   const prompt = `You are a World-Class Entrance Exam Question Architect for ${examConfig.examContext} ${examConfig.subject}.
@@ -982,7 +1048,7 @@ Return ONLY a valid JSON array:
     "marks": ${examConfig.marksPerQuestion === 'variable' ? '1' : examConfig.marksPerQuestion},
     "difficulty": "Easy|Moderate|Hard",
     "topic": "Must match one of the topic names above",
-    "questionType": "theory_conceptual|property_based|reaction_based|calculation|structure_based|application",
+    "questionType": "${questionTypeSchema}",
     "blooms": "Understand|Apply|Analyze|Evaluate",
     "solutionSteps": [
       "Step Title ::: Detailed explanation with reasoning (4-5 steps minimum, use LaTeX for math)"
