@@ -635,7 +635,7 @@ const AppShell: React.FC<{
           {/* Global Compact Header - Hidden during focus mode, mobile LJ, and ALL learning journey sub-views
               (each LJ page has its own back button + header, so this bar is redundant there) */}
           {!isFocusMode && activeView !== 'learning_journey' && !isMobile && (
-            <header className={`h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-50 shrink-0 sticky top-0 transition-all duration-300 ${isDrilledDown && isStudent && activeView === 'learning_journey' ? 'bg-primary-50/30' : ''}`}>
+            <header className={`h-14 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 z-50 shrink-0 sticky top-0 transition-all duration-300 no-print ${isDrilledDown && isStudent && activeView === 'learning_journey' ? 'bg-primary-50/30' : ''}`}>
               <div className="flex items-center gap-3">
                 {/* Contextual Action: Back vs Hamburger */}
                 <button

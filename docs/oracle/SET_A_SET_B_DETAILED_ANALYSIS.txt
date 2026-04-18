@@ -1,0 +1,191 @@
+[dotenv@17.2.3] injecting env (19) from .env.local -- tip: ⚙️  enable debug logging with { debug: true }
+📊 KCET BIOLOGY 2026 FLAGSHIP - SET A & SET B ANALYSIS
+
+═══════════════════════════════════════════════════════
+
+✅ Fetched 120 questions
+
+   SET A: 60 questions (generated first)
+   SET B: 60 questions (generated second)
+
+═══════════════════════════════════════════════════════
+
+
+📄 SET A: KCET Biology 2026 Flagship
+
+─────────────────────────────────────────────────────
+
+📌 Basic Information:
+   Total Questions: 60
+   Generated: 4/18/2026, 8:23:36 AM
+   Scan ID: ea306fe3-85ac-4bfa-a9e1-012d99f3c2f9
+   Subject: Biology | Exam: KCET | Year: 2026
+
+🎯 Difficulty Distribution:
+   Easy:     54 (90%)
+   Moderate: 6 (10%)
+   Hard:     0 (0%)
+
+📋 Question Type Distribution:
+   factual_conceptual: 46 (77%)
+   diagram_based: 10 (17%)
+   statement_based: 3 (5%)
+   application: 1 (2%)
+
+🧬 Identity Assignment:
+   Assigned: 49/60 (82%)
+   Unique Identities: 8
+   Unassigned: 11
+
+📚 Topic Coverage (Top 10):
+   Molecular Basis of Inheritance: 15 questions
+   Ecosystem: 6 questions
+   Biotechnology Principles and Processes: 5 questions
+   Sexual Reproduction in Flowering Plants: 5 questions
+   Principles of Inheritance and Variation: 5 questions
+   Human Reproduction: 4 questions
+   Evolution: 3 questions
+   Microbes in Human Welfare: 3 questions
+   Biodiversity and Conservation: 3 questions
+   Organisms and Populations: 3 questions
+
+📝 Sample Questions (First 5):
+
+   1. During the process of decomposition, certain organisms like earthworms break down detritus into smal...
+      Type: factual_conceptual
+      Identity: BIO-034
+      Difficulty: Easy
+      Topic: Ecosystem
+
+   2. In post-industrial England, the population of the dark-colored peppered moth ($Biston \ betularia$) ...
+      Type: application
+      Identity: BIO-028
+      Difficulty: Easy
+      Topic: Evolution
+
+   3. In the secondary treatment of sewage, the masses of bacteria associated with fungal filaments to for...
+      Type: factual_conceptual
+      Identity: BIO-011
+      Difficulty: Easy
+      Topic: Microbes in Human Welfare
+
+   4. The restriction enzyme $EcoRI$ is known for its high specificity. It recognizes and cuts a specific ...
+      Type: factual_conceptual
+      Identity: N/A
+      Difficulty: Easy
+      Topic: Biotechnology Principles and Processes
+
+   5. During the process of megasporogenesis in a typical angiosperm like *Polygonum*, a single functional...
+      Type: factual_conceptual
+      Identity: BIO-011
+      Difficulty: Easy
+      Topic: Sexual Reproduction in Flowering Plants
+
+═══════════════════════════════════════════════════════
+
+
+📄 SET B: KCET Biology 2026 Flagship
+
+─────────────────────────────────────────────────────
+
+📌 Basic Information:
+   Total Questions: 60
+   Generated: 4/18/2026, 8:24:05 AM
+   Scan ID: ea306fe3-85ac-4bfa-a9e1-012d99f3c2f9
+   Subject: Biology | Exam: KCET | Year: 2026
+
+🎯 Difficulty Distribution:
+   Easy:     54 (90%)
+   Moderate: 6 (10%)
+   Hard:     0 (0%)
+
+📋 Question Type Distribution:
+   factual_conceptual: 42 (70%)
+   diagram_based: 10 (17%)
+   application: 6 (10%)
+   statement_based: 2 (3%)
+
+🧬 Identity Assignment:
+   Assigned: 48/60 (80%)
+   Unique Identities: 8
+   Unassigned: 12
+
+📚 Topic Coverage (Top 10):
+   Molecular Basis of Inheritance: 11 questions
+   Principles of Inheritance and Variation: 7 questions
+   Biotechnology and its Applications: 7 questions
+   Ecosystem: 7 questions
+   Human Health and Disease: 6 questions
+   Human Reproduction: 5 questions
+   Evolution: 4 questions
+   Biotechnology Principles and Processes: 3 questions
+   Biodiversity and Conservation: 3 questions
+   Sexual Reproduction in Flowering Plants: 2 questions
+
+📝 Sample Questions (First 5):
+
+   1. A student performing a recombinant DNA experiment uses the restriction endonuclease $EcoRI$. In this...
+      Type: factual_conceptual
+      Identity: N/A
+      Difficulty: Easy
+      Topic: Biotechnology Principles and Processes
+
+   2. In a human male, the genes present on the autosomes and the sex chromosomes ($X$ and $Y$) exhibit li...
+      Type: factual_conceptual
+      Identity: BIO-026
+      Difficulty: Easy
+      Topic: Principles of Inheritance and Variation
+
+   3. The genetic code is described as 'Universal'. If a scientist transfers a gene from a $Desulfovibrio$...
+      Type: factual_conceptual
+      Identity: BIO-026
+      Difficulty: Easy
+      Topic: Molecular Basis of Inheritance
+
+   4. A patient arrives at an emergency room with a deep wound caused by a rusty nail and is immediately a...
+      Type: application
+      Identity: BIO-029
+      Difficulty: Easy
+      Topic: Human Health and Disease
+
+   5. A farmer aims to protect his cotton crop specifically against the infestation of cotton bollworms. T...
+      Type: factual_conceptual
+      Identity: N/A
+      Difficulty: Easy
+      Topic: Biotechnology and its Applications
+
+═══════════════════════════════════════════════════════
+
+
+📊 SET A vs SET B COMPARISON
+
+─────────────────────────────────────────────────────
+
+   Identity Assignment:
+      SET A: 49 questions
+      SET B: 48 questions
+      Diff: -1 questions 📉
+
+   Easy Questions:
+      SET A: 54 questions
+      SET B: 54 questions
+      Diff: 0 questions ➡️
+
+   Factual Questions:
+      SET A: 46 questions
+      SET B: 42 questions
+      Diff: -4 questions 📉
+
+═══════════════════════════════════════════════════════
+
+
+✅ SUMMARY
+
+─────────────────────────────────────────────────────
+
+📌 Total Questions: 120 (60 per set)
+🎯 Overall Difficulty: 90% Easy, 10% Moderate
+🧬 Overall Identity: 81% assigned
+ReferenceError: types is not defined
+    at analyzeSetASetB (/Users/apple/FinArna/edujourney---universal-teacher-studio/scripts/oracle/analyze_set_a_set_b.ts:157:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)

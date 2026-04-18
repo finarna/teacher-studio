@@ -1,0 +1,78 @@
+{
+  "analysis_date": "2026-04-17T05:17:30.925Z",
+  "total_questions_analyzed": 300,
+  "average_distribution": {
+    "numerical_problem": 1,
+    "conceptual": 77,
+    "graph_analysis": 15,
+    "formula_application": 0,
+    "experimental": 6,
+    "diagram_based": 1
+  },
+  "year_by_year": [
+    {
+      "year": 2021,
+      "distribution": {
+        "numerical_problem": 0,
+        "conceptual": 78,
+        "graph_analysis": 15,
+        "formula_application": 0,
+        "experimental": 5,
+        "diagram_based": 2
+      }
+    },
+    {
+      "year": 2022,
+      "distribution": {
+        "numerical_problem": 0,
+        "conceptual": 90,
+        "graph_analysis": 2,
+        "formula_application": 0,
+        "experimental": 8,
+        "diagram_based": 0
+      }
+    },
+    {
+      "year": 2023,
+      "distribution": {
+        "numerical_problem": 2,
+        "conceptual": 75,
+        "graph_analysis": 17,
+        "formula_application": 0,
+        "experimental": 7,
+        "diagram_based": 0
+      }
+    },
+    {
+      "year": 2024,
+      "distribution": {
+        "numerical_problem": 3,
+        "conceptual": 70,
+        "graph_analysis": 18,
+        "formula_application": 0,
+        "experimental": 7,
+        "diagram_based": 2
+      }
+    },
+    {
+      "year": 2025,
+      "distribution": {
+        "numerical_problem": 2,
+        "conceptual": 70,
+        "graph_analysis": 23,
+        "formula_application": 0,
+        "experimental": 5,
+        "diagram_based": 0
+      }
+    }
+  ],
+  "recommendation_2026": {
+    "numerical_problem": 1,
+    "conceptual": 77,
+    "graph_analysis": 15,
+    "formula_application": 0,
+    "experimental": 6,
+    "diagram_based": 1,
+    "notes": "Use these percentages for 2026 flagship generation to match KCET patterns"
+  }
+}

@@ -20,14 +20,6 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
     const [isGenerating, setIsGenerating] = useState(false);
     const paperRef = useRef<HTMLDivElement>(null);
 
-    const handleQuickPrint = (paper: PaperSet) => {
-        setSelectedPaper(paper);
-        setTimeout(() => {
-            window.print();
-            setSelectedPaper(null);
-        }, 1500);
-    };
-
     const handleProDownload = async (paper: PaperSet) => {
         const html2pdf = window.html2pdf;
         if (!html2pdf) {
@@ -47,102 +39,77 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
             console.warn('Font loading check failed, proceeding with delay fallback', e);
         }
 
-        // Expanded delay to ensure absolute stabilization of complex math
+        // Standard delay for high-fidelity stabilization
         setTimeout(async () => {
             if (!paperRef.current) return;
 
             const paperElement = paperRef.current.querySelector('.paper-container');
             if (!paperElement) return;
 
-            // 1. CONSTRUCT TOTAL ISOLATION SANDBOX
-            const paperHtml = paperElement.outerHTML;
-            const cleanHtml = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="utf-8">
-                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-                    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Outfit:wght@400;900&display=swap" rel="stylesheet">
-                    <style>
-                        html, body {
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            width: 210mm !important;
-                            background: white !important;
-                        }
-                        .paper-container {
-                            width: 210mm !important;
-                            margin: 0 !important;
-                            padding: 0 !important;
-                            background-color: white !important;
-                            box-shadow: none !important;
-                            position: relative !important;
-                            /* MASSIVE TILES TO PREVENT ANY CLIPPING */
-                            background-image: url("data:image/svg+xml,%3Csvg width='1000' height='1000' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fill='%230a1a16' fill-opacity='0.06' font-family='Arial' font-size='28' font-weight='900' transform='rotate(-33, 500, 500)' text-anchor='middle' dominant-baseline='middle'%3EPlus2AI OFFICIAL PATTERN SIMULATION • 2026%3C/text%3E%3C/svg%3E") !important;
-                            background-repeat: repeat !important;
-                        }
-                        .paper-header { padding: 2cm 2cm 1rem 2cm; border-bottom: 2px solid #0a1a16; position: relative; z-index: 2; }
-                        .exam-meta { display: flex; justify-content: space-between; border: 1px solid #000; padding: 0.75rem 1rem; background-color: #fafafa; }
-                        .paper-instructions { margin: 1rem 2cm 2.5rem 2cm; border: 1.5px solid #000; padding: 1rem 1.5rem; position: relative; z-index: 2; }
-                        .questions-grid { padding: 0 2cm 4rem 2cm; position: relative; z-index: 2; }
-                        .question-item { margin-bottom: 2.5rem; page-break-inside: avoid; break-inside: avoid; }
-                        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 2.5rem; padding-left: 1.5rem; }
-                        .katex { font-size: 1.15em !important; }
-                        /* THE GLUE: Absolute Fusion of matrix brackets */
-                        .katex .delimsizing { 
-                            transform: scaleY(1.05) !important; 
-                            margin-top: -1px !important;
-                            margin-bottom: -1px !important;
-                        }
-                        .katex .vlist-t { border-collapse: collapse !important; }
-                        /* THE SVG MIRROR: Match the perfect HTML view */
-                        /* We use borders for sharpness and margins for zero-smudge spacing */
-                        .katex .mfrac .frac-line { 
-                            border-bottom: 1.2pt solid black !important;
-                            height: 1px !important; 
-                            background-color: transparent !important;
-                            display: block !important;
-                            min-width: 100% !important;
-                            margin: 3px 0 !important; /* Absolute prevention of smudging */
-                        }
-                        .katex .sqrt .sqrt-line { 
-                            border-top: 1.2pt solid black !important;
-                            height: 1px !important; 
-                            background-color: transparent !important;
-                            display: block !important;
-                            margin-bottom: 2px !important;
-                        }
-                        /* Ensure proper gap in fractions */
-                        .katex .mfrac { padding: 3px 0 !important; }
-                        /* Hide any raw AI context blocks that might leak */
-                        .rich-markdown [class*="graph-description"],
-                        .rich-markdown [class*="ai-context"] {
-                            display: none !important;
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${paperHtml}
-                </body>
-                </html>
-            `;
-
             const opt = {
-                margin: [10, 0, 35, 0],
+                margin: 0,
                 filename: `Plus2AI_${paper.subject}_KCET_2026_SET_${paper.setName}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: {
-                    scale: 3.0, // HIGH FIDELITY STABILITY
+                    scale: 2.5,
                     useCORS: true,
                     letterRendering: true,
-                    foreignObjectRendering: false, // STABLE ALIGNMENT
-                    logging: true,
+                    allowTaint: false,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    scrollY: -window.scrollY,
+                    scrollX: -window.scrollX,
+                    width: paperElement.scrollWidth,
+                    height: paperElement.scrollHeight,
                     onclone: (clonedDoc: Document) => {
-                        const paths = clonedDoc.querySelectorAll('.katex svg path');
-                        paths.forEach(p => {
-                            p.setAttribute('stroke-width', '40'); // Solid vector paths
-                            p.setAttribute('stroke', 'black');
-                            p.setAttribute('fill', 'black');
+                        const clonedPaper = clonedDoc.querySelector('.paper-container') as HTMLElement;
+                        if (clonedPaper) {
+                            clonedPaper.style.boxShadow = 'none';
+                            clonedPaper.style.width = '210mm';
+                            clonedPaper.style.margin = '0';
+                            clonedPaper.style.padding = '0';
+                        }
+
+                        // CRITICAL FIX: Ensure ALL SVG elements are visible and properly sized
+                        const allSvgs = clonedDoc.querySelectorAll('svg');
+                        allSvgs.forEach((svg: Element) => {
+                            const htmlSvg = svg as SVGElement;
+                            // Force visibility
+                            htmlSvg.style.display = 'inline-block';
+                            htmlSvg.style.visibility = 'visible';
+                            htmlSvg.style.opacity = '1';
+                            htmlSvg.style.overflow = 'visible';
+
+                            // Ensure SVG has dimensions
+                            const width = htmlSvg.getAttribute('width');
+                            const height = htmlSvg.getAttribute('height');
+                            if (width) htmlSvg.style.width = width;
+                            if (height) htmlSvg.style.height = height;
+
+                            // Ensure all paths within SVG are visible
+                            const paths = htmlSvg.querySelectorAll('path');
+                            paths.forEach((path: Element) => {
+                                const htmlPath = path as SVGPathElement;
+                                htmlPath.style.visibility = 'visible';
+                                htmlPath.style.display = 'block';
+                            });
+                        });
+
+                        // Make sure all KaTeX elements are visible
+                        const katexElements = clonedDoc.querySelectorAll('.katex');
+                        katexElements.forEach((el: Element) => {
+                            const htmlEl = el as HTMLElement;
+                            htmlEl.style.display = 'inline-block';
+                            htmlEl.style.visibility = 'visible';
+                            htmlEl.style.opacity = '1';
+                        });
+
+                        // Ensure no hidden overflow on math containers
+                        const mathContainers = clonedDoc.querySelectorAll('.katex-html, .katex-mathml');
+                        mathContainers.forEach((el: Element) => {
+                            const htmlEl = el as HTMLElement;
+                            htmlEl.style.overflow = 'visible';
+                            htmlEl.style.display = 'inline-block';
                         });
                     }
                 },
@@ -151,191 +118,75 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
             };
 
             try {
-                const pdfGenerator = html2pdf().set(opt).from(cleanHtml).toPdf().get('pdf').then((pdf: any) => {
+                await html2pdf().set(opt).from(paperElement).toPdf().get('pdf').then((pdf: any) => {
                     const totalPages = pdf.internal.getNumberOfPages();
                     const pageWidth = pdf.internal.pageSize.getWidth();
                     const pageHeight = pdf.internal.pageSize.getHeight();
 
                     for (let i = 1; i <= totalPages; i++) {
                         pdf.setPage(i);
-
-                        // NO MANUAL OVERLAY WATERMARK HERE - IT'S NOW IN THE SANDBOX CSS
-
-                        pdf.setFontSize(8);
-                        pdf.setTextColor(120);
-                        pdf.text('Official Pattern Simulation. Reproduction strictly prohibited. © 2026 Plus2AI.', 20, pageHeight - 10);
-                        pdf.text(`KCET 2026 Mock Test | SET ${paper.setName} | Page ${i} of ${totalPages}`, pageWidth - 20, pageHeight - 10, { align: 'right' });
-                        pdf.setDrawColor(200);
-                        pdf.line(20, pageHeight - 15, pageWidth - 20, pageHeight - 15);
+                        pdf.setFontSize(8.5);
+                        pdf.setTextColor(40);
+                        const footerLine = `Reproduction strictly prohibited. © 2026 Plus2AI. | KCET 2026 Simulation - SET ${paper.setName} | Page ${i} of ${totalPages}`;
+                        pdf.text(footerLine, pageWidth / 2, pageHeight - 8, { align: 'center' });
+                        pdf.setDrawColor(180);
+                        pdf.setLineWidth(0.3);
+                        pdf.line(20, pageHeight - 11, pageWidth - 20, pageHeight - 11);
                     }
-                });
-
-                await pdfGenerator.save();
+                }).save();
             } catch (err) {
                 console.error('PDF Generation failed:', err);
             } finally {
                 setIsGenerating(false);
+                setSelectedPaper(null);
             }
-        }, 4500); 
+        }, 2000);
     };
 
-    /**
-     * handlePopOutPrint
-     * The NUCLEAR OPTION: Opens the paper in a clean NEW window and prints from there.
-     * This is 100% immune to dashboard CSS issues and blank previews.
-     */
-    const handlePopOutPrint = (paper: PaperSet) => {
+    const handleQuickPrint = (paper: PaperSet) => {
         setSelectedPaper(paper);
-        
-        // Give UI a moment to render the template
+        // Standard delay for DOM to settle
         setTimeout(() => {
-            if (!paperRef.current) return;
-            const paperElement = paperRef.current.querySelector('.paper-container');
-            if (!paperElement) return;
-
-            const paperHtml = paperElement.outerHTML;
-            const cleanHtml = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="utf-8">
-                    <title>Plus2AI Mock Test - ${paper.subject} SET ${paper.setName}</title>
-                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-                    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Outfit:wght@400;900&display=swap" rel="stylesheet">
-                    <style>
-                        @media print {
-                            body { margin: 0; padding: 0; }
-                            @page { margin: 10mm; }
-                        }
-                        html, body {
-                            margin: 0 !important; padding: 0 !important;
-                            background: white !important;
-                            font-family: 'Inter', sans-serif;
-                        }
-                        .paper-container {
-                            width: 210mm; margin: 0 auto; padding: 0;
-                            background-color: white !important;
-                            position: relative !important;
-                            background-image: url("data:image/svg+xml,%3Csvg width='800' height='800' viewBox='0 0 1000 1000' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fill='%230a1a16' fill-opacity='0.05' font-family='Arial' font-size='30' font-weight='900' transform='rotate(-30, 500, 500)' text-anchor='middle'%3EPlus2AI OFFICIAL PATTERN SIMULATION%3C/text%3E%3C/svg%3E") !important;
-                            background-repeat: repeat !important;
-                        }
-                        .paper-header { padding: 2cm 2cm 1rem 2cm; border-bottom: 2px solid #0a1a16; }
-                        .exam-meta { display: flex; justify-content: space-between; border: 1px solid #000; padding: 0.75rem 1rem; }
-                        .paper-instructions { margin: 1rem 2cm 2.5rem 2cm; border: 1.5px solid #000; padding: 1rem 1.5rem; }
-                        .questions-grid { padding: 0 2cm 4rem 2cm; }
-                        .question-item { margin-bottom: 2.5rem; page-break-inside: avoid; }
-                        /* Forces question number and text to stay on same line */
-                        .question-text { 
-                            display: flex !important; 
-                            align-items: flex-start !important; 
-                            gap: 0.5rem !important; 
-                            margin-bottom: 0.5rem !important;
-                        }
-                        .question-text div { display: inline !important; }
-                        .question-text p { display: inline !important; margin: 0 !important; }
-                        
-                        /* Vertical gap between question and its options */
-                        .options-grid { 
-                            display: grid; 
-                            grid-template-columns: 1fr 1fr; 
-                            gap: 0.5rem 2.5rem; 
-                            padding-left: 1.5rem; 
-                            margin-top: 0.8rem !important;
-                        }
-                        
-                        /* SURGICAL LIFT: Fixes 'Sinking' Alignment in Print */
-                        .katex { font-size: 1.15em !important; }
-                        .katex .delimsizing { transform: scaleY(1.05) !important; margin-top: -1px !important; }
-                        
-                        .katex .mfrac .frac-line { 
-                            display: block !important;
-                            height: 1px !important;
-                            background-color: black !important;
-                            opacity: 1 !important;
-                            /* We physically LIFT the line to counteract the drooping */
-                            transform: translateY(-4px) !important; 
-                            margin: 0 !important;
-                        }
-                        .katex .sqrt .sqrt-line { 
-                            display: block !important;
-                            height: 1px !important;
-                            background-color: black !important;
-                            opacity: 1 !important;
-                            /* Subtle lift for roots */
-                            transform: translateY(1px) !important;
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${paperHtml}
-                    <script>
-                        window.onload = function() {
-                            setTimeout(function() {
-                                window.print();
-                                // Optional: window.close();
-                            }, 1000);
-                        };
-                    </script>
-                </body>
-                </html>
-            `;
-
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.open();
-                printWindow.document.write(cleanHtml);
-                printWindow.document.close();
-            } else {
-                alert('Pop-up blocked! Please allow pop-ups for this site to print.');
-            }
-            
-            setSelectedPaper(null);
-        }, 500);
+            window.print();
+            setSelectedPaper(null); 
+        }, 1500);
     };
 
     return (
         <div className="min-h-screen bg-slate-50 p-6 md:p-12">
-            {/* ATOMIC PRINT OVERRIDE: Physically removes dashboard from printer's layout */}
+            {/* SURGICAL PRINT OVERRIDE: Uses standard browser engine without unmounting */}
             <style dangerouslySetInnerHTML={{ __html: `
                 @media print {
-                    /* 1. Reset Page and body */
-                    html, body { 
-                        margin: 0 !important; 
-                        padding: 0 !important; 
+                    html, body, #root, #root > div, .min-h-screen { 
+                        height: auto !important;
+                        overflow: visible !important;
+                        display: block !important;
+                        position: static !important;
                         background: white !important;
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
                     }
-                    
-                    /* 2. Kill the entire Dashboard UI */
-                    #root > div:not(.print-section),
-                    .no-print, 
-                    .min-h-screen:not(.print-section) { 
+                    .no-print, .dashboard-ui header, .dashboard-ui footer, .dashboard-ui > header, .dashboard-ui > footer, .vidya-assistant-portal, [class*="chatbot-button"] { 
                         display: none !important; 
                     }
-                    
-                    /* 3. Resuscitate the paper into standard document flow */
                     .print-section { 
                         display: block !important; 
-                        position: static !important; 
+                        position: relative !important; 
                         width: 100% !important; 
-                        height: auto !important;
-                        margin: 0 !important; 
-                        padding: 0 !important;
                         visibility: visible !important;
                     }
-                    .print-section * { visibility: visible !important; }
-                    
-                    /* 4. Fix KaTeX spacing for physical paper */
-                    .katex { font-variant-numeric: lining-nums tabular-nums !important; }
                 }
             `}} />
 
-            {/* Hidden render area for PDF capture */}
+            {/* Hidden render area for PDF capture and Quick Print */}
             {selectedPaper && (
                 <div
                     ref={paperRef}
                     className="fixed inset-0 z-[100] bg-white overflow-auto print:static print:h-auto print:overflow-visible print-section"
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                        padding: '2rem 0'
+                    }}
                 >
                     <QuestionPaperTemplate
                         title={selectedPaper.title}
@@ -344,9 +195,9 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                         setName={selectedPaper.setName}
                         serialNumber={`P2-2026-${selectedPaper.subject.slice(0, 4).toUpperCase()}`}
                     />
-
+                    
                     {!isGenerating && (
-                        <button
+                        <button 
                             onClick={() => setSelectedPaper(null)}
                             className="no-print fixed top-4 right-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-slate-700 transition-all flex items-center gap-2"
                         >
@@ -366,9 +217,9 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                 </div>
             )}
 
-            <div className={`max-w-5xl mx-auto no-print transition-opacity duration-300 ${selectedPaper ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                <header className="mb-12 no-print">
-                    <button
+            <div className={`max-w-5xl mx-auto dashboard-ui transition-opacity duration-300 ${selectedPaper ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                <header className="mb-12">
+                    <button 
                         onClick={onBack}
                         className="mb-8 text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-1 font-medium"
                     >
@@ -393,15 +244,16 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {papers.map((paper) => (
-                        <div
+                        <div 
                             key={paper.id}
                             className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group overflow-hidden relative"
                         >
-                            <div className={`absolute top-0 left-0 right-0 h-1.5 ${paper.subject === 'Physics' ? 'bg-blue-500' :
-                                    paper.subject === 'Mathematics' ? 'bg-indigo-600' :
-                                        paper.subject === 'Chemistry' ? 'bg-emerald-500' :
-                                            paper.subject === 'Biology' ? 'bg-rose-500' : 'bg-coral-500'
-                                }`} />
+                            <div className={`absolute top-0 left-0 right-0 h-1.5 ${
+                                paper.subject === 'Physics' ? 'bg-blue-500' : 
+                                paper.subject === 'Mathematics' ? 'bg-indigo-600' :
+                                paper.subject === 'Chemistry' ? 'bg-emerald-500' :
+                                paper.subject === 'Biology' ? 'bg-rose-500' : 'bg-coral-500'
+                            }`} />
 
                             <div className="flex justify-between items-start mb-6">
                                 <div className="p-3 bg-slate-50 rounded-xl group-hover:bg-slate-100 transition-colors">
@@ -420,14 +272,14 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                             </p>
 
                             <div className="flex flex-col gap-2">
-                                <button
-                                    onClick={() => handlePopOutPrint(paper)}
+                                <button 
+                                    onClick={() => handleProDownload(paper)}
                                     className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-md active:scale-[0.98]"
                                 >
                                     <Sparkles size={16} className="text-amber-400" /> Download Pro PDF
                                 </button>
-                                <button
-                                    onClick={() => handlePopOutPrint(paper)}
+                                <button 
+                                    onClick={() => handleQuickPrint(paper)}
                                     className="w-full bg-white text-slate-900 border-2 border-slate-900 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-[0.98]"
                                 >
                                     <Printer size={16} /> Quick Print Paper
