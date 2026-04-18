@@ -134,7 +134,7 @@ export const QuestionPaperTemplate: React.FC<PaperProps> = ({
                 <div className="footer-disclaimer">
                     Official Pattern Simulation. Reproduction strictly prohibited. &copy; 2026 Plus2AI.
                 </div>
-                <div className="page-number">KCET 2026 Simulation - SET {setName} | Page </div>
+                <div className="page-number">KCET 2026 Simulation - SET {setName}</div>
             </footer>
         </div>
     );

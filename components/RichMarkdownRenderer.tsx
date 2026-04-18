@@ -51,13 +51,22 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
       .replace(/\\\\n/g, '\n');
 
     // Extract all math expressions and replace with placeholders
-    // Expanded regex to catch $$, $, \[, \], \(, \)
-    let protectedText = processedText.replace(/(\$\$[\s\S]*?\$\$|\$[^\$\n]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
+    // NUCLEAR DELIMITER PASS: Robust against spaces and malformed strings
+    let protectedText = processedText.replace(/(\$\$[\s\S]*?\$\$|\$[^\$]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
       const placeholder = `__MATH_PLACEHOLDER_${placeholderCounter}__`;
-      mathPlaceholders[placeholder] = match;
+      // Normalize internal math whitespace (fixes $ \nu$)
+      let cleanedMatch = match;
+      if (match.startsWith('$') && !match.startsWith('$$')) {
+          cleanedMatch = `$${match.slice(1, -1).trim()}$`;
+      }
+      mathPlaceholders[placeholder] = cleanedMatch;
       placeholderCounter++;
       return placeholder;
     });
+
+    // METADATA CLEANER: Hide AI context blocks from the student paper
+    protectedText = protectedText.replace(/\[Graph Description:[\s\S]*?\]/gi, '');
+    protectedText = protectedText.replace(/\[AI Context:[\s\S]*?\]/gi, '');
 
     // Now split by lines (math is protected)
     const lines = protectedText.split('\n');
@@ -257,8 +266,8 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
     }
 
     // Handle math first
-    // Expanded regex to catch $$, $, \[, \], \(, \)
-    const mathRegex = /(\$\$[\s\S]*?\$\$|\$[^\s\n\$][^\$]*?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g;
+    // MATH INTEGRITY REGEX
+    const mathRegex = /(\$\$[\s\S]*?\$\$|\$[^\$]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g;
     const parts = processedText.split(mathRegex);
 
     return parts.map((part, index) => {
