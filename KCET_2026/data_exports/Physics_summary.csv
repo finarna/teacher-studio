@@ -1,0 +1,61 @@
+Question#,Topic,Difficulty,SET-A Score,SET-B Score,Combined,Verdict
+1,Electric Charges and Fields,Easy,56,44,56,partial_hit
+2,Electric Charges and Fields,Moderate,46,53,53,partial_hit
+3,Electric Charges and Fields,Hard,46,43,46,miss
+4,Electric Charges and Fields,Easy,56,44,56,partial_hit
+5,Electric Charges and Fields,Moderate,46,53,53,partial_hit
+6,Electric Charges and Fields,Hard,46,43,46,miss
+7,Electric Charges and Fields,Easy,56,44,56,partial_hit
+8,Electric Charges and Fields,Moderate,46,53,53,partial_hit
+9,Electric Charges and Fields,Hard,46,43,46,miss
+10,Electric Charges and Fields,Easy,56,44,56,partial_hit
+11,Current Electricity,Moderate,47,54,54,partial_hit
+12,Current Electricity,Hard,47,54,54,partial_hit
+13,Current Electricity,Easy,57,64,64,partial_hit
+14,Current Electricity,Moderate,47,54,54,partial_hit
+15,Current Electricity,Hard,47,54,54,partial_hit
+16,Current Electricity,Easy,57,64,64,partial_hit
+17,Current Electricity,Moderate,47,54,54,partial_hit
+18,Current Electricity,Hard,47,54,54,partial_hit
+19,Current Electricity,Easy,57,64,64,partial_hit
+20,Current Electricity,Moderate,47,54,54,partial_hit
+21,Magnetism and Matter,Hard,45,62,62,partial_hit
+22,Magnetism and Matter,Easy,44,52,52,partial_hit
+23,Magnetism and Matter,Moderate,53,52,53,partial_hit
+24,Magnetism and Matter,Hard,45,62,62,partial_hit
+25,Magnetism and Matter,Easy,44,52,52,partial_hit
+26,Magnetism and Matter,Moderate,53,52,53,partial_hit
+27,Magnetism and Matter,Hard,45,62,62,partial_hit
+28,Magnetism and Matter,Easy,44,52,52,partial_hit
+29,Magnetism and Matter,Moderate,53,52,53,partial_hit
+30,Magnetism and Matter,Hard,45,62,62,partial_hit
+31,Ray Optics,Easy,44,44,44,miss
+32,Ray Optics,Moderate,44,44,44,miss
+33,Ray Optics,Hard,45,43,45,miss
+34,Ray Optics,Easy,44,44,44,miss
+35,Ray Optics,Moderate,44,43,44,miss
+36,Ray Optics,Hard,45,43,45,miss
+37,Ray Optics,Easy,44,44,44,miss
+38,Ray Optics,Moderate,44,43,44,miss
+39,Ray Optics,Hard,45,43,45,miss
+40,Ray Optics,Easy,44,44,44,miss
+41,Dual Nature of Matter,Moderate,44,44,44,miss
+42,Dual Nature of Matter,Hard,45,43,45,miss
+43,Dual Nature of Matter,Easy,44,44,44,miss
+44,Dual Nature of Matter,Moderate,44,43,44,miss
+45,Dual Nature of Matter,Hard,45,43,45,miss
+46,Dual Nature of Matter,Easy,44,44,44,miss
+47,Dual Nature of Matter,Moderate,44,43,44,miss
+48,Dual Nature of Matter,Hard,45,43,45,miss
+49,Dual Nature of Matter,Easy,44,44,44,miss
+50,Dual Nature of Matter,Moderate,44,44,44,miss
+51,Semiconductor Electronics,Hard,55,45,55,partial_hit
+52,Semiconductor Electronics,Easy,45,45,45,miss
+53,Semiconductor Electronics,Moderate,45,55,55,partial_hit
+54,Semiconductor Electronics,Hard,55,45,55,partial_hit
+55,Semiconductor Electronics,Easy,45,45,45,miss
+56,Semiconductor Electronics,Moderate,45,55,55,partial_hit
+57,Semiconductor Electronics,Hard,55,45,55,partial_hit
+58,Semiconductor Electronics,Easy,45,45,45,miss
+59,Semiconductor Electronics,Moderate,45,55,55,partial_hit
+60,Semiconductor Electronics,Hard,55,45,55,partial_hit

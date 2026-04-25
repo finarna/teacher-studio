@@ -353,61 +353,56 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   ENHANCED KATEX FORMULA RENDERING
+   PROFESSIONAL KATEX MATHEMATICAL TYPESETTING
+
+   Design Principles:
+   1. Minimal CSS interference - Let KaTeX handle internal rendering
+   2. Baseline alignment by default (TeX standard)
+   3. Mathematical axis alignment for operators (-0.25em from baseline)
+   4. Proper spacing based on TeX primitives (thin/med/thick space)
+   5. Context-aware sizing for educational readability
+
+   Standards Followed:
+   - TeX Book (Knuth) mathematical axis and spacing rules
+   - KaTeX best practices documentation
+   - Professional mathematical publishing standards
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* Better spacing and sizing for mathematical formulas */
+/* Base container - minimal interference with KaTeX's internal rendering */
 .katex {
-    font-size: 1.3em !important;
-    line-height: 1.6 !important;
-    /* Soft highlight for all math */
-    background: rgba(241, 245, 249, 0.6);
-    padding: 0.15em 0.4em;
-    border-radius: 6px;
-    border: 1px solid rgba(226, 232, 240, 0.5);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    font-size: 1.2em;
+    line-height: normal; /* Let KaTeX manage its own line height */
     color: #1e293b;
 }
 
-/* Make symbols and operators clearer */
-.katex .mord,
-.katex .mbin,
-.katex .mrel,
-.katex .mopen,
-.katex .mclose {
-    font-weight: 500 !important;
-}
-
-/* Inline math - ensure it doesn't break line height too much */
+/* Inline math - baseline alignment (TeX standard) */
 .katex:not(.katex-display .katex) {
     display: inline-block;
-    vertical-align: middle;
-    margin: 0.1em 0.2em;
+    vertical-align: baseline;
+    margin: 0 0.15em;
 }
 
-/* Quiz question text - larger math */
-.math-text .katex {
-    font-size: 1.05em !important;
-}
-
-/* Instrument Sans context (question cards) - ensure katex aligns well */
-.font-instrument .katex,
-.font-instrument .katex-html {
-    vertical-align: middle;
-}
-
-/* Display mode (block equations) - centered and prominent */
+/* Display mode (block equations) - centered with proper spacing */
 .katex-display {
-    margin: 1.25rem 0 !important;
-    padding: 0.75rem 0 !important;
+    display: block;
+    margin: 1.5em 0;
+    padding: 0.5em 0;
+    text-align: center;
     overflow-x: auto;
     overflow-y: hidden;
 }
 
-/* Inline math - better vertical alignment */
+/* Inner HTML wrapper - baseline alignment */
 .katex-html {
     display: inline-block;
-    vertical-align: middle;
+    vertical-align: baseline;
+}
+
+/* Optional: Subtle background for math in educational context */
+.katex:not(.katex-display .katex) {
+    background: rgba(241, 245, 249, 0.3);
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
 }
 
 /* Chemistry formulas - slightly smaller and distinct color */
@@ -439,17 +434,102 @@
     text-rendering: optimizeLegibility;
 }
 
-/* Square roots - smoother rendering */
+/* ═══════════════════════════════════════════════════════════════════
+   MATHEMATICAL OPERATORS & SYMBOLS - PROFESSIONAL TYPESETTING
+   Following TeX primitives and mathematical axis alignment
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Fractions - aligned on mathematical axis (TeX standard: -0.25ex) */
+.katex .mfrac {
+    vertical-align: -0.4em;
+}
+
+/* Fraction line (vinculum) - standard thickness */
+.katex .frac-line {
+    border-bottom-width: 0.04em;
+}
+
+/* Fractions in exponents/superscripts - must stay on baseline */
+.katex sup .mfrac,
+.katex .msupsub sup .mfrac,
+.katex .msupsub > sup .mfrac {
+    vertical-align: baseline;
+    font-size: 0.7em;
+}
+
+/* Fractions in subscripts */
+.katex sub .mfrac,
+.katex .msupsub sub .mfrac {
+    vertical-align: baseline;
+    font-size: 0.7em;
+}
+
+/* Square roots - subtle adjustment for optical alignment */
 .katex .sqrt {
-    border-color: currentColor !important;
+    vertical-align: -0.03em;
 }
 
-/* Better contrast for parentheses and brackets */
+/* Square root radical (surd) - ensure proper coverage */
+.katex .sqrt > .vlist-t {
+    vertical-align: baseline;
+}
+
+/* Large operators (∫, ∑, ∏) - centered on mathematical axis */
+.katex .mop.op-symbol.large-op {
+    vertical-align: -0.25em;
+}
+
+/* Operator limits (subscripts/superscripts on ∫, ∑, etc.) */
+.katex .mop + .msupsub {
+    vertical-align: baseline;
+}
+
+/* Subscripts and superscripts - proper positioning */
+.katex .msupsub {
+    text-rendering: optimizeLegibility;
+}
+
+/* Delimiters (parentheses, brackets, braces) - optical sizing */
 .katex .delimsizing {
-    color: #334155 !important;
+    vertical-align: baseline;
 }
 
-/* Smooth scrolling for long equations */
+/* Accent positioning (hat, tilde, etc.) */
+.katex .accent {
+    vertical-align: baseline;
+}
+
+/* Matrix/Array spacing - standard TeX values */
+.katex .arraycolsep {
+    width: 0.5em;
+}
+
+/* Binary operators spacing (+, -, ×, ÷) */
+.katex .mbin {
+    margin: 0 0.22em;
+}
+
+/* Relational operators spacing (=, <, >, ≤, ≥) */
+.katex .mrel {
+    margin: 0 0.28em;
+}
+
+/* Punctuation in math mode */
+.katex .mpunct {
+    margin: 0 0.17em 0 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CONTEXT-SPECIFIC OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Quiz/Question context - larger for readability */
+.math-text .katex,
+.font-instrument .katex {
+    font-size: 1.3em;
+}
+
+/* Display equations - proper centering and scrolling */
 .katex-display>.katex {
     text-align: center;
     white-space: nowrap;
@@ -480,21 +560,19 @@
 
 /* Solution step content area */
 .solution-step-content {
-    /* Better line spacing for readability */
-    line-height: 1.7 !important;
+    line-height: 1.8;
 }
 
-/* Inline formulas in solution steps - larger and highlighted */
+/* Inline formulas in solution steps - enhanced for educational clarity */
 .solution-step-content .katex {
-    font-size: 1.15em !important;
-    padding: 0.1em 0.25em;
-    background: rgba(241, 245, 249, 0.5); /* Subtle slate background instead of yellow */
-    color: #0f172a !important;
+    font-size: 1.25em;
+    padding: 0.15em 0.35em;
+    background: rgba(241, 245, 249, 0.5);
+    color: #0f172a;
     border-radius: 4px;
     border: 1px solid rgba(226, 232, 240, 0.8);
-    margin: 0 0.15em;
-    display: inline-block;
-    transition: all 0.3s ease;
+    margin: 0 0.2em;
+    transition: all 0.2s ease;
 }
 
 .solution-step-content .katex:hover {
@@ -687,4 +765,44 @@
 
 .context-bar {
     animation: slideInDown 250ms ease-out;
+}
+
+/* Innovative Rank Stream Animation */
+@keyframes rank-stream {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.2;
+    }
+    100% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+
+.rank-stream-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.rank-dot {
+    position: absolute;
+    width: 2px;
+    height: 15px;
+    background: linear-gradient(to bottom, transparent, #2563eb);
+    border-radius: 100px;
+    animation: rank-stream 10s linear infinite;
+}
+
+/* Glass Card Enhanced */
+.glass-advanced {
+    @apply bg-white/40 backdrop-blur-3xl border border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(37,99,235,0.1)] transition-all duration-700;
 }

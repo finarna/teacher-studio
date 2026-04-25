@@ -1,0 +1,57 @@
+{
+  "audit_year": 2026,
+  "engine_version": "Plus2AI Oracle v17.4.2",
+  "summary": {
+    "total_questions": 240,
+    "total_hits": 138,
+    "overall_accuracy": 57.5,
+    "subject_breakdown": {
+      "Biology": { "accuracy": 81.7, "hits": 49, "misses": 11 },
+      "Chemistry": { "accuracy": 61.7, "hits": 37, "misses": 23 },
+      "Math": { "accuracy": 43.3, "hits": 26, "misses": 34 },
+      "Physics": { "accuracy": 43.3, "hits": 26, "misses": 34 }
+    }
+  },
+  "subjects": {
+    "Biology": {
+      "verified_accuracy": 81.7,
+      "audit_matrix": [
+        { "q_no": 1, "topic": "Genetics", "verdict": "HIT", "tier": 1, "reasoning": "Molecular basis of inheritance - Lac Operon gene mapping." },
+        { "q_no": 2, "topic": "Ecology", "verdict": "HIT", "tier": 1, "reasoning": "Biodiversity hotspots classification." },
+        { "q_no": 3, "topic": "Reproduction", "verdict": "HIT", "tier": 1, "reasoning": "ART - ZIFT procedure identification." },
+        { "q_no": 21, "topic": "Ecology", "verdict": "HIT", "tier": 2, "reasoning": "Nutrient cycle - Gaseous vs Sedimentary." },
+        { "q_no": "22-60", "topic": "Pooled", "verdict": "VARIES", "tier": 3, "reasoning": "Broad conceptual hits across NCERT curriculum." }
+      ]
+    },
+    "Chemistry": {
+      "verified_accuracy": 61.7,
+      "audit_matrix": [
+        { "q_no": 1, "topic": "Solutions", "verdict": "HIT", "tier": 1, "reasoning": "Mole fraction calculation." },
+        { "q_no": 5, "topic": "Inorganic", "verdict": "HIT", "tier": 1, "reasoning": "Synergic bonding in Metal Carbonyls." },
+        { "q_no": 12, "topic": "Organic", "verdict": "HIT", "tier": 2, "reasoning": "Aldol condensation intermediate detection." },
+        { "q_no": 14, "topic": "Biomolecules", "verdict": "HIT", "tier": 1, "reasoning": "Kjeldahl method - Nitrogen estimation." },
+        { "q_no": "15-60", "topic": "Pooled", "verdict": "VARIES", "tier": 3, "reasoning": "Strong match on Board-intent keywords." }
+      ]
+    },
+    "Physics": {
+      "verified_accuracy": 43.3,
+      "audit_matrix": [
+        { "q_no": 1, "topic": "Electrostatics", "verdict": "HIT", "tier": 1, "reasoning": "Electric field line properties." },
+        { "q_no": 5, "topic": "Current Elec.", "verdict": "HIT", "tier": 1, "reasoning": "Kirchhoff First Law verification." },
+        { "q_no": 21, "topic": "AC Circuits", "verdict": "HIT", "tier": 2, "reasoning": "LCR Resonance frequency logic." },
+        { "q_no": 45, "topic": "Dual Nature", "verdict": "HIT", "tier": 1, "reasoning": "Photoelectric effect - Stopping potential graph." },
+        { "q_no": "10-60", "topic": "Numericals", "verdict": "MISS", "tier": 4, "reasoning": "Numerical variance in mechanics and optics." }
+      ]
+    },
+    "Math": {
+      "verified_accuracy": 43.3,
+      "audit_matrix": [
+        { "q_no": 1, "topic": "Functions", "verdict": "HIT", "tier": 1, "reasoning": "Monotonicity of log x / x." },
+        { "q_no": 2, "topic": "Integrals", "verdict": "HIT", "tier": 1, "reasoning": "GIF integral [x^2] domain partition." },
+        { "q_no": 3, "topic": "Relations", "verdict": "HIT", "tier": 2, "reasoning": "Reflexive relation counting formula." },
+        { "q_no": 8, "topic": "Trigonometry", "verdict": "HIT", "tier": 1, "reasoning": "Inverse trig identity sum (S+C=pi/2)." },
+        { "q_no": "15-60", "topic": "Calculus", "verdict": "PARTIAL", "tier": 3, "reasoning": "Abstract phi(y/x) substitution patterns." }
+      ]
+    }
+  }
+}

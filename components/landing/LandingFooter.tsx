@@ -71,8 +71,8 @@ export default function LandingFooter() {
                 </button>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors duration-200">
-                  Integrations
+                <a href="/KCET_2026/analysis_reports/forensic_audit/index.html" className="hover:text-white transition-colors duration-200">
+                  2026 Prediction Analysis
                 </a>
               </li>
               <li>

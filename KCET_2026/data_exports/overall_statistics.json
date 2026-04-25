@@ -1,0 +1,33 @@
+{
+  "totalQuestions": 240,
+  "totalExactMatches": 0,
+  "avgCombinedCoverage": 0.8333333333333334,
+  "avgSetAAccuracy": 45.17083333333333,
+  "avgSetBAccuracy": 45.46666666666667,
+  "subjects": [
+    {
+      "name": "Math",
+      "coverage": 3.3333333333333335,
+      "setA": 51.28333333333333,
+      "setB": 50.96666666666667
+    },
+    {
+      "name": "Physics",
+      "coverage": 0,
+      "setA": 47.45,
+      "setB": 49.06666666666667
+    },
+    {
+      "name": "Chemistry",
+      "coverage": 0,
+      "setA": 49.28333333333333,
+      "setB": 49.5
+    },
+    {
+      "name": "Biology",
+      "coverage": 0,
+      "setA": 32.666666666666664,
+      "setB": 32.333333333333336
+    }
+  ]
+}

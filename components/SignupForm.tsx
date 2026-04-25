@@ -7,13 +7,15 @@
 import React, { useState } from 'react';
 import { useAuth, AuthError } from './AuthProvider';
 import { signInWithGoogle } from '../lib/supabase';
+import { ChevronLeft } from 'lucide-react';
 
 interface SignupFormProps {
   onSwitchToLogin?: () => void;
+  onBackToLanding?: () => void;
   onSuccess?: () => void;
 }
 
-export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
+export function SignupForm({ onSwitchToLogin, onBackToLanding, onSuccess }: SignupFormProps) {
   const { signUp, error, clearError, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -69,11 +71,22 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 relative">
+          {/* Back to Home Button */}
+          {onBackToLanding && (
+            <button
+              onClick={onBackToLanding}
+              className="absolute top-6 left-6 text-gray-400 hover:text-gray-900 transition flex items-center gap-1 group"
+            >
+              <ChevronLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+              <span className="text-xs font-bold uppercase tracking-widest">Home</span>
+            </button>
+          )}
+
           {/* Header */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 pt-4">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-            <p className="text-gray-600">Join <span style={{ color: '#0a1a16' }}>plus2</span><span style={{ color: '#ff7f50' }}>AI</span> AI mocktest to start analyzing exams</p>
+            <p className="text-gray-600 font-medium">Join <span style={{ color: '#0a1a16' }}>plus2</span><span style={{ color: '#ff7f50' }}>AI</span> AI mocktest to start analyzing exams</p>
           </div>
 
           {/* Error Display */}

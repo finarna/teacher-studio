@@ -1,11 +1,14 @@
 import LandingNav from './LandingNav';
 import HeroSection from './HeroSection';
+import VerificationAuditSection from './VerificationAuditSection';
+import SubjectMasterySection from './SubjectMasterySection';
 import FeaturesSection from './FeaturesSection';
 import AdaptiveTrajectorySection from './AdaptiveTrajectorySection';
 import PricingSection from './PricingSection';
 import TestimonialsSection from './TestimonialsSection';
 import FAQSection from './FAQSection';
 import LandingFooter from './LandingFooter';
+import RankStreamBackground from './RankStreamBackground';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -13,14 +16,19 @@ interface LandingPageProps {
 
 export default function LandingPage({ onGetStarted }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
+      <RankStreamBackground />
       <LandingNav onGetStarted={onGetStarted} />
-      <HeroSection onGetStarted={onGetStarted} />
-      <FeaturesSection />
-      <AdaptiveTrajectorySection />
-      <PricingSection onGetStarted={onGetStarted} />
-      <TestimonialsSection />
-      <FAQSection />
+      <main className="relative z-10">
+        <HeroSection onGetStarted={onGetStarted} />
+        <VerificationAuditSection />
+        <SubjectMasterySection />
+        <AdaptiveTrajectorySection />
+        <FeaturesSection />
+        <PricingSection onGetStarted={onGetStarted} />
+        <TestimonialsSection />
+        <FAQSection />
+      </main>
       <LandingFooter />
     </div>
   );

@@ -39,8 +39,8 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
     ),
-    title: 'Predictive Analytics',
-    description: 'Identify knowledge gaps and predict student performance with AI-driven insights and recommendations.',
+    title: 'Precision Discovery Engine',
+    description: 'The REI v17 engine analyzed over 100,000 historical KCET patterns to predict the 2026 paper with high verbatim precision.',
     color: 'from-pink-500 to-pink-600',
   },
   {
@@ -92,16 +92,18 @@ export default function FeaturesSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-16 relative"
         >
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            Everything You Need to{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Transform Teaching
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
+          
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+            The Infrastructure of{' '}
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Rank Engineering
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Powerful AI tools designed specifically for educators. Save hours every week while improving student outcomes.
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Leading the charge for India's premier Coaching Centers and Aspirants. Plus2AI provides the elite forensic data needed to convert preparation into guaranteed ranks.
           </p>
         </motion.div>
 
@@ -111,40 +113,40 @@ export default function FeaturesSection() {
           variants={container}
           initial="hidden"
           animate={isInView ? "show" : "hidden"}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
         >
           {features.map((feature, index) => (
             <motion.div
               key={index}
               variants={item}
-              whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-              className="group relative p-8 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300"
+              className="group relative flex flex-col items-center text-center"
             >
-              {/* Gradient border on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10`} style={{ padding: '2px' }}>
-                <div className="w-full h-full bg-white rounded-2xl" />
+              <div className="relative mb-8 w-full max-w-[280px] aspect-square flex items-center justify-center">
+                 {/* Illustration Backdrop */}
+                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-5 rounded-[3rem] group-hover:opacity-10 transition-opacity duration-500`} />
+                 
+                 {/* The Illustration */}
+                 <motion.img 
+                   whileHover={{ y: -15, rotate: index % 2 === 0 ? 5 : -5 }}
+                   src={index === 1 ? "/images/question_bank.png" : index === 3 ? "/images/rank_analytics.png" : ""} 
+                   alt={feature.title}
+                   className={`relative z-10 w-full h-auto drop-shadow-2xl ${feature.title === 'Smart Question Bank' || feature.title === 'Precision Forensic Oracle' ? 'block' : 'hidden'}`}
+                 />
+
+                 {/* Fallback for others */}
+                 {!(feature.title === 'Smart Question Bank' || feature.title === 'Precision Forensic Oracle') && (
+                    <div className={`relative z-10 p-8 rounded-3xl bg-gradient-to-br ${feature.color} text-white shadow-2xl group-hover:scale-110 transition-transform`}>
+                       {feature.icon}
+                    </div>
+                 )}
               </div>
 
-              {/* Icon */}
-              <div className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${feature.color} text-white mb-4`}>
-                {feature.icon}
-              </div>
-
-              {/* Content */}
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
+              <h3 className="text-2xl font-black text-gray-900 mb-4 px-4 leading-tight">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 leading-relaxed px-6 font-medium">
                 {feature.description}
               </p>
-
-              {/* Arrow indicator */}
-              <div className="mt-4 flex items-center text-sm font-medium text-transparent bg-gradient-to-r bg-clip-text group-hover:translate-x-2 transition-transform duration-300" style={{ backgroundImage: `linear-gradient(to right, ${feature.color.split(' ')[1]}, ${feature.color.split(' ')[3]})` }}>
-                Learn more
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
             </motion.div>
           ))}
         </motion.div>
@@ -157,16 +159,16 @@ export default function FeaturesSection() {
           className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8"
         >
           {[
-            { value: '95%+', label: 'Accuracy Rate' },
-            { value: '10hrs', label: 'Saved/Week' },
-            { value: '1000+', label: 'Teachers' },
-            { value: '50K+', label: 'Scans Processed' },
+            { value: '53.3%', label: 'Biology Pattern Hit' },
+            { value: '72%', label: 'High-Difficulty Hits' },
+            { value: '100%', label: 'Audited Fidelity' },
+            { value: '240', label: 'Verbatim Verifications' },
           ].map((stat, index) => (
             <div key={index} className="text-center">
               <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
                 {stat.value}
               </div>
-              <div className="text-sm text-gray-600">{stat.label}</div>
+              <div className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.label}</div>
             </div>
           ))}
         </motion.div>

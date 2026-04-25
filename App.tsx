@@ -32,16 +32,17 @@ import LearningJourneyApp from './components/LearningJourneyApp';
 import AdminScanApproval from './components/AdminScanApproval';
 import { MockTestDashboard } from './components/MockTestDashboard';
 
-/**
- * Authentication Gate Component
- * Shows login/signup screens when user is not authenticated
- */
-const AuthGate: React.FC = () => {
+interface AuthGateProps {
+  onBackToLanding?: () => void;
+}
+
+const AuthGate: React.FC<AuthGateProps> = ({ onBackToLanding }) => {
   const [showLogin, setShowLogin] = useState(true);
 
   return showLogin ? (
     <LoginForm
       onSwitchToSignup={() => setShowLogin(false)}
+      onBackToLanding={onBackToLanding}
       onSuccess={() => {
         // Success is handled by AuthProvider's state change
       }}
@@ -49,6 +50,7 @@ const AuthGate: React.FC = () => {
   ) : (
     <SignupForm
       onSwitchToLogin={() => setShowLogin(true)}
+      onBackToLanding={onBackToLanding}
       onSuccess={() => {
         // Success is handled by AuthProvider's state change
       }}
@@ -374,7 +376,14 @@ const AppContent: React.FC = () => {
 
   // Show login/signup if not authenticated
   if (!user) {
-    return <AuthGate />;
+    return (
+      <AuthGate
+        onBackToLanding={() => {
+          localStorage.removeItem('edujourney_landing_seen');
+          setShowLanding(true);
+        }}
+      />
+    );
   }
 
   // Check subscription status for authenticated users

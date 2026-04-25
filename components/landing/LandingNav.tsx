@@ -33,7 +33,7 @@ export default function LandingNav({ onGetStarted }: LandingNavProps) {
       transition={{ duration: 0.6 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/90 backdrop-blur-md shadow-md'
+          ? 'bg-white/90 backdrop-blur-md shadow-md border-b border-slate-100'
           : 'bg-transparent'
       }`}
     >
@@ -45,12 +45,12 @@ export default function LandingNav({ onGetStarted }: LandingNavProps) {
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center gap-2"
             >
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">P</span>
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">P</span>
               </div>
-              <span className="text-xl font-black tracking-tight">
-                <span style={{ color: '#0a1a16' }}>plus2</span>
-                <span style={{ color: '#ff7f50' }}>AI</span>
+              <span className="text-lg font-black tracking-tight">
+                <span className="text-slate-900">plus2</span>
+                <span className="text-blue-600">AI</span>
               </span>
             </button>
           </div>
@@ -59,27 +59,27 @@ export default function LandingNav({ onGetStarted }: LandingNavProps) {
           <div className="hidden md:flex items-center gap-8">
             <button
               onClick={() => scrollToSection('features')}
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+              className="text-slate-700 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors duration-200"
             >
               Features
             </button>
+            <a
+              href="/KCET_2026/analysis_reports/forensic_audit/index.html"
+              className="text-slate-700 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors duration-200"
+            >
+              2026 Prediction Analysis
+            </a>
             <button
               onClick={() => scrollToSection('pricing')}
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+              className="text-slate-700 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors duration-200"
             >
               Pricing
             </button>
             <button
-              onClick={() => scrollToSection('faq')}
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
-            >
-              FAQ
-            </button>
-            <button
               onClick={onGetStarted}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+              className="px-8 py-3 bg-blue-600 text-white font-bold text-sm rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-200 hover:scale-105"
             >
-              Get Started
+              Get Prediction Access
             </button>
           </div>
 
