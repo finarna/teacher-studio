@@ -1,0 +1,27 @@
+# Plus2AI Robots.txt
+# https://learn.dataziv.com/robots.txt
+
+User-agent: *
+Allow: /
+Allow: /KCET_2026/analysis_reports/forensic_audit/
+
+# Block API endpoints
+Disallow: /api/
+
+# Block admin routes
+Disallow: /admin/
+
+# Allow crawling of static assets
+Allow: /assets/
+Allow: /images/
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.gif$
+Allow: /*.svg$
+Allow: /*.webp$
+
+# Sitemap location
+Sitemap: https://learn.dataziv.com/sitemap.xml

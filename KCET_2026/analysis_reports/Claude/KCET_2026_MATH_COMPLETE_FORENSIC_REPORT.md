@@ -19,16 +19,16 @@
 **Hit Distribution:**
 - **TIER 1 (Exact Hits, 98-100):** 0 questions
 - **TIER 2 (Model Match, 80-94):** 8 questions
-- **TIER 3 (Concept Match, 60-79):** 15 questions
-- **TIER 4 (Chapter Only, 30-59):** 28 questions
-- **TIER 5 (Missed, 0-29):** 9 questions
+- **TIER 3 (Concept Match, 60-79):** 16 questions
+- **TIER 4 (Chapter Only, 30-59):** 32 questions
+- **TIER 5 (Missed, 0-29):** 5 questions
 
 **Success Metrics:**
 - **Elite Prediction Success (Tier 1):** 0.0% (0/60)
 - **Meaningful Prediction Success (Tier 1+2):** 13.3% (8/60)
-- **Conceptual Coverage (Tier 1+2+3):** 38.3% (23/60)
-- **Average Match Score:** 52.8/100
-- **Prediction Confidence Grade:** C+
+- **Conceptual Coverage (Tier 1+2+3):** 40.0% (24/60)
+- **Average Match Score:** 52.4/100
+- **Prediction Confidence Grade:** C
 
 ---
 
@@ -49,7 +49,7 @@
 | 11 | System x+2y=3, 2x+3y=3 has unique/no/infinite solutions | None | None | 4 | 40 | Linear Equations | System Solutions | Basic system, no close match. |
 | 12 | If \|a⃗+b⃗\|=\|a⃗-b⃗\|, find α+β where a⃗=2î+2ĵ-k̂, b⃗=αî+βĵ+2k̂ | Set A Q30 | Set A Q30 | 2 | 85 | Vectors | Magnitude Properties | Same theorem: \|a⃗+b⃗\|=\|a⃗-b⃗\| ⇒ perpendicular. Different vectors but same logic. |
 | 13 | Find c⃗ given a⃗×c⃗=b⃗ and a⃗·c⃗=3 | Set A Q49 | Set A Q49 | 3 | 70 | Vectors | Cross & Dot Product | Both involve cross and dot products but different setup. |
-| 14 | Find λ where vectors orthogonal: a⃗=2î+λĵ+k̂, b⃗=î+2ĵ+3k̂ | None | None | 4 | 50 | Vectors | Orthogonality | Common type but no close match in values. |
+| 14 | Find λ where vectors orthogonal: a⃗=2î+λĵ+k̂, b⃗=î+2ĵ+3k̂ | Set A Q30 | Set A Q30 | 3 | 70 | Vectors | Orthogonality | Same subtopic (orthogonality) as Set A Q30. Different methods: Q14 uses a⃗·b⃗=0; Q30 uses |a⃗+b⃗|=|a⃗-b⃗| implies perpendicular. Same concept, different approach. |
 | 15 | Angle between lines with DRs: a,b,c and b-c,c-a,a-b | Set A Q13 | Set A Q13 | 2 | 80 | 3D Geometry | Angle Between Lines | Same concept: testing angle via direction ratios. Different specific ratios. |
 | 16 | Angle between parametric line and symmetric line | None | None | 4 | 45 | 3D Geometry | Angle Between Lines | Similar topic but different question structures. |
 | 17 | Line L₁ through (-1,2),(3,6) divides L₂ through (3,-1) in ratio 1:3 | None | None | 4 | 40 | Coordinate Geometry | Line Division | No similar section formula applications. |
@@ -88,7 +88,7 @@
 | 50 | LPP: max Z at both (15,15) and (0,20), corners (0,10),(5,5),(15,15),(0,20), find p:q | Set B Q26 | Set B Q26 | 2 | 92 | LPP | Multiple Maxima | EXCELLENT MATCH: Same logic - max at two vertices determines slope relationship. Very similar structure. |
 | 51 | LPP: Z has same max at two corners, how many max points? | Set A Q20 | Set A Q20 | 2 | 88 | LPP | Bounded Region | STRONG MATCH: Tests LPP fundamental - if max at 2 corners, entire edge is max. |
 | 52 | P(even prime on each die) when pair rolled | None | None | 4 | 40 | Probability | Dice | Even prime = only 2. Standard but not predicted. |
-| 53 | P(neither man nor wife alive after 20 years) | Set A Q56 | Set A Q56 | 3 | 70 | Probability | Independent Events | Similar structure but different probabilities. |
+| 53 | P(neither man nor wife alive after 20 years) | Set A Q56 | Set A Q56 | 2 | 80 | Probability | Independent Events | SAME theorem: P(neither)=P(A')×P(B') for independent events. Only numerical values differ - identical solving methodology. |
 | 54 | Integrating factor of (1-x²)dy/dx - xy = 1 | Set B Q46 | Set B Q46 | 3 | 75 | Differential Equations | Integrating Factor | Both test IF calculation but different equations. |
 | 55 | Bayes theorem: Left-handedness based on parents | None | None | 3 | 65 | Probability | Bayes Theorem | Bayes problem but unique context. |
 | 56 | tan²θ - 4tanθ + 1 = 0, roots are α+β and α-β, find α,β | None | None | 4 | 45 | Trigonometry | Quadratic in tan | Unique problem. |

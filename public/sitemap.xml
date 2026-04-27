@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Main Landing Page -->
+  <url>
+    <loc>https://learn.dataziv.com/</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://learn.dataziv.com/og-image.png</image:loc>
+      <image:title>Plus2AI - India's #1 AI Exam Prediction Platform</image:title>
+    </image:image>
+  </url>
+
+  <!-- Forensic Audit Dashboard -->
+  <url>
+    <loc>https://learn.dataziv.com/KCET_2026/analysis_reports/forensic_audit/index.html</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Biology Report Viewer -->
+  <url>
+    <loc>https://learn.dataziv.com/KCET_2026/analysis_reports/forensic_audit/report_viewer.html?subject=Biology</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Physics Report Viewer -->
+  <url>
+    <loc>https://learn.dataziv.com/KCET_2026/analysis_reports/forensic_audit/report_viewer.html?subject=Physics</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Chemistry Report Viewer -->
+  <url>
+    <loc>https://learn.dataziv.com/KCET_2026/analysis_reports/forensic_audit/report_viewer.html?subject=Chemistry</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Math Report Viewer -->
+  <url>
+    <loc>https://learn.dataziv.com/KCET_2026/analysis_reports/forensic_audit/report_viewer.html?subject=Math</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog Index/Home -->
+  <url>
+    <loc>https://learn.dataziv.com/blog/</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Blog: KCET 2026 Solved Papers -->
+  <url>
+    <loc>https://learn.dataziv.com/blog/kcet-2026-solved-papers.html</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://learn.dataziv.com/og-image.png</image:loc>
+      <image:title>KCET 2026 Solved Papers - Biology, Physics, Chemistry, Math</image:title>
+    </image:image>
+  </url>
+
+  <!-- Blog: AI Prediction for CET NEET JEE -->
+  <url>
+    <loc>https://learn.dataziv.com/blog/ai-prediction-kcet-neet-jee.html</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://learn.dataziv.com/og-image.png</image:loc>
+      <image:title>AI Prediction for KCET, NEET & JEE - Plus2AI</image:title>
+    </image:image>
+  </url>
+
+</urlset>

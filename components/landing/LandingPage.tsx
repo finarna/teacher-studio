@@ -21,7 +21,6 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
       <LandingNav onGetStarted={onGetStarted} />
       <main className="relative z-10">
         <HeroSection onGetStarted={onGetStarted} />
-        <VerificationAuditSection />
         <SubjectMasterySection />
         <AdaptiveTrajectorySection />
         <FeaturesSection />

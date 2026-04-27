@@ -17,24 +17,24 @@ This master forensic report presents the complete analysis of Plus2AI's REI-v17 
 
 | Subject | Real Questions | Predicted Questions | Total Comparisons | Avg Score | Grade | Tier 1+2 Success |
 |---------|----------------|---------------------|-------------------|-----------|-------|------------------|
-| **Physics** | 60 | 120 | 7,200 | **76.2/100** | **B+** | **58.3%** |
-| **Biology** | 60 | 120 | 7,200 | **68.8/100** | **B+** | **36.7%** |
-| **Chemistry** | 60 | 120 | 7,200 | **68.8/100** | **B+** | **30.0%** |
-| **Mathematics** | 60 | 120 | 7,200 | **52.8/100** | **C+** | **13.3%** |
-| **TOTAL** | **240** | **480** | **28,800** | **66.7/100** | **B** | **34.6%** |
+| **Chemistry** | 60 | 120 | 7,200 | **81.4/100** | **A-** | **65.0%** |
+| **Physics** | 60 | 120 | 7,200 | **76.2/100** | **B+** | **51.7%** |
+| **Biology** | 60 | 120 | 7,200 | **55.7/100** | **C+** | **23.3%** |
+| **Mathematics** | 60 | 120 | 7,200 | **52.4/100** | **C** | **13.3%** |
+| **TOTAL** | **240** | **480** | **28,800** | **66.4/100** | **B-** | **38.3%** |
 
 ### Overall Performance Verdict
 
-Plus2AI's REI-v17 prediction engine demonstrated **professional-grade predictive intelligence** with an overall average match score of **66.7/100** and **34.6% meaningful prediction success** (Tier 1+2) across all four KCET 2026 subjects. The system achieved:
+Plus2AI's REI-v17 prediction engine demonstrated **professional-grade predictive intelligence** with an overall average match score of **66.4/100** and **38.3% meaningful prediction success** (Tier 1+2) across all four KCET 2026 subjects. The system achieved:
 
 ✅ **100% Blueprint Coverage** - All major syllabus topics covered across all subjects
 ✅ **Zero Blind Spots** - No critical examination topics completely missed
-✅ **Strong Conceptual Prediction** - Same principles/models in 34.6% of questions
+✅ **Strong Conceptual Prediction** - Same principles/models in 38.3% of questions
 ✅ **Professional Quality** - B-grade average suitable for serious exam preparation
 
 ⚠️ **Limited Exact Hits** - Only 1 near-identical question match (Biology Chargaff's rule)
 ⚠️ **Numerical Variation** - No exact numerical parameter matches in Physics/Chemistry/Math
-⚠️ **Subject Variance** - Performance ranged from 52.8/100 (Math) to 76.2/100 (Physics)
+⚠️ **Subject Variance** - Performance ranged from 51.9/100 (Math) to 81.4/100 (Chemistry)
 
 ---
 
@@ -43,15 +43,15 @@ Plus2AI's REI-v17 prediction engine demonstrated **professional-grade predictive
 ### Overall Rankings
 
 **By Average Match Score:**
-1. 🥇 **Physics: 76.2/100** (B+) - STRONGEST PERFORMER
-2. 🥈 **Biology: 68.8/100** (B+) - STRONG PERFORMER (tied with Chemistry)
-3. 🥈 **Chemistry: 68.8/100** (B+) - STRONG PERFORMER (tied with Biology)
-4. 🥉 **Mathematics: 52.8/100** (C+) - NEEDS IMPROVEMENT
+1. 🥇 **Chemistry: 81.4/100** (A-) - STRONGEST PERFORMER
+2. 🥈 **Physics: 76.2/100** (B+) - STRONG PERFORMER
+3. 🥉 **Biology: 55.7/100** (C+) - MODERATE PERFORMER
+4. ⚠️ **Mathematics: 52.4/100** (C) - NEEDS IMPROVEMENT
 
 **By Meaningful Prediction Success (Tier 1+2):**
-1. 🥇 **Physics: 58.3%** (35/60 questions)
-2. 🥈 **Biology: 36.7%** (22/60 questions)
-3. 🥉 **Chemistry: 30.0%** (18/60 questions)
+1. 🥇 **Chemistry: 65.0%** (39/60 questions)
+2. 🥈 **Physics: 51.7%** (31/60 questions)
+3. 🥉 **Biology: 23.3%** (14/60 questions)
 4. ⚠️ **Mathematics: 13.3%** (8/60 questions)
 
 ### Hit Distribution Matrix
@@ -59,10 +59,10 @@ Plus2AI's REI-v17 prediction engine demonstrated **professional-grade predictive
 | Tier | Physics | Biology | Chemistry | Mathematics | **Total** |
 |------|---------|---------|-----------|-------------|-----------|
 | **Tier 1 (98-100)** | 0 | 1 | 0 | 0 | **1** |
-| **Tier 2 (80-94)** | 35 | 21 | 18 | 8 | **82** |
-| **Tier 3 (60-79)** | 20 | 26 | 28 | 15 | **89** |
-| **Tier 4 (30-59)** | 5 | 11 | 14 | 28 | **58** |
-| **Tier 5 (0-29)** | 0 | 1 | 0 | 9 | **10** |
+| **Tier 2 (80-94)** | 31 | 13 | 39 | 8 | **91** |
+| **Tier 3 (60-79)** | 26 | 13 | 17 | 16 | **72** |
+| **Tier 4 (30-59)** | 3 | 32 | 4 | 32 | **71** |
+| **Tier 5 (0-29)** | 0 | 1 | 0 | 5 | **6** |
 | **Total Questions** | 60 | 60 | 60 | 60 | **240** |
 
 ### Performance Visualization

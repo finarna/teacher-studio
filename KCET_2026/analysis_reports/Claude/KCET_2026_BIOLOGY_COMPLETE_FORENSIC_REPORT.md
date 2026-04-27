@@ -19,17 +19,17 @@
 
 **Hit Distribution:**
 - **TIER 1 (Exact Hits, 98-100):** 1 question
-- **TIER 2 (Model Match, 80-94):** 21 questions
-- **TIER 3 (Concept Match, 60-79):** 26 questions
-- **TIER 4 (Chapter Only, 30-59):** 11 questions
+- **TIER 2 (Model Match, 80-94):** 13 questions
+- **TIER 3 (Concept Match, 60-79):** 13 questions
+- **TIER 4 (Chapter Only, 30-59):** 32 questions
 - **TIER 5 (Missed, 0-29):** 1 question
 
 **Success Metrics:**
 - **Elite Prediction Success (Tier 1):** 1.7% (1/60)
-- **Meaningful Prediction Success (Tier 1+2):** 36.7% (22/60)
-- **Strong Coverage (Tier 1+2+3):** 80.0% (48/60)
-- **Average Match Score:** 68.8/100
-- **Prediction Confidence Grade:** B+
+- **Meaningful Prediction Success (Tier 1+2):** 23.3% (14/60)
+- **Strong Coverage (Tier 1+2+3):** 45.0% (27/60)
+- **Average Match Score:** 55.7/100
+- **Prediction Confidence Grade:** C+
 
 ---
 

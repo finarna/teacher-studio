@@ -18,21 +18,21 @@
 
 **Hit Distribution:**
 - **TIER 1 (Exact Hits, 98-100):** 0 questions
-- **TIER 2 (Model Match, 80-94):** 18 questions
-- **TIER 3 (Concept Match, 60-79):** 28 questions
-- **TIER 4 (Chapter Only, 30-59):** 14 questions
+- **TIER 2 (Model Match, 80-94):** 39 questions
+- **TIER 3 (Concept Match, 60-79):** 17 questions
+- **TIER 4 (Chapter Only, 30-59):** 4 questions
 - **TIER 5 (Missed, 0-29):** 0 questions
 
 **Success Metrics:**
 - **Elite Prediction Success (Tier 1):** 0.0% (0/60)
-- **Meaningful Prediction Success (Tier 1+2):** 30.0% (18/60)
-- **Useful Coverage (Tier 1+2+3):** 76.7% (46/60)
-- **Average Match Score:** 68.8/100
-- **Prediction Confidence Grade:** B+
+- **Meaningful Prediction Success (Tier 1+2):** 65.0% (39/60)
+- **Useful Coverage (Tier 1+2+3):** 93.3% (56/60)
+- **Average Match Score:** 81.4/100
+- **Prediction Confidence Grade:** A-
 
 **Key Findings:**
 - Strong conceptual coverage across all chemistry domains
-- Excellent model/logic prediction capability (18 Tier 2 matches)
+- Excellent model/logic prediction capability (39 Tier 2 matches)
 - No exact question hits, indicating exam paper had novel numerical parameters
 - Outstanding blueprint alignment (100% chapter coverage)
 - Superior to Math (Grade B), comparable to Biology (Grade A-)

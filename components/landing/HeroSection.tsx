@@ -41,7 +41,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-lg sm:text-xl text-slate-600 mb-6 max-w-4xl mx-auto lg:mx-0 leading-relaxed font-medium"
           >
-            India’s leading <span className="text-blue-600 font-bold">AI prediction platform</span> for KCET, NEET, and JEE. Successfully matched <span className="text-blue-700 font-black">53.3% Biology</span>, <span className="text-blue-700 font-black">46.7% Physics</span>, <span className="text-blue-700 font-black">38.3% Chemistry</span>, and <span className="text-blue-700 font-black">23.3% Math</span>.
+            India’s leading <span className="text-blue-600 font-bold">AI prediction platform</span> for KCET, NEET, and JEE. Successfully matched <span className="text-blue-700 font-black">65.0% Chemistry</span>, <span className="text-blue-700 font-black">51.7% Physics</span>, <span className="text-blue-700 font-black">23.3% Biology</span>, and <span className="text-blue-700 font-black">21.7% Math</span>.
           </motion.p>
 
           {/* Action Buttons */}
@@ -99,8 +99,8 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
             className="relative z-10"
           >
             <img 
-              src="/images/kcet_full_audit.png" 
-              alt="Plus2AI KCET 2026 Results" 
+              src="/images/kcet_2026_hero.png" 
+              alt="Plus2AI KCET 2026 Verified Audit Results" 
               className="w-full h-auto drop-shadow-[0_15px_40px_rgba(37,99,235,0.15)] rounded-2xl scale-95"
             />
             
@@ -110,8 +110,8 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               className="absolute top-6 -left-4 md:-left-8 p-2 md:p-3 bg-white rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.08)] border border-slate-50 z-20"
             >
-               <span className="text-xs md:text-sm font-black text-green-600 block">53.3% Biology</span>
-               <span className="text-[8px] text-slate-400 font-bold uppercase">Manual OCR</span>
+               <span className="text-xs md:text-sm font-black text-green-600 block">23.3% Biology</span>
+               <span className="text-[8px] text-slate-400 font-bold uppercase">Conceptual Match</span>
             </motion.div>
 
             <motion.div 
@@ -119,7 +119,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
               transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
               className="absolute top-20 -right-4 md:-right-6 p-2 md:p-3 bg-white rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.08)] border border-slate-50 z-20"
             >
-               <span className="text-xs md:text-sm font-black text-purple-600 block">38.3% Chemistry</span>
+               <span className="text-xs md:text-sm font-black text-purple-600 block">65.0% Chemistry</span>
                <span className="text-[8px] text-slate-400 font-bold uppercase">Verbatim Hit</span>
             </motion.div>
 
@@ -128,8 +128,8 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
               transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.7 }}
               className="absolute bottom-24 -left-6 md:-left-10 p-2 md:p-3 bg-white rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.08)] border border-slate-50 z-20"
             >
-               <span className="text-xs md:text-sm font-black text-orange-600 block">23.3% Math</span>
-               <span className="text-[8px] text-slate-400 font-bold uppercase">Paper Fidelity</span>
+               <span className="text-xs md:text-sm font-black text-orange-600 block">21.7% Math</span>
+               <span className="text-[8px] text-slate-400 font-bold uppercase">Syllabus Alignment</span>
             </motion.div>
 
             <motion.div 
@@ -137,8 +137,8 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
               className="absolute bottom-10 -right-4 md:-right-6 p-2 md:p-3 bg-white rounded-xl shadow-[0_8px_20px_rgba(0,0,0,0.08)] border border-slate-50 z-20"
             >
-               <span className="text-xs md:text-sm font-black text-blue-600 block">46.7% Physics</span>
-               <span className="text-[8px] text-slate-400 font-bold uppercase">Pattern Prediction</span>
+               <span className="text-xs md:text-sm font-black text-blue-600 block">51.7% Physics</span>
+               <span className="text-[8px] text-slate-400 font-bold uppercase">Logic Prediction</span>
             </motion.div>
           </motion.div>
           
