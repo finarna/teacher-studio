@@ -1,0 +1,793 @@
+
+
+--- PAGE 1 ---
+С3
+VERSION
+CODE
+Total Number of Questions: 60
+Maximum Marks : 60
+Total Duration: 80 Minutes
+Maximum Time For Answering : 70 Minutes
+Time: 2.30 PM to 3.50 PM
+Day-1, Second Session ACA26423
+MENTION YOUR CET NUMBER
+Serial
+Number
+Subject
+Code
+C
+INSTRUCTIONS FOR CANDIDATES
+DOs:
+1. This question booklet is issued to you by the room invigilator after 2.30 pm.
+2. Check whether the CET-Number has been entered and shaded in the respective circles on the OMR answer
+sheet.
+3. The version code of this question booklet should be entered on the OMR answer sheet and the respective
+circles should also be shaded completely.
+4. The Version Code and Serial Number of this question booklet should also be entered on the Nominal Roll
+without any mistakes
+5. Compulsorily sign at the bottom portion of the OM answer sheet in the space provided
+DON'Ts:
+1. THE TIMING AND MARKS PRINTED ON THE OR ANSWER SHEET SHOULD NOT BE DAMAGED /
+MUTILATED / SPOILED.
+2. The 3rd Bell rings at 2.40 pm, till then
+Do not remove the seal present on the right hand side of this question booklet.
+Do not look inside this question booklet or start answering on the OMR answer sheet.
+IMPORTANT INSTRUCTIONS TO CANDIDATES
+1. In case of usage of SIGNS AND SYMBOLS in the questions, the regular textbook connotation should be
+considered unless stated otherwise.
+2. This question booklet contains 60 questions and each question will have one statement and four different
+options / responses & out of which you have to choose one correct answer.
+3. After the 3rd Bell rings at 2.40 pm, remove the paper seal of this question booklet and check that this
+booklet does not have any unprinted or torn or missing pages or items etc., if so, get it replaced by a
+complete test booklet. Read each item and start answering on the OMR answer sheet.
+4. Completely darken / shade the relevant circle with a blue or black ink ballpoint pen against the question
+number on the OMR answer sheet.
+CORRECT METHOD
+(1)
+(2)
+2
+(4
+5. Please note that even a minute unintended ink dot on the OMR answer sheet will also be recognized and
+recorded by the scanner. Therefore, avoid multiple markings of any kind on the OMR answer sheet.
+6. Use the space provided on each page of the question booklet for rough work. Do not use the OMR answer
+sheer for the same
+7. Last Bell will ring at 3.50 pm, stop writing on the OMR answer sheet.
+8. Hand over the OMR answer sheet to the room invigilator as it is.
+9. After separating the top sheet (Office copy), the invigilator will return the bottom sheet replica
+(Candidate's copy) to the candidate.
+10. There is no negative valuation.
+NOTE: In case of doubt/clarification about any question, candidates may refer Kannada/English version.
+
+
+
+--- PAGE 2 ---
+1.
+2.
+C3
+In which of the following option/options, the order of arrangement does not agree with the
+variation of property indicated against it?
+(a) BE, > NF, > NH, (Dipole moment)
+() HgC, > NH, > SE (Bond angle)
+(c) NH, < H,O < HF (Strength of intermolecular hydrogen bonding)
+(d) H - I > H - Br > H - CI (Bond length)
+(1) a, b and c
+(2) a only
+(3) c and d only X
+(4) d only X
+With respect to resonance structures of CO, ion, which of the following statements are correct?
+(a) All C-O bonds in CO? are equivalent
+1) There are three resonance structures possible for CO;
+ion
+(c) The position of carbon and oxygen should change in every resonance structure
+(d) The formal charge on carbon atom is -2
+(1) a, b and c
+(2) a and b only
+(3) band d only
+(4) a, b and d
+
+
+
+--- PAGE 3 ---
+C3
+3.
+4.
+5.
+6.
+Given below are two statements.
+Statement I: In HO,, each oxygen atom is assigned an oxidation number of -1, in RbO, each
+oxygen atom is assigned an oxidation number of -
+-iN
+Statement II: Representation of HAul, and MnO, in stock notation is HAu(DCI, and
+Mn(DO,, respectively
+Examine the above statements and choose the correct answer.
+(1) Both Statement I and Statement II are correct ×
+(2) Both Statement I and Statement II are incorrect >
+(3) Statement I is correct but Statement II is incorrect
+(4) Statement I is incorrect but Statement I is correct -
+a C,° + b MnO, + c H* - > x Mn?* + y H,0 + 7. CO,
+a and x respectively are
+(1) 5, 2
+(2) 4. 1
+(3) 3, 2
+(4) 4, 2
+Which of the following will not act as an oxidising agent?
+12) МОО
+(4) Cr,07
+(3) CrO
+- X
+#
+The highest oxidation state of manganese in fluoride is +4 (MnF), but the highest oxidation
+state in oxides is +7, (Mn,O,), because
+(1) Fluorine is more electronegative than oxygen
+(2) Fluorine possesses d-orbitals
+(3) Fluorine stabilises lower oxidation state
+(4) In covalent compounds, fluorine can form single bond only, while oxygen forms double bond
+SPACE FOR ROUGH WORK
+ACA26423
+
+
+
+--- PAGE 4 ---
+77 18am
+С3
+1.
+8.
+9.
+The calculated spin only magnetic moment of Cr?+ ion is
+(1) 3.87 BM
+125 4.90 BM
+(3) 5.92 BM X
+(4) 2.84 BM X
+CA) sing
+Which of the following is the most stable complex?
+(1) [Fe (CO)] X
+(2) IRe (CN)I*
+() [Re (C,O,)1*
+(4) [Re (10)J+ X
+How many ions per molecule are produced from the complex [Co(NH,)]CI, in solution?
+(1) 6
+(2) 4
+(3) 3
+(4) 2 X
+sah
+СЗ
+10. Given below are two statements:
+Statement I: The M - C o bond is formed by the donation of lone pair of electrons on the
+carbonyl carbon into a vacant d-orbital of the metal
+Statement II: The M - C bond is formed by the donation of a pair of electrons from a filled
+d-orbital of metal into the vacant antibonding n* orbital of carbon monoxide.
+In the light of the above statements, choose the correct answer from the options given below:
+(1) Both Statement I and Statement II are correct Y
+(2) Both Statement I and Statement II are incorrect X
+(3) Statement I is correct but Statement II is incorrect
+(4) Statement I is incorrect but Statement II is correct
+SPACE FOR ROUGH WORK
+ACA26423
+
+
+
+--- PAGE 5 ---
+C3
+11. Match List - I with List - II
+List - I
+(Complex)
+(a) [Co(NH,) J+
+(6)
+(b) [Ni CL,12-
+List - 11
+(Geometry)
+Trigonal bipyramidal
+Octahedral
+(c) [Ni(CN) .12-
+(iii) Tetrahedral
+(d) [Fe(CO)]
+(iv) Square planar
+Choose the correct answer from the options given below.
+(1) a - ii, b - iii, c - iv, d - i
+(2) a - ii, b - i, c - in, d - iv
+(3) a - it, b - i, c - iv, d - j
+(4) a - i, b - ii, c - iv, d - i
+12. Match List - I with List - II
+List - I
+(Vitamins)
+(a) B,
+(b) B,
+(c) B.
+(d) B,
+List - II
+(Deficiency Diseases)
+(1)
+Convulsions
+( RBC deficiency in haemoglobin
+(ili) Retarded growth
+(iv) Burning sensation of the skin
+Choose the correct answer from the options given below.
+( a - it, b - iv, c - in, d - i
+(2) a - in, b - iv, c - i, d - i
+(3) a - i, b - it, c - ill, d - iv
+(4) a - iv, b - in, c - ii, d - i
+SPACE FOR ROUGH WORK
+ACA26423
+
+
+
+--- PAGE 6 ---
+С3
+13. Consider the following statements:
+Statement I: All monosaccharides are reducing sugars.
+Statement I: Sucrose can reduce ammoniacal silver nitrate solution.
+Choose the correct answer from the options given below.
+() Both Statement I and Statement II are correct Y
+(2) Both Statement I and Statement II are incorrect Y
+(3) Statement I is correct but Statement Il is incorrect
+(4) Statement I is incorrect but Statement II is correct
+14. Incorrect statement about a-amino acids of proteins among the following is
+(1) Methionine is an essential amino acid
+ItS Glycine doesn't exhibit enantiomerism
+13) GlycylalanyIglutamine has three amide linkages -
+(4) Zwitterion of valine exhibits amphoteric behaviour
+15. Match List I with List II and select the correct options
+List - I
+(Functional group)
+List - II
+(Functional group reagent)
+Neutral ferric chloride test
+(a)
+ОН
+( C,HNH,
+(c) CH,CH,CHO
+оН
+(d)
+Codes:
+(1) a
+(3)
+b
+(ii) Azo dye test
+(G) Ceric ammonium nitrate test
+(iv) Tollen's reagent test
+c - it, d - ill
+c - i, d - iv
+(Or a - Ill, b - IL, c - iv, d - i
+(4) a - I1, b - ill, c - iv, d - i
+SPACE FOR ROUGH WORK
+ACA26423
+
+
+
+--- PAGE 7 ---
+C3
+16.
+When salt BA is treated with Conc.H,SO, reddish brown gas is liberated. The aqueous solution
+of BA gives pale yellow precipitate with AgNO, solution. Which of the following anion(A) is
+present in the salt BA?
+(1) CI-
+(2) CO?-
+(3) SO*
+(4) Br
+17. Which of the following represents de Broglie equation?
+h
+(1) 2 =
+h
+(2) 2 =
+(3) 2. =
+h
+mp
+(4) 2 =
+18. Which of the following is the CORRECT statement about 42?
+(1)Y? represents atomic orbit
+(2) Probability density of the electron at that point
+(3) 4? + 0 for nodes *
+(4) Y? has no physical meaning
+19. A: Entropy of a perfect crystalline solid at absolute zero approaches zero.
+B: For spontaneity of a reaction, TAS > AH.
+Among the two statements given above, identify the correct answer from the options given
+below.
+() Both 'A' and 'B' are true Y
+(2) 'A' is true but 'B' is false
+(3) Both 'A' and 'B' are false X
+(4) 'A' is false but 'B' is true
+SPACE FOR ROUGH WORK
+ACA26423
+15
+
+
+
+--- PAGE 8 ---
+C3
+20. Which of the following is a correct statement for a thermodynamic system?
+(1) The internal energy changes in all processes
+(2) Internal energy and entropy are state functions
+(3) Work is a state function
+(4) The work done in an adiabatic process is always zero
+21. A gas can be taken from A to B via two different paths ACB and ADB.
+B
+D
+Reaction Co-ordinate
+When path ACB is used, 60J of heat flows into the system and 30J of work is done by the
+system. If path ADB is used, work done by the system is 10J.
+The heat flow into the system in path ADB is
+(1) 80J
+(2) 20.1 X
+(3) 100J*
+14) 40.J
+22. For the reversible reaction,
+When the partial pressure is measured in atmosphere, the value of K, at 500°C is 1.44 × 10-5
+The value of K when the concentration is expressed in mol L-1 is:
+1.44 × 10-5
+1.44 × 10-5
+(1) -
+(0.082 × 500-2
+(2)
+(8.314 × 773)-2
+1.44 × 10-5
+1.44 x 10-5
+(3)
+(4)
+(0.082 × 773)?
+(0.082 × 773)-2
+SPACE FOR ROUGH WORK
+ACA26423
+
+
+
+--- PAGE 9 ---
+C3
+23.
+For the following gaseous reversible renctiom: 31
+The amount of product A," is affected by
+(1) Temperature alone
+(2 Pressure alone
+(3) Both temperature and pressure
+X
+(4) Temperature, pressure and catalyst *
+A, И
+40 (4,11 = - « k).
+24. A 0.15 mole of pyridinium chloride has been added to 500 cm° of 0.2M pyridine solution
+(a base). Assuming there is no change in volume upon mixing, the ph of the resulting
+solution is
+(1) 5 X
+276
+(3) 7
+(4)8 X
+25. Which of the following is CORRECT with respect to the property mentioned against it?
+(1) Osmotic pressure at 298K
+:0.1M NaCI solution < 0.1M Urea solution
+(2) Concentration of NaCI in the solution :
+2ppm > 2M
+3) AT,
+0.02M Urea solution > 0.02M NaCI solution
+(4) Vapour pressure at 298K
+Salt water < Pure water
+SPACE FOR ROUGH WORK
+ACA26423
+
+
+
+--- PAGE 10 ---
+C3
+26. Match List - I (Laws) with the List - II (Mathematical expressions):
+List - I
+(a) Henry's law
+(i)
+List - II
+P, = x,p.?
+() Raoult's law
+(c) First law of thermodynamics Wit)
+(d) Kohlrausch's law.
+= v. 2° + v 2°
+(iv) AU = q + w
+6) " b) :; c) iu d) ini
+Codes:
+(1) a - i, b - ii, c - ili, d - iv
+(2) a - i, b - i, c - i, d - iv
+3) a - i, b - i, c - iv, d - in
+(4) a - i, b - ii, c - iv, d - iii
+27. When 0.0106 mole of acetic acid was dissolved in 1 kg of water, the freezing point depression
+for this strength of acid was 0.0205 K. If the calculated freezing point depression is 0.0197 K,
+Van't Hoff factor (i) and degree of dissociation of acetic acid respectively are
+(1) 0.041 and 1.041
+(2) 1.041 and 0.1041
+(3) 0.041 and 0.041 X
+(4) 1.041 and 0.041 X
+28. The relative lowering of vapour pressure produced by dissolving 18 g of urea
+(Molar mass = 60 g mol-1) in 100 g of water is
+60x 18
+(1) 0.025 X
+18) 0.05
+(2) 0.5 X
+1450.25
+29. During the electrolysis of acidified water, 16 g of O, gas is formed at anode. The volume of
+H, gas liberated at cathode under ST conditions is
+(1) 22.4 L
+(2) 11.2 L
+33)2.24 I
+(4) 1.12 L
+SPACE FOR ROUGH WORK
+wag
+ACA26423
+21
+
+
+
+--- PAGE 11 ---
+C3
+30. "m NH,OH) is equal to
+1) ^°
+m (NH OH) + 1°
+m (NI.CD
+(2)
+^ m (NHACI
+1°
+m (NaOH)
+(3)
+m (NH CI)
+1°
+m NaCI
+(4)
+1°
+'m (NaCI)
+m (HCI)
+1°
+1°
+(NaOH)
+^
+m (NH CD X
+31.
+Given below are the half-cell reactions:
+Min?+ + Ze -> Mn (E° = - 1.18.V)
+2 (n?+ + e) -> Mn?+ (E° = + 1.51 V)
+The E°
+Cel for 3 Mn?+ -> Mn + 2MnS+ will be
+(1 - 2.69 V, the reaction will not occur (Non-Spontaneous)
+(2) - 2.69 V, the reaction will occur (Spontaneous
+(3) - 0.33 V, the reaction will not occur (Non-Spontaneous -
+(4) - 0.33 V, the reaction will occur (Spontaneous)
+32. The conductivity of centimolar solution of KCI at 298 K is 0.021 Ohm 1 cm 1 and the resistance
+of the cell containing the solution at 298 K is 60 . The value of cell constant (G*) is
+(1) 3.28 cm-1
+(2) 1.26 cm-1
+ryu"
+08
+(3) 3.34 cm-1
+(4) 1.34 cm-1
+33. Which one of the following graph is not applicable for a Ist order reaction (R -› P)?
+(1) [R]
+(2) In [R]
+1105. [R
+[RI
+(4) 10810 TR]
+›t
+SPACE FOR ROUGH WORK
+ACA26423
+23
+
+
+
+--- PAGE 12 ---
+C3
+4 For a reaction having three steps, the overall rate constant is K = K, kg.
+The values of
+Ea, Ea, and Ea, (activation energies stepwise) are 40, 50 and 60 kJ mol' respectively.
+Then the overall E, (activation energy) of the reaction is
+() 30 kJ mol' ×
+(2) 40 kJ mo-1
+(3) 50 kJ mol-1
+(4) 60 kJ mol1 X
+35. For a lst order change R -> P, the concentration of Reactant R changes from 0.1 M to 0.025 M
+in 40 minutes. The rate of reaction when the concentration of R is 0.01 M is
+(71.73 × 10-5 M min-!
+(2) 3.47 × 10-4 M min-1
+(3) 3.47 × 10-5 M min-1
+(4) 1.73 × 10-4 M min-1
+36. The activation energy for the reaction X -> Y is 150 kJ mol'. The change in enthalpy for the
+above reaction is -135 kJ mol'. Then the activation energy for Y -› X is
+(1) 280 kJ mol-1
+(2) 285 kJ mol-1
+(3) 270 kJ mol-1
+(4) 15 kJ moll y
+37. The intermediates in heteropolar reactions are
+(1) Free radicals only *
+(2) Cations only
+(3) Anions only
+(4) Both anions and cations X
+38. Statement I: Nitrogen in pyridine cannot be estimated by Kjeldahl's method
+Statement II: Nitrogen in pyridine changes to ammonium sulphate when heated with
+conc. H,SO, in Kjeldahl's method.
+Read the above given statements and choose the correct answer from the given options.
+(1) Statement I is true but Statement I is false
+(2) Both Statement I and Statement II are false X
+(3) Both Statement I and Statement II are true X
+(A) Statement I is false but Statement Il is true
+SPACE FOR ROUGH WORK
+62824
+ACA26423
+25
+
+
+
+--- PAGE 13 ---
+19.
+The number of chain isomers possible for the hydrocarbon with molecular formula CH, is
+(1) 4
+(3) 2
+2) 3
+(4) 1
+C3
+C - c - c - c - c
+5 _ c - c
+1. The compound with molecular formula Cult, is
+(1) Decane
+(3) Eicosane
+X
+(2) Dodecane
+(4) Hicosane >
+2(20+2
+hot?
+и?
+1. C-C bond in methyl chloride compared to C-CI bond in chlorobenzene is
+(1) Longer and stronger
+(2) Shorter and stronger
+(3) Shorter and weaker X
+(4) Longer and weaker
+1. The compound from which chlorobenzene cannot be prepared easily is
+(1) Aniline
+(2) Benzene
+(3) Phenol
+(4) Benzene diazonium chloride
+43. In S.1 reaction, the alkyl halide that on hydrolysis produces racemic mixture is
+(1) Tertiary butyl bromide
+Isopropyl bromide
+(2)2-bromobutane
+‹4) Methyl bromide
+tHe
+CH - C - EN (+ ) C" 8
+44. Match the compounds of List-I with their effects in List-Il.
+List-II
+List-I
+(a)
+Chloramphenicol
+Malaria
+Anaesthetic
+(b) Thyroxine
+(c)
+Chloroquine
+(jii)
+Goiter
+(iv) Typhoid fever
+(d) Chloroform
+Codes:
+De- 1, b - it, c - ill, d - iv
+(3) a - i, b - ii, c - iv, d - ii
+(2) a - iv, b - i, c - i, d - i
+(4)a-14, b - it, c - it, d-i
+SPACE FOR ROUGH WORK
+ACA26423
+27
+
+
+
+--- PAGE 14 ---
+15.
+-CH,OH is converted into R-CHO by reacting with
+(1) Alkaline KMnO,
+(2) LIAIH,
+3) Na/C,H OH
+(4) PCC (Pyridinium Chlorochromate) X
+16. Glycerol is a trihydric alcohol. It contains
+(1) One primary, one secondary and one tertiary alcoholic groups
+(Two primary and one secondary alcoholic groups
+(3) Two secondary and one primary alcoholic groups
+(4) One primary and two tertiary alcoholic groups
+47. The correct IUPAC name of CH, - C - 0 - C,H, is
+CH,
+CH,
+C4 - CH
+(1) Tertiary butoxy ethane
+(2) 1, 1-Dimethyl-1-ethoxyethane
++ otherinarzometres or means *
+Afghtihoxy tertiary butane *
+SPACE FOR ROUGH WORK
+ACA26423
+3C43
+С3
+13CH 3
+29
+
+
+
+--- PAGE 15 ---
+С3
+4. C"6 ID H,O, NAOH SP
+Cro,
+anhydrous medium
+> Q
+i) CH,MgBr
+) R + Mg(OH)Br,
+) Н,0*
+the organic compounds P. Q and R are
+ОН
+(0) P = CH, - CH - CH,
+0 = cH,-@-cH,
+он
+R = CH, - C- CH,
+CH,
+2)Р = CH, - CH, - CH, -он 0 = CH, - CH, - CHO R = CH, - CH, - CH - CH,
+ОН
+6) P = H, - CH, - CH, - OH 0 = CH, - CH, - COOH R = CH, - CH, - C - OCH,
+(4) P = CH, - CH - CH,
+он
+Q = CH, - C - CH,
+R = CH, - CH - CH,
+OCH,
+19. Match the reagents in List - I with products obtained from their carbonyl compounds in
+List - II.
+List - I
+List - I
+(a) NH,OH
+(b) R-NH,
+(c) R-OH
+(i)
+Cyanohydrin
+(in)
+Oxime
+(hi) Schiff base
+(d) H-CEN
+(iv)
+Acetal
+Codes:
+() а - ії, в -
+. c - iv
+d
+-i
+(2)
+r - i, b - i, , d - iv
+6) a - I, b - il, c - i, d - iv
+(4) a - 1, b - i, c - li, d -iv
+SPACE FOR ROUGH WORK
+ACA26423
+31
+
+
+
+--- PAGE 16 ---
+Сз
+50. The major product 'A' in the given reaction is
+Benzaldehyd
+Acetophenone, * (Major product)
+ОН / 293K
+CH = CH
+CHO
+(2)
+COCH,
+- CH,
+CH = CH-
+!!
+~ CHO .
+14
+51. Carboxylic acids are more acidic than phenols because
+(1) Formation of dimers
+(2) Intermolecular hydrogen bonding
+(3) More covalent nature
+14 More resonance stabilisation of their conjugate base
+52. The compound that does not answer iodoform test is
+(1) Ethanal
+(2) Acetone
+13 Ethanoic acid
+(4) Acetophenone
+53, Nitration of aniline in strong acidic medium gives significant amount of m-nitroaniline because
+At in electrophilic substitution reaction, amino group is meta directing
+dAn strong acidie medium, aniline is present as anilinium ion.
+(3) - NH, group always directs to meta position.
+(4) m-nitroaniline has higher molar mass than o&p nitroanilines.
+SPACE FOR ROUGH WORK
+
+
+
+--- PAGE 17 ---
+СЗ
+<4.
+Basic strength of alkylamines in aqueous
+phase is not decided by
+a) Inductive effect
+(2) Solvation effect
+1) Steric hindrance
+(4) Hyperconjugation effect
+Conc.HINO,, A
+Fe/HCI
+Conc.H,so,
+323 - 333K
+> B
+С,H,он
+) C
+273K
+-N,
+Organic compound 'D° is
+] + D + HCI
+(2) CH,COOH
+HN - C,H,
+(3) CH CHO
+56. Statement I: Staggered conformation of ethane is more stable than the eclipsed conformation.
+Statement II: The torsional strain in staggered conformation is more.
+Read the above statements and choose the correct answer from the options given below.
+(1) Both Statement I and Statement II are false
+(2) Both Statement I and Statement II are true
+(3) Statement I is true but Statement II is false
+(4) Statement I is false but Statement II is true
+SPACE FOR ROUGH WORK
+ACA26423
+35
+
+
+
+--- PAGE 18 ---
+51.
+From the given information, select the suitable law of chemical combination:
+Cupric Carbonate
+Natural Sample
+% of Cu % of C
+51.35
+Synthetic Sample
+51.35
+9.74
+9.74
+% of o
+38.91
+38.91
+(a) Law of Multiple Proportions
+(2) Gay Lussac's Law of Gaseous Volumes
+(3) Law of Definite Proportions
+(4) Law of Conservation of Mass
+58. Match List - I with List - II and select the correct option (Based on mole concept):
+List - I
+List - II
+(a) 2 moles of ethene
+(i)
+11.2 L volume at STP
+() Molar mass is equal to 66 g
+56 B
+(c) 1 g of H,
+(iii) 12.04 × 1023 molecules
+(d) 2 moles of water vapours
+(V) 1.5 mole of CO,
+Codes:
+A) a - ii, b - iv, c - i, d - ii
+(3) a - i, b - iv, c - ii, d - iii
+(2) a - ii. b - i. c - iv. d - i
+(4) a - i, b - i, c - i, d - iv
+59. Match List - I with List - II:
+List - I
+(Element-Atomic number)
+List - II
+(Position in periodic table)
+(a) Ra - 88
+(i
+4th period, 13th group
+(b) Ga - 31
+(ii)
+6th period, 6th group
+(c) W _ 74
+(il) gth period, 10th group
+(d) Pd - 46
+(iv) 7th period, 2nd group
+Choose the correct answer from the options given below.
+(2) a - i, b - ii, c - in, d - iv
+AJa - iv, b - i, c - i, d - iii
+(4) a - ili, b - iv, c - i, d - i
+)Bra - iv, b - it, c - ill, d - i
+SPACE FOR ROUGH WORK
+ACA26423
+Сз
+19 H2
+2C2 H2
+12 x2 +2x1
+37
+
+
+
+--- PAGE 19 ---
+a. The types of hybrid orbitals of nitrogen in NO, , NO, and H, respectively are
+4) sp, sp' and sp?
+(2) sp, sp' and sp?
+(3) sp?, sp and sp3
+(4) sp?, sp' and sp
+

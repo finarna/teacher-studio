@@ -1,0 +1,717 @@
+
+
+--- PAGE 1 ---
+PlUs?Al
+KARNATAKA COMMON ENTRANCE SIMULATION TEST 2026
+PHYSICS SIMULATION
+Serial No: P2-2026-PHYS
+Subject Code: PHY
+Duration: 80 Minutes
+Version Code: REI-v17
+Maximum Marks: 60
+CANDIDATE NAME:
+CET REG. NO:
+LEGAL DISCLAIMER & TERMS OF USAGE
+IMPORTANT: This document is an Al-generated simulation based on historical analysis of the Karnataka Common
+Entrance Test (KCET). It is intended strictly for practice and training purposes. Plus2AI does not claim that these
+specific questions will appear in the actual 2026 KCE examination. PlusZAI assumes no legal lIability for any
+discrepancies. variations. or performance outcomes in the actua exam. Users are advised to use this alongside
+official KEA study materials.
+IMPORTANT INSTRUCTIONS TO CANDIDATES
+This question booklet contains 60 questions. Check that all pages are intact.
+The Version Code and Serial Number must be correctly entered on the OMR Answer Sheet.
+Each question carries 1 mark. There is no negative marking for wrong answers.
+Answers must be marked ONLY on the OMR sheet provided using a blue/black ballpoint pen.
+Calculators, log tables, and electronic gadgets are strictly prohibited.
+Plus2AI DNA Model (REI v17): This is a high-fidelity pattern simulation. Final results may vary.
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 2 ---
+1. Inaseries I - C - R circuit connected to an AC source of variable frequency, the current
+amplitude Im is measured against the angular frequency w . It is observed that at
+w = w1, the circuit is purely inductive and at w = w2 , it is purely capacitive. Which of the
+following statements is fundamentally correct regarding the resonance frequency wo ?
+(A) Theresonance frequency wo mustlie
+(B)
+omegal > wo and w2 < wo
+between w1 _and w2 such that
+must hold true.
+DNA
+w0 = wIw2 is not necessarily true.
+Exam
+(C) The phase difference between voltage
+(D) The impedance of the circuit is minimum
+and current is positive at wi and
+at both w1 and
+negative at w2
+2. Which of the following graphs correctly represents the variation of resistivity (p) with
+temperature (T) for a typical semiconductor like Silicon?
+(A) An exponential-like decay where p
+decreases rapidly as T increases.
+(C) A constant horizontal line, as resistivity is
+a material property independent of
+temberature
+(B) A linear increase where p is directly
+proportional to T
+(D) Aparabolic increase where P
+'increaseswith g? due toincreased
+scattering.
+3. An electromagnetic wave is propagating through a non-magnetic dielectric medium with a
+relative permittivity
+Ep = 4. If the peak value of the magnetic field associated with the wave is
+2.0 × 10
+- T, what is the peak value of the electric field in that medium?
+(A) 60 V/m
+(C) 120 V /m
+(B) 30 V m
+DNA
+(D) 15 V /m
+m DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 3 ---
+4. During a Young's Double Slit Experiment (YDSE), the entire apparatus is immersed in a liquid of
+refractive index u Which of the following statements correctly describes the change in the
+interference pattern?
+(A) The fringe width increases by a factor of
+(C) The central fringe shifts towards the top
+(B) The angular fringe width decreases by a
+factor of p
+(D) The fringe width remains constant as it
+depends only on slit geometry
+5. The work function of a certain metal is & . When the metal is irradiated with light emitted by a
+transition from n = 3 to n = 2 in a hydrogen atom, photoelectrons are just emitted (zero
+kinetic energy). To obtain photoelectrons with a maximum kinetic energy of 4% , the transition in
+the same hydrogen atom must be from:
+(A) n=2 to n=1
+(B)
+n = 4 to n=2
+(C)
+n = 00
+to n=1
+(D) The required energy cannot be achieved
+by any transition in Hydrogen.
+6. Two coaxial circular loops Li and L areplaced in the same plane. If the current in the
+outer loop Li is clockwise and increasing with time, the induced current in the inner loop [2
+will be:
+(A) Anticlockwise
+(C) Zero
+(B) Clockwise
+(D) Initially clockwise and then anticlockwise
+7. The core of a transformer is laminated to reduce the effect of:
+(A) Eddy currents
+(B) Copper loss
+(C) Hysteresis loss
+(D) Magnetic flux leakage
+8. Kirchhoff's first law (Junction Law) at a junction in an electrical network is a direct consequence of
+the law of conservation of:
+(A) Charge
+(C) Momentum
+Exam DNA
+(B) Energy
+(D) Mass
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 4 ---
+9. For a glass prism, the angle of minimum deviation (Sm is found to be equal to the angle of the
+prism (A) . What is the refractive index of the material of the prism?
+(A)
+V3
+(B)I
+2 cos(A/2)
+(C) I
+2 sin(A/2)
+V2
+10. The graph shows the variation of stopping potential V with frequency u ofincident
+radiation for two different photosensitive metals A and B . Whichof the following
+conclusions drawn from the graph is correct?
+(A) Metal B has ahigher work function
+than Metal A
+(C) The work function of Metal A is
+greater than that of Metal B
+(B) The slope of the graph for Metal A is
+greater than that of Metal B
+because it has more electrons.
+(D) If light of a specific frequency illuminates
+both, Metal A will eject
+photoelectrons with higher kinetic
+energy.
+11. Which of the following statements is INCORRECT regarding the properties of electric field lines?
+(A) Electric field lines form closed loops.
+(C) Tangent to the field line at any point
+gives the direction of electric field at
+that point.
+(B) They start from positive charges and
+end at negative charges.
+(D Two field lines never intersect each
+oTher.
+ONA
+12. The electric potential at any point on the equatorial plane of an electric dipole is:
+(A) Zero
+(C) Inversely proportional to the distance
+(B) Maximum
+(D) Directly proportional to the distance
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 5 ---
+13. The I - W characteristic curves for a metallic conductor at two different temperatures
+Th and Th are shown below. If the slope of the I - W graph represents conductance,
+and the line for Th is steeper (closer to the I -axis) than Th , which of the following is
+true?
+(A) TI< I
+(C) Th = T
+(B)
+Th > I
+(D) Th = 273
+DNA
+am DNA
+14. Astationary nucleus of mass number A emits an alpha particle with a kinetic energy Ka
+The total energy ( Q -value) released in the process is:
+(A)
+AsKa
+(B)
+'Ka
+(DI
+1+1 Ka
+AKa
+15. The resistivity of a certain material is found to decrease significantly as the temperature is
+increased. This material is most likely classified as a:
+(A) Semiconductor
+(B) Metal
+(C) Alloy
+(D Perfect Conductor
+16. Above the Curie temperature, a ferromagnetic material behaves like a paramagnetic material. In
+this state, the relationship between its magnetic susceptibility × and the absolute temperature
+T
+is best described by which of the following?
+(A)
+xaT
+(BI xa:
+(C)
+(D)
+* isindependentof T
+17. A thin biconvex lens of refractive index n, = 1.5 is immersed in a transparent liquid of
+refractive index n = 1.75 . In this scenario, the lens will behave as a:
+(A) Converging lens with a larger focal
+length
+(B) Diverging lens with a larger focal length
+(C) Converging lens with a smaller focal
+length
+(D) Diverging lens with a smaller focal
+length
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 6 ---
+18. In a Young's Double Slit Experiment (YDSE), the fringes are observed on a screen placed at a
+distance D from the slits. If the entire experimental apparatus is immersed in a liquid of
+refractive index n , which of the following statements correctly describes the change in the
+interference pattern?
+(A) The fringe width increases by a factor of
+and the central fringe shifts.
+(C) The fringe width decreases by a factor
+of n , while the position of the central
+fringe remains unchanged.
+(B) The angular fringe width decreases, but
+the linear separation of fringes remains
+constant.
+(D) The fringe width remains constant
+because the path difference is
+independent of the medium.
+19. Aninductor L andaresistor R areconnected in series to an AC source of angular
+frequency w . If the phase difference between the voltage and the current is /4, then the
+value of inductive reactance XL is:
+(A) Equalto R
+(B) Zero
+(C) Infinite
+(D) R/2
+20. For ann-type semiconductor, which of the following statements regarding the energy band
+structure and carrier concentration is fundamentally true as the temperature increases from
+OK tovery high values?
+(A) The Fermi level starts near the donor
+level and moves towards the middle of
+the band gap at very high temperatures.
+(C) The number of electrons in the
+conduction band remains constant
+because all donors are already ionized.
+(B) The Fermi level stays constant just below
+the conduction band regardless of
+temperature.
+(D) The semiconductor becomes a p-type
+semiconductor at extremely high
+temperatures due to thermal hole
+generation.
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 7 ---
+21. Which of the following properties of an electromagnetic wave remains unchanged as it moves
+from vacuum into a denser transparent medium like diamond?
+(A) The ratio of the magnitudes of the
+electric and magnetic field vectors.
+(C) The frequency of the oscillating electric
+and magnetic fields.
+(B) The momentum carried by the wave per
+unit volume.
+(D) The wavelength of the wave.
+22. A ray of light passes through an equilateral glass prism such that the angle of incidence is equal to
+the angle of emergence. If the angle of emergence is 3/4 times the angle of the prism, the
+refractive index of the glass prism is:
+TIATE
+V2
+V3
+(C)
+(B)
+(D)
+1.5
+1.25
+23. Foraseries I - C - R circuit, the figure below (mentally visualize or refer to standard
+graphs) shows the variation of the current I with the angular frequency w for two
+different resistances R1 and R2 ( R1 < R2 ). Which of the following is true regarding
+the Quality FactorI O JandBandwidth( Aw 3? *
+(A) 41 <Q2 and Aur > Awa
+(BI
+Q1 > Q2 and Awn < Aws
+(C)
+Q1 > Q2 and Awi > Aw
+(D)
+Q1 = Q2 since I and C are
+identical.
+24. According to Ampere's circuital law, for a very long straight current-carrying conductor, the
+magnetic field B atadistance r from the axis varies as:
+(A)
+B a 1/r
+(C) Bar
+(D) Bay
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 8 ---
+25. Abiconvex lens of focal length f is made of glass ( n = 1.5 ). When it is immersed in a
+liquid of refractive index m = 1.25 , its focal length becomes f' . Theratio
+iS:
+(A)
+2.5
+(B
+2.0
+(C)
+(D)
+1.25
+0.4
+26. An inductor of self-inductance I carries a steady current I . The magnetic energy stored
+in it is U . If a softiron core (relative permeability Ur » 1 )is inserted into the inductor
+while the current is maintained constant by an external battery, the new energy stored U' will
+be:
+(A) U =U
+(8) U<U
+(C) u =U/pr
+(D U = MU
+27. Aproton enters a region of uniform magnetic field B moving with velocity U
+perpendicular to the field. What is the work done by the magnetic field on the proton?
+(A) Zero
+(C) Negative
+(B) Maximum
+" DNA
+(D) Depends on the charge of the particle
+28. Apoint charge +g is placed at the center of a hollow conducting sphere of radius R. Ifthe
+sphere is given a charge of +2q , what is the electric flux through a Gaussian surface of radius
+where R<+ <2R ?
+(A)
+(B)
+39
+(C
+(D) Zero
+Exam DNA
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 9 ---
+29. The V - I characteristics for a metallic conductor at two different temperatures Th
+and
+Th are shown in the graph. From the graph, we can conclude that:
+(A) TI> Th
+(B) Th < T
+(C) TI = T2
+(DI
+Th = 212
+30. Two capacitors of capacitances C1 and Cs are connected in parallel and then charged to
+a potential difference V . The ratio of the charges stored on them ( Q1/Q2 ) is:
+(A) C1/C2
+(B) Ch/C
+(C) v01/C
+DNA
+(D) (G1/C2)3
+DNA
+31. The stability of heavy nuclei( A > 170 ) is primarily limited by the competition between two
+fundamental forces. Which of the following best explains why stable heavy nuclei have a
+significantly higher number of neutrons than protons ( N > Z )?
+(A) The short-range nature of the nuclear
+force means it saturates, while the long-
+range Coulomb repulsion between
+protons continues to increase with
+(B) Neutrons are slightly heavier than
+protons, providing the extra
+gravitational binding needed to hold the
+nucleus together.
+C) The weak nuclear force converts
+protons into neutrons to minimize the
+total charge of the nucleus.
+(D) As the volume of the nucleus increases,
+the Pauli Exclusion Principle requires
+more neutrons to fill the higher energy
+levels.
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 10 ---
+32. A metallic ring is held horizontally and a bar magnet is dropped perpendicularly through the
+center of the ring with its North pole pointing downwards. As the magnet passes through the
+ring, the acceleration of the falling magnet is a . Which of the following correctly describes the
+relationship between a and the acceleration due to gravity g
+(A)
+(B)
+(C)
+a < g while approaching and
+a < g while receding
+a = g throughout the motion
+(D)
+a < g while approaching and
+a > g while receding
+a < g while approaching and
+a = g while receding
+33. Unpolarized light of intensity Io is incident on a system of two polaroids Pi and Pr
+which are placed in a 'crossed' position. A third polaroid P; is now introduced between Pi
+and P2 such that its transmission axis makes an angle of 45°
+with the axis of Pi .The
+intensity of light emerging from P2 IS:
+(A)
+(B)
+Io/4
+(C)
+Io/16
+10/8
+(D) Zero, since Pi and P are still
+crossed
+34. In a hypothetical one-electron atom, the potential energy is defined as U(r) = art, where
+is a positive constant. If Bohr's quantization of angular momentum holds true ( L = nh
+), the radius of the n* permitted orbit rn scales with the principal quantum number n
+as:
+(A)
+(B
+In On /3
+In ant/2
+(D) in an'
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 11 ---
+35. Which of the following graphs correctly represents the variation of inductive reactance ( XL)
+and capacitive reactance ( Xc) with the frequency ( f )of an AC source?
+(A)
+XL is a straight line through origin,
+Xc is a rectangular hyperbola
+(C) Both XI and Xc
+are
+(B) Both XI and Xc arestraight
+lines through origin
+XL is a rectangular hyperbola,
+rectangular hyperbolas
+Xc is a straight line through origin
+36. Unpolarized light is incident on a transparent glass surface at the Brewster's angle OB .Which
+of the following statements regarding the reflected and refracted rays is strictly TRUE?
+(A) The reflected ray is partially polarized
+and perpendicular to the refracted ray.
+(B) The reflected ray is plane polarized with
+electric field vectors parallel to the plane
+of incidence.
+(C) The reflected and refracted rays are
+mutually perpendicular.
+(D) The refracted ray is perfectly plane
+polarized.
+37. A Wheatstone bridge is most sensitive when the resistances of all four arms are:
+(A) Of the same order of magnitude
+(B) As large as possible
+(C) As small as possible
+(D) Zero
+38. Anelectron in a hydrogen atom makes a transition from an excited state n. = 2 to the
+ground state n = 1 . If the mass of the hydrogen atom is M , what is the recoil speed of
+the atom due to the emission of the photon? (Assume h is Planck's constant and R is
+Rydberg constant)
+(A)
+3hR
+(B)
+(C)
+AhR
+(D) Zero, because the nucleus is much
+heavier than the electron.
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 12 ---
+39. A proton, a deuteron, and an alpha particle are accelerated through the same potential
+difference V .Let 1p, Ad, and Aa be their respective de Broglie wavelengths.
+Which of the following relationships is correct?
+(A) Is > Ad > Aa
+(B) An> Ad> Ip
+(C) 16=14 = 16
+(D) 17 1 > 16
+40. The B - I hysteresis loops for two magnetic materials X and Y areshown.
+Material X has a thin, tall loop with high retentivity and low coercivity. Material Y hasa
+wide loop with high coercivity. Which of the following statements is most appropriate for their
+applications?
+(A) X is used for making permanent
+(B)
+X is used for transformer cores and
+magnets and Y for transformer
+Y for permanent magnets.
+(C) Both y and y aresuitable for
+permanent magnets.
+(D) Both X and I aresuitable for
+electromagnets.
+41. Atestcharge go is moved along the surface of a charged metallic sphere of radius R from
+a point A to another point B . If the charge on the sphere is Q , the work done by the
+electrostatic force in this process is:
+(A) Zero
+(B)
+1 000
+am DNA
+sTRO 120
+(D) Infinite
+42. A wire of resistance R is stretched such that its length becomes double. During this process,
+the resistivity of the material of the wire:
+(A) Remains unchanged
+B) Becomes double
+(C) Becomes four times
+(D) Becomes half
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. | KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 13 ---
+43. A monochromatic light source of frequency u illuminates a photosensitive surface with work
+function @ (where hr > o ). If the intensity of the incident light is doubled while keeping
+the frequency constant, which of the following occurs?
+(A) The maximum kinetic energy of the
+photoelectrons is doubled.
+(B) The stopping potential increases linearly
+with intensity.
+(C) The saturation photoelectric current is
+doubled.
+(D) The threshold frequency of the surface
+decreases to accommodate more
+photons.
+44. The figure shows the variation of the natural logarithm of the activity In A lofa radioactive
+sample with time ( t ). If the mass number of the sample is Am and the initial mass of the
+sample is mo , the number of nuclei decayed in the time interval t = 0 to t = t1 is
+proportional to:
+(Visual Description: A straight line with a negative slope
+-S starting from an intercept I
+onthe In A axis).
+(A) (é15)(1 - € Sty
+(C) I(1 - eSt)
+(B)
+e-St
+(D) (S/I)e Sta
+45. Consider two nuclei A and B with mass numbers 110 and 220 respectively. If the binding
+energy per nucleon (B/A) for A is 8.5 Me andfor B is 7.6 Me , and
+nucleus B undergoes fission into two identical nuclei of type A , which statement correctly
+describes the energetics of the process?
+(A) Energy of 198 MeV isreleased
+because the product nuclei have higher
+total binding energy.
+(C) Energy of 0.9 MeV isreleased
+(B) Energyof 198 Me is absorbed
+because the parent nucleus has higher
+mass number.
+because the binding energy per nucleon
+increases.
+(D) No energy change occurs since the total
+number of nucleons remains conserved
+at 220.
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 14 ---
+46. The activity of a radioactive sample is measured as RI attime ti and R2 attime
+t2
+If the mean life of the sample is + , the number of nuclei that have decayed in the time
+interval (tz-ti) is proportional to:
+(A)
+(RI - R2)T
+(BI
+(RI - R2)/T
+(D) I
+(RI - Ra)e (43-11) 7
+NA
+47. The electrostatic potential V as a function of distance r from the center of a charged
+solid conducting sphere of radius R is best represented by which of the following
+descriptions?
+(A)
+V is constant for r < R and
+(B) V iszerofor r < R and
+decreases as 1/p for r > R
+increases linearly for r > R .
+(C) v increases linearly for + < R
+(D) V is constantfor + < R and
+and is constant for r > R
+decreases as 1/7? for r> R.
+48. The binding energy per nucleon ( BE I A I vs mass number ( A ) graph for various nucleiis
+shown. Consider a hypothetical process where a nucleus with A = 100 and
+BE/A = 7.5 Me fissions into two identical fragments with A = 50 and
+BE/A = 8.5 Me each. The total energy released in this single fission event is:
+(A)
+100 MeV
+(B)
+1 MeV
+(C)
+(D)
+10 MeV
+200 MeV
+49. In a purely capacitive AC circuit, the average power dissipated over a complete cycle is:
+(A) Zero
+(8) Icy?
+(D)
+DNA
+VI
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 15 ---
+50. Aprotonandan a -particle enter a region of uniform magnetic field B with the same
+kinetic energy, moving perpendicular to the field lines. If rp and ra are the radi of their
+In
+respective circular paths, the ratio
+IS:
+(A) 1:2
+(B)
+2:1
+(C) 1:1
+(DI
+1:V2
+51. A steady current flows through a metallic conductor of non-uniform cross-section. Which of the
+following physical quantities remains constant along the length of the conductor?
+(A) Electric current
+(B) Drift speed of electrons
+(C) Current density
+(D Electric field intensity
+52. Two long, straight, parallel wires carry currents It and I in the same direction. The force
+per unit length between them is F . If the direction of I is reversed and its magnitude is
+doubled, the new force per unit length between them will be:
+(A)
+-2F (attractive)
+(B)
+2F (repulsive)
+(C)
+-F/2 (repulsive)
+(D)
+2F (attractive)
+53. A parallel plate capacitor is charged by a battery and then the battery is disconnected. If a
+dielectric slab is now inserted between the plates, the energy stored in the capacitor:
+(A) Decreases
+(B) Increases
+[CRemains the same
+(D Becomes zero
+54. radioactive sample contains two nuclei A and B with decay constants 5% and \
+respectively. Initially, both have the same number of nuclei. The ratio of the number of nuclei of
+A tothatof B will be 1/e after a time interval of:
+(A) 1/(4X)
+(B) 1/(21)
+(C) 2/1
+(D) 1/1
+am DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 16 ---
+55. An electric dipole of dipole moment ° is placed in a uniform electric field E . The dipole is in
+'stable equilibrium'when the angle O between I and E
+IS:
+(A)
+(B)
+90°
+180°
+(D)
+45°
+56. The resolving power of a compound microscope can be increased by:
+(A) Increasing the wavelength of light used
+(C) Using a medium of higher refractive
+index between the object and objective
+(B) Decreasing the diameter of the
+objective lens
+(D) Decreasing the numerical aperture of
+the objective lens
+57. A metallicring is dropped from a height h so that it falls through a long, vertical solenoid
+carrying a constant current. While the ring is entering the solenoid, its acceleration'
+compared to the acceleration due to gravity' g 'will be:
+(A)
+a = g
+DIT
+(C)
+(B)
+a > g
+(D)
+a < g
+a = 0
+58. In a Young's Double Slit Experiment, which graph correctly represents the variation of intensity
+on the screen with the phase difference • between the two interfering waves? (Assume
+Io is the intensity of each individual source)
+(A) A graph showing intensity varying as
+cos o between 0 and 210
+(C) A graph with constant intensity 21
+for all d
+(B) A graph showing intensity varying as
+cos (/2) between 0 and
+410
+(D) A linear graph where intensity increases
+with
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 17 ---
+59. Inanunbiased p- n junction at thermal equilibrium, which of the following statements
+regarding the internal dynamics is correct?
+(A) The diffusion current of holes is exactly
+balanced by the drift current of holes,
+resulting in zero net hole current.
+(C) There is no drift current because there is
+no external battery connected to the
+junction.
+(B) The diffusion current is much larger than
+the drift current, but they flow in the
+same direction.
+(D) The barrier potential increases the
+diffusion current until it equals the drift
+current.
+60. The work done in moving a test charge of 5 uC between two points on an equipotential
+surface of potential 10 V
+A Terc
+(C) 2 MJ
+(B) 50 uJ
+(D) 0.5 kJ
+Reproduction strictly prohibited. © 2026 Plus2Al. | KCET 2026 Simulation - SET A | Page 0
+

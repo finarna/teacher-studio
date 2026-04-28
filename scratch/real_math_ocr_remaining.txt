@@ -1,0 +1,324 @@
+
+
+--- PAGE 7 ---
+20. If lim
+-(1)
+21.
+2 " then lim fix) + lim fis)
+(2) 5
+(0);
+then
+tan x
+(3) .
+3у -
+ax+7 if x <1
+23. If f(x) =33x-1 if x=1
+x+3
+if x>1
+b
+is continuous at x = 1, then
+() a = 5, b = 2
+18) a = 5. b = -2
+(2) 8 8 -5.0 2
+(4) a = -5, b =
+SPACE FOR ROUGH WORK
+7/15
+
+
+
+--- PAGE 8 ---
+24.
+The second order derivative of cos-' (4x' - 3x) with respect to cos' (2x? - 1), where
+(1) 0
+(2)
+C3
+<X <1 is
+3) =
+25. If f(x) = sin"
+(1)
+** ), then i'.
+26.
+(3)
+If
+* in
+(x
+(2) §
+14)o
+dy
++
+y) and x ax - y = 0, then n =
+(1) 1
+(3).
+10|6
+(4)
+27. In a Mahakumbh, a drone camera is moving along 3y = × - 3. When y-coordinate changes 9
+times as fast as -coordinate, it captures good quality pictures. Then one of the precise positions
+of the drone at that instant is
+8(4) = (a)S_
+(1) (-3, -8)
+(2) (3, -8)
+(4) (-3, 8)
+(3) (3, 8)
+28. A Youtube short video is getting viral according to f(t) = -2 + 31? + 5. At what time does
+the video get maximum number of shares? (t is in hours)
+(2)2
+¥(1) 1
+¥ (4) 4
+6+ + 6
+601+.
+6 + 6
+(3) 3
+SPACE FOR ROUGH WORK
+8/15
+
+
+
+--- PAGE 9 ---
+19. (x fis) dx + 116) = 0, then FiN is equal to
+(2) ex
+() 6-1?
+(4) e12
+3. One of the possible functions I) which satisfies frig de = 0 is
+(1) log
+(2) sin (2 + x)
+() 2x3 + 2x + 1
+(4) 2x tan X
+b-6
+31. [f(x + 6) dx is equal to
+after -0 dr
+(3) (r(s) dx
+32. If 'n' is a natural number, then
+(a) tan 1 x + C
+n - 1
+(3) tan"+2,
+n + 2
++ C
+sin" x
+• dx =
+cos™+2 x
+tan" y
+(2)
++ C
+SPACE FOR ROUGH WORK
+9/15
+
+
+
+--- PAGE 10 ---
+13. [ex lu2 2" dx =
+(1) log x + C
+(2) × + C
+(3)
+* • + C
+(4)
+§+C
+34. 'The area of the region bounded by the curve y? = x', the y-axis and the lines y = 1 and
+y = 8 is
+(1) 155
+sq. units
+(3) 93 sq. units
+125 93
+sq. units
+(4) 155 sq. units
+35. The area enclosed by the curve × = V3 cose, y = V3 sinO is
+(1) V3 me sq. units
+(3) 67 sq. units
+(2) I sq. units
+14 3r sq. units
+36. Sum of the squares of the order and degree (if defined) of a differential equation
+2y' + (y")? = / y" -3 is
+34 + 24
+(1) 3 '
+X
+(3) 8
+37. If A = [a, b, c, d, e, f, then the number of subsets of A which contains at least 2 elements is
+(1) 64
+(3) 57
+3
+(2) 20 X
+145 16
+(2)65
+(4) 59
+SPACE FOR ROUGH WORK
+10/15
+
+
+
+--- PAGE 11 ---
+„MA- (-3.3.4 . . . lo), then the number of non ampy salbeso? A conthligails as
+number is
+8).30
+, The domain of the function 19-x
+4) 7, 9 X
+317.9 X
+< (4) 29
+(2) 17, 9) -
+(4) 17, 9] -
+4 If n(A) = 2 and the number of relations from set A to set B is 1024, then n(B) is
+(2) 5
+p/25
+(4) 52
+Probability of at least one of the events A and B occur is 0.6. If A and B occur simultaren
+with probability 0.2, then P(A) + P(B) is
+6) 0.6
+X
+90.8
+(4) 1.2 X
+C. The maximum value of sin(x + 7/6) + cos(x + n/6) is attained at x =
+() 7/2
+X
+(2)7/4
+(3) п/б
+(4) т/12
+&. The angles of a triangle are in A.P and the greatest angle is double the
+the third angle is
+(2)
+SPACE FOR ROUGH WORK
+11/15
+
+
+
+--- PAGE 12 ---
+С3
+44. The mean and standard deviation of 100 items are 50 and 4, respectively then the sum of all
+squares of the items is
+(1) 250000 Y
+97 256100
+(2) 251600
+(4) 265100
+45. Probability of occurrence of an event A is 1/2 and that of B is 3/10. IF A and B are mutually
+exclusive, then the probability of occurrence of neither A nor B is
+(Y
+2) 3
+(3)
+46. Let R be the relation in the set N given by R = {(a, b) : a = b - 2, b > 6). Which of the
+following is the correct answer?
+(1) (2, 4) є R
+97 (6, 8) E R
+(2) (3, 8) E R~
+(4) (8, 7) є R
+47. f(x) = (x + 1)? for x ≥ 1, g(x) is a function whose graph is the reflection of the graph of f(x) in
+the line y = x, then g(x) is
+(1) - K-1 Y
+(3) Vx - 1
+48. If sin-' x +
+sin-' y = /2, then x? is equal to
+(1) 1 - y?
+311-ya
+49. tan
+(1+1×2 + tan-
+1
+1+2×3
+(2) 1 + y?
+(4) /1 + y?
+Atan-t/
+n + 2
++ …... + tan-
+1
+=
+(1+ n(n + 1)
+(n+1
+(2) tan-
+(3) tan-1_ n n+1
+(4) tan-1
+SPACE FOR ROUGH WORK
+12/15
+
+
+
+--- PAGE 13 ---
+50. The corner points of the feasible region determined by the system of linear constraints are
+(0, 10), (5, 5), (15, 15), (0, 20). Let z = px + gy where p, q > 0. The relation between p and q,
+so that the maximum z occurs at both points (15, 15) and (0, 20) is
+(1) р = g
+(2) p = 2g
+(3) q = 2p
+(4) q = 3p
+51. In Linear Programming Problem (LP), the objective function Z = ax + by has the same
+maximum value at two corner points. The number of points at which max occurs is
+(1) 1
+272
+z flan + 10)
+(3) 0
+(4) Infinity X
+2 wire
+52. Probability of obtaining an even prime number on each die when a pair of dice is rolled is
+(1) 0
+(2)
+36
+(3)
+(4}
+53. The probability that a man and his wife live after 20 years are
+1
+À and 1
+3
+• respectively.
+The probability that neither the man nor his wife live after 20 years is
+(1) .
+3
+(2)
+(4)
+54. Integrating factor of the differential equation (1 - x4) -
+dy - xy = 1 is
+(1) 1 - 2
+3)
+(4) V1-x?
+SPACE FOR ROUGH WORK
+13/15
+
+
+
+--- PAGE 14 ---
+55.
+C3
+Recent studies suggest that 12% of the world population is left handed. Depending on parents'
+hand usage, the chances of having left handed children are as follows:
+A: Both parents are left handed, chances of having left handed children = 24%
+B: Both parents are right handed, chances of having left handed children = 9%
+C: Father left handed and mother right handed, chances of having left handed children = 17%
+D: Father right handed and mother left handed, chances of having left handed children = 22%
+Given P(A) = P(B) = P(C) = P(D) = 1/4 and L denotes child is left handed. What is the
+probability that P(A|L)?
+(1) _17
+(2)
+(4)
+56. If a and B are acute angles such that a + B and a - B satisfy the equation
+tan? 0 - 4 tan 0 + 1 = 0, then a and B are respectively,
+(1) 45°, 30°
+030°, 45°
+(3) 30°, 60°
+(4) 60°,
+(1) 2
+(3) 0
+ES. The solution of 3(x - 1) ≤ 2 (x - 3) is
+(1) x 5 - 3
+(3) x 5 3
+(2) - i
+(4) і
+(2) *2 - 3
+(4) x ≥ 3
+SPACE FOR ROUGH WORK
+29
+14/15
+
+
+
+--- PAGE 15 ---
+59.
+10 distinct points are taken on a circle. Then using these points
+Statement I: The number of triangles that can be formed is 100
+Statement II: The number of chords that can be formed is 45
+Which of the following is correct?
+(1) Both Statement I and Statement I are true
+(2) Both Statement I and Statement II are false
+(3) Statement I is true and Statement II is false
+(4) Statement I is false and Statement I is true
+60. How many ways can you arrange all the letters and numbers in "KCET 2025" which start with
+K and end with 5?
+(85 720
+(2) 360
+CET 202
+(3) 120
+(4) 180
+15/15
+

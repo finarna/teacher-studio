@@ -1,0 +1,61 @@
+Question#,Topic,Difficulty,SET-A Score,SET-B Score,Combined,Verdict
+1,Inverse Trigonometric Functions,Moderate,48,50,50,partial_hit
+2,Linear Programming,Moderate,58,48,58,partial_hit
+3,Linear Programming,Moderate,51,43,51,partial_hit
+4,Probability,Moderate,68,68,68,partial_hit
+5,Probability,Moderate,71,71,71,hit
+6,Differential Equations,Moderate,53,61,61,partial_hit
+7,Probability,Moderate,65,65,65,partial_hit
+8,[ANNOTATE],Moderate,40,34,40,miss
+9,[ANNOTATE],Moderate,44,43,44,miss
+10,[ANNOTATE],Moderate,44,45,45,miss
+11,[ANNOTATE],Moderate,48,49,49,miss
+12,[ANNOTATE],Moderate,47,48,48,miss
+13,Limits,Moderate,47,46,47,miss
+14,[ANNOTATE],Moderate,34,34,34,miss
+15,Matrices,Moderate,59,58,59,partial_hit
+16,Matrices,Moderate,58,58,58,partial_hit
+17,Matrices,Easy,45,33,45,miss
+18,Matrices,Moderate,61,58,61,partial_hit
+19,Matrices,Moderate,44,48,48,miss
+20,[ANNOTATE],Moderate,48,48,48,miss
+21,[ANNOTATE],Moderate,48,48,48,miss
+22,Determinants,Moderate,51,56,56,partial_hit
+23,[ANNOTATE],Moderate,40,32,40,miss
+24,[ANNOTATE],Moderate,43,44,44,miss
+25,[ANNOTATE],Moderate,49,49,49,miss
+26,Vectors,Moderate,57,67,67,partial_hit
+27,Three Dimensional Geometry,Moderate,59,58,59,partial_hit
+28,Three Dimensional Geometry,Moderate,57,57,57,partial_hit
+29,[ANNOTATE],Moderate,40,35,40,miss
+30,[ANNOTATE],Moderate,49,49,49,miss
+31,[ANNOTATE],Moderate,50,48,50,partial_hit
+32,Limits,Moderate,41,42,42,miss
+33,Limits,Moderate,48,48,48,miss
+34,Continuity and Differentiability,Moderate,53,45,53,partial_hit
+35,[ANNOTATE],Moderate,47,48,48,miss
+36,Continuity and Differentiability,Moderate,66,51,66,partial_hit
+37,[ANNOTATE],Moderate,47,46,47,miss
+38,Continuity and Differentiability,Moderate,53,46,53,partial_hit
+39,Applications of Derivatives,Hard,58,58,58,partial_hit
+40,Applications of Derivatives,Hard,54,53,54,partial_hit
+41,[ANNOTATE],Moderate,47,46,47,miss
+42,[ANNOTATE],Moderate,40,47,47,miss
+43,[ANNOTATE],Moderate,45,45,45,miss
+44,[ANNOTATE],Moderate,46,47,47,miss
+45,[ANNOTATE],Moderate,43,43,43,miss
+46,Applications of Integrals,Moderate,48,51,51,partial_hit
+47,Applications of Integrals,Moderate,47,47,47,miss
+48,Differential Equations,Moderate,50,52,52,partial_hit
+49,Sets,Moderate,48,50,50,partial_hit
+50,Sets,Moderate,48,50,50,partial_hit
+51,Relations and Functions,Moderate,60,65,65,partial_hit
+52,Sets,Moderate,48,51,51,partial_hit
+53,Probability,Moderate,69,69,69,partial_hit
+54,Applications of Derivatives,Moderate,65,66,66,partial_hit
+55,[ANNOTATE],Moderate,50,50,50,partial_hit
+56,Statistics,Moderate,49,49,49,miss
+57,Probability,Moderate,70,70,70,hit
+58,Relations and Functions,Moderate,58,68,68,partial_hit
+59,Relations and Functions,Hard,56,58,58,partial_hit
+60,[ANNOTATE],Moderate,47,46,47,miss

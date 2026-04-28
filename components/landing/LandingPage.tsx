@@ -4,6 +4,7 @@ import VerificationAuditSection from './VerificationAuditSection';
 import SubjectMasterySection from './SubjectMasterySection';
 import FeaturesSection from './FeaturesSection';
 import AdaptiveTrajectorySection from './AdaptiveTrajectorySection';
+import CoreCapabilitiesSection from './CoreCapabilitiesSection';
 import PricingSection from './PricingSection';
 import TestimonialsSection from './TestimonialsSection';
 import FAQSection from './FAQSection';
@@ -23,6 +24,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         <HeroSection onGetStarted={onGetStarted} />
         <SubjectMasterySection />
         <AdaptiveTrajectorySection />
+        <CoreCapabilitiesSection />
         <FeaturesSection />
         <PricingSection onGetStarted={onGetStarted} />
         <TestimonialsSection />

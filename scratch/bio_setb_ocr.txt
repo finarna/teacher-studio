@@ -1,0 +1,620 @@
+
+
+--- PAGE 1 ---
+PlUs?Al
+KARNATAKA COMMON ENTRANCE SIMULATION TEST 2026
+BIOLOGY SIMULATION
+Serial No: P2-2026-BIOL
+Subject Code: BIO
+Duration: 80 Minutes
+Version Code: REI-v17
+Maximum Marks: 60
+CANDIDATE NAME:
+CET REG. NO:
+LEGAL DISCLAIMER & TERMS OF USAGE
+IMPORTANT: This document is an Al-generated simulation based on historical analysis of the Karnataka Common
+Entrance Test (KCET). It is intended strictly for practice and training purposes. Plus2AI does not claim that these
+specific questions will appear in the actual 2026 KCE examination. PlusZAI assumes no legal lIability for any
+discrepancies. variations. or performance outcomes in the actua exam. Users are advised to use this alongside
+official KEA study materials.
+IMPORTANT INSTRUCTIONS TO CANDIDATES
+This question booklet contains 60 questions. Check that all pages are intact.
+The Version Code and Serial Number must be correctly entered on the OMR Answer Sheet.
+Each question carries 1 mark. There is no negative marking for wrong answers.
+Answers must be marked ONLY on the OMR sheet provided using a blue/black ballpoint pen.
+Calculators, log tables, and electronic gadgets are strictly prohibited.
+Plus2AI DNA Model (REI v17): This is a high-fidelity pattern simulation. Final results may vary.
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 2 ---
+Plus 2/
+1. In the lac operon of E. coli, the 'inducer' molecule (lactose) exerts its effect by binding to which
+component of the system?
+(A) The repressor protein, preventing it
+from binding to the operator.
+(C) The structural genes, initiating their
+direct transcription.
+(B) The RNA polymerase, enhancing its
+affinity for the promoter.
+(D) The promoter site, acting as a signal for
+transcription start.
+2. The genetic code is described as 'degenerate'. This property is best illustrated by which of the
+following scenarios?
+ONP
+(A) The amino acid Phenylalanine is coded
+by both UUU and UUC.
+(B) The codon AUG codes for Methionine
+and as res as a stare codon
+(C) The codon UUU codes only for
+Phenylalanine and no other amino acid.
+(D) A single codon can code for multiple
+different amino acids.
+3. Hemophilia is a sex-linked recessive disorder in humans. If a woman who is a carrier for hemophilia
+marries a man with normal blood clotting, what is the probability that their first-born son will be
+affected by the disease?
+(A) 0%
+(C) 50%
+(B) 25%
+(D) 100%
+4. A scientist uses the RNA interference (RNAi) technique to develop a tobacco plant resistant to the
+nematode Meloidogyne incognita . In this process, the source of the double-stranded RNA
+(dsRNA) used to trigger the interference can be:
+(A) Bacterial plasmids only
+(C) Heat shock proteins
+(B) Infection by viruses having RNA
+genomes
+(D Plant hormones like ethylene
+5. Identify the labels 'A' and 'B' in the given diagram of a mature pollen grain of an angiosperm. 'A'
+represents a large cell with abundant food reserves and an irregularly shaped nucleus, while 'B'
+represents a small cell that floats in the cytoplasm of 'A'.
+[Diagram Description: A circular structure with a thick outer wall (Exine) and thin inner wall (Intine).
+Inside, there is a very large cell 'A' and a small spindle-shaped cell 'B' within its cytoplasm.]
+(A) A = Generative cell, B = Vegetative cell
+(B) A = Vegetative cell, B = Generative cell
+(C) A = Exine, B = Intine
+(D) A = Tapetum, B = Endothecium
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 3 ---
+6. Aperson is bitten by an infected female Anopheles mosquito. Which specific stage of the
+Plasmodium parasite is injected into the human bloodstream to initiate the infection of
+Malaria?
+(A) Trophozoites
+(B) Gametocytes
+(C) Sporozoites
+(D) Merozoites
+7. Astudent performs a cross between a heterozygous tall pea plant ( It ) and a homozygous
+recessive dwarf pea plant (tt ). What is the expected phenotypic ratio of 'Tall' to 'Dwarf' plants
+in the resulting progeny?
+(A)
+3:1
+(C)
+9:3: 3: 1
+(B) 1:1
+(D) 1:2:1
+am DNA
+8. Consider the following statements regarding Biodiversity Hotspots and select the correct option:
+Statement (I): Biodiversity hotspots are regions with very high levels of species richness and high
+degree of endemism.
+Statement (Il): India has three biodiversity hotspots: Western Ghats and Sri Lanka, Indo-Burma,
+and Himalaya.
+(A) Both Statement (I) and (Il) are correct
+(B) Statement (I) is correct but (Il) is incorrect
+(C) Statement (I) is incorrect but (Il) is
+(D) Both Statement (I) and (Il) are incorrect
+m DNA
+7 DNA
+9. A hiker traveling through a tropical forest is bitten by a female Anopheles mosquito. Which
+specific morphological stage of the Plasmodium parasite is injected into the hiker's bloodstream to
+initiate the malarial infection?
+(A) Sporozoites
+(B) Gametocytes
+(C) Trophozoites
+(D) Merozoites
+Exam DNA
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 4 ---
+10. A specific forest ecosystem captures solar energy to produce gross primary productivity (GPP). If
+the respiration losses (R )of the producers are calculated to be 25% , and the GPPis
+4000 kcal/m /yr, what is the Net Primary Productivity (NPP) available for the herbivores?
+(A)
+3000 kcal/m /yr
+1000 kcal/m /vr
+(C)
+(D)
+5000 kcal/m /yr
+4000 kcal/m /yr
+plus
+plut
+11. Observe the following ecological pyramid representation of biomass in an aquatic ecosystem:
+[Apex: Large Fishes (Large Biomass)]
+[Base: Phytoplankton (Small Biomass)]
+What does this diagram represent?
+(A) Inverted pyramid of biomass
+(C) Inverted pyramid of energy
+(B) Upright pyramid of biomass
+(D) Upright pyramid of numbers
+ONA
+12. A farmer aims to protect his cotton crop specifically against the infestation of cotton bollworms.
+To achieve this through genetic engineering, he should ensure the expression of which specific
+genes from Bacillus thuringiensis ?
+(A)
+cryIAb only
+(B)
+crylAc and cryIIAb
+(C)
+cryIAb and cryIAc
+cryIIAb and cryIAb
+13. A clinical researcher observing a newborn's initial immune profile notes the presence of specific
+antibodies transferred via colostrum during the first few days of lactation. Which immunoglobulin
+class is primarily responsible for providing this naturally acquired passive immunity to the infant?
+(A)
+IgA
+(B)
+IgG
+IgE
+(D
+IgM
+14. After separating DNA fragments using agarose gel electrophoresis, a student observes the gel
+under normal visible light but sees no bands. To visualize the separated DNA fragments as bright
+orange colored bands, the student must stain the gel with.
+and then expose it to.
+(A) Ethidium bromide; UV radiation
+(B) Methylene blue; Infrared light
+(C) Acetocarmine; Visible light
+(D) Bromophenol blue; UV radiation
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 5 ---
+15. In honey bees, the sex determination system is described as haplo-diploid. If a female honey bee
+has 32 chromosomes, how many chromosomes will be found in a male honey bee (drone)?
+(A) 32 chromosomes
+B) 16 chromosomes
+a 64 chromosomes
+(D) 8 chromosomes
+16. In the structural diagram of the artificial cloning vector pBR322, the segments labeled as
+amp and tet serve a vital role in identifying and eliminating non-transformants. These
+segmenTs are known as:
+DNA
+(A) Selectable markers
+(C) Origin of replication ( or )
+(B) Cloning sites
+(D) Promoter sequences
+17. A farmer notices that after a volcanic eruption nearby, bare rocks are slowly being covered by
+lichens. Over many years, these lichens help in soil formation, eventually allowing mosses and then
+small plants to grow. In this ecological succession, the lichens represent the:
+(A) Pioneer species
+(B) Climax community
+(C) Seral stage
+D) Decomposers
+18. In a biological interaction observed in the backwaters of Karnataka, barnacles are found growing
+on the back of a whale. The barnacles benefit by being carried to different locations for food,
+while the whale appears unaffected. This specific interaction is an example of:
+(A) Commensalism
+(B) Mutualism
+(C) Parasitism
+(D) Amensalism
+19. A student performing a recombinant DNA experiment uses the restriction endonuclease
+EcoRI . In this nomenclature, the Roman numeral 'I' indicates:
+(A) The order in which the enzyme was
+isolated from the bacterial strain
+(C) The strain of the bacteria used (RY 13)
+(B) The first letter of the genus of the source
+organism
+(D) The number of recognition sites present
+in the vector
+DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 6 ---
+20. In terrestrial ecosystem, if the Net Primary Productivity ( PP )is measured as
+120 kg m
+and the respiration loss ( R )by producers is 30 kg m
+-2
+the total rate of production of organic matter by these producers ( GPP )?
+(A) 150 kg my 1
+(B) 90 kg m
+ут 1
+(C)
+(D)
+3600 kg my 1
+,what is
+21. Aresearcher observes a phenotypic ratio of 9: 3: 3: 1 inthe E generationofacross
+involving two traits in garden pea plants. This ratio specifically indicates which of the following?
+(A) The parents were homozygous for both
+traits.
+(B) The genes for the two traits are located
+on the same chromosome and are
+tightly linked.
+(D) The traits show incomplete dominance.
+(C) The two pairs of alleles assort
+independently during gamete
+formation.
+22. In the generalized structure of an antibody molecule (as shown in standard diagrams), what is the
+specific function of the variable regions ( VI and Vi )located at the tips of the 'Y' shaped
+arms?
+(A) Binding to the complement system
+(B) Binding to specific antigens
+(C) Attachment to the surface of Mast cells
+(D) Facilitating the transport across the
+placenta
+23. In a laboratory diagram representing a mature human sperm, the structure labeled 'X' is located
+in the middle piece. This structure is spiral in arrangement and is essential for the sperm's
+movement towards the ovum. What is the identity of 'X'?
+(A) Acrosome
+(B) Nucleus
+(C) Mitochondria
+(D) Centriole
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 7 ---
+24. The first human insulin produced using recombinant DNA technology by Eli Lilly in 1983 was a
+landmark achievement. In humans, natural pro-insulin contains an extra stretch called the C-
+peptide. For the genetically engineered insulin to be functional, how are the A and B
+chains of insulin linked together after being produced separately?
+(A) Hydrogen bonds
+(C) Disulfide bonds
+(B) Peptide bonds
+(D) Glycosidic bonds
+25. patient arrives at an emergency room with a deep wound caused by a rusty nail and is
+immediately administered an injection of 'pre-formed antibodies' against tetanus. This medical
+intervention is a classic example of:
+(A) Passive immunization
+(B) Active immunization
+(C) Innate immunity
+(D) Autoimmunity
+26. A cytogeneticist analyzing a human diploid cell calculates the total number of nitrogenous base
+pairs to be 6.6 x 10° bp . If the distance between two consecutive base pairs is 0.34 nm
+what is the total length of the DNA double helix in this cell?
+(A) 2.2 meters
+(B) 1.1 meters
+(C) 3.4 meters
+(D) 0.66 meters
+27. During the secondary treatment of sewage, the BOD of effluent is significantly reduced. In this
+context, 'BOD' is a measure of:
+(A) The amount of inorganic salts present in
+woler
+(C) The concentration of dissolved nitrogen
+in sewage
+(B) The rate of uptake of oxygen by
+microorganisms in a water sample
+(D) The amount of greenhouse gases
+released from the tank
+28. Consider the following statements regarding the embryological support for evolution:
+(I) Ernst Haeckel proposed that the stages of embryo development repeat the adult stages of
+ancesTors.
+(II) Karl Ernst von Baer disapproved of this by noting that embryos never pass through the adult
+stages of other animals.
+Which of the following is correct?
+(A) Both (1) and (Il) are correct
+(B) Only (1) is correct
+(C) Only (Il) is correct
+(D) Both (I) and (Il) are incorrect
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 8 ---
+29. Observe the following representation of an ecological pyramid in a specific ecosystem. If the
+base represents 10, 000 units of energy and the top represents 10 units , which type of
+pyramid is always characterized by this 'upright' orientation across all ecosystems without
+exception?
+(A) Pyramid of Energy
+(B) Pyramid of Biomass in Sea
+C) Pyramid of Numbers in a Tree
+(D) Pyramid of Biomass in a Forest
+ecosvsTen
+30. In a human male, the genes present on the autosomes and the sex chromosomes ( X and
+Y )exhibit linkage. How many linkage groups are present in a normal human male?
+(A) 22
+(B) 23
+(C) 24
+(D) 46
+31. In a human population, the inheritance of ABO blood groups is determined by three different
+alleles ( A , IB, and i ). Based on the principle of multiple allelism, what is the total
+number of possible genotypes that can exist in this population?
+(A) 3
+(B) 4
+(C) 6
+(D) 9
+DNA
+xam
+32. In the provided diagram of the basic repeating unit of chromatin in eukaryotes, identify the
+structure labeled 'X' which functions to stabilize the wrapping of DNA around the histone core.
+(A) Histone Octamer
+(B) H1 Histone
+(C) Linker DNA
+(D) RNA Polymerase
+33. The oral contraceptive pill 'Saheli' is unique compared to traditional steroidal pills because it:
+(A) Contains a high concentration of
+Estrogen and Progesterone
+(C) Must be taken daily for a period of 21
+days
+(B) Is a non-steroidal preparation called
+Centchroman
+(D) Works by increasing the phagocytosis of
+sperms within the uterus
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 9 ---
+34. In a population under Hardy-Weinberg equilibrium, if the frequency of a recessive phenotypic
+trait (represented by ad is 0.09, what is the percentage of the population that is
+expected to be heterozygous ( Aa )?
+(A)
+30%
+(B)
+(C) 21%
+(D)
+42%
+49%
+35. According to the 'Evil Quartet' of biodiversity loss, which of the following is considered the most
+important and primary cause driving animals and plants to extinction?
+(A) Habitat loss and fragmentation
+(B) Over-exploitation
+(C) Alien species invasions
+(D) Co-extinctions
+DNA
+36. In Assisted Reproductive Technology (ART), the 'ZIFT' procedure involves the transfer of:
+(A) An embryo with more than 8
+blastomeres into the uterus
+(B) Zygote or early embryo up to 8
+blastomeres into the Fallopian tube
+(C) Ova from a donor into the Fallopian
+tube of another female
+(D) Sperm directly into the cytoplasm of the
+ovum in the lab
+37. population of beetles in a limited habitat follows the logistic growth model. The growth rate
+becomes zero when the population density (I ) exactly reaches the carrying capacity (K).
+Which mathematical term in the Verhulst-Pearl equation
+# = IN (KY isresponsible
+for this stabilization?
+(A) Theterm KY becoming zero
+DNA
+(B) The intrinsic rate 'r' becoming negative
+(C) The term 'rN' becoming infinite
+(D) The carrying capacity 'K' becoming zero
+38. The rate of decomposition of detritus is significantly slower if the chemical composition of the
+organic matter is rich in:
+(A) Lignin and Chitin
+(C) Water-soluble substances
+(B) Nitrogen and Sugars
+(D) Oxygen and Phosphorus
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 10 ---
+39. A molecular biologist is synthesizing a protein in a cell-free system. To ensure that the translation
+process initiates correctly at the first position of the polypeptide chain, she must ensure the
+presence of a specific 'Start' signal on the mRNA. This triplet also serves as the code for the
+amino acid Methionine. Identify the codon that acts as this dual-purpose initiator.
+(A)
+AUG
+(B) UAA
+DNA
+(C) UAG
+40. Which of the following reflects the correct chronological sequence of brain capacity increase in
+human ancestors?
+(A) Homo habilis _ Homoerectus
+(B) Homo erectUs
+-› Homo habilis
+-> Neanderthal man
+Neanderthal man
+(C) Australopithecus -* Neanderthal
+(D) Homo habilis -› Neanderthal man
+man -› Homo erectUs
+-> Homo erectus
+DNA
+41. In a Mendelian monohybrid cross, a plant with an unknown genotype showing a dominant
+phenotype is crossed with a homozygous recessive plant. What is the expected phenotypic ratio if
+the unknown plant is heterozygous?
+(A) 3:1
+(B) 9:3:3:1
+(C) 1:1
+(D) 1:2:1
+42. The genetic code is described as 'Universal'. If a scientist transfers a gene from a
+Desul fovibrio bacterium into a tobacco plant cell, why does the plant cell produce the
+exact same sequence of amino acids as the bacterium?
+(A) The codons specify the same amino
+acids in nearly all organisms
+(B) The tobacco plant uses the bacterial
+†RNA for translation
+(C) The bacterium and tobacco plant share
+the same cell organelles
+(D) The DNA polymerase of both organisms
+is identical
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 11 ---
+43. Observe the following schematic representation of a Transcription Unit. If the polarity of the
+strand 'X' is 3' -> 5' and it acts as the template, identify the correct labels for the regions
+marked P, S, and T.
+[Diagram Description: A linear DNA segment with region 'P' at the left end of the 3' -+ 5'
+template strand, 'S' in the middle, and 'T' at the right end of the template strand.]
+(A) P= Promoter, S = Structural Gene, T =
+Terminator
+(B) P = Terminator, S = Structural Gene, T =
+Promoter
+(C) P = Promoter, S = Exon, T = Intron
+(D) P= Operator, S = Structural Gene, T=
+Terminator
+44. During DNA replication, the enzyme DNA-dependent DNA polymerase catalyzes the
+polymerization of deoxynucleotides. Which of the following describes the correct direction of
+polymerization and the polarity of the template strand it 'reads'?
+(A)
+5' -> 3' direction; reads template in
+(B) 3' -+ 5' direction; reads template in
+3' -> 5 direction
+5 - 3 direction
+(C) 5' - 3' direction: reads template in
+(D) 3' -+ 5' direction; reads template in
+5 - 3 direction
+3' - 5' direction
+am DNA
+45. If the sequence of the coding strand in a transcription unit is 5' - AIGCATGO-3', what
+will be the sequence of the corresponding primary transcript (mRNA)?
+(A) 3 - UACGUACG - 5'
+(B) §' - UACGUACG -3'
+(C) 5' -AUGCAUGO -3
+(D) 3' - ATGCAIGO - 5'
+46. During the process of decomposition in a terrestrial ecosystem, detritivores like earthworms
+break down detritus into smaller particles. This specific step is known as:
+(A) Fragmentation
+(C Catabolism
+(B) Leaching
+(D) Humification oP
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 12 ---
+47. In a laboratory study of a typical angiosperm, a student observes a structure that is described as
+7-celled and 8-nucleated at maturity. Which specific cell within the ovule must undergo meiosis to
+eventually produce this female gametophyte?
+(A) Nucellus cell
+(B) Megaspore Mother Cell (MMC)
+(C) Functional Megaspore
+(D) Synergid cell
+48. During the human menstrual cycle, a rapid surge in which hormone is directly responsible for
+inducing the rupture of the Graafian follicle and the subsequent release of the ovum (ovulation)?
+(A) Progesterone
+(C) Luteinizing Hormone (LH)
+(B) Estrogen
+(D) Follicle Stimulating Hormone (FSH)
+49. During an experiment on gene expression, a researcher inhibits the enzyme RNA Polymerase III
+in a eukaryotic cell. The synthesis of which of the following RNA molecules will be most
+significantly affected?
+(A) tRNA and 5S rRNA
+(B) mRNA and hnRNA
+(C) 285 rRNA and 18S rRNA
+(D) Only SnRNA
+50. Study the simplified diagram of the cloning vector pBR322 provided. Which of the following
+regions is responsible for controlling the copy number of the linked DNA?
+(A)
+amp
+(B)
+ori
+(C)
+(D)
+rop
+HindIII
+51. A farmer is growing Bt-cotton and notices that while the crop is healthy, the lepidopteran insects
+feeding on the leaves are dying. The Bt-toxin is synthesized as an inactive protoxin in the bacteria.
+The activation of this protoxin into a functional toxin occurs only within the insect's body due to:
+(A) Acidic pH in the stomach
+(B) Alkaline pH of the gut
+(C) Presence of specialized enzymes in the
+saliva
+(D) High temperature in the insect body
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 13 ---
+52. In the Meselson and Stahl experiment, E. coli cells were grown in a medium containing
+N HACt for many generations. They were then transferred to a medium with normal
+14NHACT . After 40 minutes (two generations of replication), what would be the ratio of
+'Hybrid' DNA to 'Light' DNA molecules?
+(A) 1:1
+(B) 1:3
+(C) 3:1
+(D) 0:1
+53. clinical researcher monitoring a 28-year-old patient's menstrual cycle detects a rapid, sharp
+increase in a specific pituitary hormone roughly 24-36 hours before the expected release of the
+ovum. This hormonal 'surge' is most likely responsible for which event in the Graafian follicle?
+(A) Completion of Meiosis-I and initiation of
+OVUlcTion
+(B) Stimulation of the primary oocyte to
+undergo Mitosis-ll
+(C) Degeneration of the Corpus Luteum
+(D) Transformation of the endometrium into
+the secretory phase
+54. The yellowish fluid 'Colostrum' secreted by a mother during the initial days of lactation is essential
+for providing immunity to the newborn. This is an example of which type of immunity and which
+antibody is predominantly found in it?
+(A) Active immunity; IgG
+(B) Passive immunity; IgA
+(C) Active immunity; IgM
+(D) Passive immunity; IgE
+55. A biotechnology research lab is developing a strategy to prevent the infestation of tobacco
+plants by the nematode Meloidogyne incognita • They use a technique that involves the
+silencing of specific mRNA using a complementary dNA molecule. This process is naturally
+occurring in all eukaryotic organisms as a method of:
+(A) Active immunity
+(B) Cellular defense
+(C) Digestive regulation
+(D) Hormonal signaling
+56. A conservationist decides to protect a rare medicinal plant species by growing it in the Mysore
+Botanical Garden and maintaining its seeds in a National Gene Bank. This strategy is categorized
+(A) Ex-situ conservation
+(C) In-vivo conservation
+(B) In-situ conservation
+(D) Sacred groves
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 14 ---
+57. Observe the provided diagram of the spark discharge apparatus used in Miller's experiment.
+What were the specific gases and conditions maintained inside the large flask (labeled 'X') to
+simulate primitive earth conditions?
+[DIAGRAM: A closed glass apparatus with two electrodes in a large flask, connected to a
+condenser and a boiling water source.]
+(A) CHA, NHs, H2, H2O at
+(B)
+CH4, NO2, 02, H2O at 100°C
+800°C
+(C) CO2, NH;, H2, H2O at
+(D) CHA, NH:, 02, H20 at
+800°C
+500°C
+58. In the first clinical gene therapy conducted in 1990, a 4-year-old girl was treated for Adenosine
+Deaminase (ADA) deficiency. The therapy involved the periodic infusion of genetically
+engineerea:
+(A) Erythrocytes
+(C Platelets
+(B) Lymphocytes
+(D) Hepatocytes
+59. During the secretory phase of the human menstrual cycle, the corpus luteum acts as a temporary
+endocrine gland. Its primary function is to secrete high levels of a specific hormone to maintain
+the uterine endometrium for potential implantation. Identify this hormone:
+(A) Estrogen
+(B) Follicle Stimulating Hormone (FSH)
+(C) Progesterone
+(D) Luteinizing Hormone (LH)
+60. Ovulation, the release of a secondary oocyte from the Graafian follicle, is triggered by a sudden
+and rapid increase in the concentration of which hormone in the middle of the menstrual cycle?
+(A) Progesterone
+(B) Estrogen
+(C) Luteinizing Hormone (LH)
+(D) Follicle Stimulating Hormone (FSH)
+Exam DNA
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 15 ---
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+

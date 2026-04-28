@@ -45,12 +45,14 @@ export default function LandingNav({ onGetStarted }: LandingNavProps) {
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center gap-2"
             >
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">P</span>
+              <div className="relative flex flex-col items-center justify-center w-8 h-8 text-[#38bdf8] bg-[#0f172a] rounded-lg shadow-md border border-slate-700">
+                <svg className="absolute -top-0.5 w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <span className="text-lg font-black mt-1">P</span>
               </div>
-              <span className="text-lg font-black tracking-tight">
-                <span className="text-slate-900">plus2</span>
-                <span className="text-blue-600">AI</span>
+              <span className="text-xl font-black tracking-tight text-slate-900 ml-1">
+                Plus2AI
               </span>
             </button>
           </div>
@@ -75,6 +77,12 @@ export default function LandingNav({ onGetStarted }: LandingNavProps) {
             >
               Pricing
             </button>
+            <a
+              href="/blog/index.html"
+              className="text-slate-700 hover:text-blue-600 font-bold text-sm tracking-wide transition-colors duration-200"
+            >
+              Blog
+            </a>
             <button
               onClick={onGetStarted}
               className="px-8 py-3 bg-blue-600 text-white font-bold text-sm rounded-xl shadow-lg hover:bg-blue-700 transition-all duration-200 hover:scale-105"
@@ -137,6 +145,12 @@ export default function LandingNav({ onGetStarted }: LandingNavProps) {
             >
               Pricing
             </button>
+            <a
+              href="/blog/index.html"
+              className="block w-full text-left px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors duration-200"
+            >
+              Blog
+            </a>
             <button
               onClick={() => scrollToSection('faq')}
               className="block w-full text-left px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors duration-200"

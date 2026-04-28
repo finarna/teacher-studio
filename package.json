@@ -7,7 +7,9 @@
     "dev": "vite --port 9000",
     "dev:server": "PORT=9001 npx tsx server-supabase.js",
     "dev:all": "PORT=9001 npx tsx server-supabase.js & vite --port 9000",
-    "build": "vite build",
+    "prebuild": "bash scripts/pre-build.sh",
+    "build": "npm run prebuild && vite build",
+    "build:fast": "vite build",
     "start": "PORT=9001 npx tsx server-supabase.js & vite preview --port 9000",
     "prod": "npm run build && npm run start",
     "test": "node tests/useFilteredScans.test.js",
@@ -43,6 +45,7 @@
     "razorpay": "^2.9.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-helmet-async": "^3.0.0",
     "recharts": "^3.6.0",
     "tsx": "^4.21.0",
     "uuid": "^13.0.0"

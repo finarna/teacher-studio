@@ -204,7 +204,7 @@ export default function PricingSection({ onGetStarted }: PricingSectionProps) {
                     {billingPeriod === 'monthly' ? '/month' : '/year'}
                   </span>
                   {billingPeriod === 'yearly' && (
-                    <div className="text-sm text-green-600 font-semibold mt-1">Save 17% - 2 months free!</div>
+                    <div className="text-sm text-green-600 font-semibold mt-1">Save 17% - Best value!</div>
                   )}
                 </div>
 

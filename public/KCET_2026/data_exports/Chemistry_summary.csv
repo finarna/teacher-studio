@@ -1,0 +1,61 @@
+Question#,Topic,Difficulty,SET-A Score,SET-B Score,Combined,Verdict
+1,Solid State,Easy,44,45,45,miss
+2,Solid State,Moderate,46,45,46,miss
+3,Solid State,Hard,36,35,36,miss
+4,Solid State,Easy,44,45,45,miss
+5,Solid State,Moderate,46,45,46,miss
+6,Solid State,Hard,36,35,36,miss
+7,Solid State,Easy,44,45,45,miss
+8,Solid State,Moderate,46,45,46,miss
+9,Solid State,Hard,36,35,36,miss
+10,Solid State,Easy,44,45,45,miss
+11,Solutions,Moderate,54,55,55,partial_hit
+12,Solutions,Hard,54,55,55,partial_hit
+13,Solutions,Easy,64,65,65,partial_hit
+14,Solutions,Moderate,54,55,55,partial_hit
+15,Solutions,Hard,54,55,55,partial_hit
+16,Solutions,Easy,64,65,65,partial_hit
+17,Solutions,Moderate,54,55,55,partial_hit
+18,Solutions,Hard,54,55,55,partial_hit
+19,Solutions,Easy,64,65,65,partial_hit
+20,Solutions,Moderate,54,55,55,partial_hit
+21,Electrochemistry,Hard,54,53,54,partial_hit
+22,Electrochemistry,Easy,64,63,64,partial_hit
+23,Electrochemistry,Moderate,54,53,54,partial_hit
+24,Electrochemistry,Hard,54,53,54,partial_hit
+25,Electrochemistry,Easy,64,63,64,partial_hit
+26,Electrochemistry,Moderate,54,53,54,partial_hit
+27,Electrochemistry,Hard,55,53,55,partial_hit
+28,Electrochemistry,Easy,64,63,64,partial_hit
+29,Electrochemistry,Moderate,54,53,54,partial_hit
+30,Electrochemistry,Hard,54,53,54,partial_hit
+31,Chemical Kinetics,Easy,63,64,64,partial_hit
+32,Chemical Kinetics,Moderate,53,54,54,partial_hit
+33,Chemical Kinetics,Hard,53,54,54,partial_hit
+34,Chemical Kinetics,Easy,63,64,64,partial_hit
+35,Chemical Kinetics,Moderate,53,54,54,partial_hit
+36,Chemical Kinetics,Hard,53,54,54,partial_hit
+37,Chemical Kinetics,Easy,63,64,64,partial_hit
+38,Chemical Kinetics,Moderate,53,54,54,partial_hit
+39,Chemical Kinetics,Hard,53,54,54,partial_hit
+40,Chemical Kinetics,Easy,63,64,64,partial_hit
+41,P-Block Elements,Moderate,45,45,45,miss
+42,P-Block Elements,Hard,35,35,35,miss
+43,P-Block Elements,Easy,44,45,45,miss
+44,P-Block Elements,Moderate,45,45,45,miss
+45,P-Block Elements,Hard,35,35,35,miss
+46,P-Block Elements,Easy,44,45,45,miss
+47,P-Block Elements,Moderate,45,45,45,miss
+48,P-Block Elements,Hard,35,35,35,miss
+49,P-Block Elements,Easy,44,45,45,miss
+50,P-Block Elements,Moderate,45,45,45,miss
+51,Organic Chemistry,Hard,35,35,35,miss
+52,Organic Chemistry,Easy,44,45,45,miss
+53,Organic Chemistry,Moderate,45,45,45,miss
+54,Organic Chemistry,Hard,35,35,35,miss
+55,Organic Chemistry,Easy,44,45,45,miss
+56,Organic Chemistry,Moderate,45,45,45,miss
+57,Organic Chemistry,Hard,35,35,35,miss
+58,Organic Chemistry,Easy,44,45,45,miss
+59,Organic Chemistry,Moderate,45,45,45,miss
+60,Organic Chemistry,Hard,35,35,35,miss

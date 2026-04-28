@@ -35,3 +35,4 @@ dist-ssr
 .env
 *.backup
 server-supabase.js.backup
+.vercel

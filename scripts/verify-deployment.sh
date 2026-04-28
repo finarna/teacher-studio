@@ -27,6 +27,7 @@ declare -a URLS=(
     "/blog/kcet-2026-solved-papers.html"
     "/blog/ai-prediction-kcet-neet-jee.html"
     "/KCET_2026/analysis_reports/forensic_audit/index.html"
+    "/KCET_2026/analysis_reports/forensic_audit/report_viewer.html"
 )
 
 echo "Checking URLs..."

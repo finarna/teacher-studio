@@ -1,0 +1,690 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --primary-glow: conic-gradient(from 180deg at 50% 50%,
+            #16abff33 0deg,
+            #0885ff33 55deg,
+            #54d6ff33 120deg,
+            #0071ff33 160deg,
+            transparent 360deg);
+    --secondary-glow: radial-gradient(rgba(255, 255, 255, 1),
+            rgba(255, 255, 255, 0));
+
+    /* Multi-Subject Theme Variables - Dynamically updated by useSubjectTheme hook */
+    --subject-primary: #10B981;
+    /* Default: Physics Green */
+    --subject-light: #D1FAE5;
+    --subject-dark: #047857;
+}
+
+@layer base {
+    html {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-size: 16px;
+    }
+
+    body {
+        @apply antialiased text-slate-900 bg-[#f8fafc];
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "ss02";
+        line-height: 1.6;
+        letter-spacing: -0.015em;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'Outfit', sans-serif;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+        font-weight: 700;
+        @apply text-slate-900;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}
+
+/* Glassmorphism */
+.glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
+}
+
+.glass-dark {
+    @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 shadow-2xl;
+}
+
+/* Typography Enhancements */
+.font-outfit {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.03em;
+}
+
+.font-inter {
+    font-family: 'Inter', sans-serif;
+}
+
+.font-instrument {
+    font-family: 'Instrument Sans', sans-serif;
+}
+
+/* Question Typography - Optimized for readability */
+.question-text {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.75;
+    letter-spacing: -0.01em;
+    @apply font-medium text-slate-800;
+}
+
+.text-balance {
+    text-wrap: balance;
+}
+
+/* Premium Shadows */
+.shadow-premium {
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.04);
+    @apply border-slate-200/50;
+}
+
+/* Animations */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.animate-float {
+    animation: float 5s ease-in-out infinite;
+}
+
+@keyframes reverse-spin {
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+.animate-reverse-spin {
+    animation: reverse-spin 3s linear infinite;
+}
+
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+/* Hide scrollbar but keep functionality */
+.scroller-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scroller-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Gradient Text */
+.text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600;
+}
+
+/* Card Hover Effects */
+.card-hover {
+    @apply transition-all duration-500 hover:scale-[1.01] hover:shadow-2xl hover:border-primary-200/50;
+}
+
+.selection-primary::selection {
+    @apply bg-primary-500 text-white;
+}
+
+/* 3D Flip Utilities */
+.perspective-1000 {
+    perspective: 1000px;
+}
+
+.transform-style-3d {
+    transform-style: preserve-3d;
+}
+
+.backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+    transform: rotateY(180deg);
+}
+
+/* Enhanced Progress Animations */
+@keyframes shimmer-fast {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.animate-shimmer-fast {
+    animation: shimmer-fast 2s linear infinite;
+}
+
+@keyframes shimmer-slow {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.animate-shimmer-slow {
+    animation: shimmer-slow 4s linear infinite;
+}
+
+@keyframes float-slow {
+
+    0%,
+    100% {
+        transform: translateY(0px) translateX(0px);
+    }
+
+    50% {
+        transform: translateY(-20px) translateX(10px);
+    }
+}
+
+.animate-float-slow {
+    animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes float-medium {
+
+    0%,
+    100% {
+        transform: translateY(0px) translateX(0px);
+    }
+
+    50% {
+        transform: translateY(-15px) translateX(-8px);
+    }
+}
+
+.animate-float-medium {
+    animation: float-medium 4s ease-in-out infinite;
+}
+
+@keyframes float-fast {
+
+    0%,
+    100% {
+        transform: translateY(0px) translateX(0px);
+    }
+
+    50% {
+        transform: translateY(-12px) translateX(8px);
+    }
+}
+
+.animate-float-fast {
+    animation: float-fast 3s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.animate-gradient-shift {
+    animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-x {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 3s ease infinite;
+}
+
+@keyframes pulse-slow {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-gentle {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+.animate-pulse-gentle {
+    animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ENHANCED KATEX FORMULA RENDERING
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Better spacing and sizing for mathematical formulas */
+.katex {
+    font-size: 1.3em !important;
+    line-height: 1.6 !important;
+    /* Soft highlight for all math */
+    background: rgba(241, 245, 249, 0.6);
+    padding: 0.15em 0.4em;
+    border-radius: 6px;
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    color: #1e293b;
+}
+
+/* Make symbols and operators clearer */
+.katex .mord,
+.katex .mbin,
+.katex .mrel,
+.katex .mopen,
+.katex .mclose {
+    font-weight: 500 !important;
+}
+
+/* Inline math - ensure it doesn't break line height too much */
+.katex:not(.katex-display .katex) {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0.1em 0.2em;
+}
+
+/* Quiz question text - larger math */
+.math-text .katex {
+    font-size: 1.05em !important;
+}
+
+/* Instrument Sans context (question cards) - ensure katex aligns well */
+.font-instrument .katex,
+.font-instrument .katex-html {
+    vertical-align: middle;
+}
+
+/* Display mode (block equations) - centered and prominent */
+.katex-display {
+    margin: 1.25rem 0 !important;
+    padding: 0.75rem 0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Inline math - better vertical alignment */
+.katex-html {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Chemistry formulas - slightly smaller and distinct color */
+.katex .mhchem {
+    color: #0f766e !important;
+    /* Teal for chemistry */
+    font-size: 0.95em;
+}
+
+/* Physics units - distinct styling */
+.katex .pu {
+    color: #1e40af !important;
+    /* Blue for physics units */
+    font-size: 0.9em;
+}
+
+/* Better rendering for fractions */
+.katex .frac-line {
+    border-bottom-width: 0.06em !important;
+}
+
+/* Matrices and arrays - better spacing */
+.katex .arraycolsep {
+    width: 0.5em !important;
+}
+
+/* Subscripts and superscripts - improved readability */
+.katex .msupsub {
+    text-rendering: optimizeLegibility;
+}
+
+/* Square roots - smoother rendering */
+.katex .sqrt {
+    border-color: currentColor !important;
+}
+
+/* Better contrast for parentheses and brackets */
+.katex .delimsizing {
+    color: #334155 !important;
+}
+
+/* Smooth scrolling for long equations */
+.katex-display>.katex {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Chemistry reaction arrows - more prominent */
+.katex .mhchem-arrow {
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+/* Enhanced readability in Vidya chat */
+.rich-markdown .katex {
+    max-width: 100%;
+}
+
+.rich-markdown .katex-display {
+    background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 50%, #f8fafc 100%);
+    border-radius: 8px;
+    padding: 1rem !important;
+    margin: 1.5rem 0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SOLUTION STEPS - ENHANCED FORMULA RENDERING
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Solution step content area */
+.solution-step-content {
+    /* Better line spacing for readability */
+    line-height: 1.7 !important;
+}
+
+/* Inline formulas in solution steps - larger and highlighted */
+.solution-step-content .katex {
+    font-size: 1.15em !important;
+    padding: 0.1em 0.25em;
+    background: rgba(241, 245, 249, 0.5); /* Subtle slate background instead of yellow */
+    color: #0f172a !important;
+    border-radius: 4px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    margin: 0 0.15em;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.solution-step-content .katex:hover {
+    background: rgba(226, 232, 240, 0.8);
+    transform: translateY(-1px);
+}
+
+.solution-step-content .katex:hover {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-color: #94a3b8;
+    box-shadow: 0 2px 8px rgba(71, 85, 105, 0.15);
+}
+
+/* Display mode (block equations) in solution steps */
+.solution-step-content .katex-display {
+    margin: 1.5rem 0 !important;
+    padding: 1.25rem !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%);
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(71, 85, 105, 0.08);
+}
+
+.solution-step-content .katex-display .katex {
+    font-size: 1.35em !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Better spacing around equals signs and operators */
+.solution-step-content .katex .mrel,
+.solution-step-content .katex .mbin {
+    margin: 0 0.4em !important;
+}
+
+/* Improved fraction rendering in solutions */
+.solution-step-content .katex .frac-line {
+    border-bottom-width: 0.08em !important;
+}
+
+/* Darker text for better contrast in solutions */
+.solution-step-content .katex {
+    color: #0f172a !important;
+}
+
+/* Step title formulas - slightly smaller but still highlighted */
+.solution-step-content h3 .katex {
+    font-size: 1.1em !important;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   QUIZ REVIEW - ENHANCED MATH RENDERING
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Quiz question text math - larger for better readability */
+.quiz-question-text .katex {
+    font-size: 1.5em !important;
+    line-height: 1.8 !important;
+    font-weight: 500 !important;
+    color: #0f172a !important;
+}
+
+/* Quiz options math - significantly larger and highlighted */
+.quiz-option-math .katex {
+    font-size: 1.6em !important;
+    line-height: 2 !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    padding: 0.1em 0.4em !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Quiz solution steps math - clear and readable */
+.quiz-solution-step .katex {
+    font-size: 1.4em !important;
+    line-height: 1.8 !important;
+    font-weight: 500 !important;
+    background: rgba(241, 245, 249, 0.4) !important;
+    padding: 0.1em 0.3em !important;
+    border-radius: 4px !important;
+}
+
+/* Display mode in quiz options */
+.quiz-option-math .katex-display {
+    margin: 0.75rem 0 !important;
+    padding: 0.5rem 0 !important;
+}
+
+/* Better spacing for fractions in options */
+.quiz-option-math .katex .frac-line {
+    border-bottom-width: 0.08em !important;
+}
+
+/* Clearer subscripts and superscripts in options */
+.quiz-option-math .katex .msupsub {
+    font-size: 0.75em !important;
+}
+
+/* Better visibility for symbols */
+.quiz-option-math .katex .mord,
+.quiz-option-math .katex .mbin,
+.quiz-option-math .katex .mrel {
+    font-weight: 500 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VIDYA V3 - CUSTOM ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Slow spin animation for sparkle effect on FAB button */
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 8s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MULTI-SUBJECT SWITCHING ANIMATIONS (Phase 5)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Subject pill transitions */
+.subject-pill {
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.subject-pill:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.subject-pill.active {
+    transform: scale(1);
+    box-shadow: 0 2px 8px var(--subject-primary);
+}
+
+/* Fade in animation for filtered content */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 300ms ease-in;
+}
+
+/* Scan grid fade-in */
+.scan-grid {
+    animation: fadeIn 300ms ease-in;
+}
+
+/* Subject switcher smooth transitions */
+.subject-switcher {
+    transition: all 200ms ease-in-out;
+}
+
+/* Context indicator bar slide-in */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.context-bar {
+    animation: slideInDown 250ms ease-out;
+}

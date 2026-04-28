@@ -24,7 +24,7 @@ const testimonials = [
     role: 'Head of Science',
     school: 'Top-Tier PU College, Bangalore',
     image: '👩‍🔬',
-    quote: 'Deploying plus2AI across our Class 12 batches reduced faculty prep time by 80%. More importantly, our students felt 100% prepared for the specific pattern signatures identified by the Oracle.',
+    quote: 'Deploying plus2AI across our Class 12 batches reduced faculty prep time by 80%. More importantly, our students felt 100% prepared for the specific pattern signatures identified by the AI Engine.',
     rating: 5,
   },
   {

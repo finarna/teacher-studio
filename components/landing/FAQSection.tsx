@@ -4,36 +4,44 @@ import { useRef, useState } from 'react';
 
 const faqs = [
   {
-    question: 'How does AI scanning work?',
-    answer: 'Our advanced AI uses computer vision and natural language processing to analyze exam papers. Simply upload a photo or scan of the paper, and our system extracts questions, answers, marks, and topic classifications with 95%+ accuracy. The AI is trained on millions of exam papers and supports Math, Physics, Chemistry, and Biology.',
+    question: 'What makes Plus2AI different from traditional coaching?',
+    answer: 'Unlike generic video lectures, Plus2AI uses an adaptive intelligence algorithm to dynamically map your exact weaknesses. It generates personalized learning trajectories, focusing your time strictly on high-yield exam patterns and rank-deciding concepts you haven\'t mastered yet.',
   },
   {
-    question: 'Which exam boards are supported?',
-    answer: 'plus2AI supports all major Indian exam boards including CBSE, ICSE, State Boards (Maharashtra, Karnataka, Tamil Nadu, etc.), and international curricula like IGCSE and IB. Our AI adapts to different question formats and marking schemes automatically.',
+    question: 'How accurate are the Predictive Practice Tests?',
+    answer: 'Our proprietary AI engine has analyzed 15 years of previous board exam grading sequences to isolate recurring concepts. This data-driven approach mathematically predicts pattern signatures you are highly likely to encounter on test day for the 2026 cycle.',
   },
   {
-    question: 'Which exam packages do you offer?',
-    answer: 'We offer specialized packages for KCET+PUC (₹299/month), NEET Achiever (₹499/month), JEE Champion (₹499/month), and Ultimate Scholar (₹699/month - all exams). Each plan includes unlimited scans, exam-specific question banks, mock tests, and performance analytics. Yearly plans available with 17% savings.',
+    question: 'How does the Vidya AI Tutor work?',
+    answer: 'Vidya is your 24/7 interactive study companion. When you get stuck on a complex problem, Vidya breaks down the solution into hyper-precise, step-by-step logic flows rather than just giving you the final answer, ensuring you deeply understand the mechanics.',
   },
   {
-    question: 'How accurate is the AI?',
-    answer: 'Our AI maintains 95%+ accuracy for text extraction and 90%+ for mathematical equations and chemical formulas. We continuously improve through machine learning. If you notice any errors, you can easily correct them in our editor, and the AI learns from your corrections.',
+    question: 'Does the system support JEE and NEET preparation?',
+    answer: 'Yes. Plus2AI is rigorously calibrated for KCET, JEE Main/Advanced, and NEET. The system automatically shifts its difficulty distribution and pattern recognition parameters based on the specific exam you are preparing for.',
   },
   {
-    question: 'Can I export materials?',
-    answer: 'Yes! You can export training materials in multiple formats including PDF, Word (DOCX), Excel (for question banks), and plain text. Pro users can also customize templates and branding for their exports.',
+    question: 'What is the SketchAI Visuals module?',
+    answer: 'SketchAI transforms abstract formulas into interactive visual diagrams. Whether it\'s a complex physics circuit or an organic chemistry reaction, visually experiencing the concept is proven to accelerate comprehension and retention by up to 3x.',
   },
   {
-    question: 'Is my data secure?',
-    answer: 'Absolutely. We use bank-level encryption (AES-256) for all data in transit and at rest. Your exam papers and student data are stored securely in India-based servers. We are GDPR compliant and never share your data with third parties. You can delete your data anytime.',
+    question: 'Can parents track the student\'s progress?',
+    answer: 'Absolutely. Every Plus2AI account features a comprehensive, real-time performance dashboard. It tracks precise topic-wise mastery, test scores, and learning velocity, making it easy to identify struggle areas instantly.',
   },
   {
-    question: 'Do you offer team pricing?',
-    answer: 'Yes! Our Enterprise plan is designed for schools and institutions. It includes unlimited team members, centralized billing, custom integrations, dedicated support, and volume discounts. Contact our sales team for a customized quote based on your needs.',
+    question: 'Is my personal data secure?',
+    answer: 'Yes. We use bank-level encryption (AES-256) for all data in transit and at rest. Your learning data and progress metrics are stored securely on India-based servers, ensuring total privacy and compliance.',
   },
   {
-    question: 'What payment methods are accepted?',
-    answer: 'We accept all major credit/debit cards (Visa, Mastercard, Amex, RuPay), UPI, Net Banking, and popular digital wallets through RazorPay. All payments are processed securely with SSL encryption. We offer monthly and annual billing (save 2 months with annual).',
+    question: 'How does the pricing compare to traditional coaching?',
+    answer: 'Unlike competitors that charge ₹30,000 to ₹80,000 annually with recurring subscriptions, Plus2AI offers a clear, one-time payment of ₹3,999 (KCET) or ₹5,999 (JEE/NEET). This single payment grants you unlimited access to the entire ecosystem until your exam is completed—no monthly expiry stress.',
+  },
+  {
+    question: 'Why choose Vidya AI over regular photo-solving apps?',
+    answer: 'Generic apps give generic answers. Vidya is a highly Context-Aware AI Tutor—she knows your exact learning history, your weakest topics, and your current exam target. This means you do not just get a random textbook copy-paste; you get guidance that is hyper-personalized to your exact situation.',
+  },
+  {
+    question: 'Do you offer a tier for Coaching Institutes?',
+    answer: 'Yes! Plus2AI provides a full Dual-Purpose platform. Coaching institutes get a complete Admin Dashboard and our unique AI Paper Scanning technology that digitizes 10 years of past papers with 95%+ accuracy in days, saving faculty hours of data entry each week.',
   },
 ];
 
@@ -131,22 +139,13 @@ export default function FAQSection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="mailto:support@edujourney.com"
+              href="mailto:support@finarna.com"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-lg border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-200"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               Email Support
-            </a>
-            <a
-              href="#"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              Live Chat
             </a>
           </div>
         </motion.div>

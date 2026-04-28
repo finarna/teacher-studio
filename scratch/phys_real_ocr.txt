@@ -1,0 +1,653 @@
+
+
+--- PAGE 1 ---
+C3
+VERSION
+CODE
+Total Number of Questions: 60
+Maximum Marks : 60
+Total Duration: 80 Minutes
+Maximum Time For Answering : 70 Minutes
+Time: 10.30 AM to 11.50 AM
+Day-1, First Session YSM26423
+MENTION YOUR CET NUMBER
+Serial
+Number:
+Subject
+Code
+P
+INSTRUCTIONS FOR CANDIDATES
+DOs:
+1. This question booklet is issued to vou by the room invigilator after 10.30 am.
+2. Check whether the CET Number has been entered and shaded in the respective circles on the OMR answer
+sheet.
+3. The version code of this question booklet should be entered on the OMR answer sheet and the respective
+circles should also be shaded completely.
+4. The Version Code and Serial Number of this question booklet should also be entered on the Nominal Roll
+without any mistakes.
+5. Compulsorily sign at the bottom portion of the OMR answer sheet in the space provided.
+DON'Ts:
+1. THE TIMING AND MARKS PRINTED ON THE OR ANSWER SHEET SHOULD NOT BE DAMAGED /
+MUTILATED / SPOILED.
+The 3rd Bell rings at 10.40 am, till then
+Do not remove the seal present on the right hand side of this question booklet.
+Do not look inside this question booklet or start answering on the OMR answer sheet.
+IMPORTANT INSTRUCTIONS TO CANDIDATES
+In case of usage of SIGNS AND SYMBOLS in the questions, the regular textbook connotation should be
+considered unless stated otherwise.
+This guestion booklet contains 60 questions and each question will have one statement and four different
+options / responses & out ot which you have to choose one correct answer.
+3. After the 3 Bell rings at 10.40 am, remove the paper seal of this question booklet and check that this
+booklet does not have any unprinted or torn or missing pages or items etc., if so, get it replaced by a
+complete test booklet. Read each item and start answering on the OMR answer sheet
+4. Completely darken / shade the relevant circle with a blue or black ink ballpoint pen against the question
+number on the OMR answer sheet.
+WRONG METHODS
+CORRECT METHOD
+1
+2
+(4
+(1
+3)
+5. Please note that even a minute unintended ink dot on the OR answer sheet will also be recognized and
+recorded by the scanner. Therefore, avoid multiple markings of any kind on the OMR answer sheet.
+6. Use the space provided on each page of the question booklet for rough work. Do not use the OMR answer
+shoe ior me same
+7. Last Bell will ring at 11.50 am, stop writing on the OMR answer sheet.
+8. Hand over the OMR answer sheet to the room invigilator as it is.
+9. After separating the top sheet (Office copy), the invigilator will return the bottom sheet replica
+[Candidate's copy) to the candidate.
+10. There is no negative valuation.
+NOTE: In case of doubt/clarification about any question, candidates may refer Kannada/English version.
+1/19
+
+
+
+--- PAGE 2 ---
+0 1.
+In the circuit shown in the figure, the potential difference across the 4pF capacitor
+2.
+(1) 3 V
+(2) 4 v
+X (4) 12 V
+An electric dipole of dipole moment P is placed in the uniform electric field E. Then which of
+the following statements are correct?
+Statement I: The torque on the dipole is ₽ × E
+Statement I: The potential energy of the dipole is -P. E
+Statement III: The net force on the dipole is non zero
+(A)1, Il and III
+(2) I and I only
+() Il and III only
+(4) I and III only
+A 200 J of work is done in moving a charge 5C from a point A where the potential is - 20V to
+another point B where potential is V volt. The value of V at B is
+(2)-20 V
+(4) 60 V X
+2/19
+
+
+
+--- PAGE 3 ---
+- I-
+In the figure, the values of currents I,
+(1) 6A, 1.54 and 1A
+(2) 4A, 2.5A and 2A
+(3) 4A, 2.5A and 1A
+(4) 6A, 4.5A and 1.5A
+The number of electrons moving per second through the filament of a lamp of 60 W operating
+at 120V is nearly (e = 1.6 × 10-19 C)
+(1) 6.2 × 1018 7
+(3) 3.1 × 1018
+(2) 6.2 × 1019
+(4) 3.1 × 1019
+Given below are two statements:
+Statement I: The resistivity of a conductor is independent of its temperature
+Statement I: The resistivity of a semiconductor decreases with increase in temperature
+Select the correct option.
+Quite
+(1) Both Statement I and Statement II are false
+(2) Both Statement I and Statement I are true
+(3) Statement I is true but Statement I is false
+(4) Statement I is false but Statement I is true
+SPACE FOR ROUGH WORK
+3/19
+
+
+
+--- PAGE 4 ---
+Current flowing through a wire decreases linearly from 10A to zero in 4s as shown in the graph.
+Find the total charge flowing through the wire in the given time interval.
+11.
+(1) 40C
+(3) 10C %
+(2) 20C X
+(4) 80C
+In a conducting region, 10 electrons and 10 protons move to the left, while 101 a-particles
+move to the right per second. The resulting electric eurrent is (em 1,6 × 10-1 C)
+(1) 3.2 A towards left
+(2) 3.2 A towards right
+(3) 1.6 A towards left
+(4) 1.6 A towards right
+A point charge is placed in a moving train. A passenger A sitting in the train and person B on
+the ground observe the fields due to this charge. Then
+(1) A observes both electric and magnetie fields
+(2) B observes both electrie and magnetic fields
+(3) A observes only magnetic field
+(4) B observes only electric field.
+A proton, an electron and an a-particle enter at right angles to a uniform magnetie field with
+the same velocity. IF R, R, and R. are the radit of circular paths of these partieles, then
+(1) R. = R. = R.
+(2)R > R. > R
+() R. < R, < R.
+(4) R. > R, = R*
+Biot-Savart law indicates that an electron moving with a velocity V produces a magnetic field
+B around it such that
+(1) B is parallel to V
+485 B is anti-parallel to V
+(2) B is perpendieular to V X
+(4) B is inclined to V by 45° X
+4/19
+
+
+
+--- PAGE 5 ---
+° 12.
+Two identical circular current loops carrying equal currents are placed with their axes inclined
+at 45° to each other as shown in the figure. The resultant magnetic field at P is
+ual (v2 +1)i+
+Hot
+(2) 6.02R
+16R
+(4) Hot v21+j
+16R
+° 13. If a paramagnetic bar is brought near a bar magnet, then it is
+(1) Attracted by both the poles of the bar magnet
+(2) Repelled by both the poles of the bar magnet
+3 Attracted by the South-pole and repelled by the North-pole of the bar magnet
+6 (4) Attracted by the North-pole and repelled by the South-pole of the bar magnet
+0 14.
+Pick out the WRONG statements about magnetic substances
+(x = magnetic susceptibility) (H, = relative permeability).
+I. Substances with - 1 ≤ y < 0 are diamagnetic
+II. Substances with x > > 1 are paramagnetic
+III. Substances with y < < 1 are ferromagnetic
+IV. Substances with H, > > 1 are ferromagnetic
+(1) Land II
+(3) IT and III
+(4)L and IV
+SPACE FOR ROUGH WORK
+5/19
+
+
+
+--- PAGE 6 ---
+15. Work function of the metal is
+(1) Maximum possible energy acquired by an electron
+(2) Equal for all metals *
+(3) Minimum energy required by an electron to just eject from metal surface.
+(4) Maximum energy which is given to electron to move out of metal surface 7
+° 16.
+Variation of photoelectric current with anode potential is shown below. Choose the correct
+option (V = stopping potential).
+Graph-I
+Graph-I
+Photo
+electric
+(1)
+Photo
+electric
+(2)
+CUTTITOSTI
+Anode potential
+| Anode potential - >
+1
+Photo
+electric
+(3) current
+Graph-II
+Photo
+electric
+Graph-IV
+17
+Anode potential
+Anode potential
+In Faradav-Henry's experiment, a coil is connected to a galvanometer. For the deflection of
+pointer in the galvanometer, which of the following statement/s is/are WRONG?
+The pointer in the galvanometer deflects -
+(a) When the bar magnet is moved towards the stationary coil along its axis
+(b) When the bar magnet is moved away from the stationary coil along its axis
+(c) When the coil is moved towards the stationary bar magnet along its axis
+(a) When the coil and the magnet are moved without relative motion between them
+(1) a and b
+(2) b and cV
+() a, b and c
+(4) Only d X
+SPACE FOR ROUGH WORK
+6/19
+
+
+
+--- PAGE 7 ---
+С3
+18. In the figure shown, the conductor PQ of length / is moved from x = 0 to x = b and then up to
+* = 2b with a constant velocity v. A uniform magnetic field B is perpendicular to the plane of
+the paper and extends from x = 0 to x = b and it is zero from x > b. The magnitude of emf
+induced in the conductor is
+= 2h
+(MBIx:05 x < b
+(3) BIv; 05xs b
+(2) Zero: 0 ≤ x < b
+(4) BIv:b5x < 26
+19. In a circuit containing a pure resistor connected to an AC source,
+(1) Voltage leads the current by 90°
+(2) Current leads the voltage by 90°
+(3) Voltage and current are in same phase with each other
+(4) Current leads the voltage by 180°
+20. A light bulb rated 100W is connected to an AC source of 220 V, 50 Hz. The rms current through
+the bulb is
+(1) 0.454 AX
+(3) 2.20 A *
+2 2
+W=
+(2) 0.545 A
+(4) 0.22 A
+21. A small town with a demand of 900 kW of electric power at 220 V is situated 20 km away
+from an electric power generating station. The two-wires line has resistance per unit length of
+§ × 10-4 Qm-'. The town gets power from the line through 45000 V to 220 V stepdown
+transformer at a substation in the town. The line power loss in the form of heat is
+(1) 4 kW
+(2) 8 kW
+(3) 40 kW
+(4)80 kW
+SPACE FOR ROUGH WORK
+7/19
+
+
+
+--- PAGE 8 ---
+22. Match the following Maxwell's equations:
+(The symbols used here have their usual meanings)
+List-I
+List-I
+Gauss' law for electrostatics
+Ep
+(b) Gauss' law for magnetism
+dep
+dt
+(c) Faraday's law
+(ti) {B.dA = 0
+(d) Ampere-Maxwell's law
+(iv) fE. di = - de,
+Codes:
+(1). a - i, b - iii, c - iv, d
+(3) a - i, b - ii, c - ii,
+(2) a - it, b - ili, c - i, d.
+(4) a - ii, b - ii, c - iv, d.
+23. With reference to the figure shown below, match the following:
+Normal
+Incident ray
+/ Reflected ray
+List-I
+(a) Angle of reflection.
+(b) Value of a
+(c) Angle of deviation
+Codes:
+(1) a - i, b - i, c - ili
+(3) a - ii, b - i, c - i
+List-II
+60°
+a-s ag
+(i)
+120°
+(iii) 30°
+C-199
+(2) a - i, b - i, c - in
+(4) a - iii, b - i, c - i
+SPACE FOR ROUGH WORK
+90
+3€
+68
+8/19
+
+
+
+--- PAGE 9 ---
+24.
+Сз
+The direction of a ray of light incident on a concave mirror is shown by PQ, while direction in
+which the ray would travel after reflection is shown by four rays marked as A, B, C and Das
+shown in the figure. Which of the four rays correctly shows the direction of the reflected ray?
+PQ is a paraxial
+(1) D
+(2)C
+(3) B
+(4) A
+25. The incorrect statement about refractive index for a pair of media is
+(1) It depends upon nature of the first medium
+(2) It depends upon nature of the second medium
+(3) It depends upon wavelength of light 7
+4} It depends upon angle of incidence
+26. The critical angle for a monochromatic light going from medium A to medium B is 0. If the
+speed of light in medium A is V, then the speed of light in medium B is
+(1) V (1 - cos 0)
+(2)
+cose
+(3) V sine
+(4) V (1 - sin 0)
+27. What range of electromagnetic spectrum is considered as light?
+(1) 1 mm to 700 pm
+(3) 400 mm to 700 nm
+121400 nm to 1 nm
+(4) 1 nm to 10-3 pm
+SPACE FOR ROUGH WORK
+9/19
+
+
+
+--- PAGE 10 ---
+C3
+28. In Young's double slit experiment, how many maxima can be seen on a screen (including central
+maxima) if d =
+(1) 5
+5^ (where 2 is wavelength of light and d is distance between the two slits).
+(2) 4
+3) 7 X
+(4) 1 X
+29. The radius of first orbit in hydrogen atom is 5.3 > 10-" m. The kinetic energy Ex potential
+energy Ep and total energy E, of electron in first orbit are
+(1) E = - 13.6 eV,
+Ep = 27.2 eV,
+E, = 13.6 eV
+125 Ek = 13.6 eV,
+Ep = - 27.2 eV,
+E, = - 13.6 eV -
+(3) Ek = - 27.2 eV,
+Ep = - 13.6 eV, E, = 13.6 eV X
+(4) Ek = 13.6 eV,
+Ep = - 6.8 eV, E, = - 13.6 eV
+30. Bohr's second postulate implies quantisation of
+(1) Charge of an electron
+(3) Angular momentum of electron
+(2) Energy of an electron X
+(4) Radiated energy by an electron X
+An electron transition takes place from excited state to ground state in hydrogen atom, then
+(1) Its kinetic energy increases but potential energy and total energy decrease
+(2) Its kinetic energy, potential energy and total energy decrease
+3) Kinetic energy decreases, potential energy increases but total energy remains same
+(4) Kinetic energy and total energy decrease but potential energy increases
+An n-type and p-type semiconductor can be obtained by respectively doping pure silicon with
+(1) Arsenic and Phosphorous respectively
+Phosphorous and Indium respectively
+and Boron respectively
+10/19
+
+
+
+--- PAGE 11 ---
+33. In which of the following figures, diode is reverse biased?
+(2)
+-20V
+(3)
+(4)
+20V
+15V
+34. A wafer of pure germanium crystal has two parts X and Y. The end X is obtained by doping
+with arsenic and Y with indium. It is connected to a battery as shown in the figure. Which of
+the following statements is correct?
+(1) X is p-type, Y is n-type and the junction is forward biased
+8P'X is n-type, Y is p-type and the junction is forward biased
+(a * is p-type, Y is n-type and the junction is reverse biased
+(4) X is n-type, Y is p-type and the junction is reverse biased
+SPACE FOR ROUGH WORK
+11/19
+
+
+
+--- PAGE 12 ---
+35. From the graph of angle of deviation versus angle of incidence for an equilateral prism, the
+refractive index of material of prism is
+2) 3
+(4) V2
+(3)
+IF
+36. Which of the following circuits is correct for verification of Ohm's law?
+D*
+A
+SPACE FOR ROUGH WORK
+12/19
+
+
+
+--- PAGE 13 ---
+Сз
+37. Match the physical quantities given in List-I with dimensions expressed in terms of mass (M),
+length (L), time (T) and electric current (A) given in List-ll.
+List-1
+List-II
+(a) Torque
+(b) Gravitational constant
+(il) [M'L? T-1
+(c) Capacitance
+(i) [M-'13 -2)
+(d) Planck's constant
+(iv) [M'L? T-21
+Codes:
+(1) a - iv, b - ii, c - iii, d - i
+, 13) a - iv, b - i, c - in, d - it
+( (2) a - iv, b - in, c - i, d - it
+(4) a - ii, b - i, c - ii, d - iv
+38. A car covers the first half of the distance between two places at 40 km/h and another half at
+50 km/h The average speed of the car is
+©M 45.00 km/h Y
+(2) 44.44 km/h
+(3) 43.14 km/h
+(4) 42.04 km/h
+39. Two bodies are projected with the same velocity. If one is projected at an angle of 30° and the
+other at 45° to the horizontal, then the ratio of maximum heights attained is
+(1) 3:1
+(3) 4:1
+(2) 1:2
+44)13
+SPACE FOR ROUGH WORK
+13/19
+
+
+
+--- PAGE 14 ---
+40.
+41.
+СЗ
+The velocity of a particle moving along x-axis is given as V = x? - 5x + 4 (in m/s) where
+× denotes the x-coordinate of the particle in metres. The magnitude of the acceleration of the
+particle when the velocity of the particle zero is
+(1) 2 m/s?
+(3) Zero
+(2) 3 m/s?
+(4) 1 m/s?
+2x - 5
+3 (0) - 4
+A man weighs 80 kg. He stands on a weighing scale in a lift which is moving upwards with a
+uniform acceleration of 6 m/s?. What would be his weight in kg? (g = 10 m/s?)
+(1) Zero X
+3)120 kg
+(2) 48 kg
+(4) 128 kg Y
+42. A mass M is hung with a light inextensible string as shown in figure. Find the tension of the
+horizontal string.
+45°
+7 M
+* (2) V3 Mg
+(4) 3 Mg
+(3) Mg
+Two bodies with kinetic energies in the ratio of 3:1 are moving with equal linear momentum.
+The ratio of their masses is
+(2) 1:3
+(1) 1:4
+(4) 1:1
+_(3) 1:2
+SPACE FOR ROUGH WORK
+14/19
+
+
+
+--- PAGE 15 ---
+44.
+С3
+A horizontal force of 5 N is applied on a stationary body of mass 5 kg, which is initially at rest
+on a frictionless table. The change in kinetic energy of the body in 10 s is
+(1) 25 J X
+(2) Zero
+73) 125 J
+(4) 250 J
+45. The angular momentum of a moving body remains constant, if
+(1) net external force is applied
+(2) net pressure is applied
+(3) net external torque is applied
+(4) net external torque is not applied
+46. If the earth were to suddenly contract to half of its present radius, what would be the duration
+of the day?
+(3) 24 h
+(2) 18 h
+(4) 30 h X
+47. - Imagine a new planet having the same density as that of the earth, but it is two times bigger
+than the earth in size. If the acceleration due to gravity on the surface of the earth is g and that
+on the surface of the new planet is g', then
+(1) g' = 8
+(3) g' = 2g
+(2) 8 = 8g Y
+(4)g = 4g
+48. Suppose the acceleration due to gravity at the earth's surface is g m/s? and at the surface of
+moon it is g' m/s. An M kg passenger goes from the earth to the moon in a spaceship moving
+with a constant velocity (Neglect all other objects in the sky). Which curve best represents the
+weight (net gravitational force) as a function of time?
+(1) A
+(3}
+(2) B
+(4) D
+SPACE FOR ROUGH WORK
+15/19
+
+
+
+--- PAGE 16 ---
+O' 49. Instrument fitted in the carburetor of the automobile to provide the correct mixture of air and
+fuel necessary for combustion works on
+(1) Pascal's Law
+MY Bernoulli's Principle
+(3) Newton's Law of Cooling
+(4) Archimedes' Principle
+50. There are two wires of same material and same length while the diameter of second wire is
+two times the diameter of the first wire. Then the ratio of extensions produced in the wires by
+applying same load will be
+(1) 1:1
+(2) 1:2
+3) 2:1
+(4) 4:1
+51. In a capillary tube experiment, a vertical 30 cm long capillary tube is dipped in water,
+water rises upto a height of 10 em due to capillarity. If this experiment is conducted in a freely
+falling water in an elevator, then the length of the water column becomes
+(1) 10 cm X
+(2) 20 cm
+(3) 30 cm
+(4) Zero
+- 52.
+In thermodynamic processes, which of the following statements is not true?
+(1) In an isothermal process, the temperature remains constant
+(2) In an isobaric process, the volume remains constant
+(3 In an adiabatic process, the system is insulated from the surroundings
+(4) In an adiabatic process, PV = a constant
+SPACE FOR ROUGH WORK
+16/19
+
+
+
+--- PAGE 17 ---
+53. The graph of pressure P and volume V of 1 mole of an ideal gas at constant temperature is
+Сз
+p
+Graph-I
+Graph-II
+Graph-III
+Graph-IV
+• v
+• V
+54. A mass of 1 kg is executing SHIM. Its displacement is given by × = 6.0 cos (100t + /4) cm.
+What is the maximum kinetic energy?
+(1) 3J X
+(2) 6 J
+(3) 9 J
+(4) 18 J Y
+A source of frequency v gives 6 beats/second when sounded with a source of frequency 200 Hz.
+The second Harmonic of frequency 2 v of the source gives 8 beats/second when sounded with a
+source of frequency 420 Hz. The value of v is
+(1) 205 Hz
+(3) 195 Hz
+12)206 Hz
+(4) 210 Hz
+SPACE FOR ROUGH WORK
+17/19
+
+
+
+--- PAGE 18 ---
+Following are statements of a few processes taking place in nature.
+1. Free expansion of a gas
+11. The combustion of a mixture of petrol and air ignited by a spark
+11. The leaking of gas from the kitchen cylinder
+I\. The transfer of heat from one heated part of a liquid to the other colder part
+Which amongst these processes are irreversible in nature?
+(1) 1 and II
+(2) Ill and IV
+GIl, Ill and IV
+(4) I, II, Ill and IV
+An electron falls through a distance 1.5 cm in a uniform electric field of magnitude
+2.0 × 10* N/C from rest. The time taken to cover this distance in second is
+(c=1.6 x 10-19 C, m = 9.11 x 10-3 kg)
+(3 2.9 × 10-9
+(2) 2.9 × 10°
+3) 4 × 10-
+(4) 4 × 10°
+What will be the total electric flux through the faces of the cube as given in the figure with side
+of length 'a' if a charge Q is placed at B, midpoint of an edge of the cube (see figure)?
+() 0 Y
+26
+SPACE FOR ROUGH WORK
+18/19
+
+
+
+--- PAGE 19 ---
+59. Consider three point charges - 2Q, O and - Q and three surfaces S,, S, and S, as shown in the
+figure. Match the entries of List-I with that of List-ll.
+List-I
+List-ll
+(a) Net flux through S,
+-20
+-20
+(b) Net flux through S, (il)
+-Q
+€g
+(iii) Zero
+(c) Net flux through S,
+Codes:
+(1) a - ii, b - i, c:
+- iii
+() a - i, b - ii, c -
+- iii
+(2) a - iii, b - ii, c - i
+(4) a - i, b - iii, c - i
+60. A parallel plate capacitor has a uniform electric field 'E' in the space between the plates.
+If the distance between the plates is 'd' and area of each plate is 'A', the energy stored in the
+capacitor is
+25, 82
+(2) E,EAd
+13)5 E,B?Ad
+(4)
+FLAd
+Eg
+(53) b
+73486
+a
+SPACE FOR ROUGH WORK
+19/19
+

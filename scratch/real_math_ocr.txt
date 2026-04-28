@@ -1,0 +1,157 @@
+PAGE 2
+(a) + 36+)", 3693 81.
+83 + 382 + 3¥ + 1
+The value at x = 2 for
+** + 48 + 68 + 48 4,
+(1) 3
+3.
+If we insert two numbers between v2 and 4 so that the resulting sequence is in G.P, then the
+inserted numbers in the order are
+(1) 8, v2
+(3) V8, 2
+272, V8
+(4) V2, 8
+Match List-I with List-I
+List-I
+List-II
+A matrix which is not a square matrix
+Symmetric matrix
+b)
+c)
+A square matrix A' = A
+il)
+Null matrix
+The diagonal elements of a diagonal matrix iti) Rectangular matrix
+are same
+d)
+A matrix which is both symmetric and skew iv)
+Scalar matrix
+symmetric
+Codes:
+(1) a - in, b - i, c - i, d - iv
+Mar a - it, b-j, c - in, a - it.
+(2) a - ii, b - i, c - iv, d - i
+(4) a - it, b - ix, c - i, d - i
+Consider the following statements:
+Statement I: If A is a non-singular matrix, then A-' exists.
+Statement II: If A and B are symmetric matrices of same order, then (AB - BA) is a skew
+symmetric matrix
+Choose the correct option.
+(1) Statement I is true and Statement I is false
+(2) Statement I is false and Statement II is false
+(3) Statement I is true and Statement II is true.
+AT Statement I is false and Statement If is true
+ud O
+61<(3)
+SPACE FOR ROUGH WORK
+2/15
+
+PAGE 3
+7.
+8.
+9,
+A row matrix has only
+(1) One element
+(2) One row with one or more columns
+3f One column with one or more rows
+(4) One row and one column
+Let X be a matrix of order 2 × n and Z be a matrix of order 2 × p. If n = p, then the order
+of the matrix 8X - 9Z is
+(1) 2 × n
+(3) n X 3
+27 p × 2
+(4) p × n -
+Which of the following is correct?
+(1) Determinant is a square matrix
+(2) Determinant is a number associated to a matrix
+(3) Determinant is a unique number associated to a square matrix
+(4) Determinant is not defined for a square matrix
+If A and B are invertible matrices of same order, then which of the following is not correct?
+(1) A. (adj A) = (adj A) . A = AI •
+(3) (AB)-1 = B-1 A-I N
+(2) A(adj A) = (adj A) . A = |A|I
+(4) |A| + 0, |BI + 01
+If A and B are invertible square matrices of order n, then which of the following is not correct?
+Adet (AB) = det (A) . det (B)
+(2) det (kA) = k" det (A)
+(3) det (A + B) = det (A) + det (B)
+1
+(4) det (A') = det (A-1)
+SPACE FOR ROUGH WORK
+3/15
+
+PAGE 4
+x 3 x8 4,
+Сз
+10. The area of the triangle with vertices (3, 8), (-4, 2) and (5, 1) is - then the value of P is
+(2)
+(3) 122
+"6.64
+11. The system of equations x + 2y = 3 and 2x + 3y = 3 has
+(1) No solution
+(2) Unique solution
+(3) Infinite solutions
+(4) Only two solutions
+12. Ira = 21 + 2} - R, b = af + B§ + 2k and la + b) = la - bi, then a + B is equal to
+(1) 2
+(2) - 1
+, (3) 0
+(232 72 1
+(444 - 1) - (22 A P° + 140)
+22, B
+13. Ira = 1 + 1 + £, b = § - Rand a x c = B, a . c = 3, then & is
+051-39+38
+03¡+¾¾+¾8
+451-33-38
+14. The value of 2 for which the vectors à = 21 + 2§ + £ and b = 1 + 2} + 3§ are orthogonal is
+() 5
+(2) =5
+(3)
+(4) =2
+SPACE FOR ROUGH WORK
+4/15
+
+PAGE 5
+15. The angle between the lines whose direction ratios are a, b, c and b - c, c - a, a - b is
+(1) 90°
+(2) 60°
+(3) 30°
+(ADo
+16. The measure of the angle between the lines x = k + 1, y = 2k - 1, z = 2k + 3, k € R and
+x-1 = Y -2 = 2-3 is
+(Y cost
+k+1
+2к + 3
+-6
+(4) cost 1)
+17. The line L, joining the two points (-1, 2) and (3, 6) divides the line Ly which passes through
+(3, -1) in the ratio 1: 3 internally, then the equation of L is
+(1) 4x - 3y - 9 = 0
+(5. 1 )
+(2) 4x - 3y + 9 = 0
+(3) 4x + 3y - 9 = 0
+(4) 4x + 3y + 9 = 0
+SPACE FOR ROUGH WORK
+TMM26424
+11
+5/15
+
+PAGE 6
+18. In the figure
+Statement I: When a > B ≥ 0, the section is hyperbola
+Statement II: When B > 90°, the section is ellipse
+Which of the following is correct?
+(L Statement I is true, Statement II is false
+(2) Statement I is false, Statement II is true
+(3) Both the Statements are true
+(4) Both the Statements are false
+19,
+The three points A (2, 4, 3), B (4, a, 9) and C (10, -1, 7) form a right-angled triangle with
+¿B = 90°, then the value of "a" is
+(1) 1 or 4
+Ari or - 4
+(2) -1 or 4
+(4) -1 or - 4
+SPACE FOR ROUGH WORK
+6/15
+

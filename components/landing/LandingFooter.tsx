@@ -8,16 +8,18 @@ export default function LandingFooter() {
           {/* Brand Column */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">P</span>
+              <div className="relative flex flex-col items-center justify-center w-10 h-10 text-[#38bdf8] bg-[#1e293b]/50 rounded-lg border border-[#38bdf8]/20">
+                <svg className="absolute top-1 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <span className="text-xl font-black mt-2">P</span>
               </div>
-              <span className="text-xl font-black tracking-tight text-white">
-                <span style={{ color: '#0a1a16' }}>plus2</span>
-                <span style={{ color: '#ff7f50' }}>AI</span>
+              <span className="text-2xl font-black tracking-tight text-white">
+                Plus2AI
               </span>
             </div>
             <p className="text-gray-400 mb-4 max-w-md">
-              Transform exam papers into interactive learning experiences with AI-powered pedagogy tools. Save time, improve outcomes.
+              The complete AI learning ecosystem. Ace KCET, JEE, and NEET with predictive practice, adaptive paths, and 24/7 visual tutoring.
             </p>
             <div className="flex gap-4">
               <a
@@ -93,7 +95,7 @@ export default function LandingFooter() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors duration-200">
+                <a href="/blog/index.html" className="hover:text-white transition-colors duration-200">
                   Blog
                 </a>
               </li>
@@ -115,7 +117,7 @@ export default function LandingFooter() {
         <div className="pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
-              © {currentYear} <span style={{ color: '#0a1a16' }}>plus2</span><span style={{ color: '#ff7f50' }}>AI</span>. All rights reserved.
+              © {currentYear} Plus2AI™. A FinArna Technologies Pvt Ltd product. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <a href="#" className="hover:text-white transition-colors duration-200">

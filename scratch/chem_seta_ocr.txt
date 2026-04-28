@@ -1,0 +1,730 @@
+
+
+--- PAGE 1 ---
+PlUs2AI
+KARNATAKA COMMON ENTRANCE SIMULATION TEST 2026
+CHEMISTRY SIMULATION
+Serial No: P2-2026-CHEM
+Subject Code: CHE
+Duration: 80 Minutes
+Version Code: REI-v17
+Maximum Marks: 60
+CANDIDATE NAME:
+CET REG. NO:
+LEGAL DISCLAIMER & TERMS OF USAGE
+IMPORTANT: This document is an Al-generated simulation based on historical analysis of the Karnataka Common
+Entrance Test (KCET). It is intended strictly for practice and training purposes. Plus2AI does not claim that these
+specific questions will appear in the actual 2026 KCE examination. PlusZAI assumes no legal lIability for any
+discrepancies. variations. or performance outcomes in the actua exam. Users are advised to use this alongside
+official KEA study materials.
+IMPORTANT INSTRUCTIONS TO CANDIDATES
+This question booklet contains 60 questions. Check that all pages are intact.
+The Version Code and Serial Number must be correctly entered on the OMR Answer Sheet.
+Each question carries 1 mark. There is no negative marking for wrong answers.
+Answers must be marked ONLY on the OMR sheet provided using a blue/black ballpoint pen.
+Calculators, log tables, and electronic gadgets are strictly prohibited.
+Plus2AI DNA Model (REI v17): This is a high-fidelity pattern simulation. Final results may vary.
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 2 ---
+1. According to the Arrhenius equation and collision theory, the addition of a positive catalyst to a
+reaction mixture increases the rate of reaction. This is primarily because the catalyst:
+(A) Increases the average kinetic energy of
+the reactant molecules
+(C) Provides an alternative pathway with a
+lower activation energy \ Ea ).
+(B) Decreases the enthalpy of the reaction (
+АН ).
+(D) Increases the number of collisions by
+increasing the pressure.
+2. When an egg is boiled, the 'egg white' (allumin) hardens and becomes opaque. This process
+represents which level of protein structural change and what is the underlying chemical cause?
+(A) Loss of 2nd and 3rd-degree structures
+due to the disruption of H-bonds and
+disulfide linkages (Denaturation).
+(C) Conversion of a fibrous protein into a
+more soluble globular form.
+(B) Cleavage of the primary peptide
+sequence into individual a -amino
+acids (Hydrolysis).
+(D) The formation of new peptide bonds
+between distant amino acid resides
+(Renaturation).
+3. When concentrated sulfuric acid ( H2504 )is added to a sample of cane sugar ( C12 H22011
+), the sugar turns into a black, charred mass of carbon. Which specific property of sulfuric acid is
+demonstrated in this reaction?
+DNA
+(A) Strong dehydrating property
+(C) Non-volatile nature
+(B) Strong oxidizing property
+(D) Strong acidic character
+4. The atomicradi of second ( Ad ) and third ( 5d) transition series elements, such as Zirconium (
+Zr )and Hafnium ( Hf ), are remarkably similar ( 160 pm and 159 pm respectively).
+This phenomenon is a direct consequence of:
+(A) Lanthanoid Contraction
+(B) Actinoid Contraction
+(C) Shielding effect of d -electrons
+(D) Increase in principal quantum number
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 3 ---
+5. A student in a laboratory is investigating the thermal stability of Group 15 hydrides. They observe
+that while NHs is stable at high temperatures, BiHs decomposes rapidly even at room
+temperature. What is the primary reason for this observed trend in thermal stability down the
+group?
+(A) Increase in the bond length of M-H bond
+(B) Decrease in the electronegativity of the
+(C) Increase in the boiling point down the
+group
+(D) Presence of intermolecular hydrogen
+bonding in NH3
+6. An unknown amino acid 'X' is subjected to electrophoresis in a buffer of pH = 6.0 . Itis
+observed that 'X' does not migrate towards either electrode. However, in 0.1M HCI , it moves
+towards the cathode. Which of the following identifies 'X'?
+(A) Alanine ( pI = 6.0 )
+(B) Lysine ( pI ~ 9.7 )
+(C) Aspartic Acid ( pI ~ 3.0 )
+(D) Arginine ( pI ~ 10.8 )
+7. For the following four compounds: (1) Phenol, (Il) o-Nitrophenol, (I) m- Nitrophenol, and (IV) p-
+Nitrophenol; which sequence correctly represents the decreasing order of their acidic strength and
+the property-based reason for the highest acidic isomer?
+(A) IV > I1 > III > I; p- Nitrophenol is most
+acidic due to effective -Rand -I effects
+of the -NO2 group.
+(C) IV > I|I > |I > I; p- Nitrophenol is most
+acidic because nitro group at meta
+position has no resonance effect.
+(B) I > IV > III > I; o-Nitrophenol is most
+acidic due to proximity of the - Oz
+group to the -OH group.
+(D) I> III > |I > IV; Phenol is most acidic
+because substituent groups always
+decrease acidity.
+8. Which of the following statements regarding the structure of proteins is CORRECT?
+(A) The secondary structure of proteins is
+stabilized by hydrogen bonding between
+- NH-
+and
+-CO-groups of
+the peptide bond.
+(C) Denaturation of proteins affects the
+primary structure by breaking peptide
+bonds.
+(B) In a -helix structure, the hydrogen
+bonds are formed between peptide
+chains lying side by side.
+(D) Renaturation is a process where a
+protein loses its biological activity due to
+change in pH.
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 4 ---
+9. In the crystal field splitting of -orbitals for an octahedral coordination complex, the energy
+difference between the t2g and eg setsis denotedby A. . Which of the following ligands
+would produce the largest 4.
+value when reacting with the same metal ion?
+(A)
+CN
+(B)
+H20
+(C)
+CE
+(D)
+ОН
+10. A food technologist is looking for an artificial sweetener to be used in a new 'Low-Calorie Cake'
+that requires baking at 180°C . Which of the following sweeteners is BEST suited for this
+purpose, and why?
+(A) Sucralose; because it is a trichloro
+derivative of sucrose and remains stable
+at cooking temperatures.
+(C) Alitame; because its high potency (2000
+times) ensures that very little is needed,
+preventing decomposition.
+(B) Aspartame; because it is the most widely
+used sweetener and has 100 times the
+sweetness of cane sugar.
+(D) Saccharin; because it is excreted
+unchanged from the body and provides
+zero calories.
+11. Identify the set of reagents that will efficiently convert 2-propanol into 2-methyl-2-propanol
+through a multi-step sequence.
+(A)
+PCC, then
+CH:MaBr/H3O*
+(C) Cu/573K then
+In - Hg/HCI
+(B) K-CrO/Ht , then LiALEA
+(D) Conc.HiS01/443K ,then
+HBr / H202
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 5 ---
+12. An alkyl halide 'X' with molecular formula CHoC is optically active. When 'X' reacts with
+AgIN in ethanol, it produces 'Y' as the major organic product. Which of the following
+statements is correctly associated with this transformation?
+(A) 'Y' is an isocyanide and the reaction
+proceeds with inversion of contiguration
+(B) 'Y' is a cyanide and the product is a
+racemic mixture due to Su1
+if it follows Sr2 dynamics.
+mechanism.
+C) 'Y' is an isocyanide and the reaction
+results in 100% retention of
+configuration.
+(D) 'Y' is a cyanide and the reaction involves
+the formation of a primary carbocation.
+13. During a group performance test, a student adds chlorine water ( CI, )to an aqueous solution
+of Potassium lodide ( KI ) containing a small amount of chloroform ( CHCl ). After
+shaking, the chloroform layer turns violet. This observation proves that:
+(A) Chlorine is a stronger oxidizing agent
+than lodine
+(B) lodine is a stronger oxidizing agent than
+Chlorine
+(C) Chlorine is more electronegative but less
+reactive than lodine
+(D) Chloroform reacts with Potassium
+lodide to form a violet complex
+14. During a laboratory experiment, a student needs to coagulate a negatively charged Arsenic
+sulfide (As2$3 ) sol. Based on the Hardy-Schulze rule, which of the following electrolytes will be
+most effective in bringing about coagulation?
+(A)
+AICI
+BaCk
+(C) NaCh
+(D) I
+K2S04
+15. Which of the following ligands is 'ambidentate' and can lead to linkage isomerism in the complex
+[Co(NHs)5(NO2)ICk ?
+(A) NH3
+(C)
+(B) I
+NOr
+(D) H50
+DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 6 ---
+16. Identify the correct decreasing order of acid strength for the following phenols:
+1. Phenol
+Il. p-Nitrophenol
+Ill. m-Nitrophenol
+IV. p-Methylphenol
+(A) /››IV
+(C) IV>>>
+(B) I>>|>IV
+(D) IS››I
+17. A student is given two coordination compounds with the same molecular formula
+Co(NHs)5Br$04 . Compound A forms a white precipitate with BaC% solution, while
+Compound B forms a pale yellow precipitate with AgO: solution. These two compounds
+are examples of:
+(A) lonization Isomerism
+(C) Coordination Isomerism
+xam
+(B) Linkage Isomerism
+(D) Geometrical Isomerism
+18. A laboratory technician is investigating the geometry of noble gas compounds. For a specific
+compound XeF4 , the technician observes that despite having six electron pairs around the
+central Xenon atom, the molecule adopts a Square Planar geometry. The number of lone pairs
+present on the central atom and the resulting F- Xe - F bondangle in the plane are:
+(A) 2 lone pairs, 90°
+(B) I lone pair, 120°
+(G) Olone pairs, 109.5°
+(D) 2 lone pairs, 180°
+19. How muchelectricity in Faradays ( F' )is required to deposit 27 g of Aluminum from a
+molten Al203 bath? (Atomicmass of Al = 27 u )
+(A)
+(B
+3F
+(C) 2F
+1F
+(D) 0.33 F
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. | KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 7 ---
+20. For a standard galvanic cell based on the following half-reactions:
+Zin' (ag) +26 -+ Zn(s); E° =- 0.76 V
+Cret (ag) +26 -+ Cu(s); E° = +0.34 V
+Which of the following statements is CORRECT regarding the cell operation?
+(A)
+Zn acts as the cathode and is
+(B) The standard cell potential ( Ecell )is
+•reduced.
+0.42 V
+(C) Electrons flow from the Zn
+(D) The concentration of Zn
+2+
+ions
+electrode to the Cu electrode in the
+decreases as the cell operates.
+external circuit.
+21. A carbohydrate A on treatment with Br/ H,O gives a monocarboxylic acid 'B'. On further
+oxidation of 'A' with HNO3 , a dicarboxylic acid 'C' (Saccharic acid) is formed. If 'A' also reacts
+with HI/P togiven-hexane, 'A' is most likely:
+(A) D-Glucose
+(B) D-Fructose
+(C) D-Galactose
+(D) Sucrose
+22. Hypophosphorous acid \ H: PO2 )is a powerful reducing agent used in various chemical
+processes, such as reducing silver nitrate to metallic silver. How many P - H bonds are
+present in one molecule of H3 PO2 that contribute to its strong reducing character?
+(A) 2
+(B) 1
+D' O
+am DNA
+23. The correct order of reactivity of the following compounds towards nucleophilic addition
+reaction is:
+I. Acetone
+II. Acetaldehyde
+II. Formaldehyde
+IV. Di-tert-butyl ketone
+(A) I>>|>IV
+(B) IV>> I
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 8 ---
+Plus21
+24. For a hypothetical first-order reaction A -> B, a student observes that the time required for
+the concentration of A todecreasefrom 0.8M to 0.4M is 20 minutes. What will
+be the time required for the concentration to decrease from 0.2M to 0.1M ?
+(A)
+10 minutes
+(B)
+20 minutes
+(C)
+40 minutes
+(D)
+5 minutes
+25. The major organic product formed in the following reaction is:
+CHC(з/aq.NaOH,340
+H'
+Phenol
+Intermediate
+Product
+DNA
+(A) Salicylaldehyde
+(B) Salicylic acid
+(C) Acetophenone
+(D) o-Cresol
+26. Identify the product 'C' in the following reaction sequence:
+NaNOr/HC1,0-5°C
+CUCN KCN
+H2 Ni
+Aniline
+A
+C
+(A) Benzylamine
+(B) Benzonitrile
+(C) N-Methylaniline
+am DNA
+(D) Aniline
+im DNA
+27. The Henry's law constants ( Kit \ for four different gases A, B, C and D in water at
+298K are 40.30, 1.67, 0.413 and 1.83 × 10 kbar respectively. Which gas
+will have the highest solubility in water at the same pressure and temperature?
+(A) Gas D
+(B) Gas C
+(C) Gas B
+(D) Gas A
+28. During the electrolysis of an aqueous solution of CuS0 , a constant current is passed
+through the cell. If the total charge passed through the electrolyte is 2 Faraday ( 2F ),
+what is the mass of Copper deposited at the cathode? (Atomic mass of Cu = 63.5 u )
+(B) 63.5g
+(A) 31.75 g
+(D) 190.5 g
+(C) 127.0 g
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 9 ---
+29. The correct order of basic strength for the following amines in aqueous solution is:
+ONI
+I. CHINHa
+II. (CH3)NH
+III. (CH3)N
+IV. NHs
+(B) I>|›/>IV
+(D IS/>I›IV
+30. A laboratory technician notices that when liquid Mercury ( Hg )is exposed to Ozone ( 03 ),
+it loses its shiny meniscus and starts sticking to the glass surface, a phenomenon known as 'tailing
+of mercury'. This happens because Ozone:
+(A) Oxidizes Mercury to Mercurous oxide (
+H920 )
+(C) Forms a coordinate bond with Mercury
+(B) Reduces Mercury to Mercuric oxide (
+Hg0 )
+(D) Decomposes Mercury into its isotopes
+31. In the Williamson Ether Synthesis of +-butyl methyl ether, the correct choice of reagents is:
+(A) Sodium tert-butoxide and Methyl
+bromide
+(C) tert-butanol and Methanol in conc.
+H2S04
+o8
+(B) Sodium methoxide and tert-butyl
+bromide
+(D) Potassium methoxide and tert-butyl
+alcohol
+DNA
+32. A food scientist finds that a certain biochemical reaction in milk at 27°C ( 300K ) doubles
+its rate when the temperature is increased to 37°C (310K ). Which of the following
+statements correctly describes this temperature dependence according to the Arrhenius theory?
+(A) The number of effective collisions
+(B) The activation energy ( E. )ofthe
+increases significantly due to a 10K
+reaction becomes zero at 37°C
+rise.
+(C) The threshold energy decreases as
+temperature increases
+(D) The value of the pre-exponential factor
+(A) doubles for every 10K
+rise.
+Reproduction strictly prohibited. © 2026 Plus2AI. | KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 10 ---
+33. The spin-only magnetic moment ( Is ) of a coordination complex is measured to be
+3.87 BM . Which of the following ions is most likely the central metal ion in this complex?
+(A) 1/2+
+(B)
+Cost
+0.24
+(high spin)
+D) All of the above
+34. Thestandard electrode potential( E )for the half-cells 2,n?+
+34 / In and Cri
+/Cu
+are -0.76 V and +0.31 V respectively. If the concentration of Zn?+ is increased
+while keeping the Cr?+ concentration constant at 1 M , what happens to the cell
+potential ( Ecell )of the Daniel cell at 298 K?
+(A)
+Ecell decreases.
+(B)
+Ecell increases.
+(C
+(D
+Ecell remains unchanged because
+Ecell becomes zero immediately.
+E°
+is constant
+35. An organic compound A' with molecular formula C: HIsO on treatment with Lucas reagent
+at room temperature does not show turbidity immediately but gives turbidity after 5-10 minutes.
+When 'A' is passed over heated Copper at 573K, it gives 'B'. 'B' on reaction with I2/NaOH
+gives a yellow precipitate. Compound 'A' is:
+(A) 2-Propanol
+(B) 1-Propanol
+(C) Propanal
+(D) 2-Methyl-2-propanol
+36. In the manufacture of H,504 by the Contact Process, finely divided Platinum or Vanadium
+pentoxide ( V205 )is used to speed up the conversion of SO, to SO3 . Thisis an
+example of which type of catalysis and why?
+(A) Heterogeneous catalysis; The catalyst
+and reactants are in different phases.
+(C) Enzyme catalysis; It involves biological
+molecules.
+(B) Homogeneous catalysis; The catalyst
+and reactants are in the same phase
+(D) Autocatalysis; One of the products acts
+as a catalyst.
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 11 ---
+37. When 50 mL of Ethanol is mixed with 50 ml of water at room temperature, the total
+volume of the resulting solution ( total ) and the thermal observation are most likely to be:
+(A)
+Vtotal > 100 mL and the container
+feels cool
+(C)
+Vtotal = 100 mL and no
+temperature change
+(B) total < 100 mL and the container
+feels warm
+(D)
+Vtotal > 100 mL and the container
+feels warm
+38. A surfactant 'Y' has the formula CHi(CH)iN* (CHs)Br
+. This compound is most
+likely used in which application, and to which category of detergents does it belong?
+(A) Hair conditioner; Cationic detergent.
+(B) Dishwashing liquid; Non-ionic detergent.
+(C) Laundry powder; Anionic detergent.
+(D) Toothpaste; Anionic detergent.
+39. In a water purification plant, a technician uses activated charcoal to remove coloring matter
+from waste water. According to the Freundlich adsorption isotherm, if the slope of the plot of
+log(x/m vs log P is found to be 0.5, what does this indicate about the relationship
+between adsorption and pressure?
+(A) The amount of gas adsorbed is
+proportional to the square root of
+O cosure.
+(C) The amount of gas adsorbed is directly
+proportional to pressure.
+(B) The amount of gas adsorbed is
+independent of pressure.
+(D) The adsorption process is exothermic
+and follows a linear path.
+40. For a chemicalreaction, the rate law is given by Rate = k|41 B| /2. What are the units of
+the rate constant( k)if the concentration is measured in mol L 1 and time in seconds
+(A)
+(C
+mol? I-1/2s
+mol'Ls-1
+(B)
+(D)
+mol 12 _12,
+DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 12 ---
+41. In the following sequence of reactions:
+Me KOH
+#Br/H202
+B
+CH3ONa
+C
+D
+The compound 'D' is:
+(A) Methoxypropane
+(C) 1-Methoxypropane
+(B) Ethoxyethane
+(D) Methoxyethane
+42. An equimolar mixture of a
+- D - glucopyranose ( la|D = +112° ) and B - D
+glucopyranose ( laD = +19° )is dissolved in water. After several hours, the specific rotation
+of the solution stabilizes at +52.7° . This phenomenon is primarily attributed to which of the
+following?
+(A) The dynamic equilibrium between open-
+chain and cyclic forms through
+mutarotation.
+(C) The formation of an equimolar Invert
+Sugar' mixture through hydrolysis.
+(B) The irreversible conversion of B -
+anomer into the more stable a
+апотег.
+(D) The complete conversion of the mixture
+into an acyclic aldehyde form.
+43. An industrial chemist observes that during the decomposition of gaseous ammonia on a hot
+Br,
+platinum surface ( 2N H (g)
+N2(g) + 3H2(g) ), the rate of reaction remains constant
+despite increasing the pressure of ammonia at very high concentrations. This behavior indicates
+that the reaction follows which order and is limited by which factor?
+(A) Zero-order; Surface area saturation of
+the catalyst
+(B) First-order; Concentration of the
+reactant
+(C) Second-order; Frequency of collisions
+(D) Pseudo-first order; Solvent
+concentration
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 13 ---
+44. Consider the following carbonyl compounds:
+(i) HCHO
+(il) CHCHO
+Exam DNA
+(iv) (CHs)C - CHO
+The correct order of reactivity towards nucleophilic addition reactions (e.g., with HCIN ) is:
+[A) (i) > (ji) > (iv) > (ji)
+(C) (iv) > (ji) > (ji) > (i)
+(B) () > (¡i) > (ji) > (iv)
+(D (ji) > (iv) > (ii) > (i)
+45. patient suffering from hyperacidity is prescribed 'Cimetidine'. Later, for an allergy, they are
+given 'Terfenadine' (Seldane). Which statement correctly describes the pharmacological logic of
+using these two different drugs?
+(A) They target different receptors;
+Cimetidine affects gastric histamine
+receptors, while Terfenadine affects
+respiratory/skin histamine receptors.
+(C) Both drugs compete for the same
+receptor site, but Terfenadine has a
+higher affinity.
+(B) Cimetidine is a neutralizer (antacid) while
+Terfenadine is an enzyme inhibitor.
+(D) Cimetidine acts as an analgesic while
+Terfenadine acts as an antiseptic.
+46. In a precision conductance cell, a 0.1 M aqueous solution of an electrolyte shows a specific
+conductance of k. When the solution is diluted to 0.01 M, the molar conductivity ( Am )
+is observed to increase significantly. For which of the following electrolytes would the plot of
+Am vs. Ve be a straight line with a negative slope, following the Debye-Hückel-Onsager
+equation?
+(A) с#соон
+(B) NHOH
+(C) KCl
+(D) H2C03
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 14 ---
+47. In a qualitative analysis test, Chlorine water is added to an aqueous solution of Potassium lodide (
+KI )in the presence of Chloroform ( CHCIs ). The organic layer turns violet. This reaction
+occurs because:
+(A) Chlorine is a stronger oxidizing agent
+than lodine
+B) lodine is more soluble in water than in
+Chloroform
+(C) Chlorine is more electronegative than
+Fluorine
+(D) Iodide ion is a stronger oxidizing agent
+than Chloride ion
+48. An aqueous solution of a transition metal salt MC% is found to be violet in color. This color is
+attributed to d-d transitions of a single unpaired electron. Using the spin-only formula, the
+calculated magnetic moment ( Ö3bceff )ofthe M°t ion is approximately:
+(A)
+1.73 BM
+(B)
+2.83 BM
+(C)
+3.87 BM
+(D)
+0 BM
+49. A pharmacist is studying the shelf-life of a liquid antibiotic that decomposes following first-order
+kinetics. If the half-life ( t1/2 )of the drug is 6 months at room temperature, what fraction of
+the drug will remain after 18 months?
+(A)
+1/8
+(B)
+½ am DNA
+(C) 1/4
+(D) 1/6
+50. An aqueous solution of 0.1 m concentrationis prepared for each of the following solutes.
+Which of these solutions will exhibit the lowest freezing point in a comparative laboratory test?
+(A)
+AlCIs
+(C) KCl
+Exam DNA
+(B) K2501
+(D) C•H1206
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 15 ---
+51. During a synthesis reaction, Xenon hexafluoride ( XeF6 )undergoes complete hydrolysis when
+it comes into contact with excess water. Which of the following represents the final stable Xenon-
+containing product formed?
+(A)
+Xe03
+(B)
+(C) Xe0F4
+Xe02F2
+Xe + 0,
+52. For the nucleophilic substitution of alkyl halides, which of the following represents the correct
+decreasing order of reactivity towards an Si2 reaction mechanism?
+(CHs)2CHCI > (CHs)зСС
+(B) (CHi):ca> (CHs)›CHOU>
+CHsCH20 > CHsCI
+(C) CHCH›C> CHsCI>
+(CH)2CHCI > (CHs)CCI
+(D) (CH)CHOI > CHCH.Ch>
+CHsCi > (CHs)CCI
+53. Among the following isomeric bromobutanes, which one is expected to have the lowest boiling
+point?
+(A)
+n-Butyl bromide
+(C)
+sec-Butyl bromide
+(B)
+Isobutyl bromide
+(D)
+tert-Butyl bromide
+54. Which of the following carbonyl compounds will undergo the Cannizzaro reaction and also give a
+positive test with Schiff's reagent?
+DNA
+(A) Benzaldehyde
+(B) Acetaldehyde
+(C) Acetone
+(D) Formaldehyde
+55. Aquatic species are more comfortable in cold water than in warm water. This ecological
+observation is best explained by which of the following applications of Henry's Law?
+(A) As temperature increases, Henry's Law
+(B) As temperature increases, Henry's Law
+constant ( K# ) increases, reducing
+constant ( Km ) decreases, increasing
+the solubility of oxygen.
+the solubility of oxygen.
+(C) Solubility of gases is independent of
+temperature according to Henry's Law.
+(D) At higher temperatures, the partial
+pressure of 02 in the atmosphere
+decreases significantly.
+Reproduction strictly prohibited. © 2026 Plus2AI. | KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 16 ---
+56. An organic compound 'X' with molecular formula Ct H6O does notreduce Fehling's solution
+but undergoes a reaction with concentrated NaH to give 'Y' and 'Z'. If 'Y' on treatment
+with soda lime gives benzene and 'Z' is an alcohol, identify the reaction and the product 'Z'.
+(A) Cannizzaro reaction; Benzyl alcohol
+(B) Aldol condensation; Benzyl alcohol
+(C) Cannizzaro reaction; Ethanol
+(D) Benzoin condensation; Benzyl alcohol
+57. A laboratory chemist synthesizes a coordination compound with the formula CoCI-5N Hs
+. On treating one mole of this complex with excess silver nitrate solution, exactly 2 moles of
+AgCt precipitate are formed. The correct IUPAC name of the complex is:
+(A) Pentaamminechloridocobalt(III) chloride
+(B) Pentaamminecobalt(III) trichloride
+(C) Chloridopentaamminecobal+(Ill)
+chloride
+(D Pentaamminecobalt (Il) chloride
+58. Astudent mixes 100 mL of pure ethanol with 100 mL of pure acetone at 298 K
+Upon mixing, it is observed that the final volume of the solution is 202 mL . Which of the
+following thermodynamic observations is most consistent with this system?
+(A)
+AHmix > 0 and the solution shows
+(B) AHmir < 0 and the solutionshows
+positive deviation from Raoult's law.
+negative deviation from Raoult's law.
+(C)
+AHmix = 0 and the solution
+(D)
+A Plotal < Pideal because the A-B
+behaves as an ideal solution.
+interactions are stronger than A-A
+interactions.
+59. For a strongelectrolyte like KCI, the plot of molar conductivity ( Am ) against the square
+root of concentration ( VC )is a straight line. The intercept on the Am axis represents:
+(A) Limiting molar conductivity ( Am )
+(B) Cell constanti G* )
+(C) Degree of dissociation ( a )
+(D) Kohlrausch constant ( A )
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET A | Page 0
+
+
+
+--- PAGE 17 ---
+60. Anorganic compound 'X'( Cs HIsO ) on treatment with Copper at 573 K gives'Y'.
+Compound 'Y' does not reduce Fehling's solution but forms a yellow precipitate with I2 and
+NaH When 'Y' is treated with CH3MgBr followed by acid hydrolysis, it yields 'Z'.
+The IUPAC name of 'Z' is:
+(A) 2-Methylpropan-2-ol
+(B) Butan-2-ol
+(C) 2-Methylpropan-1-ol
+(D) Propan-2-ol
+Reproduction strictly prohibited. © 2026 Plus2Al. | KCET 2026 Simulation - SET A | Page 0
+

@@ -1,127 +1,205 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { Check, Target, Flame } from 'lucide-react';
 
 const masteryData = [
   {
     subject: 'Chemistry',
-    accuracy: '65.0%',
-    hits: '39/60',
-    slogan: 'Elite Molecular Prediction.',
-    description: 'Verbatim hits on Organic mechanisms and Physical chemistry numericals. Dominating the board with AI-driven pattern recognition.',
-    color: 'border-purple-500 text-purple-600',
-    bg: 'bg-purple-50',
+    t1t2: '65.0%',
+    t1t2Hits: '39/60',
+    t3Expanded: '93.3%',
+    t3Hits: '56/60',
+    slogan: 'Unrivaled Chemical Precision.',
+    description: 'Transforming Physical Chemistry numericals and Organic mechanisms into predictable, solvable logic frameworks.',
+    gradient: 'from-[#a855f7] to-[#ec4899]',
   },
   {
     subject: 'Physics',
-    accuracy: '51.7%',
-    hits: '31/60',
-    slogan: 'Mastering the Laws of Ranks.',
-    description: 'Surgical accuracy on Electromagnetism and Modern Physics patterns. Turning complex theories into solvable predictive hits.',
-    color: 'border-blue-500 text-blue-600',
-    bg: 'bg-blue-50',
+    t1t2: '51.7%',
+    t1t2Hits: '31/60',
+    t3Expanded: '95.0%',
+    t3Hits: '57/60',
+    slogan: 'Mastering Universal Laws.',
+    description: 'Pinpoint accuracy across Electromagnetism and Modern Physics. We extract surgical theorem patterns straight from the blueprint.',
+    gradient: 'from-[#3b82f6] to-[#06b6d4]',
   },
   {
     subject: 'Biology',
-    accuracy: '23.3%',
-    hits: '14/60',
-    slogan: 'Precision for Future Medics.',
-    description: 'Direct hits on high-yield NCERT diagrams and genetic logic. Verbatim alignment on Chargaff\'s rule and DNA biology.',
-    color: 'border-green-500 text-green-600',
-    bg: 'bg-green-50',
+    t1t2: '23.3%',
+    t1t2Hits: '14/60',
+    t3Expanded: '45.0%',
+    t3Hits: '27/60',
+    slogan: 'Precision for Medics.',
+    description: 'Direct hits on high-yield genetics, taxonomy, and biotechnology logic. Aligning perfectly with structural anatomy patterns.',
+    gradient: 'from-[#10b981] to-[#14b8a6]',
   },
   {
     subject: 'Mathematics',
-    accuracy: '21.7%',
-    hits: '13/60',
-    slogan: 'Logic that Leads to Ranks.',
-    description: 'Strategic alignment on LPP, Probability, and Vector Calculus. Identifying high-value theorem patterns in the official paper.',
-    color: 'border-orange-500 text-orange-600',
-    bg: 'bg-orange-50',
+    t1t2: '21.7%',
+    t1t2Hits: '13/60',
+    t3Expanded: '21.7%',
+    t3Hits: '13/60',
+    slogan: 'Calculated Rankings.',
+    description: 'Strategic T1 and T2 alignment on LPP, Probability, and Differential equations. Focusing relentlessly on the defining rank deciders.',
+    gradient: 'from-[#f97316] to-[#f43f5e]',
   },
 ];
 
 export default function SubjectMasterySection() {
+  const [activeTab, setActiveTab] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        const next = prev + 1;
+        if (next >= 100) return 100;
+        return next;
+      });
+    }, 45); 
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (progress >= 100) {
+      setActiveTab(idx => (idx + 1) % masteryData.length);
+      setProgress(0);
+    }
+  }, [progress]);
+
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="inline-block px-6 py-2 mb-6 text-sm font-black tracking-widest text-blue-700 uppercase bg-blue-50 rounded-full"
-          >
-            Deep Strategic Matrix
-          </motion.div>
-          <h2 className="text-4xl sm:text-6xl font-black text-slate-900 mb-6 tracking-tight">
-            Subject-Specific <span className="text-blue-600">Dominance.</span>
-          </h2>
-          <p className="text-xl text-slate-500 max-w-3xl mx-auto font-medium">
-            We don't just predict exams; we engineer subject mastery. Our REI v18 model analyzes subject-level signatures to deliver rank-deciding hits.
-          </p>
-        </div>
+    <section className="py-24 bg-[#07090E] relative overflow-hidden flex flex-col items-center w-full">
+       
+       {/* Background Glow */}
+       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {masteryData.map((data, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className={`p-10 rounded-[3rem] border-4 ${data.color} ${data.bg} flex flex-col md:flex-row gap-8 items-start hover:shadow-2xl transition-all duration-500 group`}
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-4 mb-4">
-                  <h3 className="text-3xl font-black text-slate-900">{data.subject}</h3>
-                  <div className={`px-4 py-1 rounded-full ${data.color} border-2 font-bold text-sm bg-white`}>
-                    {data.accuracy} Accuracy
-                  </div>
-                </div>
-                <div className="text-lg font-black text-slate-700 mb-4">{data.slogan}</div>
-                <p className="text-slate-600 font-medium mb-6 leading-relaxed">
-                  {data.description}
-                </p>
-                <div className="flex items-center gap-6">
-                   <div className="text-center">
-                      <div className="text-2xl font-black text-slate-900">{data.hits}</div>
-                      <div className="text-[10px] font-black uppercase text-slate-400">Hits/Questions</div>
+       {/* Top Badge */}
+       <div className="mb-6 z-10">
+         <div className="px-4 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-300 text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] shadow-lg backdrop-blur-sm">
+           Subject-Level Performance Analysis
+         </div>
+       </div>
+
+       {/* Mobile-Chassis Style Interactive Widget (Applied Globally) */}
+       <div className="relative w-full max-w-[380px] sm:max-w-[420px] bg-gradient-to-br from-[#121622] to-[#0A0D14] rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-15px_rgba(0,0,0,0.8)] border-[3px] border-[#1e2333] z-10 z-10">
+          
+          {/* Progress Loading Line */}
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-[#1a1e2d] z-30">
+                <div 
+                  className={`h-full bg-gradient-to-r ${masteryData[activeTab].gradient} transition-all duration-75 ease-linear`}
+                  style={{ width: `${progress}%` }}
+                />
+          </div>
+
+          <div className="relative h-[650px] w-full px-6 pt-12 pb-24 overflow-hidden">
+             <AnimatePresence mode="wait">
+                <motion.div
+                   key={activeTab}
+                   initial={{ opacity: 0, scale: 0.96 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   exit={{ opacity: 0, scale: 1.04 }}
+                   transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                   className="absolute inset-0 w-full h-full p-6 pt-12 flex flex-col items-center"
+                >
+                   {/* Massive Subject Heading */}
+                   <div className="text-center mb-8 shrink-0 flex flex-col items-center w-full">
+                      <h2 className="text-[2.75rem] font-black text-white leading-[0.95] tracking-tight text-center">
+                         {masteryData[activeTab].subject.split('').map((char, i) => (
+                             <span key={i} className="inline-block">{char}</span>
+                         ))}
+                         <br/>
+                         <span className={`text-transparent bg-clip-text bg-gradient-to-r ${masteryData[activeTab].gradient}`}>
+                            Dominance
+                         </span>
+                      </h2>
                    </div>
-                   <div className="h-8 w-[1px] bg-slate-300" />
-                   <div className="text-center">
-                      <div className="text-2xl font-black text-slate-900">72%</div>
-                      <div className="text-[10px] font-black uppercase text-slate-400">Rank Deciders</div>
+
+                   {/* Sleek Central Data Card (Matches the "Strengths/Weakness" card style from ref) */}
+                   <div className="bg-[#fcfdfd] rounded-[1.75rem] p-5 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.8)] mb-8 w-full border border-white/80 shrink-0">
+                     <div className="grid grid-cols-2 gap-4 relative">
+                       {/* Center Divider */}
+                       <div className="absolute left-1/2 top-1 bottom-1 w-px bg-slate-200 -translate-x-1/2" />
+                       
+                       {/* Column 1: T1+T2 Direct Hits */}
+                       <div className="flex flex-col pr-1">
+                         <div className="flex items-center gap-1.5 mb-2.5">
+                            <div className="w-[20px] h-[20px] rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                               <Check className="w-[12px] h-[12px] text-emerald-600" strokeWidth={3.5} />
+                            </div>
+                            <span className="text-[9px] font-black uppercase text-emerald-600 tracking-[0.1em] whitespace-nowrap">
+                               T1+T2 Hits
+                            </span>
+                         </div>
+                         <div>
+                            <div className="text-[12px] font-black text-slate-800 leading-tight mb-1">Elite Alignment</div>
+                            <p className="text-[9px] text-slate-500 leading-[1.3] font-medium min-h-[38px]">
+                               {masteryData[activeTab].t1t2Hits} formula-driven verbatim hits.
+                            </p>
+                            <div className="mt-2 pt-2 border-t border-slate-100/80">
+                               <span className="text-[2rem] font-black text-slate-900 tracking-tighter leading-none block">
+                                  {masteryData[activeTab].t1t2}
+                               </span>
+                            </div>
+                         </div>
+                       </div>
+                       
+                       {/* Column 2: T3 Expanded Coverage */}
+                       <div className="flex flex-col pl-3">
+                          <div className="flex items-center gap-1.5 mb-2.5">
+                            <div className="w-[20px] h-[20px] rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                               <Target className="w-[12px] h-[12px] text-blue-600" strokeWidth={3.5} />
+                            </div>
+                            <span className="text-[9px] font-black uppercase text-blue-600 tracking-[0.1em] whitespace-nowrap">
+                               T3 Coverage
+                            </span>
+                         </div>
+                         <div>
+                            <div className="text-[12px] font-black text-slate-800 leading-tight mb-1">Conceptual Field</div>
+                            <p className="text-[9px] text-slate-500 leading-[1.3] font-medium min-h-[38px]">
+                               {masteryData[activeTab].t3Hits} questions structural matched.
+                            </p>
+                            <div className="mt-2 pt-2 border-t border-slate-100/80">
+                               <span className="text-[2rem] font-black text-slate-900 tracking-tighter leading-none block">
+                                  {masteryData[activeTab].t3Expanded}
+                               </span>
+                            </div>
+                         </div>
+                       </div>
+
+                     </div>
                    </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
 
-        {/* Global Stats Bar */}
-        <div className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-8">
-           {[
-             { label: 'Total Questions Audited', val: '240+', icon: '📊' },
-             { label: 'Rankings Improved', val: '120%', icon: '🚀' },
-             { label: 'Student Selection Rate', val: '5.4x', icon: '🎓' },
-             { label: 'Institution Partners', val: '12+', icon: '🏢' },
-           ].map((stat, i) => (
-             <motion.div 
-               whileHover={{ y: -5 }}
-               key={i} 
-               className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 text-center"
-             >
-                <div className="text-3xl mb-2">{stat.icon}</div>
-                <div className="text-4xl font-black text-slate-900 mb-2">{stat.val}</div>
-                <div className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{stat.label}</div>
-             </motion.div>
-           ))}
-        </div>
+                   {/* Post-card Descriptors */}
+                   <div className="text-center px-2 flex flex-col items-center">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/5 mb-4 backdrop-blur-sm">
+                         <Flame className="w-3 h-3 text-orange-400" />
+                         <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{masteryData[activeTab].slogan}</span>
+                      </div>
+                      <p className="text-[#94a3b8] text-[13px] leading-relaxed font-medium">
+                        {masteryData[activeTab].description}
+                      </p>
+                   </div>
+                </motion.div>
+             </AnimatePresence>
+          </div>
 
-        <div className="mt-20 text-center">
-           <p className="text-slate-400 font-bold uppercase tracking-[0.2em] mb-4">Precision is our Pedagogy.</p>
-           <h3 className="text-2xl font-black text-slate-900">The Oracle for India's Future Doctors and Engineers.</h3>
-        </div>
-      </div>
+          {/* Floating Navigation Dots (Pill) */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30 bg-[#000000a0] backdrop-blur-xl px-5 py-3 rounded-full border border-white/10 shadow-2xl">
+              {masteryData.map((_, idx) => (
+                  <button
+                      key={idx}
+                      onClick={() => { setActiveTab(idx); setProgress(0); }}
+                      className={`rounded-full transition-all duration-300 ease-out ${
+                          activeTab === idx 
+                               ? 'w-2.5 h-2.5 bg-white shadow-[0_0_12px_rgba(255,255,255,1)] scale-[1.2]' 
+                               : 'w-2.5 h-2.5 bg-white/20 hover:bg-white/40'
+                      }`}
+                      aria-label={`View Subject ${idx + 1}`}
+                  />
+              ))}
+          </div>
+
+       </div>
     </section>
   );
 }

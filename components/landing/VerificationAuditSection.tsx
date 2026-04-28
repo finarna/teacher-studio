@@ -28,103 +28,103 @@ export default function VerificationAuditSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-end justify-between mb-12 gap-8 text-center lg:text-left">
           <div className="max-w-2xl">
-              <h2 className="text-4xl sm:text-7xl font-black text-slate-900 mb-8 tracking-tighter leading-[0.9]">
-                Forensic <br /><span className="text-blue-600">Performance Audit</span>
-              </h2>
-              <p className="text-lg text-slate-500 mb-0 leading-relaxed font-semibold">
-                Verbatim 1:1 question mapping against official KCET 2026 examination papers. <br />
-                Institutional proof of <span className="text-blue-600 font-black italic">REI-v17 Predictive Intelligence</span>.
-              </p>
+            <h2 className="text-4xl sm:text-7xl font-black text-slate-900 mb-8 tracking-tighter leading-[0.9]">
+              Comprehensive <br /><span className="text-blue-600">Performance Audit</span>
+            </h2>
+            <p className="text-lg text-slate-500 mb-0 leading-relaxed font-semibold">
+              Verbatim 1:1 question mapping against official KCET 2026 examination papers. <br />
+              Institutional proof of <span className="text-blue-600 font-black italic">REI-v17 Predictive Intelligence</span>.
+            </p>
           </div>
           <div className="px-10 py-8 bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 blur-3xl -mr-16 -mt-16" />
-             <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Global Success Rate (97/240)</div>
-             <div className="text-6xl font-black text-white">40.4%</div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 blur-3xl -mr-16 -mt-16" />
+            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Global Success Rate (97/240)</div>
+            <div className="text-6xl font-black text-white">40.4%</div>
           </div>
         </div>
 
         {/* High-Density Cockpit Heatmap */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           className="mb-16 bg-slate-50 rounded-[3.5rem] border border-slate-200 shadow-2xl overflow-hidden"
         >
-           <div className="p-8 lg:p-12 pb-0 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div>
-                <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Verbatim Success Heatmap</h3>
-                <p className="text-slate-500 font-bold text-sm">Sequential 1-to-1 Mapping Metrics (240 Questions Total)</p>
-              </div>
-              <div className="flex flex-wrap justify-center gap-2">
-                 {[
-                   { label: 'T1: Masterpiece', range: '98-100%', color: 'bg-emerald-500' },
-                   { label: 'T2: Strategic', range: '80-97%', color: 'bg-blue-600' },
-                   { label: 'T3: Tactical', range: '60-79%', color: 'bg-violet-500' },
-                   { label: 'T4: Concept', range: '30-59%', color: 'bg-slate-400' },
-                   { label: 'T5: Missed', range: '<30%', color: 'bg-slate-200' },
-                 ].map((legend, i) => (
-                   <div key={i} className="flex flex-col items-center gap-1 min-w-[100px] bg-white p-3 rounded-2xl border border-slate-100 shadow-sm transition-all hover:border-blue-500/30">
-                      <div className={`w-full h-1.5 rounded-full ${legend.color}`} />
-                      <div className="text-[10px] font-black text-slate-900 uppercase mt-1">{legend.label}</div>
-                      <div className="text-[9px] font-bold text-slate-400">{legend.range} Success</div>
-                   </div>
-                 ))}
-              </div>
-           </div>
-
-           <div className="p-4 lg:p-10 space-y-4">
-              {Object.entries(subjectScores).map(([subject, scores]) => (
-                <div key={subject} className="bg-white p-4 lg:p-6 rounded-[2rem] border border-slate-200/60 shadow-sm flex flex-col lg:flex-row items-center gap-6">
-                   <div className="w-[140px] text-left shrink-0">
-                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{subject} Audit</div>
-                      <div className="text-lg font-black text-slate-900 leading-tight">60 Questions</div>
-                   </div>
-                   
-                   <div className="flex-1 w-full overflow-hidden">
-                      <div className="grid grid-cols-20 sm:grid-cols-30 gap-1 lg:gap-1.5">
-                         {scores.map((score, i) => (
-                           <div 
-                             key={i} 
-                             className={`aspect-square rounded-[2px] lg:rounded-[4px] ${getColor(score)} transition-all duration-300 hover:scale-125 cursor-crosshair hover:z-10 relative group border border-black/5`}
-                           >
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-50 shadow-xl border border-white/10">
-                                {subject} Q{i+1}: <span className={score >= 80 ? 'text-emerald-400' : 'text-slate-300'}>{score}% Match</span>
-                              </div>
-                           </div>
-                         ))}
-                      </div>
-                   </div>
-
-                   <div className="hidden xl:flex flex-col items-end gap-1 shrink-0 w-32 border-l border-slate-100 pl-6">
-                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Section Health</div>
-                      <div className={`text-xl font-black ${subject === 'Chemistry' ? 'text-purple-600' : subject === 'Physics' ? 'text-blue-600' : subject === 'Biology' ? 'text-emerald-600' : 'text-orange-600'}`}>
-                        {subject === 'Chemistry' ? '81.4' : subject === 'Physics' ? '76.2' : subject === 'Biology' ? '55.7' : '51.9'}%
-                      </div>
-                   </div>
+          <div className="p-8 lg:p-12 pb-0 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Verbatim Success Heatmap</h3>
+              <p className="text-slate-500 font-bold text-sm">Sequential 1-to-1 Mapping Metrics (240 Questions Total)</p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                { label: 'T1: Masterpiece', range: '98-100%', color: 'bg-emerald-500' },
+                { label: 'T2: Strategic', range: '80-97%', color: 'bg-blue-600' },
+                { label: 'T3: Tactical', range: '60-79%', color: 'bg-violet-500' },
+                { label: 'T4: Concept', range: '30-59%', color: 'bg-slate-400' },
+                { label: 'T5: Missed', range: '<30%', color: 'bg-slate-200' },
+              ].map((legend, i) => (
+                <div key={i} className="flex flex-col items-center gap-1 min-w-[100px] bg-white p-3 rounded-2xl border border-slate-100 shadow-sm transition-all hover:border-blue-500/30">
+                  <div className={`w-full h-1.5 rounded-full ${legend.color}`} />
+                  <div className="text-[10px] font-black text-slate-900 uppercase mt-1">{legend.label}</div>
+                  <div className="text-[9px] font-bold text-slate-400">{legend.range} Success</div>
                 </div>
               ))}
-           </div>
-           
-           <div className="px-12 py-8 bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6 border-t border-slate-800">
-              <div className="flex flex-wrap justify-center items-center gap-6 text-xs font-black uppercase tracking-widest">
-                 <div className="flex items-center gap-2">
-                    <span className="text-slate-500">Protocol:</span>
-                    <span className="text-yellow-400">KCET_MASTER_REI_V17</span>
-                 </div>
-                 <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
-                 <div className="flex items-center gap-2">
-                    <span className="text-slate-500">Coverage:</span>
-                    <span className="text-blue-400">97.5% Conceptual Useful</span>
-                 </div>
-                 <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
-                 <div className="flex items-center gap-2 text-emerald-400">
-                    Verified Verified Forensic Evidence
-                 </div>
+            </div>
+          </div>
+
+          <div className="p-4 lg:p-10 space-y-4">
+            {Object.entries(subjectScores).map(([subject, scores]) => (
+              <div key={subject} className="bg-white p-4 lg:p-6 rounded-[2rem] border border-slate-200/60 shadow-sm flex flex-col lg:flex-row items-center gap-6">
+                <div className="w-[140px] text-left shrink-0">
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{subject} Audit</div>
+                  <div className="text-lg font-black text-slate-900 leading-tight">60 Questions</div>
+                </div>
+
+                <div className="flex-1 w-full overflow-hidden">
+                  <div className="grid grid-cols-20 sm:grid-cols-30 gap-1 lg:gap-1.5">
+                    {scores.map((score, i) => (
+                      <div
+                        key={i}
+                        className={`aspect-square rounded-[2px] lg:rounded-[4px] ${getColor(score)} transition-all duration-300 hover:scale-125 cursor-crosshair hover:z-10 relative group border border-black/5`}
+                      >
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-50 shadow-xl border border-white/10">
+                          {subject} Q{i + 1}: <span className={score >= 80 ? 'text-emerald-400' : 'text-slate-300'}>{score}% Match</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="hidden xl:flex flex-col items-end gap-1 shrink-0 w-32 border-l border-slate-100 pl-6">
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Section Health</div>
+                  <div className={`text-xl font-black ${subject === 'Chemistry' ? 'text-purple-600' : subject === 'Physics' ? 'text-blue-600' : subject === 'Biology' ? 'text-emerald-600' : 'text-orange-600'}`}>
+                    {subject === 'Chemistry' ? '81.4' : subject === 'Physics' ? '76.2' : subject === 'Biology' ? '55.7' : '51.9'}%
+                  </div>
+                </div>
               </div>
-              <div className="text-[10px] text-slate-500 font-bold max-w-[300px] text-center md:text-right leading-tight">
-                * BASED ON 28,800 INDIVIDUAL PAIRWISE COMPARISONS AGAINST OFFICIAL BOARD PAPERS.
+            ))}
+          </div>
+
+          <div className="px-12 py-8 bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6 border-t border-slate-800">
+            <div className="flex flex-wrap justify-center items-center gap-6 text-xs font-black uppercase tracking-widest">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500">Protocol:</span>
+                <span className="text-yellow-400">KCET_MASTER_REI_V17</span>
               </div>
-           </div>
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500">Coverage:</span>
+                <span className="text-blue-400">97.5% Conceptual Useful</span>
+              </div>
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+              <div className="flex items-center gap-2 text-emerald-400">
+                Verified Prediction Evidence
+              </div>
+            </div>
+            <div className="text-[10px] text-slate-500 font-bold max-w-[300px] text-center md:text-right leading-tight">
+              * BASED ON 28,800 INDIVIDUAL PAIRWISE COMPARISONS AGAINST OFFICIAL BOARD PAPERS.
+            </div>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -165,7 +165,7 @@ export default function VerificationAuditSection() {
               </p>
             </div>
             <button className="px-12 py-5 bg-yellow-400 text-blue-900 font-bold rounded-2xl shadow-xl hover:bg-yellow-500 transition-all transform hover:scale-105">
-                 Request Demo for Institute
+              Request Demo for Institute
             </button>
           </div>
         </div>

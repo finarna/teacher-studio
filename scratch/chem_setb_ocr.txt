@@ -1,0 +1,679 @@
+
+
+--- PAGE 1 ---
+PlUs2AI
+KARNATAKA COMMON ENTRANCE SIMULATION TEST 2026
+CHEMISTRY SIMULATION
+Serial No: P2-2026-CHEM
+Subject Code: CHE
+Duration: 80 Minutes
+Version Code: REI-v17
+Maximum Marks: 60
+CANDIDATE NAME:
+CET REG. NO:
+LEGAL DISCLAIMER & TERMS OF USAGE
+IMPORTANT: This document is an Al-generated simulation based on historical analysis of the Karnataka Common
+Entrance Test (KCET). It is intended strictly for practice and training purposes. Plus2AI does not claim that these
+specific questions will appear in the actual 2026 KCE examination. PlusZAI assumes no legal lIability for any
+discrepancies. variations. or performance outcomes in the actua exam. Users are advised to use this alongside
+official KEA study materials.
+IMPORTANT INSTRUCTIONS TO CANDIDATES
+This question booklet contains 60 questions. Check that all pages are intact.
+The Version Code and Serial Number must be correctly entered on the OMR Answer Sheet.
+Each question carries 1 mark. There is no negative marking for wrong answers.
+Answers must be marked ONLY on the OMR sheet provided using a blue/black ballpoint pen.
+Calculators, log tables, and electronic gadgets are strictly prohibited.
+Plus2AI DNA Model (REI v17): This is a high-fidelity pattern simulation. Final results may vary.
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 2 ---
+1. For the Freundlich adsorption isotherm, a plot of log(a/m) against log P yields a straight
+line. If the line is parallel to the log P axis, what can be inferred about the relationship between
+the extent ot adsorption and the pressure o the gas:
+(A) The extent of adsorption is independent
+of the pressure.
+(B) The extent of adsorption is directly
+proportional to the pressure.
+(C) The extent of adsorption is proportional
+to the sauare root or pressure
+(D) Adsorption does not occur at any
+pressure.
+DNA
+2. Identify the final product 'C' in the following sequence of reactions:
+1. CHCI /NaOH
+2 Hi
+(CHSCO)20,
+Pyridine
+(A) 2-hydroxybenzylalcohol
+(C) 2-ethoxybenzyl alcohol
+(B) 2-(hydroxymethyl)phenyl acetate
+(D) 1,2-bis(hydroxymethyl)benzene
+3. Afirst-order decomposition reaction X -+ Products has ahalf-life ( t1/2 ) of 30 minutes.
+If the initial concentration of X is 0.80 M , how much time is required for the concentration
+to drop to 0.10 M ?
+(A) 90 minutes
+I DNA
+(C) 120 minutes
+(D) 150 minutes
+Plus
+4. Three isomeric alcohols X, Y, and Z with the formula CaHoO were treated with
+Lucas reagent ( conc. HCI + ZnCl2 ). X reacted immediately to give turbidity, Y
+gave turbidity after 5-10 minutes, and Z did not show turbidity at room temperature. When
+Y isoxidized with KM01 , the product formed is:
+(A) Butan-2-one
+(B) Butanoic acid
+(C) 2-Methylpropan-2-ol
+(D) Butanal
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 3 ---
+5. coordination compound has the formula CoCl3 • 4N H3 . When treated with excess silver
+nitrate ( AgO3 ), one mole of silver chloride ( AgCt ) is precipitated per mole of the
+compound. The secondary valence of Cobalt in this complex is 6. The correct IUPAC name of the
+complex is:
+(A) Tetraamminedichloridocobalt(III)
+chloride
+(B) Tetraamminetrichloridocobalt(III)
+(C) Tetraamminedichloridocobalt(Il)
+chloride
+(D) Triamminetrichloridocobalt(I) ammine
+6. The industrial preparation of certain chemicals requires controlling the pH of the medium. For a
+solution containing chromate( CrO^ ) and dichromate( Cr? )ions, which ofthe
+following statements correctly describes the effect of pH on their equilibrium?
+(A) Dichromate ions are converted to
+chromate ions in an alkaline medium.
+B) Chromate ions are converted to
+dichromate ions at pH > 7
+C Dichromate ions are stable only in
+strongly basic solutions.
+(D) The color of the solution remains orange
+regardless of pH changes.
+7. An organic compound 'X' with molecular formula CaH1o0 produces an immediate turbidity
+with Lucas reagent at room temperature. When 'X' is passed over heated Copper at 573 K , it
+forms a hydrocarbon 'Y'. However, 'X' fails to show any color change with neutral FeCl3 and
+does not react with Na0I . Identify the correct statement regarding the reaction of 'X' with
+concentrated HI
+(A) It undergoes Sv1 mechanismto
+(B) It undergoes S~ mechanismto
+produce 2-iodo-2-methylpropane and
+produce 1-iodobutane and water.
+woTer.
+(C) It undergoes dehydration to form but-1-
+ene as the major product.
+(D) It remains unreactive towards HI
+due to steric hindrance.
+Exam DNA
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 4 ---
+8. Based on the standardelectrode potentials ( E® ) given below, which of the following metals can
+be safely used to store an aqueous solution of CuSO4 without any reaction occurring?
+E°(In?+ (2n) =-0.76 V . E° (Fe?+ /Fe) =-0.41 V
+E° (Cr?* /Ca) = +0.34 V. E°(Ag*/Ag) = +0.80 V
+(A) Zinc( Zn)
+(G) Silver ( Ag )
+(B) Iron( Fe )
+(D) Both Zn and Fe
+9. In the following sequence of reactions:
+NaNO2/HC1,273K
+HREA
+Aniline
+A
+The product 'C' is:
+(A) Nitrobenzene
+(C) Benzene
+NaNOsICUA, O
+(B) Fluorobenzene
+(D) Chlorobenzene
+10. Anoptically active compound A with molecular formula CHirBr reacts with
+AgNOs in aqueous ethanol to give a racemic mixture of alcohols. However, when A is
+treated with NaI in dry acetone, it yields a single enantiomer B ( CHarI ) with
+inverted configuration. Which of the following describes compound A and the mechanism of
+its reaction with NaI ?
+(A)
+A is a secondary alkyl halide;
+reaction with NaI follows S~2
+mechanism.
+A is a primary alkyl halide; reaction
+with NaI follows Su2
+mechanism.
+(B)
+A is a tertiary alkyl halide; reaction
+with NaI follows Su1
+mechanism.
+(D)
+A is a secondary alkyl halide;
+reaction with NaI follows Sin1
+mechanism.
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 5 ---
+11. The atomic radii of second ( 4d) and third ( 5d) transition series elements (e.g., Zr and
+Hf ) are almost identical. This phenomenon is primarily a consequence of:
+(A) Lanthanoid Contraction
+(B) Actinoid Contraction
+(C) Shielding effect of s -electrons
+(D) Increase in nuclear charge only
+12. What is the geometry and the number of lone pairs on the central Xenon atom in XeFy?
+(A) Square planar, 2 lone pairs
+(C) See-saw, 1lone pair
+(B) Tetrahedral, O lone pairs
+(D) Octahedral, 2 lone pairs
+13. A patient is prescribed a drug that inhibits the enzyme 'Dihydrofolate reductase' by binding to its
+active site, preventing the natural substrate from binding. However, another drug 'Y' binds to a
+different site of the enzyme, changing the shape of the active site. Identify the drug types for the
+first drug and 'Y' respectively.
+(A) Competitive inhibitor, Allosteric inhibitor
+(B) Allosteric inhibitor, Competitive inhibitor
+(C) Agonist, Antagonist
+(D) Receptor, Chemical messenger
+14. The correct order of bond dissociation enthalpy for the halogens is:
+(A) F3 > Cla > Bra > I2
+(C) Ch > Br? > Fir > Ir
+(B) Cla > FL > Br > I
+(D) Is > Bra > Cla > Fr
+15. In a kinetic study of the reaction A - B , it was observed that doubling the initial
+concentration of reactant A results in the reaction rate increasing by a factor of 4. Based on
+this observation, what are the units of the rate constant & for this reaction?
+(A)
+mol1. I.sI
+(B)
+(C)
+mol.L-1.g1
+(D)
+mot 2. I?. g1
+16. Which of the following compounds will undergo Cannizzaro reaction but NOT Aldo
+condensation?
+(A) 2,2-dimethylpropanal
+(C) Propanone
+(B) Ethanal
+(D) Phenylacetaldehyde
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 6 ---
+17. In the Reimer-Tiemann reaction, phenol reacts with chloroform in the presence of sodium
+hydroxide to form salicylaldehyde. Which of the following statements regarding the mechanism is
+INCORRECT?
+(A) The electrophile in this reaction is the
+chloromethyl carbanion
+(B) The reaction involves the formation of a
+dichlorocarbene (: CC(2)
+(: CHC12) .
+intermediate.
+C) The intermediate formed is a
+substituted benzal chloride.
+(D) The final product salicylaldehyde is
+obtained after acid hydrolysis of the
+intermediate.
+18. Which of the following statements regarding Physical Adsorption (Physisorption) is INCORRECT?
+(A) It results in the formation of a unilayer of
+adsorbate molecules.
+(B) It is generally reversible in nature.
+(C) The enthalpy of adsorption (
+A Hadsorption ) is low (20-40 kJ/mol).
+(D) It decreases with an increase in
+temperature at constant pressure.
+19. Among the following group 15 hydrides, which one exhibits the highest reducing character and
+the lowest thermal stability?
+(A) NH3
+(B) PH3
+(C)
+As Hs
+(D)
+BiHs
+20. In the study of second and third transition series, it is observed that the atomic radii of Zirconium (
+Zr, Z = 40 ) and Hafnium ( Hf, Z = 72 ) are almost identical ( 160 pmand 159
+pm respectively). The primary reason for this observation is:
+(A) Lanthanoid Contraction
+(B) Actinoid Contraction
+(C) The Shielding Effect of d-electrons
+(D) The Diagonal Relationship
+21. According to the Arrhenius equation, k = A. eRa/ RI
+, what happens to the rate of a
+reaction when a positive catalyst is added at constant temperature?
+(A) The rate increases because the
+activation energy \ Ea ) decreases.
+(C) The rate decreases because the pre-
+exponential factor ( A ) decreases.
+(B) The rate increases because the
+activation energy (Ea ) increases.
+(D) The rate remains unchanged as the
+equilibrium constant is unaffected.
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 7 ---
+22. Which of the following carboxylic acids has the highest pKa value?
+(A)
+-Methylbenzoic acid
+(C) Benzoic acid
+(B)
+-Nitrobenzoic acid
+(D)
+o - Nitrobenzoic acid
+23. A student reacts Chlorine gas with a cold and dilute solution of Sodium Hydroxide. The chlorine
+undergoes disproportionation. The oxidation states of Chlorine in the two chlorine-containing
+products formed are:
+(A) -land +1
+(C) Oand -1
+(B) - land +5
+(D) +land +5
+24. During the hydrolysis of 3-bromo-2,2-dimethylbutane with aqueous KOH, the major
+product obtained is 2,3-dimethylbutan-2-ol. This observation is best explained by:
+(A)
+Si1 mechanism involving a 1,2-
+(B)
+Sr2 mechanism where the
+methyl shift to form a more stable
+tertiary carbocation.
+hydroxide ion attacks the most
+substituted carbon.
+(C) An elimination reaction followed by
+Markovnikov addition of water.
+(D) SiN1 mechanism involving a 1,2-
+hydride shift to form a secondary
+carbocation
+25. Which of the following statements regarding the structure of DNA is INCORRECT?
+(A) The two strands are identical and run in
+the same direction.
+(B) Adenine forms two hydrogen bonds with
+Thymine.
+(C) The backbone is formed by alternating
+sugar and phosphate Units
+(D) The glycosidic linkage connects the
+nitrogenous base to the Cl' of the
+pentose sugar.
+26. The correct order of increasing basic strength of the lanthanoid hydroxides is:
+(A)
+I(OH): < УЫ(OH)з <
+Ce(OH)з < La(OH)з
+(C) Ce(OH): < La(OH): <
+[«(OH): < I(OH)з
+La(OH)з < Ce(OH)з <
+Y(OH)3 < Lu(OH)з
+(D) In(OH)3 < La(OH)3 <
+Ce(OH)з < I(OH)з
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 8 ---
+27. A mixture of three amines (Primary, Secondary, and Tertiary) is treated with Benzenesulfonyl
+chloride. The resulting mixture is then treated with excess aqueous NaH . Which of the
+following observations is correct?
+(A) The primary amine derivative dissolves
+in NaOH , while the secondary
+amine derivative remains as a solid.
+(C) The tertiary amine derivative forms a
+solid that is soluble in NaOH
+(B) The secondary amine derivative
+dissolves in NaOH , while the
+primary amine derivative remains as a
+solid.
+(D) All three amine derivatives are insoluble
+in aqueous NaOH
+28. An electrochemical cell is constructed where 3 moles ofelectrons are passed through an
+aqueous solution of AlC during an electrolysis process. The total mass of Aluminum
+(Atomic mass = 27 g/mol) deposited at the cathode is:
+(A)
+27 g
+(B)
+9 g
+(C)
+81 g
+(D)
+54 g
+29. A students asked to identify an aqueous solution containing M?+ ions from the 3d series
+that is colorless and diamagnetic. Upon adding a small amount of sodium hydroxide, a white
+precipitate forms which is soluble in excess alkali. Which of the following ions matches this
+observation?
+(A)
+2+
+Zni
+(B
+Ch?t
+(C)
+Fe?t
+Ni?t
+30. The zig-zag random motion of colloidal particles observed under an ultramicroscope, which
+provides stability to the sol by preventing particles from settling, is known as:
+(A) Brownian Movement
+(B) Tyndall Effect
+(C) Electrophoresis
+(D) Peptization
+DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 9 ---
+31. According to Faraday's second law of electrolysis, when the same quantity of electricity is passed
+through solutions of AgNOs and Cu.SO connected in series, the ratio of the mass of
+Ag tothemassof Cu deposited is:
+(A)
+ETITELETX
+(B)
+63.5
+(C)
+51
+(D)
+32. The correct decreasing order of basic strength of the following amines in their aqueous solution
+is:
+( CH3NHa
+(I) (CH3)NH
+Exam DNA
+Plus2A1
+(IV) NHs
+(A) (> >‹III) > (IV)
+(C) (I)> (I|I) > (1) > (IV)
+(B) (I)> [>(I) > (IV)
+(D) (I) > (Il) > (III) > (IV)
+33. Which of the following statements is INCORRECT regarding the coupling reaction of benzene
+diazonium chloride?
+(A) Coupling with phenol is carried out in a
+strongly acidic medium ( pH < 2 ).
+(C) The reaction is an example of
+electrophilic aromatic substitution.
+(B) The product of coupling with aniline is
+-aminoazobenzene, which is a
+yellow dye.
+(D) Coupling generally occurs at the para-
+position with respect to the activating
+group.
+34. In the reaction sequence:
+CHCI/alc.KOH
+CHsCH2NH2
+The compound 'B' is:
+(A) Ethylmethylamine
+(C) Diethylamine
+* B
+(B) Isocyanomethane
+(D) Propan-2-amine
+Reproduction strictly prohibited. © 2026 Plus2AI. | KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 10 ---
+35. Which of the following 0.1 M aqueous solutions will exhibit the highest boiling point?
+(A) C6H1206 (Glucose)
+(B)
+NaCl
+(C) Cach
+Al2(SO4)3
+cam
+cam DNA
+36. A laboratory technician observes that when a white crystalline phosphorus oxoacid H3PO,
+is added to a silver nitrate solution, a black precipitate of metallic silver is formed. This specific
+reducing behavior of H3PO is attributed to the presence of:
+(A) Two P-H bonds and one P-OH bond
+(B) One P-H bond and two P-OH bonds
+(C) Three P-OH bonds and no P-H bonds
+(D) Two P-OH bonds and two P-H bonds
+37. Fortwo gases A and B, the Henry's law constants at 298 I are 1.5 × 10° bar
+and 3.5 x 10 bar respectively. If both gases are present at the same partial pressure above
+a solvent, which of the following is true regarding their solubility (x)?
+(A)
+(B)
+ХА > XB
+ХВ > ХА
+(C)
+ХА = XB
+(D) Solubility cannot be compared without
+knowing the solvent
+38. The major product formed when tert-butyl methyl ether is treated with one equivalent of cold
+hydriodic acid (HI) is:
+(A) tert-butyl alcohol and methyl iodide
+C) isobutylene and methyl iodide
+(B) tert-butyl iodide and methanol
+(D) tert-butyliodide and methyl iodide
+39. For a certain chemical reaction, the rate constant is found to be
+k=4.5 × 10-2 Lmol s1. The order of this reaction is:
+(A) Zero order
+B) First order
+(C) Second order
+(D Third order
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 11 ---
+40. In the reaction of Benzaldehyde with concentrated NaH followed by acidification, the
+products obtained are 'P' and 'Q'. When 'P' is treated with PCIs , it gives 'R'. When 'Q'is
+treated with SOCI , it gives 'S'. Which of the following is correct?
+(A) 'R' is Benzyl chloride and 'S' is Benzoyl
+chloride.
+(B) 'R' is Chlorobenzene and 'S' is Benzyl
+chloride.
+(C) 'R' is Benzoyl chloride and 'S' is Benzyl
+chloride.
+(D) 'R' is Benzyl chloride and 'S' is
+Chlorobenzene
+DNA
+41. An organic compound 'X' with molecular formula Cs Ho reacts with C6H;SO,Ch to
+form a solid 'Y' that is insoluble in aqueous KOH . When 'X' is treated with NaNO2 and
+HCt at 0 - 5 C, a colorless, odorless gas is evolved. Which of the following is the correct
+decreasing order of basic strength for the isomers of 'X' in the aqueous phase?
+(A)
+(CH)NH > CHNH, >
+(CHs)N > NH3
+(B) (CH)NH > (CH33N>
+CHaNH2 > NHs
+(C) (CHa):N > (CHs)NH>
+CHaNH2 > NHs
+(D) CHINH. > (CHa)LNH>
+(CHs)N > NH3
+42. Among the group 16 hydrides ( H20, HaS, HaSe, HaTe ), H2O has an unusually high
+boiling point compared to the others. This anomaly is primarily due to:
+(A) Intermolecular hydrogen bonding
+(B) High electron affinity of oxygen
+(C) The presence of three lone pairs on
+(D) Smallest bond angle in group 16
+oxygen
+43. Afirst-order reaction has a half-life ( t1/2 )of 30 minutes . The time required for the
+completion of 75% of the reaction is:
+(A)
+60 minutes
+90 minutes
+(B)
+(D)
+45 minutes
+120 minutes
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 12 ---
+44. The molar conductivities at infinite dilution for NaC, HIC, and CH:COONa are
+126.4, 425.9 , and 91.0 S cm mol 1
+respectively. The molar conductivity at infinite
+dilution ( Am )for CHCOOH is:
+(A)
+390.5 S cm' mo!1
+(B)
+441.35 cm' mol
+(C)
+516.9 S cm' mol 1
+(D)
+208.5 S cm" mo! 1
+45. An organic compound 'X' with molecular formula C; H6O does not reduce Tollen's reagent
+but forms a yellow precipitate with I2/NaOH . When 'X'is treated with CHMgBr
+followed by acid hydrolysis, it yields 'Y'. The correct observation regarding 'Y' is:
+(A) 'Y' gives a turbid solution immediately
+with Lucas reagent at room
+temperature.
+(B) 'Y' is a primary alcohol that can be
+oxidized to propanal.
+(C) 'Y' reacts with Cu/573K toforman
+(D) 'Y' shows an optical activity due to the
+presence of a chiral center.
+aldehyde.
+46. In the presence of a catalyst, the rate of a chemical reaction increases because the catalyst:
+(A) Decreases the activation energy ( Ea
+)
+(C) Decreases the threshold energy of the
+molecules
+(B) Increases the enthalpy of the reaction (
+ДН )
+(D) Increases the average kinetic energy of
+the reactants
+47. Arrange the following compounds in the increasing order of their pa values:
+-Nitrophenol (i) m -Nitrophenol (i) p -Cresol (iv) Phenol
+(A) (i) < (i) < (iv) < (it)
+(C) (i) < (it) < (i) < (iv)
+(B) (iti) < (iv) < (il) < (i)
+(D) (iv) < (iti) < (it) < (i)
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 13 ---
+48. Arrange the following carboxylic acids in the increasing order of their acidity:
+(i) CHCOOH
+(ii) CICH,COOH
+(i) ChCHCOOH
+(iv) FCH2COOH
+Exam DNA
+(A) (i) < (ji) < (iv) < (ill)
+(C) (i) < (i) < (iti) < (iv)
+(B) (i) < (iv) < (i) < (ili)
+(D) (iv) < (i) < (i) < (i)
+49. In the coagulation of a negative sol like Arsenic sulphide ( As253 ), whichof the following
+electrolytes will have the maximum 'coagulating power'?
+(A)
+NaCi
+(BI
+MgCh
+(C
+AICI
+(DI
+Na250s
+50. For the Danielcell: Zin(g) 2n? (ag, Ci)| Cr?+ (ag, Cs) Cu(s) , the cellpotential Ecell
+is found to be equal to the standard cell potential Ecell when:
+(A) C1 = 1.0M, C2 = 0.1 M
+(B)
+C1 = C2
+(C)
+C1 = 0.1 M, C2 = 1.0 M
+(D)
+C1 = 2 × C2
+51. To synthesize tert-butyl ethyl ether using the Williamson synthesis, which set of reagents and
+conditions is most appropriate?
+(A) Sodium tert-butoxide and Ethyl bromide
+(C) tert-Butanol and Ethanol with
+conc. H2SOs at 140°C
+(B) Sodium ethoxide and tert-Butyl bromide
+(D) Sodium phenoxide and tert-Butyl
+bromide
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 14 ---
+52. carbohydrate 'P' on hydrolysis with dilute HCI gives an equimolar mixture of two hexoses,
+'Q'and 'R'. 'Q' gives a red precipitate with Fehling's solution and reacts with Bromine water to
+form a sugar acid, while 'R' gives a red precipitate with Fehling's solution but does not react with
+Bromine water. If'P' is a non-reducing sugar, what is the specific nature of the linkage in 'P"?
+(A)
+a - C1 ofglucose and B - C2
+(B)
+a - C'1 of glucose and B - C4
+of fructose
+of galactose
+(C)
+B - C1 of galactose and
+(D)
+a - C1 of glucose and a - C4
+B - 04 of glucose
+of glucose
+53. The zeolite catalyst ZSM - 5 is extensively used in the petrochemical industry. Its specific
+function is to convert:
+(A) Alcohols directly into Gasoline
+(Hydrocarbons)
+(C) Vegetable oils into Vanaspati Ghee
+(B) Nitrogen and Hydrogen into Ammonia
+(D) Sulfur dioxide into Sulfur trioxide
+54. Arrange the following compounds in the increasing order of their reactivity towards nucleophilic
+addition reactions:
+(i) Benzaldehyde, (i) p -Tolualdehyde, (i) p -Nitrobenzaldehyde, (iv) Acetophenone.
+am
+(A) (iv) < (ii) < (i) < (ili)
+(B) (iv) < (i) < (it) < (ili)
+(C) (iti) < (i) < (ii) < (iv)
+(D) (ii) < (iv) < (i) < (i)
+55. Anaqueous solution contains Ni?+ ions ( Z= 28 ). Based on the 'spin-only' formula, what
+is the calculated magnetic moment of this solution in Bohr Magnetons (BM)?
+(A) 2.83 BM
+(B) 1.73 BM
+(C) 3.87 BM
+(D) 4.90 BM
+Plus2A1
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 15 ---
+56. The spin-only magnetic moment of a coordination compound with the formula
+[Fe(CN)6*- isfoundtobe O BM. This indicates that:
+(A) The central metalion is in +2 state
+(B) The central metal ion is in +3 state
+and is low spin
+and is low spin
+(C) The central metal ion is in +2 state
+and is high spin
+(D) The central metal ion is in +3 state
+and is high spin
+57. Freshly prepared precipitates of Fe(OH) can be converted into a colloidal sol by shaking it
+with a small amount of FeCl solution. This process is known as:
+(A) Dialysis
+(B) Peptization
+(C) Electro-osmosis
+(D) Coagulation
+58. Four separate aqueous solutions are prepared by dissolving 0.1 mol of the following solutes
+in 1 kg ofwater: (I) C6 1206 (I) NaCI , (I) MgCl, ,and (IV) AICI
+298 K , which solution will exhibit the highest vapor pressure?
+(A) Solution (I)
+(B) Solution (Il)
+(C) Solution (IlI)
+(D) Solution (IV)
+59. Inamolar conductivity ( Am )vs VC plotfortwoelectrolytes X and Y, X
+shows a linear decrease with increasing concentration while Y shows a steep increase as
+concentration approaches zero. Electrolytes X and Y arelikely:
+(A) X = KCI. Y = CH3COOH
+(B) × = CHCOOH . Y = KCI
+(6) X = NaCh, Y = HCI
+(D) x = NHAOH,
+Exam DNA
+Reproduction strictly prohibited. © 2026 Plus2AI. KCET 2026 Simulation - SET B | Page 0
+
+
+
+--- PAGE 16 ---
+60. mixture of ethanol and acetone shows a positive deviation from Raoult's Law. This behavior is
+primarily due to:
+(A) The A - B interactions being
+stronger than A - A and
+B - B interactions.
+(B) The A - B interactions being
+weaker than A - A and B - B
+interactions.
+(C)
+AVmixing < 0
+(D)
+AHmixing < 0
+Reproduction strictly prohibited. © 2026 Plus2AI. | KCET 2026 Simulation - SET B | Page 0
+

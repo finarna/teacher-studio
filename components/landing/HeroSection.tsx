@@ -41,7 +41,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-lg sm:text-xl text-slate-600 mb-6 max-w-4xl mx-auto lg:mx-0 leading-relaxed font-medium"
           >
-            India’s leading <span className="text-blue-600 font-bold">AI prediction platform</span> for KCET, NEET, and JEE. Successfully matched <span className="text-blue-700 font-black">65.0% Chemistry</span>, <span className="text-blue-700 font-black">51.7% Physics</span>, <span className="text-blue-700 font-black">23.3% Biology</span>, and <span className="text-blue-700 font-black">21.7% Math</span>.
+            India’s leading <span className="text-blue-600 font-bold">AI prediction platform</span> for KCET, NEET, and JEE. Successfully matched the KCET 2026 exam: <span className="text-blue-700 font-black">65.0% Chemistry</span>, <span className="text-blue-700 font-black">51.7% Physics</span>, <span className="text-blue-700 font-black">23.3% Biology</span>, and <span className="text-blue-700 font-black">21.7% Math</span>.
           </motion.p>
 
           {/* Action Buttons */}
@@ -55,7 +55,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
               onClick={onGetStarted}
               className="px-8 py-4 bg-blue-600 text-white rounded-xl font-black text-base shadow-[0_15px_30px_rgba(37,99,235,0.2)] hover:scale-105 transition-transform"
             >
-              Start Predicting Free
+              Get Prediction Access
             </button>
             <a 
               href="/KCET_2026/analysis_reports/forensic_audit/index.html"
