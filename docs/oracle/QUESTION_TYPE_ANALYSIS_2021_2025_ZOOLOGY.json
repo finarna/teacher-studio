@@ -1,0 +1,35 @@
+{
+  "subject": "Zoology",
+  "exam": "NEET",
+  "years_analyzed": "2021-2025",
+  "total_questions": 270,
+  "answer_format": "MCQ (4 options, single correct)",
+  "question_type_distribution": {
+    "match_following_mcq": 20,
+    "assertion_reason_mcq": 3,
+    "statement_based_mcq": 0,
+    "true_false_combo_mcq": 0,
+    "sequence_mcq": 2,
+    "exception_based_mcq": 2,
+    "diagram_based_mcq": 1,
+    "reason_based_mcq": 0,
+    "definitional_mcq": 1,
+    "calculation_mcq": 0,
+    "simple_recall_mcq": 69
+  },
+  "question_type_counts": {
+    "match_following_mcq": 54,
+    "assertion_reason_mcq": 9,
+    "statement_based_mcq": 0,
+    "true_false_combo_mcq": 0,
+    "sequence_mcq": 5,
+    "exception_based_mcq": 5,
+    "diagram_based_mcq": 4,
+    "reason_based_mcq": 1,
+    "definitional_mcq": 4,
+    "calculation_mcq": 1,
+    "simple_recall_mcq": 187
+  },
+  "analysis_date": "2026-04-29T11:35:58.543Z",
+  "note": "NEET uses uniform MCQ answer format but has diverse question types within that format"
+}

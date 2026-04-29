@@ -2301,7 +2301,12 @@ async function prepareOfficialTest(userId, setId, supabase, subject, examContext
     if (isMath) {
       sourceFile = normalizedSetId === 'SET-B' ? 'flagship_final_b.json' : 'flagship_final.json';
     } else if (isPhysics) {
-      sourceFile = normalizedSetId === 'SET-B' ? 'flagship_physics_final_b.json' : 'flagship_physics_final.json';
+      // Check exam context for NEET vs KCET Physics
+      if (examContext === 'NEET') {
+        sourceFile = normalizedSetId === 'SET-B' ? 'flagship_neet_physics_2026_set_b.json' : 'flagship_neet_physics_2026_set_a.json';
+      } else {
+        sourceFile = normalizedSetId === 'SET-B' ? 'flagship_physics_final_b.json' : 'flagship_physics_final.json';
+      }
     } else if (isChem) {
       sourceFile = normalizedSetId === 'SET-B' ? 'flagship_chemistry_final_b.json' : 'flagship_chemistry_final.json';
     } else if (isBio) {
@@ -2593,10 +2598,18 @@ export async function createCustomTest(req, res) {
             { id: 'SET-B', file: 'flagship_final_b.json', label: 'Math Set-B Prediction' }
           ];
         } else if (isPhysics) {
-          flagships = [
-            { id: 'SET-A', file: 'flagship_physics_final.json', label: 'Physics Set-A Prediction' },
-            { id: 'SET-B', file: 'flagship_physics_final_b.json', label: 'Physics Set-B Prediction' }
-          ];
+          // Check exam context for NEET vs KCET Physics
+          if (examContext === 'NEET') {
+            flagships = [
+              { id: 'SET-A', file: 'flagship_neet_physics_2026_set_a.json', label: 'Physics Set-A Prediction' },
+              { id: 'SET-B', file: 'flagship_neet_physics_2026_set_b.json', label: 'Physics Set-B Prediction' }
+            ];
+          } else {
+            flagships = [
+              { id: 'SET-A', file: 'flagship_physics_final.json', label: 'Physics Set-A Prediction' },
+              { id: 'SET-B', file: 'flagship_physics_final_b.json', label: 'Physics Set-B Prediction' }
+            ];
+          }
         } else if (isChem) {
           flagships = [
             { id: 'SET-A', file: 'flagship_chemistry_final.json', label: 'Chemistry Set-A Prediction' },
@@ -2615,13 +2628,23 @@ export async function createCustomTest(req, res) {
           try {
             const filePath = path.join(process.cwd(), set.file);
             if (fs.existsSync(filePath)) {
+              // Read the JSON file to get the actual total_questions count
+              let totalQuestions = 60; // default fallback
+              try {
+                const fileContent = fs.readFileSync(filePath, 'utf8');
+                const jsonData = JSON.parse(fileContent);
+                totalQuestions = jsonData.total_questions || jsonData.test_config?.questions?.length || 60;
+              } catch (readErr) {
+                console.warn(`Could not read total_questions from ${set.file}, using default 60:`, readErr);
+              }
+
               sortedBaseline.push({
                 id: `virtual-${subjectLower}-${set.id.toLowerCase()}`,
                 test_name: set.label,
                 subject: normalizedSubject,
                 exam_context: examContext || 'KCET',
                 status: 'completed',
-                total_questions: 60,
+                total_questions: totalQuestions,
                 duration_minutes: 80,
                 created_at: new Date().toISOString(),
                 is_virtual: true,

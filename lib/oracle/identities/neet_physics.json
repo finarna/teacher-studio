@@ -1,52 +1,394 @@
 {
-  "version": "16.0",
+  "version": "2.0",
   "subject": "Physics",
   "exam": "NEET",
+  "generated_at": "2026-04-29T11:20:11.204Z",
+  "years_analyzed": "2021-2025",
+  "total_questions": 245,
   "identities": [
     {
       "id": "ID-NP-001",
-      "name": "Dimensional Homogeneity Traps",
-      "logic": "Predicting the dimensions of obscure constants like Stefan's constant or Coefficient of Viscosity.",
-      "high_yield": true,
-      "confidence": 0.98
+      "name": "ELECTROSTATICS",
+      "topic": "ELECTROSTATICS",
+      "empiricalFrequency": {
+        "total_2021_2025": 23,
+        "avgPerYear": 4.6,
+        "distribution": {
+          "2021": 6,
+          "2022": 6,
+          "2023": 4,
+          "2024": 4,
+          "2025": 3
+        }
+      },
+      "confidence": 2,
+      "high_yield": true
     },
     {
       "id": "ID-NP-002",
-      "name": "Graph Interpretation-Slope/Area",
-      "logic": "Interpreting work done from P-V diagrams or Acceleration from V-t graphs. Focusing on 'Cyclic' vs 'Non-cyclic' processes.",
-      "high_yield": true,
-      "confidence": 0.96
+      "name": "OPTICS",
+      "topic": "OPTICS",
+      "empiricalFrequency": {
+        "total_2021_2025": 20,
+        "avgPerYear": 4,
+        "distribution": {
+          "2021": 4,
+          "2022": 4,
+          "2023": 4,
+          "2024": 4,
+          "2025": 4
+        }
+      },
+      "confidence": 2,
+      "high_yield": true
     },
     {
       "id": "ID-NP-003",
-      "name": "Semiconductor - Logic Gate Fusion",
-      "logic": "NAND/NOR as universal gates. Using de Morgan's theorems to simplify complex gate combinations.",
-      "high_yield": true,
-      "confidence": 0.95
+      "name": "CURRENT ELECTRICITY",
+      "topic": "CURRENT ELECTRICITY",
+      "empiricalFrequency": {
+        "total_2021_2025": 20,
+        "avgPerYear": 4,
+        "distribution": {
+          "2021": 4,
+          "2022": 4,
+          "2023": 5,
+          "2024": 4,
+          "2025": 3
+        }
+      },
+      "confidence": 2,
+      "high_yield": true
     },
     {
       "id": "ID-NP-004",
-      "name": "Optics - Focal Length in Medium",
-      "logic": "Calculating lens power shift when immersed in a medium of different refractive index. Lens Maker's Formula application.",
-      "high_yield": true,
-      "confidence": 0.94
+      "name": "MAGNETIC EFFECTS OF CURRENT AND MAGNETISM",
+      "topic": "MAGNETIC EFFECTS OF CURRENT AND MAGNETISM",
+      "empiricalFrequency": {
+        "total_2021_2025": 18,
+        "avgPerYear": 3.6,
+        "distribution": {
+          "2021": 4,
+          "2022": 4,
+          "2023": 3,
+          "2024": 4,
+          "2025": 3
+        }
+      },
+      "confidence": 2,
+      "high_yield": true
     },
     {
       "id": "ID-NP-005",
-      "name": "Rayleigh Criterion - Resolution",
-      "logic": "Limit of resolution for Microscope vs Telescope. Focusing on 'wavelength dependency'.",
-      "high_yield": true,
-      "confidence": 0.92
-    }
-  ],
-  "traps": [
-    {
-      "name": "Significant Figures",
-      "description": "Calculation where the answer must follow rules of significant figures for addition vs multiplication."
+      "name": "ELECTROMAGNETIC INDUCTION AND ALTERNATING CURRENTS",
+      "topic": "ELECTROMAGNETIC INDUCTION AND ALTERNATING CURRENTS",
+      "empiricalFrequency": {
+        "total_2021_2025": 18,
+        "avgPerYear": 3.6,
+        "distribution": {
+          "2021": 4,
+          "2022": 4,
+          "2023": 5,
+          "2024": 3,
+          "2025": 2
+        }
+      },
+      "confidence": 2,
+      "high_yield": true
     },
     {
-      "name": "Mass of Electron neglect",
-      "description": "Common trap in Photoelectric effect or Atomic physics where 'mass' is mentioned but not needed, or vice-versa."
+      "id": "ID-NP-006",
+      "name": "ELECTRONIC DEVICES",
+      "topic": "ELECTRONIC DEVICES",
+      "empiricalFrequency": {
+        "total_2021_2025": 14,
+        "avgPerYear": 2.8,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 3,
+          "2024": 3,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NP-007",
+      "name": "ATOMS AND NUCLEI",
+      "topic": "ATOMS AND NUCLEI",
+      "empiricalFrequency": {
+        "total_2021_2025": 14,
+        "avgPerYear": 2.8,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 3,
+          "2024": 3,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NP-008",
+      "name": "PHYSICS AND MEASUREMENT",
+      "topic": "PHYSICS AND MEASUREMENT",
+      "empiricalFrequency": {
+        "total_2021_2025": 13,
+        "avgPerYear": 2.6,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 2,
+          "2024": 3,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NP-009",
+      "name": "PROPERTIES OF SOLIDS AND LIQUIDS",
+      "topic": "PROPERTIES OF SOLIDS AND LIQUIDS",
+      "empiricalFrequency": {
+        "total_2021_2025": 13,
+        "avgPerYear": 2.6,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 3,
+          "2024": 3,
+          "2025": 3
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NP-010",
+      "name": "KINEMATICS",
+      "topic": "KINEMATICS",
+      "empiricalFrequency": {
+        "total_2021_2025": 13,
+        "avgPerYear": 2.6,
+        "distribution": {
+          "2021": 2,
+          "2022": 3,
+          "2023": 4,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NP-011",
+      "name": "ROTATIONAL MOTION",
+      "topic": "ROTATIONAL MOTION",
+      "empiricalFrequency": {
+        "total_2021_2025": 11,
+        "avgPerYear": 2.2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 2,
+          "2025": 3
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NP-012",
+      "name": "OSCILLATIONS AND WAVES",
+      "topic": "OSCILLATIONS AND WAVES",
+      "empiricalFrequency": {
+        "total_2021_2025": 11,
+        "avgPerYear": 2.2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 2,
+          "2025": 3
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NP-013",
+      "name": "GRAVITATION",
+      "topic": "GRAVITATION",
+      "empiricalFrequency": {
+        "total_2021_2025": 10,
+        "avgPerYear": 2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NP-014",
+      "name": "DUAL NATURE OF MATTER AND RADIATION",
+      "topic": "DUAL NATURE OF MATTER AND RADIATION",
+      "empiricalFrequency": {
+        "total_2021_2025": 10,
+        "avgPerYear": 2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NP-015",
+      "name": "ELECTROMAGNETIC WAVES",
+      "topic": "ELECTROMAGNETIC WAVES",
+      "empiricalFrequency": {
+        "total_2021_2025": 9,
+        "avgPerYear": 1.8,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 1,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NP-016",
+      "name": "WORK, ENERGY, AND POWER",
+      "topic": "WORK, ENERGY, AND POWER",
+      "empiricalFrequency": {
+        "total_2021_2025": 9,
+        "avgPerYear": 1.8,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 1,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NP-017",
+      "name": "LAWS OF MOTION",
+      "topic": "LAWS OF MOTION",
+      "empiricalFrequency": {
+        "total_2021_2025": 9,
+        "avgPerYear": 1.8,
+        "distribution": {
+          "2021": 2,
+          "2022": 1,
+          "2023": 2,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NP-018",
+      "name": "KINETIC THEORY OF GASES",
+      "topic": "KINETIC THEORY OF GASES",
+      "empiricalFrequency": {
+        "total_2021_2025": 5,
+        "avgPerYear": 1,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NP-019",
+      "name": "THERMODYNAMICS",
+      "topic": "THERMODYNAMICS",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NP-020",
+      "name": "Electromagnetic Induction and Magnetism",
+      "topic": "Electromagnetic Induction and Magnetism",
+      "empiricalFrequency": {
+        "total_2021_2025": 1,
+        "avgPerYear": 0.2,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 1,
+          "2025": 0
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NP-021",
+      "name": "States of Matter",
+      "topic": "States of Matter",
+      "empiricalFrequency": {
+        "total_2021_2025": 1,
+        "avgPerYear": 0.2,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 1,
+          "2025": 0
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
     }
-  ]
+  ],
+  "calibration": {
+    "status": "CALIBRATED_2021_2025",
+    "updated_at": "2026-04-29T12:12:40.379Z",
+    "final_match_rate": 0.8924444444444445,
+    "total_iterations": 4
+  }
 }

@@ -1,0 +1,40 @@
+{
+  "engine_version": "4.0",
+  "exam_type": "NEET",
+  "subject": "Physics",
+  "target_year": 2026,
+  "calibration_period": "2021-2025",
+  "total_questions_analyzed": 245,
+  "rigor_drift_multiplier": 1.6816666666666666,
+  "ids_baseline": 0.8941666666666667,
+  "intent_learning_rate": 0.25,
+  "volatility_factor": 1.15,
+  "solve_tension_multiplier": 1.12,
+  "projection_buffer": 1.05,
+  "synthesis_weight": 0.294,
+  "trap_weight": 0.3,
+  "board_signature": "DIAGRAM_FORMULA_MCQ",
+  "difficulty_distribution": {
+    "easy_pct": 20,
+    "moderate_pct": 71,
+    "hard_pct": 9,
+    "note": "2025 trend - CRITICAL SHIFT from historical 50/50/0. First year with hard questions."
+  },
+  "question_type_profile": {
+    "simple_recall_mcq": 78,
+    "diagram_based_mcq": 12,
+    "calculation_mcq": 4,
+    "definitional_mcq": 3,
+    "match_following_mcq": 2,
+    "assertion_reason_mcq": 0,
+    "statement_based_mcq": 0
+  },
+  "neet_2026_format": {
+    "questions_per_subject": 45,
+    "all_compulsory": true,
+    "duration_minutes": 200,
+    "marking_scheme": "+4 correct, -1 incorrect"
+  },
+  "last_updated": "2026-04-29T14:40:00.000Z",
+  "calibration_note": "Calibrated using iterative RWC (2021-2025) - NEET Physics. Database is source of truth."
+}

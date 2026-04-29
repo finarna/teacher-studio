@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "description": "Calibrated identity confidences for NEET Biology (Botany + Zoology) (Placeholder - Not Yet Calibrated)",
+  "subject": "Biology",
+  "exam": "NEET",
+  "years_analyzed": 0,
+  "total_questions": 50,
+  "notes": "This is a placeholder file. All confidences are set to 1.0 (neutral) until empirical calibration is performed using actual NEET Biology exam data. Biology section includes both Botany (25Q) and Zoology (25Q).",
+  "generated_at": "2026-04-29T11:45:00.000Z",
+  "identityConfidences": {
+    "ID-NB-001": 1.0,
+    "ID-NB-002": 1.0,
+    "ID-NB-003": 1.0,
+    "ID-NB-004": 1.0,
+    "ID-NB-005": 1.0,
+    "ID-NB-006": 1.0
+  },
+  "empiricalDistribution": {
+    "ID-NB-001": null,
+    "ID-NB-002": null,
+    "ID-NB-003": null,
+    "ID-NB-004": null,
+    "ID-NB-005": null,
+    "ID-NB-006": null
+  },
+  "statistics": {
+    "calibration_status": "NOT_CALIBRATED",
+    "botany_questions": 25,
+    "zoology_questions": 25,
+    "recommendation": "Run calibration analysis on NEET 2021-2025 Biology papers to generate empirical confidence weights for question type distribution"
+  }
+}

@@ -1,52 +1,550 @@
 {
-  "version": "16.0",
+  "version": "2.0",
   "subject": "Chemistry",
   "exam": "NEET",
+  "generated_at": "2026-04-29T11:18:55.846Z",
+  "years_analyzed": "2021-2025",
+  "total_questions": 245,
   "identities": [
     {
       "id": "ID-NC-001",
-      "name": "Hybridization & Shape Prediction",
-      "logic": "VSEPR theory applied to Xenon fluorides and interhalogen compounds. Trap: Lone pair placement in Bent vs See-saw.",
-      "high_yield": true,
-      "confidence": 0.99
+      "name": "Aldehydes, Ketones and Carboxylic Acids",
+      "topic": "Aldehydes, Ketones and Carboxylic Acids",
+      "empiricalFrequency": {
+        "total_2021_2025": 15,
+        "avgPerYear": 3,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 2,
+          "2024": 4,
+          "2025": 3
+        }
+      },
+      "confidence": 2,
+      "high_yield": true
     },
     {
       "id": "ID-NC-002",
-      "name": "Nernst Equation - pH dependence",
-      "logic": "Calculating E_cell when H+ concentration is varied. Linking Electrochemistry with Ionic Equilibrium.",
-      "high_yield": true,
-      "confidence": 0.96
+      "name": "Haloalkanes and Haloarenes",
+      "topic": "Haloalkanes and Haloarenes",
+      "empiricalFrequency": {
+        "total_2021_2025": 14,
+        "avgPerYear": 2.8,
+        "distribution": {
+          "2021": 2,
+          "2022": 3,
+          "2023": 2,
+          "2024": 4,
+          "2025": 3
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
     },
     {
       "id": "ID-NC-003",
-      "name": "Named Organic Reactions - Yield Priority",
-      "logic": "Identifying primary products for Reimer-Tiemann, Kolbe's, and Williamson Synthesis. Focus on phenolic derivatives.",
-      "high_yield": true,
-      "confidence": 0.98
+      "name": "Chemical Kinetics",
+      "topic": "Chemical Kinetics",
+      "empiricalFrequency": {
+        "total_2021_2025": 12,
+        "avgPerYear": 2.4,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 3,
+          "2025": 3
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
     },
     {
       "id": "ID-NC-004",
-      "name": "Hard-Soft Acid Base (HSAB) basics",
-      "logic": "Predicting stability of complexes. Focus on F- vs I- ligand substitutions.",
-      "high_yield": true,
-      "confidence": 0.92
+      "name": "Coordination Compounds",
+      "topic": "Coordination Compounds",
+      "empiricalFrequency": {
+        "total_2021_2025": 12,
+        "avgPerYear": 2.4,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 3,
+          "2025": 3
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
     },
     {
       "id": "ID-NC-005",
-      "name": "Biomolecules - Linkage Types",
-      "logic": "Glycosidic vs Peptide vs Phosphodiester. Identifying the specific atoms involved in the bond (e.g., C1-C4).",
-      "high_yield": true,
-      "confidence": 0.97
-    }
-  ],
-  "traps": [
-    {
-      "name": "Enthalpy of Atomization",
-      "description": "Confusing standard enthalpy of formation with enthalpy of atomization for transition elements."
+      "name": "Chemical Bonding and Molecular Structure",
+      "topic": "Chemical Bonding and Molecular Structure",
+      "empiricalFrequency": {
+        "total_2021_2025": 10,
+        "avgPerYear": 2,
+        "distribution": {
+          "2021": 1,
+          "2022": 3,
+          "2023": 2,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
     },
     {
-      "name": "Oxidation State vs Covalency",
-      "description": "Asking for 'Covalency' of Al in [Al(H2O)6]3+ vs its oxidation state."
+      "id": "ID-NC-006",
+      "name": "Solutions",
+      "topic": "Solutions",
+      "empiricalFrequency": {
+        "total_2021_2025": 10,
+        "avgPerYear": 2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 1,
+          "2024": 2,
+          "2025": 3
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NC-007",
+      "name": "Amines",
+      "topic": "Amines",
+      "empiricalFrequency": {
+        "total_2021_2025": 10,
+        "avgPerYear": 2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 1,
+          "2024": 3,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NC-008",
+      "name": "Alcohols, Phenols and Ethers",
+      "topic": "Alcohols, Phenols and Ethers",
+      "empiricalFrequency": {
+        "total_2021_2025": 9,
+        "avgPerYear": 1.8,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 0,
+          "2024": 2,
+          "2025": 1
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-009",
+      "name": "The d-and f-Block Elements",
+      "topic": "The d-and f-Block Elements",
+      "empiricalFrequency": {
+        "total_2021_2025": 9,
+        "avgPerYear": 1.8,
+        "distribution": {
+          "2021": 2,
+          "2022": 3,
+          "2023": 1,
+          "2024": 2,
+          "2025": 1
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-010",
+      "name": "Electrochemistry",
+      "topic": "Electrochemistry",
+      "empiricalFrequency": {
+        "total_2021_2025": 9,
+        "avgPerYear": 1.8,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 2,
+          "2025": 1
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-011",
+      "name": "Some Basic Concepts of Chemistry",
+      "topic": "Some Basic Concepts of Chemistry",
+      "empiricalFrequency": {
+        "total_2021_2025": 7,
+        "avgPerYear": 1.4,
+        "distribution": {
+          "2021": 0,
+          "2022": 1,
+          "2023": 2,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-012",
+      "name": "The Solid State",
+      "topic": "The Solid State",
+      "empiricalFrequency": {
+        "total_2021_2025": 6,
+        "avgPerYear": 1.2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 2,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-013",
+      "name": "Thermodynamics",
+      "topic": "Thermodynamics",
+      "empiricalFrequency": {
+        "total_2021_2025": 6,
+        "avgPerYear": 1.2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 0,
+          "2024": 1,
+          "2025": 1
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-014",
+      "name": "Biomolecules",
+      "topic": "Biomolecules",
+      "empiricalFrequency": {
+        "total_2021_2025": 6,
+        "avgPerYear": 1.2,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-015",
+      "name": "Classification of Elements and Periodicity in Properties",
+      "topic": "Classification of Elements and Periodicity in Properties",
+      "empiricalFrequency": {
+        "total_2021_2025": 6,
+        "avgPerYear": 1.2,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 2,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-016",
+      "name": "General Principles and Processes of Isolation of Elements",
+      "topic": "General Principles and Processes of Isolation of Elements",
+      "empiricalFrequency": {
+        "total_2021_2025": 5,
+        "avgPerYear": 1,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 1,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-017",
+      "name": "Redox Reactions",
+      "topic": "Redox Reactions",
+      "empiricalFrequency": {
+        "total_2021_2025": 5,
+        "avgPerYear": 1,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-018",
+      "name": "The p-Block Elements",
+      "topic": "The p-Block Elements",
+      "empiricalFrequency": {
+        "total_2021_2025": 5,
+        "avgPerYear": 1,
+        "distribution": {
+          "2021": 0,
+          "2022": 1,
+          "2023": 0,
+          "2024": 2,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-019",
+      "name": "Chemical Equilibrium",
+      "topic": "Chemical Equilibrium",
+      "empiricalFrequency": {
+        "total_2021_2025": 5,
+        "avgPerYear": 1,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 3,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-020",
+      "name": "Organic Chemistry - Some Basic Principles and Techniques",
+      "topic": "Organic Chemistry - Some Basic Principles and Techniques",
+      "empiricalFrequency": {
+        "total_2021_2025": 4,
+        "avgPerYear": 0.8,
+        "distribution": {
+          "2021": 1,
+          "2022": 0,
+          "2023": 1,
+          "2024": 0,
+          "2025": 2
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-021",
+      "name": "Surface Chemistry",
+      "topic": "Surface Chemistry",
+      "empiricalFrequency": {
+        "total_2021_2025": 4,
+        "avgPerYear": 0.8,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 2,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-022",
+      "name": "Chemistry in Everyday Life",
+      "topic": "Chemistry in Everyday Life",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-023",
+      "name": "Polymers",
+      "topic": "Polymers",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-024",
+      "name": "States of Matter: Gaseous State",
+      "topic": "States of Matter: Gaseous State",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 2,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-025",
+      "name": "Environmental Chemistry",
+      "topic": "Environmental Chemistry",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 1,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-026",
+      "name": "Structure of Atom",
+      "topic": "Structure of Atom",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 2,
+          "2024": 1,
+          "2025": 0
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-027",
+      "name": "Chemical Thermodynamics",
+      "topic": "Chemical Thermodynamics",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 1,
+          "2024": 2,
+          "2025": 0
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-028",
+      "name": "Atoms",
+      "topic": "Atoms",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 1,
+          "2025": 2
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-029",
+      "name": "The p-Block Elements (Group 18)",
+      "topic": "The p-Block Elements (Group 18)",
+      "empiricalFrequency": {
+        "total_2021_2025": 2,
+        "avgPerYear": 0.4,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NC-030",
+      "name": "s-Block Elements (Group 2)",
+      "topic": "s-Block Elements (Group 2)",
+      "empiricalFrequency": {
+        "total_2021_2025": 2,
+        "avgPerYear": 0.4,
+        "distribution": {
+          "2021": 2,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
     }
   ]
 }

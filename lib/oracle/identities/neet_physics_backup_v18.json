@@ -1,0 +1,276 @@
+{
+  "version": "19.0",
+  "subject": "Physics",
+  "exam": "NEET",
+  "identities": [
+    {
+      "id": "ID-NP-001",
+      "name": "Dimensional Analysis - Constant Derivation",
+      "topic": "Physics and Measurement",
+      "logic": "Deriving dimensions of physical constants (Stefan's constant, Planck's constant, etc.) and checking dimensional homogeneity of equations.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-002",
+      "name": "Current Electricity - Circuit Analysis",
+      "topic": "Current Electricity",
+      "logic": "Kirchhoff's laws in complex circuits, Wheatstone bridge balance conditions, and potentiometer applications.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-003",
+      "name": "Capacitance - Series/Parallel Combinations",
+      "topic": "Electrostatics",
+      "logic": "Energy stored in capacitors, dielectric effects, and redistribution of charge when capacitors are connected.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-004",
+      "name": "Semiconductor - PN Junction Diodes",
+      "topic": "Electronic Devices",
+      "logic": "Forward/reverse bias, depletion region, logic gates (NAND/NOR as universal gates), and transistor configurations.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-005",
+      "name": "Ray Optics - Lens/Mirror Formula Applications",
+      "topic": "Optics",
+      "logic": "Sign conventions in lens/mirror formula, lens immersed in medium (refractive index effects), and lens maker's formula.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-006",
+      "name": "Magnetism - Force on Moving Charges",
+      "topic": "Magnetic Effects of Current and Magnetism",
+      "logic": "Lorentz force, cyclotron motion, magnetic force on current-carrying conductor, and torque on current loop.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-007",
+      "name": "AC Circuits - Impedance Calculations",
+      "topic": "Electromagnetic Induction and Alternating Currents",
+      "logic": "LCR circuits, resonance conditions, power factor, and phasor diagrams for AC circuits.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-008",
+      "name": "Rotational Motion - Moment of Inertia",
+      "topic": "Rotational Motion",
+      "logic": "Parallel/perpendicular axis theorems, torque-angular acceleration relationship, and rolling motion.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-009",
+      "name": "Photoelectric Effect - Einstein's Equation",
+      "topic": "Dual Nature of Matter and Radiation",
+      "logic": "Work function, threshold frequency, stopping potential, and kinetic energy of photoelectrons.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-010",
+      "name": "Electromagnetic Waves - Properties",
+      "topic": "Electromagnetic Waves",
+      "logic": "Speed of EM waves in different media, wavelength-frequency relationships, and EM spectrum characteristics.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-011",
+      "name": "Electrostatics - Gauss's Law Applications",
+      "topic": "Electrostatics",
+      "logic": "Electric field due to infinite sheet, charged sphere (conducting/non-conducting), and cylindrical charge distributions.",
+      "high_yield": true,
+      "confidence": 0.6399999999999997
+    },
+    {
+      "id": "ID-NP-012",
+      "name": "Wave Optics - Interference Patterns",
+      "topic": "Optics",
+      "logic": "Young's double slit, fringe width, path difference, and coherent sources.",
+      "high_yield": true,
+      "confidence": 0.7899999999999999
+    },
+    {
+      "id": "ID-NP-013",
+      "name": "Thermodynamics - First Law Applications",
+      "topic": "Thermodynamics",
+      "logic": "PV diagrams, work done in cyclic/non-cyclic processes, and isothermal vs adiabatic processes.",
+      "high_yield": true,
+      "confidence": 0.7199999999999994
+    },
+    {
+      "id": "ID-NP-014",
+      "name": "Modern Physics - Atomic Models",
+      "topic": "Atoms and Nuclei",
+      "logic": "Bohr's model, energy levels, spectral lines (Balmer/Lyman series), and de Broglie wavelength.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-015",
+      "name": "Gravitation - Orbital Mechanics",
+      "topic": "Gravitation",
+      "logic": "Kepler's laws, escape velocity, gravitational potential energy, and satellite motion.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-016",
+      "name": "SHM - Energy Conservation",
+      "topic": "Oscillations and Waves",
+      "logic": "Total energy in SHM, kinetic-potential energy exchange, and time period calculations.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-017",
+      "name": "Electromagnetic Induction - Faraday's Law",
+      "topic": "Electromagnetic Induction and Alternating Currents",
+      "logic": "Induced EMF, Lenz's law direction, motional EMF, and self/mutual inductance.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-018",
+      "name": "Kinetic Theory - Gas Laws",
+      "topic": "Kinetic Theory of Gases",
+      "logic": "Ideal gas equation, kinetic energy-temperature relationship, and RMS velocity.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-019",
+      "name": "Mechanics - Work-Energy Theorem",
+      "topic": "WORK, ENERGY, AND POWER",
+      "logic": "Work done by variable forces, conservation of mechanical energy, and power calculations.",
+      "high_yield": true,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-020",
+      "name": "Mechanics - Collision Analysis",
+      "topic": "WORK, ENERGY, AND POWER",
+      "logic": "Elastic vs inelastic collisions, coefficient of restitution, and momentum conservation.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-021",
+      "name": "Nuclear Physics - Radioactive Decay",
+      "topic": "Atoms and Nuclei",
+      "logic": "Decay law, half-life, alpha/beta/gamma decay, and binding energy per nucleon.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-022",
+      "name": "Communication Systems - Modulation",
+      "topic": "REMOVED_FROM_NEET_2026",
+      "logic": "AM/FM modulation, bandwidth, and modulation index. ⚠️ NOT IN NEET 2026 SYLLABUS - Communication Systems was removed.",
+      "high_yield": false,
+      "confidence": 0.01
+    },
+    {
+      "id": "ID-NP-023",
+      "name": "Fluid Mechanics - Bernoulli's Theorem",
+      "topic": "Properties of Solids and Liquids",
+      "logic": "Equation of continuity, Bernoulli's equation applications, and Torricelli's theorem.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-024",
+      "name": "Thermal Properties - Heat Transfer",
+      "topic": "Properties of Solids and Liquids",
+      "logic": "Conduction, convection, radiation, and thermal conductivity in series/parallel.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-025",
+      "name": "Waves - Sound Properties",
+      "topic": "Oscillations and Waves",
+      "logic": "Doppler effect, beats, resonance in pipes, and velocity of sound in different media.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-026",
+      "name": "Magnetic Materials - Hysteresis",
+      "topic": "Magnetic Effects of Current and Magnetism",
+      "logic": "Diamagnetic, paramagnetic, ferromagnetic materials, and magnetic susceptibility.",
+      "high_yield": false,
+      "confidence": 0.72
+    },
+    {
+      "id": "ID-NP-027",
+      "name": "Kinematics - Projectile Motion",
+      "topic": "Kinematics",
+      "logic": "Range, maximum height, time of flight, and trajectory equation for projectile motion.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-028",
+      "name": "Circular Motion - Centripetal Force",
+      "topic": "Laws of Motion",
+      "logic": "Banking of roads, conical pendulum, and centrifugal force in rotating frames.",
+      "high_yield": false,
+      "confidence": 0.99
+    },
+    {
+      "id": "ID-NP-029",
+      "name": "Wave Optics - Polarization",
+      "topic": "Optics",
+      "logic": "Malus law, Brewster's angle, and polarization by reflection/refraction.",
+      "high_yield": false,
+      "confidence": 0.73
+    },
+    {
+      "id": "ID-NP-030",
+      "name": "Resolution - Rayleigh Criterion",
+      "topic": "Optics",
+      "logic": "Resolving power of microscope/telescope, limit of resolution, and wavelength dependency.",
+      "high_yield": false,
+      "confidence": 0.7999999999999999
+    }
+  ],
+  "traps": [
+    {
+      "name": "Sign Convention Errors",
+      "description": "Mixing up sign conventions in optics (lens/mirror formulas) or forgetting negative signs in potential energy."
+    },
+    {
+      "name": "Unit Confusion",
+      "description": "Not converting units consistently (e.g., cm to m, eV to Joules) leading to wrong numerical answers."
+    },
+    {
+      "name": "Vector vs Scalar Confusion",
+      "description": "Treating vector quantities as scalars (e.g., current vs current density, force vs pressure)."
+    },
+    {
+      "name": "Formula Misapplication",
+      "description": "Using formulas outside their valid range (e.g., applying ideal gas law to real gases at high pressure)."
+    },
+    {
+      "name": "Conservation Law Violations",
+      "description": "Forgetting to check if conditions for conservation (momentum, energy) are met before applying them."
+    }
+  ],
+  "calibration": {
+    "status": "PENDING_CALIBRATION",
+    "expanded_at": "2026-04-29T03:43:27.760Z",
+    "previous_count": 30,
+    "current_count": 30,
+    "expansion_ratio": "1.00"
+  }
+}

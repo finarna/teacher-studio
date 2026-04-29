@@ -570,6 +570,20 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
+
+      // Get correct question count for official papers
+      let officialQuestionCount = 60; // default fallback
+      if (officialSetId) {
+        const allPapers = getPredictedPapers();
+        const setName = officialSetId === 'SET-A' ? 'A' : 'B';
+        const paper = allPapers.find(p =>
+          p.examContext === examContext &&
+          p.subject === subject &&
+          p.setName === setName
+        );
+        officialQuestionCount = paper?.questions.length || 60;
+      }
+
       const url = getApiUrl('/api/learning-journey/create-custom-test');
       const response = await fetch(url, {
         method: 'POST',
@@ -581,7 +595,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
           subject,
           examContext,
           topicIds: officialSetId ? topics.map(t => t.topicId) : selectedTopicIds,
-          questionCount: officialSetId ? 60 : questionCount,
+          questionCount: officialSetId ? officialQuestionCount : questionCount,
           difficultyMix,
           durationMinutes,
           strategyMode,
@@ -790,32 +804,49 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                         ))
                       ) : (
                         // Fallback UI if API is still loading or empty
-                        ['SET-A', 'SET-B'].map((setId, idx) => (
-                          <button
-                            key={setId}
-                            onClick={() => handleCreateTest(setId)}
-                            className={cn(
-                              "flex items-center gap-4 p-4 bg-white border-2 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all group text-left",
-                              idx === 0 ? "border-indigo-300 hover:border-indigo-500 hover:shadow-indigo-200/50" : "border-purple-300 hover:border-purple-500 hover:shadow-purple-200/50"
-                            )}
-                          >
-                            <div className={cn(
-                              "w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-sm",
-                              idx === 0 ? "bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white" : "bg-purple-100 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"
-                            )}>
-                              <ShieldCheck size={22} />
-                            </div>
-                            <div className="flex-1">
-                              <div className="text-[13px] font-black text-slate-900 leading-tight">{subject} {setId === 'SET-A' ? 'Set-A' : 'Set-B'} Prediction</div>
-                              <div className="text-[9px] font-bold text-slate-500 mt-1">Institutional Forensic Calibration</div>
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <div className={cn(
-                                "px-2.5 py-1 rounded-lg text-[9px] font-black border",
-                                idx === 0 ? "bg-indigo-100 text-indigo-700 border-indigo-200" : "bg-purple-100 text-purple-700 border-purple-200"
-                              )}>
-                                60 Qs
-                              </div>
+                        (() => {
+                          const allPapers = getPredictedPapers();
+                          console.log('[MockTestBuilder] examContext:', examContext, 'subject:', subject);
+                          console.log('[MockTestBuilder] All papers:', allPapers.map(p => ({ id: p.id, context: p.examContext, subject: p.subject, count: p.questions.length })));
+
+                          const currentExamPapers = allPapers.filter(p =>
+                            p.examContext === examContext &&
+                            p.subject === subject
+                          );
+                          console.log('[MockTestBuilder] Filtered papers:', currentExamPapers.map(p => ({ id: p.id, setName: p.setName, count: p.questions.length })));
+
+                          return ['SET-A', 'SET-B'].map((setId, idx) => {
+                            const setName = setId === 'SET-A' ? 'A' : 'B';
+                            const paper = currentExamPapers.find(p => p.setName === setName);
+                            const questionCount = paper?.questions.length || 60;
+                            console.log(`[MockTestBuilder] ${setId}: paper found=${!!paper}, questionCount=${questionCount}`);
+
+                            return (
+                              <button
+                                key={setId}
+                                onClick={() => handleCreateTest(setId)}
+                                className={cn(
+                                  "flex items-center gap-4 p-4 bg-white border-2 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all group text-left",
+                                  idx === 0 ? "border-indigo-300 hover:border-indigo-500 hover:shadow-indigo-200/50" : "border-purple-300 hover:border-purple-500 hover:shadow-purple-200/50"
+                                )}
+                              >
+                                <div className={cn(
+                                  "w-11 h-11 rounded-xl flex items-center justify-center transition-all shadow-sm",
+                                  idx === 0 ? "bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white" : "bg-purple-100 text-purple-600 group-hover:bg-purple-600 group-hover:text-white"
+                                )}>
+                                  <ShieldCheck size={22} />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="text-[13px] font-black text-slate-900 leading-tight">{subject} {setId === 'SET-A' ? 'Set-A' : 'Set-B'} Prediction</div>
+                                  <div className="text-[9px] font-bold text-slate-500 mt-1">Institutional Forensic Calibration</div>
+                                </div>
+                                <div className="flex flex-col items-end gap-2">
+                                  <div className={cn(
+                                    "px-2.5 py-1 rounded-lg text-[9px] font-black border",
+                                    idx === 0 ? "bg-indigo-100 text-indigo-700 border-indigo-200" : "bg-purple-100 text-purple-700 border-purple-200"
+                                  )}>
+                                    {questionCount} Qs
+                                  </div>
                               {userRole !== 'student' && (
                                 <button
                                   onClick={(e) => {
@@ -829,8 +860,10 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                 </button>
                               )}
                             </div>
-                          </button>
-                        ))
+                              </button>
+                            );
+                          });
+                        })()
                       )}
                     </div>
                   </section>

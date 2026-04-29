@@ -1,0 +1,550 @@
+{
+  "version": "2.0",
+  "subject": "Botany",
+  "exam": "NEET",
+  "generated_at": "2026-04-29T11:19:41.293Z",
+  "years_analyzed": "2021-2025",
+  "total_questions": 245,
+  "identities": [
+    {
+      "id": "ID-NB-001",
+      "name": "Molecular Basis of Inheritance",
+      "topic": "Molecular Basis of Inheritance",
+      "empiricalFrequency": {
+        "total_2021_2025": 19,
+        "avgPerYear": 3.8,
+        "distribution": {
+          "2021": 4,
+          "2022": 4,
+          "2023": 4,
+          "2024": 4,
+          "2025": 3
+        }
+      },
+      "confidence": 2,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-002",
+      "name": "Biotechnology: Principles and Processes",
+      "topic": "Biotechnology: Principles and Processes",
+      "empiricalFrequency": {
+        "total_2021_2025": 16,
+        "avgPerYear": 3.2,
+        "distribution": {
+          "2021": 5,
+          "2022": 5,
+          "2023": 1,
+          "2024": 2,
+          "2025": 3
+        }
+      },
+      "confidence": 2,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-003",
+      "name": "Photosynthesis in Higher Plants",
+      "topic": "Photosynthesis in Higher Plants",
+      "empiricalFrequency": {
+        "total_2021_2025": 15,
+        "avgPerYear": 3,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 7,
+          "2024": 3,
+          "2025": 1
+        }
+      },
+      "confidence": 2,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-004",
+      "name": "Sexual Reproduction in Flowering Plants",
+      "topic": "Sexual Reproduction in Flowering Plants",
+      "empiricalFrequency": {
+        "total_2021_2025": 14,
+        "avgPerYear": 2.8,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 2,
+          "2024": 3,
+          "2025": 3
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-005",
+      "name": "Plant Kingdom",
+      "topic": "Plant Kingdom",
+      "empiricalFrequency": {
+        "total_2021_2025": 14,
+        "avgPerYear": 2.8,
+        "distribution": {
+          "2021": 3,
+          "2022": 4,
+          "2023": 4,
+          "2024": 0,
+          "2025": 3
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-006",
+      "name": "Plant Growth and Development",
+      "topic": "Plant Growth and Development",
+      "empiricalFrequency": {
+        "total_2021_2025": 13,
+        "avgPerYear": 2.6,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 3,
+          "2024": 3,
+          "2025": 1
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-007",
+      "name": "Morphology of Flowering Plants",
+      "topic": "Morphology of Flowering Plants",
+      "empiricalFrequency": {
+        "total_2021_2025": 12,
+        "avgPerYear": 2.4,
+        "distribution": {
+          "2021": 1,
+          "2022": 2,
+          "2023": 4,
+          "2024": 4,
+          "2025": 1
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-008",
+      "name": "Anatomy of Flowering Plants",
+      "topic": "Anatomy of Flowering Plants",
+      "empiricalFrequency": {
+        "total_2021_2025": 11,
+        "avgPerYear": 2.2,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 3,
+          "2024": 2,
+          "2025": 0
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-009",
+      "name": "Organisms and Populations",
+      "topic": "Organisms and Populations",
+      "empiricalFrequency": {
+        "total_2021_2025": 11,
+        "avgPerYear": 2.2,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 2,
+          "2024": 1,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-010",
+      "name": "Ecosystem",
+      "topic": "Ecosystem",
+      "empiricalFrequency": {
+        "total_2021_2025": 11,
+        "avgPerYear": 2.2,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 2,
+          "2024": 1,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-011",
+      "name": "Principles of Inheritance and Variation",
+      "topic": "Principles of Inheritance and Variation",
+      "empiricalFrequency": {
+        "total_2021_2025": 11,
+        "avgPerYear": 2.2,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 3,
+          "2024": 4,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-012",
+      "name": "Biomolecules",
+      "topic": "Biomolecules",
+      "empiricalFrequency": {
+        "total_2021_2025": 11,
+        "avgPerYear": 2.2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 1,
+          "2024": 4,
+          "2025": 2
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-013",
+      "name": "Cell Cycle and Cell Division",
+      "topic": "Cell Cycle and Cell Division",
+      "empiricalFrequency": {
+        "total_2021_2025": 10,
+        "avgPerYear": 2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 3,
+          "2024": 2,
+          "2025": 1
+        }
+      },
+      "confidence": 1.5,
+      "high_yield": true
+    },
+    {
+      "id": "ID-NB-014",
+      "name": "Cell: The Unit of Life",
+      "topic": "Cell: The Unit of Life",
+      "empiricalFrequency": {
+        "total_2021_2025": 8,
+        "avgPerYear": 1.6,
+        "distribution": {
+          "2021": 3,
+          "2022": 2,
+          "2023": 1,
+          "2024": 1,
+          "2025": 1
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-015",
+      "name": "Biodiversity and Conservation",
+      "topic": "Biodiversity and Conservation",
+      "empiricalFrequency": {
+        "total_2021_2025": 8,
+        "avgPerYear": 1.6,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 2,
+          "2024": 5,
+          "2025": 1
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-016",
+      "name": "Biotechnology and its Applications",
+      "topic": "Biotechnology and its Applications",
+      "empiricalFrequency": {
+        "total_2021_2025": 7,
+        "avgPerYear": 1.4,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 0,
+          "2024": 1,
+          "2025": 2
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-017",
+      "name": "Strategies for Enhancement in Food Production",
+      "topic": "Strategies for Enhancement in Food Production",
+      "empiricalFrequency": {
+        "total_2021_2025": 6,
+        "avgPerYear": 1.2,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 0,
+          "2024": 2,
+          "2025": 0
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-018",
+      "name": "Respiration in Plants",
+      "topic": "Respiration in Plants",
+      "empiricalFrequency": {
+        "total_2021_2025": 6,
+        "avgPerYear": 1.2,
+        "distribution": {
+          "2021": 1,
+          "2022": 0,
+          "2023": 3,
+          "2024": 2,
+          "2025": 0
+        }
+      },
+      "confidence": 1,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-019",
+      "name": "Biological Classification",
+      "topic": "Biological Classification",
+      "empiricalFrequency": {
+        "total_2021_2025": 4,
+        "avgPerYear": 0.8,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 2,
+          "2025": 0
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-020",
+      "name": "Chemical Coordination and Integration",
+      "topic": "Chemical Coordination and Integration",
+      "empiricalFrequency": {
+        "total_2021_2025": 4,
+        "avgPerYear": 0.8,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 4
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-021",
+      "name": "Evolution",
+      "topic": "Evolution",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 1
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-022",
+      "name": "Human Reproduction",
+      "topic": "Human Reproduction",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 3
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-023",
+      "name": "Human Health and Disease",
+      "topic": "Human Health and Disease",
+      "empiricalFrequency": {
+        "total_2021_2025": 3,
+        "avgPerYear": 0.6,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 3
+        }
+      },
+      "confidence": 0.7,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-024",
+      "name": "Reproduction in Organisms",
+      "topic": "Reproduction in Organisms",
+      "empiricalFrequency": {
+        "total_2021_2025": 2,
+        "avgPerYear": 0.4,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-025",
+      "name": "Transport in Plants",
+      "topic": "Transport in Plants",
+      "empiricalFrequency": {
+        "total_2021_2025": 2,
+        "avgPerYear": 0.4,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-026",
+      "name": "Environmental Issues",
+      "topic": "Environmental Issues",
+      "empiricalFrequency": {
+        "total_2021_2025": 2,
+        "avgPerYear": 0.4,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 2,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-027",
+      "name": "Microbes in Human Welfare",
+      "topic": "Microbes in Human Welfare",
+      "empiricalFrequency": {
+        "total_2021_2025": 2,
+        "avgPerYear": 0.4,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 1,
+          "2025": 1
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-028",
+      "name": "Animal Kingdom",
+      "topic": "Animal Kingdom",
+      "empiricalFrequency": {
+        "total_2021_2025": 2,
+        "avgPerYear": 0.4,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 2
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-029",
+      "name": "Plant Kingdom - Bryophytes",
+      "topic": "Plant Kingdom - Bryophytes",
+      "empiricalFrequency": {
+        "total_2021_2025": 1,
+        "avgPerYear": 0.2,
+        "distribution": {
+          "2021": 1,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
+    },
+    {
+      "id": "ID-NB-030",
+      "name": "Alternating Current",
+      "topic": "Alternating Current",
+      "empiricalFrequency": {
+        "total_2021_2025": 1,
+        "avgPerYear": 0.2,
+        "distribution": {
+          "2021": 1,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.2,
+      "high_yield": false
+    }
+  ]
+}

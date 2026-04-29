@@ -1,0 +1,35 @@
+{
+  "subject": "Physics",
+  "exam": "NEET",
+  "years_analyzed": "2021-2025",
+  "total_questions": 245,
+  "answer_format": "MCQ (4 options, single correct)",
+  "question_type_distribution": {
+    "match_following_mcq": 2,
+    "assertion_reason_mcq": 0,
+    "statement_based_mcq": 0,
+    "true_false_combo_mcq": 0,
+    "sequence_mcq": 0,
+    "exception_based_mcq": 0,
+    "diagram_based_mcq": 12,
+    "reason_based_mcq": 0,
+    "definitional_mcq": 3,
+    "calculation_mcq": 4,
+    "simple_recall_mcq": 78
+  },
+  "question_type_counts": {
+    "match_following_mcq": 6,
+    "assertion_reason_mcq": 1,
+    "statement_based_mcq": 0,
+    "true_false_combo_mcq": 0,
+    "sequence_mcq": 0,
+    "exception_based_mcq": 0,
+    "diagram_based_mcq": 29,
+    "reason_based_mcq": 0,
+    "definitional_mcq": 8,
+    "calculation_mcq": 9,
+    "simple_recall_mcq": 192
+  },
+  "analysis_date": "2026-04-29T11:51:16.307Z",
+  "note": "NEET uses uniform MCQ answer format but has diverse question types within that format"
+}

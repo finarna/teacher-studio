@@ -15,10 +15,19 @@ declare global {
  * A high-end dashboard to manage and download PLUS2AI official prediction papers.
  */
 export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    const [papers] = useState<PaperSet[]>(getPredictedPapers());
+    const allPapers = getPredictedPapers();
+    const [selectedExamContext, setSelectedExamContext] = useState<string>('KCET'); // Default to KCET
+    const [papers, setPapers] = useState<PaperSet[]>(
+        allPapers.filter(p => p.examContext === selectedExamContext || p.id.startsWith('mock-'))
+    );
     const [selectedPaper, setSelectedPaper] = useState<PaperSet | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const paperRef = useRef<HTMLDivElement>(null);
+
+    // Update papers when exam context changes
+    React.useEffect(() => {
+        setPapers(allPapers.filter(p => p.examContext === selectedExamContext || p.id.startsWith('mock-')));
+    }, [selectedExamContext]);
 
     const handleProDownload = async (paper: PaperSet) => {
         const html2pdf = window.html2pdf;
@@ -232,13 +241,37 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                                 <span style={{ color: '#ff7f50' }}>AI</span>
                             </h1>
                             <p className="text-slate-600 text-lg max-w-2xl">
-                                Download high-fidelity KCET 2026 AI mocktest papers with official layouts and Plus2AI simulated watermarking.
+                                Download high-fidelity {selectedExamContext} 2026 AI mocktest papers with official layouts and Plus2AI simulated watermarking.
                             </p>
                         </div>
                         <div className="bg-white px-4 py-2 rounded-full border border-slate-200 text-sm font-semibold text-slate-500 flex items-center gap-2 shadow-sm">
                             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                             REI v17 Calibrated
                         </div>
+                    </div>
+
+                    {/* Exam Context Selector */}
+                    <div className="flex gap-3 mt-8">
+                        <button
+                            onClick={() => setSelectedExamContext('KCET')}
+                            className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                                selectedExamContext === 'KCET'
+                                    ? 'bg-slate-900 text-white shadow-lg'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                        >
+                            KCET 2026
+                        </button>
+                        <button
+                            onClick={() => setSelectedExamContext('NEET')}
+                            className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                                selectedExamContext === 'NEET'
+                                    ? 'bg-slate-900 text-white shadow-lg'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                        >
+                            NEET 2026
+                        </button>
                     </div>
                 </header>
 
@@ -264,11 +297,18 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                                 </span>
                             </div>
 
-                            <h3 className="text-xl font-bold text-slate-900 mb-2 truncate">
-                                {paper.subject} Prediction
-                            </h3>
+                            <div className="flex justify-between items-start mb-2">
+                                <h3 className="text-xl font-bold text-slate-900 truncate">
+                                    {paper.subject} Prediction
+                                </h3>
+                                {paper.examContext && (
+                                    <span className="bg-slate-900 text-white px-2 py-1 rounded text-xs font-bold">
+                                        {paper.examContext}
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-slate-500 text-sm mb-6">
-                                60 Questions • 80 Minutes • Official Layout
+                                {paper.questions.length} Questions • {Math.ceil(paper.questions.length * 1.33)} Minutes • Official Layout
                             </p>
 
                             <div className="flex flex-col gap-2">
