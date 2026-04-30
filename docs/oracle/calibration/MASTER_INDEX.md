@@ -1,18 +1,30 @@
-# KCET Math Calibration System - Master Index
+# REI v17 Calibration System - Master Index
 
-**Version:** 1.0
-**Last Updated:** 2026-04-14
-**Status:** ✅ **PRODUCTION READY** - All parameters deployed
+**Version:** 2.0
+**Last Updated:** 2026-04-30
+**Status:** ✅ **PRODUCTION READY** - KCET & NEET Calibrations Complete
 
 ---
 
 ## 🎯 Quick Summary
 
-**Achievement:** Identity Hit Rate of **79.2%** (0.8% from 80% target!)
+### KCET Calibration (Math, Physics, Chemistry, Biology)
+**Achievement:** Identity Hit Rate of **79.2%** (Math) - 0.8% from 80% target!
 
-The KCET Math calibration system successfully learned from 2021-2025 actual papers and optimized REI parameters to predict which math concepts will appear in future exams with near-80% accuracy.
+The KCET calibration system successfully learned from 2021-2025 actual papers and optimized REI parameters to predict which concepts will appear in future exams.
 
 **All calibrated parameters are now ACTIVE in production and ready for 2026 flagship paper generation.**
+
+### NEET Calibration (Physics - COMPLETE, Chemistry/Biology - READY)
+**Achievement:** **90 questions** generated for NEET Physics 2026 (45 SET A + 45 SET B)
+
+**Status:**
+- ✅ NEET Physics 2026: Phases 1-8 COMPLETE, Production Deployed
+- ✅ Reusable workflow template created for all subjects
+- ✅ All scripts documented and organized (33 scripts)
+- ✅ Chemistry, Botany, Zoology: Identity banks ready, scripts prepared
+
+**Latest:** Phase 8 UI deployment complete with exam context routing (NEET vs KCET)
 
 ---
 
@@ -391,3 +403,122 @@ The files in `configs/` are copies for reference, backup, and deployment purpose
 **Last Updated:** 2026-04-14
 **Maintained By:** REI Calibration Team
 **Status:** ✅ Complete & Organized
+
+---
+
+## 🆕 NEET 2026 Calibration System
+
+### Overview
+
+**Status:** ✅ NEET Physics COMPLETE - Production Deployed
+**Framework:** REI v17 with Strategic Differentiation (SET A: CALCULATION, SET B: UNDERSTANDING)
+
+### Key Documents
+
+#### Workflow Templates (Reusable for All Subjects)
+- **[NEET_SUBJECT_WORKFLOW_TEMPLATE.md](./NEET_SUBJECT_WORKFLOW_TEMPLATE.md)** ⭐ **Complete guide** for any NEET subject (26 KB)
+  - Step-by-step workflow for Phases 1-8
+  - Copy-paste commands for each phase
+  - Estimated time: 5-6 hours per subject
+  - **Use this to replicate Physics workflow for Chemistry, Botany, Zoology**
+
+#### Scripts Documentation
+- **[scripts/oracle/NEET_SCRIPTS_README.md](../../scripts/oracle/NEET_SCRIPTS_README.md)** ⭐ **All 33 scripts** documented (19 KB)
+  - Categorized by phase (Calibration, Generation, Verification, Export)
+  - Subject-specific vs shared scripts
+  - Quick start commands
+  - Troubleshooting guide
+
+#### NEET Physics 2026 Reports
+- **[NEET_PHYSICS_2026_FLAGSHIP_MASTER_REPORT.md](./NEET_PHYSICS_2026_FLAGSHIP_MASTER_REPORT.md)** ⭐ **Complete overview** (27 KB)
+  - All phases 1-8 summary
+  - Production deployment status
+  - Replication guide for other subjects
+- **[NEET_PHYSICS_PHASE8_UI_DEPLOYMENT_REPORT.md](./NEET_PHYSICS_PHASE8_UI_DEPLOYMENT_REPORT.md)** - UI deployment details (20 KB)
+  - JSON export process
+  - Frontend/Backend integration
+  - Bug fix documentation (dynamic question count)
+- **[NEET_PHYSICS_CALIBRATION_REPORT_2021_2025.md](./NEET_PHYSICS_CALIBRATION_REPORT_2021_2025.md)** - Calibration parameters (5.7 KB)
+- **[NEET_CALIBRATION_COMPLETE_2021_2025.md](./NEET_CALIBRATION_COMPLETE_2021_2025.md)** - Overall calibration status (13 KB)
+
+#### Phase Completion Reports
+- **[NEET_PHASE7_COMPLETION_REPORT.md](./NEET_PHASE7_COMPLETION_REPORT.md)** - Quality verification (10 KB)
+- **[NEET_PHASE7.5_COMPLETION_REPORT.md](./NEET_PHASE7.5_COMPLETION_REPORT.md)** - Independent verification (21 KB)
+- **[NEET_PHYSICS_FLAGSHIP_FINAL_ACCEPTANCE.md](./NEET_PHYSICS_FLAGSHIP_FINAL_ACCEPTANCE.md)** - Final approval (17 KB)
+
+### Production Files (NEET Physics 2026)
+
+#### JSON Exports
+- `flagship_neet_physics_2026_set_a.json` (131 KB, 45 questions)
+- `flagship_neet_physics_2026_set_b.json` (125 KB, 45 questions)
+
+#### Identity Banks
+- `lib/oracle/identities/neet_physics.json` (180 identities)
+- `lib/oracle/identities/neet_chemistry.json` (180 identities)
+- `lib/oracle/identities/neet_botany.json` (180 identities)
+- `lib/oracle/identities/neet_zoology.json` (180 identities)
+
+### Calibration Parameters (NEET Physics)
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| **IDS** | 0.894 | Item Difficulty Score (historical baseline) |
+| **Rigor Velocity** | 1.68 | Trend multiplier for 2026 predictions |
+| **Difficulty Distribution** | 20/71/9 | Easy/Moderate/Hard percentages |
+| **Board Signature** | DIAGRAM_FORMULA_MCQ | Dominant question format |
+| **Question Count** | 45 per set | NEET-specific (vs 60 for KCET) |
+| **Marks per Question** | 4 | NEET standard |
+
+### Strategic Differentiation
+
+**SET A: Formula for CALCULATION**
+- Emphasis: Computational mastery, numerical problem-solving
+- Style: Specific values, multi-step calculations, substitution
+- Formula Score: 3.67/7 (52% formula emphasis)
+
+**SET B: Formula for UNDERSTANDING**
+- Emphasis: Conceptual relationships, proportionality
+- Style: Cause-effect reasoning, graphical interpretation
+- Conceptual Score: 2.07/7 (improved +63% conceptual indicators)
+
+### Quality Metrics (NEET Physics 2026)
+
+| Metric | Target | Actual | Status |
+|--------|--------|--------|--------|
+| Question Count | 90 (45+45) | 90 (45+45) | ✅ PASS |
+| Content Completeness | ≥95% | 100% | ✅ EXCELLENT |
+| Difficulty Variance | ≤10% | 7% | ✅ PASS |
+| Independent Verification | ≥85/100 | 89/100 | ✅ APPROVED |
+| UI Integration | Complete | Complete | ✅ PASS |
+
+### Next Subjects Ready for Deployment
+
+| Subject | Identity Bank | Scripts | Estimated Time |
+|---------|--------------|---------|----------------|
+| **Chemistry** | ✅ 180 identities | ✅ Ready | 5-6 hours |
+| **Botany** | ✅ 180 identities | ✅ Ready | 5-6 hours |
+| **Zoology** | ✅ 180 identities | ✅ Ready | 5-6 hours |
+
+**Quick Start (Chemistry Example):**
+```bash
+npx tsx scripts/oracle/analyze_neet_chemistry_question_types_2021_2025.ts
+npx tsx scripts/oracle/build_neet_chemistry_identities_2021_2025.ts
+npx tsx scripts/oracle/neet_chemistry_iterative_calibration_2021_2025.ts
+# ... follow NEET_SUBJECT_WORKFLOW_TEMPLATE.md
+```
+
+### Scripts Inventory (NEET)
+
+**Total Scripts:** 33
+
+**Categories:**
+- Historical verification: 4 scripts (shared)
+- Calibration (Phase 1-4): 12 scripts (3 per subject)
+- Generation (Phase 6): 1 script (shared)
+- Verification (Phase 7-7.5): 3 scripts (shared)
+- Export (Phase 8): 4 scripts (1 per subject)
+- Utilities: 9+ scripts (analysis, validation)
+
+**All documented in:** `scripts/oracle/NEET_SCRIPTS_README.md`
+
+---

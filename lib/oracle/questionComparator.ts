@@ -3,7 +3,7 @@
  * Part of REI v16 Iterative Calibration System
  *
  * Compares generated vs actual questions across 5 dimensions:
- * 1. Identity Match (40%)
+ * 1. Identity Match (40%) - NOW WITH CLUSTER-BASED MATCHING
  * 2. Topic Match (20%)
  * 3. Difficulty Match (15%)
  * 4. Concept Similarity (15%)
@@ -11,6 +11,10 @@
  */
 
 import { getGeminiClient, withGeminiRetry } from '../../utils/geminiClient';
+import {
+  compareAtClusterLevel,
+  getClusterCreditScore
+} from './clusterMatcher';
 
 export interface AnalyzedQuestion {
   id?: string;
@@ -72,15 +76,30 @@ export function compareQuestions(
 
   const discrepancies: string[] = [];
 
-  // 1. Identity Match (40% weight) - Exact match on identity ID
+  // 1. Identity Match (40% weight) - CLUSTER-BASED MATCHING
   if (generated.identityId && actual.identityId) {
     const genId = normalizeIdentityId(generated.identityId);
     const actId = normalizeIdentityId(actual.identityId);
 
-    if (genId === actId) {
-      scores.identityMatch = 1.0;
+    // Use cluster-based matching for graduated credit scoring
+    const clusterResult = compareAtClusterLevel(
+      genId,
+      actId,
+      generated.topic,
+      actual.topic
+    );
+
+    // Convert cluster confidence to identity match score
+    scores.identityMatch = clusterResult.confidence;
+
+    // Add discrepancy details based on match type
+    if (clusterResult.matchType === 'exact') {
+      // Perfect match - no discrepancy
+    } else if (clusterResult.matchType === 'cluster') {
+      discrepancies.push(`Cluster match (${(clusterResult.confidence * 100).toFixed(0)}%): Generated=${generated.identityId}, Actual=${actual.identityId}`);
+    } else if (clusterResult.matchType === 'topic') {
+      discrepancies.push(`Topic match (${(clusterResult.confidence * 100).toFixed(0)}%): Generated=${generated.identityId}, Actual=${actual.identityId}`);
     } else {
-      scores.identityMatch = 0.0;
       discrepancies.push(`Identity mismatch: Generated=${generated.identityId}, Actual=${actual.identityId}`);
     }
   } else {
@@ -542,8 +561,64 @@ function normalizeIdentityId(id: string): string {
   return id.toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
 
+/**
+ * Normalize database topics to official NTA NEET 2026 unit names
+ * Maps NCERT chapter names to official NTA syllabus units
+ */
+function normalizeToNTAUnit(dbTopic: string): string {
+  const mapping: Record<string, string> = {
+    'units and measurements': 'PHYSICS AND MEASUREMENT',
+    'physics and measurement': 'PHYSICS AND MEASUREMENT',
+    'motion in a straight line': 'KINEMATICS',
+    'motion in a plane': 'KINEMATICS',
+    'kinematics': 'KINEMATICS',
+    'laws of motion': 'LAWS OF MOTION',
+    'work, energy and power': 'WORK, ENERGY, AND POWER',
+    'work energy and power': 'WORK, ENERGY, AND POWER',
+    'system of particles and rotational motion': 'ROTATIONAL MOTION',
+    'rotational motion': 'ROTATIONAL MOTION',
+    'gravitation': 'GRAVITATION',
+    'mechanical properties of solids': 'PROPERTIES OF SOLIDS AND LIQUIDS',
+    'mechanical properties of fluids': 'PROPERTIES OF SOLIDS AND LIQUIDS',
+    'thermal properties of matter': 'PROPERTIES OF SOLIDS AND LIQUIDS',
+    'properties of solids and liquids': 'PROPERTIES OF SOLIDS AND LIQUIDS',
+    'thermodynamics': 'THERMODYNAMICS',
+    'kinetic theory of gases': 'KINETIC THEORY OF GASES',
+    'kinetic theory': 'KINETIC THEORY OF GASES',
+    'oscillations': 'OSCILLATIONS AND WAVES',
+    'waves': 'OSCILLATIONS AND WAVES',
+    'oscillations and waves': 'OSCILLATIONS AND WAVES',
+    'electric charges and fields': 'ELECTROSTATICS',
+    'electrostatic potential and capacitance': 'ELECTROSTATICS',
+    'electrostatics': 'ELECTROSTATICS',
+    'current electricity': 'CURRENT ELECTRICITY',
+    'moving charges and magnetism': 'MAGNETIC EFFECTS OF CURRENT AND MAGNETISM',
+    'magnetism and matter': 'MAGNETIC EFFECTS OF CURRENT AND MAGNETISM',
+    'magnetic effects of current and magnetism': 'MAGNETIC EFFECTS OF CURRENT AND MAGNETISM',
+    'electromagnetic induction': 'ELECTROMAGNETIC INDUCTION AND ALTERNATING CURRENTS',
+    'alternating current': 'ELECTROMAGNETIC INDUCTION AND ALTERNATING CURRENTS',
+    'electromagnetic induction and alternating currents': 'ELECTROMAGNETIC INDUCTION AND ALTERNATING CURRENTS',
+    'electromagnetic waves': 'ELECTROMAGNETIC WAVES',
+    'ray optics and optical instruments': 'OPTICS',
+    'wave optics': 'OPTICS',
+    'optics': 'OPTICS',
+    'dual nature of radiation and matter': 'DUAL NATURE OF MATTER AND RADIATION',
+    'dual nature of matter and radiation': 'DUAL NATURE OF MATTER AND RADIATION',
+    'atoms': 'ATOMS AND NUCLEI',
+    'nuclei': 'ATOMS AND NUCLEI',
+    'atoms and nuclei': 'ATOMS AND NUCLEI',
+    'semiconductor electronics: materials, devices and simple circuits': 'ELECTRONIC DEVICES',
+    'electronic devices': 'ELECTRONIC DEVICES',
+    'communication systems': 'REMOVED_FROM_NEET_2026'
+  };
+
+  return mapping[dbTopic.toLowerCase().trim()] || dbTopic.toUpperCase();
+}
+
 function normalizeTopic(topic: string): string {
-  return topic.toLowerCase().trim()
+  // First normalize to NTA unit, then apply text normalization
+  const ntaUnit = normalizeToNTAUnit(topic);
+  return ntaUnit.toLowerCase().trim()
     .replace(/\s+/g, ' ')
     .replace(/[&\-]/g, ' ');
 }

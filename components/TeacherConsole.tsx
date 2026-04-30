@@ -23,6 +23,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { LessonContract, UserState } from '../types';
+import RichMarkdownRenderer from './RichMarkdownRenderer';
 
 interface TeacherConsoleProps {
   userState: UserState;
@@ -447,7 +448,9 @@ const TeacherConsole: React.FC<TeacherConsoleProps> = ({ userState, currentLesso
                       {worksheet.worked_example?.steps.map((step: string, i: number) => (
                         <div key={i} className="flex gap-4 items-start">
                           <span className="w-8 h-8 bg-white rounded-lg shadow-md border border-slate-200 flex items-center justify-center shrink-0 font-bold text-primary-600 text-[9px]">{i + 1}</span>
-                          <p className="text-slate-700 font-bold italic text-base leading-relaxed pt-0.5">{step}</p>
+                          <div className="text-slate-700 font-bold italic text-base leading-relaxed pt-0.5">
+                      <RichMarkdownRenderer text={step} className="inline" />
+                    </div>
                         </div>
                       ))}
                     </div>
@@ -461,10 +464,10 @@ const TeacherConsole: React.FC<TeacherConsoleProps> = ({ userState, currentLesso
                   <div className="space-y-8">
                     {worksheet.practice_questions?.map((q: string, i: number) => (
                       <div key={i} className="group">
-                        <p className="text-lg font-bold text-slate-900 mb-8 leading-relaxed group-hover:text-primary-600 transition-colors">
+                        <div className="text-lg font-bold text-slate-900 mb-8 leading-relaxed group-hover:text-primary-600 transition-colors">
                           <span className="text-slate-400 font-black mr-3 font-outfit">{String(i + 1).padStart(2, '0')}</span>
-                          {q}
-                        </p>
+                          <RichMarkdownRenderer text={q} className="inline" />
+                        </div>
                         <div className="h-20 w-full border-b border-slate-100 border-dashed relative">
                           <div className="absolute top-0 right-0 text-[8px] font-bold text-slate-200 uppercase tracking-widest uppercase">Show architectural logic here</div>
                         </div>

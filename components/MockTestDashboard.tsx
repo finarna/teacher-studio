@@ -57,7 +57,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
 
             const opt = {
                 margin: 0,
-                filename: `Plus2AI_${paper.subject}_KCET_2026_SET_${paper.setName}.pdf`,
+                filename: `Plus2AI_${paper.subject}_${paper.examContext || 'KCET'}_2026_SET_${paper.setName}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: {
                     scale: 2.5,
@@ -75,8 +75,10 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                         if (clonedPaper) {
                             clonedPaper.style.boxShadow = 'none';
                             clonedPaper.style.width = '210mm';
-                            clonedPaper.style.margin = '0';
+                            clonedPaper.style.margin = '0 auto'; // Center alignment
                             clonedPaper.style.padding = '0';
+                            clonedPaper.style.position = 'relative';
+                            clonedPaper.style.left = '0';
                         }
 
                         // CRITICAL FIX: Ensure ALL SVG elements are visible and properly sized
@@ -136,7 +138,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                         pdf.setPage(i);
                         pdf.setFontSize(8.5);
                         pdf.setTextColor(40);
-                        const footerLine = `Reproduction strictly prohibited. © 2026 Plus2AI. | KCET 2026 Simulation - SET ${paper.setName} | Page ${i} of ${totalPages}`;
+                        const footerLine = `Reproduction strictly prohibited. © 2026 Plus2AI. | ${paper.examContext || 'KCET'} 2026 Simulation - SET ${paper.setName} | Page ${i} of ${totalPages}`;
                         pdf.text(footerLine, pageWidth / 2, pageHeight - 8, { align: 'center' });
                         pdf.setDrawColor(180);
                         pdf.setLineWidth(0.3);
@@ -202,6 +204,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                         subject={selectedPaper.subject}
                         questions={selectedPaper.questions}
                         setName={selectedPaper.setName}
+                        examContext={selectedPaper.examContext || 'KCET'}
                         serialNumber={`P2-2026-${selectedPaper.subject.slice(0, 4).toUpperCase()}`}
                     />
                     

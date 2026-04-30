@@ -8,7 +8,7 @@
 
 ## Exam Pattern
 
-- **Total Questions**: 180 (45 per subject — Section A: 35 compulsory + Section B: 15, attempt any 10)
+- **Total Questions**: 180 (45 per subject — All compulsory)
 - **Duration**: 200 minutes (3 hours 20 minutes)
 - **Subjects**: Physics, Chemistry, Biology (Botany + Zoology)
 - **Marking**: +4 for correct, -1 for incorrect

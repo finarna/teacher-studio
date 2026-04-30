@@ -44,21 +44,71 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
     const mathPlaceholders: { [key: string]: string } = {};
     let placeholderCounter = 0;
 
-    // CRITICAL FIX: Normalize line breaks. Handle literal \n or \\n strings
-    // as well as real newlines.
+    // PRE-PROCESS: Clean up double-backslashes globally before detection starts
     let processedText = text
       .replace(/\\n/g, '\n')
-      .replace(/\\\\n/g, '\n');
+      .replace(/\\\\n/g, '\n')
+      .replace(/\\\\([a-zA-Z]+)/g, '\\$1') // Force all double-backslashes to single
+      .replace(/\\u00b5/g, '\u00B5') // Micro sign
+      .replace(/\\u00b0/g, '\u00B0') // Degree sign
+      .replace(/\\u212B/g, '\u212B') // Angstrom sign
+      .replace(/\\u00d7/g, '\u00D7') // Multiplication sign (×)
+      .replace(/\\u22c5/g, '\u22C5') // Dot operator (⋅)
+      .replace(/²21A/g, '\\sqrt ')  // RECOVERY: Mangled square root symbol
+      .replace(/\\{1,4}u221a/gi, '\\sqrt ') // Square root (√)
+      .replace(/\\{1,4}u221e/gi, '\\infty ') // Infinity (∞)
+      .replace(/\\{1,4}u03c0/gi, '\\pi ')   // Pi (π)
+      .replace(/\\{1,4}u([0-9a-fA-F]{4})/g, (match, hex) => String.fromCharCode(parseInt(hex, 16))) // Recursive Unicode unescape
+      .replace(/\\u207b/g, '\u207B') // Superscript minus (⁻)
+      .replace(/\\u207a/g, '\u207A') // Superscript plus (⁺)
+      .replace(/\\u207([0-9])/g, (m, d) => String.fromCharCode(0x2070 + parseInt(d))) // Superscripts 0-9
+      .replace(/\\u208([0-9])/g, (m, d) => String.fromCharCode(0x2080 + parseInt(d))) // Subscripts 0-9
+      .replace(/\\u2264/g, '\\leq ')  // Less than or equal (≤)
+      .replace(/\\u2265/g, '\\geq ')  // Greater than or equal (≥)
+      .replace(/\\u2260/g, '\\neq ')  // Not equal (≠)
+      // Separate Greek letters from units (handles \muF and \\muF)
+      .replace(/\\{1,2}(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|Delta|Gamma|Theta|Lambda|Xi|Pi|Sigma|Phi|Psi|Omega)([a-zA-Z])/g, '\\$1 $2');
 
-    // Extract all math expressions and replace with placeholders
-    // NUCLEAR DELIMITER PASS: Robust against spaces and malformed strings
-    let protectedText = processedText.replace(/(\$\$[\s\S]*?\$\$|\$[^\$]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
+    // TRIPLE-PASS DETECTION: Support single/multiple backslashes and symbols.
+    // Fixed: Added a-zA-Z to allow variables (m, V, f1, f2) to be part of the math block.
+    // CRITICAL: Space is excluded from this greedy set to prevent accidental sentence wrapping.
+    const mathRegex = /(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]|\$[^\$]+?\$|\\\([\s\S]*?\\\)|(?:\\+(?:[a-zA-Z]+|[,!|:;])(?:\{[^\}]*\}|\[[^\]]*\]|\s)*|[\u00B5-\u23FF\d\/\+\-\=\*x\(\)\[\]\{\}\.\,\^ \_\!\:\;\\a-zA-Z])+)/g;
+
+    let protectedText = processedText.replace(mathRegex, (match) => {
+      // Only auto-wrap if it's already wrapped or contains a "hard" math signal
+      const isAlreadyWrapped = match.startsWith('$') || match.startsWith('\\\[') || match.startsWith('\\\(');
+      const containsHardSignal = match.includes('\\') || /[\u00B5\u03BC\u03A9\u212B\u00B0\u00D7\u22C5\u2070-\u207F\u2080-\u208F]/.test(match) || /[\^\_\:\;]/.test(match) || match.includes('√');
+
+      if (!isAlreadyWrapped && !containsHardSignal) return match;
+
       const placeholder = `__MATH_PLACEHOLDER_${placeholderCounter}__`;
-      // Normalize internal math whitespace (fixes $ \nu$)
+
+      // Normalize match: If it doesn't have delimiters, add them
       let cleanedMatch = match;
-      if (match.startsWith('$') && !match.startsWith('$$')) {
-          cleanedMatch = `$${match.slice(1, -1).trim()}$`;
+      if (!isAlreadyWrapped) {
+        // 1. Normalize backslashes (AI often sends \\times or \\mu)
+        cleanedMatch = match.replace(/\\\\([a-zA-Z]+)/g, '\\$1');
+
+        // 2. Convert raw symbols to LaTeX commands with variable grouping
+        cleanedMatch = cleanedMatch
+          .replace(/√\(([^\)]+)\)/g, '\\sqrt{$1}') // Group bracketed: √(f1f2) -> \sqrt{f1f2}
+          .replace(/√([0-9a-zA-Z_]+)/g, '\\sqrt{$1}') // Group plain: √f1f2 -> \sqrt{f1f2}
+          .replace(/√/g, '\\sqrt ') // Fallback for single symbol
+          .replace(/×/g, '\\times ')
+          .replace(/⋅/g, '\\cdot ')
+          .replace(/Ω/g, '\\Omega ')
+          .replace(/Å/g, '\\AA ');
+
+        // 3. Sanitize units at the end (e.g., "10 T" or "10^-4 T")
+        // This prevents KaTeX from failing on plain text units
+        cleanedMatch = cleanedMatch.replace(/([0-9a-zA-Z\}\)])\s*([A-Z])(?:\s|$)/g, '$1 \\text{ $2}');
+
+        cleanedMatch = `$${cleanedMatch.trim()}$`;
+      } else if (match.startsWith('$') && !match.startsWith('$$')) {
+        // Normalize already wrapped content
+        cleanedMatch = `$${match.slice(1, -1).replace(/\\\\([a-zA-Z]+)/g, '\\$1').trim()}$`;
       }
+
       mathPlaceholders[placeholder] = cleanedMatch;
       placeholderCounter++;
       return placeholder;
@@ -286,6 +336,11 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
             macros: {
               '\\ce': '\\ce', // Chemistry notation support
               '\\pu': '\\pu', // Physical units support
+              '\\AA': '\\text{\u212B}', // Angstrom
+              '\\degree': '^{\\circ}',
+              '\\Omega': '\\text{\u03A9}', // Ohm
+              '\\mu': '\\text{\u03BC}', // Micro
+              '\\nu': '\\text{\u03BD}', // Nu
             },
           });
           return (
@@ -312,6 +367,11 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
             macros: {
               '\\ce': '\\ce', // Chemistry notation support
               '\\pu': '\\pu', // Physical units support
+              '\\AA': '\\text{\u212B}', // Angstrom
+              '\\degree': '^{\\circ}',
+              '\\Omega': '\\text{\u03A9}', // Ohm
+              '\\mu': '\\text{\u03BC}', // Micro
+              '\\nu': '\\text{\u03BD}', // Nu
             },
           });
           return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;

@@ -499,8 +499,34 @@ async function predictNextYearPattern(
   console.log('🔮 [REI v3.0] Step 1: Initiating AI Prediction Phase...');
   console.log('📂 [REI v3.0] RAW PYQ CONTEXT:', JSON.stringify(historicalSummary, null, 2));
 
-  const prompt = `You are an expert exam pattern analyst for ${examConfig.examContext} ${examConfig.subject}.
+  // Enhanced NEET-specific prompt
+  const neetExamples = examConfig.examContext === 'NEET' ? `
 
+NEET PHYSICS PATTERN INSIGHTS (2021-2025):
+- CORE TOPICS: Electrostatics (3-4Q), Current Electricity (2-3Q), Optics (3-4Q), Modern Physics (3-4Q)
+- HIGH-YIELD PATTERNS: Capacitor combinations, AC circuits (LCR/impedance), Photoelectric effect, Nuclear decay
+- SHIFTING TRENDS: Wave optics increasing (interference/diffraction), Communication Systems REMOVED from 2026
+- NUMERICAL FOCUS: 70% numerical, 30% conceptual - prefer questions with formula applications
+- DIFFICULTY MIX: Easy 30% (direct formula), Moderate 50% (2-step), Hard 20% (3-step/tricky)
+
+NEET-SPECIFIC QUESTION CHARACTERISTICS:
+✓ Single correct answer (MCQ with 4 options)
+✓ NCERT-based with 90% strict alignment
+✓ Numerical problems dominate over theory
+✓ Formula-heavy: Use standard equations (lens formula, Ohm's law, photoelectric equation)
+✓ Avoid: Multi-concept hybrid questions, overly theoretical questions
+✓ Prefer: Clear numerical scenarios, specific value calculations
+
+EXAMPLE HIGH-YIELD IDENTITIES:
+- "Capacitance energy redistribution when capacitors connected"
+- "LCR resonance and power factor calculations"
+- "Lens formula with medium change (refractive index)"
+- "Photoelectric stopping potential and work function"
+- "Radioactive decay law and half-life calculations"
+` : '';
+
+  const prompt = `You are an expert exam pattern analyst for ${examConfig.examContext} ${examConfig.subject}.
+${neetExamples}
 HISTORICAL DATA (${historicalData.length} years):
 ${JSON.stringify(historicalSummary, null, 2)}
 
@@ -511,10 +537,11 @@ TARGET: Predict the distribution for a ${examConfig.totalQuestions}-question ${e
 CRITICAL: The sum of ALL expectedQuestionCount values MUST equal exactly ${examConfig.totalQuestions}.
 
 Analyze the historical pattern and perform a "Recursive Concept Evolution" analysis:
-1. Identifying Concepts that are CORE (appear every year).
+1. Identifying Concepts that are CORE (appear every year with 80%+ consistency).
 2. Identifying Concepts that are SHIFTING (e.g., were easy 3 years ago, now asked with 2-step complexity).
 3. Predict the "Next Logical Twist": If last year asked for A, and the year before for B, what is the unseen 'C' for ${nextYear}?
-4. Expected difficulty distribution and statistical probability for each topic.
+4. Expected difficulty distribution (Easy/Moderate/Hard) and statistical probability for each topic.
+5. Consider SYLLABUS CHANGES: Remove deprecated topics, boost newly added topics.
 
 CRITICAL: Use the EXACT topicId from the AVAILABLE TOPICS list above.
 
@@ -576,7 +603,7 @@ Return ONLY a JSON object with the following structure:
     // Without normalization, the allocation engine scales up by 1.85× causing some topics
     // to jump to 7–8 questions instead of proportionally distributing the full 50.
     const rawTotal = rawTopics.reduce((sum, t) => sum + (t.expectedQuestionCount || 0), 0);
-    const topicsArr = rawTotal > 0
+    let topicsArr = rawTotal > 0
       ? rawTopics.map(t => ({
           ...t,
           expectedQuestionCount: (t.expectedQuestionCount / rawTotal) * examConfig.totalQuestions
@@ -585,10 +612,74 @@ Return ONLY a JSON object with the following structure:
 
     console.log(`📐 Prediction normalized: raw total=${rawTotal} → scaled to ${examConfig.totalQuestions} (factor ${rawTotal > 0 ? (examConfig.totalQuestions / rawTotal).toFixed(2) : 'N/A'})`);
 
+    // Apply empirically-calibrated identity confidences (NEET all subjects)
+    if (examConfig.examContext === 'NEET') {
+      try {
+        // Load subject-specific calibration file
+        const subjectLower = examConfig.subject.toLowerCase();
+        const calibratedPath = path.join(
+          process.cwd(),
+          `docs/oracle/calibration/identity_confidences_neet_${subjectLower}.json`
+        );
+
+        if (fs.existsSync(calibratedPath)) {
+          const calibratedData = JSON.parse(fs.readFileSync(calibratedPath, 'utf8'));
+          const confidences = calibratedData.identityConfidences || {};
+
+          console.log(`🎯 [CALIBRATION] Applying empirically-calibrated identity confidences for NEET ${examConfig.subject}...`);
+
+          // Apply confidence weights to adjust distribution
+          topicsArr = topicsArr.map(t => {
+            const confidence = confidences[t.topicId] || 1.0;
+            const adjustedCount = t.expectedQuestionCount * confidence;
+
+            if (confidence !== 1.0) {
+              console.log(`   ${t.topicId}: ${t.expectedQuestionCount.toFixed(1)}Q × ${confidence} = ${adjustedCount.toFixed(1)}Q`);
+            }
+
+            return {
+              ...t,
+              expectedQuestionCount: adjustedCount
+            };
+          });
+
+          // Re-normalize after applying confidences
+          const adjustedTotal = topicsArr.reduce((sum, t) => sum + t.expectedQuestionCount, 0);
+          if (adjustedTotal > 0) {
+            topicsArr = topicsArr.map(t => ({
+              ...t,
+              expectedQuestionCount: (t.expectedQuestionCount / adjustedTotal) * examConfig.totalQuestions
+            }));
+          }
+
+          console.log(`✅ [CALIBRATION] Applied confidence weights, re-normalized to ${examConfig.totalQuestions}Q`);
+        } else {
+          console.log('⚠️  [CALIBRATION] No calibrated confidences found, using AI predictions as-is');
+        }
+      } catch (error) {
+        console.warn('⚠️  [CALIBRATION] Failed to apply confidences:', (error as any).message);
+      }
+    }
+
+    // Normalize difficulty distribution (handle both "25%" strings and numbers)
+    let normalizedDifficulty = { easy: 30, moderate: 50, hard: 20 }; // default
+    if (prediction.difficultyDistribution) {
+      const parseDiff = (val: any): number => {
+        if (typeof val === 'number') return val;
+        if (typeof val === 'string') return parseInt(val.replace('%', ''));
+        return 0;
+      };
+      normalizedDifficulty = {
+        easy: parseDiff(prediction.difficultyDistribution.easy),
+        moderate: parseDiff(prediction.difficultyDistribution.moderate),
+        hard: parseDiff(prediction.difficultyDistribution.hard)
+      };
+    }
+
     return {
       year: nextYear,
       topics: topicsArr,
-      difficultyDistribution: prediction.difficultyDistribution || { easy: 30, moderate: 50, hard: 20 },
+      difficultyDistribution: normalizedDifficulty,
       overallConfidence: prediction.overallConfidence || 0.5
     };
 
@@ -668,14 +759,22 @@ function calculateTopicAllocation(
 
     console.log(`   ${predictedTopic.topicName}: score=${allocationScore.toFixed(2)} → ${questionCount} questions`);
 
-    // Determine difficulty distribution 
+    // Determine difficulty distribution
     let difficultyDist: { easy: number; moderate: number; hard: number };
 
-    // MACHINE MODE / PREDICTIVE CALIBRATION: Respect the Exam Blueprint 1:1
+    // MACHINE MODE / PREDICTIVE CALIBRATION: Use AI-predicted difficulty distribution
     if (isOracle || mode === 'predictive_mock') {
-      const blueprint = (examConfig as any).difficultyProfile || { easy: 30, moderate: 50, hard: 20 };
-      difficultyDist = { ...blueprint };
-      console.log(`      Locked to Exam Blueprint: E:${difficultyDist.easy} M:${difficultyDist.moderate} H:${difficultyDist.hard}`);
+      // Use AI prediction if available, otherwise fall back to default
+      const aiPredictedDiff = prediction.difficultyDistribution;
+      if (aiPredictedDiff && typeof aiPredictedDiff.easy === 'number') {
+        difficultyDist = { ...aiPredictedDiff };
+        console.log(`      AI-Predicted Difficulty: E:${difficultyDist.easy} M:${difficultyDist.moderate} H:${difficultyDist.hard}`);
+      } else {
+        // Fallback only if AI didn't provide prediction
+        const blueprint = (examConfig as any).difficultyProfile || { easy: 30, moderate: 50, hard: 20 };
+        difficultyDist = { ...blueprint };
+        console.log(`      Fallback Blueprint: E:${difficultyDist.easy} M:${difficultyDist.moderate} H:${difficultyDist.hard}`);
+      }
     } else {
       // ADAPTIVE CALIBRATION: Adjust based on student mastery
       if (studentMastery < 40) {
@@ -988,6 +1087,50 @@ This is the ACTUAL KCET Biology pattern. Follow this distribution STRICTLY for $
 
 CRITICAL: KCET Biology is 61% factual recall. Focus on straightforward questions testing knowledge.
 Do NOT over-complicate with multi-step reasoning. Most questions are direct fact-checking.`;
+  } else if (isOracle && examConfig.examContext === 'NEET' && examConfig.subject === 'Physics') {
+    questionTypeMandate = `
+QUESTION TYPE DISTRIBUTION (CRITICAL - Based on NEET 2021-2025 Analysis):
+This is the ACTUAL NEET Physics pattern. Follow this distribution STRICTLY for ${totalInBatch} questions:
+
+1. SIMPLE_RECALL_MCQ (80% = ${Math.round(totalInBatch * 0.80)} questions):
+   - Standard numerical/conceptual MCQs with direct formula application
+   - Example: "A capacitor of capacitance 10μF is charged to 100V. Find the energy stored."
+   - Example: "The photoelectric work function of a metal is 2.5 eV. Find threshold frequency."
+   - NCERT-based numerical problems (Ohm's law, lens formula, Kirchhoff's laws)
+   - Focus: Formula mastery, 2-step calculations, concept recall
+
+2. DIAGRAM_BASED_MCQ (10% = ${Math.round(totalInBatch * 0.10)} questions):
+   - Circuit diagrams (resistor networks, capacitor combinations, LCR circuits)
+   - Ray diagrams (lenses, mirrors, refraction)
+   - Graphs (P-V diagrams, V-I characteristics, waveforms)
+   - Example: "In the circuit shown, find the current through resistor R2."
+
+3. CALCULATION_MCQ (4% = ${Math.round(totalInBatch * 0.04)} questions):
+   - Multi-step calculations requiring 3+ steps
+   - Example: "A lens of focal length 20cm forms an image at 30cm. Find object distance and magnification."
+   - Combination of multiple formulas
+
+4. MATCH_FOLLOWING_MCQ (2% = ${Math.round(totalInBatch * 0.02)} questions):
+   - Column I matched with Column II
+   - Example: "Match the physical quantities in Column I with their SI units in Column II."
+
+5. DEFINITIONAL_MCQ (2% = ${Math.round(totalInBatch * 0.02)} questions):
+   - Definition-based questions
+   - Example: "Which of the following correctly defines electric flux?"
+
+6. ASSERTION_REASON_MCQ (2% = ${Math.round(totalInBatch * 0.02)} questions):
+   - Statement verification questions
+   - Example: "Assertion: Photoelectric current is independent of frequency. Reason: ..."
+
+CRITICAL NEET CHARACTERISTICS:
+- 70% numerical (with specific values), 30% conceptual
+- NCERT-strict alignment (90%)
+- Formula-heavy: Use standard NCERT formulas
+- Single correct answer MCQ (4 options)
+- Avoid: Multi-concept hybrid, overly theoretical questions
+- Prefer: Clear numerical scenarios, direct applications
+
+DO NOT over-generate diagram-based questions (common AI mistake). NEET is 80% simple recall!`;
   }
 
   // Determine questionType schema based on subject
@@ -996,7 +1139,7 @@ Do NOT over-complicate with multi-step reasoning. Most questions are direct fact
   if (examConfig.subject === 'Math') {
     questionTypeSchema = 'property_based|word_problem|computational|pattern_recognition|abstract';
   } else if (examConfig.subject === 'Physics') {
-    questionTypeSchema = 'conceptual|graph_analysis|experimental|numerical_problem|diagram_based';
+    questionTypeSchema = 'simple_recall_mcq|diagram_based_mcq|calculation_mcq|match_following_mcq|definitional_mcq|assertion_reason_mcq';
   } else if (examConfig.subject === 'Biology') {
     questionTypeSchema = 'factual_conceptual|diagram_based|match_column|statement_based|reasoning|application';
   }

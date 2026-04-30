@@ -35,27 +35,33 @@ export async function auditPaperHistoricalContext(
         let identityPrompt = "";
         if (identities && identities.length > 0) {
             const identityList = identities.map(i => i.id).join(', ');
+            const sampleIds = identities.slice(0, 3).map(i => i.id).join('", "');
             identityPrompt = `
 VALID IDENTITY IDS (USE THESE EXACTLY):
 ${identityList}
 
 IDENTITY DETAILS:
-${identities.map(i => `${i.id} → ${i.name} (${i.topic})`).join('\n')}
+${identities.map(i => `${i.id} → ${i.name || i.topic}`).join('\n')}
 
 🚨 CRITICAL INSTRUCTION - READ CAREFULLY:
-You MUST use ONLY the identity IDs listed above (MAT-001, MAT-002, MAT-003, etc.) as keys in the identityVector.
+You MUST use ONLY the identity IDs listed above (${sampleIds}, etc.) as keys in the identityVector.
 
 EXAMPLES OF CORRECT FORMAT:
-✅ CORRECT: { "MAT-001": 2, "MAT-016": 3, "MAT-027": 1 }
-❌ WRONG: { "MAT-MATR-NIL": 1, "MAT-DET-PROP": 2 } ← DO NOT create new IDs
-❌ WRONG: { "Sets": 2, "Matrices": 3 } ← DO NOT use topic names
-❌ WRONG: { "VEC-3D": 1, "CALC-DIFF": 2 } ← DO NOT use abbreviations
+✅ CORRECT: { "${identities[0].id}": 2, "${identities[1].id}": 3, "${identities[2].id}": 1 }
+❌ WRONG: { "PHY-MEC-001": 1, "PHY-ELE-002": 2 } ← DO NOT create new IDs
+❌ WRONG: { "Mechanics": 2, "Optics": 3 } ← DO NOT use topic names
+❌ WRONG: { "MEC-001": 1, "OPT-002": 2 } ← DO NOT use abbreviations
 
-If a question matches the "Matrices" topic, use MAT-016 or MAT-017 (whichever identity logic matches best).
+If a question matches "${identities[0].name || identities[0].topic}", use ${identities[0].id} (whichever identity logic matches best).
 If unsure, pick the closest matching ID from the list above.
 
 MANDATORY: Every key in identityVector MUST be from the list: ${identityList}`;
         }
+
+        // Create example identity vector using actual IDs
+        const exampleVector = identities && identities.length >= 3
+            ? `{ "${identities[0].id}": 2, "${identities[1].id}": 1, "${identities[2].id}": 3 }`
+            : `{ "ID-001": 2, "ID-002": 1 }`;
 
         const prompt = `You are an expert ${examContext} Exam Auditor.
 Analyze the following text of the ${year} ${subject} paper to identify the "Evolutionary Intent".
@@ -76,6 +82,7 @@ TASK:
    - 0.90-1.0 (LEVEL 4): Deep "Synthesis Traps" requiring property-level fusion and extreme speed.
 3. Evolution Note: Technical summary of year-over-year differentiation.
 4. Rigor detected (1-10) and FINAL Average IDS (as 'idsActual').
+${identityPrompt}
 
 Return ONLY valid JSON with these EXACT keys based on the PaperAuditResult interface:
 {
@@ -84,7 +91,7 @@ Return ONLY valid JSON with these EXACT keys based on the PaperAuditResult inter
   "evolutionNote": "...",
   "rigorDetected": 8,
   "idsActual": 0.82,
-  "identityVector": { "MAT-001": 2, ... }
+  "identityVector": ${exampleVector}
 }
 `;
 
@@ -118,10 +125,16 @@ Return ONLY valid JSON with these EXACT keys based on the PaperAuditResult inter
                     console.warn(`⚠️  Invalid identity key "${key}" - attempting to map...`);
 
                     // Try to find matching identity by topic/name similarity
-                    const matchedIdentity = identities.find(id =>
-                        key.toLowerCase().includes(id.topic.toLowerCase().substring(0, 4)) ||
-                        id.name.toLowerCase().includes(key.toLowerCase().substring(4, 8))
-                    );
+                    const matchedIdentity = identities.find(id => {
+                        const topicOrName = id.topic || id.name;
+                        if (!topicOrName) return false;
+
+                        const nameField = id.name || '';
+                        return (
+                            key.toLowerCase().includes(topicOrName.toLowerCase().substring(0, 4)) ||
+                            (nameField && nameField.toLowerCase().includes(key.toLowerCase().substring(4, 8)))
+                        );
+                    });
 
                     if (matchedIdentity) {
                         console.log(`   ✓ Mapped "${key}" → "${matchedIdentity.id}"`);
