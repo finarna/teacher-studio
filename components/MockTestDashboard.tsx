@@ -42,14 +42,18 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
 
     // ── [ACTIVE] Server-side Gemini + Puppeteer PDF download ─────────────────
     const handleProDownload = async (paper: PaperSet) => {
+        console.log('[PDF] handleProDownload called for:', paper.subject, paper.setName, paper.examContext);
         const paperId = getPaperId(paper);
+        console.log('[PDF] resolved paperId:', paperId);
 
         if (!paperId) {
+            console.error('[PDF] No paperId match — subject:', paper.subject, 'set:', paper.setName);
             alert(`Pro PDF not yet available for ${paper.subject} Set ${paper.setName}. Coming soon!`);
             return;
         }
 
         setIsGenerating(true);
+        console.log('[PDF] setIsGenerating=true, calling server...');
 
         try {
             const res = await fetch('http://localhost:9001/api/generate-flagship-pdf', {
@@ -58,12 +62,16 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                 body: JSON.stringify({ paperId }),
             });
 
+            console.log('[PDF] Server response status:', res.status);
+
             if (!res.ok) {
                 const err = await res.json().catch(() => ({ error: 'Unknown server error' }));
                 throw new Error(err.error || `Server error ${res.status}`);
             }
 
+            console.log('[PDF] Streaming blob...');
             const blob = await res.blob();
+            console.log('[PDF] Blob received, size:', blob.size);
             const url  = URL.createObjectURL(blob);
             const a    = document.createElement('a');
             a.href     = url;
@@ -72,9 +80,10 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            console.log('[PDF] ✅ Download triggered');
 
         } catch (err: any) {
-            console.error('Gemini PDF generation error:', err);
+            console.error('[PDF] ❌ Gemini PDF generation error:', err);
             alert(`PDF generation failed: ${err.message}\n\nMake sure the server is running on port 9001.`);
         } finally {
             setIsGenerating(false);
@@ -266,7 +275,19 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                 </div>
             )}
 
-            <div className={`max-w-5xl mx-auto dashboard-ui transition-opacity duration-300 ${selectedPaper ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            {/* ── Gemini generation spinner (independent of selectedPaper) ── */}
+            {isGenerating && !selectedPaper && (
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[200] flex items-center justify-center">
+                    <div className="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full mx-4">
+                        <div className="w-14 h-14 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-5" />
+                        <h3 className="text-xl font-bold text-slate-900">Gemini is Generating Your PDF</h3>
+                        <p className="text-slate-500 mt-2 text-sm">Formatting all 45 questions with NEET-standard layout, math rendering, watermarks, and branding...</p>
+                        <p className="text-xs text-slate-400 mt-3">This takes ~30–60 seconds. Please wait.</p>
+                    </div>
+                </div>
+            )}
+
+            <div className={`max-w-5xl mx-auto dashboard-ui transition-opacity duration-300 ${selectedPaper || isGenerating ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 <header className="mb-12">
                     <button
                         onClick={onBack}
