@@ -67,7 +67,19 @@ ${JSON.stringify(qData, null, 2)}
 
 ### Head Section
 - Include Google Fonts: Inter (400, 500, 600, 700) and Public Sans (700, 900).
-- Include KaTeX CSS/JS and Auto-render extension.
+- Include KaTeX CSS/JS and Auto-render extension via CDN.
+- **IMPORTANT**: Include the following script at the end of the <head> to ensure math renders:
+  \`<script>
+    document.addEventListener("DOMContentLoaded", function() {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ],
+        throwOnError : false
+      });
+    });
+  </script>\`
 - Custom CSS:
   - \`body\`: font-family 'Inter', sans-serif; line-height: 1.6; color: #111;
   - \`.watermark\`: position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr); opacity: 0.02; padding: 20px; gap: 40px;
