@@ -65,6 +65,7 @@ function buildGeminiPrompt(paperData, subject, set, color) {
      - \\begin{enumerate} -> <ol>
    - Keep ONLY the actual mathematical symbols, equations, and formulas inside $...$ (inline) or $$...$$ (display).
    - Ensure all chemical formulas and scientific symbols are wrapped in KaTeX math mode ($...$).
+   - **NO TRUNCATION**: You MUST generate all 45 questions provided in the JSON. DO NOT stop at question 20 or 30. The document must be complete.
 
 2. **DATA INTEGRITY**:
    - Replicate the wording of question text, option text, and diagram descriptions **EXACTLY as they appear in the JSON**. 
@@ -165,8 +166,18 @@ async function generateHtmlWithGemini(paperData, subject, set, color) {
 
   console.log(`[PDF Gen] Calling Gemini (${modelName}) with ${prompt.length} char prompt...`);
 
-  const model = genAI.getGenerativeModel({ model: modelName });
-  const result = await model.generateContent(prompt);
+  const model = genAI.getGenerativeModel({ 
+    model: modelName,
+    generationConfig: {
+      maxOutputTokens: 8192,
+      temperature: 0.1,
+    }
+  });
+
+  const result = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+  });
+
   const response = await result.response;
   let html = response.text();
 
