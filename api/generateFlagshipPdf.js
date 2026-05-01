@@ -1,16 +1,13 @@
 /**
  * generateFlagshipPdf.js
  * Route: POST /api/generate-flagship-pdf
- * Body:  { paperId: 'neet-physics-set-a' | 'neet-physics-set-b' | 'neet-chemistry-set-a' | 'neet-chemistry-set-b' }
- *
- * Pipeline:
- *   1. Read flagship JSON from disk
- *   2. Send to Gemini (@google/genai) → Gemini generates complete, production-quality NEET HTML
- *   3. Puppeteer renders HTML → PDF (server-side, no canvas limits)
- *   4. Stream PDF to client
+ * Body:  { paperId: 'neet-physics-set-a' | ... }
+ * 
+ * A professional, high-fidelity PDF generation pipeline for NEET Prediction Papers.
+ * Matches the institutional aesthetic of the NTA NEET 2026 standard.
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import puppeteer from 'puppeteer';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -19,238 +16,253 @@ import fs from 'fs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
 
-// ── Gemini client ─────────────────────────────────────────────────────────────
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// ── Gemini Configuration ──────────────────────────────────────────────────────
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // ── Paper Registry ────────────────────────────────────────────────────────────
 export const PAPER_REGISTRY = {
-  'neet-physics-set-a':   { file: 'flagship_neet_physics_2026_set_a.json',   subject: 'Physics',   set: 'A', color: '#1e40af' },
-  'neet-physics-set-b':   { file: 'flagship_neet_physics_2026_set_b.json',   subject: 'Physics',   set: 'B', color: '#1e40af' },
-  'neet-chemistry-set-a': { file: 'flagship_neet_chemistry_2026_set_a.json', subject: 'Chemistry', set: 'A', color: '#065f46' },
-  'neet-chemistry-set-b': { file: 'flagship_neet_chemistry_2026_set_b.json', subject: 'Chemistry', set: 'B', color: '#065f46' },
+  'neet-chemistry-a': 'flagship_neet_chemistry_2026_set_a.json',
+  'neet-physics-a': 'flagship_neet_physics_2026_set_a.json',
+  'neet-botany-a': 'flagship_neet_botany_2026_set_a.json',
+  'neet-zoology-a': 'flagship_neet_zoology_2026_set_a.json',
+  'neet-chemistry-b': 'flagship_neet_chemistry_2026_set_b.json',
+  'neet-physics-b': 'flagship_neet_physics_2026_set_b.json',
+  'neet-botany-b': 'flagship_neet_botany_2026_set_b.json',
+  'neet-zoology-b': 'flagship_neet_zoology_2026_set_b.json'
 };
 
-// ── Gemini prompt ─────────────────────────────────────────────────────────────
-function buildGeminiPrompt(paperData, subject, set, color) {
+// ── Prompt Engineering ────────────────────────────────────────────────────────
+function buildProfessionalPrompt(paperData, subject, set, color) {
   const questions = paperData.test_config?.questions || [];
-  const totalMarks = paperData.total_marks || questions.length * 4;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
-  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-  const subjectCode = subject.slice(0, 4).toUpperCase();
-  const serialNo = `P2-2026-${subjectCode}-${set}`;
-
-  // Serialize questions compactly for Gemini
   const qData = questions.map((q, i) => ({
-    num: i + 1,
-    topic: q.topic,
-    difficulty: q.difficulty,
-    marks: q.marks || 4,
-    text: q.text,
-    options: q.options,
-    correctOptionIndex: q.correctOptionIndex
+    n: i + 1,
+    s: q.subject_section || null,
+    t: q.text,
+    o: q.options,
+    d: q.metadata?.questionType === 'diagram_based_mcq' || q.text.includes('graph') || q.text.includes('diagram') || q.text.includes('Contextual Diagram')
   }));
 
-  return `You are an expert NEET exam paper formatter and senior front-end designer. Your goal is to generate a COMPLETE, PRODUCTION-READY HTML document that mirrors a premium, institutional NTA examination paper. 
+  const qrPortal = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQMAAABDsxw2AAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAABWklEQVRoge3Z3W3DMAwEYGmCjKBRvapH8ARmJfFHNJIWedQVRxhNWn99uoiinFK+q0O8rvFr/ylnf61y1rjT/0K2BbsstQHmNardU+qdSgbHNHcJr6GfNb0hQ2X2xpYw2X9g5SVzLbshg2WrRYt0KXK7/KWTk23OxMu33UfutrTJkNijRu66ou/yR5HtzY7Ifdbo0k3mik4XGRa7fDB+xUDl5x39AJChsV4WvV92q4nJZi2aDIVZ9HMwVvO24VYyMJZzl+jVMSHrqYdsGzZrDUil2kHmfdslg2C+TkNa9KWmzwAZGhOx9pvT18otmgyHpcT9OdJi9jSJDIjl8s03RuI6/4UMjB2Repxlmg9Rn0YpMgCWnuHrY4dRLUXfyPDYyv0xTc1KnZwMkqnU6NUYJoNl60sZ33CbpU+GxaJFi34vo7Px6cfYQobGxMvTn6asRS2fJi6yjdl39QOHOnuoZrXIDwAAAABJRU5ErkJggg==";
+  const qrOfficial = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQMAAABDsxw2AAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAABWUlEQVRoge3a0a2DMAwF0GQCRsiorMoITMB9JPY18FSkfsbVtRBqyemXwdhRS/kuVjD2/vU8A0cpFVuNFWxic7Dds9bBOEqzpVPaShVLxyzvCO+A2d/EEjP/0OMQ+w1WFvTcNxqxtOwq0cApx6rJl0ouNjkDg69dT/r22nGJTc4esfRrfJbLa4jNzdbI+wiv0mUU6jjEcjGbXnvG+Tj3+kzJs1gmNgAf5NsYC5rmlVwsFwMbqnEbHOyQ7UIVS8b4OHvs3JqwG8CnHrFZmK0+opv/71OxdAzWIC248g7Dj9SLZWEORvRia6uwybSK5WM7e6SFs0zzn8SgKpaI3QPWL+GW9JhrxPKwlUlGvH9bJL1erZRYInbbwy8l9hzqlXq2UmKJmOc9ju2+e+97v2JZGWKzl8axWGbmI8/BzV58Tr3Y3CxKtLHHnxxYrsUyMTAuxtQ3LomlYt/FHyfaPv4NgpeYAAAAAElFTkSuQmCC";
 
-## CORE DIRECTIVES (CRITICAL)
+  const promptText = [
+    "You are the Lead Document Architect for Plus2AI's Flagship Series.",
+    "Mission: Generate a 100% EXACT HTML/CSS replica of the 'Proposed' NEET 2026 Simulation Paper.",
+    `CRITICAL: Render all ${qData.length} questions for this subject. DO NOT TRUNCATE. NEVER stop mid-document.`,
+    "MANDATORY: Options in the JSON are provided as an array. Render each as a standalone block (1), (2), (3), (4).",
+    "- **ADAPTIVE OPTIONS LAYOUT**: **MANDATORY**: For each question, intelligently choose the best layout:",
+    "  1. **2-COLUMN GRID**: Use for short, concise options (e.g., single words, simple numbers, or short LaTeX expressions like $I^A i$). This matches the official NEET 'A4 density' style.",
+    "  2. **1-COLUMN STACK**: Use ONLY if an option is long (>12 words), contains multi-line LaTeX, or is a complex 'Assertion-Reason' sentence. This prevents text squeezing and ensures legibility.",
+    "",
+    "## 1. BRANDING & FONTS",
+    "- Fonts: @import 'Outfit' (400, 500, 600, 800) and 'Inter' (400, 500, 600).",
+    "- COLORS: Plus2 Green (#059669), AI Orange (#f97316), Text (#000000).",
+    "",
+    "## 2. COVER PAGE (PAGE 1) - EXACT SPECIFICATIONS",
+    "### TOP ROW (Flex-Between)",
+    "- **LEFT**: Logo 'Plus2' (Green) 'AI' (Orange) in Outfit 800 (Size: 28pt).",
+    "- **CENTER**: Serial No Box: 'P2-2026-${subject.substring(0,4).toUpperCase()}-${set}' in 10pt Bold Mono. (Bordered, compact).",
+    `- **RIGHT**: TWO QR Code images (75px each). Use <img> tags with these Data URIs:`,
+    `  1. Learning Portal: ${qrPortal}`,
+    `  2. Plus2AI Official: ${qrOfficial}`,
+    "- Labels underneath: 'Learning Portal' and 'Plus2AI Official' in 9pt bold slate-600.",
+    "",
+    "### TITLES (Centered)",
+    "- Subheader: 'NATIONAL ELIGIBILITY CUM ENTRANCE TEST (NEET) 2026' in 14pt Outfit 600, Black.",
+    "- Main Header: '${subject.toUpperCase()}' in Black + ' SIMULATION' in AI Orange. Font: Outfit 800, Size: 36pt, Letter-spacing: -0.02em.",
+    "",
+    "### META GRID (Centered Table)",
+    "- A full-width table with 4 columns. Borders: 2px solid black on all sides and between cells.",
+    `- CELLS: [Subject Code: 02 (${subject.substring(0, 4).toUpperCase()})] [Duration: 200 Minutes] [Version Code: REI-v17] [Max Marks: 720].`,
+    "- TYPOGRAPHY: 11pt Bold Inter, centered.",
+    "",
+    "### CANDIDATE SECTION",
+    "- Box with 1px black border. Contents:",
+    "- 'CANDIDATE NAME: ........................................................................................' (12pt Bold)",
+    "- 'NTA REG. NO:' followed by exactly 8 individual 28px square boxes with black borders.",
+    "",
+    "### LEGAL DISCLAIMER BOX",
+    "- 1.5px black border box. Centered Title: '**<u>LEGAL DISCLAIMER & TERMS OF USAGE</u>**' (11pt Bold).",
+    "- Text: 'IMPORTANT: This document is an AI-generated simulation created by Plus2AI for educational purposes. It is intended strictly for practice and does not claim to be an official NTA document. All questions are modeled on the NCERT curriculum and NEET patterns. Plus2AI assumes no legal liability for discrepancies in actual examination formats.' (10pt, justified, line-height: 1.4).",
+    "",
+    "### IMPORTANT INSTRUCTIONS BOX",
+    "- 1.5px black border box. Centered Title: '**<u>IMPORTANT INSTRUCTIONS TO CANDIDATES</u>**' (11pt Bold).",
+    "- Text: 1-6 list in a single compact block. 1. This paper contains 180 questions across Physics, Chemistry, Botany, and Zoology. 2. Duration is 200 minutes... 3. +4 marks/-1 mark... 4. Blue/Black pen... 5. No calculators... 6. DNA Model REI v17 pattern matching. (10pt, justified, line-height: 1.4).",
+    "- **STRICT**: This entire box MUST stay on Page 1. No splitting.",
+    "",
+    "### SPACE OPTIMIZATION",
+    "- **MANDATORY**: Compress ALL vertical spacing on Page 1. Set `margin: 0` for boxes if needed. Ensure everything fits on ONE A4 page.",
+    "",
+    "- **MANDATORY**: Generate the `<div class=\"watermark-container\">` (containing the 3x5 grid of 'Plus2AI DNA' spans) as the VERY FIRST element inside the `<body>`.",
+    "- CSS Template: `.watermark-container { position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr); overflow: hidden; opacity: 0.07; }`.",
+    "- Inner Text: 'Plus2AI DNA' rotated -45deg, Font: Outfit 800, Size: 48pt, Color: #94a3b8.",
+    "",
+    "## 4. QUESTION RENDERING (PAGE 2+)",
+    "- **PAGE BREAK**: **MANDATORY**: Insert a hard page break (`break-after: page`) immediately after the cover page content. Questions MUST start on Page 2.",
+    "- **SPACING**: **STRICT**: Ensure natural spacing between words and around mathematical expressions. NEVER merge words together (e.g., avoid 'decreasing1/r^2').",
+    "- **MATCH THE FOLLOWING**: **STRICT MANDATE**: Detect questions containing 'Column I/II' or 'Match the'. 1. **STRUCTURE**: Use a standard HTML `<table>` with `width: 100%` and `table-layout: fixed`. 2. **COLUMNS**: Exactly TWO columns. 3. **ALIGNMENT**: Align Column I (A-D) and Column II (p-s) perfectly. 4. **FORBIDDEN**: NO manual spaces.",
+    `- **DIAGRAMS**: **CRITICAL**: Produce high-precision, **full-circuit** technical vector illustrations (SVG). 
+      1. **CONNECTIVITY**: Every component (resistor, battery, etc.) MUST be connected by straight, 90-degree technical 'wires' (lines). NO floating symbols.
+      2. **SYMBOLS**: Use NCERT standard symbols: Resistor (zig-zag), Inductor (tight coils), Capacitor (parallel lines), AC Source (circle with sine wave). 
+      3. **STYLE**: Crisp black strokes (1.2pt). Font for labels: 9pt Sans-serif. **COMPACT**: Max-width 45%, Max-height 200px. Centered. indinstinguishable from a Pearson/NCERT textbook.`,
+    "- **LATEX NORMALIZATION**: **CRITICAL**: Ensure ALL mathematical expressions, units (e.g., $^\\circ C$, $\\Omega$, $\\mu F$), and physical variables are properly wrapped in standard KaTeX delimiters (\`$\`). If the source JSON has malformed LaTeX or literal symbols, you MUST fix them in the HTML to ensure perfect rendering.",
+    "- **SECTION HEADERS**: **MANDATORY**: Detect subject changes using `s`. Insert a full-width section header (e.g., '**SECTION I: PHYSICS**') before the first question of each subject. Style: 14pt Outfit 800, centered, with 2px top/bottom borders.",
+    "- **DENSITY**: **MANDATORY**: Maximize question density. Aim for 6-8 questions per page for subject mocks. Minimize white space between questions. Set `.card { margin-bottom: 6px; padding: 4px 0; }`.",
+    "- **CLEANUP**: Ensure NO empty elements or trailing margins at the end of the document. Prevent blank pages.",
+    "",
+    "### DATA (JSON)",
+    JSON.stringify(qData),
+    "",
+    "### FINAL OUTPUT",
+    "- Return ONE complete HTML5 document. Include standard KaTeX (CSS/JS/Auto-render) via CDN.",
+    "- **MANDATORY**: Use this EXACT script for math rendering (Support both $ and $$):",
+    "  \`<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css\">\`",
+    "  \`<script defer src=\"https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js\"></script>\`",
+    "  \`<script defer src=\"https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js\" onload=\"renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});\"></script>\`",
+    "- **STRICT**: Only use KaTeX for mathematical expressions.",
+    "- CSS: Enforce \`html, body { height: 100%; margin: 0; padding: 0; } body { font-family: 'Inter', sans-serif; background: white; text-align: left; -webkit-print-color-adjust: exact; } .card { page-break-inside: avoid !important; break-inside: avoid-page !important; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; background: transparent; display: block; width: 100%; } .q-num { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 12pt; margin-right: 4px; } .options-container { display: grid; gap: 8px 24px; margin-top: 10px; } .options-grid { grid-template-columns: 1fr 1fr; } .options-stack { grid-template-columns: 1fr; } .option-item { display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; } .option-label { font-weight: 800; min-width: 25px; } .content-wrapper { position: relative; z-index: 10; background: transparent; width: 100%; } .cover-page { break-after: page; padding-top: 0; } .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; } .section-header { width: 100%; text-align: center; border-top: 2px solid black; border-bottom: 2px solid black; padding: 8px 0; margin: 20px 0; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 14pt; }\`.",
+    `- MANDATORY: Ensure all ${qData.length} questions from the JSON are rendered completely. Never stop mid-document.`
+  ].join("\n");
 
-1. **FORMATTING & COMPLETENESS**:
-   - Use high-fidelity CSS and semantic HTML5.
-   - Inject KaTeX for all math/chemical formulas.
-   - **NO TRUNCATION**: You MUST generate all 45 questions provided in the JSON. DO NOT stop early. The document must be complete.
-   - The provided JSON contains raw LaTeX like \\begin{itemize}, \\item, \\begin{tabular}. 
-   - **DO NOT** output these raw environments in the HTML. CONVERT them to semantic HTML (ul, li, table).
-- Subject: ${subject} | Set: ${set} | Questions: ${questions.length} | Total Marks: ${totalMarks}
-- Serial No: ${serialNo}
-- Accent Color: ${color}
-
-## QUESTIONS JSON
-${JSON.stringify(qData, null, 2)}
-
----
-
-## HTML STRUCTURE REQUIREMENTS
-
-### Head Section
-- Include Google Fonts: Inter (400, 500, 600, 700) and Public Sans (700, 900).
-- Include KaTeX CSS/JS and Auto-render extension via CDN.
-- **IMPORTANT**: Include the following script at the end of the <head> to ensure math renders:
-  \`<script>
-    document.addEventListener("DOMContentLoaded", function() {
-      renderMathInElement(document.body, {
-        delimiters: [
-          {left: '$$', right: '$$', display: true},
-          {left: '$', right: '$', display: false}
-        ],
-        throwOnError : false
-      });
-    });
-  </script>\`
-- Custom CSS:
-  - body: font-family 'Inter', sans-serif; line-height: 1.6; color: #111;
-  - .watermark: position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr); opacity: 0.02; padding: 20px; gap: 40px;
-  - .watermark-item: display: flex; align-items: center; justify-content: center; font-size: 35pt; font-weight: 900; color: #000; transform: rotate(-35deg); white-space: nowrap;
-  - .question-block: margin-bottom: 24px; padding: 18px; border: 0.5pt solid #e2e8f0; border-radius: 8px; break-inside: avoid; background: #fff;
-  - .topic-pill: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px;
-  - .question-num: font-weight: 800; color: ${color}; font-size: 10.5pt;
-  - .question-text: font-weight: 400; font-size: 9.8pt; margin-bottom: 12px;
-  - .option-grid: display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 20px; margin-top: 12px; padding-left: 15px;
-  - .option-row: display: flex; align-items: flex-start; gap: 10px;
-  - .option-label: font-weight: 700; color: ${color}; min-width: 28px; flex-shrink: 0;
-  - .option-text: font-size: 9.2pt;
-  - \`.math-table\`: border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 9pt;
-  - \`.math-table td\`: border: 0.5pt solid #cbd5e1; padding: 8px; vertical-align: top;
-  - \`.katex\`: font-size: 1.08em !important; margin: 0 2px;
-  - \`.katex-display\`: margin: 1em 0 !important;
-  - \`.diagram-container\`: margin: 15px auto; text-align: center; max-width: 100%;
-  - \`.diagram-description\`: font-style: italic; font-size: 8.5pt; color: #475569; background: #f8fafc; border-left: 3px solid ${color}; padding: 10px 15px; margin: 10px 0; border-radius: 0 4px 4px 0;
-  - \`@page { size: A4; margin: 15mm 15mm 25mm 15mm; }\`
-
-### FIRST PAGE LAYOUT (MANDATORY BLOCKS)
-
-1. **HEADER**:
-   - Centered **Plus2AI** logo (Plus2 dark green, AI orange, large bold).
-   - Top-right: **TWO Dynamic QR Codes** (50px each, side-by-side).
-     - QR 1: https://learn.dataziv.com with label "Learning Portal" below it.
-     - QR 2: https://plus2ai.com with label "Plus2AI Official" below it.
-     - Use https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=[URL] for the images.
-   - Title: "NATIONAL ELIGIBILITY CUM ENTRANCE TEST (NEET) 2026" (Centered, 11pt, bold).
-   - Large Subtitle: "${subject.toUpperCase()} <span style='color:#ff6b2b'>SIMULATION</span>" (30pt, heavy bold).
-
-2. **IDENTIFIERS**:
-   - Serial No Box: "Serial No: P2-2026-${subject.slice(0, 4).toUpperCase()}-${set}" (Centered, bordered box).
-   - Info Table: 2-col bordered table. Left: Subject Code & Duration (45 mins). Right: Version Code (REI-v17) & Max Marks (180).
-
-3. **CANDIDATE ENTRY**:
-   - Dotted line for "CANDIDATE NAME".
-   - "NTA REG. NO:" with 8 empty grid boxes.
-
-4. **LEGAL DISCLAIMER**:
-   - Bordered box titled "LEGAL DISCLAIMER & TERMS OF USAGE".
-   - Text: "IMPORTANT: This document is an AI-generated simulation... Intended strictly for practice... Plus2AI assumes no legal liability..."
-
-5. **INSTRUCTIONS**:
-   - Bordered box titled "IMPORTANT INSTRUCTIONS TO CANDIDATES".
-   - 6 items: (1) 45 questions check, (2) OMR Version/Serial entry, (3) 4 marks each / -1 wrong, (4) OMR pen use, (5) No gadgets, (6) Plus2AI DNA Model REI v17 note.
-
-### WATERMARK & DIAGRAMS
-- **WATERMARK**: Include a <div class="watermark"> at the VERY END of the body (after all questions). **REPEAT** the text "Plus2AI DNA" inside 15 separate <div class="watermark-item">Plus2AI DNA</div> elements to fill the grid.
-- **DIAGRAMS**: If a question includes a "Diagram Description", **GENERATE a supplementary inline SVG**.
-  - Use clean lines, labeled axes, and clear markers.
-  - Place the SVG inside a .diagram-container.
-
-### IMPORTANT: NO CONTENT FOOTERS
-- **DO NOT** include any footer, page numbers, or bottom lines in the HTML body. 
-- These are handled automatically by the PDF engine. 
-
-### Output format
-Return ONLY the raw HTML. No markdown code fences. Start with <!DOCTYPE html>.`;
+  return promptText;
 }
 
-// ── Call Gemini ───────────────────────────────────────────────────────────────
 async function generateHtmlWithGemini(paperData, subject, set, color) {
-  const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-  const prompt = buildGeminiPrompt(paperData, subject, set, color);
+  const questions = paperData.test_config?.questions || [];
+  const isConsolidated = questions.length > 50;
 
-  console.log(`[PDF Gen] Calling Gemini (${modelName}) with ${prompt.length} char prompt...`);
+  // Force gemini-3.1-pro-preview for consolidated papers due to length/complexity
+  const modelName = isConsolidated ? 'gemini-3.1-pro-preview' : (process.env.GEMINI_MODEL || 'gemini-3.1-pro-preview');
+  const prompt = buildProfessionalPrompt(paperData, subject, set, color);
 
-  const model = genAI.getGenerativeModel({ 
+  console.log(`[PDF Gen] 🚀 Dispatching to ${modelName} (@google/genai)...`);
+
+  const response = await ai.models.generateContent({
     model: modelName,
-    generationConfig: {
-      maxOutputTokens: 8192,
-      temperature: 0.1,
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    config: {
+      maxOutputTokens: 64000,
+      temperature: 0.1
     }
   });
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  let html = response.text();
-
-  console.log(`[PDF Gen] Gemini returned ${html.length} chars of HTML`);
-
+  let html = response.text;
   html = html.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
 
+  console.log(`[PDF Gen] 📥 Received HTML (Length: ${html.length} chars)`);
+
   if (!html.toLowerCase().includes('<!doctype html')) {
-    throw new Error('Gemini response did not contain a valid HTML document');
+    throw new Error('Gemini failed to return a valid HTML document');
   }
   return html;
 }
 
-// ── Puppeteer PDF render ──────────────────────────────────────────────────────
-async function renderPdf(html, subject, set) {
+// ── Puppeteer Rendering ───────────────────────────────────────────────────────
+async function renderPdf(html, subject, set, outputPath) {
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--font-render-hinting=none']
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-font-render-hinting=none']
   });
 
   try {
     const page = await browser.newPage();
-    // Set a larger viewport to ensure charts/SVG render well
-    await page.setViewport({ width: 1200, height: 1600 });
-    
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 90000 });
-    
-    // Give KaTeX and any SVGs time to settle
-    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 3000)));
 
-    const pdf = await page.pdf({
+    // Wait for KaTeX and SVGs to finalize
+    await new Promise(r => setTimeout(r, 2500));
+
+    await page.pdf({
+      path: outputPath,
       format: 'A4',
       printBackground: true,
-      preferCSSPageSize: true,
       displayHeaderFooter: true,
-      headerTemplate: '<div></div>', // Empty header
+      headerTemplate: '<div></div>',
       footerTemplate: `
-        <div style="width: 100%; font-size: 8pt; color: #666; border-top: 0.5pt solid #eee; padding: 5px 40px; font-family: 'Inter', sans-serif; display: flex; justify-content: space-between;">
-          <span>Reproduction strictly prohibited. © 2026 Plus2AI. | NEET 2026 Simulation - SET ${set}</span>
+        <div style="width: 100%; font-size: 7pt; color: #94a3b8; padding: 0 45px 15px; font-family: 'Inter', sans-serif; display: flex; justify-content: space-between; border-top: 0.5px solid #e2e8f0;">
+          <span>Reproduction strictly prohibited. © 2026 Plus2AI. | NEET 2026 Simulation - SET ${set} | Generated: ${new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</span>
           <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
         </div>
       `,
-      margin: {
-        top: '15mm',
-        bottom: '25mm', // Extra room for the footer
-        left: '15mm',
-        right: '15mm'
-      }
+      margin: { top: '15mm', bottom: '25mm', left: '15mm', right: '15mm' }
     });
-    return pdf;
   } finally {
     await browser.close();
   }
 }
 
-// ── Express route handler ─────────────────────────────────────────────────────
+// ── Main Entry Point ──────────────────────────────────────────────────────────
+export async function generateFlagshipPdf(paperId) {
+  const fileName = PAPER_REGISTRY[paperId];
+  if (!fileName) throw new Error(`Invalid paperId: ${paperId}`);
+
+  const filePath = path.join(ROOT, fileName);
+  if (!fs.existsSync(filePath)) throw new Error(`File not found: ${fileName}`);
+
+  const paperData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  let subject = 'Physics';
+  if (paperId.includes('chemistry')) subject = 'Chemistry';
+  if (paperId.includes('zoology')) subject = 'Zoology';
+  if (paperId.includes('consolidated')) subject = 'NEET CONSOLIDATED';
+
+  const set = paperId.endsWith('-a') ? 'A' : 'B';
+
+  let color = '#065f46'; // Green for Physics/Bio
+  if (subject === 'Chemistry') color = '#1e40af'; // Blue
+  if (subject === 'Botany') color = '#15803d'; // Forest Green
+  if (subject === 'Zoology') color = '#9333ea'; // Purple
+  if (subject === 'NEET CONSOLIDATED') color = '#065f46'; // Main Institutional Green
+
+  console.log(`[PDF Gen] 📄 Generating ${subject} Set ${set} Flagship Paper...`);
+
+  const html = await generateHtmlWithGemini(paperData, subject, set, color);
+
+  const outputDir = path.join(ROOT, 'public', 'flagship-pdfs');
+  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+
+  const outputFileName = `Plus2AI_NEET_2026_${subject}_SET_${set}_Prediction.pdf`;
+  const outputPath = path.join(outputDir, outputFileName);
+
+  await renderPdf(html, subject, set, outputPath);
+
+  console.log(`[PDF Gen] ✅ Success: ${outputFileName}`);
+  return `/flagship-pdfs/${outputFileName}`;
+}
+
+/**
+ * Express Handler wrapper for the above logic
+ * Returns the PDF buffer directly for high-fidelity downloading
+ */
 export async function handleGenerateFlagshipPdf(req, res) {
   const { paperId } = req.body;
-
-  if (!paperId || !PAPER_REGISTRY[paperId]) {
-    return res.status(400).json({
-      error: `Invalid paperId. Valid options: ${Object.keys(PAPER_REGISTRY).join(', ')}`
-    });
-  }
-
-  const { file, subject, set, color } = PAPER_REGISTRY[paperId];
-  const filePath = path.join(ROOT, file);
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: `Paper file not found: ${file}` });
-  }
-
   try {
-    console.log(`[PDF Gen] ▶ Starting for ${paperId}...`);
-    const paperData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    const html = await generateHtmlWithGemini(paperData, subject, set, color);
-    const pdfBuffer = await renderPdf(html, subject, set);
-    const filename = `Plus2AI_NEET_2026_${subject}_SET_${set}_Prediction.pdf`;
+    const fileName = PAPER_REGISTRY[paperId];
+    if (!fileName) throw new Error(`Invalid paperId: ${paperId}`);
 
+    let subject = 'Physics';
+    if (paperId.includes('chemistry')) subject = 'Chemistry';
+    if (paperId.includes('botany')) subject = 'Botany';
+    if (paperId.includes('zoology')) subject = 'Zoology';
+    if (paperId.includes('consolidated')) subject = 'NEET CONSOLIDATED';
+
+    const set = paperId.endsWith('-a') ? 'A' : 'B';
+    const outputFileName = `Plus2AI_NEET_2026_${subject}_SET_${set}_Prediction.pdf`;
+
+    // Generate the PDF and get the server-side path
+    const relativePath = await generateFlagshipPdf(paperId);
+    const absolutePath = path.join(ROOT, 'public', relativePath);
+
+    // Read the generated file
+    const pdfBuffer = fs.readFileSync(absolutePath);
+
+    // Send the buffer as a PDF
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${outputFileName}"`);
     res.setHeader('Content-Length', pdfBuffer.length);
-    res.end(pdfBuffer);
+    res.send(pdfBuffer);
 
-    console.log(`[PDF Gen] ✅ Sent ${(pdfBuffer.length / 1024).toFixed(0)} KB → ${filename}`);
+    console.log(`[PDF Gen] 🚀 Streamed ${outputFileName} (${(pdfBuffer.length / 1024).toFixed(0)} KB)`);
   } catch (err) {
-    console.error('[PDF Gen] ❌ Error:', err);
-    res.status(500).json({ error: 'PDF generation failed', detail: err.message });
+    console.error('[PDF Gen] Error:', err);
+    res.status(500).json({ error: err.message });
   }
 }

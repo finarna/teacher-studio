@@ -16,7 +16,7 @@ declare global {
  */
 export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const allPapers = getPredictedPapers();
-    const [selectedExamContext, setSelectedExamContext] = useState<string>('KCET'); // Default to KCET
+    const [selectedExamContext, setSelectedExamContext] = useState<string>('NEET'); // Default to NEET
     const [papers, setPapers] = useState<PaperSet[]>(
         allPapers.filter(p => p.examContext === selectedExamContext || p.id.startsWith('mock-'))
     );
@@ -33,10 +33,16 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
     const getPaperId = (paper: PaperSet): string | null => {
         const subj = (paper.subject || '').toLowerCase();
         const set  = (paper.setName || '').toUpperCase();
-        if (subj.includes('physics')   && set === 'A') return 'neet-physics-set-a';
-        if (subj.includes('physics')   && set === 'B') return 'neet-physics-set-b';
-        if (subj.includes('chemistry') && set === 'A') return 'neet-chemistry-set-a';
-        if (subj.includes('chemistry') && set === 'B') return 'neet-chemistry-set-b';
+        if (subj.includes('physics') && set === 'A') return 'neet-physics-a';
+        if (subj.includes('physics') && set === 'B') return 'neet-physics-b';
+        if (subj.includes('chemistry') && set === 'A') return 'neet-chemistry-a';
+        if (subj.includes('chemistry') && set === 'B') return 'neet-chemistry-b';
+        if (subj.includes('botany') && set === 'A') return 'neet-botany-a';
+        if (subj.includes('botany') && set === 'B') return 'neet-botany-b';
+        if (subj.includes('zoology') && set === 'A') return 'neet-zoology-a';
+        if (subj.includes('zoology') && set === 'B') return 'neet-zoology-b';
+        if (subj.includes('consolidated') && set === 'A') return 'neet-consolidated-a';
+        if (subj.includes('consolidated') && set === 'B') return 'neet-consolidated-b';
         return null;
     };
 
@@ -314,15 +320,6 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                     {/* Exam Context Selector */}
                     <div className="flex gap-3 mt-8">
                         <button
-                            onClick={() => setSelectedExamContext('KCET')}
-                            className={`px-6 py-3 rounded-xl font-bold transition-all ${selectedExamContext === 'KCET'
-                                    ? 'bg-slate-900 text-white shadow-lg'
-                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                }`}
-                        >
-                            KCET 2026
-                        </button>
-                        <button
                             onClick={() => setSelectedExamContext('NEET')}
                             className={`px-6 py-3 rounded-xl font-bold transition-all ${selectedExamContext === 'NEET'
                                     ? 'bg-slate-900 text-white shadow-lg'
@@ -330,6 +327,15 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                                 }`}
                         >
                             NEET 2026
+                        </button>
+                        <button
+                            onClick={() => setSelectedExamContext('KCET')}
+                            className={`px-6 py-3 rounded-xl font-bold transition-all ${selectedExamContext === 'KCET'
+                                    ? 'bg-slate-900 text-white shadow-lg'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                }`}
+                        >
+                            KCET 2026
                         </button>
                     </div>
                 </header>
@@ -343,20 +349,24 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                             <div className={`absolute top-0 left-0 right-0 h-1.5 ${paper.subject === 'Physics' ? 'bg-blue-500' :
                                     paper.subject === 'Mathematics' ? 'bg-indigo-600' :
                                         paper.subject === 'Chemistry' ? 'bg-emerald-500' :
-                                            paper.subject === 'Biology' ? 'bg-rose-500' : 'bg-coral-500'
+                                            paper.subject === 'Biology' ? 'bg-rose-500' : 
+                                                paper.subject === 'Botany' ? 'bg-green-600' :
+                                                    paper.subject === 'Zoology' ? 'bg-purple-600' : 'bg-coral-500'
                                 }`} />
 
                             <div className="flex justify-between items-start mb-6">
-                                <div className="p-3 bg-slate-50 rounded-xl group-hover:bg-slate-100 transition-colors">
-                                    <FileText className="text-slate-700" size={24} />
+                                <div className="bg-slate-50 text-slate-700 p-3 rounded-xl group-hover:bg-slate-100 transition-colors">
+                                    <FileText size={24} />
                                 </div>
-                                <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase">
-                                    SET {paper.setName}
-                                </span>
+                                <div className="flex gap-2">
+                                    <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase">
+                                        SET {paper.setName}
+                                    </span>
+                                </div>
                             </div>
 
                             <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-xl font-bold text-slate-900 truncate">
+                                <h3 className="text-xl font-bold truncate text-slate-900">
                                     {paper.subject} Prediction
                                 </h3>
                                 {paper.examContext && (
@@ -366,7 +376,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                                 )}
                             </div>
                             <p className="text-slate-500 text-sm mb-6">
-                                {paper.questions.length} Questions • {Math.ceil(paper.questions.length * 1.33)} Minutes • Official Layout
+                                {paper.questions.length} Questions • 50 Minutes • Official Layout
                             </p>
 
                             <div className="flex flex-col gap-2">
