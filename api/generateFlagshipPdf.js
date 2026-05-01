@@ -70,7 +70,7 @@ ${JSON.stringify(qData, null, 2)}
 - Include KaTeX CSS/JS and Auto-render extension.
 - Custom CSS:
   - \`body\`: font-family 'Inter', sans-serif; line-height: 1.6; color: #111;
-  - \`.watermark\`: position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; display: flex; align-items: center; justify-content: center; opacity: 0.04; font-size: 80pt; font-weight: 900; color: #000; transform: rotate(-35deg); white-space: nowrap;
+  - \`.watermark\`: position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0.03; font-size: 80pt; font-weight: 900; color: #000; transform: rotate(-35deg); white-space: nowrap;
   - \`.question-block\`: margin-bottom: 28px; padding: 18px; border: 0.5pt solid #e2e8f0; border-radius: 8px; break-inside: avoid; background: #fff;
   - \`.topic-pill\`: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px;
   - \`.question-num\`: font-weight: 800; color: ${color}; font-size: 10.5pt;
