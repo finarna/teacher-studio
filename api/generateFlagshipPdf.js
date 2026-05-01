@@ -135,10 +135,10 @@ ${JSON.stringify(qData, null, 2)}
    - 6 items: (1) 45 questions check, (2) OMR Version/Serial entry, (3) 4 marks each / -1 wrong, (4) OMR pen use, (5) No gadgets, (6) Plus2AI DNA Model REI v17 note.
 
 ### WATERMARK & DIAGRAMS
-- **WATERMARK**: Include a \`<div class="watermark">\` at the very start of the body. **REPEAT** the text "Plus2AI DNA" inside 15 separate \`<div class="watermark-item">Plus2AI DNA</div>\` elements to fill the grid.
+- **WATERMARK**: Include a <div class="watermark"> at the VERY END of the body (after all questions). **REPEAT** the text "Plus2AI DNA" inside 15 separate <div class="watermark-item">Plus2AI DNA</div> elements to fill the grid.
 - **DIAGRAMS**: If a question includes a "Diagram Description", **GENERATE a supplementary inline SVG**.
   - Use clean lines, labeled axes, and clear markers.
-  - Place the SVG inside a \`.diagram-container\`.
+  - Place the SVG inside a .diagram-container.
 
 ### IMPORTANT: NO CONTENT FOOTERS
 - **DO NOT** include any footer, page numbers, or bottom lines in the HTML body. 
@@ -163,11 +163,11 @@ async function generateHtmlWithGemini(paperData, subject, set, color) {
     }
   });
 
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-  });
+  const result = await model.generateContent(prompt);
   const response = await result.response;
   let html = response.text();
+
+  console.log(`[PDF Gen] Gemini returned ${html.length} chars of HTML`);
 
   html = html.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
 
