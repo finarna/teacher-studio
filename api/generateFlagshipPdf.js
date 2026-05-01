@@ -37,6 +37,8 @@ function buildGeminiPrompt(paperData, subject, set, color) {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const subjectCode = subject.slice(0, 4).toUpperCase();
+  const serialNo = `P2-2026-${subjectCode}-${set}`;
 
   // Serialize questions compactly for Gemini
   const qData = questions.map((q, i) => ({
@@ -49,90 +51,152 @@ function buildGeminiPrompt(paperData, subject, set, color) {
     correctOptionIndex: q.correctOptionIndex
   }));
 
-  return `You are an expert NEET exam paper formatter. Your job is to generate a COMPLETE, SELF-CONTAINED HTML document that represents a professional NEET 2026 mock test paper. This HTML will be rendered by a headless Puppeteer browser into a PDF.
+  return `You are an expert NEET exam paper formatter. Generate a COMPLETE, SELF-CONTAINED HTML document for a professional NEET 2026 mock test paper. It will be rendered by Puppeteer into a PDF.
 
 ## PAPER DETAILS
-- Title: ${paperData.test_name}
-- Subject: ${subject}
-- Set: ${set}
-- Total Questions: ${questions.length}
-- Total Marks: ${totalMarks}
-- Date/Time Generated: ${dateStr} at ${timeStr}
-- Brand Color: ${color}
+- Subject: ${subject}  |  Set: ${set}  |  Questions: ${questions.length}  |  Total Marks: ${totalMarks}
+- Serial No: ${serialNo}
+- Generated: ${dateStr} at ${timeStr}
+- Accent Color: ${color}
 
-## QUESTIONS DATA (JSON)
+## QUESTIONS JSON
 ${JSON.stringify(qData, null, 2)}
 
-## ABSOLUTE REQUIREMENTS — DO NOT SKIP ANY
+---
 
-### 1. HTML Structure
-- Return ONLY the raw HTML — no markdown fences, no explanation text
-- Must start with <!DOCTYPE html> and be fully self-contained
-- Include KaTeX CSS + JS from CDN in <head> with auto-render configured for $...$ delimiters
+## PAGE & GLOBAL RULES
 
-### 2. Watermark (CRITICAL)
-- A diagonal tiled watermark "Plus2AI · Exam DNA · 2026" across ALL pages
-- Implement as body::before with fixed positioning and a repeating SVG background at ~8% opacity
-- Must appear on every single page including the answer key page
+### Watermark (every page)
+- body::before, position:fixed, top:0 left:0 width:100% height:100%, z-index:-1
+- SVG repeating background: diagonal text "Plus2AI · Exam DNA · 2026", fill-opacity 0.06, rotate -35deg
 
-### 3. CSS @page Footer (CRITICAL — every page)
-- Use CSS @page with @bottom-center to add footer on EVERY page:
-  "Reproduction strictly prohibited. © 2026 Plus2AI | NEET 2026 Prediction · SET ${set} | Page X of Y"
-- Use counter(page) and counter(pages) for page numbering
-- Footer font: 7.5pt, color: #6b7280
+### CSS @page Footer (every page, NO exceptions)
+\`\`\`css
+@page {
+  size: A4;
+  margin: 15mm 15mm 22mm 15mm;
+  @bottom-center {
+    content: "Reproduction strictly prohibited. © 2026 Plus2AI. | NEET 2026 Simulation - SET ${set} | Page " counter(page) " of " counter(pages);
+    font-family: Arial, sans-serif;
+    font-size: 7.5pt;
+    color: #555;
+    border-top: 0.5pt solid #bbb;
+    padding-top: 3pt;
+  }
+}
+\`\`\`
 
-### 4. First Page Header
-- Top row: "plus2AI" brand logo (left) — "plus2" in #0a1a16 bold, "AI" in #ff7f50 bold — and a small QR placeholder box (right)
-- Tagline below logo: "Oracle REI v17 · NEET 2026 Flagship Prediction" in small gray text
-- Centered title: "NATIONAL ELIGIBILITY CUM ENTRANCE TEST (NEET) 2026" in ${color}
-- Centered subtitle: the full paper title
-- A colored info bar showing: Subject | Set ${set} | Duration: 80 Minutes | Questions: ${questions.length} | Total Marks: ${totalMarks}
-- Generated timestamp: "${dateStr} at ${timeStr}" in small gray text right-aligned
+### KaTeX (math rendering)
+Include in <head>:
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"/>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
 
-### 5. Instructions Box (first page only, before questions)
-- Left border accent in ${color}
-- Heading: "⚠ Important Instructions — Read Carefully"
-- Bullet points including:
-  * ${questions.length} MCQs, one correct answer each
-  * Duration: 80 minutes (~1 min 45 sec per question)
-  * Marking: +4 correct, −1 wrong, 0 unattempted, max ${totalMarks} marks
-  * Plus2AI Oracle REI v17 AI-generated prediction calibrated on 5 years of NEET patterns
-  * Do not share — strictly prohibited
+---
 
-### 6. Section Label
-- A colored banner bar: "📖 ${subject} — SET ${set} · ${questions.length} Questions · ${totalMarks} Marks"
+## FIRST PAGE LAYOUT (replicate this EXACTLY)
 
-### 7. Every Question Block (MOST IMPORTANT)
-- MUST have CSS: break-inside: avoid; page-break-inside: avoid;
-- Structure per question:
-  * Top meta row: Topic tag (gray pill) | Difficulty badge (Easy=green, Moderate=amber, Hard=red) | Marks tag
-  * Question number in bold ${color} followed by question text (LaTeX in $...$)
-  * Options in a 2-column grid: (A) ... (B) ... / (C) ... (D) ...
-  * Thin border around entire block, slight border-radius
-  * Small spacing between blocks
+### BLOCK 1 — Top Header Row
+A single row with THREE elements:
+- LEFT: Empty (spacer)
+- CENTER: "Plus2AI" logo text — LARGE, bold, centered
+    * "Plus2" in font-weight:900, color:#1a2e1a (very dark green-black), font-size:32pt
+    * "AI" in font-weight:900, color:#ff6b2b (orange), font-size:32pt
+    * No tagline here — just the big logo mark
+- RIGHT: A 55×55px QR code placeholder box (border:1px solid #999, display:flex, align/justify center)
+    * Inside: tiny text "QR CODE" in gray, and below it "learn.dataziv.com" in 6pt gray
 
-### 8. Answer Key (last page, page-break-before: always)
-- Heading: "Answer Key" styled with ${color}
-- Compact table: Q number + correct option letter (A/B/C/D)
-- 9 questions per row
-- All ${questions.length} questions covered
+### BLOCK 2 — NEET Title
+Centered, margin-top: 10px:
+"NATIONAL ELIGIBILITY CUM ENTRANCE TEST (NEET) 2026"
+font-size:11pt, font-weight:600, color:#222, letter-spacing:0.5px, text-transform:uppercase
 
-### 9. Math Rendering
-- All LaTeX between $...$ must render via KaTeX auto-render
-- Include this in the HTML <head>:
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"/>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
+### BLOCK 3 — Subject Simulation Title  
+Centered, font-size:30pt, font-weight:900, text-transform:uppercase, margin:6px 0:
+- "${subject.toUpperCase()}" in color:#1a1a1a (black)
+- " SIMULATION" in color:#ff6b2b (orange)
+(i.e. two <span> elements side by side: "<span style='color:#1a1a1a'>${subject.toUpperCase()}</span><span style='color:#ff6b2b'> SIMULATION</span>")
 
-### 10. Typography & Layout
-- Font: 'Helvetica Neue', Arial, sans-serif
-- A4 size, 18mm top/bottom, 16mm left/right margins
-- Question text: ~9.5pt
-- Options: ~9pt
-- Clean, institutional, professional NEET paper look — black on white, no decorative flourishes
+### BLOCK 4 — Serial Number Box
+Centered box, border:1.5px solid #222, display:inline-block, padding:5px 24px, margin:8px auto:
+"Serial No: " normal weight + "<strong>${serialNo}</strong>" bold
+font-size:10pt
 
-## OUTPUT
-Return ONLY the complete HTML document. Start with <!DOCTYPE html>. Zero markdown. Zero extra text.`;
+### BLOCK 5 — Info Table
+Full-width bordered table (border:1.5px solid #333), no border-collapse gaps, padding 8px 14px, margin-top:10px:
+| LEFT column                        | RIGHT column                  |
+| Subject Code: <strong>${subjectCode}</strong>  | Version Code: <strong>REI-v17</strong>   |
+| Duration: <strong>45 Minutes</strong>          | Maximum Marks: <strong>${totalMarks}</strong> |
+Table has 1 row, 2 columns. Each column is 50%. Left-aligned left col, right-aligned right col.
+
+### BLOCK 6 — Candidate Fields Row
+Two fields side by side, margin-top:12px:
+LEFT (60% width): "CANDIDATE NAME:" label, then a dotted underline spanning full width (border-bottom:1px dotted #555, min-width:300px, display:block, margin-top:4px)
+RIGHT (40% width): "NTA REG. NO:" label, then 8 individual boxes (each box: width:28px, height:28px, border:1px solid #333, display:inline-block, margin-left:2px)
+
+### BLOCK 7 — Legal Disclaimer Box
+Full-width bordered box (border:1.5px solid #333), padding:10px 14px, margin-top:12px:
+Title: "LEGAL DISCLAIMER & TERMS OF USAGE" — centered, font-weight:700, font-size:9pt, text-decoration:underline
+Body paragraph (font-size:8.5pt, margin-top:6px):
+"IMPORTANT: This document is an <strong>AI-generated simulation</strong> based on historical analysis of the National Eligibility cum Entrance Test (NEET). It is intended <strong>strictly for practice</strong> and training purposes. Plus2AI does not claim that these specific questions will appear in the actual 2026 NEET examination. Plus2AI assumes no legal liability for any discrepancies, variations, or performance outcomes in the actual exam. Users are advised to use this alongside official NTA study materials."
+
+### BLOCK 8 — Instructions Box (directly below disclaimer, still first page)
+Full-width bordered box (border:1.5px solid #333), padding:10px 14px, margin-top:10px:
+Title: "IMPORTANT INSTRUCTIONS TO CANDIDATES" — centered, font-weight:700, font-size:9.5pt, underline
+Horizontal rule after title (border-top:1px solid #ccc, margin:6px 0)
+List items (no bullets, font-size:9pt, line-height:1.7, padding-left:0):
+1. "This question booklet contains <strong>${questions.length}</strong> questions. Check that all pages are intact."
+2. "The Version Code and Serial Number must be correctly entered on the OMR Answer Sheet."
+3. "Each question carries <strong>4 marks</strong>. There is <strong>negative marking of 1 mark</strong> for each wrong answer."
+4. "Answers must be marked ONLY on the OMR sheet provided using a blue/black ballpoint pen."
+5. "Calculators, log tables, and electronic gadgets are strictly prohibited."
+6. "<strong>Plus2AI DNA Model (REI v17)</strong>: This is a high-fidelity pattern simulation. Final results may vary."
+
+---
+
+## QUESTIONS SECTION (pages 2+)
+
+### Section Label Bar
+Full-width div, background:${color}, color:white, font-weight:700, font-size:9pt, padding:5px 12px, margin-top:14px:
+"${subject.toUpperCase()} | SET ${set} | ${questions.length} Questions | Total Marks: ${totalMarks}"
+
+### Each Question Block — MUST have: break-inside:avoid; page-break-inside:avoid
+Structure:
+- Container: border:0.75px solid #d1d5db, border-radius:4px, padding:8px 10px, margin-bottom:7px, background:#fff
+- Top meta row (display:flex, gap:8px, margin-bottom:4px, font-size:7pt):
+    * Topic pill: background:#f3f4f6, border:0.5px solid #ccc, padding:1px 5px, border-radius:2px, uppercase
+    * Difficulty badge: Easy→{bg:#d1fae5,color:#065f46}, Moderate→{bg:#fef3c7,color:#92400e}, Hard→{bg:#fee2e2,color:#991b1b}; font-weight:700, padding:1px 5px, border-radius:2px, uppercase
+    * Marks tag: color:#6b7280, font-weight:500, margin-left:auto
+- Question row (display:flex, gap:5px, font-size:9.5pt, line-height:1.6, margin-bottom:6px):
+    * Number "<strong>N.</strong>" in color:${color}, min-width:22px, flex-shrink:0
+    * Question text (flex:1) — LaTeX in $...$ will be rendered by KaTeX
+- Options grid (display:grid, grid-template-columns:1fr 1fr, gap:2px 12px, padding-left:26px, font-size:9pt):
+    * "(A) option text" — "(A)" in bold ${color}
+    * "(B) option text"
+    * "(C) option text"
+    * "(D) option text"
+
+---
+
+## ANSWER KEY (last page, page-break-before: always)
+
+- Heading "Answer Key" in ${color}, font-size:14pt, font-weight:700, border-bottom:2px solid ${color}, padding-bottom:4px
+- Sub: "Generated: ${dateStr} at ${timeStr} | Plus2AI Flagship Prediction Series 2026" in 8pt gray
+- Table: border-collapse:collapse, width:100%, margin-top:12px
+- 9 answers per row, each cell: border:0.75px solid #d1d5db, padding:4px 6px, text-align:center, font-size:8.5pt
+- Cell content: "<strong style='color:${color}'>Q.N</strong> Opt" e.g. "<strong style='color:${color}'>1.</strong> A"
+
+---
+
+## TYPOGRAPHY & BASE STYLES
+- font-family: 'Helvetica Neue', Arial, sans-serif
+- body font-size: 10pt, color: #111, background: #fff
+- .katex { font-size: 1em !important; }
+- * { box-sizing: border-box; margin: 0; padding: 0; }
+
+## OUTPUT RULE
+Return ONLY the complete HTML. Start immediately with <!DOCTYPE html>. No markdown code fences. No explanatory text before or after.`;
 }
 
 // ── Call Gemini ───────────────────────────────────────────────────────────────
