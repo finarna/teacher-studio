@@ -1,0 +1,87 @@
+[dotenv@17.2.3] injecting env (19) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (19) from .env.local -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+🔍 VERIFYING CHEMISTRY FLAGSHIP v2 GENERATION
+
+═══════════════════════════════════════════════════════
+
+✅ Found 120 recent Chemistry KCET AI-generated questions
+
+
+📊 SET_A: KCET Chemistry 2026 Flagship
+   Total Questions: 60/60
+   First question created: 2026-04-17T18:40:17.382557+00:00
+   Last question created: 2026-04-17T18:40:17.382557+00:00
+   ─────────────────────────────────────────────────────
+
+   🎯 DIFFICULTY DISTRIBUTION:
+      Easy: 36 (60.0%)
+      Moderate: 24 (40.0%)
+      Hard: 0 (0.0%)
+      Status: ✅ MATCH (Target: 36/23/1)
+
+   📋 QUESTION TYPE DISTRIBUTION:
+      theory_conceptual: 15/20 (-5) ⚠️ UNDER
+      property_based: 18/15 (+3) ⚠️ OVER
+      reaction_based: 14/14 (+0) ✅
+      calculation: 5/5 (+0) ✅
+      structure_based: 5/4 (+1) ✅
+      application: 3/1 (+2) ✅
+      untagged: 0 ✅
+
+      Overall Type Accuracy: 81.7%
+      Perfect Matches: 2/6 types
+      Total Gap: 11 questions
+
+   🧬 IDENTITY ASSIGNMENT:
+      Assigned: 46/60
+      Unassigned: 14
+      Status: ⚠️ PARTIAL
+
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✓ Difficulty Match: ✅
+   ✓ Question Types (≥85%): ❌
+   ✓ Identity Assignment: ✅
+
+   VERDICT: ⚠️ NEEDS REVIEW
+
+📊 SET_B: KCET Chemistry 2026 Flagship
+   Total Questions: 60/60
+   First question created: 2026-04-17T18:40:41.535442+00:00
+   Last question created: 2026-04-17T18:40:41.535442+00:00
+   ─────────────────────────────────────────────────────
+
+   🎯 DIFFICULTY DISTRIBUTION:
+      Easy: 36 (60.0%)
+      Moderate: 24 (40.0%)
+      Hard: 0 (0.0%)
+      Status: ✅ MATCH (Target: 36/23/1)
+
+   📋 QUESTION TYPE DISTRIBUTION:
+      theory_conceptual: 13/20 (-7) ⚠️ UNDER
+      property_based: 17/15 (+2) ✅
+      reaction_based: 12/14 (-2) ✅
+      calculation: 8/5 (+3) ⚠️ OVER
+      structure_based: 9/4 (+5) ⚠️ OVER
+      application: 1/1 (+0) ✅
+      untagged: 0 ✅
+
+      Overall Type Accuracy: 68.3%
+      Perfect Matches: 1/6 types
+      Total Gap: 19 questions
+
+   🧬 IDENTITY ASSIGNMENT:
+      Assigned: 48/60
+      Unassigned: 12
+      Status: ⚠️ PARTIAL
+
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✓ Difficulty Match: ✅
+   ✓ Question Types (≥85%): ❌
+   ✓ Identity Assignment: ✅
+
+   VERDICT: ⚠️ NEEDS REVIEW
+
+
+═══════════════════════════════════════════════════════
+✅ VERIFICATION COMPLETE
+

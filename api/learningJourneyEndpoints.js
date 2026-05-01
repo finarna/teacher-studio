@@ -2295,24 +2295,35 @@ async function prepareOfficialTest(userId, setId, supabase, subject, examContext
   if (nId.includes('SET-B') || nId.endsWith('-B') || nId.endsWith('_B') || nId.includes('SET_B')) normalizedSetId = 'SET-B';
 
   let sourceName = `PLUS2AI OFFICIAL ${subject.toUpperCase()} PREDICTION 2026: ${normalizedSetId}`;
-  
+
   try {
     let sourceFile;
+    const eContext = (examContext || '').toUpperCase();
+
     if (isMath) {
       sourceFile = normalizedSetId === 'SET-B' ? 'flagship_final_b.json' : 'flagship_final.json';
     } else if (isPhysics) {
       // Check exam context for NEET vs KCET Physics
-      if (examContext === 'NEET') {
+      if (eContext === 'NEET') {
         sourceFile = normalizedSetId === 'SET-B' ? 'flagship_neet_physics_2026_set_b.json' : 'flagship_neet_physics_2026_set_a.json';
       } else {
         sourceFile = normalizedSetId === 'SET-B' ? 'flagship_physics_final_b.json' : 'flagship_physics_final.json';
       }
     } else if (isChem) {
-      sourceFile = normalizedSetId === 'SET-B' ? 'flagship_chemistry_final_b.json' : 'flagship_chemistry_final.json';
+      if (eContext === 'NEET') {
+        sourceFile = normalizedSetId === 'SET-B' ? 'flagship_neet_chemistry_2026_set_b.json' : 'flagship_neet_chemistry_2026_set_a.json';
+      } else {
+        sourceFile = normalizedSetId === 'SET-B' ? 'flagship_chemistry_final_b.json' : 'flagship_chemistry_final.json';
+      }
     } else if (isBio) {
-      sourceFile = normalizedSetId === 'SET-B' ? 'flagship_biology_final_b.json' : 'flagship_biology_final.json';
+      if (eContext === 'NEET') {
+        // Fallback to flagship_biology_final for now if NEET bio is not available, but logic is correct
+        sourceFile = normalizedSetId === 'SET-B' ? 'flagship_biology_final_b.json' : 'flagship_biology_final.json';
+      } else {
+        sourceFile = normalizedSetId === 'SET-B' ? 'flagship_biology_final_b.json' : 'flagship_biology_final.json';
+      }
     }
-    
+
     if (sourceFile) {
       const filePath = path.join(process.cwd(), sourceFile);
       if (fs.existsSync(filePath)) {
@@ -2403,333 +2414,346 @@ export async function createCustomTest(req, res) {
   }
 }
 
-  /**
-   * GET /api/learning-journey/test-templates
-   * Get user's saved test templates
-   */
-  export async function getTestTemplates(req, res) {
-    try {
-      const { userId, subject, examContext } = req.query;
+/**
+ * GET /api/learning-journey/test-templates
+ * Get user's saved test templates
+ */
+export async function getTestTemplates(req, res) {
+  try {
+    const { userId, subject, examContext } = req.query;
 
-      if (!userId || userId === 'anonymous') {
-        return res.status(401).json({ error: 'Authentication required' });
+    if (!userId || userId === 'anonymous') {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { data: templates, error } = await supabaseAdmin
+      .from('test_templates')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('subject', subject)
+      .eq('exam_context', examContext)
+      .order('last_used_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: {
+        templates: templates || []
       }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching test templates:', error);
+    res.status(500).json({
+      error: 'Failed to fetch test templates',
+      message: error.message
+    });
+  }
+}
 
-      const { data: templates, error } = await supabaseAdmin
-        .from('test_templates')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('subject', subject)
-        .eq('exam_context', examContext)
-        .order('last_used_at', { ascending: false });
+/**
+ * POST /api/learning-journey/count-available-questions
+ * Count available questions matching specified criteria
+ */
+export async function countAvailableQuestions(req, res) {
+  try {
+    const {
+      subject,
+      examContext,
+      topicIds,
+      difficultyMix
+    } = req.body;
 
-      if (error) throw error;
+    if (!subject || !examContext || !topicIds || topicIds.length === 0) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
 
-      res.json({
+    console.log(`🔢 Counting available questions for ${subject} (${examContext})`);
+
+    // Get topic names for these IDs
+    // topics table uses 'name' column (not 'topic_name')
+    const { data: topicsData } = await supabaseAdmin
+      .from('topics')
+      .select('name')
+      .in('id', topicIds);
+
+    const topicNames = topicsData?.map(t => t.name).filter(Boolean) || [];
+
+    // Check if AI generation is enabled - if so we have essentially infinite questions
+    // Check both GEMINI_API_KEY and VITE_GEMINI_API_KEY (same as generateTest strategy)
+    const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    const useAIGeneration = !!(GEMINI_KEY && examContext && subject);
+
+    if (useAIGeneration) {
+      console.log(`🤖 AI generation is enabled -> Reporting virtually infinite question capacity`);
+
+      // Calculate realistic max based on number of topics selected
+      const topicsMultiplier = Math.max(1, topicNames.length);
+      const totalAvailable = topicsMultiplier * 300; // E.g., 300 questions per topic capacity
+
+      return res.json({
         success: true,
         data: {
-          templates: templates || []
+          total: totalAvailable,
+          byDifficulty: {
+            easy: Math.floor(totalAvailable * 0.3),
+            moderate: Math.floor(totalAvailable * 0.5),
+            hard: Math.floor(totalAvailable * 0.2)
+          },
+          isAIGenerated: true
         }
       });
-    } catch (error) {
-      console.error('❌ Error fetching test templates:', error);
-      res.status(500).json({
-        error: 'Failed to fetch test templates',
-        message: error.message
-      });
     }
-  }
 
-  /**
-   * POST /api/learning-journey/count-available-questions
-   * Count available questions matching specified criteria
-   */
-  export async function countAvailableQuestions(req, res) {
-    try {
-      const {
-        subject,
-        examContext,
-        topicIds,
-        difficultyMix
-      } = req.body;
+    // fallback to actual DB counts if AI generation is off
 
-      if (!subject || !examContext || !topicIds || topicIds.length === 0) {
-        return res.status(400).json({ error: 'Missing required parameters' });
-      }
+    // Get system scans for this subject
+    const { data: scans } = await supabaseAdmin
+      .from('scans')
+      .select('id')
+      .eq('is_system_scan', true)
+      .eq('subject', subject)
+      .eq('exam_context', examContext);
 
-      console.log(`🔢 Counting available questions for ${subject} (${examContext})`);
+    const scanIds = scans?.map(s => s.id) || [];
 
-      // Get topic names for these IDs
-      // topics table uses 'name' column (not 'topic_name')
-      const { data: topicsData } = await supabaseAdmin
-        .from('topics')
-        .select('name')
-        .in('id', topicIds);
-
-      const topicNames = topicsData?.map(t => t.name).filter(Boolean) || [];
-
-      // Check if AI generation is enabled - if so we have essentially infinite questions
-      // Check both GEMINI_API_KEY and VITE_GEMINI_API_KEY (same as generateTest strategy)
-      const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-      const useAIGeneration = !!(GEMINI_KEY && examContext && subject);
-
-      if (useAIGeneration) {
-        console.log(`🤖 AI generation is enabled -> Reporting virtually infinite question capacity`);
-
-        // Calculate realistic max based on number of topics selected
-        const topicsMultiplier = Math.max(1, topicNames.length);
-        const totalAvailable = topicsMultiplier * 300; // E.g., 300 questions per topic capacity
-
-        return res.json({
-          success: true,
-          data: {
-            total: totalAvailable,
-            byDifficulty: {
-              easy: Math.floor(totalAvailable * 0.3),
-              moderate: Math.floor(totalAvailable * 0.5),
-              hard: Math.floor(totalAvailable * 0.2)
-            },
-            isAIGenerated: true
-          }
-        });
-      }
-
-      // fallback to actual DB counts if AI generation is off
-
-      // Get system scans for this subject
-      const { data: scans } = await supabaseAdmin
-        .from('scans')
-        .select('id')
-        .eq('is_system_scan', true)
-        .eq('subject', subject)
-        .eq('exam_context', examContext);
-
-      const scanIds = scans?.map(s => s.id) || [];
-
-      if (scanIds.length === 0) {
-        return res.json({
-          success: true,
-          data: {
-            total: 0,
-            byDifficulty: { easy: 0, moderate: 0, hard: 0 },
-            isAIGenerated: false
-          }
-        });
-      }
-
-      // Count questions by difficulty
-      const counts = { easy: 0, moderate: 0, hard: 0 };
-
-      // questions table uses: 'difficulty' (not 'diff'), 'topic' singular TEXT (not 'topics' array)
-      // Count Easy questions
-      let easyQuery = supabaseAdmin
-        .from('questions')
-        .select('id', { count: 'exact', head: true })
-        .in('scan_id', scanIds)
-        .eq('difficulty', 'Easy');
-      if (topicNames.length > 0) easyQuery = easyQuery.in('topic', topicNames);
-      const { count: easyCount } = await easyQuery;
-      counts.easy = easyCount || 0;
-
-      // Count Moderate questions
-      let modQuery = supabaseAdmin
-        .from('questions')
-        .select('id', { count: 'exact', head: true })
-        .in('scan_id', scanIds)
-        .eq('difficulty', 'Moderate');
-      if (topicNames.length > 0) modQuery = modQuery.in('topic', topicNames);
-      const { count: moderateCount } = await modQuery;
-      counts.moderate = moderateCount || 0;
-
-      // Count Hard questions
-      let hardQuery = supabaseAdmin
-        .from('questions')
-        .select('id', { count: 'exact', head: true })
-        .in('scan_id', scanIds)
-        .eq('difficulty', 'Hard');
-      if (topicNames.length > 0) hardQuery = hardQuery.in('topic', topicNames);
-      const { count: hardCount } = await hardQuery;
-      counts.hard = hardCount || 0;
-
-      const total = counts.easy + counts.moderate + counts.hard;
-
-      res.json({
+    if (scanIds.length === 0) {
+      return res.json({
         success: true,
         data: {
-          total,
-          byDifficulty: counts,
+          total: 0,
+          byDifficulty: { easy: 0, moderate: 0, hard: 0 },
           isAIGenerated: false
         }
       });
-    } catch (error) {
-      console.error('❌ Error counting available questions:', error);
-      res.status(500).json({
-        error: 'Failed to count questions',
-        message: error.message
-      });
     }
+
+    // Count questions by difficulty
+    const counts = { easy: 0, moderate: 0, hard: 0 };
+
+    // questions table uses: 'difficulty' (not 'diff'), 'topic' singular TEXT (not 'topics' array)
+    // Count Easy questions
+    let easyQuery = supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .in('scan_id', scanIds)
+      .eq('difficulty', 'Easy');
+    if (topicNames.length > 0) easyQuery = easyQuery.in('topic', topicNames);
+    const { count: easyCount } = await easyQuery;
+    counts.easy = easyCount || 0;
+
+    // Count Moderate questions
+    let modQuery = supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .in('scan_id', scanIds)
+      .eq('difficulty', 'Moderate');
+    if (topicNames.length > 0) modQuery = modQuery.in('topic', topicNames);
+    const { count: moderateCount } = await modQuery;
+    counts.moderate = moderateCount || 0;
+
+    // Count Hard questions
+    let hardQuery = supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .in('scan_id', scanIds)
+      .eq('difficulty', 'Hard');
+    if (topicNames.length > 0) hardQuery = hardQuery.in('topic', topicNames);
+    const { count: hardCount } = await hardQuery;
+    counts.hard = hardCount || 0;
+
+    const total = counts.easy + counts.moderate + counts.hard;
+
+    res.json({
+      success: true,
+      data: {
+        total,
+        byDifficulty: counts,
+        isAIGenerated: false
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error counting available questions:', error);
+    res.status(500).json({
+      error: 'Failed to count questions',
+      message: error.message
+    });
   }
+}
 
-  /**
-   * GET /api/tests/official
-   * Fetch official flagship papers (visible to all users)
-   */
-  export async function getOfficialTests(req, res) {
-    try {
-      const { subject, examContext } = req.query;
+/**
+ * GET /api/tests/official
+ * Fetch official flagship papers (visible to all users)
+ */
+export async function getOfficialTests(req, res) {
+  try {
+    const { subject, examContext } = req.query;
 
-      // 🚀 [MISSION CRITICAL] Load Local Flagship Files as "Virtual Blueprints"
-      // Flagship papers are ONLY stored locally, NOT in the database
-      const sortedBaseline = [];
-      // --- UNIVERSAL SUBJECT-AWARE VIRTUAL BLUEPRINT INJECTION ---
-      const subjectLower = subject?.toLowerCase() || '';
-      const isMath = subjectLower === 'mathematics' || subjectLower === 'math';
-      const isPhysics = subjectLower === 'physics';
-      const isChem = subjectLower === 'chemistry';
-      const isBio = subjectLower === 'biology';
+    // 🚀 [MISSION CRITICAL] Load Local Flagship Files as "Virtual Blueprints"
+    // Flagship papers are ONLY stored locally, NOT in the database
+    const sortedBaseline = [];
+    // --- UNIVERSAL SUBJECT-AWARE VIRTUAL BLUEPRINT INJECTION ---
+    const subjectLower = subject?.toLowerCase() || '';
+    const isMath = subjectLower.includes('math');
+    const isPhysics = subjectLower.includes('physics');
+    const isChem = subjectLower.includes('chem');
+    const isBio = subjectLower.includes('bio');
+    const eContext = (examContext || '').toUpperCase();
 
-      if (isMath || isPhysics || isChem || isBio) {
-        let flagships = [];
-        const prefix = isMath ? 'MATH' : isPhysics ? 'PHYSICS' : isChem ? 'CHEM' : 'BIO';
-        
-        if (isMath) {
+    if (isMath || isPhysics || isChem || isBio) {
+      let flagships = [];
+
+      if (isMath) {
+        flagships = [
+          { id: 'SET-A', file: 'flagship_final.json', label: 'Math Set-A Prediction' },
+          { id: 'SET-B', file: 'flagship_final_b.json', label: 'Math Set-B Prediction' }
+        ];
+      } else if (isPhysics) {
+        if (eContext === 'NEET') {
           flagships = [
-            { id: 'SET-A', file: 'flagship_final.json', label: 'Math Set-A Prediction' },
-            { id: 'SET-B', file: 'flagship_final_b.json', label: 'Math Set-B Prediction' }
+            { id: 'SET-A', file: 'flagship_neet_physics_2026_set_a.json', label: 'NEET Physics Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_neet_physics_2026_set_b.json', label: 'NEET Physics Set-B Prediction' }
           ];
-        } else if (isPhysics) {
-          // Check exam context for NEET vs KCET Physics
-          if (examContext === 'NEET') {
-            flagships = [
-              { id: 'SET-A', file: 'flagship_neet_physics_2026_set_a.json', label: 'Physics Set-A Prediction' },
-              { id: 'SET-B', file: 'flagship_neet_physics_2026_set_b.json', label: 'Physics Set-B Prediction' }
-            ];
-          } else {
-            flagships = [
-              { id: 'SET-A', file: 'flagship_physics_final.json', label: 'Physics Set-A Prediction' },
-              { id: 'SET-B', file: 'flagship_physics_final_b.json', label: 'Physics Set-B Prediction' }
-            ];
-          }
-        } else if (isChem) {
+        } else {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_physics_final.json', label: 'Physics Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_physics_final_b.json', label: 'Physics Set-B Prediction' }
+          ];
+        }
+      } else if (isChem) {
+        if (eContext === 'NEET') {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_neet_chemistry_2026_set_a.json', label: 'NEET Chemistry Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_neet_chemistry_2026_set_b.json', label: 'NEET Chemistry Set-B Prediction' }
+          ];
+        } else {
           flagships = [
             { id: 'SET-A', file: 'flagship_chemistry_final.json', label: 'Chemistry Set-A Prediction' },
             { id: 'SET-B', file: 'flagship_chemistry_final_b.json', label: 'Chemistry Set-B Prediction' }
           ];
-        } else if (isBio) {
+        }
+      } else if (isBio) {
+        if (eContext === 'NEET') {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_biology_final.json', label: 'NEET Biology Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_biology_final_b.json', label: 'NEET Biology Set-B Prediction' }
+          ];
+        } else {
           flagships = [
             { id: 'SET-A', file: 'flagship_biology_final.json', label: 'Biology Set-A Prediction' },
             { id: 'SET-B', file: 'flagship_biology_final_b.json', label: 'Biology Set-B Prediction' }
           ];
         }
-
-        const normalizedSubject = isMath ? 'Mathematics' : isPhysics ? 'Physics' : isChem ? 'Chemistry' : 'Biology';
-
-        for (const set of flagships) {
-          try {
-            const filePath = path.join(process.cwd(), set.file);
-            if (fs.existsSync(filePath)) {
-              // Read the JSON file to get the actual total_questions count
-              let totalQuestions = 60; // default fallback
-              try {
-                const fileContent = fs.readFileSync(filePath, 'utf8');
-                const jsonData = JSON.parse(fileContent);
-                totalQuestions = jsonData.total_questions || jsonData.test_config?.questions?.length || 60;
-              } catch (readErr) {
-                console.warn(`Could not read total_questions from ${set.file}, using default 60:`, readErr);
-              }
-
-              sortedBaseline.push({
-                id: `virtual-${subjectLower}-${set.id.toLowerCase()}`,
-                test_name: set.label,
-                subject: normalizedSubject,
-                exam_context: examContext || 'KCET',
-                status: 'completed',
-                total_questions: totalQuestions,
-                duration_minutes: 80,
-                created_at: new Date().toISOString(),
-                is_virtual: true,
-                official_set_id: `${prefix}-${set.id}`, // Locked subject-specific set ID
-                label: set.label
-              });
-            }
-          } catch (e) {
-            console.error(`Failed to inject virtual flagship ${set.id}:`, e);
-          }
-        }
       }
 
-      // --- Aggressive Forensic Deduplication ---
-      const unique = [];
-      const seenOfficialSets = new Set();
-      const seenNames = new Set();
+      const normalizedSubject = isMath ? 'Mathematics' : isPhysics ? 'Physics' : isChem ? 'Chemistry' : 'Biology';
 
-      // Sort: Virtual/Official Blueprints FIRST, then by Date
-      const sorted = sortedBaseline.sort((a, b) => {
-        if (a.is_virtual && !b.is_virtual) return -1;
-        if (!a.is_virtual && b.is_virtual) return 1;
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-      });
+      for (const set of flagships) {
+        try {
+          const filePath = path.join(process.cwd(), set.file);
+          if (fs.existsSync(filePath)) {
+            // Read the JSON file to get the actual total_questions count
+            let totalQuestions = 60; // default fallback
+            try {
+              const fileContent = fs.readFileSync(filePath, 'utf8');
+              const jsonData = JSON.parse(fileContent);
+              totalQuestions = jsonData.total_questions || jsonData.test_config?.questions?.length || 60;
+            } catch (readErr) {
+              console.warn(`Could not read total_questions from ${set.file}, using default 60:`, readErr);
+            }
 
-      sorted.forEach(item => {
-        const name = (item.testName || item.test_name || '').toUpperCase();
-        
-        // Identify the "Set" (A or B)
-        let setType = 'CUSTOM';
-        if (item.official_set_id?.includes('SET-B') || item.setId?.includes('SET-B') || name.includes('SET-B') || name.includes('SET B')) {
-          setType = 'SET-B';
-        } else if (item.official_set_id?.includes('SET-A') || item.setId?.includes('SET-A') || name.includes('SET-A') || name.includes('SET A')) {
-          setType = 'SET-A';
-        }
-
-        if (setType !== 'CUSTOM') {
-          // Force EXACTLY ONE card per Set Type (SET-A, SET-B)
-          if (!seenOfficialSets.has(setType)) {
-            seenOfficialSets.add(setType);
-            unique.push({
-              ...item,
-              testName: item.test_name || item.testName,
-              durationMinutes: item.duration_minutes || 80,
-              totalQuestions: item.total_questions || 60,
-              isOfficialBlueprint: true
+            sortedBaseline.push({
+              id: `virtual-${subjectLower}-${set.id.toLowerCase()}`,
+              test_name: set.label,
+              subject: normalizedSubject,
+              exam_context: examContext || 'KCET',
+              status: 'completed',
+              total_questions: totalQuestions,
+              duration_minutes: 80,
+              created_at: new Date().toISOString(),
+              is_virtual: true,
+              official_set_id: `${prefix}-${set.id}`, // Locked subject-specific set ID
+              label: set.label
             });
           }
-        } else if (!seenNames.has(name)) {
-          seenNames.add(name);
+        } catch (e) {
+          console.error(`Failed to inject virtual flagship ${set.id}:`, e);
+        }
+      }
+    }
+
+    // --- Aggressive Forensic Deduplication ---
+    const unique = [];
+    const seenOfficialSets = new Set();
+    const seenNames = new Set();
+
+    // Sort: Virtual/Official Blueprints FIRST, then by Date
+    const sorted = sortedBaseline.sort((a, b) => {
+      if (a.is_virtual && !b.is_virtual) return -1;
+      if (!a.is_virtual && b.is_virtual) return 1;
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    });
+
+    sorted.forEach(item => {
+      const name = (item.testName || item.test_name || '').toUpperCase();
+
+      // Identify the "Set" (A or B)
+      let setType = 'CUSTOM';
+      if (item.official_set_id?.includes('SET-B') || item.setId?.includes('SET-B') || name.includes('SET-B') || name.includes('SET B')) {
+        setType = 'SET-B';
+      } else if (item.official_set_id?.includes('SET-A') || item.setId?.includes('SET-A') || name.includes('SET-A') || name.includes('SET A')) {
+        setType = 'SET-A';
+      }
+
+      if (setType !== 'CUSTOM') {
+        // Force EXACTLY ONE card per Set Type (SET-A, SET-B)
+        if (!seenOfficialSets.has(setType)) {
+          seenOfficialSets.add(setType);
           unique.push({
             ...item,
-            testName: item.test_name,
-            durationMinutes: item.duration_minutes,
-            totalQuestions: item.total_questions
+            testName: item.test_name || item.testName,
+            durationMinutes: item.duration_minutes || 80,
+            totalQuestions: item.total_questions || 60,
+            isOfficialBlueprint: true
           });
         }
-      });
+      } else if (!seenNames.has(name)) {
+        seenNames.add(name);
+        unique.push({
+          ...item,
+          testName: item.test_name,
+          durationMinutes: item.duration_minutes,
+          totalQuestions: item.total_questions
+        });
+      }
+    });
 
-      res.json({
-        success: true,
-        data: unique
-      });
-    } catch (error) {
-      console.error('❌ Error fetching official tests:', error);
-      res.status(500).json({ error: 'Failed to load official prediction papers' });
-    }
+    res.json({
+      success: true,
+      data: unique
+    });
+  } catch (error) {
+    console.error('❌ Error fetching official tests:', error);
+    res.status(500).json({ error: 'Failed to load official prediction papers' });
   }
+}
 
-  // Export all handlers
-  export const learningJourneyHandlers = {
-    getTopics,
-    getTopicResources,
-    updateTopicProgress,
-    recordActivity,
-    generateTest,
-    submitTest,
-    getTestResults,
-    getTestHistory,
-    getSubjectProgress,
-    getTrajectoryProgress,
-    getWeakTopics,
-    createCustomTest,
-    getTestTemplates,
-    countAvailableQuestions,
-    getGenerationProgress,
-    getOfficialTests
-  };
+// Export all handlers
+export const learningJourneyHandlers = {
+  getTopics,
+  getTopicResources,
+  updateTopicProgress,
+  recordActivity,
+  generateTest,
+  submitTest,
+  getTestResults,
+  getTestHistory,
+  getSubjectProgress,
+  getTrajectoryProgress,
+  getWeakTopics,
+  createCustomTest,
+  getTestTemplates,
+  countAvailableQuestions,
+  getGenerationProgress,
+  getOfficialTests
+};

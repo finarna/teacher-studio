@@ -4,7 +4,7 @@
 
 @page {
   size: A4;
-  margin: 0.3cm 1cm 0.3cm 1cm; /* Absolute minimum margins to push title up and footer down */
+  margin: 1cm 1cm 1.5cm 1cm; /* Absolute minimum margins to push title up and footer down */
 }
 
 :root {
@@ -28,13 +28,12 @@ body {
   box-sizing: border-box;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: #1a1a1a;
-  overflow: hidden;
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
   
   /* TILED WATERMARK EVERYWHERE */
   background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='150' y='150' fill-opacity='0.15' font-family='Arial' font-size='16' font-weight='900' transform='rotate(-33, 150, 150)' text-anchor='middle'%3E%3Ctspan fill='%230a1a16'%3EPlus2%3C/tspan%3E%3Ctspan fill='%23ff7f50'%3EAI%3C/tspan%3E%3Ctspan fill='%230a1a16'%3E Exam DNA%3C/tspan%3E%3C/text%3E%3C/svg%3E");
   background-repeat: repeat;
-  padding-bottom: 2cm; /* Optimized safety buffer to push questions away from footer */
+  padding-bottom: 2.5cm; /* Optimized safety buffer to push questions away from footer */
 }
 
 /* Header Sections */
@@ -126,8 +125,8 @@ body {
 
 .question-item {
   margin-bottom: 1.6rem;
-  break-inside: avoid;
-  page-break-inside: avoid;
+  break-inside: auto !important;
+  page-break-inside: auto !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -136,14 +135,14 @@ body {
    ═══════════════════════════════════════════════════════════════ */
 
 /* Base KaTeX styling */
-.katex {
+.paper-container .katex {
   font-family: KaTeX_Main, Times New Roman, serif !important;
   font-size: 1.15em !important;
   line-height: 1.5 !important;
 }
 
 /* Fix vertical list positioning - CRITICAL for fractions, roots, matrices */
-.katex .vlist-t {
+.paper-container .katex .vlist-t {
   display: inline-table !important;
   table-layout: auto !important;
   border-collapse: separate !important;
@@ -151,135 +150,135 @@ body {
   vertical-align: middle !important;
 }
 
-.katex .vlist-r {
+.paper-container .katex .vlist-r {
   display: table-row !important;
   vertical-align: middle !important;
 }
 
-.katex .vlist {
+.paper-container .katex .vlist {
   display: table-cell !important;
   vertical-align: middle !important;
   position: relative !important;
 }
 
 /* Fraction line positioning */
-.katex .mfrac {
+.paper-container .katex .mfrac {
   vertical-align: middle !important;
   display: inline-block !important;
 }
 
-.katex .mfrac .frac-line {
+.paper-container .katex .mfrac .frac-line {
   border-bottom: 0.04em solid black !important;
   margin: 0.1em 0 !important;
 }
 
-.katex .mfrac > span {
+.paper-container .katex .mfrac > span {
   vertical-align: middle !important;
 }
 
 /* Square root positioning */
-.katex .sqrt {
+.paper-container .katex .sqrt {
   vertical-align: middle !important;
   display: inline-block !important;
 }
 
-.katex .sqrt > .vlist-t {
+.paper-container .katex .sqrt > .vlist-t {
   vertical-align: -0.05em !important;
 }
 
-.katex .sqrt .sqrt-sign {
+.paper-container .katex .sqrt .sqrt-sign {
   vertical-align: top !important;
 }
 
-.katex .sqrt .vlist-s {
+.paper-container .katex .sqrt .vlist-s {
   vertical-align: middle !important;
 }
 
 /* Matrix and delimiter positioning */
-.katex .delimsizing,
-.katex .delim-size1,
-.katex .delim-size2,
-.katex .delim-size3,
-.katex .delim-size4 {
+.paper-container .katex .delimsizing,
+.paper-container .katex .delim-size1,
+.paper-container .katex .delim-size2,
+.paper-container .katex .delim-size3,
+.paper-container .katex .delim-size4 {
   vertical-align: middle !important;
   transform: none !important;
 }
 
-.katex .delimcenter {
+.paper-container .katex .delimcenter {
   vertical-align: middle !important;
 }
 
-.katex .arraycolsep {
+.paper-container .katex .arraycolsep {
   vertical-align: middle !important;
 }
 
 /* Superscript and subscript positioning */
-.katex .vlist-t.vlist-t2 {
+.paper-container .katex .vlist-t.vlist-t2 {
   vertical-align: -0.05em !important;
 }
 
-.katex .msupsub {
+.paper-container .katex .msupsub {
   vertical-align: baseline !important;
 }
 
 /* Ensure proper baseline alignment */
-.katex .base {
+.paper-container .katex .base {
   vertical-align: baseline !important;
 }
 
-.katex .strut {
+.paper-container .katex .strut {
   vertical-align: -0.05em !important;
 }
 
 /* Matrix row alignment */
-.katex .mtable {
+.paper-container .katex .mtable {
   vertical-align: middle !important;
 }
 
-.katex .mtable .col-align-c {
+.paper-container .katex .mtable .col-align-c {
   text-align: center !important;
 }
 
 /* Paren and bracket sizing */
-.katex .sizing,
-.katex .fontsize-ensurer {
+.paper-container .katex .sizing,
+.paper-container .katex .fontsize-ensurer {
   vertical-align: baseline !important;
 }
 
 /* Integral symbols and operators */
-.katex .mop {
+.paper-container .katex .mop {
   vertical-align: baseline !important;
   display: inline-block !important;
 }
 
-.katex .mop.op-symbol {
+.paper-container .katex .mop.op-symbol {
   vertical-align: baseline !important;
 }
 
 /* Large operators (integrals, sums) with limits */
-.katex .mop.op-limits {
+.paper-container .katex .mop.op-limits {
   vertical-align: baseline !important;
 }
 
 /* SVG rendering fixes for complex symbols */
-.katex svg {
+.paper-container .katex svg {
   display: inline-block !important;
   vertical-align: middle !important;
   fill: currentColor !important;
 }
 
-.katex svg path {
+.paper-container .katex svg path {
   fill: currentColor !important;
   stroke: none !important;
 }
 
 /* Square root SVG specific */
-.katex .sqrt svg {
+.paper-container .katex .sqrt svg {
   vertical-align: middle !important;
 }
 
 /* Ensure proper rendering of stretchy delimiters */
-.katex .stretchy {
+.paper-container .katex .stretchy {
   vertical-align: middle !important;
   display: inline-block !important;
 }
@@ -342,64 +341,88 @@ body {
 /* ══════════════ PRINT OPTIMIZATIONS ══════════════ */
 
 @media print {
-  /* Parent Liberation to prevent clipping */
-  html, body, #root, #root > div, .min-h-screen {
+  /* Liberate all containers from overflow and height restrictions */
+  html, body, #root, #root > div, #root div:has(.print-area), .min-h-screen {
     height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
     overflow: visible !important;
     display: block !important;
     position: static !important;
-    background: white !important;
-  }
-  
-  .no-print {
-    display: none !important;
+    -webkit-overflow-scrolling: auto !important;
   }
 
-  body {
-    background-color: #fff;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  /* Force display of the print area regardless of tab state */
+  .print-area, .print-section {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important; /* CHANGED FROM ABSOLUTE: Crucial for multi-page flow */
+    width: 100% !important;
+    z-index: 999999 !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  /* Hide the rest of the application to avoid overflow/clipping interference */
+  #root > div:not(.print-area) {
+    display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important; /* Ensure they don't take space */
   }
 
   .paper-container {
-    width: 100%;
-    box-shadow: none;
-    margin: 0;
-    min-height: 100vh;
+    width: 100% !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
     visibility: visible !important;
-    padding-bottom: 0 !important;
+    padding-bottom: 8cm !important; /* EXTREME buffer to force final page discovery */
+    overflow: visible !important;
+    display: block !important;
+    position: relative !important;
+  }
+
+  .questions-grid {
+    display: block !important;
+    height: auto !important;
     overflow: visible !important;
   }
 
-  /* Table Footer Strategy to reserve space on every page */
-  .print-layout-table {
-    width: 100%;
-    border-collapse: collapse;
-    border: none;
+  /* Simplify options for print - Grid can cause truncation on page breaks */
+  .options-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.4rem !important;
+    padding-left: 1rem !important;
+    margin-bottom: 1rem !important;
   }
 
-  .tfoot-spacer {
-    height: 1.8cm; /* Reserved space for the fixed footer on EVERY page */
-    visibility: hidden;
+  .option {
+    display: flex !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
-  .thead-spacer {
-    height: 1cm; /* Reserved space at the top of EVERY page for better margins */
-    visibility: hidden;
-  }
-
-  .print-section {
-    position: static !important;
+  .print-area, .print-section {
     display: block !important;
+    position: static !important;
+    height: auto !important;
+    overflow: visible !important;
     visibility: visible !important;
-    z-index: 9999 !important;
   }
   
   .paper-footer {
-    position: fixed !important;
-    bottom: 0.1cm !important; /* Pin to absolute bottom edge of the paper */
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 10000;
+    position: static !important; /* CHANGED FROM FIXED: Prevent overlap/clipping during troubleshooting */
+    margin-top: 2cm !important;
+    border-top: 1px solid #000 !important;
+    width: 100% !important;
+    padding: 1rem 0 !important;
   }
 }

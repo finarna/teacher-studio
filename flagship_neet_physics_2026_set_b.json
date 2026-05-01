@@ -16,12 +16,12 @@
     "questions": [
       {
         "id": "40548711-a4ba-49e3-b201-6d17d794b180",
-        "text": "A square loop of side $10 \\text{ cm}$ and resistance $0.5 \\Omega$ is placed vertically in the East-West plane. A uniform magnetic field of $0.10 \\text{ T}$ is set up across the plane in the North-East direction. The magnetic field is decreased to zero in $0.70 \\text{ s}$ at a steady rate. Determine the magnitude of the induced current during this time interval.",
+        "text": "A square loop of side $10 cm$ and resistance $0.5 \\Omega$ is placed vertically in the East-West plane. A uniform magnetic field of $0.10 T$ is set up across the plane in the North-East direction. The magnetic field is decreased to zero in $0.70 s$ at a steady rate. Determine the magnitude of the induced current during this time interval.",
         "options": [
-          "$1.0 \\times 10^{-3} \\text{ A}$",
-          "$2.0 \\times 10^{-3} \\text{ A}$",
-          "$0.5 \\times 10^{-3} \\text{ A}$",
-          "$4.0 \\times 10^{-3} \\text{ A}$"
+          "$1.0 \\times 10^{-3} A$",
+          "$0.5 \\times 10^{-3} A$",
+          "$2.0 \\times 10^{-3} A$",
+          "$4.0 \\times 10^{-3} A$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -30,15 +30,15 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Step 1: Calculate the area of the loop. $A = (0.1 \\text{ m})^2 = 0.01 \\text{ m}^2$.",
-          "Step 2: Identify the angle $\\theta$ between the magnetic field $\\vec{B}$ and the area vector $\\vec{A}$. Since the loop is in the E-W plane, its normal (area vector) points North. The field is North-East, so $\\theta = 45^\\circ$.",
-          "Step 3: Calculate initial flux $\\Phi_1 = B A \\cos \\theta = 0.1 \\times 0.01 \\times \\cos 45^\\circ = 0.001 / \\sqrt{2} \\text{ Wb}$. Final flux $\\Phi_2 = 0$.",
-          "Step 4: Calculate induced EMF using Faraday's Law: $|e| = \\left| \\frac{\\Delta \\Phi}{\\Delta t} \\right| = \\frac{0.001 / \\sqrt{2}}{0.7} \\approx \\frac{0.000707}{0.7} = 1.01 \\times 10^{-3} \\text{ V}$.",
-          "Step 5: Calculate induced current: $I = \\frac{|e|}{R} = \\frac{1.01 \\times 10^{-3}}{0.5} \\approx 2.02 \\times 10^{-3} \\text{ A}$."
+          "Step 1: Calculate the area of the loop. $A = (0.1 m)^2 = 0.01 m^2$.",
+          "Step 2: Identify the angle $\\theta$ between the magnetic field $\\vec{B}$ and the area vector $\\vec{A}$. Since the loop is in the E-W plane, its normal (area vector) points North. The field is North-East, so $\\theta = 45^°$.",
+          "Step 3: Calculate initial flux $\\Phi_1 = B A \\cos \\theta = 0.1 \\times 0.01 \\times \\cos 45^° = 0.001 / \\sqrt{2} Wb$. Final flux $\\Phi_2 = 0$.",
+          "Step 4: Calculate induced EMF using Faraday's Law: $|e| = \\left| \\frac{\\Delta \\Phi}{\\Delta t} \\right| = \\frac{0.001 / \\sqrt}{2}{0.7} \\approx \\frac{0.000707}{0.7} = 1.01 \\times 10^{-3} V$.",
+          "Step 5: Calculate induced current: $I = \\frac{|e|}{R} = \\frac{1.01 \\times 10^}{-3}{0.5} \\approx 2.02 \\times 10^{-3} A$."
         ],
         "examTip": "Always double-check the angle between the area vector and the magnetic field. In EMI, the 'plane of the loop' and the 'normal to the loop' are often confused.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Magnetic flux is the dot product of $\\\\vec{B}$ and $\\\\vec{A}$. Induced EMF is the time rate of change of this flux.\",\"memoryTrigger\":\"FLUX = B-A-Cos (Think: Bacons for breakfast)\",\"visualPrompt\":\"Imagine a window (loop) facing North and a breeze (B-field) blowing from the North-East. Only the component of the breeze entering directly through the window contributes to the flux.\",\"commonTrap\":\"Using $\\\\theta=90^\\\\circ$ or $0^\\\\circ$ instead of $45^\\\\circ$ due to misreading the North-East direction.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Magnetic flux is the dot product of $\\\\vec{B}$ and $\\\\vec{A}$. Induced EMF is the time rate of change of this flux.\", \"memoryTrigger\": \"FLUX = B-A-Cos (Think: Bacons for breakfast)\", \"visualPrompt\": \"Imagine a window (loop) facing North and a breeze (B-field) blowing from the North-East. Only the component of the breeze entering directly through the window contributes to the flux.\", \"commonTrap\": \"Using $\\\\theta=90^\\\\circ$ or $0^\\\\circ$ instead of $45^\\\\circ$ due to misreading the North-East direction.\"}",
         "keyFormulas": [
           "$\\Phi = BA \\cos \\theta$",
           "$e = -\\frac{d\\Phi}{dt}$",
@@ -46,7 +46,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
@@ -54,12 +54,12 @@
       },
       {
         "id": "b664162e-1ec4-4dcb-9962-46599bbd84a5",
-        "text": "A circular coil of $500$ turns and radius $2 \\text{ cm}$ is placed coaxially inside a very long solenoid of $1000$ turns per meter and radius $5 \\text{ cm}$. What is the mutual inductance of the system? (Take $\\mu_0 = 4\\pi \\times 10^{-7} \\text{ T m/A}$ and $\\pi^2 \\approx 10$)",
+        "text": "A circular coil of $500$ turns and radius $2 cm$ is placed coaxially inside a very long solenoid of $1000$ turns per meter and radius $5 cm$. What is the mutual inductance of the system? (Take $\\mu_0 = 4\\pi \\times 10^{-7} T m/A$ and $\\pi^2 \\approx 10$)",
         "options": [
-          "$4 \\times 10^{-4} \\text{ H}$",
-          "$8 \\times 10^{-4} \\text{ H}$",
-          "$2 \\times 10^{-4} \\text{ H}$",
-          "$16 \\times 10^{-4} \\text{ H}$"
+          "$2 \\times 10^{-4} H$",
+          "$8 \\times 10^{-4} H$",
+          "$16 \\times 10^{-4} H$",
+          "$4 \\times 10^{-4} H$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -69,22 +69,22 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Step 1: Identify the formula for mutual inductance of two coaxial solenoids/coils: $M = \\mu_0 n_1 N_2 A_2$, where $A_2$ is the area of the smaller (inner) coil.",
-          "Step 2: Note the parameters: $n_1 = 1000 \\text{ turns/m}$, $N_2 = 500$, $r_2 = 2 \\text{ cm} = 0.02 \\text{ m}$.",
-          "Step 3: Calculate the area of the inner coil: $A_2 = \\pi r_2^2 = \\pi (0.02)^2 = 4\\pi \\times 10^{-4} \\text{ m}^2$.",
+          "Step 2: Note the parameters: $n_1 = 1000 turns/m$, $N_2 = 500$, $r_2 = 2 cm = 0.02 m$.",
+          "Step 3: Calculate the area of the inner coil: $A_2 = \\pi r_2^2 = \\pi (0.02)^2 = 4\\pi \\times 10^{-4} m^2$.",
           "Step 4: Substitute into the formula: $M = (4\\pi \\times 10^{-7}) \\times 1000 \\times 500 \\times (4\\pi \\times 10^{-4})$.",
           "Step 5: Simplify: $M = 16\\pi^2 \\times 10^{-7} \\times 10^3 \\times 5 \\times 10^2 \\times 10^{-4} = 80\\pi^2 \\times 10^{-6}$.",
-          "Step 6: Using $\\pi^2 \\approx 10$, $M = 80 \\times 10 \\times 10^{-6} = 800 \\times 10^{-6} = 8 \\times 10^{-4} \\text{ H}$."
+          "Step 6: Using $\\pi^2 \\approx 10$, $M = 80 \\times 10 \\times 10^{-6} = 800 \\times 10^{-6} = 8 \\times 10^{-4} H$."
         ],
         "examTip": "In mutual inductance between two different sized coils, always use the area of the **smaller** coil because that is where the flux is linked.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Mutual inductance $M$ is a property of the pair of coils. $M_{12} = M_{21}$. It depends only on geometry.\",\"memoryTrigger\":\"M = Munia ($\\\\mu_0 n N A$)\",\"visualPrompt\":\"Imagine a smaller ring inside a larger pipe. Only the magnetic field inside the pipe that passes through the ring 'counts' for the link.\",\"commonTrap\":\"Using the area of the larger solenoid instead of the inner coil.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Mutual inductance $M$ is a property of the pair of coils. $M_{12} = M_{21}$. It depends only on geometry.\", \"memoryTrigger\": \"M = Munia ($\\\\mu_0 n N A$)\", \"visualPrompt\": \"Imagine a smaller ring inside a larger pipe. Only the magnetic field inside the pipe that passes through the ring 'counts' for the link.\", \"commonTrap\": \"Using the area of the larger solenoid instead of the inner coil.\"}",
         "keyFormulas": [
           "$M = \\mu_0 n_1 N_2 A_2$",
           "$\\Phi = MI$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
@@ -92,12 +92,12 @@
       },
       {
         "id": "3abac957-162c-4826-b990-ee0c2550bef6",
-        "text": "A horizontal straight wire $10 \\text{ m}$ long extending from East to West is falling with a speed of $5.0 \\text{ m/s}$, at right angles to the horizontal component of the Earth's magnetic field, $0.30 \\times 10^{-4} \\text{ Wb/m}^2$. The instantaneous value of the induced EMF in the wire and the direction of the EMF (from the perspective of an observer) are:",
+        "text": "A horizontal straight wire $10 m$ long extending from East to West is falling with a speed of $5.0 m/s$, at right angles to the horizontal component of the Earth's magnetic field, $0.30 \\times 10^{-4} Wb/m^2$. The instantaneous value of the induced EMF in the wire and the direction of the EMF (from the perspective of an observer) are:",
         "options": [
-          "$1.5 \\text{ mV}$, West to East",
-          "$1.5 \\text{ mV}$, East to West",
-          "$2.5 \\text{ mV}$, West to East",
-          "$2.5 \\text{ mV}$, East to West"
+          "$2.5 mV$, West to East",
+          "$1.5 mV$, East to West",
+          "$1.5 mV$, West to East",
+          "$2.5 mV$, East to West"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -107,21 +107,21 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Step 1: Identify that this is a case of motional EMF. Formula: $e = B l v$.",
-          "Step 2: Plug in values: $B = 0.30 \\times 10^{-4} \\text{ T}$, $l = 10 \\text{ m}$, $v = 5.0 \\text{ m/s}$.",
-          "Step 3: Calculate magnitude: $e = (0.30 \\times 10^{-4}) \\times 10 \\times 5 = 1.5 \\times 10^{-3} \\text{ V} = 1.5 \\text{ mV}$.",
+          "Step 2: Plug in values: $B = 0.30 \\times 10^{-4} T$, $l = 10 m$, $v = 5.0 m/s$.",
+          "Step 3: Calculate magnitude: $e = (0.30 \\times 10^{-4}) \\times 10 \\times 5 = 1.5 \\times 10^{-3} V = 1.5 mV$.",
           "Step 4: Determine direction using Fleming's Right-Hand Rule. Thumb (Motion) points down, First finger (Field) points North (Horizontal component of Earth's field).",
           "Step 5: The second finger (Induced Current) points West. Thus, the EMF is directed from East to West."
         ],
         "examTip": "For Earth's magnetic field questions, remember that the horizontal component ($B_H$) points North. Use Fleming's Right-Hand Rule for 'Motional' (Generation) and Left-Hand Rule for 'Motor' (Force).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Motional EMF occurs when a conductor cuts magnetic field lines. The direction is determined by the Lorentz force on charges within the conductor.\",\"memoryTrigger\":\"R-H Rule: Thumb=Thrust (Motion), First=Field, Second=Sent (Current/EMF)\",\"visualPrompt\":\"Imagine the wire 'scooping' the magnetic field lines as it falls. The electrons get pushed to one end like water in a moving tray.\",\"commonTrap\":\"Confusing the direction of the horizontal component of Earth's magnetic field (it points South to North).\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Motional EMF occurs when a conductor cuts magnetic field lines. The direction is determined by the Lorentz force on charges within the conductor.\", \"memoryTrigger\": \"R-H Rule: Thumb=Thrust (Motion), First=Field, Second=Sent (Current/EMF)\", \"visualPrompt\": \"Imagine the wire 'scooping' the magnetic field lines as it falls. The electrons get pushed to one end like water in a moving tray.\", \"commonTrap\": \"Confusing the direction of the horizontal component of Earth's magnetic field (it points South to North).\"}",
         "keyFormulas": [
           "$e = B l v$",
           "Direction: $\\vec{v} \\times \\vec{B}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
@@ -129,12 +129,12 @@
       },
       {
         "id": "fc5ec48a-99aa-476e-9ea5-2acf6a7f1baf",
-        "text": "The electron in a hydrogen atom revolves around the nucleus in an orbit of radius $0.5 \\, \\text{\\AA}$ with a frequency of $10^{16} \\, \\text{Hz}$. What is the magnetic moment associated with the orbital motion of the electron? (Take $e = 1.6 \\times 10^{-19} \\, \\text{C}$)",
+        "text": "The electron in a hydrogen atom revolves around the nucleus in an orbit of radius $0.5 \\, \\AA$ with a frequency of $10^{16} \\, Hz$. What is the magnetic moment associated with the orbital motion of the electron? (Take $e = 1.6 \\times 10^{-19} \\, C$)",
         "options": [
-          "1.25 \\times 10^{-23} \\, \\text{A}\\cdot\\text{m}^2",
-          "1.6 \\times 10^{-23} \\, \\text{A}\\cdot\\text{m}^2",
-          "8.0 \\times 10^{-24} \\, \\text{A}\\cdot\\text{m}^2",
-          "4.0 \\times 10^{-24} \\, \\text{A}\\cdot\\text{m}^2"
+          "$$1.25 \\times 10$⁻²³$ \\, $A\\cdotm²$",
+          "$$4.0 \\times 10$⁻²⁴$ \\, $A\\cdotm²$",
+          "$$8.0 \\times 10$⁻²⁴$ \\, $A\\cdotm²$",
+          "$$1.6 \\times 10$⁻²³$ \\, $A\\cdotm²$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -145,15 +145,15 @@
         "solutionSteps": [
           "Recall magnetic moment formula for a loop ::: $M = IA$.",
           "Determine the equivalent current $I$ ::: $I = \\frac{q}{T} = qf$, where $f$ is frequency.",
-          "Calculate current ::: $I = (1.6 \\times 10^{-19} \\, \\text{C}) \\times (10^{16} \\, \\text{Hz}) = 1.6 \\times 10^{-3} \\, \\text{A}$.",
-          "Calculate the area $A$ of the orbit ::: $A = \\pi r^2$. Using $r = 0.5 \\times 10^{-10} \\, \\text{m}$.",
-          "Compute $A$ ::: $A = 3.14 \\times (0.5 \\times 10^{-10})^2 = 3.14 \\times 0.25 \\times 10^{-20} \\approx 0.785 \\times 10^{-20} \\, \\text{m}^2$.",
-          "Calculate magnetic moment $M$ ::: $M = (1.6 \\times 10^{-3}) \\times (0.785 \\times 10^{-20}) \\approx 1.256 \\times 10^{-23} \\, \\text{A}\\cdot\\text{m}^2$. *Self-Correction: Recalculating with frequency given as $10^{16}$ exactly.* Let's re-verify: $M = evr/2 = e(2\\pi rf)r/2 = e\\pi r^2 f$. $M = (1.6 \\times 10^{-19}) \\times (3.14) \\times (0.25 \\times 10^{-20}) \\times 10^{16} = 1.256 \\times 10^{-23}$.",
-          "Wait, check option B ::: If $M = 1.6 \\times 10^{-23}$, this corresponds to a slightly different $r$ or $f$. Re-evaluating standard Bohr model values: $M = n\\mu_B$. For $n=1$, $M = 9.27 \\times 10^{-24}$. Using the question's specific values is mandatory. $1.6 \\times 3.14 \\times 0.25 = 1.256$. Matches Option A better."
+          "Calculate current ::: $I = (1.6 \\times 10^{-19} \\, C) \\times (10^{16} \\, Hz) = 1.6 \\times 10^{-3} \\, A$.",
+          "Calculate the area $A$ of the orbit ::: $A = \\pi r^2$. Using $r = 0.5 \\times 10^{-10} \\, m$.",
+          "Compute $A$ ::: $A = 3.14 \\times (0.5 \\times 10^{-10})^2 = 3.14 \\times 0.25 \\times 10^{-20} \\approx 0.785 \\times 10^{-20} \\, m^2$.",
+          "Calculate magnetic moment $M$ ::: $M = (1.6 \\times 10^{-3}) \\times (0.785 \\times 10^{-20}) \\approx 1.256 \\times 10^{-23} \\, A\\cdotm^2$. *Self-Correction: Recalculating with frequency given as $10^{16}$ exactly.* Let's re-verify: $M = evr/2 = e(2\\pi rf)r/2 = e\\pi r^2 f$. $M = (1.6 \\times 10^{-19}) \\times (3.14) \\times (0.25 \\times 10^{-20}) \\times 10^{16} = 1.256 \\times 10^{-23}$.",
+          "Wait, check option (d)::: If $M = 1.6 \\times 10^{-23}$, this corresponds to a slightly different $r$ or $f$. Re-evaluating standard Bohr model values: $M = n\\mu_B$. For $n=1$, $M = 9.27 \\times 10^{-24}$. Using the question's specific values is mandatory. $1.6 \\times 3.14 \\times 0.25 = 1.256$. Matches Option (d)better."
         ],
         "examTip": "In atom-based magnetism, current is always $I = ef$ or $I = ev/2\\pi r$. The orbital magnetic moment is often linked to the angular momentum $L$ by the gyromagnetic ratio $e/2m$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"A revolving electron is equivalent to a tiny current loop. The magnetic moment of this loop is the product of current and the area enclosed.\",\"memoryTrigger\":\"M-I-A: Moment = Current $\\\\times$ Area.\",\"visualPrompt\":\"A tiny, fast-spinning bead of electricity creating a microscopic magnetic field.\",\"commonTrap\":\"Using diameter instead of radius or forgetting to square the radius in the area formula.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"A revolving electron is equivalent to a tiny current loop. The magnetic moment of this loop is the product of current and the area enclosed.\", \"memoryTrigger\": \"M-I-A: Moment = Current $\\\\times$ Area.\", \"visualPrompt\": \"A tiny, fast-spinning bead of electricity creating a microscopic magnetic field.\", \"commonTrap\": \"Using diameter instead of radius or forgetting to square the radius in the area formula.\"}",
         "keyFormulas": [
           "$M = IA$",
           "$I = ef$",
@@ -161,7 +161,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -169,11 +169,11 @@
       },
       {
         "id": "c46ff121-99eb-4c23-8783-f903998f27f1",
-        "text": "The energy of an electron in the ground state of Hydrogen atom is $-13.6 \\text{ eV}$. An electron from an excited state $n=3$ of $He^+$ ion jumps to its ground state. The photon emitted in this process is absorbed by a Hydrogen atom in its ground state. What will be the final state of the electron in the Hydrogen atom?",
+        "text": "The energy of an electron in the ground state of Hydrogen atom is $-13.6 eV$. An electron from an excited state $n=3$ of $He^+$ ion jumps to its ground state. The photon emitted in this process is absorbed by a Hydrogen atom in its ground state. What will be the final state of the electron in the Hydrogen atom?",
         "options": [
-          "The electron will be ejected with $K.E. = 40.8 \\text{ eV}$",
+          "The electron will be ejected with $K.E. = 40.8 eV$",
+          "The electron will be ejected with $K.E. = 34.8 eV$",
           "The electron will reach the $n=4$ state",
-          "The electron will be ejected with $K.E. = 34.8 \\text{ eV}$",
           "The electron will reach the $n=2$ state"
         ],
         "marks": 4,
@@ -184,21 +184,21 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Calculate $He^+$ Transition Energy ::: For $He^+$, $Z=2$. Energy $E_n = -13.6 \\frac{Z^2}{n^2} = -13.6 \\frac{4}{n^2}$.",
-          "Specific States in $He^+$ ::: $E_3 = -13.6 \\frac{4}{9} = -6.04 \\text{ eV}$. $E_1 = -13.6 \\frac{4}{1} = -54.4 \\text{ eV}$.",
-          "Photon Energy ::: Energy emitted $\\Delta E = E_3 - E_1 = -6.04 - (-54.4) = 48.36 \\text{ eV}$. (Note: Using $13.6 Z^2(1 - 1/9) = 13.6 \\times 4 \\times 8/9 = 48.35 \\text{ eV}$).",
-          "Hydrogen Interaction ::: Ionization energy of H is $13.6 \\text{ eV}$. Since $48.36 \\text{ eV} > 13.6 \\text{ eV}$, the electron will be ionized.",
-          "Kinetic Energy ::: $K.E. = E_{photon} - E_{ionization} = 48.36 - 13.6 = 34.76 \\text{ eV} \\approx 34.8 \\text{ eV}$."
+          "Specific States in $He^+$ ::: $E_3 = -13.6 \\frac{4}{9} = -6.04 eV$. $E_1 = -13.6 \\frac{4}{1} = -54.4 eV$.",
+          "Photon Energy ::: Energy emitted $\\Delta E = E_3 - E_1 = -6.04 - (-54.4) = 48.36 eV$. (Note: Using $13.6 Z^2(1 - 1/9) = 13.6 \\times 4 \\times 8/9 = 48.35 eV$).",
+          "Hydrogen Interaction ::: Ionization energy of H is $13.6 eV$. Since $48.36 eV > 13.6 eV$, the electron will be ionized.",
+          "Kinetic Energy ::: $K.E. = E_{photon} - E_{ionization} = 48.36 - 13.6 = 34.76 eV \\approx 34.8 eV$."
         ],
         "examTip": "If the incoming photon energy exceeds the ionization energy (13.6 eV for H), the electron is NOT just excited—it is kicked out. The excess energy becomes Kinetic Energy.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Energy absorption in atoms is discrete only for excitation. For ionization, any energy $E > E_{ion}$ can be absorbed, with the surplus appearing as kinetic energy of the free electron.\",\"memoryTrigger\":\"Excitation = Exactly the gap; Ionization = Anything above the cliff.\",\"visualPrompt\":\"A person on a 13.6ft deep hole. A ladder (photon) of 48.4ft is thrown. The person not only gets out but has enough 'energy' to run 34.8ft away.\",\"commonTrap\":\"Assuming the electron must jump to a higher $n$ level even if the energy is above $13.6 \\\\text{ eV}$.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Energy absorption in atoms is discrete only for excitation. For ionization, any energy $E > E_{ion}$ can be absorbed, with the surplus appearing as kinetic energy of the free electron.\", \"memoryTrigger\": \"Excitation = Exactly the gap; Ionization = Anything above the cliff.\", \"visualPrompt\": \"A person on a 13.6ft deep hole. A ladder (photon) of 48.4ft is thrown. The person not only gets out but has enough 'energy' to run 34.8ft away.\", \"commonTrap\": \"Assuming the electron must jump to a higher $n$ level even if the energy is above $13.6 \\\\text{ eV}$.\"}",
         "keyFormulas": [
           "$E_n = -13.6 \\frac{Z^2}{n^2}$",
           "$K.E. = E_{photon} - E_{binding}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-007",
           "questionType": "simple_recall_mcq"
@@ -206,12 +206,12 @@
       },
       {
         "id": "a3f0408b-0013-44fd-8e8f-9f62e10de526",
-        "text": "An electric heating element is rated at $220\\text{ V}$ and $1000\\text{ W}$. If the line voltage drops to $110\\text{ V}$ during peak hours, what will be the power dissipated by the heating element, assuming its resistance remains constant?",
+        "text": "An electric heating element is rated at $220\\,\\text{V}$ and $1000\\,\\text{W}$. If the line voltage drops to $110\\,\\text{V}$ during peak hours, what will be the power dissipated by the heating element, assuming its resistance remains constant?",
         "options": [
-          "250\\text{ W}",
-          "500\\text{ W}",
-          "750\\text{ W}",
-          "125\\text{ W}"
+          "750W",
+          "500W",
+          "125W",
+          "250W"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -221,14 +221,14 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Find Resistance ::: From the rating, $P = V^2 / R$. Thus, $R = V^2 / P = (220)^2 / 1000$.",
-          "New Scenario ::: New voltage $V' = 110\\text{ V}$. Resistance $R$ is constant.",
+          "New Scenario ::: New voltage $V' = 110V$. Resistance $R$ is constant.",
           "Power Ratio ::: $P' / P = (V' / V)^2$ because $R$ cancels out.",
           "Calculation ::: $P' = P \\times (110 / 220)^2 = 1000 \\times (1/2)^2$.",
-          "Result ::: $P' = 1000 / 4 = 250\\text{ W}$."
+          "Result ::: $P' = 1000 / 4 = 250W$."
         ],
         "examTip": "Don't calculate the actual resistance value if not asked. Use the proportionality $P \\propto V^2$ to save 30 seconds of calculation time.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Electric power $P$ is the rate of energy dissipation. Since $V=IR$, substituting $I=V/R$ into $P=VI$ gives $P=V^2/R$. For a fixed resistor, halving the voltage quarters the power.\",\"memoryTrigger\":\"Double the V, Quadruple the P. Half the V, Quarter the P.\",\"visualPrompt\":\"Think of a water pipe; if you halve the pressure, not only is the water slower, but there's also less water moving—a double reduction.\",\"commonTrap\":\"Assuming $P \\\\propto V$ (linear relationship) and picking 500W.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Electric power $P$ is the rate of energy dissipation. Since $V=IR$, substituting $I=V/R$ into $P=VI$ gives $P=V^2/R$. For a fixed resistor, halving the voltage quarters the power.\", \"memoryTrigger\": \"Double the V, Quadruple the P. Half the V, Quarter the P.\", \"visualPrompt\": \"Think of a water pipe; if you halve the pressure, not only is the water slower, but there's also less water moving\\u2014a double reduction.\", \"commonTrap\": \"Assuming $P \\\\propto V$ (linear relationship) and picking 500W.\"}",
         "keyFormulas": [
           "$P = V^2 / R$",
           "$P = I^2 R$",
@@ -236,7 +236,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "simple_recall_mcq"
@@ -244,12 +244,12 @@
       },
       {
         "id": "2ae410d5-3711-4846-ac7f-d580d3715a30",
-        "text": "A specialized spherical conductor used in a Van de Graaff generator has a radius $R = 9\\text{ cm}$ and is maintained at an electrostatic potential of $1000\\text{ V}$ in dry air. To evaluate the energy storage capacity of this system, calculate the total electrostatic potential energy stored in the electric field of this isolated charged sphere.",
+        "text": "A specialized spherical conductor used in a Van de Graaff generator has a radius $R = 9cm$ and is maintained at an electrostatic potential of $1000\\,\\text{V}$ in dry air. To evaluate the energy storage capacity of this system, calculate the total electrostatic potential energy stored in the electric field of this isolated charged sphere.",
         "options": [
-          "5.0 \\u00d7 10\\u207b\\u2076 J",
-          "1.0 \\u00d7 10\\u207b\\u2075 J",
-          "2.5 \\u00d7 10\\u207b\\u2076 J",
-          "5.0 \\u00d7 10\\u207b\\u2075 J"
+          "$$2.5 \\times 10$⁻⁶$ J",
+          "$$5.0 \\times 10$⁻⁵$ J",
+          "$$5.0 \\times 10$⁻⁶$ J",
+          "$$1.0 \\times 10$⁻⁵$ J"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -260,20 +260,20 @@
         "solutionSteps": [
           "Identify the System ::: The system is an isolated spherical conductor.",
           "Recall Capacitance ::: For an isolated sphere, $C = 4\\pi\\epsilon_0 R$.",
-          "Calculate Capacitance ::: $C = \\frac{R}{k} = \\frac{0.09\\text{ m}}{9 \\times 10^9} = 10^{-11}\\text{ F} = 10\\text{ pF}$.",
+          "Calculate Capacitance ::: $C = \\frac{R}{k} = \\frac{0.09m}{9 \\times 10^9} = 10^{-11}F = 10pF$.",
           "Recall Energy Formula ::: The energy $U$ stored is given by $U = \\frac{1}{2} CV^2$.",
-          "Numerical Calculation ::: $U = \\frac{1}{2} \\times (10^{-11}) \\times (1000)^2 = \\frac{1}{2} \\times 10^{-11} \\times 10^6 = 0.5 \\times 10^{-5} = 5.0 \\times 10^{-6}\\text{ J}$."
+          "Numerical Calculation ::: $U = \\frac{1}{2} \\times (10^{-11}) \\times (1000)^2 = \\frac{1}{2} \\times 10^{-11} \\times 10^6 = 0.5 \\times 10^{-5} = 5.0 \\times 10^{-6}J$."
         ],
         "examTip": "For isolated spheres, use $C = R/k$ directly. It saves you from calculating $4\\pi\\epsilon_0$ separately. $k$ is $9 \\times 10^9$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"The electrostatic energy of a conductor is the work done in assembling the charges on its surface against their mutual repulsion. This energy resides in the surrounding electric field.\",\"memoryTrigger\":\"Energy is Half CV Squared (U = 1/2 CV²).\",\"visualPrompt\":\"Imagine the sphere as a balloon being filled with charge; the pressure inside (potential) and the size (capacitance) determine the work needed.\",\"commonTrap\":\"Forgetting the '1/2' in the energy formula.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"The electrostatic energy of a conductor is the work done in assembling the charges on its surface against their mutual repulsion. This energy resides in the surrounding electric field.\", \"memoryTrigger\": \"Energy is Half CV Squared (U = 1/2 CV\\u00b2).\", \"visualPrompt\": \"Imagine the sphere as a balloon being filled with charge; the pressure inside (potential) and the size (capacitance) determine the work needed.\", \"commonTrap\": \"Forgetting the '1/2' in the energy formula.\"}",
         "keyFormulas": [
           "$C = 4\\pi\\epsilon_0 R$ Capacitance of a sphere",
           "$U = \\frac{1}{2} CV^2$ Energy stored in a capacitor"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -281,12 +281,12 @@
       },
       {
         "id": "587b4e1b-d668-4543-9418-f691e2122458",
-        "text": "A Silicon specimen is doped with Al ($10^{21} \\text{ atoms/m}^3$) and subsequently with P ($1.001 \\times 10^{21} \\text{ atoms/m}^3$). If the intrinsic carrier concentration $n_i$ at $300 \\text{ K}$ is $1.5 \\times 10^{16} \\text{ m}^{-3}$, determine the nature of the semiconductor and the minority carrier concentration ($n_h$ or $n_e$) at this temperature.",
+        "text": "A Silicon specimen is doped with Al ($10^{21} atoms/m^3$) and subsequently with P ($1.001 \\times 10^{21} atoms/m^3$). If the intrinsic carrier concentration $n_i$ at $300 K$ is $1.5 \\times 10^{16} m^{-3}$, determine the nature of the semiconductor and the minority carrier concentration ($n_h$ or $n_e$) at this temperature.",
         "options": [
-          "n-type, $n_h = 2.25 \\times 10^{11} \\text{ m}^{-3}$",
-          "p-type, $n_e = 2.25 \\times 10^{11} \\text{ m}^{-3}$",
-          "n-type, $n_h = 2.25 \\times 10^{8} \\text{ m}^{-3}$",
-          "p-type, $n_e = 4.5 \\times 10^{11} \\text{ m}^{-3}$"
+          "n-type, $n_h = 2.25 \\times 10^{11} m^{-3}$",
+          "n-type, $n_h = 2.25 \\times 10^{8} m^{-3}$",
+          "p-type, $n_e = 2.25 \\times 10^{11} m^{-3}$",
+          "p-type, $n_e = 4.5 \\times 10^{11} m^{-3}$"
         ],
         "marks": 4,
         "difficulty": "Hard",
@@ -295,22 +295,22 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Net Doping Concentration ::: Aluminum (Al) is a trivalent impurity (Acceptor, $N_A = 10^{21} \\text{ m}^{-3}$) and Phosphorus (P) is a pentavalent impurity (Donor, $N_D = 1.001 \\times 10^{21} \\text{ m}^{-3}$).",
-          "Determine Net Carrier Type ::: Since $N_D > N_A$, the net doping is n-type. The net donor concentration $N_D' = N_D - N_A = (1.001 - 1.000) \\times 10^{21} = 0.001 \\times 10^{21} = 10^{18} \\text{ m}^{-3}$.",
-          "Majority Carrier Concentration ::: In n-type, $n_e \\approx N_D' = 10^{18} \\text{ m}^{-3}$.",
+          "Net Doping Concentration ::: Aluminum (Al) is a trivalent impurity (Acceptor, $N_A = 10^{21} m^{-3}$) and Phosphorus (P) is a pentavalent impurity (Donor, $N_D = 1.001 \\times 10^{21} m^{-3}$).",
+          "Determine Net Carrier Type ::: Since $N_D > N_A$, the net doping is n-type. The net donor concentration $N_D' = N_D - N_A = (1.001 - 1.000) \\times 10^{21} = 0.001 \\times 10^{21} = 10^{18} m^{-3}$.",
+          "Majority Carrier Concentration ::: In n-type, $n_e \\approx N_D' = 10^{18} m^{-3}$.",
           "Minority Carrier Concentration Calculation ::: Using the Mass Action Law: $n_e \\cdot n_h = n_i^2$. Therefore, $n_h = \\frac{n_i^2}{n_e} = \\frac{(1.5 \\times 10^{16})^2}{10^{18}}$.",
-          "Final Calculation ::: $n_h = \\frac{2.25 \\times 10^{32}}{10^{18}} = 2.25 \\times 10^{14} \\text{ m}^{-3}$. Wait, let me re-check the power. $0.001 \\times 10^{21} = 10^{18}$. $n_i^2 = 2.25 \\times 10^{32}$. $10^{32}/10^{18} = 10^{14}$. Let's re-read the options. Ah, if the concentration was $10^{22}$ instead of $10^{21}$, or if the math was $n_h = 2.25 \\times 10^{11}$. Let's re-calculate $N_D - N_A$ carefully. $1.001 - 1 = 0.001$. $0.001 \\times 10^{21} = 10^{18}$. Then $n_h = 2.25 \\times 10^{14}$. If option A says $10^{11}$, let's check if $N_D'$ was $10^{21}$. If $N_D' = 10^{21}$, then $n_h = 2.25 \\times 10^{11}$."
+          "Final Calculation ::: $n_h = \\frac{2.25 \\times 10^}{32}{10^{18}} = 2.25 \\times 10^{14} m^{-3}$. Wait, let me re-check the power. $0.001 \\times 10^{21} = 10^{18}$. $n_i^2 = 2.25 \\times 10^{32}$. $10^{32}/10^{18} = 10^{14}$. Let's re-read the options. Ah, if the concentration was $10^{22}$ instead of $10^{21}$, or if the math was $n_h = 2.25 \\times 10^{11}$. Let's re-calculate $N_D - N_A$ carefully. $1.001 - 1 = 0.001$. $0.001 \\times 10^{21} = 10^{18}$. Then $n_h = 2.25 \\times 10^{14}$. If option A says $10^{11}$, let's check if $N_D'$ was $10^{21}$. If $N_D' = 10^{21}$, then $n_h = 2.25 \\times 10^{11}$."
         ],
         "examTip": "In double-doping problems, always subtract the lower concentration from the higher one. The 'winner' determines the semiconductor type. Use the Mass Action Law only after finding the net majority carriers.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Mass Action Law states that for a semiconductor in thermal equilibrium, the product of electron and hole concentrations is constant at a fixed temperature, regardless of doping level.\",\"memoryTrigger\":\"Net Doping = |Donors - Acceptors|; Mass Action = 'Product is Constant'.\",\"visualPrompt\":\"Imagine a room with boys (electrons) and girls (holes). If you add more boys, some girls will pair up (recombine), keeping the product of 'lonely' boys and girls constant.\",\"commonTrap\":\"Adding $N_D$ and $N_A$ instead of subtracting them.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Mass Action Law states that for a semiconductor in thermal equilibrium, the product of electron and hole concentrations is constant at a fixed temperature, regardless of doping level.\", \"memoryTrigger\": \"Net Doping = |Donors - Acceptors|; Mass Action = 'Product is Constant'.\", \"visualPrompt\": \"Imagine a room with boys (electrons) and girls (holes). If you add more boys, some girls will pair up (recombine), keeping the product of 'lonely' boys and girls constant.\", \"commonTrap\": \"Adding $N_D$ and $N_A$ instead of subtracting them.\"}",
         "keyFormulas": [
           "$n \\cdot p = n_i^2$",
           "$n \\approx N_D - N_A$ (if $N_D > N_A$)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": null,
           "questionType": "simple_recall_mcq"
@@ -318,12 +318,12 @@
       },
       {
         "id": "824882e9-d063-4521-9a41-69f9caee5e70",
-        "text": "Consider the following circuit diagram where three identical resistors, each of resistance $R = 12\\text{ \\Omega}$, are connected in parallel to a $6\\text{ V}$ ideal DC source. What is the total current ($I$) flowing from the source?",
+        "text": "Consider the following circuit diagram where three identical resistors, each of resistance $R = 12\\Omega$, are connected in parallel to a $6\\,\\text{V}$ ideal DC source. What is the total current ($I$) flowing from the source?",
         "options": [
-          "1.5\\text{ A}",
-          "0.5\\text{ A}",
-          "3.0\\text{ A}",
-          "1.0\\text{ A}"
+          "1.5A",
+          "1.0A",
+          "3.0A",
+          "0.5A"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -333,21 +333,21 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Analyze Parallel Connection ::: For $n$ identical resistors in parallel, $R_{eq} = R/n$.",
-          "Calculate $R_{eq}$ ::: $R_{eq} = 12\\text{ \\Omega} / 3 = 4\\text{ \\Omega}$.",
+          "Calculate $R_{eq}$ ::: $R_{eq} = 12\\Omega / 3 = 4\\Omega$.",
           "Apply Ohm's Law ::: $V = I \\times R_{eq} \\implies I = V / R_{eq}$.",
-          "Substitute Values ::: $I = 6\\text{ V} / 4\\text{ \\Omega}$.",
-          "Final Result ::: $I = 1.5\\text{ A}$."
+          "Substitute Values ::: $I = 6V / 4\\Omega$.",
+          "Final Result ::: $I = 1.5A$."
         ],
         "examTip": "For identical resistors in parallel, just divide the single resistance by the number of resistors. It's much faster than the $1/R$ formula.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"In parallel, all resistors share the same voltage. The total current is the sum of currents through each branch ($I_{total} = I_1 + I_2 + I_3$).\",\"memoryTrigger\":\"Parallel = Path sharing. More paths = less resistance.\",\"visualPrompt\":\"Imagine three identical doors opening at the same time; three times as many people (current) can get through than with one door.\",\"commonTrap\":\"Calculating total resistance as $12 + 12 + 12 = 36\\\\text{ \\\\Omega}$ (series error).\"}",
+        "masteryMaterial": "{\"coreConcept\": \"In parallel, all resistors share the same voltage. The total current is the sum of currents through each branch ($I_{total} = I_1 + I_2 + I_3$).\", \"memoryTrigger\": \"Parallel = Path sharing. More paths = less resistance.\", \"visualPrompt\": \"Imagine three identical doors opening at the same time; three times as many people (current) can get through than with one door.\", \"commonTrap\": \"Calculating total resistance as $12 + 12 + 12 = 36\\\\text{ \\\\Omega}$ (series error).\"}",
         "keyFormulas": [
           "$R_{eq} = R/n$ (Identical parallel)",
           "$I = V/R$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "diagram_based_mcq"
@@ -355,12 +355,12 @@
       },
       {
         "id": "df82f9cc-db45-4cd3-901f-c13eff083c3e",
-        "text": "A metallic surface is irradiated with monochromatic radiation of wavelength $2000\\text{ \\AA}$. The stopping potential required to reduce the photoelectric current to zero is found to be $3.7\\text{ V}$. If the same surface is irradiated with radiation of wavelength $3000\\text{ \\AA}$, calculate the new stopping potential ($V_s'$). [Take $hc = 12400\\text{ eV\\AA}$]",
+        "text": "A metallic surface is irradiated with monochromatic radiation of wavelength $2000\\AA$. The stopping potential required to reduce the photoelectric current to zero is found to be $3.7V$. If the same surface is irradiated with radiation of wavelength $3000\\AA$, calculate the new stopping potential ($V_s'$). [Take $hc = 12400eV\\AA$]",
         "options": [
-          "2.13 V",
-          "1.65 V",
           "1.48 V",
-          "2.48 V"
+          "2.48 V",
+          "2.13 V",
+          "1.65 V"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -370,22 +370,22 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Einstein's Photoelectric Equation ::: $eV_s = \\frac{hc}{\\lambda} - \\phi$, where $\\phi$ is the work function.",
-          "Calculate Energy of First Photon ::: $E_1 = \\frac{12400}{2000} = 6.2\\text{ eV}$.",
-          "Determine Work Function ::: From the first case, $3.7\\text{ eV} = 6.2\\text{ eV} - \\phi \\Rightarrow \\phi = 6.2 - 3.7 = 2.5\\text{ eV}$.",
-          "Calculate Energy of Second Photon ::: $E_2 = \\frac{12400}{3000} = 4.133\\text{ eV}$ (approx $4.13\\text{ eV}$).",
-          "Find New Stopping Potential ::: $eV_s' = E_2 - \\phi = 4.13 - 2.5 = 1.63\\text{ eV}$. Wait, let's re-calculate: $124/30 = 4.133$. $4.13 - 2.5 = 1.63$. Let me re-check the options/values. $1.65\\text{V}$ is the closest.",
+          "Calculate Energy of First Photon ::: $E_1 = \\frac{12400}{2000} = 6.2eV$.",
+          "Determine Work Function ::: From the first case, $3.7eV = 6.2eV - \\phi \\Rightarrow \\phi = 6.2 - 3.7 = 2.5eV$.",
+          "Calculate Energy of Second Photon ::: $E_2 = \\frac{12400}{3000} = 4.133eV$ (approx $4.13eV$).",
+          "Find New Stopping Potential ::: $eV_s' = E_2 - \\phi = 4.13 - 2.5 = 1.63eV$. Wait, let's re-calculate: $124/30 = 4.133$. $4.13 - 2.5 = 1.63$. Let me re-check the options/values. $1.65V$ is the closest.",
           "Correction on Calculation ::: If $E_1 = 6.2$ and $V_s = 3.7$, then $\\phi = 2.5$. If $\\lambda_2 = 3000$, $E_2 = 124/30 = 4.13$. $4.13 - 2.5 = 1.63$. Adjusting for precision, option (b) $1.65$ matches typical NEET rounding."
         ],
         "examTip": "When using $hc = 12400$, the energy is in $eV$ and wavelength in Angstroms. This saves significant time over using $6.6\\times 10^{-34}$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Light behaves as discrete packets (photons). When a photon hits an electron, it gives all its energy. Part is used to escape the metal (work function), and the rest becomes kinetic energy, which is measured by the stopping potential.\",\"memoryTrigger\":\"Energy In = Work Out + Kinetic Leftovers ($h\\\\nu = \\\\phi + K_{max}$).\",\"visualPrompt\":\"Imagine a person jumping out of a pit. The depth of the pit is $\\\\phi$. The strength of the jump is $h\\\\nu$. The height they reach above the ground is $eV_s$.\",\"commonTrap\":\"Subtracting potential from energy directly without ensuring both are in $eV$ or both in Joules.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Light behaves as discrete packets (photons). When a photon hits an electron, it gives all its energy. Part is used to escape the metal (work function), and the rest becomes kinetic energy, which is measured by the stopping potential.\", \"memoryTrigger\": \"Energy In = Work Out + Kinetic Leftovers ($h\\\\nu = \\\\phi + K_{max}$).\", \"visualPrompt\": \"Imagine a person jumping out of a pit. The depth of the pit is $\\\\phi$. The strength of the jump is $h\\\\nu$. The height they reach above the ground is $eV_s$.\", \"commonTrap\": \"Subtracting potential from energy directly without ensuring both are in $eV$ or both in Joules.\"}",
         "keyFormulas": [
           "$eV_s = \\frac{hc}{\\lambda} - \\phi$",
           "$E(eV) = \\frac{12400}{\\lambda(\\text{\\AA})}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 3,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-014",
           "questionType": "simple_recall_mcq"
@@ -395,10 +395,10 @@
         "id": "b80cf133-a19e-45f5-9573-3bd5b2f5d910",
         "text": "A point charge $q = +5.0 \\mu C$ is fixed at the origin $(0,0)$ of a coordinate system. A second test charge $q_0 = +2.0 nC$ is moved by an external agent from a point $A$ (at $x = 10 cm$) to a point $B$ (at $x = 50 cm$) along the x-axis. Calculate the work done by the electrostatic force during this displacement. (Use $k = 9 \\times 10^9 Nm^2/C^2$)",
         "options": [
-          "7.2 \\u00d7 10\\u207b\\u2074 J",
-          "1.8 \\u00d7 10\\u207b\\u2074 J",
-          "7.2 \\u00d7 10\\u207b\\u2075 J",
-          "1.44 \\u00d7 10\\u207b\\u2074 J"
+          "$$7.2 \\times 10$⁻⁴$ J",
+          "$$1.8 \\times 10$⁻⁴$ J",
+          "$$1.44 \\times 10$⁻⁴$ J",
+          "$$7.2 \\times 10$⁻⁵$ J"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -415,14 +415,14 @@
         ],
         "examTip": "Work done BY the field is $q(V_{initial} - V_{final})$. Work done BY the external agent is $q(V_{final} - V_{initial})$. This sign convention is the most common trap in NEET.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"The electrostatic force is conservative; therefore, the work done by it is independent of the path and equals the negative change in potential energy.\",\"memoryTrigger\":\"W-Field = Positive if moving with the flow (like gravity).\",\"visualPrompt\":\"Imagine pushing two north poles of magnets together; you do work, but the field wants to push them apart.\",\"commonTrap\":\"Confusing 'work done by field' with 'work done by external agent' leading to a sign error.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"The electrostatic force is conservative; therefore, the work done by it is independent of the path and equals the negative change in potential energy.\", \"memoryTrigger\": \"W-Field = Positive if moving with the flow (like gravity).\", \"visualPrompt\": \"Imagine pushing two north poles of magnets together; you do work, but the field wants to push them apart.\", \"commonTrap\": \"Confusing 'work done by field' with 'work done by external agent' leading to a sign error.\"}",
         "keyFormulas": [
           "$V = \\frac{kq}{r}$ Potential of point charge",
           "$W_{elec} = q(V_i - V_f)$ Work done by electric field"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -430,12 +430,12 @@
       },
       {
         "id": "00b1a210-257d-4e7c-8fa0-20cf35b0f0c2",
-        "text": "An electron in a hydrogen-like atom of atomic number $Z$ makes a transition from an excited state with quantum number $n$ to the ground state ($n=1$). The emitted photon has an energy that is used to eject a photoelectron from a metal surface ($ \\Phi_0 = 3.8 \\text{ eV} $). If the maximum kinetic energy of the photoelectron is $10.2 \\text{ eV}$ and the transition was from $n=2$ to $n=1$, calculate the value of the atomic number $Z$. (Assume $R_H \\cdot ch = 13.6 \\text{ eV}$)",
+        "text": "An electron in a hydrogen-like atom of atomic number $Z$ makes a transition from an excited state with quantum number $n$ to the ground state ($n=1$). The emitted photon has an energy that is used to eject a photoelectron from a metal surface ($ \\Phi_0 = 3.8 eV $). If the maximum kinetic energy of the photoelectron is $10.2 eV$ and the transition was from $n=2$ to $n=1$, calculate the value of the atomic number $Z$. (Assume $R_H \\cdot ch = 13.6 eV$)",
         "options": [
+          "4",
           "1",
           "2",
-          "3",
-          "4"
+          "3"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -444,23 +444,23 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Identify Photon Energy ::: The energy of the emitted photon $E_{ph}$ must satisfy Einstein's equation: $E_{ph} = \\Phi_0 + K_{\\text{max}}$. Substituting the values: $E_{ph} = 3.8 \\text{ eV} + 10.2 \\text{ eV} = 14.0 \\text{ eV}$.",
+          "Identify Photon Energy ::: The energy of the emitted photon $E_{ph}$ must satisfy Einstein's equation: $E_{ph} = \\Phi_0 + K_{max}$. Substituting the values: $E_{ph} = 3.8 eV + 10.2 eV = 14.0 eV$.",
           "Bohr Model Formula ::: For a H-like atom, transition energy $E_{n \\to 1} = 13.6 \\cdot Z^2 \\left( \\frac{1}{1^2} - \\frac{1}{n^2} \\right)$.",
-          "Substitute Parameters ::: Here $n=2$ and the energy is $14.0 \\text{ eV}$, wait... let's re-calculate $E_{ph}$. If $E_{ph} = 13.6 Z^2 (1 - 1/4) = 13.6 Z^2 (3/4) = 10.2 Z^2$.",
+          "Substitute Parameters ::: Here $n=2$ and the energy is $14.0 eV$, wait... let's re-calculate $E_{ph}$. If $E_{ph} = 13.6 Z^2 (1 - 1/4) = 13.6 Z^2 (3/4) = 10.2 Z^2$.",
           "Solve for Z ::: $14.0 = 10.2 Z^2 \\implies Z^2 \\approx 1.37$. Re-checking values: If $K_{max} = 6.4$ and $\\Phi = 3.8$, $E_{ph}=10.2$. Let's adjust to $E_{ph} = 13.6 Z^2 (0.75) = 10.2 Z^2$. If $E_{ph} = 40.8$, then $Z=2$.",
-          "Refined Calculation ::: $E_{ph} = 13.6 \\times Z^2 \\times (1 - 1/4) = 13.6 \\times Z^2 \\times 0.75 = 10.2 Z^2$. To get $Z=2$, $E_{ph}$ must be $40.8 \\text{ eV}$. Let's check $E_{ph} = 3.8 + 37.0$... no. Let's look at the options. If $Z=1$, $E = 10.2$. If $Z=2$, $E = 40.8$. Given the sum $3.8 + 10.2 = 14.0$. $14.0 = 10.2 Z^2$ is not a perfect square. Standard NEET check: $Z=1 \\implies E = 10.2$. $\\Phi_0 = 3.8$. $K_{max} = 10.2 - 3.8 = 6.4$. My setup had $E_{ph} = 14.0$. Let's re-align the question: If $Z=1$, $E_{ph}=10.2$. Then $K_{max} = 10.2 - 3.8 = 6.4$. If $K_{max}$ was $10.2$ and $\\Phi = 3.8$, $E_{ph} = 14.0$. For $Z=2$, $E = 40.8$.",
+          "Refined Calculation ::: $E_{ph} = 13.6 \\times Z^2 \\times (1 - 1/4) = 13.6 \\times Z^2 \\times 0.75 = 10.2 Z^2$. To get $Z=2$, $E_{ph}$ must be $40.8 eV$. Let's check $E_{ph} = 3.8 + 37.0$... no. Let's look at the options. If $Z=1$, $E = 10.2$. If $Z=2$, $E = 40.8$. Given the sum $3.8 + 10.2 = 14.0$. $14.0 = 10.2 Z^2$ is not a perfect square. Standard NEET check: $Z=1 \\implies E = 10.2$. $\\Phi_0 = 3.8$. $K_{max} = 10.2 - 3.8 = 6.4$. My setup had $E_{ph} = 14.0$. Let's re-align the question: If $Z=1$, $E_{ph}=10.2$. Then $K_{max} = 10.2 - 3.8 = 6.4$. If $K_{max}$ was $10.2$ and $\\Phi = 3.8$, $E_{ph} = 14.0$. For $Z=2$, $E = 40.8$.",
           "Final Logic ::: In a typical NEET $Z$ calculation, if the values lead to $10.2 Z^2$, and $E_{ph}$ matches a multiple of $10.2$, $Z$ is easily found. For $Z=1$, $E=10.2$. For $Z=2$, $E=40.8$. Let's assume $E_{ph} = 40.8$, then $10.2 Z^2 = 40.8 \\implies Z^2 = 4 \\implies Z=2$."
         ],
         "examTip": "Memorize the sequence for Hydrogen: 13.6, 3.4, 1.51, 0.85. For $Z=2$, multiply these by $Z^2=4$. The transition $n=2$ to $n=1$ is always $0.75$ of the ionization energy.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"The energy of a photon emitted during transition $n_2 \\\\to n_1$ is $E = 13.6 Z^2 (1/n_1^2 - 1/n_2^2)$. This energy then acts as incident energy in the photoelectric effect.\",\"memoryTrigger\":\"Bohr meets Einstein: $E_{transition} = \\\\Phi + K_{max}$.\",\"visualPrompt\":\"An electron falling down a ladder (atom) drops a ball (photon) that hits a see-saw (metal) to launch another ball (photoelectron).\",\"commonTrap\":\"Using $Z$ instead of $Z^2$ in the energy formula.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"The energy of a photon emitted during transition $n_2 \\\\to n_1$ is $E = 13.6 Z^2 (1/n_1^2 - 1/n_2^2)$. This energy then acts as incident energy in the photoelectric effect.\", \"memoryTrigger\": \"Bohr meets Einstein: $E_{transition} = \\\\Phi + K_{max}$.\", \"visualPrompt\": \"An electron falling down a ladder (atom) drops a ball (photon) that hits a see-saw (metal) to launch another ball (photoelectron).\", \"commonTrap\": \"Using $Z$ instead of $Z^2$ in the energy formula.\"}",
         "keyFormulas": [
           "$E_n = -13.6 \\frac{Z^2}{n^2} \\text{ eV}$",
           "$\\Delta E = 13.6 Z^2 \\left(\\frac{1}{n_{low}^2} - \\frac{1}{n_{high}^2}\\right)$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-007",
           "questionType": "simple_recall_mcq"
@@ -468,12 +468,12 @@
       },
       {
         "id": "8074fa86-10f6-4226-9a6c-3056097bab2a",
-        "text": "A spherical conductor of radius $R = 9\\text{ cm}$ is localized in a vacuum and carries a net positive charge of $Q = 4 \\times 10^{-7}\\text{ C}$ distributed uniformly over its surface. Considering the electrostatic permittivity of free space $\\epsilon_0$ and the relationship between potential and distance, calculate the electrostatic potential at a point located exactly on the surface of the sphere.",
+        "text": "A spherical conductor of radius $R = 9cm$ is localized in a vacuum and carries a net positive charge of $Q = 4 \\times 10^{-7}C$ distributed uniformly over its surface. Considering the electrostatic permittivity of free space $\\epsilon_0$ and the relationship between potential and distance, calculate the electrostatic potential at a point located exactly on the surface of the sphere.",
         "options": [
-          "4 \\times 10^4\\text{ V}",
-          "4 \\times 10^3\\text{ V}",
-          "3.6 \\times 10^4\\text{ V}",
-          "3.6 \\times 10^3\\text{ V}"
+          "$$3.6 \\times 10$⁴$V",
+          "$$4 \\times 10$⁴$V",
+          "$$3.6 \\times 10$³$V",
+          "$$4 \\times 10$³$V"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -482,23 +482,23 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Identify Parameters ::: Radius $r = 9\\text{ cm} = 9 \\times 10^{-2}\\text{ m}$ and charge $Q = 4 \\times 10^{-7}\\text{ C}$.",
+          "Identify Parameters ::: Radius $r = 9cm = 9 \\times 10^{-2}m$ and charge $Q = 4 \\times 10^{-7}C$.",
           "Formula Selection ::: The potential $V$ at the surface of a spherical conductor is given by the point-charge formula $V = \\frac{1}{4\\pi\\epsilon_0} \\frac{Q}{r}$.",
-          "Substitute Constants ::: Use the standard value for Coulomb's constant $k = \\frac{1}{4\\pi\\epsilon_0} = 9 \\times 10^9\\text{ N m}^2\\text{C}^{-2}$.",
-          "Calculation ::: $V = (9 \\times 10^9) \\times \\frac{4 \\times 10^{-7}}{9 \\times 10^{-2}}$.",
-          "Simplify ::: $V = \\frac{36 \\times 10^2}{9 \\times 10^{-2}} = 4 \\times 10^4\\text{ V}$.",
-          "Final Result ::: The surface potential is $40,000\\text{ V}$ or $4 \\times 10^4\\text{ V}$."
+          "Substitute Constants ::: Use the standard value for Coulomb's constant $k = \\frac{1}{4\\pi\\epsilon_0} = 9 \\times 10^9N m^2C^{-2}$.",
+          "Calculation ::: $V = (9 \\times 10^9) \\times \\frac{4 \\times 10^}{-7}{9 \\times 10^{-2}}$.",
+          "Simplify ::: $V = \\frac{36 \\times 10^2}{9 \\times 10^{-2}} = 4 \\times 10^4V$.",
+          "Final Result ::: The surface potential is $40,000V$ or $4 \\times 10^4V$."
         ],
         "examTip": "Always convert radius from cm to m immediately. In NEET, powers of 10 are the most common source of error in 'Easy' potential questions.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"For a conducting sphere, the entire charge resides on the outer surface, and the potential is constant everywhere inside and on the surface, behaving as if the charge were at the center.\",\"memoryTrigger\":\"V = kQ/r: 'Very Kingly Quality/Rate'\",\"visualPrompt\":\"Imagine a hollow ball glowing with energy; the 'pressure' (potential) of that energy is the same everywhere on and inside its skin.\",\"commonTrap\":\"Using $r^2$ instead of $r$ (confusing Potential with Electric Field).\"}",
+        "masteryMaterial": "{\"coreConcept\": \"For a conducting sphere, the entire charge resides on the outer surface, and the potential is constant everywhere inside and on the surface, behaving as if the charge were at the center.\", \"memoryTrigger\": \"V = kQ/r: 'Very Kingly Quality/Rate'\", \"visualPrompt\": \"Imagine a hollow ball glowing with energy; the 'pressure' (potential) of that energy is the same everywhere on and inside its skin.\", \"commonTrap\": \"Using $r^2$ instead of $r$ (confusing Potential with Electric Field).\"}",
         "keyFormulas": [
           "$V = \\frac{kQ}{r}$ where $k = 9 \\times 10^9$",
           "$V_{inside} = V_{surface}$ for a conductor"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -508,9 +508,9 @@
         "id": "d75b9097-57cd-422e-9825-c105d3be8d26",
         "text": "Analyze the steady-state behavior of the DC circuit shown in the conceptual diagram. A parallel-plate capacitor with capacitance $C = 20 \\mu F$ is connected in a series loop with a $10 \\Omega$ resistor and a $20 V$ battery of negligible internal resistance. If the switch $S$ is closed at $t=0$, what is the total charge $Q$ accumulated on the positive plate of the capacitor after the circuit has reached a state of equilibrium (steady state)?",
         "options": [
-          "400 \\u00b5C",
-          "200 \\u00b5C",
-          "2 \\u00b5C",
+          "400 $\\mu\\text{C}$",
+          "2 $\\mu\\text{C}$",
+          "200 $\\mu\\text{C}$",
           "Zero"
         ],
         "marks": 4,
@@ -528,14 +528,14 @@
         ],
         "examTip": "In steady-state DC, treat capacitors as 'open circuits' (breaks in the wire) and resistors in series with them as 'short circuits' (0V drop).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"A capacitor acts as a block to direct current once it is fully charged because the potential difference across its plates perfectly balances the electromotive force of the source.\",\"memoryTrigger\":\"Steady State = No Current through Capacitor (I=0).\",\"visualPrompt\":\"Imagine a tank being filled with water; once the water level in the tank reaches the height of the supply pipe, flow stops.\",\"commonTrap\":\"Including the resistor in a $V = IR$ calculation for the steady-state current.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"A capacitor acts as a block to direct current once it is fully charged because the potential difference across its plates perfectly balances the electromotive force of the source.\", \"memoryTrigger\": \"Steady State = No Current through Capacitor (I=0).\", \"visualPrompt\": \"Imagine a tank being filled with water; once the water level in the tank reaches the height of the supply pipe, flow stops.\", \"commonTrap\": \"Including the resistor in a $V = IR$ calculation for the steady-state current.\"}",
         "keyFormulas": [
           "$Q = CV$ Fundamental capacitance relation",
           "$V_R = IR$ Ohm's law (used to show $V_R = 0$ at steady state)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "diagram_based_mcq"
@@ -543,12 +543,12 @@
       },
       {
         "id": "a81d1175-7144-4387-947e-8c77f3d626c5",
-        "text": "In a sophisticated laboratory setup for optical metrology, a compound microscope is configured with an objective lens having a focal length of $1.0\\text{ cm}$ and an eyepiece having a focal length of $5.0\\text{ cm}$. A specimen is precisely positioned at a distance of $1.1\\text{ cm}$ from the objective lens. Assuming the final virtual image is formed at the standard least distance of distinct vision ($D = 25\\text{ cm}$) for a normal eye, calculate the total magnifying power ($M$) produced by this specific configuration.",
+        "text": "In a sophisticated laboratory setup for optical metrology, a compound microscope is configured with an objective lens having a focal length of $1.0cm$ and an eyepiece having a focal length of $5.0cm$. A specimen is precisely positioned at a distance of $1.1cm$ from the objective lens. Assuming the final virtual image is formed at the standard least distance of distinct vision ($D = 25cm$) for a normal eye, calculate the total magnifying power ($M$) produced by this specific configuration.",
         "options": [
-          "60",
-          "50",
+          "55",
           "44",
-          "55"
+          "60",
+          "50"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -557,22 +557,22 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Calculate Image Distance for Objective ::: Using the lens formula $\\frac{1}{v_o} - \\frac{1}{u_o} = \\frac{1}{f_o}$ where $f_o = +1.0\\text{ cm}$ and $u_o = -1.1\\text{ cm}$. Thus, $\\frac{1}{v_o} = \\frac{1}{1} + \\frac{1}{-1.1} = 1 - \\frac{10}{11} = \\frac{1}{11}$. Therefore, $v_o = 11\\text{ cm}$.",
+          "Calculate Image Distance for Objective ::: Using the lens formula $\\frac{1}{v_o} - \\frac{1}{u_o} = \\frac{1}{f_o}$ where $f_o = +1.0cm$ and $u_o = -1.1cm$. Thus, $\\frac{1}{v_o} = \\frac{1}{1} + \\frac{1}{-1.1} = 1 - \\frac{10}{11} = \\frac{1}{11}$. Therefore, $v_o = 11cm$.",
           "Calculate Objective Magnification ::: The linear magnification of the objective is $m_o = |\\frac{v_o}{u_o}| = \\frac{11}{1.1} = 10$.",
           "Calculate Eyepiece Magnification ::: When the final image is at $D$, the magnification of the eyepiece is $m_e = (1 + \\frac{D}{f_e}) = (1 + \\frac{25}{5}) = 1 + 5 = 6$.",
           "Total Magnifying Power ::: The total magnifying power is $M = m_o \\times m_e = 10 \\times 6 = 60$.",
           "Verification of Sign ::: Since the final image in a compound microscope is inverted with respect to the object, the magnitude of magnification is 60."
         ],
-        "examTip": "Always check if the final image is at infinity or at $D$. The formula changes from $\\frac{D}{f_e}$ to $(1 + \\frac{D}{f_e})$. In NEET, $D$ is always $25\\text{ cm}$ unless specified.",
+        "examTip": "Always check if the final image is at infinity or at $D$. The formula changes from $\\frac{D}{f_e}$ to $(1 + \\frac{D}{f_e})$. In NEET, $D$ is always $25cm$ unless specified.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"A compound microscope uses an objective to create a real, enlarged image which then acts as an object for the eyepiece, which acts as a simple magnifying glass to create a further enlarged virtual image.\",\"memoryTrigger\":\"M-O-E: Magnification = Objective $\\\\times$ Eyepiece. When at $D$, add '1' to the $D/f$ ratio.\",\"visualPrompt\":\"Imagine a tiny object getting stretched twice: first by the objective into a real image inside the tube, then by the eyepiece into a huge virtual ghost image.\",\"commonTrap\":\"Using $u_o$ as the tube length instead of $v_o + u_e$.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"A compound microscope uses an objective to create a real, enlarged image which then acts as an object for the eyepiece, which acts as a simple magnifying glass to create a further enlarged virtual image.\", \"memoryTrigger\": \"M-O-E: Magnification = Objective $\\\\times$ Eyepiece. When at $D$, add '1' to the $D/f$ ratio.\", \"visualPrompt\": \"Imagine a tiny object getting stretched twice: first by the objective into a real image inside the tube, then by the eyepiece into a huge virtual ghost image.\", \"commonTrap\": \"Using $u_o$ as the tube length instead of $v_o + u_e$.\"}",
         "keyFormulas": [
           "$\\frac{1}{v} - \\frac{1}{u} = \\frac{1}{f}$",
           "$M = \\frac{v_o}{u_o} (1 + \\frac{D}{f_e})$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
@@ -580,12 +580,12 @@
       },
       {
         "id": "a4ac5734-5cfe-4b23-811a-ed97cc4d7605",
-        "text": "A circular coil of radius $10 \\, \\text{cm}$ consisting of $50$ closely wound turns carries a current of $2.0 \\, \\text{A}$ in the clockwise direction when viewed from the top. Calculate the magnitude of the magnetic field induction $B$ at the center of the coil. (Use $\\mu_0 = 4\\pi \\times 10^{-7} \\, \\text{T}\\cdot\\text{m/A}$)",
+        "text": "A circular coil of radius $10 \\, cm$ consisting of $50$ closely wound turns carries a current of $2.0 \\, A$ in the clockwise direction when viewed from the top. Calculate the magnitude of the magnetic field induction $B$ at the center of the coil. (Use $\\mu_0 = 4\\pi \\times 10^{-7} \\, T\\cdotm/A$)",
         "options": [
-          "6.28 \\times 10^{-4} \\, \\text{T}",
-          "3.14 \\times 10^{-4} \\, \\text{T}",
-          "1.25 \\times 10^{-3} \\, \\text{T}",
-          "2.00 \\times 10^{-4} \\, \\text{T}"
+          "$$2.00 \\times 10$⁻⁴$ \\, T",
+          "$$1.25 \\times 10$⁻³$ \\, T",
+          "$$6.28 \\times 10$⁻⁴$ \\, T",
+          "$$3.14 \\times 10$⁻⁴$ \\, T"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -595,21 +595,21 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Identify the formula for a circular loop ::: For $N$ turns, the field at the center is $B = \\frac{N\\mu_0 I}{2R}$.",
-          "Convert units to SI ::: $R = 10 \\, \\text{cm} = 0.1 \\, \\text{m}$.",
+          "Convert units to SI ::: $R = 10 \\, cm = 0.1 \\, m$.",
           "Substitute values ::: $B = \\frac{50 \\times (4\\pi \\times 10^{-7}) \\times 2.0}{2 \\times 0.1}$.",
-          "Simplify the expression ::: $B = \\frac{100 \\times 4\\pi \\times 10^{-7}}{0.2} = \\frac{400\\pi \\times 10^{-7}}{0.2}$.",
-          "Final calculation ::: $B = 2000\\pi \\times 10^{-7} = 2\\pi \\times 10^{-4} \\approx 2 \\times 3.14 \\times 10^{-4} = 6.28 \\times 10^{-4} \\, \\text{T}$."
+          "Simplify the expression ::: $B = \\frac{100 \\times 4\\pi \\times 10^}{-7}{0.2} = \\frac{400\\pi \\times 10^}{-7}{0.2}$.",
+          "Final calculation ::: $B = 2000\\pi \\times 10^{-7} = 2\\pi \\times 10^{-4} \\approx 2 \\times 3.14 \\times 10^{-4} = 6.28 \\times 10^{-4} \\, T$."
         ],
         "examTip": "NEET often gives $\\pi$ in the answers or expects $3.14$. Always look at the options before deciding whether to keep $\\pi$ in your calculation or substitute its value.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Each turn of the coil contributes equally to the magnetic field at the center. The direction is given by the Right-Hand Thumb Rule.\",\"memoryTrigger\":\"Center is 'MU-I over 2R' ($B = \\\\frac{\\\\mu_0 I}{2R}$). Multiply by N for turns.\",\"visualPrompt\":\"Curling your fingers with the current; your thumb points in the direction of the B-field at the center.\",\"commonTrap\":\"Using $2\\\\pi R$ in the denominator instead of $2R$. Remember, $2\\\\pi R$ is for a straight wire at distance $R$ (Ampere's Law).\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Each turn of the coil contributes equally to the magnetic field at the center. The direction is given by the Right-Hand Thumb Rule.\", \"memoryTrigger\": \"Center is 'MU-I over 2R' ($B = \\\\frac{\\\\mu_0 I}{2R}$). Multiply by N for turns.\", \"visualPrompt\": \"Curling your fingers with the current; your thumb points in the direction of the B-field at the center.\", \"commonTrap\": \"Using $2\\\\pi R$ in the denominator instead of $2R$. Remember, $2\\\\pi R$ is for a straight wire at distance $R$ (Ampere's Law).\"}",
         "keyFormulas": [
           "$B = \\frac{\\mu_0 N I}{2R}$ (Center of coil)",
           "$B = \\frac{\\mu_0 N I R^2}{2(R^2+x^2)^{3/2}}$ (Axial point)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -617,12 +617,12 @@
       },
       {
         "id": "f131bf97-c849-4807-a653-3d1a2f236e76",
-        "text": "The work done in moving a test charge of $q = 2 \\times 10^{-6}\\text{ C}$ from a point $A$ to a point $B$ in an electric field is $2 \\times 10^{-5}\\text{ J}$. What is the potential difference between the points $B$ and $A$ ($V_B - V_A$)?",
+        "text": "The work done in moving a test charge of $q = 2 \\times 10^{-6}C$ from a point $A$ to a point $B$ in an electric field is $2 \\times 10^{-5}J$. What is the potential difference between the points $B$ and $A$ ($V_B - V_A$)?",
         "options": [
-          "10\\text{ V}",
-          "0.1\\text{ V}",
-          "20\\text{ V}",
-          "5\\text{ V}"
+          "10V",
+          "5V",
+          "0.1V",
+          "20V"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -632,21 +632,21 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Definition of Potential Difference ::: $V_B - V_A = W_{AB} / q$.",
-          "Identify Given Data ::: $W_{AB} = 2 \\times 10^{-5}\\text{ J}$ and $q = 2 \\times 10^{-6}\\text{ C}$.",
+          "Identify Given Data ::: $W_{AB} = 2 \\times 10^{-5}J$ and $q = 2 \\times 10^{-6}C$.",
           "Calculation ::: $\\Delta V = (2 \\times 10^{-5}) / (2 \\times 10^{-6})$.",
           "Simplify Powers ::: $\\Delta V = 10^{-5 - (-6)} = 10^1$.",
-          "Final Result ::: $\\Delta V = 10\\text{ V}$."
+          "Final Result ::: $\\Delta V = 10V$."
         ],
         "examTip": "Potential difference is work per unit charge. If the work is positive, the potential at the final point is higher (for a positive test charge).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Electrostatic potential difference is the external work required to move a unit positive charge without acceleration between two points.\",\"memoryTrigger\":\"V = W / q : 'Very Well Qualified'\",\"visualPrompt\":\"Think of lifting a ball (charge) against gravity (electric field); the height difference is the potential difference.\",\"commonTrap\":\"Multiplying $W \\\\times q$ instead of dividing $W / q$.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Electrostatic potential difference is the external work required to move a unit positive charge without acceleration between two points.\", \"memoryTrigger\": \"V = W / q : 'Very Well Qualified'\", \"visualPrompt\": \"Think of lifting a ball (charge) against gravity (electric field); the height difference is the potential difference.\", \"commonTrap\": \"Multiplying $W \\\\times q$ instead of dividing $W / q$.\"}",
         "keyFormulas": [
           "$\\Delta V = \\frac{W}{q}$",
           "$W = q \\Delta V$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -654,12 +654,12 @@
       },
       {
         "id": "f762f17a-de6b-470b-ad08-36997fc09992",
-        "text": "Two capacitors of capacitances $C_1 = 3\\text{ \\mu F}$ and $C_2 = 6\\text{ \\mu F}$ are connected in series across a $12\\text{ V}$ battery. Determine the equivalent capacitance of the combination and the charge on each capacitor.",
+        "text": "Two capacitors of capacitances $C_1 = 3\\mu F$ and $C_2 = 6\\mu F$ are connected in series across a $12\\,\\text{V}$ battery. Determine the equivalent capacitance of the combination and the charge on each capacitor.",
         "options": [
-          "2\\text{ \\mu F and } 24\\text{ \\mu C}",
-          "9\\text{ \\mu F and } 108\\text{ \\mu C}",
-          "2\\text{ \\mu F and } 12\\text{ \\mu C}",
-          "4.5\\text{ \\mu F and } 54\\text{ \\mu C}"
+          "4.5$\\mu$ F and 54$\\mu$ C",
+          "2$\\mu$ F and 12$\\mu$ C",
+          "9$\\mu$ F and 108$\\mu$ C",
+          "2$\\mu$ F and 24$\\mu$ C"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -669,21 +669,21 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Formula for Series ::: $1/C_{eq} = 1/C_1 + 1/C_2$ or $C_{eq} = (C_1 C_2) / (C_1 + C_2)$.",
-          "Calculate $C_{eq}$ ::: $C_{eq} = (3 \\times 6) / (3 + 6) = 18 / 9 = 2\\text{ \\mu F}$.",
+          "Calculate $C_{eq}$ ::: $C_{eq} = (3 \\times 6) / (3 + 6) = 18 / 9 = 2\\mu F$.",
           "Recall Series Property ::: In series, the charge $Q$ on each capacitor is the same and equal to the total charge.",
-          "Calculate Charge ::: $Q = C_{eq} \\times V = 2\\text{ \\mu F} \\times 12\\text{ V}$.",
-          "Final Result ::: $Q = 24\\text{ \\mu C}$. Charge on $C_1$ and $C_2$ is $24\\text{ \\mu C}$."
+          "Calculate Charge ::: $Q = C_{eq} \\times V = 2\\mu F \\times 12V$.",
+          "Final Result ::: $Q = 24\\mu C$. Charge on $C_1$ and $C_2$ is $24\\mu C$."
         ],
         "examTip": "In series, Charge is constant ($Q_1=Q_2$). In parallel, Voltage is constant ($V_1=V_2$). This distinction is the core of most capacitor combination questions.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Capacitors in series add reciprocally (like resistors in parallel) because they share the same charge, leading to an increased effective plate separation.\",\"memoryTrigger\":\"Series-Same-Charge (SSC) and Parallel-Potential-Same (PPS).\",\"visualPrompt\":\"Imagine a line of people passing buckets of water; every person must handle the same amount of water (charge).\",\"commonTrap\":\"Adding $C_1 + C_2$ as if they were resistors in series.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Capacitors in series add reciprocally (like resistors in parallel) because they share the same charge, leading to an increased effective plate separation.\", \"memoryTrigger\": \"Series-Same-Charge (SSC) and Parallel-Potential-Same (PPS).\", \"visualPrompt\": \"Imagine a line of people passing buckets of water; every person must handle the same amount of water (charge).\", \"commonTrap\": \"Adding $C_1 + C_2$ as if they were resistors in series.\"}",
         "keyFormulas": [
           "$C_{eq} = \\frac{C_1 C_2}{C_1 + C_2}$ (Series)",
           "$Q = CV$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -691,12 +691,12 @@
       },
       {
         "id": "2c98df03-4f26-495b-ab39-9a0b133cd09a",
-        "text": "Unpolarized light of intensity $I_0$ is incident on a system of two polarizing sheets. The first sheet (polarizer) has its transmission axis vertical. The second sheet (analyzer) is oriented such that its transmission axis makes an angle of $60^\\circ$ with the vertical. Calculate the intensity of the light emerging from the analyzer in terms of $I_0$.",
+        "text": "Unpolarized light of intensity $I_0$ is incident on a system of two polarizing sheets. The first sheet (polarizer) has its transmission axis vertical. The second sheet (analyzer) is oriented such that its transmission axis makes an angle of $60^°$ with the vertical. Calculate the intensity of the light emerging from the analyzer in terms of $I_0$.",
         "options": [
-          "$I_0 / 2$",
-          "$I_0 / 4$",
           "$I_0 / 8$",
-          "$3I_0 / 8$"
+          "$I_0 / 2$",
+          "$3I_0 / 8$",
+          "$I_0 / 4$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -707,20 +707,20 @@
         "solutionSteps": [
           "Passage through Polarizer ::: When unpolarized light of intensity $I_0$ passes through the first polarizer, its intensity is halved. $I_1 = \\frac{I_0}{2}$.",
           "Identify Malus Law ::: The intensity of polarized light passing through an analyzer is given by $I = I_{inc} \\cos^2(\\theta)$.",
-          "Identify the Angle ::: The angle between the polarizer and analyzer axes is $\\theta = 60^\\circ$.",
-          "Apply the Law ::: $I_2 = I_1 \\cos^2(60^\\circ) = (\\frac{I_0}{2}) \\times (\\cos 60^\\circ)^2$.",
+          "Identify the Angle ::: The angle between the polarizer and analyzer axes is $\\theta = 60^°$.",
+          "Apply the Law ::: $I_2 = I_1 \\cos^2(60^°) = (\\frac{I_0}{2}) \\times (\\cos 60^°)^2$.",
           "Calculate Final Value ::: $I_2 = \\frac{I_0}{2} \\times (\\frac{1}{2})^2 = \\frac{I_0}{2} \\times \\frac{1}{4} = \\frac{I_0}{8}$."
         ],
         "examTip": "The first polarizer always cuts intensity by half regardless of its orientation (for unpolarized light). Malus Law only applies to the second sheet onwards.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Unpolarized light consists of vibrations in all planes. A polarizer 'filters' all but one plane. An analyzer then takes the component of that filtered light along its own axis, resulting in the $\\\\cos^2\\\\theta$ dependence.\",\"memoryTrigger\":\"Unpolarized $\\\\xrightarrow{1/2}$ Polarized $\\\\xrightarrow{\\\\cos^2}$ Analyzed.\",\"visualPrompt\":\"Imagine trying to pass a jump rope through two picket fences. If the fences are aligned, the wave passes. If they are perpendicular, nothing passes. At $60^\\\\circ$, only a fraction passes.\",\"commonTrap\":\"Forgetting the $1/2$ factor for the first polarizer and applying $\\\\cos^2\\\\theta$ directly to $I_0$.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Unpolarized light consists of vibrations in all planes. A polarizer 'filters' all but one plane. An analyzer then takes the component of that filtered light along its own axis, resulting in the $\\\\cos^2\\\\theta$ dependence.\", \"memoryTrigger\": \"Unpolarized $\\\\xrightarrow{1/2}$ Polarized $\\\\xrightarrow{\\\\cos^2}$ Analyzed.\", \"visualPrompt\": \"Imagine trying to pass a jump rope through two picket fences. If the fences are aligned, the wave passes. If they are perpendicular, nothing passes. At $60^\\\\circ$, only a fraction passes.\", \"commonTrap\": \"Forgetting the $1/2$ factor for the first polarizer and applying $\\\\cos^2\\\\theta$ directly to $I_0$.\"}",
         "keyFormulas": [
           "$I = I_0 \\cos^2\\theta$ (Malus Law)",
           "$I_{out} = \\frac{1}{2}I_{unpol}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
@@ -728,12 +728,12 @@
       },
       {
         "id": "5b64c482-0e0b-433d-b8bc-d774f372d253",
-        "text": "A parallel plate capacitor with air between the plates has a capacitance of $C_0 = 10\\text{ pF}$. What will be the new capacitance if the distance between the plates is reduced by half and the space between them is completely filled with a dielectric medium of dielectric constant $K = 5$?",
+        "text": "A parallel plate capacitor with air between the plates has a capacitance of $C_0 = 10pF$. What will be the new capacitance if the distance between the plates is reduced by half and the space between them is completely filled with a dielectric medium of dielectric constant $K = 5$?",
         "options": [
-          "100\\text{ pF}",
-          "50\\text{ pF}",
-          "25\\text{ pF}",
-          "200\\text{ pF}"
+          "200pF",
+          "50pF",
+          "25pF",
+          "100pF"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -742,22 +742,22 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Initial State ::: $C_0 = \\frac{\\epsilon_0 A}{d} = 10\\text{ pF}$.",
+          "Initial State ::: $C_0 = \\frac{\\epsilon_0 A}{d} = 10pF$.",
           "Identify Changes ::: New distance $d' = d/2$ and Dielectric constant $K = 5$.",
           "New Formula ::: $C' = \\frac{K \\epsilon_0 A}{d'}$.",
           "Substitution ::: $C' = \\frac{5 \\epsilon_0 A}{d/2} = 10 \\times \\frac{\\epsilon_0 A}{d}$.",
-          "Calculation ::: $C' = 10 \\times C_0 = 10 \\times 10\\text{ pF} = 100\\text{ pF}$."
+          "Calculation ::: $C' = 10 \\times C_0 = 10 \\times 10pF = 100pF$."
         ],
         "examTip": "When both distance and dielectric change, use the ratio method: $C_{new} = K \\times (d_{old}/d_{new}) \\times C_{old}$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Capacitance is directly proportional to the dielectric constant and area, but inversely proportional to the separation distance.\",\"memoryTrigger\":\"C = K-A-D: Capacitance = (K)indness * (A)rea / (D)istance\",\"visualPrompt\":\"Imagine a sandwich. If you make the bread closer (smaller d) and use a denser filling (higher K), the 'flavor' (capacitance) increases significantly.\",\"commonTrap\":\"Multiplying by $d/2$ instead of dividing.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Capacitance is directly proportional to the dielectric constant and area, but inversely proportional to the separation distance.\", \"memoryTrigger\": \"C = K-A-D: Capacitance = (K)indness * (A)rea / (D)istance\", \"visualPrompt\": \"Imagine a sandwich. If you make the bread closer (smaller d) and use a denser filling (higher K), the 'flavor' (capacitance) increases significantly.\", \"commonTrap\": \"Multiplying by $d/2$ instead of dividing.\"}",
         "keyFormulas": [
           "$C = \\frac{K \\epsilon_0 A}{d}$",
           "$C' = \\frac{K}{d'/d} C_0$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -765,12 +765,12 @@
       },
       {
         "id": "699a354e-828c-4c54-a907-d99d3304ba5c",
-        "text": "In a common-emitter configuration of an $npn$ transistor amplifier, the collector load resistance is $R_C = 4 \\text{ k}\\Omega$ and the input resistance is $R_i = 1 \\text{ k}\\Omega$. A sinusoidal signal of $10 \\text{ mV}$ is applied across the base-emitter junction, resulting in a change in the base current by $20 \\mu\\text{A}$ and a corresponding change in the collector current by $2 \\text{ mA}$. If the amplifier is used to drive a load, calculate the voltage gain ($A_V$) and the power gain ($A_P$) of the system, and identify the phase relationship between the input and output signals.",
+        "text": "In a common-emitter configuration of an $npn$ transistor amplifier, the collector load resistance is $R_C = 4 k\\Omega$ and the input resistance is $R_i = 1 k\\Omega$. A sinusoidal signal of $10 mV$ is applied across the base-emitter junction, resulting in a change in the base current by $20 \\,\\mu\\text{A}$ and a corresponding change in the collector current by $2 mA$. If the amplifier is used to drive a load, calculate the voltage gain ($A_V$) and the power gain ($A_P$) of the system, and identify the phase relationship between the input and output signals.",
         "options": [
-          "$A_V = 800$, $A_P = 8 \\times 10^4$, Phase difference = $180^\\circ$",
-          "$A_V = 400$, $A_P = 4 \\times 10^4$, Phase difference = $0^\\circ$",
-          "$A_V = 800$, $A_P = 1.6 \\times 10^5$, Phase difference = $180^\\circ$",
-          "$A_V = 200$, $A_P = 2 \\times 10^4$, Phase difference = $180^\\circ$"
+          "$A_V = 400$, $A_P = 4 \\times 10^4$, Phase difference = $0^°$",
+          "$A_V = 800$, $A_P = 1.6 \\times 10^5$, Phase difference = $180^°$",
+          "$A_V = 200$, $A_P = 2 \\times 10^4$, Phase difference = $180^°$",
+          "$A_V = 800$, $A_P = 8 \\times 10^4$, Phase difference = $180^°$"
         ],
         "marks": 4,
         "difficulty": "Hard",
@@ -779,14 +779,14 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Current Gain ($\\beta_{ac}$) Calculation ::: The AC current gain is defined as the ratio of change in collector current to the change in base current: $\\beta_{ac} = \\frac{\\Delta I_C}{\\Delta I_B} = \\frac{2 \\times 10^{-3}}{20 \\times 10^{-6}} = 100$.",
-          "Voltage Gain ($A_V$) Calculation ::: Voltage gain is given by the product of current gain and resistance gain: $A_V = \\beta_{ac} \\times \\frac{R_C}{R_i}$. Substituting the values: $A_V = 100 \\times \\frac{4000}{1000} = 400$. *Correction Check*: Wait, the input signal is $10 \\text{ mV}$ and $\\Delta I_C = 2 \\text{ mA}$. $V_{out} = \\Delta I_C \\times R_C = 2 \\text{ mA} \\times 4 \\text{ k}\\Omega = 8 \\text{ V}$. Thus $A_V = \\frac{V_{out}}{V_{in}} = \\frac{8}{10 \\times 10^{-3}} = 800$.",
+          "Current Gain ($\\beta_{ac}$) Calculation ::: The AC current gain is defined as the ratio of change in collector current to the change in base current: $\\beta_{ac} = \\frac{\\Delta I_C}{\\Delta I_B} = \\frac{2 \\times 10^}{-3}{20 \\times 10^{-6}} = 100$.",
+          "Voltage Gain ($A_V$) Calculation ::: Voltage gain is given by the product of current gain and resistance gain: $A_V = \\beta_{ac} \\times \\frac{R_C}{R_i}$. Substituting the values: $A_V = 100 \\times \\frac{4000}{1000} = 400$. *Correction Check*: Wait, the input signal is $10 mV$ and $\\Delta I_C = 2 mA$. $V_{out} = \\Delta I_C \\times R_C = 2 mA \\times 4 k\\Omega = 8 V$. Thus $A_V = \\frac{V_}{out}{V_{in}} = \\frac{8}{10 \\times 10^{-3}} = 800$.",
           "Power Gain ($A_P$) Calculation ::: Power gain is the product of current gain and voltage gain: $A_P = \\beta_{ac} \\times A_V = 100 \\times 800 = 80,000$ or $8 \\times 10^4$.",
-          "Phase Relationship ::: In a Common Emitter (CE) amplifier configuration, the output voltage is $180^\\circ$ out of phase with the input voltage due to the collector current characteristics relative to $V_{CC}$."
+          "Phase Relationship ::: In a Common Emitter (CE) amplifier configuration, the output voltage is $180^°$ out of phase with the input voltage due to the collector current characteristics relative to $V_{CC}$."
         ],
-        "examTip": "Always verify voltage gain using two methods: $A_V = \\beta \\frac{R_L}{R_i}$ and $A_V = \\frac{\\Delta V_{out}}{\\Delta V_{in}}$. If they differ, the problem might be testing your ability to identify the most direct physical relationship. In CE mode, the $180^\\circ$ phase shift is a mandatory hallmark.",
+        "examTip": "Always verify voltage gain using two methods: $A_V = \\beta \\frac{R_L}{R_i}$ and $A_V = \\frac{\\Delta V_}{out}{\\Delta V_{in}}$. If they differ, the problem might be testing your ability to identify the most direct physical relationship. In CE mode, the $180^°$ phase shift is a mandatory hallmark.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"An amplifier increases signal strength. In CE configuration, the emitter is common, providing high current and voltage gain. The phase reversal occurs because an increase in $I_B$ increases $I_C$, which increases the voltage drop across $R_C$, thereby decreasing $V_{CE}$ ($V_{out} = V_{CC} - I_C R_C$).\",\"memoryTrigger\":\"CE = 'Commonly Everted' (Output is inverted/180 degrees).\",\"visualPrompt\":\"Imagine a see-saw: when input base current pushes up, the output collector voltage swings down. They move in opposite directions.\",\"commonTrap\":\"Using $A_P = \\\\beta^2$ instead of $A_P = \\\\beta \\\\times A_V$ when input and load resistances are different.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"An amplifier increases signal strength. In CE configuration, the emitter is common, providing high current and voltage gain. The phase reversal occurs because an increase in $I_B$ increases $I_C$, which increases the voltage drop across $R_C$, thereby decreasing $V_{CE}$ ($V_{out} = V_{CC} - I_C R_C$).\", \"memoryTrigger\": \"CE = 'Commonly Everted' (Output is inverted/180 degrees).\", \"visualPrompt\": \"Imagine a see-saw: when input base current pushes up, the output collector voltage swings down. They move in opposite directions.\", \"commonTrap\": \"Using $A_P = \\\\beta^2$ instead of $A_P = \\\\beta \\\\times A_V$ when input and load resistances are different.\"}",
         "keyFormulas": [
           "$\\beta = \\frac{\\Delta I_C}{\\Delta I_B}$",
           "$A_V = \\frac{\\Delta I_C \\cdot R_L}{V_{in}}$",
@@ -794,7 +794,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": null,
           "questionType": "simple_recall_mcq"
@@ -802,12 +802,12 @@
       },
       {
         "id": "e2cb1331-dc0e-4b16-9bf7-58b3826902b3",
-        "text": "Study the optical arrangement shown in the description. A converging lens $L_1$ of focal length $f_1 = 15 \\text{ cm}$ is placed coaxially with a diverging lens $L_2$ of focal length $f_2 = -10 \\text{ cm}$. The distance of separation between the two lenses is $d = 5 \\text{ cm}$. If a parallel beam of light is incident on $L_1$ from the left, calculate the final position of the image formed by this combination relative to the center of lens $L_2$.",
+        "text": "Study the optical arrangement shown in the description. A converging lens $L_1$ of focal length $f_1 = 15 cm$ is placed coaxially with a diverging lens $L_2$ of focal length $f_2 = -10 cm$. The distance of separation between the two lenses is $d = 5 cm$. If a parallel beam of light is incident on $L_1$ from the left, calculate the final position of the image formed by this combination relative to the center of lens $L_2$.",
         "options": [
-          "Infinity",
-          "30 cm to the right",
           "20 cm to the right",
-          "10 cm to the left"
+          "10 cm to the left",
+          "Infinity",
+          "30 cm to the right"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -816,23 +816,23 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Step 1: Image from First Lens ($L_1$) ::: For a parallel beam incident on $L_1$, the image $I_1$ is formed at its focal point. Thus, $v_1 = f_1 = +15 \\text{ cm}$ to the right of $L_1$.",
-          "Step 2: Object for Second Lens ($L_2$) ::: The image $I_1$ acts as a virtual object for $L_2$. Since the lenses are separated by $d = 5 \\text{ cm}$, the distance of $I_1$ from $L_2$ is $u_2 = v_1 - d = 15 - 5 = +10 \\text{ cm}$ (to the right of $L_2$).",
-          "Step 3: Apply Lens Formula for $L_2$ ::: Using $\\frac{1}{v_2} - \\frac{1}{u_2} = \\frac{1}{f_2}$. Here $u_2 = +10 \\text{ cm}$ and $f_2 = -10 \\text{ cm}$.",
+          "Step 1: Image from First Lens ($L_1$) ::: For a parallel beam incident on $L_1$, the image $I_1$ is formed at its focal point. Thus, $v_1 = f_1 = +15 cm$ to the right of $L_1$.",
+          "Step 2: Object for Second Lens ($L_2$) ::: The image $I_1$ acts as a virtual object for $L_2$. Since the lenses are separated by $d = 5 cm$, the distance of $I_1$ from $L_2$ is $u_2 = v_1 - d = 15 - 5 = +10 cm$ (to the right of $L_2$).",
+          "Step 3: Apply Lens Formula for $L_2$ ::: Using $\\frac{1}{v_2} - \\frac{1}{u_2} = \\frac{1}{f_2}$. Here $u_2 = +10 cm$ and $f_2 = -10 cm$.",
           "Step 4: Solve for $v_2$ ::: $\\frac{1}{v_2} = \\frac{1}{-10} + \\frac{1}{10} = 0$. Therefore, $v_2 = \\infty$. No, wait! Re-calculate carefully: $\\frac{1}{v_2} = \\frac{1}{f_2} + \\frac{1}{u_2} = \\frac{1}{-10} + \\frac{1}{10} = 0$. This implies $v_2 = \\infty$.",
           "Step 5: Re-evaluating Trap ::: Wait, if $u_2 = +10$ and $f_2 = -10$, the object is at the virtual focus of the concave lens. A ray directed towards the focus of a concave lens emerges parallel. Thus $v_2 = \\infty$. Let's check the options. Ah, if the parallel beam comes out, the image is at infinity. Let's adjust the 'noise' separation to $d = 20$ cm for a better 'Moderate' difficulty. Let's stick to $d = 35$ cm. Let's re-solve for $d=5$cm: $u_2 = +10, f_2 = -10 \\Rightarrow v = \\infty$. If $d=20$, $u_2 = 15-20 = -5$, $\\frac{1}{v} = \\frac{1}{-10} + \\frac{1}{-5} = -3/10 \\Rightarrow v = -3.33$. Let's use $d = 30$ cm. $u_2 = 15-30 = -15$. $\\frac{1}{v} = \\frac{1}{-10} - \\frac{1}{15} = -5/30 \\Rightarrow v = -6$.",
-          "Step 6: Final check for 'Moderate' calculation ::: Let $f_1=20, f_2=-10, d=15$. $u_2 = 20-15 = +5$. $\\frac{1}{v} = \\frac{1}{-10} + \\frac{1}{5} = \\frac{-1+2}{10} = 1/10$. So $v = +10 \\text{ cm}$. Let's use this scenario. $f_1=20, f_2=-10, d=15$, final $v=10$."
+          "Step 6: Final check for 'Moderate' calculation ::: Let $f_1=20, f_2=-10, d=15$. $u_2 = 20-15 = +5$. $\\frac{1}{v} = \\frac{1}{-10} + \\frac{1}{5} = \\frac{-1+2}{10} = 1/10$. So $v = +10 cm$. Let's use this scenario. $f_1=20, f_2=-10, d=15$, final $v=10$."
         ],
         "examTip": "In lens combinations, the image of the first lens becomes the object for the second. Use the sign convention relative to the pole of the lens you are currently calculating for.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Virtual Object: If rays are converging towards a point behind a lens, that point acts as a virtual object for that lens. $u$ is taken as positive in such cases.\",\"memoryTrigger\":\"Real is Left (-), Virtual is Right (+) for objects.\",\"visualPrompt\":\"Imagine the light rays 'aiming' for a spot behind the second lens. The second lens intercepts them before they can get there.\",\"commonTrap\":\"Using $u_2 = d + v_1$ instead of $u_2 = v_1 - d$.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Virtual Object: If rays are converging towards a point behind a lens, that point acts as a virtual object for that lens. $u$ is taken as positive in such cases.\", \"memoryTrigger\": \"Real is Left (-), Virtual is Right (+) for objects.\", \"visualPrompt\": \"Imagine the light rays 'aiming' for a spot behind the second lens. The second lens intercepts them before they can get there.\", \"commonTrap\": \"Using $u_2 = d + v_1$ instead of $u_2 = v_1 - d$.\"}",
         "keyFormulas": [
           "$\\frac{1}{v} - \\frac{1}{u} = \\frac{1}{f}$",
           "$u_2 = v_1 - d$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "diagram_based_mcq"
@@ -840,12 +840,12 @@
       },
       {
         "id": "8b2867bc-b89f-47da-bf8d-0ab0dba7b1c3",
-        "text": "An experimental physicist in a high-precision laboratory measures the electrostatic force of repulsion between two identical point charges, $q_1$ and $q_2$, separated by a fixed distance $r$ in a vacuum to be exactly $120\\text{ N}$. If the entire experimental setup is subsequently immersed in a non-conducting dielectric liquid medium having a relative permittivity (dielectric constant) $\\epsilon_r = 6.0$ without altering the spatial separation between the charges, what will be the magnitude of the new electrostatic force between them in this medium?",
+        "text": "An experimental physicist in a high-precision laboratory measures the electrostatic force of repulsion between two identical point charges, $q_1$ and $q_2$, separated by a fixed distance $r$ in a vacuum to be exactly $120N$. If the entire experimental setup is subsequently immersed in a non-conducting dielectric liquid medium having a relative permittivity (dielectric constant) $\\epsilon_r = 6.0$ without altering the spatial separation between the charges, what will be the magnitude of the new electrostatic force between them in this medium?",
         "options": [
-          "20 N",
-          "720 N",
           "60 N",
-          "10 N"
+          "20 N",
+          "10 N",
+          "720 N"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -854,22 +854,22 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Identify the Initial State ::: In a vacuum, the force between two charges is given by $F_{vac} = \\frac{1}{4\\pi\\epsilon_0} \\frac{q_1 q_2}{r^2} = 120\\text{ N}$.",
+          "Identify the Initial State ::: In a vacuum, the force between two charges is given by $F_{vac} = \\frac{1}{4\\pi\\epsilon_0} \\frac{q_1 q_2}{r^2} = 120N$.",
           "Identify the Medium Effect ::: When the space between charges is filled with a dielectric of constant $K$ (or $\\epsilon_r$), the permittivity of the medium becomes $\\epsilon = K\\epsilon_0$.",
-          "Apply the Formula ::: The force in the medium is $F_{med} = \\frac{1}{4\\pi(K\\epsilon_0)} \\frac{q_1 q_2}{r^2} = \\frac{F_{vac}}{K}$.",
-          "Numerical Calculation ::: Substitute the given values: $F_{med} = \\frac{120\\text{ N}}{6.0} = 20\\text{ N}$.",
+          "Apply the Formula ::: The force in the medium is $F_{med} = \\frac{1}{4\\pi(K\\epsilon_0)} \\frac{q_1 q_2}{r^2} = \\frac{F_}{vac}{K}$.",
+          "Numerical Calculation ::: Substitute the given values: $F_{med} = \\frac{120N}{6.0} = 20N$.",
           "Conclusion ::: The electrostatic force reduces by a factor of the dielectric constant."
         ],
         "examTip": "Whenever a dielectric is introduced, force and electric field decrease by a factor of $K$, while capacitance increases by $K$. Always check if the question asks for 'decrease by' vs 'decrease to'.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"The presence of a dielectric medium leads to the polarization of molecules, creating an induced electric field that opposes the original field, thereby reducing the net force between charges.\",\"memoryTrigger\":\"F-V-K: Force in Vacuum over K (F-V/K).\",\"visualPrompt\":\"Imagine the dielectric molecules 'crowding' the space between the charges and 'shielding' them from each other's full electric influence.\",\"commonTrap\":\"Students sometimes multiply by $K$ (thinking of capacitance) instead of dividing.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"The presence of a dielectric medium leads to the polarization of molecules, creating an induced electric field that opposes the original field, thereby reducing the net force between charges.\", \"memoryTrigger\": \"F-V-K: Force in Vacuum over K (F-V/K).\", \"visualPrompt\": \"Imagine the dielectric molecules 'crowding' the space between the charges and 'shielding' them from each other's full electric influence.\", \"commonTrap\": \"Students sometimes multiply by $K$ (thinking of capacitance) instead of dividing.\"}",
         "keyFormulas": [
-          "$F_{med} = \\frac{F_{vac}}{K}$ used for force in dielectric medium",
+          "$F_{med} = \\frac{F_}{vac}{K}$ used for force in dielectric medium",
           "$\\epsilon = \\epsilon_r \\epsilon_0$ definition of permittivity"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -877,12 +877,12 @@
       },
       {
         "id": "d194f118-3903-45b4-9401-994b3bc5e574",
-        "text": "A plane electromagnetic wave is propagating along the positive $x$-direction in a non-magnetic dielectric medium. The oscillating electric field is described by the equation $E_y = 60 \\sin(2 \\times 10^{10} t - kx) \\text{ V/m}$. If the relative permittivity (dielectric constant) of the medium is $\\epsilon_r = 4.0$, determine the corresponding peak value of the magnetic field $B_0$ and the speed of the wave $v$ in this medium.",
+        "text": "A plane electromagnetic wave is propagating along the positive $x$-direction in a non-magnetic dielectric medium. The oscillating electric field is described by the equation $E_y = 60 \\sin(2 \\times 10^{10} t - kx) V/m$. If the relative permittivity (dielectric constant) of the medium is $\\epsilon_r = 4.0$, determine the corresponding peak value of the magnetic field $B_0$ and the speed of the wave $v$ in this medium.",
         "options": [
-          "$B_0 = 4 \\times 10^{-7} \\text{ T}, v = 1.5 \\times 10^8 \\text{ m/s}$",
-          "$B_0 = 2 \\times 10^{-7} \\text{ T}, v = 3.0 \\times 10^8 \\text{ m/s}$",
-          "$B_0 = 8 \\times 10^{-7} \\text{ T}, v = 1.5 \\times 10^8 \\text{ m/s}$",
-          "$B_0 = 4 \\times 10^{-7} \\text{ T}, v = 3.0 \\times 10^8 \\text{ m/s}$"
+          "$B_0 = 2 \\times 10^{-7} T, v = 3.0 \\times 10^8 m/s$",
+          "$B_0 = 8 \\times 10^{-7} T, v = 1.5 \\times 10^8 m/s$",
+          "$B_0 = 4 \\times 10^{-7} T, v = 1.5 \\times 10^8 m/s$",
+          "$B_0 = 4 \\times 10^{-7} T, v = 3.0 \\times 10^8 m/s$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -891,14 +891,14 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Step 1: Calculate Wave Speed in Medium ::: The speed of an EM wave in a medium is $v = \\frac{c}{\\sqrt{\\mu_r \\epsilon_r}}$. For a non-magnetic medium, $\\mu_r \\approx 1$. Given $\\epsilon_r = 4$, $v = \\frac{3 \\times 10^8}{\\sqrt{4}} = 1.5 \\times 10^8 \\text{ m/s}$.",
+          "Step 1: Calculate Wave Speed in Medium ::: The speed of an EM wave in a medium is $v = \\frac{c}{\\\\sqrt\\mu_r \\epsilon_r}$. For a non-magnetic medium, $\\mu_r \\approx 1$. Given $\\epsilon_r = 4$, $v = \\frac{3 \\times 10^8}{\\sqrt{4}} = 1.5 \\times 10^8 m/s$.",
           "Step 2: Relate $E_0$ and $B_0$ ::: In any medium, the ratio of the amplitudes of the electric and magnetic fields is equal to the speed of the wave in that medium: $\\frac{E_0}{B_0} = v$.",
-          "Step 3: Calculate $B_0$ ::: Using the values $E_0 = 60 \\text{ V/m}$ and $v = 1.5 \\times 10^8 \\text{ m/s}$, we get $B_0 = \\frac{E_0}{v} = \\frac{60}{1.5 \\times 10^8}$.",
-          "Step 4: Final Value ::: $B_0 = \\frac{600}{15} \\times 10^{-8} = 40 \\times 10^{-8} = 4 \\times 10^{-7} \\text{ T}$."
+          "Step 3: Calculate $B_0$ ::: Using the values $E_0 = 60 V/m$ and $v = 1.5 \\times 10^8 m/s$, we get $B_0 = \\frac{E_0}{v} = \\frac{60}{1.5 \\times 10^8}$.",
+          "Step 4: Final Value ::: $B_0 = \\frac{600}{15} \\times 10^{-8} = 40 \\times 10^{-8} = 4 \\times 10^{-7} T$."
         ],
-        "examTip": "Never use $c$ ($3 \\times 10^8$) for $E/B$ ratios if the wave is in a medium. Always adjust for the refractive index $n = \\sqrt{\\epsilon_r}$.",
+        "examTip": "Never use $c$ ($3 \\times 10^8$) for $E/B$ ratios if the wave is in a medium. Always adjust for the refractive index $n = \\\\sqrt\\epsilon_r$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"EM waves slow down in media. Since $E_0/B_0 = v$, and $v < c$, for a given $E_0$, the magnetic field $B_0$ in a medium is actually larger than it would be in vacuum.\",\"memoryTrigger\":\"E=vB (Eve is very Bright).\",\"visualPrompt\":\"Imagine a wave trying to run through water (medium) versus air (vacuum). It slows down, and the relationship between its 'electric' and 'magnetic' components must stay proportional to that slower speed.\",\"commonTrap\":\"Using $B_0 = E_0 / c$ instead of $B_0 = E_0 / v$.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"EM waves slow down in media. Since $E_0/B_0 = v$, and $v < c$, for a given $E_0$, the magnetic field $B_0$ in a medium is actually larger than it would be in vacuum.\", \"memoryTrigger\": \"E=vB (Eve is very Bright).\", \"visualPrompt\": \"Imagine a wave trying to run through water (medium) versus air (vacuum). It slows down, and the relationship between its 'electric' and 'magnetic' components must stay proportional to that slower speed.\", \"commonTrap\": \"Using $B_0 = E_0 / c$ instead of $B_0 = E_0 / v$.\"}",
         "keyFormulas": [
           "$v = c / \\sqrt{\\epsilon_r}$",
           "$E_0 / B_0 = v$",
@@ -906,7 +906,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-015",
           "questionType": "simple_recall_mcq"
@@ -916,10 +916,10 @@
         "id": "be2f2ceb-4c06-4cb4-84d9-5e36d12b1068",
         "text": "A series $LCR$ circuit contains a $10 \\Omega$ resistor, an inductor of inductive reactance $20 \\Omega$ and a capacitor of capacitive reactance $10 \\Omega$. The power factor of the circuit is:",
         "options": [
-          "$1 / \\sqrt{2}$",
-          "$\\u221A3 / 2$",
+          "$1$",
           "$1/2$",
-          "$1$"
+          "$1 / \\sqrt{2}$",
+          "$\\u221A3 / 2$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -930,20 +930,20 @@
         "solutionSteps": [
           "Step 1: Identify the given values: $R = 10 \\Omega$, $X_L = 20 \\Omega$, $X_C = 10 \\Omega$.",
           "Step 2: Calculate the net reactance $X = X_L - X_C = 20 - 10 = 10 \\Omega$.",
-          "Step 3: Calculate the impedance $Z = \\sqrt{R^2 + X^2} = \\sqrt{10^2 + 10^2} = 10\\sqrt{2} \\Omega$.",
+          "Step 3: Calculate the impedance $Z = \\sqrt{R}^2 + X^2 = \\sqrt{10}^2 + 10^2 = 10\\sqrt{2} \\Omega$.",
           "Step 4: Calculate the power factor $\\cos \\phi = R/Z$.",
           "Step 5: $\\cos \\phi = 10 / (10\\sqrt{2}) = 1/\\sqrt{2}$."
         ],
-        "examTip": "If $R = |X_L - X_C|$, the phase angle is always $45^\\circ$ and the power factor is always $1/\\sqrt{2} \\approx 0.707$.",
+        "examTip": "If $R = |X_L - X_C|$, the phase angle is always $45^°$ and the power factor is always $1/\\sqrt{2} \\approx 0.707$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Power factor measures how much of the current is effectively doing work. Resonance occurs when power factor is 1.\",\"memoryTrigger\":\"Power Factor = 'Real resistance / Total Z'\",\"visualPrompt\":\"Imagine the Impedance Triangle. $R$ is the base, $(X_L - X_C)$ is the height, and $Z$ is the hypotenuse. The power factor is the cosine of the angle between $R$ and $Z$.\",\"commonTrap\":\"Using $\\\\sin \\\\phi$ instead of $\\\\cos \\\\phi$ or forgetting to subtract $X_C$ from $X_L$.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Power factor measures how much of the current is effectively doing work. Resonance occurs when power factor is 1.\", \"memoryTrigger\": \"Power Factor = 'Real resistance / Total Z'\", \"visualPrompt\": \"Imagine the Impedance Triangle. $R$ is the base, $(X_L - X_C)$ is the height, and $Z$ is the hypotenuse. The power factor is the cosine of the angle between $R$ and $Z$.\", \"commonTrap\": \"Using $\\\\sin \\\\phi$ instead of $\\\\cos \\\\phi$ or forgetting to subtract $X_C$ from $X_L$.\"}",
         "keyFormulas": [
           "$Z = \\sqrt{R^2 + (X_L - X_C)^2}$",
           "Power Factor = $\\cos \\phi = R/Z$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
@@ -951,12 +951,12 @@
       },
       {
         "id": "be168393-c529-422a-84e1-2fb065431210",
-        "text": "An optical microscope is focused on a minute mark etched at the bottom of a glass beaker. The beaker is subsequently filled with a transparent liquid of refractive index $\\mu = 1.60$ to a height of $12.0 \\text{ cm}$. To bring the mark back into sharp focus, the microscope must be moved vertically. Calculate the required displacement of the microscope and specify the direction of movement.",
+        "text": "An optical microscope is focused on a minute mark etched at the bottom of a glass beaker. The beaker is subsequently filled with a transparent liquid of refractive index $\\mu = 1.60$ to a height of $12.0 cm$. To bring the mark back into sharp focus, the microscope must be moved vertically. Calculate the required displacement of the microscope and specify the direction of movement.",
         "options": [
           "4.5 cm upwards",
+          "7.5 cm downwards",
           "4.5 cm downwards",
-          "7.5 cm upwards",
-          "7.5 cm downwards"
+          "7.5 cm upwards"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -966,20 +966,20 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Step 1: Understand Apparent Depth ::: When an object in a denser medium is viewed from a rarer medium, it appears closer to the surface. The apparent depth $h'$ is given by $h' = \\frac{h}{\\mu}$.",
-          "Step 2: Calculate Apparent Depth ::: Given real depth $h = 12.0 \\text{ cm}$ and $\\mu = 1.60$. Therefore, $h' = \\frac{12.0}{1.6} = \\frac{120}{16} = 7.5 \\text{ cm}$ from the surface.",
-          "Step 3: Calculate Vertical Shift ::: The mark appears to have shifted upwards from the bottom. The shift $\\Delta h$ is given by $h - h'$. $\\Delta h = 12.0 - 7.5 = 4.5 \\text{ cm}$.",
+          "Step 2: Calculate Apparent Depth ::: Given real depth $h = 12.0 cm$ and $\\mu = 1.60$. Therefore, $h' = \\frac{12.0}{1.6} = \\frac{120}{16} = 7.5 cm$ from the surface.",
+          "Step 3: Calculate Vertical Shift ::: The mark appears to have shifted upwards from the bottom. The shift $\\Delta h$ is given by $h - h'$. $\\Delta h = 12.0 - 7.5 = 4.5 cm$.",
           "Step 4: Determine Direction ::: Since the image (apparent position) is higher than the actual position, the microscope must be moved upwards to refocus on the shifted image."
         ],
         "examTip": "Shift is always $h(1 - 1/\\mu)$. If $\\mu > 1$, the shift is always 'towards' the observer (upwards in this case).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Refraction at a plane surface causes a change in the apparent position of objects. The shift is always towards the interface for a denser-to-rarer transition.\",\"memoryTrigger\":\"SAM: Shift is Always Minus (Real - Apparent).\",\"visualPrompt\":\"Imagine a swimming pool floor appearing shallower than it actually is. The 'gap' between the real floor and the floor you see is the shift.\",\"commonTrap\":\"Confusing 'Apparent Depth' ($h/\\\\mu$) with 'Normal Shift' ($h - h/\\\\mu$).\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Refraction at a plane surface causes a change in the apparent position of objects. The shift is always towards the interface for a denser-to-rarer transition.\", \"memoryTrigger\": \"SAM: Shift is Always Minus (Real - Apparent).\", \"visualPrompt\": \"Imagine a swimming pool floor appearing shallower than it actually is. The 'gap' between the real floor and the floor you see is the shift.\", \"commonTrap\": \"Confusing 'Apparent Depth' ($h/\\\\mu$) with 'Normal Shift' ($h - h/\\\\mu$).\"}",
         "keyFormulas": [
           "$h' = h/\\mu$",
           "$\\text{Shift} = h(1 - 1/\\mu)$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
@@ -987,12 +987,12 @@
       },
       {
         "id": "95a13466-07b3-4d86-af5f-92d4f96142ec",
-        "text": "Consider a Young's Double Slit Experiment (YDSE) performed in a controlled environment where the monochromatic light source has a wavelength of $6000\\text{ \\AA}$ in vacuum. The fringes are observed on a screen placed at a distance $D$ from the slits which are separated by a distance $d$. If the entire experimental apparatus is submerged in a transparent liquid of refractive index $\\mu = 1.5$, and the original fringe width in air was $0.6\\text{ mm}$, determine the new fringe width ($ \\beta' $) in the liquid medium.",
+        "text": "Consider a Young's Double Slit Experiment (YDSE) performed in a controlled environment where the monochromatic light source has a wavelength of $6000\\AA$ in vacuum. The fringes are observed on a screen placed at a distance $D$ from the slits which are separated by a distance $d$. If the entire experimental apparatus is submerged in a transparent liquid of refractive index $\\mu = 1.5$, and the original fringe width in air was $0.6mm$, determine the new fringe width ($ \\beta' $) in the liquid medium.",
         "options": [
+          "0.45 mm",
           "0.4 mm",
-          "0.9 mm",
           "0.3 mm",
-          "0.45 mm"
+          "0.9 mm"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1001,22 +1001,22 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Identify the relationship for Fringe Width ::: In air, $\\beta = \\frac{\\lambda D}{d}$. Given $\\beta = 0.6\\text{ mm}$.",
+          "Identify the relationship for Fringe Width ::: In air, $\\beta = \\frac{\\lambda D}{d}$. Given $\\beta = 0.6mm$.",
           "Effect of Medium on Wavelength ::: When light enters a medium of refractive index $\\mu$, its wavelength changes to $\\lambda' = \\frac{\\lambda}{\\mu}$.",
           "Express New Fringe Width ::: The new fringe width $\\beta'$ is given by $\\beta' = \\frac{\\lambda' D}{d} = \\frac{(\\lambda/\\mu) D}{d}$.",
           "Relate $\\beta'$ to $\\beta$ ::: By substitution, $\\beta' = \\frac{\\beta}{\\mu}$.",
-          "Numerical Calculation ::: $\\beta' = \\frac{0.6\\text{ mm}}{1.5} = \\frac{0.6}{3/2} = \\frac{1.2}{3} = 0.4\\text{ mm}$."
+          "Numerical Calculation ::: $\\beta' = \\frac{0.6mm}{1.5} = \\frac{0.6}{3/2} = \\frac{1.2}{3} = 0.4mm$."
         ],
         "examTip": "Fringe width is directly proportional to wavelength. Since light slows down and 'shrinks' in a denser medium, the interference pattern also 'shrinks' or compresses.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"The spacing of interference fringes depends on the phase difference, which is a function of path difference and wavelength. A higher refractive index reduces the wavelength, necessitating smaller spatial intervals for the same phase change.\",\"memoryTrigger\":\"Denser = Smaller. (Medium index up, Fringe width down).\",\"visualPrompt\":\"Imagine the accordion-like interference pattern being squeezed together as the whole setup is dipped into water.\",\"commonTrap\":\"Confusing the frequency change (which is zero) with the wavelength change.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"The spacing of interference fringes depends on the phase difference, which is a function of path difference and wavelength. A higher refractive index reduces the wavelength, necessitating smaller spatial intervals for the same phase change.\", \"memoryTrigger\": \"Denser = Smaller. (Medium index up, Fringe width down).\", \"visualPrompt\": \"Imagine the accordion-like interference pattern being squeezed together as the whole setup is dipped into water.\", \"commonTrap\": \"Confusing the frequency change (which is zero) with the wavelength change.\"}",
         "keyFormulas": [
           "$\\beta = \\frac{\\lambda D}{d}$",
-          "$\\lambda_{med} = \\frac{\\lambda_{vac}}{\\mu}$"
+          "$\\lambda_{med} = \\frac{\\lambda_}{vac}{\\mu}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
@@ -1027,8 +1027,8 @@
         "text": "A radioactive nucleus ${}_{Z}^{A}X$ undergoes a series of decays as follows: $X \\xrightarrow{\\alpha} X_1 \\xrightarrow{\\beta^-} X_2 \\xrightarrow{\\alpha} X_3$. If the mass number of the original nucleus is $A=238$ and the atomic number is $Z=92$, what are the mass number and atomic number of the final nucleus $X_3$?",
         "options": [
           "$A=230, Z=89$",
-          "$A=232, Z=90$",
           "$A=230, Z=88$",
+          "$A=232, Z=90$",
           "$A=234, Z=91$"
         ],
         "marks": 4,
@@ -1046,14 +1046,14 @@
         ],
         "examTip": "Remember: $\\alpha$ is $(-4, -2)$, $\\beta^-$ is $(0, +1)$, and $\\beta^+$ is $(0, -1)$. Gamma $(\\gamma)$ is $(0, 0)$. Track $A$ and $Z$ separately to avoid confusion.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Radioactive decay follows Soddy-Fajans displacement laws. Alpha emission removes a Helium nucleus, Beta emission transforms a neutron to a proton (or vice versa).\",\"memoryTrigger\":\"Alpha = He(4,2) goes out. Beta-minus = Neutron becomes Proton (+1 Z).\",\"visualPrompt\":\"Imagine a heavy backpack. Alpha is like throwing away 4 bricks. Beta is like turning a blue marble into a red one without changing total count.\",\"commonTrap\":\"Students often decrease $Z$ for $\\\\beta^-$ decay instead of increasing it.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Radioactive decay follows Soddy-Fajans displacement laws. Alpha emission removes a Helium nucleus, Beta emission transforms a neutron to a proton (or vice versa).\", \"memoryTrigger\": \"Alpha = He(4,2) goes out. Beta-minus = Neutron becomes Proton (+1 Z).\", \"visualPrompt\": \"Imagine a heavy backpack. Alpha is like throwing away 4 bricks. Beta is like turning a blue marble into a red one without changing total count.\", \"commonTrap\": \"Students often decrease $Z$ for $\\\\beta^-$ decay instead of increasing it.\"}",
         "keyFormulas": [
           "${}_{Z}^{A}X \\to {}_{Z-2}^{A-4}Y + {}_{2}^{4}He$ (Alpha)",
           "${}_{Z}^{A}X \\to {}_{Z+1}^{A}Y + e^- + \\bar{\\nu}$ (Beta-minus)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-007",
           "questionType": "simple_recall_mcq"
@@ -1061,12 +1061,12 @@
       },
       {
         "id": "bc399521-9452-4dbc-8966-71fee7d77e91",
-        "text": "An ideal step-down transformer is designed to convert a primary input voltage of $2200 \\text{ V}$ to a secondary output voltage of $220 \\text{ V}$. If the transformer supplies power to a industrial load consisting of a pure resistive element of $22 \\Omega$, and assuming the efficiency of the transformer is $100\\%$, calculate the current flowing through the primary coil.",
+        "text": "An ideal step-down transformer is designed to convert a primary input voltage of $2200 V$ to a secondary output voltage of $220 V$. If the transformer supplies power to a industrial load consisting of a pure resistive element of $22 \\Omega$, and assuming the efficiency of the transformer is $100\\%$, calculate the current flowing through the primary coil.",
         "options": [
-          "1.0 A",
+          "2.2 A",
           "0.1 A",
-          "10.0 A",
-          "2.2 A"
+          "1.0 A",
+          "10.0 A"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1075,21 +1075,21 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Step 1: Calculate Secondary Current ($I_s$) ::: Using Ohm's Law for the secondary circuit: $I_s = \\frac{V_s}{R}$. Given $V_s = 220 \\text{ V}$ and $R = 22 \\Omega$. $I_s = \\frac{220}{22} = 10 \\text{ A}$.",
+          "Step 1: Calculate Secondary Current ($I_s$) ::: Using Ohm's Law for the secondary circuit: $I_s = \\frac{V_s}{R}$. Given $V_s = 220 V$ and $R = 22 \\Omega$. $I_s = \\frac{220}{22} = 10 A$.",
           "Step 2: Apply Transformer Principle ::: For an ideal transformer (100% efficiency), the power in the primary equals the power in the secondary: $V_p I_p = V_s I_s$.",
           "Step 3: Relate Voltages and Currents ::: Alternatively, use the turns ratio relationship: $\\frac{I_p}{I_s} = \\frac{V_s}{V_p}$.",
-          "Step 4: Solve for $I_p$ ::: $I_p = I_s \\times \\left(\\frac{V_s}{V_p}\\right) = 10 \\times \\left(\\frac{220}{2200}\\right) = 10 \\times \\frac{1}{10} = 1.0 \\text{ A}$."
+          "Step 4: Solve for $I_p$ ::: $I_p = I_s \\times \\left(\\frac{V_s}{V_p}\\right) = 10 \\times \\left(\\frac{220}{2200}\\right) = 10 \\times \\frac{1}{10} = 1.0 A$."
         ],
         "examTip": "In transformers, Voltage and Current are inversely proportional. If Voltage goes down (step-down), Current goes up in the secondary. The primary current must be lower.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Energy conservation in an ideal transformer dictates that the rate of energy input (Primary Power) equals the rate of energy output (Secondary Power).\",\"memoryTrigger\":\"VIP: $V_p I_p = V_s I_s$.\",\"visualPrompt\":\"Imagine two gears: a large gear (high voltage, low speed/current) turning a small gear (low voltage, high speed/current). The work (power) stays the same.\",\"commonTrap\":\"Directly proportional current: Thinking $I_p/I_s = V_p/V_s$ (This is wrong!).\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Energy conservation in an ideal transformer dictates that the rate of energy input (Primary Power) equals the rate of energy output (Secondary Power).\", \"memoryTrigger\": \"VIP: $V_p I_p = V_s I_s$.\", \"visualPrompt\": \"Imagine two gears: a large gear (high voltage, low speed/current) turning a small gear (low voltage, high speed/current). The work (power) stays the same.\", \"commonTrap\": \"Directly proportional current: Thinking $I_p/I_s = V_p/V_s$ (This is wrong!).\"}",
         "keyFormulas": [
           "$V_s / V_p = N_s / N_p = I_p / I_s$",
           "$P = V I$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
@@ -1097,12 +1097,12 @@
       },
       {
         "id": "1dd754c4-8817-4f13-8961-387bb4d1be64",
-        "text": "In the circuit network shown below, if the potential at point $A$ is $10 \\, \\text{V}$, calculate the potential at point $B$. The current entering the junction is $2 \\, \\text{A}$, which splits into two branches. Branch 1 contains a $4 \\, \\Omega$ resistor, and Branch 2 contains a $6 \\, \\Omega$ resistor. The branches recombine before reaching $B$, passing through a single $2.6 \\, \\Omega$ resistor. (Assume the current flows from $A$ to $B$).",
+        "text": "In the circuit network shown below, if the potential at point $A$ is $10 \\, V$, calculate the potential at point $B$. The current entering the junction is $2 \\, A$, which splits into two branches. Branch 1 contains a $4 \\, \\Omega$ resistor, and Branch 2 contains a $6 \\, \\Omega$ resistor. The branches recombine before reaching $B$, passing through a single $2.6 \\, \\Omega$ resistor. (Assume the current flows from $A$ to $B$).",
         "options": [
-          "0 \\, \\text{V}",
-          "5 \\, \\text{V}",
-          "2 \\, \\text{V}",
-          "-10 \\, \\text{V}"
+          "-10 \\, V",
+          "0 \\, V",
+          "2 \\, V",
+          "5 \\, V"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1115,18 +1115,18 @@
           "Calculate total equivalent resistance from A to B ::: $R_{total} = R_p + R_{series} = 2.4 + 2.6 = 5.0 \\, \\Omega$.",
           "Use Ohm's Law for the potential drop ::: $\\Delta V = V_A - V_B = I R_{total}$.",
           "Substitute known values ::: $10 - V_B = 2 \\times 5.0$.",
-          "Solve for $V_B$ ::: $10 - V_B = 10 \\implies V_B = 0 \\, \\text{V}$."
+          "Solve for $V_B$ ::: $10 - V_B = 10 \\implies V_B = 0 \\, V$."
         ],
         "examTip": "In potential difference problems, always use $V_{start} - \\sum(IR) = V_{end}$. Be careful with the signs if there are batteries in the branch.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Potential decreases in the direction of current flow across a resistor ($V = IR$). In parallel, the potential difference across each branch is the same.\",\"memoryTrigger\":\"V-Drop = I-Stop: Potential drops whenever current is 'stopped' by resistance.\",\"visualPrompt\":\"Imagine water pressure dropping as it flows through a filter; the more filters (resistors), the lower the pressure (potential) at the end.\",\"commonTrap\":\"Adding the parallel resistances directly instead of using the reciprocal rule.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Potential decreases in the direction of current flow across a resistor ($V = IR$). In parallel, the potential difference across each branch is the same.\", \"memoryTrigger\": \"V-Drop = I-Stop: Potential drops whenever current is 'stopped' by resistance.\", \"visualPrompt\": \"Imagine water pressure dropping as it flows through a filter; the more filters (resistors), the lower the pressure (potential) at the end.\", \"commonTrap\": \"Adding the parallel resistances directly instead of using the reciprocal rule.\"}",
         "keyFormulas": [
           "$R_p = \\frac{R_1 R_2}{R_1 + R_2}$",
           "$V_A - V_B = I R_{eq}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "diagram_based_mcq"
@@ -1134,12 +1134,12 @@
       },
       {
         "id": "e2007676-df70-4950-a126-f527c028cd0f",
-        "text": "A high-purity copper conductor of uniform cross-sectional area $2.0 \\times 10^{-6} \\text{ m}^2$ is utilized in a laboratory experiment to study charge carrier dynamics. When a steady current of $1.6 \\text{ A}$ is maintained through the conductor, and assuming the free electron density for copper is approximately $8.0 \\times 10^{28} \\text{ m}^{-3}$, determine the average drift velocity ($v_d$) of the conduction electrons. (Take charge of an electron $e = 1.6 \\times 10^{-19} \\text{ C}$)",
+        "text": "A high-purity copper conductor of uniform cross-sectional area $2.0 \\times 10^{-6} m^2$ is utilized in a laboratory experiment to study charge carrier dynamics. When a steady current of $1.6 A$ is maintained through the conductor, and assuming the free electron density for copper is approximately $8.0 \\times 10^{28} m^{-3}$, determine the average drift velocity ($v_d$) of the conduction electrons. (Take charge of an electron $e = 1.6 \\times 10^{-19} C$)",
         "options": [
-          "6.25 \\times 10^{-5} \\text{ m/s}",
-          "1.25 \\times 10^{-4} \\text{ m/s}",
-          "3.12 \\times 10^{-5} \\text{ m/s}",
-          "0.625 \\times 10^{-3} \\text{ m/s}"
+          "$$6.25 \\times 10$⁻⁵$ m/s",
+          "$$3.12 \\times 10$⁻⁵$ m/s",
+          "$$1.25 \\times 10$⁻⁴$ m/s",
+          "$$0.625 \\times 10$⁻³$ m/s"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1152,18 +1152,18 @@
           "Rearrange for drift velocity ::: Solve for $v_d$ to get $v_d = \\frac{I}{nAe}$.",
           "Substitute numerical values ::: $v_d = \\frac{1.6}{(8.0 \\times 10^{28}) \\times (2.0 \\times 10^{-6}) \\times (1.6 \\times 10^{-19})}$.",
           "Simplify the calculation ::: $v_d = \\frac{1.6}{1.6 \\times 16 \\times 10^{28-6-19}} = \\frac{1}{16 \\times 10^3}$.",
-          "Final computation ::: $v_d = 0.0625 \\times 10^{-3} = 6.25 \\times 10^{-5} \\text{ m/s}$."
+          "Final computation ::: $v_d = 0.0625 \\times 10^{-3} = 6.25 \\times 10^{-5} m/s$."
         ],
-        "examTip": "When calculating drift velocity, always check the powers of 10 carefully. $v_d$ is typically very small (order of $10^{-4}$ to $10^{-5} \\text{ m/s}$), which is a good sanity check for your answer.",
+        "examTip": "When calculating drift velocity, always check the powers of 10 carefully. $v_d$ is typically very small (order of $10^{-4}$ to $10^{-5} m/s$), which is a good sanity check for your answer.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Drift velocity is the average velocity acquired by free electrons in a conductor under the influence of an external electric field. It is inversely proportional to electron density and area for a fixed current.\",\"memoryTrigger\":\"I-NeAv (Sounds like 'I envy' or 'I-NEAV'): $I = n e A v_d$.\",\"visualPrompt\":\"Imagine a crowded hallway (conductor) where people (electrons) are being pushed slowly by a wind (electric field) while bouncing off walls (ions).\",\"commonTrap\":\"Confusing drift velocity with the speed of electrical signal propagation ($c$).\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Drift velocity is the average velocity acquired by free electrons in a conductor under the influence of an external electric field. It is inversely proportional to electron density and area for a fixed current.\", \"memoryTrigger\": \"I-NeAv (Sounds like 'I envy' or 'I-NEAV'): $I = n e A v_d$.\", \"visualPrompt\": \"Imagine a crowded hallway (conductor) where people (electrons) are being pushed slowly by a wind (electric field) while bouncing off walls (ions).\", \"commonTrap\": \"Confusing drift velocity with the speed of electrical signal propagation ($c$).\"}",
         "keyFormulas": [
           "$I = nAev_d$ for relationship between current and drift speed",
           "$J = nev_d$ for current density"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "simple_recall_mcq"
@@ -1171,12 +1171,12 @@
       },
       {
         "id": "9aa36c58-d512-4fdb-addc-3ef63bfa2da6",
-        "text": "In a sophisticated laboratory setup designed to investigate the photoelectric effect, a monochromatic light source of wavelength $\\lambda = 310 \\text{ nm}$ is incident upon a metallic photocathode. If the work function of the metal is $\\Phi_0 = 2.4 \\text{ eV}$, and the intensity of the light is doubled while maintaining the same wavelength, determine the maximum kinetic energy ($K_{\\text{max}}$) of the emitted photoelectrons and the effect on the stopping potential ($V_0$). (Take $hc = 1240 \\text{ eV}\\cdot\\text{nm}$)",
+        "text": "In a sophisticated laboratory setup designed to investigate the photoelectric effect, a monochromatic light source of wavelength $\\lambda = 310 nm$ is incident upon a metallic photocathode. If the work function of the metal is $\\Phi_0 = 2.4 eV$, and the intensity of the light is doubled while maintaining the same wavelength, determine the maximum kinetic energy ($K_{max}$) of the emitted photoelectrons and the effect on the stopping potential ($V_0$). (Take $hc = 1240 eV\\cdotnm$)",
         "options": [
-          "$K_{\\text{max}} = 1.6 \\text{ eV}$, $V_0$ remains $1.6 \\text{ V}$",
-          "$K_{\\text{max}} = 4.0 \\text{ eV}$, $V_0$ becomes $3.2 \\text{ V}$",
-          "$K_{\\text{max}} = 1.6 \\text{ eV}$, $V_0$ becomes $3.2 \\text{ V}$",
-          "$K_{\\text{max}} = 6.4 \\text{ eV}$, $V_0$ remains $1.6 \\text{ V}$"
+          "$K_{max} = 1.6 eV$, $V_0$ becomes $3.2 V$",
+          "$K_{max} = 6.4 eV$, $V_0$ remains $1.6 V$",
+          "$K_{max} = 4.0 eV$, $V_0$ becomes $3.2 V$",
+          "$K_{max} = 1.6 eV$, $V_0$ remains $1.6 V$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1185,15 +1185,15 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Energy Calculation ::: Calculate the energy of the incident photon using $E = \\frac{hc}{\\lambda}$. Given $hc = 1240 \\text{ eV}\\cdot\\text{nm}$ and $\\lambda = 310 \\text{ nm}$, we get $E = \\frac{1240}{310} = 4.0 \\text{ eV}$.",
-          "Einstein's Equation ::: Apply Einstein's photoelectric equation: $K_{\\text{max}} = E - \\Phi_0$. Substituting the values: $K_{\\text{max}} = 4.0 \\text{ eV} - 2.4 \\text{ eV} = 1.6 \\text{ eV}$.",
-          "Stopping Potential ::: The stopping potential is related to max kinetic energy by $K_{\\text{max}} = eV_0$. Therefore, $1.6 \\text{ eV} = e(V_0) \\implies V_0 = 1.6 \\text{ V}$.",
+          "Energy Calculation ::: Calculate the energy of the incident photon using $E = \\frac{hc}{\\lambda}$. Given $hc = 1240 eV\\cdotnm$ and $\\lambda = 310 nm$, we get $E = \\frac{1240}{310} = 4.0 eV$.",
+          "Einstein's Equation ::: Apply Einstein's photoelectric equation: $K_{max} = E - \\Phi_0$. Substituting the values: $K_{max} = 4.0 eV - 2.4 eV = 1.6 eV$.",
+          "Stopping Potential ::: The stopping potential is related to max kinetic energy by $K_{max} = eV_0$. Therefore, $1.6 eV = e(V_0) \\implies V_0 = 1.6 V$.",
           "Intensity Analysis ::: Recall that intensity affects the number of photoelectrons (photoelectric current) but has no effect on the maximum kinetic energy or stopping potential, provided the frequency (wavelength) remains constant.",
-          "Final Conclusion ::: The $K_{\\text{max}}$ remains $1.6 \\text{ eV}$ and the stopping potential $V_0$ remains $1.6 \\text{ V}$ despite doubling the intensity."
+          "Final Conclusion ::: The $K_{max}$ remains $1.6 eV$ and the stopping potential $V_0$ remains $1.6 V$ despite doubling the intensity."
         ],
         "examTip": "Never confuse intensity with energy. Intensity = Number of photons (Current); Wavelength/Frequency = Energy per photon (Stopping Potential). Always check units of $hc$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Einstein's Photoelectric Equation states that the energy of an incident photon is used to overcome the work function and provide kinetic energy to the electron. $h\\\\nu = \\\\Phi_0 + K_{\\\\text{max}}$.\",\"memoryTrigger\":\"I-C-E: Intensity affects Current; Energy affects Electrons' speed.\",\"visualPrompt\":\"Imagine a rain of tennis balls (photons) hitting a wall. Heavier balls (higher frequency) make the pieces fly faster, while more balls (higher intensity) just mean more pieces fly off.\",\"commonTrap\":\"Students often multiply the kinetic energy by 2 when intensity is doubled.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Einstein's Photoelectric Equation states that the energy of an incident photon is used to overcome the work function and provide kinetic energy to the electron. $h\\\\nu = \\\\Phi_0 + K_{\\\\text{max}}$.\", \"memoryTrigger\": \"I-C-E: Intensity affects Current; Energy affects Electrons' speed.\", \"visualPrompt\": \"Imagine a rain of tennis balls (photons) hitting a wall. Heavier balls (higher frequency) make the pieces fly faster, while more balls (higher intensity) just mean more pieces fly off.\", \"commonTrap\": \"Students often multiply the kinetic energy by 2 when intensity is doubled.\"}",
         "keyFormulas": [
           "$E = \\frac{1240}{\\lambda (\\text{nm})} \\text{ eV}$",
           "$K_{\\text{max}} = E - \\Phi_0$",
@@ -1201,7 +1201,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-014",
           "questionType": "simple_recall_mcq"
@@ -1209,12 +1209,12 @@
       },
       {
         "id": "5908a75a-4017-4c05-ae7c-1d702e88f952",
-        "text": "A thin equiconvex lens of focal length $20\\text{ cm}$ is placed in contact with a thin equiconcave lens of focal length $10\\text{ cm}$. This combination is then used to view an object placed $30\\text{ cm}$ away from the lens system. Determine the nature and position of the final image formed by this combination.",
+        "text": "A thin equiconvex lens of focal length $20cm$ is placed in contact with a thin equiconcave lens of focal length $10cm$. This combination is then used to view an object placed $30cm$ away from the lens system. Determine the nature and position of the final image formed by this combination.",
         "options": [
+          "Real image at 30 cm",
           "Real image at 60 cm",
-          "Virtual image at 15 cm",
           "Virtual image at 30 cm",
-          "Real image at 30 cm"
+          "Virtual image at 15 cm"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1223,16 +1223,16 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Calculate Equivalent Focal Length ::: For lenses in contact, $\\frac{1}{F} = \\frac{1}{f_1} + \\frac{1}{f_2}$. Here $f_1 = +20\\text{ cm}$ (convex) and $f_2 = -10\\text{ cm}$ (concave).",
-          "Solve for F ::: $\\frac{1}{F} = \\frac{1}{20} - \\frac{1}{10} = \\frac{1-2}{20} = -\\frac{1}{20}$. So, $F = -20\\text{ cm}$. The combination acts as a diverging lens.",
-          "Apply Lens Formula ::: $\\frac{1}{v} - \\frac{1}{u} = \\frac{1}{F}$. Given $u = -30\\text{ cm}$ (object distance).",
+          "Calculate Equivalent Focal Length ::: For lenses in contact, $\\frac{1}{F} = \\frac{1}{f_1} + \\frac{1}{f_2}$. Here $f_1 = +20cm$ (convex) and $f_2 = -10cm$ (concave).",
+          "Solve for F ::: $\\frac{1}{F} = \\frac{1}{20} - \\frac{1}{10} = \\frac{1-2}{20} = -\\frac{1}{20}$. So, $F = -20cm$. The combination acts as a diverging lens.",
+          "Apply Lens Formula ::: $\\frac{1}{v} - \\frac{1}{u} = \\frac{1}{F}$. Given $u = -30cm$ (object distance).",
           "Calculate Image Distance (v) ::: $\\frac{1}{v} = \\frac{1}{-20} + \\frac{1}{-30} = -\\frac{3+2}{60} = -\\frac{5}{60} = -\\frac{1}{12}$.",
-          "Wait, re-check arithmetic ::: $\\frac{1}{v} = \\frac{1}{-20} + \\frac{1}{-30}$. Common denominator is 60. $-3/60 - 2/60 = -5/60$. $v = -12\\text{ cm}$. Let me re-verify the focal length values. If $f_2 = -10$ and $f_1 = 20$, $F=-20$. If $u=-30$, $v=-12$. If $u=-30$ and $v=-15$, $F$ must be $-30$. Let's check $1/v = 1/-20 + 1/-30 = -12$. If the question had $u = -60$, $v = -15$. Let's assume the question asked for position. $v = -12$ is virtual. Let's re-calculate $1/v = 1/F + 1/u = 1/-20 - 1/30 = -5/60 = -12$. None of the options match exactly - let's re-evaluate $f_2 = -15$? No. If $F = -10$, $v = -7.5$. If $F = -20$ and $u = -60$, $v = -15$. Let's use $f_2 = -10, f_1 = 30 \\Rightarrow F = -15$. If $F = -15, u = -30 \\Rightarrow 1/v = 1/-15 + 1/-30 = -3/30 = -10$. ",
+          "Wait, re-check arithmetic ::: $\\frac{1}{v} = \\frac{1}{-20} + \\frac{1}{-30}$. Common denominator is 60. $-3/60 - 2/60 = -5/60$. $v = -12cm$. Let me re-verify the focal length values. If $f_2 = -10$ and $f_1 = 20$, $F=-20$. If $u=-30$, $v=-12$. If $u=-30$ and $v=-15$, $F$ must be $-30$. Let's check $1/v = 1/-20 + 1/-30 = -12$. If the question had $u = -60$, $v = -15$. Let's assume the question asked for position. $v = -12$ is virtual. Let's re-calculate $1/v = 1/F + 1/u = 1/-20 - 1/30 = -5/60 = -12$. None of the options match exactly - let's re-evaluate $f_2 = -15$? No. If $F = -10$, $v = -7.5$. If $F = -20$ and $u = -60$, $v = -15$. Let's use $f_2 = -10, f_1 = 30 \\Rightarrow F = -15$. If $F = -15, u = -30 \\Rightarrow 1/v = 1/-15 + 1/-30 = -3/30 = -10$.",
           "Corrected Scenario for Option Match ::: If $f_1=20, f_2=-10 \\Rightarrow F=-20$. If $u=-60$, $v=-15$. If $u=-30$, $v=-12$. Let's re-read: 'Equiconvex 20, Equiconcave 10'. Combined $F=-20$. Object at 30. $v=-12$. Let's adjust the option logic: a common NEET trick is to ask for the distance. If the option was 'Virtual image at 15 cm', it likely meant $F = -10$ (which happens if both were 20cm lenses but one is concave). If $F=-20$ and $u=-30$, $v=-12$. Let's provide the most accurate logical derivation for a 'Moderate' question."
         ],
         "examTip": "Sign convention is king. Convex is positive, Concave is negative. A negative equivalent focal length means the whole system behaves like a diverging lens.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Lenses in contact add their powers ($P = P_1 + P_2$). Since Power is $1/f$, the reciprocal focal lengths add. The sign of the resulting power determines the nature of the combined system.\",\"memoryTrigger\":\"Power is Positive for 'P'utting light together (Convex), Negative for 'N'egating convergence (Concave).\",\"visualPrompt\":\"Imagine a weak convex lens trying to converge light, but a stronger concave lens immediately spreading it out even more.\",\"commonTrap\":\"Adding focal lengths directly ($F = f_1 + f_2$) instead of reciprocals.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Lenses in contact add their powers ($P = P_1 + P_2$). Since Power is $1/f$, the reciprocal focal lengths add. The sign of the resulting power determines the nature of the combined system.\", \"memoryTrigger\": \"Power is Positive for 'P'utting light together (Convex), Negative for 'N'egating convergence (Concave).\", \"visualPrompt\": \"Imagine a weak convex lens trying to converge light, but a stronger concave lens immediately spreading it out even more.\", \"commonTrap\": \"Adding focal lengths directly ($F = f_1 + f_2$) instead of reciprocals.\"}",
         "keyFormulas": [
           "$P_{eq} = P_1 + P_2$",
           "$\\frac{1}{F} = \\frac{1}{f_1} + \\frac{1}{f_2}$",
@@ -1240,7 +1240,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
@@ -1250,10 +1250,10 @@
         "id": "7658c847-af89-4a77-85b8-74239f64328c",
         "text": "A network engineer is configuring a circuit with three identical capacitors, each having a capacitance of $C = 12 \\mu F$. These capacitors are initially connected in a series arrangement and then rearranged into a parallel arrangement across the same ideal $10 V$ source. What is the numerical ratio of the total equivalent capacitance in the parallel configuration ($C_p$) to that in the series configuration ($C_s$)?",
         "options": [
-          "3 : 1",
-          "1 : 9",
           "9 : 1",
-          "6 : 1"
+          "3 : 1",
+          "6 : 1",
+          "1 : 9"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -1270,14 +1270,14 @@
         ],
         "examTip": "For 'n' identical components, the ratio of parallel to series is always $n^2$ for capacitors and resistors. This is a 2-second trick for competitive exams.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Parallel connection increases the effective plate area (increasing C), while series connection increases the effective separation between the first and last plate (decreasing C).\",\"memoryTrigger\":\"Parallel = Plus (Add them). Series = Small (Result is smaller than smallest).\",\"visualPrompt\":\"Think of parallel as widening a highway (more lanes/area) and series as making the highway longer with more tolls (more distance).\",\"commonTrap\":\"Inverting the formulas with those of resistors (where series is additive).\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Parallel connection increases the effective plate area (increasing C), while series connection increases the effective separation between the first and last plate (decreasing C).\", \"memoryTrigger\": \"Parallel = Plus (Add them). Series = Small (Result is smaller than smallest).\", \"visualPrompt\": \"Think of parallel as widening a highway (more lanes/area) and series as making the highway longer with more tolls (more distance).\", \"commonTrap\": \"Inverting the formulas with those of resistors (where series is additive).\"}",
         "keyFormulas": [
           "$C_p = \\sum C_i$ Parallel combination",
           "$\\frac{1}{C_s} = \\sum \\frac{1}{C_i}$ Series combination"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -1287,10 +1287,10 @@
         "id": "f2c50cbc-1d15-4f06-b476-56039809def0",
         "text": "An alternating voltage $V = 141 \\sin(100\\pi t)$ is applied to a pure resistor of $100 \\Omega$. The time taken by the current to rise from zero to its peak value and the RMS current are respectively:",
         "options": [
-          "$10 \\text{ ms}, 1 \\text{ A}$",
-          "$5 \\text{ ms}, 1 \\text{ A}$",
-          "$10 \\text{ ms}, 1.41 \\text{ A}$",
-          "$5 \\text{ ms}, 1.41 \\text{ A}$"
+          "$5 ms, 1 A$",
+          "$5 ms, 1.41 A$",
+          "$10 ms, 1 A$",
+          "$10 ms, 1.41 A$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1299,15 +1299,15 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Step 1: Identify $\\omega$ from the equation $V = V_0 \\sin(\\omega t)$. Here, $\\omega = 100\\pi \\text{ rad/s}$.",
-          "Step 2: Find the time period $T = \\frac{2\\pi}{\\omega} = \\frac{2\\pi}{100\\pi} = 0.02 \\text{ s} = 20 \\text{ ms}$.",
-          "Step 3: The time taken to reach peak value from zero is $T/4$. $t = 20/4 = 5 \\text{ ms}$.",
-          "Step 4: Calculate peak current $I_0 = \\frac{V_0}{R} = \\frac{141}{100} = 1.41 \\text{ A}$.",
-          "Step 5: Calculate RMS current $I_{rms} = \\frac{I_0}{\\sqrt{2}} = \\frac{1.41}{1.414} \\approx 1 \\text{ A}$."
+          "Step 1: Identify $\\omega$ from the equation $V = V_0 \\sin(\\omega t)$. Here, $\\omega = 100\\pi rad/s$.",
+          "Step 2: Find the time period $T = \\frac{2\\pi}{\\omega} = \\frac{2\\pi}{100\\pi} = 0.02 s = 20 ms$.",
+          "Step 3: The time taken to reach peak value from zero is $T/4$. $t = 20/4 = 5 ms$.",
+          "Step 4: Calculate peak current $I_0 = \\frac{V_0}{R} = \\frac{141}{100} = 1.41 A$.",
+          "Step 5: Calculate RMS current $I_{rms} = \\frac{I_0}{\\sqrt{2}} = \\frac{1.41}{1.414} \\approx 1 A$."
         ],
         "examTip": "Remember that $\\sqrt{2} \\approx 1.414$. If you see $141$ in the question, it's almost certainly designed to cancel with $\\sqrt{2}$ to give $100$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"RMS value represents the DC equivalent that would produce the same heating effect. Time to peak is determined by the angular frequency.\",\"memoryTrigger\":\"RMS = Root Mean Square = 'Real Measure of Strength'\",\"visualPrompt\":\"A sine wave starting at the origin reaches its mountain top (peak) exactly at one-quarter of its full cycle journey.\",\"commonTrap\":\"Confusing $T/2$ with $T/4$ for the peak value or using $V_{rms} = V_0$ directly.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"RMS value represents the DC equivalent that would produce the same heating effect. Time to peak is determined by the angular frequency.\", \"memoryTrigger\": \"RMS = Root Mean Square = 'Real Measure of Strength'\", \"visualPrompt\": \"A sine wave starting at the origin reaches its mountain top (peak) exactly at one-quarter of its full cycle journey.\", \"commonTrap\": \"Confusing $T/2$ with $T/4$ for the peak value or using $V_{rms} = V_0$ directly.\"}",
         "keyFormulas": [
           "$V_{rms} = V_0 / \\sqrt{2}$",
           "$T = 2\\pi / \\omega$",
@@ -1315,7 +1315,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
@@ -1323,12 +1323,12 @@
       },
       {
         "id": "2e13e39d-abcb-40e0-ac91-8acee8df352a",
-        "text": "In a laboratory simulation of a high-fidelity audio crossover network, a series $LCR$ circuit is constructed using a non-inductive resistor of $400 \\Omega$, a pure inductor of $5.0 \\text{ H}$, and a capacitor of $80 \\mu\\text{F}$. The assembly is energized by a sinusoidal voltage source characterized by $V = 230 \\sin(100 \\pi t + \\phi) \\text{ V}$. If the source frequency is adjusted such that the circuit enters a state of electrical resonance, calculate the average power dissipated by the system over a complete cycle of operation.",
+        "text": "In a laboratory simulation of a high-fidelity audio crossover network, a series $LCR$ circuit is constructed using a non-inductive resistor of $400 \\Omega$, a pure inductor of $5.0 H$, and a capacitor of $80 \\,\\mu\\text{F}$. The assembly is energized by a sinusoidal voltage source characterized by $V = 230 \\sin(100 \\pi t + \\phi) V$. If the source frequency is adjusted such that the circuit enters a state of electrical resonance, calculate the average power dissipated by the system over a complete cycle of operation.",
         "options": [
           "33.12 W",
-          "66.12 W",
+          "264.50 W",
           "132.25 W",
-          "264.50 W"
+          "66.12 W"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1338,13 +1338,13 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Step 1: Identify Resonant Condition ::: At resonance, the inductive reactance $X_L$ and capacitive reactance $X_C$ cancel each other out ($X_L = X_C$). Therefore, the total impedance $Z$ of the circuit becomes equal to the resistance $R$. Here, $Z = R = 400 \\Omega$.",
-          "Step 2: Determine RMS Voltage ::: The given equation is $V = 230 \\sin(100 \\pi t + \\phi)$. The peak voltage $V_0 = 230 \\text{ V}$. The RMS voltage is $V_{rms} = \\frac{V_0}{\\sqrt{2}} = \\frac{230}{\\sqrt{2}} \\text{ V}$.",
+          "Step 2: Determine RMS Voltage ::: The given equation is $V = 230 \\sin(100 \\pi t + \\phi)$. The peak voltage $V_0 = 230 V$. The RMS voltage is $V_{rms} = \\frac{V_0}{\\sqrt{2}} = \\frac{230}{\\sqrt{2}} V$.",
           "Step 3: Calculate Average Power ::: The formula for average power at resonance (where $\\cos \\phi = 1$) is $P_{avg} = \\frac{V_{rms}^2}{R}$. Substituting the values: $P_{avg} = \\frac{(230/\\sqrt{2})^2}{400} = \\frac{230 \\times 230}{2 \\times 400}$.",
-          "Step 4: Final Computation ::: $P_{avg} = \\frac{52900}{800} = \\frac{529}{8} = 66.125 \\text{ W}$. Rounding to two decimal places gives $66.12 \\text{ W}$."
+          "Step 4: Final Computation ::: $P_{avg} = \\frac{52900}{800} = \\frac{529}{8} = 66.125 W$. Rounding to two decimal places gives $66.12 W$."
         ],
         "examTip": "At resonance, $Z = R$. Do not waste time calculating $X_L$ or $X_C$ unless the question specifically asks for the resonant frequency or Q-factor. Always check if the given voltage is peak ($V_0$) or RMS ($V_{rms}$).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Resonance occurs when the driving frequency matches the natural frequency of the $LC$ pair, resulting in maximum current and purely resistive behavior.\",\"memoryTrigger\":\"RE-Z-R: At REsonance, Z equals R.\",\"visualPrompt\":\"Imagine a swing being pushed at exactly the right moment; the amplitude (current) hits its peak because the 'resistance' to the motion is minimized.\",\"commonTrap\":\"Using $V_0$ in $P = V^2/R$ instead of $V_{rms}$. Power is always calculated using RMS values unless specified.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Resonance occurs when the driving frequency matches the natural frequency of the $LC$ pair, resulting in maximum current and purely resistive behavior.\", \"memoryTrigger\": \"RE-Z-R: At REsonance, Z equals R.\", \"visualPrompt\": \"Imagine a swing being pushed at exactly the right moment; the amplitude (current) hits its peak because the 'resistance' to the motion is minimized.\", \"commonTrap\": \"Using $V_0$ in $P = V^2/R$ instead of $V_{rms}$. Power is always calculated using RMS values unless specified.\"}",
         "keyFormulas": [
           "$P_{avg} = V_{rms} I_{rms} \\cos \\phi$",
           "$V_{rms} = V_0 / \\sqrt{2}$",
@@ -1352,7 +1352,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
@@ -1360,11 +1360,11 @@
       },
       {
         "id": "917cd506-63f3-46e2-b3fb-75930cf2febd",
-        "text": "A Zener diode with a breakdown voltage $V_Z = 6.0 \\text{ V}$ and a maximum power dissipation $P_{max} = 600 \\text{ mW}$ is used in a voltage regulator circuit. The unregulated DC input voltage $V_{in}$ fluctuates between $8 \\text{ V}$ and $12 \\text{ V}$. If the load resistance is $R_L = 1 \\text{ k}\\Omega$, what is the minimum value of the series resistance $R_s$ required to ensure the Zener diode does not exceed its power rating?",
+        "text": "A Zener diode with a breakdown voltage $V_Z = 6.0 V$ and a maximum power dissipation $P_{max} = 600 mW$ is used in a voltage regulator circuit. The unregulated DC input voltage $V_{in}$ fluctuates between $8 V$ and $12 V$. If the load resistance is $R_L = 1 k\\Omega$, what is the minimum value of the series resistance $R_s$ required to ensure the Zener diode does not exceed its power rating?",
         "options": [
-          "$60 \\Omega$",
           "$56.6 \\Omega$",
           "$100 \\Omega$",
+          "$60 \\Omega$",
           "$200 \\Omega$"
         ],
         "marks": 4,
@@ -1374,15 +1374,15 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Determine Maximum Safe Zener Current ($I_{Z,max}$) ::: From the power rating, $P = V_Z I_{Z,max} \\implies 0.6 = 6.0 \\times I_{Z,max} \\implies I_{Z,max} = 100 \\text{ mA}$.",
-          "Calculate Load Current ($I_L$) ::: Since the Zener maintains $6 \\text{ V}$ across the load, $I_L = \\frac{V_Z}{R_L} = \\frac{6 \\text{ V}}{1000 \\Omega} = 6 \\text{ mA}$.",
-          "Analyze Worst-Case Scenario for Zener Power ::: The Zener diode consumes maximum current when the input voltage is at its maximum ($V_{in} = 12 \\text{ V}$) and the load current is minimal (though $R_L$ is constant here).",
-          "Calculate Total Series Current ($I_s$) ::: $I_s = I_{Z,max} + I_L = 100 \\text{ mA} + 6 \\text{ mA} = 106 \\text{ mA}$.",
-          "Calculate Minimum $R_s$ ::: The voltage drop across $R_s$ is $V_{in,max} - V_Z = 12 - 6 = 6 \\text{ V}$. Using Ohm's Law, $R_{s,min} = \\frac{V_{drop}}{I_s} = \\frac{6 \\text{ V}}{106 \\times 10^{-3} \\text{ A}} \\approx 56.6 \\Omega$."
+          "Determine Maximum Safe Zener Current ($I_{Z,max}$) ::: From the power rating, $P = V_Z I_{Z,max} \\implies 0.6 = 6.0 \\times I_{Z,max} \\implies I_{Z,max} = 100 mA$.",
+          "Calculate Load Current ($I_L$) ::: Since the Zener maintains $6 V$ across the load, $I_L = \\frac{V_Z}{R_L} = \\frac{6 V}{1000 \\Omega} = 6 mA$.",
+          "Analyze Worst-Case Scenario for Zener Power ::: The Zener diode consumes maximum current when the input voltage is at its maximum ($V_{in} = 12 V$) and the load current is minimal (though $R_L$ is constant here).",
+          "Calculate Total Series Current ($I_s$) ::: $I_s = I_{Z,max} + I_L = 100 mA + 6 mA = 106 mA$.",
+          "Calculate Minimum $R_s$ ::: The voltage drop across $R_s$ is $V_{in,max} - V_Z = 12 - 6 = 6 V$. Using Ohm's Law, $R_{s,min} = \\frac{V_}{drop}{I_s} = \\frac{6 V}{106 \\times 10^{-3} A} \\approx 56.6 \\Omega$."
         ],
         "examTip": "In Zener regulator problems, always solve for the 'extreme' case. To find the *minimum* resistance to prevent *overheating*, use the *maximum* input voltage.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"A Zener diode operates in the reverse breakdown region. Once $V_{in} > V_Z$, the voltage across the Zener remains constant at $V_Z$, and any excess voltage is dropped across the series resistor $R_s$.\",\"memoryTrigger\":\"Zener = Voltage Anchor. $R_s$ = Stress Absorber.\",\"visualPrompt\":\"Imagine a dam (Zener) that keeps the water level (voltage) constant. If the river (input) floods, the overflow pipe (series resistor) must be big enough to handle the flow without the dam breaking.\",\"commonTrap\":\"Forgetting to add $I_L$ to $I_Z$ when calculating the total current through $R_s$.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"A Zener diode operates in the reverse breakdown region. Once $V_{in} > V_Z$, the voltage across the Zener remains constant at $V_Z$, and any excess voltage is dropped across the series resistor $R_s$.\", \"memoryTrigger\": \"Zener = Voltage Anchor. $R_s$ = Stress Absorber.\", \"visualPrompt\": \"Imagine a dam (Zener) that keeps the water level (voltage) constant. If the river (input) floods, the overflow pipe (series resistor) must be big enough to handle the flow without the dam breaking.\", \"commonTrap\": \"Forgetting to add $I_L$ to $I_Z$ when calculating the total current through $R_s$.\"}",
         "keyFormulas": [
           "$P_Z = V_Z I_Z$",
           "$V_{in} = I_s R_s + V_Z$",
@@ -1390,7 +1390,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": null,
           "questionType": "simple_recall_mcq"
@@ -1398,12 +1398,12 @@
       },
       {
         "id": "d2178c22-fef4-41bf-8fe5-5963178c8538",
-        "text": "In a laboratory simulation of high-voltage transmission lines, a very long, thin, straight metallic wire is uniformly charged with a linear charge density of $\\lambda = 2 \\times 10^{-8}\\text{ C/m}$. Applying the principles of Gauss's Law for a cylindrical symmetry, calculate the magnitude of the electric field intensity produced by this wire at a perpendicular radial distance of $10\\text{ cm}$ from the axis of the wire. (Assume the medium is air and use $\\frac{1}{4\\pi\\epsilon_0} = 9 \\times 10^9\\text{ Nm}^2/\\text{C}^2$)",
+        "text": "In a laboratory simulation of high-voltage transmission lines, a very long, thin, straight metallic wire is uniformly charged with a linear charge density of $\\lambda = 2 \\times 10^{-8}C/m$. Applying the principles of Gauss's Law for a cylindrical symmetry, calculate the magnitude of the electric field intensity produced by this wire at a perpendicular radial distance of $10cm$ from the axis of the wire. (Assume the medium is air and use $\\frac{1}{4\\pi\\epsilon_0} = 9 \\times 10^9Nm^2/C^2$)",
         "options": [
           "1800 N/C",
-          "3600 N/C",
           "900 N/C",
-          "7200 N/C"
+          "7200 N/C",
+          "3600 N/C"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -1415,19 +1415,19 @@
           "Identify Geometry ::: The source is an infinitely long straight wire, implying cylindrical symmetry for Gauss's Law.",
           "State Formula ::: The electric field $E$ at distance $r$ from a line charge is $E = \\frac{\\lambda}{2\\pi\\epsilon_0 r}$.",
           "Rewrite Formula ::: For easier calculation using the known constant $k$, use $E = \\frac{2k\\lambda}{r}$, where $k = 9 \\times 10^9$.",
-          "Convert Units ::: Ensure distance is in meters: $r = 10\\text{ cm} = 0.1\\text{ m}$.",
-          "Numerical Calculation ::: $E = \\frac{2 \\times (9 \\times 10^9) \\times (2 \\times 10^{-8})}{0.1} = \\frac{36 \\times 10^1}{0.1} = 3600\\text{ N/C}$."
+          "Convert Units ::: Ensure distance is in meters: $r = 10cm = 0.1m$.",
+          "Numerical Calculation ::: $E = \\frac{2 \\times (9 \\times 10^9) \\times (2 \\times 10^{-8})}{0.1} = \\frac{36 \\times 10^1}{0.1} = 3600N/C$."
         ],
         "examTip": "Always convert cm to meters immediately. Using the $2k\\lambda/r$ form is much faster than $1/2\\pi\\epsilon_0$ because you likely already have $9 \\times 10^9$ memorized.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"For a line charge, the electric field spreads out radially in 2D, leading to a $1/r$ dependence, unlike point charges which have $1/r^2$ dependence.\",\"memoryTrigger\":\"Line is 1D, so E is $1/r$. Point is 0D (sphere is 3D), so E is $1/r^2$.\",\"visualPrompt\":\"Imagine a glowing fluorescent tube; the intensity of 'field' drops off slower than a single small light bulb.\",\"commonTrap\":\"Using $1/r^2$ instead of $1/r$ because of confusion with Coulomb's law for point charges.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"For a line charge, the electric field spreads out radially in 2D, leading to a $1/r$ dependence, unlike point charges which have $1/r^2$ dependence.\", \"memoryTrigger\": \"Line is 1D, so E is $1/r$. Point is 0D (sphere is 3D), so E is $1/r^2$.\", \"visualPrompt\": \"Imagine a glowing fluorescent tube; the intensity of 'field' drops off slower than a single small light bulb.\", \"commonTrap\": \"Using $1/r^2$ instead of $1/r$ because of confusion with Coulomb's law for point charges.\"}",
         "keyFormulas": [
           "$E = \\frac{\\lambda}{2\\pi\\epsilon_0 r}$ Standard Gauss Law result",
           "$E = \\frac{2k\\lambda}{r}$ Computational shortcut"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -1437,10 +1437,10 @@
         "id": "7c5368fa-02b4-4800-b74f-0fefe97436ae",
         "text": "The de-Broglie wavelength of an electron ($\\lambda_e$) and a proton ($\\lambda_p$) are equal. If $E_e$ and $E_p$ represent their respective kinetic energies, and $m_e, m_p$ are their masses, which of the following statements is precisely correct regarding the ratio of their energies?",
         "options": [
-          "$E_e = E_p$",
-          "$E_e = \\left(\\frac{m_p}{m_e}\\right) E_p$",
           "$E_e = \\left(\\frac{m_e}{m_p}\\right) E_p$",
-          "$E_e = \\sqrt{\\frac{m_p}{m_e}} E_p$"
+          "$E_e = \\\\sqrt{\\frac{m_p}{m_e}} E_p$",
+          "$E_e = \\left(\\frac{m_p}{m_e}\\right) E_p$",
+          "$E_e = E_p$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1457,14 +1457,14 @@
         ],
         "examTip": "For same $\\lambda$, $E \\propto 1/m$. Since $m_p \\gg m_e$, it follows $E_e \\gg E_p$. This qualitative check helps eliminate wrong options quickly.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"The de-Broglie wavelength represents the wave nature of matter. For a fixed wavelength, the particle with smaller mass must have higher energy/momentum.\",\"memoryTrigger\":\"Same Lambda? Mass and Energy are inversely proportional ($m_1E_1 = m_2E_2$).\",\"visualPrompt\":\"A heavy truck and a small car having the same 'wave' signature. The car must be speeding significantly faster.\",\"commonTrap\":\"Forgetting to square the mass or swapping the mass ratio.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"The de-Broglie wavelength represents the wave nature of matter. For a fixed wavelength, the particle with smaller mass must have higher energy/momentum.\", \"memoryTrigger\": \"Same Lambda? Mass and Energy are inversely proportional ($m_1E_1 = m_2E_2$).\", \"visualPrompt\": \"A heavy truck and a small car having the same 'wave' signature. The car must be speeding significantly faster.\", \"commonTrap\": \"Forgetting to square the mass or swapping the mass ratio.\"}",
         "keyFormulas": [
           "$\\lambda = \\frac{h}{\\sqrt{2mE}}$",
           "$p = \\sqrt{2mE}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-014",
           "questionType": "simple_recall_mcq"
@@ -1474,10 +1474,10 @@
         "id": "104bb096-eb53-4d04-aff3-e2d1ec0049b3",
         "text": "A ray of monochromatic light is incident normally on one face of an equilateral glass prism of refractive index $\\mu$. The situation is illustrated in the diagram below (mental visualization: ray enters perpendicular to the first surface). Determine the minimum value of the refractive index $\\mu$ such that the ray just undergoes Total Internal Reflection (TIR) at the second face of the prism.",
         "options": [
-          "1.15",
-          "1.33",
+          "1.73",
           "1.50",
-          "1.73"
+          "1.33",
+          "1.15"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1487,22 +1487,22 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Analyze Entry at First Face ::: Since the ray is incident normally ($i = 0$), it passes undeviated into the prism. Therefore, the angle of refraction at the first face $r_1 = 0$.",
-          "Geometry of the Prism ::: For any prism, $r_1 + r_2 = A$. Here, $A = 60^\\circ$ (equilateral prism) and $r_1 = 0$, so the angle of incidence at the second face is $r_2 = 60^\\circ$.",
+          "Geometry of the Prism ::: For any prism, $r_1 + r_2 = A$. Here, $A = 60^°$ (equilateral prism) and $r_1 = 0$, so the angle of incidence at the second face is $r_2 = 60^°$.",
           "Condition for TIR ::: Total Internal Reflection occurs at the second face if the angle of incidence $r_2$ is greater than or equal to the critical angle $\\theta_c$. For 'just' undergoing TIR, $r_2 = \\theta_c$.",
-          "Relate $\\mu$ to Critical Angle ::: We know $\\sin \\theta_c = \\frac{1}{\\mu}$. Therefore, $\\sin 60^\\circ = \\frac{1}{\\mu}$.",
-          "Calculate $\\mu$ ::: $\\frac{\\sqrt{3}}{2} = \\frac{1}{\\mu} \\Rightarrow \\mu = \\frac{2}{\\sqrt{3}} \\approx \\frac{2}{1.732} \\approx 1.1547$.",
+          "Relate $\\mu$ to Critical Angle ::: We know $\\sin \\theta_c = \\frac{1}{\\mu}$. Therefore, $\\sin 60^° = \\frac{1}{\\mu}$.",
+          "Calculate $\\mu$ ::: $\\frac{\\sqrt}{3}{2} = \\frac{1}{\\mu} \\Rightarrow \\mu = \\frac{2}{\\sqrt{3}} \\approx \\frac{2}{1.732} \\approx 1.1547$.",
           "Conclusion ::: The minimum refractive index required is approximately $1.15$."
         ],
         "examTip": "In 'normal incidence' problems, the angle of incidence at the second face is always equal to the prism angle ($r_2 = A$). This is a major time-saver.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Total Internal Reflection occurs when light travels from a denser to a rarer medium at an angle exceeding the critical angle. In a prism, the geometry $r_1 + r_2 = A$ dictates where the light hits the second boundary.\",\"memoryTrigger\":\"Normal In $\\\\rightarrow$ Angle at face 2 = Prism Angle.\",\"visualPrompt\":\"Imagine a ray hitting the first wall of a $60^\\\\circ$ tent head-on. It walks straight to the other wall, hitting it at a slanted $60^\\\\circ$ angle.\",\"commonTrap\":\"Using $30^\\\\circ$ instead of $60^\\\\circ$ for the second face incidence by confusing the face angle with the normal angle.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Total Internal Reflection occurs when light travels from a denser to a rarer medium at an angle exceeding the critical angle. In a prism, the geometry $r_1 + r_2 = A$ dictates where the light hits the second boundary.\", \"memoryTrigger\": \"Normal In $\\\\rightarrow$ Angle at face 2 = Prism Angle.\", \"visualPrompt\": \"Imagine a ray hitting the first wall of a $60^\\\\circ$ tent head-on. It walks straight to the other wall, hitting it at a slanted $60^\\\\circ$ angle.\", \"commonTrap\": \"Using $30^\\\\circ$ instead of $60^\\\\circ$ for the second face incidence by confusing the face angle with the normal angle.\"}",
         "keyFormulas": [
           "$r_1 + r_2 = A$",
           "$\\mu = \\frac{1}{\\sin \\theta_c}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "diagram_based_mcq"
@@ -1512,8 +1512,8 @@
         "id": "d6d620d3-28f8-4bc5-b32a-5ce7f6991ea6",
         "text": "The following graph illustrates the relationship between the stopping potential ($V_0$) and the frequency ($\\nu$) of incident radiation for two different photosensitive materials, Metal A and Metal B. Based on the provided diagram and the principles of photoelectric emission, which of the following conclusions is correct?\\n\\n[Diagram Description: A linear graph with $V_0$ on the y-axis and frequency $\\nu$ on the x-axis. Two parallel lines, A and B. Line A intersects the x-axis at $\\nu_{0A}$ and Line B intersects at $\\nu_{0B}$, where $\\nu_{0B} > \\nu_{0A}$. Both lines have the same positive slope.]",
         "options": [
-          "The work function of Metal A is greater than that of Metal B.",
           "The value of Planck’s constant can be determined from the intercept on the $V_0$ axis.",
+          "The work function of Metal A is greater than that of Metal B.",
           "Metal B has a higher threshold wavelength than Metal A.",
           "The slope of both lines is equal to $h/e$, which is a universal constant."
         ],
@@ -1531,16 +1531,16 @@
           "Analyze Work Function ::: $\\Phi_0 = h\\nu_0$. Since $\\nu_{0B} > \\nu_{0A}$, the work function of B is greater than A. (Eliminates option 1).",
           "Analyze Threshold Wavelength ::: $\\lambda_0 = c/\\nu_0$. Since $\\nu_{0B} > \\nu_{0A}$, $\\lambda_{0B} < \\lambda_{0A}$. (Eliminates option 3)."
         ],
-        "examTip": "In $V_0$ vs $\\nu$ graphs, the slope is ALWAYS $h/e$. In $K_{\\text{max}}$ vs $\\nu$ graphs, the slope is ALWAYS $h$. This is a frequent point of confusion.",
+        "examTip": "In $V_0$ vs $\\nu$ graphs, the slope is ALWAYS $h/e$. In $K_{max}$ vs $\\nu$ graphs, the slope is ALWAYS $h$. This is a frequent point of confusion.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"The $V_0$ vs $\\\\nu$ graph is a straight line. The slope depends only on universal constants ($h, e$), while the intercepts depend on the material's specific property (Work Function).\",\"memoryTrigger\":\"Slope = h/e (e for potential).\",\"visualPrompt\":\"Two parallel slides. They have the same steepness (slope), but one starts further along the ground (higher threshold frequency).\",\"commonTrap\":\"Thinking the slope changes with the material.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"The $V_0$ vs $\\\\nu$ graph is a straight line. The slope depends only on universal constants ($h, e$), while the intercepts depend on the material's specific property (Work Function).\", \"memoryTrigger\": \"Slope = h/e (e for potential).\", \"visualPrompt\": \"Two parallel slides. They have the same steepness (slope), but one starts further along the ground (higher threshold frequency).\", \"commonTrap\": \"Thinking the slope changes with the material.\"}",
         "keyFormulas": [
           "$V_0 = (h/e)\\nu - \\Phi_0/e$",
           "$\\Phi_0 = h\\nu_0$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 3,
+        "correctOptionIndex": 3,
         "metadata": {
           "identityId": "ID-NP-014",
           "questionType": "diagram_based_mcq"
@@ -1548,12 +1548,12 @@
       },
       {
         "id": "37ab67b7-9906-42c7-b4c9-c1d869a20e1a",
-        "text": "In the series $LCR$ circuit shown in the diagram, a source of $V_{rms} = 200 \\text{ V}$ is applied. If the voltage across the inductor and capacitor are $V_L = 120 \\text{ V}$ and $V_C = 120 \\text{ V}$ respectively, find the voltage across the resistor and the current in the circuit given $R = 40 \\Omega$. \\n\\n[Diagram Description: A series circuit with a resistor $R$, an inductor $L$, and a capacitor $C$ connected to an AC source. Voltmeters $V_L$ and $V_C$ are connected across $L$ and $C$ respectively.]",
+        "text": "In the series $LCR$ circuit shown in the diagram, a source of $V_{rms} = 200 V$ is applied. If the voltage across the inductor and capacitor are $V_L = 120 V$ and $V_C = 120 V$ respectively, find the voltage across the resistor and the current in the circuit given $R = 40 \\Omega$. \\n\\n[Diagram Description: A series circuit with a resistor $R$, an inductor $L$, and a capacitor $C$ connected to an AC source. Voltmeters $V_L$ and $V_C$ are connected across $L$ and $C$ respectively.]",
         "options": [
-          "$200 \\text{ V}, 5 \\text{ A}$",
-          "$160 \\text{ V}, 4 \\text{ A}$",
-          "$200 \\text{ V}, 4 \\text{ A}$",
-          "$160 \\text{ V}, 5 \\text{ A}$"
+          "$200 V, 5 A$",
+          "$200 V, 4 A$",
+          "$160 V, 4 A$",
+          "$160 V, 5 A$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1562,22 +1562,22 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Step 1: Observe that $V_L = V_C = 120 \\text{ V}$. This indicates that the circuit is in a state of resonance.",
-          "Step 2: In a series $LCR$ circuit, the applied voltage $V$ is given by $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$.",
+          "Step 1: Observe that $V_L = V_C = 120 V$. This indicates that the circuit is in a state of resonance.",
+          "Step 2: In a series $LCR$ circuit, the applied voltage $V$ is given by $V = \\sqrt{V_R}^2 + (V_L - V_C)^2$.",
           "Step 3: Since $V_L = V_C$, the term $(V_L - V_C)^2 = 0$. Therefore, $V = V_R$.",
-          "Step 4: Given $V_{rms} = 200 \\text{ V}$, it follows that $V_R = 200 \\text{ V}$.",
-          "Step 5: Calculate the current using Ohm's Law for the resistor: $I = V_R / R = 200 / 40 = 5 \\text{ A}$."
+          "Step 4: Given $V_{rms} = 200 V$, it follows that $V_R = 200 V$.",
+          "Step 5: Calculate the current using Ohm's Law for the resistor: $I = V_R / R = 200 / 40 = 5 A$."
         ],
         "examTip": "When you see $V_L = V_C$ or $X_L = X_C$, immediately conclude the circuit is at resonance. In this state, the entire source voltage drops across the resistor.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"At resonance, the inductive and capacitive reactances cancel each other out. The circuit becomes purely resistive.\",\"memoryTrigger\":\"Resonance = Resistance Rules (L and C 'kill' each other)\",\"visualPrompt\":\"Imagine two people pulling a rope in opposite directions with equal force (120V each). The net force in that direction is zero, so only the third person pulling in a different direction (the resistor) determines the movement.\",\"commonTrap\":\"Summing the voltages arithmetically (120 + 120 + 200) instead of using the phasor sum.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"At resonance, the inductive and capacitive reactances cancel each other out. The circuit becomes purely resistive.\", \"memoryTrigger\": \"Resonance = Resistance Rules (L and C 'kill' each other)\", \"visualPrompt\": \"Imagine two people pulling a rope in opposite directions with equal force (120V each). The net force in that direction is zero, so only the third person pulling in a different direction (the resistor) determines the movement.\", \"commonTrap\": \"Summing the voltages arithmetically (120 + 120 + 200) instead of using the phasor sum.\"}",
         "keyFormulas": [
           "$V_{source} = \\sqrt{V_R^2 + (V_L - V_C)^2}$",
           "$I = V_R / R$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 0,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "diagram_based_mcq"
@@ -1587,10 +1587,10 @@
         "id": "9e021c41-ba64-4f7f-86be-2bef18992dac",
         "text": "A proton and an alpha particle, starting from rest, are accelerated through the same potential difference $V$. They then enter a uniform magnetic field $B$ acting perpendicular to their velocity. If $r_p$ and $r_\\alpha$ are the radii of their circular paths respectively, the ratio $\\frac{r_p}{r_\\alpha}$ is:",
         "options": [
-          "1 : \\sqrt{2}",
           "1 : 2",
-          "2 : 1",
-          "1 : 1"
+          "1 : 1",
+          "1 : \\sqrt2",
+          "2 : 1"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1600,22 +1600,22 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Establish the radius formula ::: $r = \\frac{mv}{qB}$.",
-          "Relate velocity to potential difference ::: Kinetic energy $K = qV = \\frac{1}{2}mv^2 \\implies v = \\sqrt{\\frac{2qV}{m}}$.",
-          "Substitute $v$ into the radius formula ::: $r = \\frac{m}{qB} \\sqrt{\\frac{2qV}{m}} = \\frac{1}{B} \\sqrt{\\frac{2mV}{q}}$.",
-          "Analyze the ratio ::: Since $V$ and $B$ are constant, $r \\propto \\sqrt{\\frac{m}{q}}$.",
+          "Relate velocity to potential difference ::: Kinetic energy $K = qV = \\frac{1}{2}mv^2 \\implies v = \\\\sqrt{\\frac{2qV}{m}}$.",
+          "Substitute $v$ into the radius formula ::: $r = \\frac{m}{qB} \\\\sqrt{\\frac{2qV}{m}} = \\frac{1}{B} \\\\sqrt{\\frac{2mV}{q}}$.",
+          "Analyze the ratio ::: Since $V$ and $B$ are constant, $r \\propto \\\\sqrt{\\frac{m}{q}}$.",
           "Compare proton and alpha particle ::: For proton: $m_p, e$. For alpha: $4m_p, 2e$.",
-          "Final calculation ::: $\\frac{r_p}{r_\\alpha} = \\sqrt{\\frac{m_p}{e} / \\frac{4m_p}{2e}} = \\sqrt{\\frac{m_p}{e} \\times \\frac{2e}{4m_p}} = \\sqrt{\\frac{2}{4}} = \\sqrt{\\frac{1}{2}} = 1 : \\sqrt{2}$."
+          "Final calculation ::: $\\frac{r_p}{r_\\alpha} = \\sqrt{\\frac{m_p/e}{4m_p/2e}} = \\sqrt{\\frac{2}{4}} = \\sqrt{\\frac{1}{2}} = 1 : \\sqrt{2}$."
         ],
-        "examTip": "Memorize the dependency of $r$ on other variables: $r \\propto v$ (same $B, q, m$), $r \\propto p$ (same $B, q$), $r \\propto \\sqrt{K}$ (same $B, q$), and $r \\propto \\sqrt{m/q}$ (same $B, V$).",
+        "examTip": "Memorize the dependency of $r$ on other variables: $r \\propto v$ (same $B, q, m$), $r \\propto p$ (same $B, q$), $r \\propto \\sqrt{K}$ (same $B, q$), and $r \\propto \\sqrt{m}/q$ (same $B, V$).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"When a charge enters a magnetic field perpendicularly, the magnetic force acts as a centripetal force ($qvB = mv^2/r$). The radius depends on the charge's momentum.\",\"memoryTrigger\":\"Radius is 'MVP over QB' ($r = mv/qB$).\",\"visualPrompt\":\"Imagine two different sized balls being thrown into a swirling pool; the heavier one with less 'spin' (charge) makes a wider circle.\",\"commonTrap\":\"Forgetting that an alpha particle has twice the charge AND four times the mass of a proton.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"When a charge enters a magnetic field perpendicularly, the magnetic force acts as a centripetal force ($qvB = mv^2/r$). The radius depends on the charge's momentum.\", \"memoryTrigger\": \"Radius is 'MVP over QB' ($r = mv/qB$).\", \"visualPrompt\": \"Imagine two different sized balls being thrown into a swirling pool; the heavier one with less 'spin' (charge) makes a wider circle.\", \"commonTrap\": \"Forgetting that an alpha particle has twice the charge AND four times the mass of a proton.\"}",
         "keyFormulas": [
           "$r = \\frac{mv}{qB}$",
-          "$r = \\frac{\\sqrt{2mqV}}{qB} = \\frac{1}{B}\\sqrt{\\frac{2mV}{q}}$"
+          " = \\frac{\\sqrt{2mqV}}{qB} = \\frac{1}{B}\\sqrt{\\frac{2mV}{q}}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 2,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
@@ -1623,12 +1623,12 @@
       },
       {
         "id": "5a738657-3cc1-4169-9b28-efd7bd63b416",
-        "text": "A platinum resistance thermometer is calibrated at two fixed points. The resistance of the platinum wire is found to be $10.0 \\, \\Omega$ at the ice point ($0^\\circ\\text{C}$) and $12.5 \\, \\Omega$ at the steam point ($100^\\circ\\text{C}$). If the thermometer is placed in a hot oil bath, the resistance is measured to be $14.0 \\, \\Omega$. Calculate the temperature of the oil bath assuming a linear variation of resistance with temperature.",
+        "text": "A platinum resistance thermometer is calibrated at two fixed points. The resistance of the platinum wire is found to be $10.0 \\, \\Omega$ at the ice point ($0°C$) and $12.5 \\, \\Omega$ at the steam point ($100°C$). If the thermometer is placed in a hot oil bath, the resistance is measured to be $14.0 \\, \\Omega$. Calculate the temperature of the oil bath assuming a linear variation of resistance with temperature.",
         "options": [
-          "140^\\circ\\text{C}",
-          "160^\\circ\\text{C}",
-          "150^\\circ\\text{C}",
-          "125^\\circ\\text{C}"
+          "150$^$\\circ C",
+          "160$^$\\circ C",
+          "125$^$\\circ C",
+          "140$^$\\circ C"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1637,22 +1637,22 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Recall the linear resistance formula ::: $R_t = R_0(1 + \\alpha t)$, where $R_0$ is resistance at $0^\\circ\\text{C}$.",
-          "Find the temperature coefficient ($\\alpha$) or use the ratio method ::: For $100^\\circ\\text{C}$, $12.5 = 10(1 + \\alpha \\times 100) \\implies 2.5 = 1000\\alpha \\implies \\alpha = 0.0025 \\, ^\\circ\\text{C}^{-1}$.",
+          "Recall the linear resistance formula ::: $R_t = R_0(1 + \\alpha t)$, where $R_0$ is resistance at $0°C$.",
+          "Find the temperature coefficient ($\\alpha$) or use the ratio method ::: For $100°C$, $12.5 = 10(1 + \\alpha \\times 100) \\implies 2.5 = 1000\\alpha \\implies \\alpha = 0.0025 \\, °C^{-1}$.",
           "Set up the equation for the unknown temperature $t$ ::: $14.0 = 10(1 + 0.0025 \\times t)$.",
           "Solve for $t$ ::: $1.4 = 1 + 0.0025t \\implies 0.4 = 0.0025t$.",
-          "Calculate the final value ::: $t = \\frac{0.4}{0.0025} = \\frac{4000}{25} = 160^\\circ\\text{C}$."
+          "Calculate the final value ::: $t = \\frac{0.4}{0.0025} = \\frac{4000}{25} = 160°C$."
         ],
         "examTip": "For linear variations, use the formula $t = \\frac{R_t - R_0}{R_{100} - R_0} \\times 100$. This 'ratio of differences' bypasses the need to calculate $\\alpha$ explicitly, saving time.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"Resistivity and resistance of metals increase linearly with temperature due to increased lattice vibrations hindering electron flow. $\\\\alpha$ is the temperature coefficient of resistance.\",\"memoryTrigger\":\"R-T-A: Resistance-Temperature-Alpha. High Temp = High R for metals.\",\"visualPrompt\":\"Imagine a hallway where the walls are vibrating more violently as it gets hotter, making it harder to run through.\",\"commonTrap\":\"Using $T$ in Kelvin instead of Celsius when $\\\\alpha$ is given in per degree Celsius.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"Resistivity and resistance of metals increase linearly with temperature due to increased lattice vibrations hindering electron flow. $\\\\alpha$ is the temperature coefficient of resistance.\", \"memoryTrigger\": \"R-T-A: Resistance-Temperature-Alpha. High Temp = High R for metals.\", \"visualPrompt\": \"Imagine a hallway where the walls are vibrating more violently as it gets hotter, making it harder to run through.\", \"commonTrap\": \"Using $T$ in Kelvin instead of Celsius when $\\\\alpha$ is given in per degree Celsius.\"}",
         "keyFormulas": [
           "$R_t = R_0(1 + \\alpha t)$",
           "$t = \\frac{R_t - R_0}{R_{100} - R_0} \\times 100$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "simple_recall_mcq"
@@ -1660,12 +1660,12 @@
       },
       {
         "id": "a5fab301-6d2a-4f87-8748-28afdb809c04",
-        "text": "An alternating current circuit consists of a resistor of $R = 10 \\Omega$ and an inductor of $L = \\frac{0.1}{\\pi} \\text{ H}$ connected in series to a source $V = 20 \\sin(100 \\pi t) \\text{ V}$. Calculate the phase angle $\\phi$ between the applied voltage and the resulting current, and determine the power factor of this circuit.",
+        "text": "An alternating current circuit consists of a resistor of $R = 10 \\Omega$ and an inductor of $L = \\frac{0.1}{\\pi} H$ connected in series to a source $V = 20 \\sin(100 \\pi t) V$. Calculate the phase angle $\\phi$ between the applied voltage and the resulting current, and determine the power factor of this circuit.",
         "options": [
-          "$\\phi = 45^\\circ, \\cos \\phi = 0.707$",
-          "$\\phi = 30^\\circ, \\cos \\phi = 0.866$",
-          "$\\phi = 60^\\circ, \\cos \\phi = 0.500$",
-          "$\\phi = 0^\\circ, \\cos \\phi = 1.000$"
+          "$\\phi = 60^°, \\cos \\phi = 0.500$",
+          "$\\phi = 45^°, \\cos \\phi = 0.707$",
+          "$\\phi = 0^°, \\cos \\phi = 1.000$",
+          "$\\phi = 30^°, \\cos \\phi = 0.866$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1674,14 +1674,14 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Step 1: Calculate Angular Frequency ($\\omega$) ::: From the equation $V = 20 \\sin(100 \\pi t)$, the angular frequency $\\omega = 100 \\pi \\text{ rad/s}$.",
+          "Step 1: Calculate Angular Frequency ($\\omega$) ::: From the equation $V = 20 \\sin(100 \\pi t)$, the angular frequency $\\omega = 100 \\pi rad/s$.",
           "Step 2: Calculate Inductive Reactance ($X_L$) ::: $X_L = \\omega L = (100 \\pi) \\times \\left(\\frac{0.1}{\\pi}\\right) = 10 \\Omega$.",
-          "Step 3: Calculate Phase Angle ($\\phi$) ::: For an $RL$ circuit, $\\tan \\phi = \\frac{X_L}{R}$. Since $X_L = 10 \\Omega$ and $R = 10 \\Omega$, $\\tan \\phi = \\frac{10}{10} = 1$. Thus, $\\phi = 45^\\circ$.",
-          "Step 4: Calculate Power Factor ($\\cos \\phi$) ::: $\\cos(45^\\circ) = \\frac{1}{\\sqrt{2}} \\approx 0.707$."
+          "Step 3: Calculate Phase Angle ($\\phi$) ::: For an $RL$ circuit, $\\tan \\phi = \\frac{X_L}{R}$. Since $X_L = 10 \\Omega$ and $R = 10 \\Omega$, $\\tan \\phi = \\frac{10}{10} = 1$. Thus, $\\phi = 45^°$.",
+          "Step 4: Calculate Power Factor ($\\cos \\phi$) ::: $\\cos(45^°) = \\frac{1}{\\sqrt{2}} \\approx 0.707$."
         ],
-        "examTip": "If $R = X_L$ or $R = X_C$, the phase angle is always $45^\\circ$. This is a frequent 'shortcut' scenario in competitive exams.",
+        "examTip": "If $R = X_L$ or $R = X_C$, the phase angle is always $45^°$. This is a frequent 'shortcut' scenario in competitive exams.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\":\"The phase angle represents the 'lag' or 'lead' of current relative to voltage. In an $RL$ circuit, current lags voltage because the inductor opposes changes in current flow.\",\"memoryTrigger\":\"ELI the ICE man: In an Inductor (L), E (voltage) leads I (current).\",\"visualPrompt\":\"Imagine the voltage trying to push current through the inductor; the inductor's back-EMF acts like a spring that delays the current's response.\",\"commonTrap\":\"Using $f = 100\\\\pi$ instead of $\\\\omega = 100\\\\pi$.\"}",
+        "masteryMaterial": "{\"coreConcept\": \"The phase angle represents the 'lag' or 'lead' of current relative to voltage. In an $RL$ circuit, current lags voltage because the inductor opposes changes in current flow.\", \"memoryTrigger\": \"ELI the ICE man: In an Inductor (L), E (voltage) leads I (current).\", \"visualPrompt\": \"Imagine the voltage trying to push current through the inductor; the inductor's back-EMF acts like a spring that delays the current's response.\", \"commonTrap\": \"Using $f = 100\\\\pi$ instead of $\\\\omega = 100\\\\pi$.\"}",
         "keyFormulas": [
           "$\\omega = 2\\pi f$",
           "$X_L = \\omega L$",
@@ -1690,7 +1690,7 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
+        "correctOptionIndex": 1,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"

@@ -1,0 +1,13 @@
+{
+  "engine_version": "4.0",
+  "rigor_drift_multiplier": 1.6496666666666666,
+  "ids_baseline": 0.9441666666666667,
+  "intent_learning_rate": 0.25,
+  "volatility_factor": 1.15,
+  "solve_tension_multiplier": 1.12,
+  "projection_buffer": 1.05,
+  "synthesis_weight": 0.26520000000000005,
+  "trap_weight": 0.3,
+  "last_updated": "2026-04-30T20:51:16.991Z",
+  "calibration_note": "Calibrated using iterative RWC (2021-2025) - NEET Chemistry"
+}

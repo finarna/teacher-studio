@@ -17,10 +17,9 @@ import React, { useEffect, useState } from 'react';
 interface RichMarkdownRendererProps {
   text: string;
   className?: string;
-  textSize?: string; // e.g. 'text-lg'
 }
 
-const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, className = '', textSize = 'text-sm' }) => {
+const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, className = '' }) => {
   const [isKatexLoaded, setIsKatexLoaded] = useState(false);
 
   // Poll for KaTeX availability
@@ -41,103 +40,75 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
   }, []);
 
   const renderContent = () => {
+    // CRITICAL FIX: Handle literal \n strings that might come from double-escaped JSON
+    let processedText = text.replace(/\\n/g, '\n');
+
+    // NEW: Transform LaTeX tabular Match-the-Following into standard list format before other cleanups
+    // This handles the case where Column I and Column II items are on the same line separated by &
+    processedText = processedText.replace(/\\begin\{tabular\}.*?Column\s*I.*?Column\s*II.*?\\\\(.*?)\\end\{tabular\}/gsi, (match, content) => {
+      const rows = content.split(/\\\\|\\hline/).filter(r => r.trim() && r.includes('&'));
+      const col1: string[] = [];
+      const col2: string[] = [];
+      rows.forEach(row => {
+        const parts = row.split('&');
+        if (parts.length >= 2) {
+          col1.push(parts[0].trim());
+          col2.push(parts[1].trim());
+        }
+      });
+      return `\nColumn I\n${col1.join('\n')}\nColumn II\n${col2.join('\n')}\n`;
+    });
+
+    // NEW: Strip LaTeX environment tags and common formatting artifacts
+    processedText = processedText
+      .replace(/\\begin\{itemize\}/g, '')
+      .replace(/\\end\{itemize\}/g, '')
+      .replace(/\\begin\{tabular\}\{.*?\}/g, '')
+      .replace(/\\end\{tabular\}/g, '')
+      .replace(/\\hline/g, '')
+      .replace(/\\item\s*\[(.*?)\]/g, '$1') // Convert \item [Label] to Label
+      .replace(/\\item/g, '')               // Strip remaining \item tags
+      .replace(/\\text\{.*?\}/g, (m) => m.slice(6, -1)) // Strip \text{} wrapper but keep content
+      .replace(/\\textbf\{(.*?)\}/g, '**$1**')           // Convert to Markdown Bold
+      .replace(/\\textit\{(.*?)\}/g, '*$1*')             // Convert to Markdown Italic
+      .replace(/\\underline\{(.*?)\}/g, '_$1_')          // Convert to Markdown Underline
+      .replace(/\\\\/g, '\n')               // Convert LaTeX newlines to actual newlines
+      .replace(/&/g, ' ');                  // Remove LaTeX table column separators (default fallback)
+
+    // CRITICAL FIX: Extract and protect math expressions BEFORE splitting by lines
+    // This prevents multi-line math from being broken up
     const mathPlaceholders: { [key: string]: string } = {};
     let placeholderCounter = 0;
 
-    // PRE-PROCESS: Clean up double-backslashes globally before detection starts
-    let processedText = text
-      .replace(/\\n/g, '\n')
-      .replace(/\\\\n/g, '\n')
-      .replace(/\\\\([a-zA-Z]+)/g, '\\$1') // Force all double-backslashes to single
-      .replace(/\\u00b5/g, '\u00B5') // Micro sign
-      .replace(/\\u00b0/g, '\u00B0') // Degree sign
-      .replace(/\\u212B/g, '\u212B') // Angstrom sign
-      .replace(/\\u00d7/g, '\u00D7') // Multiplication sign (×)
-      .replace(/\\u22c5/g, '\u22C5') // Dot operator (⋅)
-      .replace(/²21A/g, '\\sqrt ')  // RECOVERY: Mangled square root symbol
-      .replace(/\\{1,4}u221a/gi, '\\sqrt ') // Square root (√)
-      .replace(/\\{1,4}u221e/gi, '\\infty ') // Infinity (∞)
-      .replace(/\\{1,4}u03c0/gi, '\\pi ')   // Pi (π)
-      .replace(/\\{1,4}u([0-9a-fA-F]{4})/g, (match, hex) => String.fromCharCode(parseInt(hex, 16))) // Recursive Unicode unescape
-      .replace(/\\u207b/g, '\u207B') // Superscript minus (⁻)
-      .replace(/\\u207a/g, '\u207A') // Superscript plus (⁺)
-      .replace(/\\u207([0-9])/g, (m, d) => String.fromCharCode(0x2070 + parseInt(d))) // Superscripts 0-9
-      .replace(/\\u208([0-9])/g, (m, d) => String.fromCharCode(0x2080 + parseInt(d))) // Subscripts 0-9
-      .replace(/\\u2264/g, '\\leq ')  // Less than or equal (≤)
-      .replace(/\\u2265/g, '\\geq ')  // Greater than or equal (≥)
-      .replace(/\\u2260/g, '\\neq ')  // Not equal (≠)
-      // Separate Greek letters from units (handles \muF and \\muF)
-      .replace(/\\{1,2}(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|Delta|Gamma|Theta|Lambda|Xi|Pi|Sigma|Phi|Psi|Omega)([a-zA-Z])/g, '\\$1 $2');
-
-    // TRIPLE-PASS DETECTION: Support single/multiple backslashes and symbols.
-    // Fixed: Added a-zA-Z to allow variables (m, V, f1, f2) to be part of the math block.
-    // CRITICAL: Space is excluded from this greedy set to prevent accidental sentence wrapping.
-    const mathRegex = /(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]|\$[^\$]+?\$|\\\([\s\S]*?\\\)|(?:\\+(?:[a-zA-Z]+|[,!|:;])(?:\{[^\}]*\}|\[[^\]]*\]|\s)*|[\u00B5-\u23FF\d\/\+\-\=\*x\(\)\[\]\{\}\.\,\^ \_\!\:\;\\a-zA-Z])+)/g;
-
-    let protectedText = processedText.replace(mathRegex, (match) => {
-      // Only auto-wrap if it's already wrapped or contains a "hard" math signal
-      const isAlreadyWrapped = match.startsWith('$') || match.startsWith('\\\[') || match.startsWith('\\\(');
-      const containsHardSignal = match.includes('\\') || /[\u00B5\u03BC\u03A9\u212B\u00B0\u00D7\u22C5\u2070-\u207F\u2080-\u208F]/.test(match) || /[\^\_\:\;]/.test(match) || match.includes('√');
-
-      if (!isAlreadyWrapped && !containsHardSignal) return match;
-
+    // Extract all math expressions and replace with placeholders
+    processedText = processedText.replace(/(\$\$[\s\S]*?\$\$|\$[^\$\n]+?\$)/g, (match) => {
       const placeholder = `__MATH_PLACEHOLDER_${placeholderCounter}__`;
-
-      // Normalize match: If it doesn't have delimiters, add them
-      let cleanedMatch = match;
-      if (!isAlreadyWrapped) {
-        // 1. Normalize backslashes (AI often sends \\times or \\mu)
-        cleanedMatch = match.replace(/\\\\([a-zA-Z]+)/g, '\\$1');
-
-        // 2. Convert raw symbols to LaTeX commands with variable grouping
-        cleanedMatch = cleanedMatch
-          .replace(/√\(([^\)]+)\)/g, '\\sqrt{$1}') // Group bracketed: √(f1f2) -> \sqrt{f1f2}
-          .replace(/√([0-9a-zA-Z_]+)/g, '\\sqrt{$1}') // Group plain: √f1f2 -> \sqrt{f1f2}
-          .replace(/√/g, '\\sqrt ') // Fallback for single symbol
-          .replace(/×/g, '\\times ')
-          .replace(/⋅/g, '\\cdot ')
-          .replace(/Ω/g, '\\Omega ')
-          .replace(/Å/g, '\\AA ');
-
-        // 3. Sanitize units at the end (e.g., "10 T" or "10^-4 T")
-        // This prevents KaTeX from failing on plain text units
-        cleanedMatch = cleanedMatch.replace(/([0-9a-zA-Z\}\)])\s*([A-Z])(?:\s|$)/g, '$1 \\text{ $2}');
-
-        cleanedMatch = `$${cleanedMatch.trim()}$`;
-      } else if (match.startsWith('$') && !match.startsWith('$$')) {
-        // Normalize already wrapped content
-        cleanedMatch = `$${match.slice(1, -1).replace(/\\\\([a-zA-Z]+)/g, '\\$1').trim()}$`;
-      }
-
-      mathPlaceholders[placeholder] = cleanedMatch;
+      mathPlaceholders[placeholder] = match;
       placeholderCounter++;
       return placeholder;
     });
 
-    // METADATA CLEANER: Hide AI context blocks from the student paper
-    protectedText = protectedText.replace(/\[Graph Description:[\s\S]*?\]/gi, '');
-    protectedText = protectedText.replace(/\[AI Context:[\s\S]*?\]/gi, '');
-
     // Now split by lines (math is protected)
-    const lines = protectedText.split('\n');
+    const lines = processedText.split('\n');
     const elements: React.ReactNode[] = [];
     let i = 0;
 
     while (i < lines.length) {
       const line = lines[i];
+      const trimmedLine = line.trim();
 
       // Skip empty lines
-      if (!line.trim()) {
-        elements.push(<div key={`empty-${i}`} className="h-2" />);
+      if (!trimmedLine) {
+        elements.push(<div key={`empty-${i}`} className="h-1" />);
         i++;
         continue;
       }
 
       // Markdown Table Detection
-      if (line.includes('|') && i + 1 < lines.length && lines[i + 1].includes('|')) {
+      if (trimmedLine.includes('|') && i + 1 < lines.length && (lines[i + 1].includes('|') || lines[i+1].includes('---'))) {
         const tableLines: string[] = [];
         let j = i;
-        while (j < lines.length && lines[j].includes('|')) {
+        while (j < lines.length && (lines[j].includes('|') || lines[j].includes('---'))) {
           tableLines.push(lines[j]);
           j++;
         }
@@ -145,6 +116,58 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
         if (tableLines.length >= 2) {
           elements.push(renderTable(tableLines, i));
           i = j;
+          continue;
+        }
+      }
+
+      // Match-the-Following (Column I / Column II) Detection
+      // Robust detection for "Column I", "Column I:", "[Column I]", etc.
+      if (trimmedLine.match(/Column\s+I/i) && i + 1 < lines.length) {
+        // Look ahead for Column II
+        let column2Index = -1;
+        for (let k = i + 1; k < Math.min(i + 15, lines.length); k++) {
+          if (lines[k].match(/Column\s+II/i)) {
+            column2Index = k;
+            break;
+          }
+        }
+
+        if (column2Index !== -1) {
+          // Extract items for Column I and Column II
+          const col1Items: string[] = lines.slice(i + 1, column2Index).filter(l => l.trim());
+          
+          // Find where Column II ends (usually next empty line or header)
+          let col2End = column2Index + 1;
+          while (col2End < lines.length && lines[col2End].trim() && !lines[col2End].includes('|') && !lines[col2End].startsWith('###')) {
+            col2End++;
+          }
+          const col2Items: string[] = lines.slice(column2Index + 1, col2End).filter(l => l.trim());
+
+          elements.push(
+            <div key={`match-${i}`} className="my-4 bg-slate-50/50 border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="grid grid-cols-2 border-b border-slate-200 bg-slate-100/80">
+                <div className="px-4 py-2 font-bold text-xs uppercase tracking-wider text-slate-600 border-r border-slate-200">Column I</div>
+                <div className="px-4 py-2 font-bold text-xs uppercase tracking-wider text-slate-600">Column II</div>
+              </div>
+              <div className="grid grid-cols-2 min-h-[100px]">
+                <div className="p-4 border-r border-slate-200 space-y-2">
+                  {col1Items.map((item, idx) => (
+                    <div key={idx} className="text-sm flex gap-2">
+                      <span className="font-bold text-indigo-600 min-w-[20px]">{renderInline(item, mathPlaceholders)}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-4 space-y-2">
+                  {col2Items.map((item, idx) => (
+                    <div key={idx} className="text-sm">
+                      {renderInline(item, mathPlaceholders)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+          i = col2End;
           continue;
         }
       }
@@ -194,7 +217,7 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
         elements.push(
           <ul key={`ul-${i}`} className="list-disc list-inside my-2 space-y-1">
             {listItems.map((item, idx) => (
-              <li key={idx} className={textSize}>
+              <li key={idx} className="text-sm">
                 {renderInline(item, mathPlaceholders)}
               </li>
             ))}
@@ -215,7 +238,7 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
         elements.push(
           <ol key={`ol-${i}`} className="list-decimal list-inside my-2 space-y-1">
             {listItems.map((item, idx) => (
-              <li key={idx} className={textSize}>
+              <li key={idx} className="text-sm">
                 {renderInline(item, mathPlaceholders)}
               </li>
             ))}
@@ -233,20 +256,11 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
       }
 
       // Regular paragraph
-      const isComponentInline = className.includes('inline');
-      if (i === 0 && isComponentInline) {
-        elements.push(
-          <span key={`p-${i}`} className={`${textSize} leading-relaxed font-outfit text-slate-700`}>
-            {renderInline(line, mathPlaceholders)}
-          </span>
-        );
-      } else {
-        elements.push(
-          <div key={`p-${i}`} className={`${textSize} leading-relaxed my-1.5 font-outfit text-slate-700`}>
-            {renderInline(line, mathPlaceholders)}
-          </div>
-        );
-      }
+      elements.push(
+        <p key={`p-${i}`} className="text-sm leading-relaxed my-1">
+          {renderInline(line, mathPlaceholders)}
+        </p>
+      );
       i++;
     }
 
@@ -316,17 +330,13 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
     }
 
     // Handle math first
-    // MATH INTEGRITY REGEX
-    const mathRegex = /(\$\$[\s\S]*?\$\$|\$[^\$]+?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g;
+    const mathRegex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$)/g;
     const parts = processedText.split(mathRegex);
 
     return parts.map((part, index) => {
-      // Display Math $$...$$ or \[...\]
-      const isDisplay = (part.startsWith('$$') && part.endsWith('$$')) || (part.startsWith('\\\[') && part.endsWith('\\\]'));
-      const isInline = !isDisplay && ((part.startsWith('$') && part.endsWith('$')) || (part.startsWith('\\\(') && part.endsWith('\\\)')));
-
-      if (isDisplay && isKatexLoaded) {
-        const latex = (part.startsWith('$$') ? part.slice(2, -2) : part.slice(2, -2)).trim();
+      // Display Math $$...$$
+      if (part.startsWith('$$') && part.endsWith('$$') && isKatexLoaded) {
+        const latex = part.slice(2, -2).trim();
         try {
           const html = (window as any).katex.renderToString(latex, {
             throwOnError: false,
@@ -336,11 +346,6 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
             macros: {
               '\\ce': '\\ce', // Chemistry notation support
               '\\pu': '\\pu', // Physical units support
-              '\\AA': '\\text{\u212B}', // Angstrom
-              '\\degree': '^{\\circ}',
-              '\\Omega': '\\text{\u03A9}', // Ohm
-              '\\mu': '\\text{\u03BC}', // Micro
-              '\\nu': '\\text{\u03BD}', // Nu
             },
           });
           return (
@@ -355,9 +360,10 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
         }
       }
 
-      // Inline Math $...$ or \(...\)
-      if (isInline && isKatexLoaded) {
-        const latex = (part.startsWith('$') ? part.slice(1, -1) : part.slice(2, -2)).trim();
+      // Inline Math $...$
+      const isKatexActuallyAvailable = typeof (window as any).katex !== 'undefined';
+      if (part.startsWith('$') && part.endsWith('$') && part.length > 2 && (isKatexLoaded || isKatexActuallyAvailable)) {
+        const latex = part.slice(1, -1).trim();
         try {
           const html = (window as any).katex.renderToString(latex, {
             throwOnError: false,
@@ -367,11 +373,6 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
             macros: {
               '\\ce': '\\ce', // Chemistry notation support
               '\\pu': '\\pu', // Physical units support
-              '\\AA': '\\text{\u212B}', // Angstrom
-              '\\degree': '^{\\circ}',
-              '\\Omega': '\\text{\u03A9}', // Ohm
-              '\\mu': '\\text{\u03BC}', // Micro
-              '\\nu': '\\text{\u03BD}', // Nu
             },
           });
           return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;
@@ -396,18 +397,12 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
     text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
     // Inline code `text`
-    text = text.replace(/`(.*?)`/g, '<code class="px-1 py-0.5 rounded-sm font-semibold border-none" style="background-color: transparent !important; color: inherit !important;">$1</code>');
+    text = text.replace(/`(.*?)`/g, '<code class="bg-slate-200 px-1 py-0.5 rounded text-xs font-mono">$1</code>');
 
     return <span dangerouslySetInnerHTML={{ __html: text }} />;
   };
 
-  const isComponentInline = className.includes('inline');
-
-  return isComponentInline ? (
-    <span className={`rich-markdown inline ${className}`}>
-      {renderContent()}
-    </span>
-  ) : (
+  return (
     <div className={`rich-markdown ${className}`}>
       {renderContent()}
     </div>

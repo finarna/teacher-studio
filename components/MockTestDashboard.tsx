@@ -60,7 +60,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                 filename: `Plus2AI_${paper.subject}_${paper.examContext || 'KCET'}_2026_SET_${paper.setName}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: {
-                    scale: 2.5,
+                    scale: 1.35, // Optimal safety scale for long 45-question papers
                     useCORS: true,
                     letterRendering: true,
                     allowTaint: false,
@@ -71,17 +71,18 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                     width: paperElement.scrollWidth,
                     height: paperElement.scrollHeight,
                     onclone: (clonedDoc: Document) => {
-                        const clonedPaper = clonedDoc.querySelector('.paper-container') as HTMLElement;
-                        if (clonedPaper) {
-                            clonedPaper.style.boxShadow = 'none';
-                            clonedPaper.style.width = '210mm';
-                            clonedPaper.style.margin = '0 auto'; // Center alignment
-                            clonedPaper.style.padding = '0';
-                            clonedPaper.style.position = 'relative';
-                            clonedPaper.style.left = '0';
-                        }
+                        // FORCE visibility and height on ALL parent containers
+                        const containers = clonedDoc.querySelectorAll('html, body, #root, .print-area, .paper-container, .questions-grid');
+                        containers.forEach(el => {
+                            (el as HTMLElement).style.display = 'block';
+                            (el as HTMLElement).style.height = 'auto';
+                            (el as HTMLElement).style.minHeight = 'auto';
+                            (el as HTMLElement).style.maxHeight = 'none';
+                            (el as HTMLElement).style.overflow = 'visible';
+                            (el as HTMLElement).style.visibility = 'visible';
+                        });
 
-                        // CRITICAL FIX: Ensure ALL SVG elements are visible and properly sized
+                        // Standard KaTeX/SVG hardening
                         const allSvgs = clonedDoc.querySelectorAll('svg');
                         allSvgs.forEach((svg: Element) => {
                             const htmlSvg = svg as SVGElement;
@@ -125,7 +126,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                     }
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                pagebreak: { mode: ['css', 'legacy'] }
             };
 
             try {
@@ -151,7 +152,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                 setIsGenerating(false);
                 setSelectedPaper(null);
             }
-        }, 2000);
+        }, 35000); // Increased from 2s to 35s for complex NEET papers
     };
 
     const handleQuickPrint = (paper: PaperSet) => {
@@ -159,14 +160,15 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
         // Standard delay for DOM to settle
         setTimeout(() => {
             window.print();
-            setSelectedPaper(null); 
+            setSelectedPaper(null);
         }, 1500);
     };
 
     return (
         <div className="min-h-screen bg-slate-50 p-6 md:p-12">
             {/* SURGICAL PRINT OVERRIDE: Uses standard browser engine without unmounting */}
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @media print {
                     html, body, #root, #root > div, .min-h-screen { 
                         height: auto !important;
@@ -207,9 +209,9 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                         examContext={selectedPaper.examContext || 'KCET'}
                         serialNumber={`P2-2026-${selectedPaper.subject.slice(0, 4).toUpperCase()}`}
                     />
-                    
+
                     {!isGenerating && (
-                        <button 
+                        <button
                             onClick={() => setSelectedPaper(null)}
                             className="no-print fixed top-4 right-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-slate-700 transition-all flex items-center gap-2"
                         >
@@ -231,7 +233,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
 
             <div className={`max-w-5xl mx-auto dashboard-ui transition-opacity duration-300 ${selectedPaper ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 <header className="mb-12">
-                    <button 
+                    <button
                         onClick={onBack}
                         className="mb-8 text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-1 font-medium"
                     >
@@ -257,21 +259,19 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                     <div className="flex gap-3 mt-8">
                         <button
                             onClick={() => setSelectedExamContext('KCET')}
-                            className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                                selectedExamContext === 'KCET'
+                            className={`px-6 py-3 rounded-xl font-bold transition-all ${selectedExamContext === 'KCET'
                                     ? 'bg-slate-900 text-white shadow-lg'
                                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
+                                }`}
                         >
                             KCET 2026
                         </button>
                         <button
                             onClick={() => setSelectedExamContext('NEET')}
-                            className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                                selectedExamContext === 'NEET'
+                            className={`px-6 py-3 rounded-xl font-bold transition-all ${selectedExamContext === 'NEET'
                                     ? 'bg-slate-900 text-white shadow-lg'
                                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
+                                }`}
                         >
                             NEET 2026
                         </button>
@@ -280,16 +280,15 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {papers.map((paper) => (
-                        <div 
+                        <div
                             key={paper.id}
                             className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group overflow-hidden relative"
                         >
-                            <div className={`absolute top-0 left-0 right-0 h-1.5 ${
-                                paper.subject === 'Physics' ? 'bg-blue-500' : 
-                                paper.subject === 'Mathematics' ? 'bg-indigo-600' :
-                                paper.subject === 'Chemistry' ? 'bg-emerald-500' :
-                                paper.subject === 'Biology' ? 'bg-rose-500' : 'bg-coral-500'
-                            }`} />
+                            <div className={`absolute top-0 left-0 right-0 h-1.5 ${paper.subject === 'Physics' ? 'bg-blue-500' :
+                                    paper.subject === 'Mathematics' ? 'bg-indigo-600' :
+                                        paper.subject === 'Chemistry' ? 'bg-emerald-500' :
+                                            paper.subject === 'Biology' ? 'bg-rose-500' : 'bg-coral-500'
+                                }`} />
 
                             <div className="flex justify-between items-start mb-6">
                                 <div className="p-3 bg-slate-50 rounded-xl group-hover:bg-slate-100 transition-colors">
@@ -315,13 +314,13 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                             </p>
 
                             <div className="flex flex-col gap-2">
-                                <button 
+                                <button
                                     onClick={() => handleProDownload(paper)}
                                     className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-md active:scale-[0.98]"
                                 >
                                     <Sparkles size={16} className="text-amber-400" /> Download Pro PDF
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => handleQuickPrint(paper)}
                                     className="w-full bg-white text-slate-900 border-2 border-slate-900 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-[0.98]"
                                 >

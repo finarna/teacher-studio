@@ -102,8 +102,9 @@ const MathRenderer: React.FC<MathRendererProps> = ({
     const hasMathDelimiters = /\$|\\\[|\\\(/.test(processedText);
 
     // HEURISTIC FIX: Only auto-wrap if the string is short (likely a math option) 
-    // or contains explicit backslashed LaTeX commands.
-    const containsHighConfLatex = /\\(frac|sqrt|int|sum|begin|alpha|beta|gamma|theta|omega|sigma|pi|delta|phi|psi|mu|nu|xi|tau|vec|hat|bar|tilde|rightarrow|leftarrow|Rightarrow|Leftarrow|uparrow|downarrow|leftrightarrow|to|times|cdot|div|pm|leq|geq|neq|approx|infty|partial|nabla|forall|exists|in|notin|subset|cup|cap|log|sin|cos|tan|Omega|AA|text|ce|degree|deg|angle|perp|parallel|cong|sim|equiv|approx|propto|mid|parallel|triangle|square|odot|oplus|otimes)/i.test(processedText);
+    // or contains high-confidence LaTeX commands.
+    // Do NOT wrap long blocks of text (paragraphs) because KaTeX will strip all spaces.
+    const containsHighConfLatex = /\\(frac|sqrt|int|sum|begin|lambda|alpha|beta|gamma|theta|omega|sigma|pi|delta|phi|psi|mu|nu|xi|tau|vec|hat|bar|tilde|rightarrow|leftarrow|Rightarrow|Leftarrow|uparrow|downarrow|leftrightarrow|to|times|cdot|div|pm|leq|geq|neq|approx|infty|partial|nabla|forall|exists|in|notin|subset|cup|cap)/.test(processedText);
     const containsMathMarkers = /[\^_]|\{|\}/.test(processedText);
     const containsOperators = /[\+\-\=\/\*x<\>\(\)\[\]]/.test(processedText);
     const looksLikeMathVar = /[0-9][A-Z]|[A-Z][0-9]/.test(processedText);
@@ -140,9 +141,8 @@ const MathRenderer: React.FC<MathRendererProps> = ({
         else if (part.startsWith('\\\[')) latex = part.slice(2, -2);
         else if (part.startsWith('$')) latex = part.slice(1, -1);
         else if (part.startsWith('\\\(')) latex = part.slice(2, -2);
-        
-        // CRITICAL FIX: Normalize backslashes (AI often sends \\times or \\mu)
-        latex = latex.replace(/\\\\([a-zA-Z]+)/g, '\\$1').trim();
+
+        latex = latex.trim();
 
         // If the content inside $...$ has no LaTeX commands, operators, or math symbols,
         // it's plain text that the AI mistakenly wrapped in math delimiters.
@@ -199,7 +199,7 @@ const MathRenderer: React.FC<MathRendererProps> = ({
  * Just renders text with math delimiters
  */
 export const RenderWithMath: React.FC<{
-  text: any;
+  text: any; // Allow anything for robustness
   className?: string;
   showOptions?: boolean;
   serif?: boolean;
@@ -208,7 +208,8 @@ export const RenderWithMath: React.FC<{
   compact?: boolean;
 }> = ({ text, className = '', serif = false }) => {
   if (text === null || text === undefined) return null;
-  return <MathRenderer text={text} className={`${className} ${serif ? 'font-serif' : ''} leading-relaxed`} />;
+
+  return <MathRenderer text={text} className={`${className} ${serif ? 'font-serif' : ''}`} />;
 };
 
 /**

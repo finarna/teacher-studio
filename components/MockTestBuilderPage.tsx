@@ -228,7 +228,9 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     questionsGenerated?: number;
     targetQuestions?: number;
     currentTopics?: string[];
+    printStyles?: string;
   } | null>(null);
+
   const [showForecastExplanation, setShowForecastExplanation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [testHistory, setTestHistory] = useState<PastTestAttempt[]>([]);
@@ -243,7 +245,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
       const url = getApiUrl(`/api/tests/official?subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(examContext)}`);
       const response = await fetch(url, {
         headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
         }
       });
       if (!response.ok) throw new Error('Failed to load official papers');
@@ -347,7 +349,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
       const url = getApiUrl(`/api/learning-journey/weak-topics?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(examContext)}`);
       const response = await fetch(url, {
         headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
         }
       });
       if (response.ok) {
@@ -371,7 +373,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
       const token = session?.access_token;
       const url = getApiUrl(`/api/learning-journey/mock-history?userId=${encodeURIComponent(userId)}&subject=${encodeURIComponent(subject)}&examContext=${encodeURIComponent(examContext)}&limit=50`);
       const response = await fetch(url, {
-        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+        headers: { ...(token ? { 'Authorization': 'Bearer ' + token } : {}) }
       });
       if (response.ok) {
         const result = await response.json();
@@ -396,7 +398,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -564,7 +566,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     setIsCreatingTest(true);
     setError(null);
     setProgressMeta(null);
-    setProgressMessage(officialSetId ? `🚀 Synchronizing ${officialSetId} flagship...` : 'AI is building your personalised test...');
+    setProgressMessage(officialSetId ? '🚀 Synchronizing ' + officialSetId + ' flagship...' : 'AI is building your personalised test...');
     setProgressPercentage(officialSetId ? 50 : 5);
     let pollInterval: NodeJS.Timeout | null = null;
     try {
@@ -578,7 +580,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
         const setName = officialSetId === 'SET-A' ? 'A' : 'B';
         const paper = allPapers.find(p =>
           p.examContext === examContext &&
-          p.subject === subject &&
+          p.subject.toLowerCase() === subject.toLowerCase() &&
           p.setName === setName
         );
         officialQuestionCount = paper?.questions.length || 60;
@@ -587,11 +589,11 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
       const url = getApiUrl('/api/learning-journey/create-custom-test');
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+        headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) },
         credentials: 'include',
         body: JSON.stringify({
           userId,
-          testName: officialSetId ? `Official Prediction (${officialSetId})` : testName,
+          testName: officialSetId ? 'Official Prediction (' + officialSetId + ')' : testName,
           subject,
           examContext,
           topicIds: officialSetId ? topics.map(t => t.topicId) : selectedTopicIds,
@@ -624,7 +626,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
           try {
             const { data: { session } } = await supabase.auth.getSession();
             const token = session?.access_token;
-            const progressRes = await fetch(getApiUrl(`/api/learning-journey/generation-progress/${progressId}`), { headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }, credentials: 'include' });
+            const progressRes = await fetch(getApiUrl('/api/learning-journey/generation-progress/' + progressId), { headers: { ...(token ? { 'Authorization': 'Bearer ' + token } : {}) }, credentials: 'include' });
             if (!progressRes.ok) return;
             const progressData = await progressRes.json();
             setProgressMessage(progressData.message || 'Generating questions...');
@@ -658,15 +660,69 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
     const match = allPapers.find(p => {
       const pSetName = p.setName.toUpperCase().trim();
       return pSetName === normalizedSetId && 
+             p.examContext === examContext &&
              p.subject.toLowerCase().includes(subject.toLowerCase().substring(0, 4));
     });
     
     if (match) {
       setSelectedPaperForPrint(match);
-      setTimeout(() => {
-        window.print();
-        setSelectedPaperForPrint(null);
-      }, 1200);
+      
+      // Use html2pdf for high-fidelity multi-page generation, mirroring MockTestDashboard
+      setTimeout(async () => {
+        const paperElement = document.querySelector('.print-area .paper-container');
+        if (!paperElement) return;
+
+        const opt = {
+          margin: 0,
+          filename: `Plus2AI_${match.subject}_${match.examContext || 'NEET'}_2026_SET_${match.setName}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 1.3, // Optimal balance of quality and canvas safety
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            scrollY: 0,
+            scrollX: 0,
+            onclone: (clonedDoc: Document) => {
+              // FORCE visibility and height on ALL parent containers
+              const containers = clonedDoc.querySelectorAll('html, body, #root, .print-area, .paper-container, .questions-grid');
+              containers.forEach(el => {
+                (el as HTMLElement).style.display = 'block';
+                (el as HTMLElement).style.height = 'auto';
+                (el as HTMLElement).style.minHeight = 'auto';
+                (el as HTMLElement).style.maxHeight = 'none';
+                (el as HTMLElement).style.overflow = 'visible';
+                (el as HTMLElement).style.visibility = 'visible';
+              });
+            }
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'] } // Removed 'avoid-all' which can be too aggressive
+        };
+
+        try {
+          // @ts-ignore - html2pdf is loaded via CDN in index.html
+          await html2pdf().set(opt).from(paperElement).toPdf().get('pdf').then((pdf: any) => {
+            const totalPages = pdf.internal.getNumberOfPages();
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            for (let i = 1; i <= totalPages; i++) {
+              pdf.setPage(i);
+              pdf.setFontSize(8.5);
+              pdf.setTextColor(40);
+              const footerLine = 'Reproduction strictly prohibited. © 2026 Plus2AI. | ' + (match.examContext || 'NEET') + ' 2026 Simulation - SET ' + match.setName + ' | Page ' + i + ' of ' + totalPages;
+              pdf.text(footerLine, pageWidth / 2, pageHeight - 8, { align: 'center' });
+              pdf.line(20, pageHeight - 11, pageWidth - 20, pageHeight - 11);
+            }
+          }).save();
+        } catch (err) {
+          console.error('PDF Generation failed:', err);
+        } finally {
+          // Keep it mounted for a bit to ensure user sees completion
+          setTimeout(() => setSelectedPaperForPrint(null), 2000);
+        }
+      }, 45000); // 45s buffer for absolute stability in flagship papers
     }
   };
 
@@ -689,7 +745,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
   }, [testHistory, completed, sortedHistory]);
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] font-inter pb-20 relative overflow-hidden">
+    <div className="min-h-screen bg-[#fafbfc] font-inter pb-20 relative">
       {/* 🚀 ULTIMATE PRINT FIX: Wrap EVERYTHING except the printable area */}
       <div className={selectedPaperForPrint ? "no-print" : ""}>
         <div className="fixed inset-0 pointer-events-none overflow-hidden bg-[#F8FAFC]">
@@ -701,7 +757,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
         <LearningJourneyHeader
           showBack onBack={onBack}
           icon={<Zap size={24} className="text-yellow-400" fill="currentColor" />}
-          title="Mock Test Builder" subtitle={`Create tests for ${subject}`}
+          title="Mock Test Builder" subtitle={'Create tests for ' + subject}
           subject={subject} trajectory={examContext}
           mastery={subjectProgress?.[subject]?.overallMastery || matrixStats.master}
           accuracy={subjectProgress?.[subject]?.overallAccuracy || matrixStats.solve}
@@ -729,7 +785,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as 'builder' | 'history')}
-                className={`relative px-6 py-2.5 rounded-xl md:rounded-2xl flex items-center gap-3 text-xs font-black transition-all uppercase tracking-widest ${isActive ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                className={'relative px-6 py-2.5 rounded-xl md:rounded-2xl flex items-center gap-3 text-xs font-black transition-all uppercase tracking-widest ' + (isActive ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-700')}
               >
                 {tab.icon} {tab.label}
                 {tab.badge ? <span className="ml-1 px-1.5 py-0.5 rounded-md text-[8px] bg-indigo-100 text-indigo-700 font-black">{tab.badge}</span> : null}
@@ -774,7 +830,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                             </div>
                             <div className="flex-1">
                               <div className="text-[13px] font-black text-slate-900 leading-tight">
-                                {test.test_name || test.testName || `${subject} Prediction`}
+                                {test.test_name || test.testName || (subject + ' Prediction')}
                               </div>
                               <div className="text-[9px] font-bold text-slate-500 mt-1">
                                 {test.official_set_id === 'SET-A' ? 'Official Paper Simulation' : 'Pattern-Based Paper Analysis'}
@@ -806,20 +862,15 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                         // Fallback UI if API is still loading or empty
                         (() => {
                           const allPapers = getPredictedPapers();
-                          console.log('[MockTestBuilder] examContext:', examContext, 'subject:', subject);
-                          console.log('[MockTestBuilder] All papers:', allPapers.map(p => ({ id: p.id, context: p.examContext, subject: p.subject, count: p.questions.length })));
-
                           const currentExamPapers = allPapers.filter(p =>
                             p.examContext === examContext &&
                             p.subject === subject
                           );
-                          console.log('[MockTestBuilder] Filtered papers:', currentExamPapers.map(p => ({ id: p.id, setName: p.setName, count: p.questions.length })));
 
                           return ['SET-A', 'SET-B'].map((setId, idx) => {
                             const setName = setId === 'SET-A' ? 'A' : 'B';
                             const paper = currentExamPapers.find(p => p.setName === setName);
                             const questionCount = paper?.questions.length || 60;
-                            console.log(`[MockTestBuilder] ${setId}: paper found=${!!paper}, questionCount=${questionCount}`);
 
                             return (
                               <button
@@ -848,14 +899,14 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                                     {questionCount} Qs
                                   </div>
                               {userRole !== 'student' && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDownloadPaper(setId);
-                                  }}
-                                  className="p-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shadow-sm"
-                                  title="Download PDF"
-                                >
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDownloadPaper(setId);
+                                    }}
+                                    className="p-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shadow-sm"
+                                    title="Download PDF"
+                                  >
                                   <Download size={14} />
                                 </button>
                               )}
@@ -883,10 +934,10 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
                         <button
                           key={mode.id}
                           onClick={() => setStrategyMode(mode.id as StrategyMode)}
-                          className={`w-full p-3.5 rounded-2xl border transition-all group relative text-left ${strategyMode === mode.id ? 'bg-indigo-50/50 border-indigo-500 shadow-sm shadow-indigo-100/50' : 'bg-white border-slate-100 hover:border-slate-200'}`}
+                          className={'w-full p-3.5 rounded-2xl border transition-all group relative text-left ' + (strategyMode === mode.id ? 'bg-indigo-50/50 border-indigo-500 shadow-sm shadow-indigo-100/50' : 'bg-white border-slate-100 hover:border-slate-200')}
                         >
                           <div className="flex items-center gap-3.5">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${strategyMode === mode.id ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'}`}>
+                            <div className={'w-10 h-10 rounded-xl flex items-center justify-center transition-colors ' + (strategyMode === mode.id ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100')}>
                               <mode.icon size={18} />
                             </div>
                             <div>
@@ -1290,6 +1341,7 @@ const MockTestBuilderPage: React.FC<MockTestBuilderPageProps> = ({
             subject={selectedPaperForPrint.subject}
             questions={selectedPaperForPrint.questions}
             setName={selectedPaperForPrint.setName}
+            examContext={selectedPaperForPrint.examContext}
           />
         </div>
       )}

@@ -1,8 +1,8 @@
 # KCET Math 2022 - Iteration Log
 
-**Final Match Rate:** 88.2%
-**Total Iterations:** 1
-**Generated:** 2026-04-29T12:12:40.375Z
+**Final Match Rate:** 71.4%
+**Total Iterations:** 3
+**Generated:** 2026-04-30T20:51:16.988Z
 
 ---
 
@@ -14,53 +14,53 @@ No iteration history recorded.
 
 | Q# | Generated Identity | Actual Identity | Overall Score | Match | Discrepancies |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | ID-NP-002 | ID-NP-002 | 80.1% | ✅ | Different solution approach |
-| 2 | ID-NP-003 | ID-NP-003 | 81.1% | ✅ | Different solution approach |
-| 3 | ID-NP-006 | ID-NP-006 | 81.2% | ✅ |  |
-| 4 | ID-NP-007 | ID-NP-007 | 82.3% | ✅ |  |
-| 5 | ID-NP-005 | ID-NP-005 | 80.3% | ✅ |  |
-| 6 | ID-NP-013 | ID-NP-013 | 81.6% | ✅ |  |
-| 7 | ID-NP-006 | ID-NP-006 | 80.1% | ✅ |  |
-| 8 | ID-NP-016 | ID-NP-016 | 74.2% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate; Different solution approach |
-| 9 | ID-NP-006 | ID-NP-006 | 73.8% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
-| 10 | ID-NP-015 | ID-NP-015 | 74.7% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate |
-| 11 | ID-NP-003 | ID-NP-003 | 80.4% | ✅ |  |
-| 12 | ID-NP-017 | ID-NP-017 | 73.7% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate; Different solution approach |
-| 13 | ID-NP-003 | ID-NP-003 | 79.5% | ✅ | Different solution approach |
-| 14 | ID-NP-008 | ID-NP-008 | 72.1% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
-| 15 | ID-NP-010 | ID-NP-010 | 79.9% | ✅ |  |
-| 16 | ID-NP-004 | ID-NP-004 | 80.6% | ✅ | Different solution approach |
-| 17 | ID-NP-002 | ID-NP-002 | 72.5% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate; Different solution approach |
-| 18 | ID-NP-002 | ID-NP-002 | 73.0% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate; Different solution approach |
-| 19 | ID-NP-012 | ID-NP-012 | 81.0% | ✅ |  |
-| 20 | ID-NP-008 | ID-NP-008 | 73.2% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy |
-| 21 | ID-NP-019 | ID-NP-015 | 33.1% | ❌ | Cluster match (70%): Generated=ID-NP-019, Actual=ID-NP-015; Topic mismatch: Generated=THERMODYNAMICS, Actual=ELECTROMAGNETIC WAVES |
-| 22 | ID-NP-009 | ID-NP-009 | 79.1% | ✅ |  |
-| 23 | ID-NP-014 | ID-NP-014 | 74.3% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate |
-| 24 | ID-NP-011 | ID-NP-011 | 80.2% | ✅ | Different solution approach |
-| 25 | ID-NP-010 | ID-NP-010 | 81.9% | ✅ |  |
-| 26 | ID-NP-005 | ID-NP-005 | 81.1% | ✅ | Different solution approach |
-| 27 | ID-NP-017 | ID-NP-007 | 39.8% | ❌ | Cluster match (70%): Generated=ID-NP-017, Actual=ID-NP-007; Topic mismatch: Generated=LAWS OF MOTION, Actual=ATOMS AND NUCLEI |
-| 28 | ID-NP-009 | ID-NP-009 | 72.5% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy |
-| 29 | ID-NP-004 | ID-NP-004 | 80.3% | ✅ |  |
-| 30 | ID-NP-003 | ID-NP-003 | 71.1% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate; Different solution approach |
-| 31 | ID-NP-018 | ID-NP-018 | 64.2% | ❌ | Difficulty mismatch: Generated=Hard, Actual=Easy; Different solution approach |
-| 32 | ID-NP-014 | ID-NP-014 | 64.6% | ❌ | Difficulty mismatch: Generated=Hard, Actual=Easy; Different solution approach |
-| 33 | ID-NP-001 | ID-NP-001 | 80.3% | ✅ |  |
-| 34 | ID-NP-003 | ID-NP-011 | 47.8% | ❌ | Cluster match (70%): Generated=ID-NP-003, Actual=ID-NP-011; Topic mismatch: Generated=CURRENT ELECTRICITY, Actual=ROTATIONAL MOTION |
-| 35 | ID-NP-012 | ID-NP-012 | 71.9% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy |
-| 36 | ID-NP-012 | ID-NP-005 | 47.8% | ❌ | Cluster match (70%): Generated=ID-NP-012, Actual=ID-NP-005; Topic mismatch: Generated=OSCILLATIONS AND WAVES, Actual=ELECTROMAGNETIC INDUCTION AND ALTERNATING CURRENTS |
-| 37 | ID-NP-005 | ID-NP-005 | 74.0% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
-| 38 | ID-NP-005 | ID-NP-004 | 21.4% | ❌ | Identity mismatch: Generated=ID-NP-005, Actual=ID-NP-004; Topic mismatch: Generated=ELECTROMAGNETIC INDUCTION AND ALTERNATING CURRENTS, Actual=MAGNETIC EFFECTS OF CURRENT AND MAGNETISM |
-| 39 | ID-NP-006 | ID-NP-004 | 46.4% | ❌ | Cluster match (70%): Generated=ID-NP-006, Actual=ID-NP-004; Topic mismatch: Generated=ELECTRONIC DEVICES, Actual=MAGNETIC EFFECTS OF CURRENT AND MAGNETISM |
-| 40 | ID-NP-011 | ID-NP-002 | 48.8% | ❌ | Cluster match (70%): Generated=ID-NP-011, Actual=ID-NP-002; Topic mismatch: Generated=ROTATIONAL MOTION, Actual=OPTICS |
-| 41 | ID-NP-011 | ID-NP-010 | 40.5% | ❌ | Cluster match (70%): Generated=ID-NP-011, Actual=ID-NP-010; Topic mismatch: Generated=ROTATIONAL MOTION, Actual=KINEMATICS |
-| 42 | ID-NP-001 | ID-NP-001 | 81.5% | ✅ |  |
-| 43 | ID-NP-002 | ID-NP-001 | 19.4% | ❌ | Identity mismatch: Generated=ID-NP-002, Actual=ID-NP-001; Topic mismatch: Generated=OPTICS, Actual=ELECTROSTATICS |
-| 44 | ID-NP-007 | ID-NP-007 | 71.4% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
-| 45 | ID-NP-011 | ID-NP-013 | 20.9% | ❌ | Identity mismatch: Generated=ID-NP-011, Actual=ID-NP-013; Topic mismatch: Generated=ROTATIONAL MOTION, Actual=GRAVITATION |
-| 46 | ID-NP-003 | ID-NP-008 | 18.3% | ❌ | Identity mismatch: Generated=ID-NP-003, Actual=ID-NP-008; Topic mismatch: Generated=CURRENT ELECTRICITY, Actual=PHYSICS AND MEASUREMENT |
-| 47 | ID-NP-001 | ID-NP-001 | 77.3% | ✅ | Different solution approach |
-| 48 | ID-NP-001 | ID-NP-001 | 72.0% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate |
-| 49 | ID-NP-003 | ID-NP-016 | 12.3% | ❌ | Identity mismatch: Generated=ID-NP-003, Actual=ID-NP-016; Topic mismatch: Generated=CURRENT ELECTRICITY, Actual=WORK, ENERGY, AND POWER |
-| 50 | ID-NP-002 | ID-NP-001 | 12.1% | ❌ | Identity mismatch: Generated=ID-NP-002, Actual=ID-NP-001; Topic mismatch: Generated=OPTICS, Actual=ELECTROSTATICS |
+| 1 | ID-NC-001 | ID-NC-001 | 79.5% | ✅ | Different solution approach |
+| 2 | ID-NC-005 | ID-NC-005 | 74.8% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
+| 3 | ID-NC-007 | ID-NC-007 | 50.7% | ❌ | Topic mismatch: Generated=d and f Block Elements, Actual=Surface Chemistry; Adjacent difficulty: Generated=Moderate, Actual=Easy |
+| 4 | ID-NC-012 | ID-NC-012 | 58.9% | ❌ | Topic mismatch: Generated=p-Block Elements, Actual=The p-Block Elements (Group 17); Different solution approach |
+| 5 | ID-NC-009 | ID-NC-009 | 71.4% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate; Different solution approach |
+| 6 | ID-NC-006 | ID-NC-006 | 79.1% | ✅ |  |
+| 7 | ID-NC-001 | ID-NC-001 | 71.4% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
+| 8 | ID-NC-002 | ID-NC-002 | 78.5% | ✅ | Different solution approach |
+| 9 | ID-NC-005 | ID-NC-005 | 73.2% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
+| 10 | ID-NC-011 | ID-NC-011 | 71.9% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate; Different solution approach |
+| 11 | ID-NC-002 | ID-NC-002 | 77.9% | ✅ | Different solution approach |
+| 12 | ID-NC-004 | ID-NC-004 | 71.3% | ✅ | Adjacent difficulty: Generated=Hard, Actual=Moderate; Different solution approach |
+| 13 | ID-NC-001 | ID-NC-001 | 59.6% | ❌ | Topic mismatch: Generated=Solutions, Actual=Solutions and Gaseous State; Different solution approach |
+| 14 | ID-NC-014 | ID-NC-014 | 79.9% | ✅ | Different solution approach |
+| 15 | ID-NC-002 | ID-NC-002 | 70.6% | ✅ | Adjacent difficulty: Generated=Easy, Actual=Moderate; Different solution approach |
+| 16 | ID-NC-002 | ID-NC-002 | 58.7% | ❌ | Topic mismatch: Generated=Aldehydes, Ketones and Carboxylic Acids, Actual=The Solid State; Different solution approach |
+| 17 | ID-NC-002 | ID-NC-020 | 19.4% | ❌ | Identity mismatch: Generated=ID-NC-002, Actual=ID-NC-020; Topic mismatch: Generated=Aldehydes, Ketones and Carboxylic Acids, Actual=The d-and f-Block Elements |
+| 18 | ID-NC-005 | ID-NC-005 | 58.7% | ❌ | Topic mismatch: Generated=Chemical Kinetics, Actual=s-Block Elements; Different solution approach |
+| 19 | ID-NC-015 | ID-NC-015 | 51.4% | ❌ | Topic mismatch: Generated=Atomic Structure, Actual=Some Basic Concepts of Chemistry; Adjacent difficulty: Generated=Moderate, Actual=Easy |
+| 20 | ID-NC-003 | ID-NC-003 | 59.6% | ❌ | Topic mismatch: Generated=Redox Reactions and Electrochemistry, Actual=Redox Reactions |
+| 21 | ID-NC-010 | ID-NC-010 | 60.3% | ❌ | Topic mismatch: Generated=Chemical Thermodynamics, Actual=Thermodynamics; Different solution approach |
+| 22 | ID-NC-003 | ID-NC-003 | 58.2% | ❌ | Topic mismatch: Generated=Redox Reactions and Electrochemistry, Actual=Electrochemistry; Different solution approach |
+| 23 | ID-NC-018 | ID-NC-018 | 58.7% | ❌ | Topic mismatch: Generated=Some Basic Principles of Organic Chemistry, Actual=The d-and f-Block Elements |
+| 24 | ID-NC-018 | ID-NC-010 | 19.6% | ❌ | Identity mismatch: Generated=ID-NC-018, Actual=ID-NC-010; Topic mismatch: Generated=Some Basic Principles of Organic Chemistry, Actual=Thermodynamics |
+| 25 | ID-NC-003 | ID-NC-003 | 51.7% | ❌ | Topic mismatch: Generated=Redox Reactions and Electrochemistry, Actual=Electrochemistry; Adjacent difficulty: Generated=Easy, Actual=Moderate |
+| 26 | ID-NC-011 | ID-NC-011 | 79.4% | ✅ | Different solution approach |
+| 27 | ID-NC-008 | ID-NC-008 | 79.4% | ✅ | Different solution approach |
+| 28 | ID-NC-005 | ID-NC-011 | 18.7% | ❌ | Identity mismatch: Generated=ID-NC-005, Actual=ID-NC-011; Topic mismatch: Generated=Chemical Kinetics, Actual=Alcohols, Phenols and Ethers |
+| 29 | ID-NC-004 | ID-NC-004 | 63.6% | ❌ | Difficulty mismatch: Generated=Hard, Actual=Easy; Different solution approach |
+| 30 | ID-NC-011 | ID-NC-011 | 50.8% | ❌ | Topic mismatch: Generated=Alcohols, Phenols and Ethers, Actual=Polymers; Adjacent difficulty: Generated=Moderate, Actual=Easy |
+| 31 | ID-NC-016 | ID-NC-016 | 50.2% | ❌ | Topic mismatch: Generated=Classification of Elements and Periodicity in Properties, Actual=Environmental Chemistry; Adjacent difficulty: Generated=Hard, Actual=Moderate |
+| 32 | ID-NC-002 | ID-NC-015 | 20.2% | ❌ | Identity mismatch: Generated=ID-NC-002, Actual=ID-NC-015; Topic mismatch: Generated=Aldehydes, Ketones and Carboxylic Acids, Actual=Nuclei |
+| 33 | ID-NC-008 | ID-NC-008 | 71.1% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
+| 34 | ID-NC-014 | ID-NC-001 | 20.2% | ❌ | Identity mismatch: Generated=ID-NC-014, Actual=ID-NC-001; Topic mismatch: Generated=Equilibrium, Actual=Electromagnetic Waves |
+| 35 | ID-NC-006 | ID-NC-006 | 69.9% | ❌ | Adjacent difficulty: Generated=Moderate, Actual=Easy; Different solution approach |
+| 36 | ID-NC-018 | ID-NC-009 | 19.5% | ❌ | Identity mismatch: Generated=ID-NC-018, Actual=ID-NC-009; Topic mismatch: Generated=Some Basic Principles of Organic Chemistry, Actual=Amines |
+| 37 | ID-NC-001 | ID-NC-020 | 18.9% | ❌ | Identity mismatch: Generated=ID-NC-001, Actual=ID-NC-020; Topic mismatch: Generated=Solutions, Actual=The Solid State |
+| 38 | ID-NC-006 | ID-NC-006 | 51.1% | ❌ | Topic mismatch: Generated=Coordination Compounds, Actual=Chemistry in Everyday Life; Adjacent difficulty: Generated=Moderate, Actual=Easy |
+| 39 | ID-NC-010 | ID-NC-012 | 18.5% | ❌ | Identity mismatch: Generated=ID-NC-010, Actual=ID-NC-012; Topic mismatch: Generated=Chemical Thermodynamics, Actual=The p-Block Elements |
+| 40 | ID-NC-013 | ID-NC-013 | 58.2% | ❌ | Topic mismatch: Generated=Some Basic Concepts in Chemistry, Actual=The d-and f-Block Elements; Different solution approach |
+| 41 | ID-NC-003 | ID-NC-009 | 18.9% | ❌ | Identity mismatch: Generated=ID-NC-003, Actual=ID-NC-009; Topic mismatch: Generated=Redox Reactions and Electrochemistry, Actual=General Principles and Processes of Isolation of Elements |
+| 42 | ID-NC-012 | ID-NC-012 | 57.9% | ❌ | Topic mismatch: Generated=p-Block Elements, Actual=The p-Block Elements (Group 18); Different solution approach |
+| 43 | ID-NC-008 | ID-NC-008 | 71.1% | ✅ | Adjacent difficulty: Generated=Moderate, Actual=Easy |
+| 44 | ID-NC-006 | ID-NC-019 | 11.8% | ❌ | Identity mismatch: Generated=ID-NC-006, Actual=ID-NC-019; Topic mismatch: Generated=Coordination Compounds, Actual=Hydrocarbons and IUPAC Nomenclature |
+| 45 | ID-NC-003 | ID-NC-004 | 18.9% | ❌ | Identity mismatch: Generated=ID-NC-003, Actual=ID-NC-004; Topic mismatch: Generated=Redox Reactions and Electrochemistry, Actual=Haloalkanes and Haloarenes |
+| 46 | ID-NC-006 | ID-NC-008 | 12.7% | ❌ | Identity mismatch: Generated=ID-NC-006, Actual=ID-NC-008; Topic mismatch: Generated=Coordination Compounds, Actual=s-Block Elements (Group 2: Alkaline Earth Metals) |
+| 47 | ID-NC-018 | ID-NC-013 | 18.9% | ❌ | Identity mismatch: Generated=ID-NC-018, Actual=ID-NC-013; Topic mismatch: Generated=Some Basic Principles of Organic Chemistry, Actual=States of Matter: Gaseous State |
+| 48 | ID-NC-017 | ID-NC-017 | 62.8% | ❌ | Difficulty mismatch: Generated=Hard, Actual=Easy; Different solution approach |
+| 49 | ID-NC-013 | ID-NC-019 | 10.4% | ❌ | Identity mismatch: Generated=ID-NC-013, Actual=ID-NC-019; Topic mismatch: Generated=Some Basic Concepts in Chemistry, Actual=Hydrocarbons - Conformational Isomerism |
+| 50 | ID-NC-011 | ID-NC-016 | 2.9% | ❌ | Identity mismatch: Generated=ID-NC-011, Actual=ID-NC-016; Topic mismatch: Generated=Alcohols, Phenols and Ethers, Actual=General Principles and Processes of Isolation of Elements |
