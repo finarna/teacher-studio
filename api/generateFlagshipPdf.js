@@ -20,7 +20,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
 
 // ── Gemini client ─────────────────────────────────────────────────────────────
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
 // ── Paper Registry ────────────────────────────────────────────────────────────
 export const PAPER_REGISTRY = {
@@ -53,39 +53,7 @@ function buildGeminiPrompt(paperData, subject, set, color) {
 
   return `You are an expert NEET exam paper formatter and senior front-end designer. Your goal is to generate a COMPLETE, PRODUCTION-READY HTML document that mirrors a premium, institutional NTA examination paper.
 
-## CORE DIRECTIVES (CRITICAL)
-
-1. **LATEX TRANSFORMATION**: 
-   - The provided JSON contains raw LaTeX like \\begin{itemize}, \\item, \\begin{tabular}. 
-   - **DO NOT** output these raw environments in the HTML. KaTeX will not render them.
-   - **CONVERT** them to semantic HTML: 
-     - \\begin{itemize} -> <ul>
-     - \\item -> <li>
-     - \\begin{tabular} -> <table class="math-table">
-     - \\begin{enumerate} -> <ol>
-   - Keep ONLY the actual mathematical symbols, equations, and formulas inside $...$ (inline) or $$...$$ (display).
-   - Ensure all chemical formulas (e.g., H2O, SnCl2) and scientific symbols (e.g., \Delta, \alpha) are wrapped in KaTeX math mode ($...$).
-
-2. **PREMIUM TYPOGRAPHY**:
-   - Use Google Fonts: 'Inter' (sans-serif) for body text and 'Public Sans' (sans-serif) for headers.
-   - Import these fonts via Google Fonts API in the <head>.
-   - Body font-size: 9.5pt. Line-height: 1.55.
-   - Question text should be sharp and high-contrast (#111).
-   - Math font-size should be 1.05x the body size for clarity.
-
-3. **VISUAL DIFFERENTIATION**:
-   - **Question Numbers**: Bold, using the accent color (${color}).
-   - **Options**: Use a flexible layout.
-     - Short options: 2-column grid.
-     - Long options (or if math symbols are complex): **SINGLE COLUMN (1x4)** to prevent overlap.
-     - Labels (A), (B), (C), (D) must be bold and in the accent color, with a fixed width to ensure alignment.
-   - **Match-the-Column**: Format as a clean 2-column table with borders. Column I on left, Column II on right.
-
-4. **PAGE BREAKS**:
-   - Enforce \`break-inside: avoid\` on all question blocks. 
-   - Ensure no question is split across pages.
-
-## PAPER DATA
+## CONTEXT
 - Subject: ${subject} | Set: ${set} | Questions: ${questions.length} | Total Marks: ${totalMarks}
 - Serial No: ${serialNo}
 - Accent Color: ${color}
@@ -123,10 +91,10 @@ ${JSON.stringify(qData, null, 2)}
 
 1. **HEADER**:
    - Centered **Plus2AI** logo (Plus2 dark green, AI orange, large bold).
-    - Top-right: **TWO Dynamic QR Codes** (50px each, side-by-side).
-      - QR 1: https://learn.dataziv.com with label "Learning Portal" below it.
-      - QR 2: https://plus2ai.com with label "Plus2AI Official" below it.
-      - Use https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=[URL] for the images.
+   - Top-right: **TWO Dynamic QR Codes** (50px each, side-by-side).
+     - QR 1: https://learn.dataziv.com with label "Learning Portal" below it.
+     - QR 2: https://plus2ai.com with label "Plus2AI Official" below it.
+     - Use https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=[URL] for the images.
    - Title: "NATIONAL ELIGIBILITY CUM ENTRANCE TEST (NEET) 2026" (Centered, 11pt, bold).
    - Large Subtitle: "${subject.toUpperCase()} <span style='color:#ff6b2b'>SIMULATION</span>" (30pt, heavy bold).
 
@@ -163,26 +131,21 @@ ${JSON.stringify(qData, null, 2)}
 - These are handled automatically by the PDF engine. 
 
 ### Output format
-Return ONLY the raw HTML. No markdown code fences. Start with <!DOCTYPE html>.\`;
+Return ONLY the raw HTML. No markdown code fences. Start with <!DOCTYPE html>.`;
 }
 
 // ── Call Gemini ───────────────────────────────────────────────────────────────
 async function generateHtmlWithGemini(paperData, subject, set, color) {
-  const model = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+  const modelName = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
   const prompt = buildGeminiPrompt(paperData, subject, set, color);
 
-  console.log(`[PDF Gen] Calling Gemini (${model}) with ${prompt.length} char prompt...`);
+  console.log(`[PDF Gen] Calling Gemini (${modelName}) with ${prompt.length} char prompt...`);
 
-  const response = await ai.models.generateContent({
-    model,
-    contents: prompt,
-    config: {
-      maxOutputTokens: 65536,
-      temperature: 0.15,
-    }
-  });
+  const model = genAI.getGenerativeModel({ model: modelName });
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  let html = response.text();
 
-  let html = response.text;
   html = html.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
 
   if (!html.toLowerCase().includes('<!doctype html')) {
