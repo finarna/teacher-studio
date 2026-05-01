@@ -98,25 +98,25 @@ ${JSON.stringify(qData, null, 2)}
     });
   </script>\`
 - Custom CSS:
-  - \`body\`: font-family 'Inter', sans-serif; line-height: 1.45; color: #111;
-  - \`.watermark\`: position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr); opacity: 0.02; padding: 20px; gap: 40px;
+  - \`body\`: font-family 'Inter', sans-serif; line-height: 1.48; color: #111;
+  - \`.watermark\`: position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr); opacity: 0.018; padding: 20px; gap: 40px;
   - \`.watermark-item\`: display: flex; align-items: center; justify-content: center; font-size: 35pt; font-weight: 900; color: #000; transform: rotate(-35deg); white-space: nowrap;
-  - \`.question-block\`: margin-bottom: 16px; padding: 10px 15px; border: 0.5pt solid #cbd5e1; border-radius: 8px; break-inside: avoid; background: #fff;
-  - \`.topic-pill\`: font-size: 7.2pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px; font-weight: 600; text-transform: uppercase;
-  - \`.question-num\`: font-weight: 800; color: ${color}; font-size: 10pt; margin-right: 5px;
-  - \`.question-text\`: font-weight: 400; font-size: 9.2pt; margin-bottom: 8px; color: #0f172a;
-  - \`.option-grid\`: display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 20px; margin-top: 8px; padding-left: 15px;
-  - \`.option-row\`: display: flex; align-items: flex-start; gap: 8px;
-  - \`.option-label\`: font-weight: 700; color: ${color}; min-width: 24px; flex-shrink: 0;
-  - \`.option-text\`: font-size: 8.8pt; color: #334155;
-  - \`.math-table\`: border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 8.8pt;
-  - \`.math-table td\`: border: 0.5pt solid #e2e8f0; padding: 8px; vertical-align: top;
+  - \`.question-block\`: margin-bottom: 20px; padding: 12px 18px; border: 0.5pt solid #cbd5e1; border-radius: 8px; break-inside: avoid; background: #fff;
+  - \`.topic-pill\`: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px; font-weight: 600; text-transform: uppercase;
+  - \`.question-num\`: font-weight: 800; color: ${color}; font-size: 10.5pt; margin-right: 6px;
+  - \`.question-text\`: font-weight: 400; font-size: 9.5pt; margin-bottom: 12px; color: #0f172a;
+  - \`.option-grid\`: display: grid; grid-template-columns: 1fr 1fr; gap: 6px 35px; margin-top: 10px; padding-left: 10px;
+  - \`.option-row\`: display: flex; align-items: flex-start; gap: 8px; break-inside: avoid;
+  - \`.option-label\`: font-weight: 700; color: ${color}; min-width: 28px; flex-shrink: 0;
+  - \`.option-text\`: font-size: 9pt; color: #334155;
+  - \`.math-table\`: border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 9pt; break-inside: avoid;
+  - \`.math-table td\`: border: 0.5pt solid #e2e8f0; padding: 10px; vertical-align: top;
   - \`.math-table tr:nth-child(even)\` { background: #f8fafc; }
   - \`.katex\`: font-size: 1.05em !important;
   - \`.katex-display\`: margin: 0.8em 0 !important;
-  - \`.diagram-container\`: margin: 10px auto; text-align: center; max-width: 100%; border: 0.5pt dashed #e2e8f0; padding: 8px; border-radius: 6px;
-  - \`.diagram-description\`: font-style: italic; font-size: 8.2pt; color: #64748b; background: #f8fafc; border-left: 3px solid ${color}; padding: 8px 12px; margin: 8px 0; border-radius: 0 4px 4px 0;
-  - \`@page { size: A4; margin: 10mm 10mm 18mm 10mm; }\`
+  - \`.diagram-container\`: margin: 12px auto; text-align: center; max-width: 100%; border: 0.5pt dashed #e2e8f0; padding: 10px; border-radius: 6px; break-inside: avoid;
+  - \`.diagram-description\`: font-style: italic; font-size: 8.5pt; color: #64748b; background: #f8fafc; border-left: 3px solid ${color}; padding: 8px 15px; margin: 8px 0; border-radius: 0 4px 4px 0;
+  - \`@page { size: A4; margin: 12mm 12mm 18mm 12mm; }\`
 
 ### FIRST PAGE LAYOUT (MANDATORY BLOCKS)
 
