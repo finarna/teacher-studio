@@ -102,6 +102,7 @@ ${JSON.stringify(qData, null, 2)}
 - Include KaTeX CSS/JS and Auto-render extension.
 - Custom CSS:
   - \`body\`: font-family 'Inter', sans-serif; line-height: 1.6; color: #111;
+  - \`.watermark\`: position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; display: flex; flex-wrap: wrap; align-content: flex-start; opacity: 0.03; font-size: 50pt; font-weight: 900; color: #000; transform: rotate(-45deg);
   - \`.question-block\`: margin-bottom: 28px; padding: 18px; border: 0.5pt solid #e2e8f0; border-radius: 8px; break-inside: avoid; background: #fff;
   - \`.topic-pill\`: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px;
   - \`.question-num\`: font-weight: 800; color: ${color}; font-size: 10.5pt;
@@ -114,8 +115,9 @@ ${JSON.stringify(qData, null, 2)}
   - \`.math-table td\`: border: 0.5pt solid #cbd5e1; padding: 8px; vertical-align: top;
   - \`.katex\`: font-size: 1.08em !important; margin: 0 2px;
   - \`.katex-display\`: margin: 1em 0 !important;
+  - \`.diagram-container\`: margin: 15px auto; text-align: center; max-width: 100%;
+  - \`.diagram-description\`: font-style: italic; font-size: 8.5pt; color: #475569; background: #f8fafc; border-left: 3px solid ${color}; padding: 10px 15px; margin: 10px 0; border-radius: 0 4px 4px 0;
   - \`@page { size: A4; margin: 15mm 15mm 22mm 15mm; }\`
-  - \`.footer-content { position: fixed; bottom: -10mm; left: 0; right: 0; text-align: center; font-size: 8pt; color: #666; border-top: 0.5pt solid #ccc; padding-top: 5px; font-family: 'Inter', sans-serif; }\`
 
 ### FIRST PAGE LAYOUT (MANDATORY BLOCKS)
 
@@ -141,9 +143,14 @@ ${JSON.stringify(qData, null, 2)}
    - Bordered box titled "IMPORTANT INSTRUCTIONS TO CANDIDATES".
    - 6 items: (1) 45 questions check, (2) OMR Version/Serial entry, (3) 4 marks each / -1 wrong, (4) OMR pen use, (5) No gadgets, (6) Plus2AI DNA Model REI v17 note.
 
+### WATERMARK & DIAGRAMS
+- **WATERMARK**: Repeat the text "Plus2AI DNA" diagonally across every page (opacity 0.03).
+- **DIAGRAMS**: If a question includes a "Diagram Description" (e.g., LCR circuit graph, Photoelectric setup), **GENERATE an inline SVG** that visually represents it. 
+  - Use clean lines, labeled axes (e.g., Impedance Z vs Frequency ω), and clear markers for key points (e.g., resonant frequency).
+  - Place the SVG inside a \`.diagram-container\` and follow it with the formatted \`.diagram-description\`.
+
 ### FOOTER RULE
-- Every page (including first) MUST have this footer: 
-- "Reproduction strictly prohibited. © 2026 Plus2AI. | NEET 2026 Simulation - SET ${set} | Page X of Y" (where X is page number).
+- Use the Puppeteer template for "Page <span class='pageNumber'></span> of <span class='totalPages'></span>" numbering (no manual counter needed in HTML).
 
 ### Output format
 Return ONLY the raw HTML. No markdown code fences. Start with <!DOCTYPE html>.`;
@@ -175,7 +182,7 @@ async function generateHtmlWithGemini(paperData, subject, set, color) {
 }
 
 // ── Puppeteer PDF render ──────────────────────────────────────────────────────
-async function renderPdf(html) {
+async function renderPdf(html, subject, set) {
   const browser = await puppeteer.launch({
     headless: 'new',
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--font-render-hinting=none']
@@ -183,13 +190,32 @@ async function renderPdf(html) {
 
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60000 });
-    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 2500)));
+    // Set a larger viewport to ensure charts/SVG render well
+    await page.setViewport({ width: 1200, height: 1600 });
+    
+    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 90000 });
+    
+    // Give KaTeX and any SVGs time to settle
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 3000)));
 
     const pdf = await page.pdf({
       format: 'A4',
       printBackground: true,
       preferCSSPageSize: true,
+      displayHeaderFooter: true,
+      headerTemplate: '<div></div>', // Empty header
+      footerTemplate: `
+        <div style="width: 100%; font-size: 8pt; color: #666; border-top: 0.5pt solid #eee; padding: 5px 40px; font-family: 'Inter', sans-serif; display: flex; justify-content: space-between;">
+          <span>Reproduction strictly prohibited. © 2026 Plus2AI. | NEET 2026 Simulation - SET ${set}</span>
+          <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+        </div>
+      `,
+      margin: {
+        top: '15mm',
+        bottom: '25mm', // Extra room for the footer
+        left: '15mm',
+        right: '15mm'
+      }
     });
     return pdf;
   } finally {
@@ -218,7 +244,7 @@ export async function handleGenerateFlagshipPdf(req, res) {
     console.log(`[PDF Gen] ▶ Starting for ${paperId}...`);
     const paperData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     const html = await generateHtmlWithGemini(paperData, subject, set, color);
-    const pdfBuffer = await renderPdf(html);
+    const pdfBuffer = await renderPdf(html, subject, set);
     const filename = `Plus2AI_NEET_2026_${subject}_SET_${set}_Prediction.pdf`;
 
     res.setHeader('Content-Type', 'application/pdf');
