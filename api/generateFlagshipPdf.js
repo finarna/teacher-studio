@@ -53,6 +53,23 @@ function buildGeminiPrompt(paperData, subject, set, color) {
 
   return `You are an expert NEET exam paper formatter and senior front-end designer. Your goal is to generate a COMPLETE, PRODUCTION-READY HTML document that mirrors a premium, institutional NTA examination paper.
 
+## CORE DIRECTIVES (CRITICAL)
+
+1. **LATEX TRANSFORMATION**: 
+   - The provided JSON contains raw LaTeX like \\begin{itemize}, \\item, \\begin{tabular}. 
+   - **DO NOT** output these raw environments in the HTML. KaTeX will not render them.
+   - **CONVERT** them to semantic HTML: 
+     - \\begin{itemize} -> <ul>
+     - \\item -> <li>
+     - \\begin{tabular} -> <table class="math-table">
+     - \\begin{enumerate} -> <ol>
+   - Keep ONLY the actual mathematical symbols, equations, and formulas inside $...$ (inline) or $$...$$ (display).
+   - Ensure all chemical formulas and scientific symbols are wrapped in KaTeX math mode ($...$).
+
+2. **DATA INTEGRITY**:
+   - Replicate the wording of question text, option text, and diagram descriptions **EXACTLY as they appear in the JSON**. 
+   - DO NOT "improve" the grammar or rephrase the statements.
+
 ## CONTEXT
 - Subject: ${subject} | Set: ${set} | Questions: ${questions.length} | Total Marks: ${totalMarks}
 - Serial No: ${serialNo}
@@ -132,12 +149,6 @@ ${JSON.stringify(qData, null, 2)}
 - **DIAGRAMS**: If a question includes a "Diagram Description", **GENERATE a supplementary inline SVG**.
   - Use clean lines, labeled axes, and clear markers.
   - Place the SVG inside a \`.diagram-container\`.
-
-### DATA INTEGRITY & VERBATIM REPRODUCTION (CRITICAL)
-- **STRICT ADHERENCE**: You must replicate the question text, option text, and diagram descriptions **EXACTLY as they appear in the JSON**.
-- **DO NOT** rephrase, summarize, "improve", or modify any content. 
-- **DO NOT** omit any part of the text.
-- You **MUST include the verbatim "Diagram Description" text** below any generated SVG.
 
 ### IMPORTANT: NO CONTENT FOOTERS
 - **DO NOT** include any footer, page numbers, or bottom lines in the HTML body. 
