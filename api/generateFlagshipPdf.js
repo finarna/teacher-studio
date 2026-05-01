@@ -99,8 +99,6 @@ ${JSON.stringify(qData, null, 2)}
   </script>\`
 - Custom CSS:
   - \`body\`: font-family 'Inter', sans-serif; line-height: 1.48; color: #111;
-  - \`.watermark\`: position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr); opacity: 0.018; padding: 20px; gap: 40px;
-  - \`.watermark-item\`: display: flex; align-items: center; justify-content: center; font-size: 35pt; font-weight: 900; color: #000; transform: rotate(-35deg); white-space: nowrap;
   - \`.question-block\`: margin-bottom: 20px; padding: 12px 18px; border: 0.5pt solid #cbd5e1; border-radius: 8px; break-inside: avoid; background: #fff;
   - \`.topic-pill\`: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px; font-weight: 600; text-transform: uppercase;
   - \`.question-num\`: font-weight: 800; color: ${color}; font-size: 10.5pt; margin-right: 6px;
@@ -145,11 +143,20 @@ ${JSON.stringify(qData, null, 2)}
    - Bordered box titled "IMPORTANT INSTRUCTIONS TO CANDIDATES".
    - 6 items: (1) 45 questions check, (2) OMR Version/Serial entry, (3) 4 marks each / -1 wrong, (4) OMR pen use, (5) No gadgets, (6) Plus2AI DNA Model REI v17 note.
 
-### WATERMARK & DIAGRAMS
-- **WATERMARK**: Include a \`<div class="watermark">\` at the very start of the body. **REPEAT** the text "Plus2AI DNA" inside 15 separate \`<div class="watermark-item">Plus2AI DNA</div>\` elements to fill the grid.
+- **WATERMARK**: Include the following CSS to ensure the watermark repeats on EVERY page:
+  \`body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 9999;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250' transform='rotate(-35)'><text x='0' y='125' fill='black' font-family='sans-serif' font-weight='900' font-size='24'>Plus2AI DNA</text></svg>");
+    background-repeat: repeat;
+    opacity: 0.018;
+  }\`
 - **DIAGRAMS**: If a question includes a "Diagram Description", **GENERATE a supplementary inline SVG**.
   - Use clean lines, labeled axes, and clear markers.
-  - Place the SVG inside a \`.diagram-container\`.
+  - Place the SVG inside a .diagram-container.
 
 ### IMPORTANT: NO CONTENT FOOTERS
 - **DO NOT** include any footer, page numbers, or bottom lines in the HTML body. 
