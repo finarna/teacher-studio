@@ -122,10 +122,10 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
 
       // Match-the-Following (Column I / Column II) Detection
       // Robust detection for "Column I", "Column I:", "[Column I]", etc.
-      if (trimmedLine.match(/Column\s+I/i) && i + 1 < lines.length) {
+      if (trimmedLine.match(/^Column\s+I/i) && i + 1 < lines.length) {
         // Look ahead for Column II
         let column2Index = -1;
-        for (let k = i + 1; k < Math.min(i + 15, lines.length); k++) {
+        for (let k = i; k < Math.min(i + 15, lines.length); k++) {
           if (lines[k].match(/Column\s+II/i)) {
             column2Index = k;
             break;
@@ -133,15 +133,42 @@ const RichMarkdownRenderer: React.FC<RichMarkdownRendererProps> = ({ text, class
         }
 
         if (column2Index !== -1) {
-          // Extract items for Column I and Column II
-          const col1Items: string[] = lines.slice(i + 1, column2Index).filter(l => l.trim());
+          // Extract items for Column I
+          let col1Items: string[] = [];
           
+          // Check if items are on the SAME line as "Column I:"
+          const col1HeaderLine = lines[i];
+          if (col1HeaderLine.includes(':')) {
+            const afterColon = col1HeaderLine.split(':')[1].trim();
+            if (afterColon) {
+              // Split by (A), (B), (C) or commas
+              col1Items = afterColon.split(/,\s*(?=\()|,\s+/).filter(l => l.trim());
+            }
+          }
+          
+          // Add items from subsequent lines until Column II header
+          if (column2Index > i + 1) {
+            col1Items = [...col1Items, ...lines.slice(i + 1, column2Index).filter(l => l.trim())];
+          }
+          
+          // Extract items for Column II
+          let col2Items: string[] = [];
+          const col2HeaderLine = lines[column2Index];
+          if (col2HeaderLine.includes(':')) {
+            const afterColon = col2HeaderLine.split(':')[1].trim();
+            if (afterColon) {
+              col2Items = afterColon.split(/,\s*(?=\()|,\s+/).filter(l => l.trim());
+            }
+          }
+
           // Find where Column II ends (usually next empty line or header)
           let col2End = column2Index + 1;
           while (col2End < lines.length && lines[col2End].trim() && !lines[col2End].includes('|') && !lines[col2End].startsWith('###')) {
             col2End++;
           }
-          const col2Items: string[] = lines.slice(column2Index + 1, col2End).filter(l => l.trim());
+          
+          // Add items from subsequent lines
+          col2Items = [...col2Items, ...lines.slice(column2Index + 1, col2End).filter(l => l.trim())];
 
           elements.push(
             <div key={`match-${i}`} className="my-4 bg-slate-50/50 border border-slate-200 rounded-xl overflow-hidden shadow-sm">
