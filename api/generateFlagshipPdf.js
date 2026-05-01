@@ -147,15 +147,20 @@ ${JSON.stringify(qData, null, 2)}
    - 6 items: (1) 45 questions check, (2) OMR Version/Serial entry, (3) 4 marks each / -1 wrong, (4) OMR pen use, (5) No gadgets, (6) Plus2AI DNA Model REI v17 note.
 
 ### WATERMARK & DIAGRAMS
-- **WATERMARK**: Include a \`<div class="watermark">Plus2AI DNA</div>\` at the very start of the body.
-- **DIAGRAMS**: If a question includes a "Diagram Description" (e.g., LCR circuit graph, Photoelectric setup), **GENERATE an inline SVG** that visually represents it. 
-  - Use clean lines, labeled axes (e.g., Impedance Z vs Frequency ω), and clear markers for key points (e.g., resonant frequency).
-  - Place the SVG inside a \`.diagram-container\` and follow it with the formatted \`.diagram-description\`.
+- **WATERMARK**: Include a `<div class="watermark">Plus2AI DNA</div>` at the very start of the body.
+- **DIAGRAMS**: If a question includes a "Diagram Description", **GENERATE a supplementary inline SVG**.
+  - Use clean lines, labeled axes, and clear markers.
+  - Place the SVG inside a `.diagram-container`.
+
+### DATA INTEGRITY & VERBATIM REPRODUCTION (CRITICAL)
+- **STRICT ADHERENCE**: You must replicate the question text, option text, and diagram descriptions **EXACTLY as they appear in the JSON**.
+- **DO NOT** rephrase, summarize, "improve", or modify any content. 
+- **DO NOT** omit any part of the text.
+- You **MUST include the verbatim "Diagram Description" text** below any generated SVG.
 
 ### IMPORTANT: NO CONTENT FOOTERS
 - **DO NOT** include any footer, page numbers, or bottom lines in the HTML body. 
 - These are handled automatically by the PDF engine. 
-- Ensure no "Page X of Y" or "Serial: ..." text appears at the bottom of your HTML output.
 
 ### Output format
 Return ONLY the raw HTML. No markdown code fences. Start with <!DOCTYPE html>.`;
