@@ -51,7 +51,7 @@ function buildGeminiPrompt(paperData, subject, set, color) {
     correctOptionIndex: q.correctOptionIndex
   }));
 
-  return \`You are an expert NEET exam paper formatter and senior front-end designer. Your goal is to generate a COMPLETE, PRODUCTION-READY HTML document that mirrors a premium, institutional NTA examination paper.
+  return `You are an expert NEET exam paper formatter and senior front-end designer. Your goal is to generate a COMPLETE, PRODUCTION-READY HTML document that mirrors a premium, institutional NTA examination paper.
 
 ## CORE DIRECTIVES (CRITICAL)
 
@@ -86,7 +86,7 @@ ${JSON.stringify(qData, null, 2)}
 - Include Google Fonts: Inter (400, 500, 600, 700) and Public Sans (700, 900).
 - Include KaTeX CSS/JS and Auto-render extension via CDN.
 - **IMPORTANT**: Include the following script at the end of the <head> to ensure math renders:
-  \`<script>
+  <script>
     document.addEventListener("DOMContentLoaded", function() {
       renderMathInElement(document.body, {
         delimiters: [
@@ -96,26 +96,26 @@ ${JSON.stringify(qData, null, 2)}
         throwOnError : false
       });
     });
-  </script>\`
+  </script>
 - Custom CSS:
-  - \`body\`: font-family 'Inter', sans-serif; line-height: 1.6; color: #111;
-  - \`body::before\`: content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; opacity: 0.02; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500'><text x='200' y='250' fill='black' font-family='sans-serif' font-weight='900' font-size='35' transform='rotate(-35, 200, 250)' text-anchor='middle'>Plus2AI DNA</text></svg>"); background-repeat: repeat;
-  - \`.question-block\`: margin-bottom: 28px; padding: 20px; border: 0.5pt solid #e2e8f0; border-radius: 8px; break-inside: avoid; background: #fff;
-  - \`.topic-pill\`: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px;
-  - \`.question-num\`: font-weight: 800; color: ${color}; font-size: 10.5pt;
-  - \`.question-text\`: font-weight: 400; font-size: 10.2pt; margin-bottom: 12px;
-  - \`.option-grid\`: display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-left: 15px;
-  - \`.option-row\`: display: flex; align-items: flex-start; gap: 10px;
-  - \`.option-label\`: font-weight: 700; color: ${color}; min-width: 28px; flex-shrink: 0;
-  - \`.option-text\`: font-size: 9.8pt;
-  - \`.math-table\`: border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 9pt;
-  - \`.math-table td\`: border: 0.5pt solid #cbd5e1; padding: 10px; vertical-align: top;
-  - \`.math-table tr:nth-child(even)\` { background: #f8fafc; }
-  - \`.katex\`: font-size: 1.08em !important; margin: 0 2px;
-  - \`.katex-display\`: margin: 1em 0 !important;
-  - \`.diagram-container\`: margin: 15px auto; text-align: center; max-width: 100%; border: 0.5pt dashed #e2e8f0; padding: 12px; border-radius: 6px;
-  - \`.diagram-description\`: font-style: italic; font-size: 8.5pt; color: #475569; background: #f8fafc; border-left: 3px solid ${color}; padding: 10px 15px; margin: 10px 0; border-radius: 0 4px 4px 0;
-  - \`@page { size: A4; margin: 15mm 15mm 25mm 15mm; }\`
+  - body: font-family 'Inter', sans-serif; line-height: 1.6; color: #111;
+  - body::before: content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; opacity: 0.02; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500'><text x='200' y='250' fill='black' font-family='sans-serif' font-weight='900' font-size='35' transform='rotate(-35, 200, 250)' text-anchor='middle'>Plus2AI DNA</text></svg>"); background-repeat: repeat;
+  - .question-block: margin-bottom: 28px; padding: 20px; border: 0.5pt solid #e2e8f0; border-radius: 8px; break-inside: avoid; background: #fff;
+  - .topic-pill: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px;
+  - .question-num: font-weight: 800; color: ${color}; font-size: 10.5pt;
+  - .question-text: font-weight: 400; font-size: 10.2pt; margin-bottom: 12px;
+  - .option-grid: display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-left: 15px;
+  - .option-row: display: flex; align-items: flex-start; gap: 10px;
+  - .option-label: font-weight: 700; color: ${color}; min-width: 28px; flex-shrink: 0;
+  - .option-text: font-size: 9.8pt;
+  - .math-table: border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 9pt;
+  - .math-table td: border: 0.5pt solid #cbd5e1; padding: 10px; vertical-align: top;
+  - .math-table tr:nth-child(even) { background: #f8fafc; }
+  - .katex: font-size: 1.08em !important; margin: 0 2px;
+  - .katex-display: margin: 1em 0 !important;
+  - .diagram-container: margin: 15px auto; text-align: center; max-width: 100%; border: 0.5pt dashed #e2e8f0; padding: 12px; border-radius: 6px;
+  - .diagram-description: font-style: italic; font-size: 8.5pt; color: #475569; background: #f8fafc; border-left: 3px solid ${color}; padding: 10px 15px; margin: 10px 0; border-radius: 0 4px 4px 0;
+  - @page { size: A4; margin: 15mm 15mm 25mm 15mm; }
 
 ### FIRST PAGE LAYOUT (MANDATORY BLOCKS)
 
@@ -145,10 +145,10 @@ ${JSON.stringify(qData, null, 2)}
    - 6 items: (1) 45 questions check, (2) OMR Version/Serial entry, (3) 4 marks each / -1 wrong, (4) OMR pen use, (5) No gadgets, (6) Plus2AI DNA Model REI v17 note.
 
 ### WATERMARK & DIAGRAMS
-- **WATERMARK**: Include a \`<div class="watermark">\` at the very start of the body. **REPEAT** the text "Plus2AI DNA" inside 15 separate \`<div class="watermark-item">Plus2AI DNA</div>\` elements to fill the grid.
+- **WATERMARK**: Include a <div class="watermark"> at the very start of the body. **REPEAT** the text "Plus2AI DNA" inside 15 separate <div class="watermark-item">Plus2AI DNA</div> elements to fill the grid.
 - **DIAGRAMS**: If a question includes a "Diagram Description", **GENERATE a supplementary inline SVG**.
   - Use clean lines, labeled axes, and clear markers.
-  - Place the SVG inside a \`.diagram-container\`.
+  - Place the SVG inside a .diagram-container.
 
 ### IMPORTANT: NO CONTENT FOOTERS
 - **DO NOT** include any footer, page numbers, or bottom lines in the HTML body. 
