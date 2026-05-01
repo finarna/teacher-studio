@@ -40,12 +40,11 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
         return null;
     };
 
-    // ── Server-side Gemini + Puppeteer PDF download ───────────────────────────
+    // ── [ACTIVE] Server-side Gemini + Puppeteer PDF download ─────────────────
     const handleProDownload = async (paper: PaperSet) => {
         const paperId = getPaperId(paper);
 
         if (!paperId) {
-            // Fallback: alert if paper isn't in registry
             alert(`Pro PDF not yet available for ${paper.subject} Set ${paper.setName}. Coming soon!`);
             return;
         }
@@ -64,7 +63,6 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                 throw new Error(err.error || `Server error ${res.status}`);
             }
 
-            // Stream PDF blob and trigger browser download
             const blob = await res.blob();
             const url  = URL.createObjectURL(blob);
             const a    = document.createElement('a');
@@ -83,6 +81,113 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
         }
     };
 
+    // ── [LEGACY — PRESERVED, BYPASSED] Client-side html2pdf pipeline ──────────
+    // Do NOT delete. Switch button to call handleLegacyDownload to revert.
+    const handleLegacyDownload = async (paper: PaperSet) => {
+        const html2pdf = window.html2pdf;
+        if (!html2pdf) {
+            alert('Pro PDF engine loading... Please wait a second and try again.');
+            return;
+        }
+
+        setSelectedPaper(paper);
+        setIsGenerating(true);
+
+        try {
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+        } catch (e) {
+            console.warn('Font loading check failed, proceeding with delay fallback', e);
+        }
+
+        setTimeout(async () => {
+            if (!paperRef.current) return;
+            const paperElement = paperRef.current.querySelector('.paper-container');
+            if (!paperElement) return;
+
+            const opt = {
+                margin: 0,
+                filename: `Plus2AI_${paper.subject}_${paper.examContext || 'KCET'}_2026_SET_${paper.setName}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 1.35,
+                    useCORS: true,
+                    letterRendering: true,
+                    allowTaint: false,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    scrollY: -window.scrollY,
+                    scrollX: -window.scrollX,
+                    width: (paperElement as HTMLElement).scrollWidth,
+                    height: (paperElement as HTMLElement).scrollHeight,
+                    onclone: (clonedDoc: Document) => {
+                        const containers = clonedDoc.querySelectorAll('html, body, #root, .print-area, .paper-container, .questions-grid');
+                        containers.forEach(el => {
+                            (el as HTMLElement).style.display = 'block';
+                            (el as HTMLElement).style.height = 'auto';
+                            (el as HTMLElement).style.minHeight = 'auto';
+                            (el as HTMLElement).style.maxHeight = 'none';
+                            (el as HTMLElement).style.overflow = 'visible';
+                            (el as HTMLElement).style.visibility = 'visible';
+                        });
+                        clonedDoc.querySelectorAll('svg').forEach((svg: Element) => {
+                            const el = svg as SVGElement;
+                            el.style.display = 'inline-block';
+                            el.style.visibility = 'visible';
+                            el.style.opacity = '1';
+                            el.style.overflow = 'visible';
+                            const w = el.getAttribute('width');
+                            const h = el.getAttribute('height');
+                            if (w) el.style.width = w;
+                            if (h) el.style.height = h;
+                            el.querySelectorAll('path').forEach((path: Element) => {
+                                (path as SVGPathElement).style.visibility = 'visible';
+                                (path as SVGPathElement).style.display = 'block';
+                            });
+                        });
+                        clonedDoc.querySelectorAll('.katex').forEach((el: Element) => {
+                            (el as HTMLElement).style.display = 'inline-block';
+                            (el as HTMLElement).style.visibility = 'visible';
+                            (el as HTMLElement).style.opacity = '1';
+                        });
+                        clonedDoc.querySelectorAll('.katex-html, .katex-mathml').forEach((el: Element) => {
+                            (el as HTMLElement).style.overflow = 'visible';
+                            (el as HTMLElement).style.display = 'inline-block';
+                        });
+                    }
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+
+            try {
+                await html2pdf().set(opt).from(paperElement).toPdf().get('pdf').then((pdf: any) => {
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    const pageWidth  = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    for (let i = 1; i <= totalPages; i++) {
+                        pdf.setPage(i);
+                        pdf.setFontSize(8.5);
+                        pdf.setTextColor(40);
+                        pdf.text(
+                            `Reproduction strictly prohibited. © 2026 Plus2AI. | ${paper.examContext || 'KCET'} 2026 Simulation - SET ${paper.setName} | Page ${i} of ${totalPages}`,
+                            pageWidth / 2, pageHeight - 8, { align: 'center' }
+                        );
+                        pdf.setDrawColor(180);
+                        pdf.setLineWidth(0.3);
+                        pdf.line(20, pageHeight - 11, pageWidth - 20, pageHeight - 11);
+                    }
+                }).save();
+            } catch (err) {
+                console.error('Legacy PDF generation failed:', err);
+            } finally {
+                setIsGenerating(false);
+                setSelectedPaper(null);
+            }
+        }, 35000);
+    };
+    // ── END LEGACY ────────────────────────────────────────────────────────────
 
     const handleQuickPrint = (paper: PaperSet) => {
         setSelectedPaper(paper);
