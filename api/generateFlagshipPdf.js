@@ -147,10 +147,10 @@ ${JSON.stringify(qData, null, 2)}
    - 6 items: (1) 45 questions check, (2) OMR Version/Serial entry, (3) 4 marks each / -1 wrong, (4) OMR pen use, (5) No gadgets, (6) Plus2AI DNA Model REI v17 note.
 
 ### WATERMARK & DIAGRAMS
-- **WATERMARK**: Include a `<div class="watermark">Plus2AI DNA</div>` at the very start of the body.
+- **WATERMARK**: Include a \`<div class="watermark">Plus2AI DNA</div>\` at the very start of the body.
 - **DIAGRAMS**: If a question includes a "Diagram Description", **GENERATE a supplementary inline SVG**.
   - Use clean lines, labeled axes, and clear markers.
-  - Place the SVG inside a `.diagram-container`.
+  - Place the SVG inside a \`.diagram-container\`.
 
 ### DATA INTEGRITY & VERBATIM REPRODUCTION (CRITICAL)
 - **STRICT ADHERENCE**: You must replicate the question text, option text, and diagram descriptions **EXACTLY as they appear in the JSON**.
@@ -163,7 +163,7 @@ ${JSON.stringify(qData, null, 2)}
 - These are handled automatically by the PDF engine. 
 
 ### Output format
-Return ONLY the raw HTML. No markdown code fences. Start with <!DOCTYPE html>.`;
+Return ONLY the raw HTML. No markdown code fences. Start with <!DOCTYPE html>.\`;
 }
 
 // ── Call Gemini ───────────────────────────────────────────────────────────────
