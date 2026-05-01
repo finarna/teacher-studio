@@ -131,10 +131,10 @@
         "id": "fc5ec48a-99aa-476e-9ea5-2acf6a7f1baf",
         "text": "The electron in a hydrogen atom revolves around the nucleus in an orbit of radius $0.5 \\, \\AA$ with a frequency of $10^{16} \\, Hz$. What is the magnetic moment associated with the orbital motion of the electron? (Take $e = 1.6 \\times 10^{-19} \\, C$)",
         "options": [
-          "$$1.25 \\times 10$⁻²³$ \\, $A\\cdotm²$",
-          "$$4.0 \\times 10$⁻²⁴$ \\, $A\\cdotm²$",
-          "$$8.0 \\times 10$⁻²⁴$ \\, $A\\cdotm²$",
-          "$$1.6 \\times 10$⁻²³$ \\, $A\\cdotm²$"
+          "$1.25 \\times 10^{-23} \\, A \\cdot m^{2}$",
+          "$4.0 \\times 10^{-24} \\, A \\cdot m^{2}$",
+          "$8.0 \\times 10^{-24} \\, A \\cdot m^{2}$",
+          "$1.6 \\times 10^{-23} \\, A \\cdot m^{2}$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -246,10 +246,10 @@
         "id": "2ae410d5-3711-4846-ac7f-d580d3715a30",
         "text": "A specialized spherical conductor used in a Van de Graaff generator has a radius $R = 9cm$ and is maintained at an electrostatic potential of $1000\\,\\text{V}$ in dry air. To evaluate the energy storage capacity of this system, calculate the total electrostatic potential energy stored in the electric field of this isolated charged sphere.",
         "options": [
-          "$$2.5 \\times 10$⁻⁶$ J",
-          "$$5.0 \\times 10$⁻⁵$ J",
-          "$$5.0 \\times 10$⁻⁶$ J",
-          "$$1.0 \\times 10$⁻⁵$ J"
+          "$2.5 \\times 10^{-6}$ J",
+          "$5.0 \\times 10^{-5}$ J",
+          "$5.0 \\times 10^{-6}$ J",
+          "$1.0 \\times 10^{-5}$ J"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -395,10 +395,10 @@
         "id": "b80cf133-a19e-45f5-9573-3bd5b2f5d910",
         "text": "A point charge $q = +5.0 \\mu C$ is fixed at the origin $(0,0)$ of a coordinate system. A second test charge $q_0 = +2.0 nC$ is moved by an external agent from a point $A$ (at $x = 10 cm$) to a point $B$ (at $x = 50 cm$) along the x-axis. Calculate the work done by the electrostatic force during this displacement. (Use $k = 9 \\times 10^9 Nm^2/C^2$)",
         "options": [
-          "$$7.2 \\times 10$⁻⁴$ J",
-          "$$1.8 \\times 10$⁻⁴$ J",
-          "$$1.44 \\times 10$⁻⁴$ J",
-          "$$7.2 \\times 10$⁻⁵$ J"
+          "$7.2 \\times 10^{-4}$ J",
+          "$1.8 \\times 10^{-4}$ J",
+          "$1.44 \\times 10^{-4}$ J",
+          "$7.2 \\times 10^{-5}$ J"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -470,10 +470,10 @@
         "id": "8074fa86-10f6-4226-9a6c-3056097bab2a",
         "text": "A spherical conductor of radius $R = 9cm$ is localized in a vacuum and carries a net positive charge of $Q = 4 \\times 10^{-7}C$ distributed uniformly over its surface. Considering the electrostatic permittivity of free space $\\epsilon_0$ and the relationship between potential and distance, calculate the electrostatic potential at a point located exactly on the surface of the sphere.",
         "options": [
-          "$$3.6 \\times 10$⁴$V",
-          "$$4 \\times 10$⁴$V",
-          "$$3.6 \\times 10$³$V",
-          "$$4 \\times 10$³$V"
+          "$3.6 \\times 10^{4}$ V",
+          "$4 \\times 10^{4}$ V",
+          "$3.6 \\times 10^{3}$ V",
+          "$4 \\times 10^{3}$ V"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -582,10 +582,10 @@
         "id": "a4ac5734-5cfe-4b23-811a-ed97cc4d7605",
         "text": "A circular coil of radius $10 \\, cm$ consisting of $50$ closely wound turns carries a current of $2.0 \\, A$ in the clockwise direction when viewed from the top. Calculate the magnitude of the magnetic field induction $B$ at the center of the coil. (Use $\\mu_0 = 4\\pi \\times 10^{-7} \\, T\\cdotm/A$)",
         "options": [
-          "$$2.00 \\times 10$⁻⁴$ \\, T",
-          "$$1.25 \\times 10$⁻³$ \\, T",
-          "$$6.28 \\times 10$⁻⁴$ \\, T",
-          "$$3.14 \\times 10$⁻⁴$ \\, T"
+          "$2.00 \\times 10^{-4}$ \\, T",
+          "$1.25 \\times 10^{-3}$ \\, T",
+          "$6.28 \\times 10^{-4}$ \\, T",
+          "$3.14 \\times 10^{-4}$ \\, T"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1136,10 +1136,10 @@
         "id": "e2007676-df70-4950-a126-f527c028cd0f",
         "text": "A high-purity copper conductor of uniform cross-sectional area $2.0 \\times 10^{-6} m^2$ is utilized in a laboratory experiment to study charge carrier dynamics. When a steady current of $1.6 A$ is maintained through the conductor, and assuming the free electron density for copper is approximately $8.0 \\times 10^{28} m^{-3}$, determine the average drift velocity ($v_d$) of the conduction electrons. (Take charge of an electron $e = 1.6 \\times 10^{-19} C$)",
         "options": [
-          "$$6.25 \\times 10$⁻⁵$ m/s",
-          "$$3.12 \\times 10$⁻⁵$ m/s",
-          "$$1.25 \\times 10$⁻⁴$ m/s",
-          "$$0.625 \\times 10$⁻³$ m/s"
+          "$6.25 \\times 10^{-5}$ m/s",
+          "$3.12 \\times 10^{-5}$ m/s",
+          "$1.25 \\times 10^{-4}$ m/s",
+          "$0.625 \\times 10^{-3}$ m/s"
         ],
         "marks": 4,
         "difficulty": "Moderate",

@@ -1,0 +1,1655 @@
+{
+  "test_name": "PLUS2AI OFFICIAL NEET BOTANY PREDICTION 2026: SET A",
+  "subject": "Botany",
+  "exam_context": "NEET",
+  "total_questions": 45,
+  "total_marks": 180,
+  "description": "SET A: Formula/Numerical Emphasis - Focus on calculation-based problems and numerical problem-solving",
+  "strategic_focus": "Formula application, numerical calculations, quantitative reasoning, multi-step problem solving",
+  "calibration": {
+    "ids": 0.9,
+    "rigor": 1.638,
+    "difficulty_distribution": "68/32/20",
+    "board_signature": "CONCEPTUAL_FACTUAL"
+  },
+  "test_config": {
+    "questions": [
+      {
+        "id": "b970259d-1f73-4b05-b756-5d49a2abc3a3",
+        "text": "In a laboratory setup, a student observes a floral specimen with a papilionaceous corolla. The aestivation of the petals involves a large 'standard' petal overlapping two lateral 'wings', which in turn overlap the two smallest anterior petals known as the 'keel'. What is the technical term for this aestivation and in which family is it typically found?",
+        "options": [
+          "Valvate aestivation; Solanaceae",
+          "Twisted aestivation; Malvaceae",
+          "Imbricate aestivation; Cassia",
+          "Vexillary aestivation; Fabaceae"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Morphology of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze the pattern ::: 1 (Standard) + 2 (Wings) + 2 (Keel). This is the $1 + 2 + (2)$ arrangement.",
+          "Identify Aestivation ::: This specific descending imbricate arrangement is called 'Vexillary' or 'Papilionaceous'.",
+          "Identify Family ::: NCERT explicitly links Vexillary aestivation to the Fabaceae (formerly Papilionoideae) family.",
+          "Verify other options ::: Valvate is for Calotropis; Twisted is for China rose; Imbricate is for Gulmohur."
+        ],
+        "examTip": "Learn the 4 types of aestivation with one 'Brand Ambassador' example each. Fabaceae = Vexillary = Pea/Bean.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Aestivation is the mode of arrangement of sepals or petals in a floral bud. Vexillary is the most complex 'Easy' type to remember because of its hierarchy (1 > 2 > (2)).\",\"memoryTrigger\":\"Vexillary = 'Very' big standard petal.\",\"visualPrompt\":\"Imagine a large umbrella (Standard) protecting two people (Wings) who are holding a small boat (Keel).\",\"commonTrap\":\"Confusing 'Imbricate' with 'Vexillary'. Vexillary is a specific type of imbricate, but 'Vexillary' is the more precise term.\"}",
+        "keyFormulas": [
+          "Vexillary = 1 + 2 + (2)"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-007",
+          "questionType": "SIMPLE_RECALL_MCQ"
+        }
+      },
+      {
+        "id": "a2b549d6-384a-43f8-8061-bddf3bbffe50",
+        "text": "**Assertion (A):** The mitochondria and chloroplasts are considered semi-autonomous organelles.\\n**Reason (R):** They possess their own genetic material ($DNA$) and ribosomes ($70S$), allowing them to synthesize some of their own proteins.",
+        "options": [
+          "Both (A) and (R) are true, but (R) is NOT the correct explanation of (A).",
+          "Both (A) and (R) are true, and (R) is the correct explanation of (A).",
+          "(A) is false but (R) is true.",
+          "(A) is true but (R) is false."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Cell: The Unit of Life",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Assertion (A) ::: Mitochondria and chloroplasts are indeed called semi-autonomous because they function somewhat independently of the nucleus. (Statement is True).",
+          "Evaluate Reason (R) ::: These organelles contain circular DNA and 70S ribosomes (similar to prokaryotes). This enables them to produce their own proteins and replicate. (Statement is True).",
+          "Establish Connection ::: The reason we call them 'semi-autonomous' is *precisely because* they have their own DNA/protein machinery but still depend on the nucleus for some proteins. Thus, R explains A.",
+          "Final Choice ::: Option (a)."
+        ],
+        "examTip": "Semi-autonomous means 'half-independent'. If an organelle has DNA and Ribosomes, it qualifies.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Endosymbiosis: Mitochondria and Chloroplasts were once free-living bacteria. They kept their DNA and ribosomes, making them 'semi-autonomous'.\",\"memoryTrigger\":\"DNA + Ribosome = Autonomy (partially).\",\"visualPrompt\":\"A 'cell within a cell' having its own blueprints (DNA) and factory (Ribosomes).\",\"commonTrap\":\"Thinking they are 'fully autonomous' (they are not; they need nuclear support).\"}",
+        "keyFormulas": [
+          "$Semi-autonomy = Own\\ DNA + Own\\ Ribosomes$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-014",
+          "questionType": "theory_conceptual"
+        }
+      },
+      {
+        "id": "a44b08d3-8915-4817-b45f-6b053d28a8b8",
+        "text": "A circular plasmid vector $pUC19$ ($2686\\ bp$) is digested with two restriction enzymes, $HindIII$ and $EcoRI$. The plasmid contains exactly one recognition site for $HindIII$ at position $400$ and one recognition site for $EcoRI$ at position $450$. If a $500\\ bp$ foreign DNA fragment is successfully ligated into the $EcoRI$ site, and the resulting recombinant plasmid is subsequently digested with $HindIII$ only, how many linear fragments will be produced and what will be their length(s)?",
+        "options": [
+          "Two fragments of $50\\ bp$ and $3136\\ bp$",
+          "One linear fragment of $2686\\ bp$",
+          "Two fragments of $450\\ bp$ and $2736\\ bp$",
+          "One linear fragment of $3186\\ bp$"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biotechnology Principles and Processes",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Calculate the size of the recombinant plasmid ::: Original plasmid = $2686\\ bp$. Insert = $500\\ bp$. Total recombinant size = $2686 + 500 = 3186\\ bp$.",
+          "Step 2: Analyze the ligation site ::: The insert was placed into the $EcoRI$ site. This does not destroy the $HindIII$ site at position $400$.",
+          "Step 3: Analyze the second digestion ::: The recombinant plasmid is circular. Digestion with a single enzyme ($HindIII$) that has only one recognition site in the circular DNA will result in 'linearization'.",
+          "Step 4: Determine fragment count and size ::: A circular DNA with 1 cut site produces 1 linear fragment. The size of this fragment must equal the total size of the plasmid.",
+          "Step 5: Conclusion ::: 1 fragment of $3186\\ bp$. This matches Option 1."
+        ],
+        "examTip": "Remember the golden rule of restriction mapping: For circular DNA, $n$ sites = $n$ fragments. For linear DNA, $n$ sites = $n+1$ fragments. Since the recombinant plasmid is still circular, 1 cut = 1 linear piece.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"A circular DNA molecule becomes linear when cut once. The total mass/length remains conserved.\",\"memoryTrigger\":\"Circle + 1 cut = 1 Line. Line + 1 cut = 2 Lines.\",\"visualPrompt\":\"Imagine a rubber band. If you snip it once, you get one long string. If you add more rubber to the band first, the string just gets longer.\",\"commonTrap\":\"Subtracting the $50\\\\ bp$ distance between sites or assuming two fragments are formed because two enzymes were mentioned in the story.\"}",
+        "keyFormulas": [
+          "Recombinant\\ Size = Vector\\ Size + Insert\\ Size",
+          "Fragments\\ (Circular) = Number\\ of\\ Sites"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-002",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "e9897d35-022e-49f1-a745-1b5a8f778a88",
+        "text": "Match the following structures in an angiosperm ($2n = 18$) with their correct chromosome numbers:\\n\\n**Column I**\\n(A) Nucellus\\n(B) Secondary Nucleus\\n(C) Antipodal Cell\\n(D) Microspore Mother Cell\\n\\n**Column II**\\n(i) 9\\n(ii) 18\\n(iii) 27",
+        "options": [
+          "(A)-(ii), (B)-(ii), (C)-(i), (D)-(i)",
+          "(A)-(ii), (B)-(ii), (C)-(i), (D)-(ii)",
+          "(A)-(ii), (B)-(iii), (C)-(i), (D)-(ii)",
+          "(A)-(i), (B)-(ii), (C)-(i), (D)-(ii)"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Sexual Reproduction in Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Determine $n$: Given $2n = 18$, so $n = 9$.",
+          "Identify ploidy of (A) Nucellus: It is diploid sporophytic tissue ($2n$). Number = 18.",
+          "Identify ploidy of (B) Secondary Nucleus: Formed by fusion of two polar nuclei ($n+n$) in the embryo sac before fertilization. Ploidy = $2n$. Number = 18.",
+          "Identify ploidy of (C) Antipodal Cell: These are haploid cells of the female gametophyte ($n$). Number = 9.",
+          "Identify ploidy of (D) Microspore Mother Cell: These are diploid cells ($2n$) that undergo meiosis. Number = 18.",
+          "Match: A-18 (ii), B-18 (ii), C-9 (i), D-18 (ii)."
+        ],
+        "examTip": "The secondary nucleus (formed by polar nuclei fusion) is $2n$ BEFORE fertilization. Do not confuse it with the Primary Endosperm Nucleus ($3n$), which forms AFTER fertilization.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Gametophytic tissues (embryo sac cells, pollen) are haploid ($n$). Sporophytic tissues (nucellus, integuments, MMC) are diploid ($2n$).\",\"memoryTrigger\":\"Secondary = 2 nuclei ($2n$); Endosperm = 3 nuclei ($3n$).\",\"visualPrompt\":\"Imagine the embryo sac: 3 antipodals ($n$), 1 central cell ($n+n$), 2 synergids ($n$), 1 egg ($n$).\",\"commonTrap\":\"Labeling the Secondary Nucleus as $3n$ or the MMC as $n$ because it 'makes' microspores.\"}",
+        "keyFormulas": [
+          "$n = 1/2 \\times (2n)$",
+          "Secondary Nucleus = $n + n = 2n$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-005",
+          "questionType": "match_following_mcq"
+        }
+      },
+      {
+        "id": "8c49b072-51b0-447d-a57f-16e1d9afa075",
+        "text": "In a biotechnological application to develop nematode-resistant tobacco plants, double-stranded RNA (dsRNA) is produced to trigger RNA interference (RNAi). If a researcher introduces a DNA segment such that the sense strand sequence is $5'-ATGCGT-3'$ and the antisense strand is transcribed simultaneously under another promoter, what will be the sequence of the resulting dsRNA duplex that initiates the silencing of the $Meloidogyne\\ incognita$ specific mRNA?",
+        "options": [
+          "$5'-GCGUAU-3'$ paired with $3'-CGCAUA-5'$",
+          "$5'-UACGCA-3'$ paired with $3'-AUGCGU-5'$",
+          "$5'-AUGCGU-3'$ paired with $3'-UACGCA-5'$",
+          "$5'-ATGCGT-3'$ paired with $3'-TACGCA-5'$"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biotechnology and its Applications",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Understand RNAi mechanism ::: RNAi requires dsRNA, which is formed by transcribing both sense and antisense strands of the target gene.",
+          "Step 2: Identify the RNA sequences ::: If the DNA sense strand is $5'-ATGCGT-3'$, the corresponding mRNA (sense RNA) will be $5'-AUGCGU-3'$ (T replaced by U).",
+          "Step 3: Identify the antisense RNA ::: The DNA antisense strand is complementary to the sense strand: $3'-TACGCA-5'$. When transcribed, it produces antisense RNA: $3'-UACGCA-5'$.",
+          "Step 4: Form the duplex ::: The two RNA strands ($5'-AUGCGU-3'$ and $3'-UACGCA-5'$) are complementary and will hybridize to form dsRNA.",
+          "Step 5: Final Check ::: Option 1 correctly represents the RNA duplex with Uracil and proper antiparallel complementarity."
+        ],
+        "examTip": "RNA always contains Uracil ($U$) instead of Thymine ($T$). In dsRNA, the strands must be complementary and antiparallel ($5' \\rightarrow 3'$ and $3' \\rightarrow 5'$).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"RNA interference involves silencing a specific mRNA by a complementary dsRNA molecule. The dsRNA is processed into small interfering RNAs (siRNAs).\",\"memoryTrigger\":\"Sense + Antisense = Silence.\",\"visualPrompt\":\"Imagine two halves of a zipper. Alone they do nothing, but together (dsRNA) they lock onto the target and prevent it from being 'read' by the ribosome.\",\"commonTrap\":\"Choosing the option with Thymine ($T$), which is DNA, not RNA.\"}",
+        "keyFormulas": [
+          "DNA\\ Sense \\rightarrow RNA\\ Sense\\ (T \\rightarrow U)",
+          "DNA\\ Antisense \\rightarrow RNA\\ Antisense\\ (T \\rightarrow U)"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-016",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "366be56b-9cfe-4a0b-8f0c-07115a9f7124",
+        "text": "A population of a specific plant species in a localized ecosystem exhibits a Logistic Growth pattern. If the intrinsic rate of natural increase ($r$) is $0.2$ individuals per capita per year and the Carrying Capacity ($K$) of the environment is $1000$ individuals, calculate the absolute growth rate ($dN/dt$) at the exact moment when the population size ($N$) reaches $500$. Provide the value in individuals per year.",
+        "options": [
+          "$200$ individuals/year",
+          "$25$ individuals/year",
+          "$50$ individuals/year",
+          "$100$ individuals/year"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Organisms and Populations",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Recall the Logistic Growth equation ::: The formula is $\\frac{dN}{dt} = rN \\left( \\frac{K - N}{K} \\right)$.",
+          "Step 2: Identify given variables ::: $r = 0.2$, $K = 1000$, $N = 500$.",
+          "Step 3: Substitute values into the equation ::: $\\frac{dN}{dt} = 0.2 \\times 500 \\times \\left( \\frac{1000 - 500}{1000} \\right)$.",
+          "Step 4: Simplify the fraction ::: $\\frac{1000 - 500}{1000} = \\frac{500}{1000} = 0.5$.",
+          "Step 5: Perform final multiplication ::: $\\frac{dN}{dt} = (0.2 \\times 500) \\times 0.5 = 100 \\times 0.5 = 50$.",
+          "Step 6: Conclusion ::: The absolute growth rate is 50 individuals per year."
+        ],
+        "examTip": "When $N = K/2$, the population is growing at its maximum possible rate in a logistic model. If $N$ is very small, growth is nearly exponential; if $N$ is near $K$, growth slows to zero.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Logistic growth accounts for limited resources. The term $(1 - N/K)$ is the 'environmental resistance'.\",\"memoryTrigger\":\"Logistic = S-shaped. $dN/dt = rN(1-N/K)$.\",\"visualPrompt\":\"Imagine a bus with 1000 seats. As more people get on, it becomes harder to find a seat (growth slows down).\",\"commonTrap\":\"Using the exponential formula ($rN$) instead of the logistic one.\"}",
+        "keyFormulas": [
+          "$\\frac{dN}{dt} = rN \\left( 1 - \\frac{N}{K} \\right)$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-010",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "3593ad08-6e03-4a42-94d3-4c299050198c",
+        "text": "Assertion (A): Pteridophytes are significantly limited in their geographical distribution and are restricted to narrow geographical regions. \\nReason (R): The gametophytes of pteridophytes require cool, damp, and shady places to grow, and they necessitate the presence of external liquid water for the process of syngamy.",
+        "options": [
+          "(A) is true but (R) is false.",
+          "Both (A) and (R) are true but (R) is not the correct explanation of (A).",
+          "Both (A) and (R) are true and (R) is the correct explanation of (A).",
+          "(A) is false but (R) is true."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Plant Kingdom",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Fact Check (A) ::: According to NCERT, the spread of living pteridophytes is limited because their gametophytes (prothallus) need specific cool/damp conditions.",
+          "Fact Check (R) ::: Fertilization in pteridophytes is dependent on water for the transfer of antherozoids to the archegonia.",
+          "Logical Linkage ::: Because they need water for sex and specific climates for gametophyte survival, they cannot inhabit diverse or arid geographical zones.",
+          "Conclusion ::: Both statements are factually correct, and the requirement for water/shade (R) directly explains the limited distribution (A)."
+        ],
+        "examTip": "Whenever you see 'limited distribution' in Pteridophytes or Bryophytes, look for 'water for fertilization' or 'gametophyte requirements' as the primary reason.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Pteridophytes represent a 'transition' state: they have vascular tissue for the sporophyte but lack desiccation-resistant reproductive mechanisms for the gametophyte.\",\"memoryTrigger\":\"Pteridophyte = Prothallus (P) + Prerequisite Water (W) = Restricted Range (R).\",\"visualPrompt\":\"Imagine a fern growing near a stream; it cannot move to the desert because its 'sperm' (antherozoids) must swim to reach the 'egg'.\",\"commonTrap\":\"Students often think 'Vascular tissue' means they can live anywhere. Remember: Seedless plants are slaves to water for reproduction.\"}",
+        "keyFormulas": [
+          "Syngamy + Water = Restricted Distribution"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-003",
+          "questionType": "ASSERTION_REASON_MCQ"
+        }
+      },
+      {
+        "id": "4a2532b7-aa50-4e01-b875-3ebda975c02f",
+        "text": "Assertion (A): In a test cross of a dihybrid showing a recombination frequency of 10%, the parental phenotypes will appear in 90% of the offspring.\\nReason (R): The distance between two genes on a chromosome is directly proportional to the frequency of crossing over between them, up to a limit of 50%.",
+        "options": [
+          "(A) is true, but (R) is false.",
+          "Both (A) and (R) are true, but (R) is not the correct explanation of (A).",
+          "(A) is false, but (R) is true.",
+          "Both (A) and (R) are true, and (R) is the correct explanation of (A)."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Principles of Inheritance and Variation",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Assertion (A): Recombination frequency (RF) = 10%. By definition, RF = (Total Recombinants / Total Offspring) * 100. If 10% are recombinants, then the remaining 90% must be parentals. Thus, (A) is true.",
+          "Evaluate Reason (R): Sturtevant's principle states that the frequency of crossing over (recombination) is a measure of the distance between genes. 1% RF = 1 centiMorgan (cM). The maximum observable RF is 50% (independent assortment). Thus, (R) is true.",
+          "Determine Connection: The reason explains *why* we can calculate the percentage of parentals and recombinants—because the RF is a direct reflection of the physical/genetic relationship between the genes. Since the RF is 10%, we know exactly how many recombinants to expect, leaving the rest as parentals. (R) explains (A)."
+        ],
+        "examTip": "Recombination frequency can never exceed 50%. If a calculation gives you 60%, the genes are effectively unlinked (assorting independently).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Linkage means genes stay together; recombination means they swap. Sum of Parentals + Recombinants = 100%. Map distance = Recombination %.\",\"memoryTrigger\":\"Recom = Distance (R=D).\",\"visualPrompt\":\"Imagine two beads on a string; the further apart they are, the more likely a random cut will fall between them.\",\"commonTrap\":\"Thinking that parental percentage is half of the RF, or forgetting that RF + Parental% = 100%.\"}",
+        "keyFormulas": [
+          "$\\text{RF} = \\frac{\\text{Number of Recombinants}}{\\text{Total Offspring}} \\times 100$",
+          "$\\text{Parental \\%} = 100 - \\text{RF}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-009",
+          "questionType": "theory_conceptual"
+        }
+      },
+      {
+        "id": "aa0398f4-79b2-4a11-ae88-fd9826a24e95",
+        "text": "In $C_4$ plants like Maize ($Zea\\ mays$), the process of $CO_2$ fixation is split between mesophyll and bundle sheath cells to minimize photorespiration. Calculate the total number of $ATP$ molecules required to synthesize one molecule of sucrose ($C_{12}H_{22}O_{11}$) in such a plant.",
+        "options": [
+          "30 ATP",
+          "60 ATP",
+          "12 ATP",
+          "36 ATP"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Photosynthesis in Higher Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Determine energy cost per $CO_2$ in $C_4$ plants. It requires 5 ATP (3 for Calvin cycle + 2 for PEP regeneration).",
+          "Step 2: Calculate cost for 1 Glucose ($6$ carbons). $6 \\times 5 = 30\\ ATP$.",
+          "Step 3: Identify the molecule in the question. The question asks for 'Sucrose'.",
+          "Step 4: Sucrose is a disaccharide (Glucose + Fructose), containing 12 carbon atoms.",
+          "Step 5: Total ATP = $12 \\text{ carbons} \\times 5 \\text{ ATP/carbon} = 60\\ ATP$."
+        ],
+        "examTip": "The most common error is calculating for Glucose when the question asks for Sucrose. Sucrose = 12 Carbons; Glucose = 6 Carbons.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"C4 plants use an additional 2 ATP per $CO_2$ to pump $CO_2$ from the mesophyll to the bundle sheath, preventing the oxygenase activity of RuBisCO.\",\"memoryTrigger\":\"C4-52: 5 ATP and 2 NADPH per $CO_2$.\",\"visualPrompt\":\"Imagine paying a 'delivery fee' of 2 ATP for every $CO_2$ package sent to the bundle sheath factory.\",\"commonTrap\":\"Using the $C_3$ value (18 ATP) or the glucose value (30 ATP) instead of the sucrose value (60 ATP).\"}",
+        "keyFormulas": [
+          "$C_4\\ Energy\\ Cost: 5\\ ATP / 2\\ NADPH\\ per\\ CO_2$",
+          "$Sucrose = Glucose + Fructose = 12\\ Carbon\\ atoms$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-004",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "be9236ca-8fcf-42ed-aa65-44f3c35fd47a",
+        "text": "During the complex process of Meiosis I, a specific substage of Prophase I is identified by the dissolution of the synaptonemal complex and the initial appearance of X-shaped configurations where crossing over had previously occurred. Identify this stage based on these forensic histological markers.",
+        "options": [
+          "Diplotene",
+          "Zygotene",
+          "Diakinesis",
+          "Pachytene"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Cell Cycle and Cell Division",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Stage Analysis (Leptotene) ::: Chromosomes become visible, no complex structures yet.",
+          "Stage Analysis (Zygotene) ::: Synapsis begins, synaptonemal complex forms.",
+          "Stage Analysis (Pachytene) ::: Crossing over occurs (recombination nodules visible).",
+          "Stage Analysis (Diplotene) ::: Dissolution of synaptonemal complex; Chiasmata (X-shapes) become visible.",
+          "Stage Analysis (Diakinesis) ::: Terminalisation of chiasmata.",
+          "Conclusion ::: The markers (dissolution + X-shapes) define Diplotene."
+        ],
+        "examTip": "L-Z-P-D-D order is vital. Remember: Pachytene = Crossing Over; Diplotene = Chiasmata Visible.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Diplotene is the 'unzipping' phase where homologous chromosomes start to separate but stay stuck at crossing-over points.\",\"memoryTrigger\":\"Diplotene = Dissolution (D-D).\",\"visualPrompt\":\"Two friends hugging (Zygotene/Pachytene) and then trying to step back but their hands are still joined (Diplotene chiasmata).\",\"commonTrap\":\"Confusing Diplotene with Diakinesis. Terminalisation happens in Diakinesis.\"}",
+        "keyFormulas": [
+          "None"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-013",
+          "questionType": "DIAGRAM_BASED_MCQ"
+        }
+      },
+      {
+        "id": "17531649-962c-43f9-8ce7-b604f6c45a47",
+        "text": "Match the specific chemical moieties listed in Column I with their appropriate structural classification or biological representative in Column II as per the NCERT secondary metabolite profiles:\\n\\n\\begin{itemize}\\n    \\item [A] Alkaloids\\n    \\item [B] Terpenoids\\n    \\item [C] Lectins\\n    \\item [D] Drugs\\n\\end{itemize}\\n\\nColumn II:\\n\\begin{itemize}\\n    \\item [p] Monoterpenes, Diterpenes\\n    \\item [q] Concanavalin A\\n    \\item [r] Morphine, Codeine\\n    \\item [s] Vinblastine, Curcumin\\n\\end{itemize}",
+        "options": [
+          "A-r, B-q, C-p, D-s",
+          "A-r, B-p, C-q, D-s",
+          "A-p, B-r, C-s, D-q",
+          "A-q, B-s, C-p, D-r"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Biomolecules",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify A ::: Alkaloids in NCERT Table 9.3 are explicitly listed as Morphine and Codeine. (A-r)",
+          "Identify B ::: Terpenoids are categorized by their 'isoprene' units like Monoterpenes and Diterpenes. (B-p)",
+          "Identify C ::: Lectins are carbohydrate-binding proteins; Concanavalin A is the primary example given. (C-q)",
+          "Identify D ::: Drugs extracted from plants include Vinblastine (anti-cancer) and Curcumin. (D-s)",
+          "Final Match ::: A-r, B-p, C-q, D-s corresponds to Option 1."
+        ],
+        "examTip": "Memorize Table 9.3 (Secondary Metabolites) in NCERT. It is a high-frequency source for Match-the-following questions.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Secondary metabolites are compounds not directly involved in normal growth/development but have ecological or medicinal roles.\",\"memoryTrigger\":\"L-C (Lectins-Concanavalin); A-M (Alkaloids-Morphine); D-V (Drugs-Vinblastine).\",\"visualPrompt\":\"Visualize a pharmacy shelf: Morphine is an alkaloid, Vinblastine is a drug, and rubber is a polymer.\",\"commonTrap\":\"Confusing 'Alkaloids' with 'Drugs'. While morphine is used as a drug, in the NCERT table classification, it is explicitly an Alkaloid.\"}",
+        "keyFormulas": [
+          "No formulas required for this classification."
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-012",
+          "questionType": "MATCH_FOLLOWING_MCQ"
+        }
+      },
+      {
+        "id": "8b8b9648-b2ff-4ccf-8066-27d5c3265c2b",
+        "text": "Match the components of a typical cloning vector with their significance in recombinant DNA technology:\\n\\nColumn I:\\n(A) $ori$ sequence\\n(B) $rop$ gene\\n(C) Antibiotic resistance gene\\n(D) $BamHI$ site in $tet^R$\\n\\nColumn II:\\n(i) Selection of transformants from non-transformants\\n(ii) Controlling the copy number of linked DNA\\n(iii) Site for insertional inactivation\\n(iv) Essential for initiation of replication\\n\\nChoose the correct option:",
+        "options": [
+          "(b) A-(iv), B-(i), C-(ii), D-(iii)",
+          "(c) A-(ii), B-(iv), C-(iii), D-(i)",
+          "(d) A-(i), B-(iii), C-(iv), D-(ii)",
+          "(a) A-(iv), B-(ii), C-(i), D-(iii)"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Biotechnology Principles and Processes",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: $ori$ (Origin of Replication) - It is where replication starts and it controls the copy number of the DNA (A-iv, but more primarily iv for initiation).",
+          "Step 2: $rop$ gene - Codes for proteins involved in the replication of the plasmid, specifically controlling the copy number (B-ii).",
+          "Step 3: Antibiotic resistance gene ($amp^R$, $tet^R$) - Acts as a selectable marker to identify transformants (C-i).",
+          "Step 4: $BamHI$ site - A recognition site located within the tetracycline resistance gene; if an insert is joined here, the gene is inactivated (D-iii).",
+          "Step 5: Verify the sequence A-iv, B-ii, C-i, D-iii."
+        ],
+        "examTip": "The $rop$ gene is a frequent 'forgotten' detail in pBR322. Remember: 'rop' = 'Reproduction Of Plasmid' (controls copy number).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"A vector must have an $ori$, selectable markers, and cloning sites. Insertional inactivation is a clever way to use these markers to see if the foreign DNA was actually incorporated.\",\"memoryTrigger\":\"ORI = Origin; ROP = Replication Of Plasmid; Marker = Selection.\",\"visualPrompt\":\"Imagine a plasmid as a circular shuttle; $ori$ is the engine, markers are the 'entry tickets', and $rop$ is the 'throttle' (copy number).\",\"commonTrap\":\"Confusing $ori$ as only being for copy number; it is also the physical start site for replication.\"}",
+        "keyFormulas": [
+          "None"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-002",
+          "questionType": "MATCH_FOLLOWING_MCQ"
+        }
+      },
+      {
+        "id": "c6903eca-bc83-4c96-a826-3004f3e54b72",
+        "text": "Identify the algae represented in the given description: 'It is a colonial green alga where cells are arranged in a hollow sphere, and the colony is referred to as a Coenobium. It reproduces both asexually by daughter colonies and sexually by oogamous methods.'",
+        "options": [
+          "Ulothrix",
+          "Volvox",
+          "Spirogyra",
+          "Chlamydomonas"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Plant Kingdom",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Key Characteristic 1 ::: 'Colonial' immediately eliminates *Ulothrix* (filamentous) and *Chlamydomonas* (unicellular).",
+          "Key Characteristic 2 ::: 'Hollow sphere' and 'Daughter colonies' are the signature features of *Volvox*.",
+          "Reproduction Check ::: *Volvox* shows advanced Oogamy.",
+          "Confirmation ::: The description matches the NCERT diagram text for *Volvox*."
+        ],
+        "examTip": "Whenever 'Colony' or 'Daughter colony' is mentioned in Algae, *Volvox* is the answer 99% of the time.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Algae display a range of forms. Volvox is the 'ball' (colonial), Spirogyra is the 'string' (filamentous).\",\"memoryTrigger\":\"Volvox = 'Revolve' (It's a rolling ball).\",\"visualPrompt\":\"Imagine a green football filled with smaller green marbles (daughter colonies).\",\"commonTrap\":\"Thinking *Chlamydomonas* is colonial because it is related; it is actually unicellular.\"}",
+        "keyFormulas": [
+          "Colonial + Oogamous = Volvox"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-003",
+          "questionType": "DIAGRAM_BASED_MCQ"
+        }
+      },
+      {
+        "id": "b62e49c5-4718-45f5-ac0f-68de2f01be01",
+        "text": "A technician is visualizing a DNA gel electrophoresis under UV light after staining with Ethidium Bromide. They observe two distinct bands, Band X and Band Y. Band X is closer to the cathode (-), while Band Y is closer to the anode (+). Which of the following statements regarding these bands is scientifically accurate?",
+        "options": [
+          "Band Y contains smaller DNA fragments than Band X because smaller fragments move faster through the agarose matrix.",
+          "Band X has a higher net negative charge than Band Y, causing it to be repelled by the cathode.",
+          "The distance moved is independent of the size of the DNA, and depends only on the voltage applied.",
+          "Band X contains smaller DNA fragments than Band Y because it moved slower."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Biotechnology Principles and Processes",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Understand the direction of movement. DNA is negatively charged and moves toward the positive pole (Anode).",
+          "Step 2: Understand the sieving effect. The agarose gel acts as a sieve. Smaller fragments move more easily through the pores.",
+          "Step 3: Analyze Band X (near cathode). It has moved the least. Therefore, it consists of larger fragments.",
+          "Step 4: Analyze Band Y (near anode). It has moved the most. Therefore, it consists of smaller fragments.",
+          "Step 5: Match with the options. Option 2 correctly identifies that Band Y is smaller because smaller fragments move faster."
+        ],
+        "examTip": "Remember the mnemonic 'DNA is Negative, so it goes to the Anode (Positive)'. Small things run fast in a race!",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Agarose gel electrophoresis separates DNA based on size. The phosphate groups give DNA a uniform negative charge-to-mass ratio, meaning size is the only variable affecting speed.\",\"memoryTrigger\":\"Anode = Add (DNA goes there); Cathode = Cut (DNA stays away).\",\"visualPrompt\":\"Think of a crowd trying to run through a forest. Small children (small DNA) can dodge trees faster than tall adults (large DNA).\",\"commonTrap\":\"Confusing Anode (+) and Cathode (-). In chemistry, sometimes the names are used differently, but in electrophoresis, DNA always runs to the positive Anode.\"}",
+        "keyFormulas": [
+          "None"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-002",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "57b52c69-1626-41f3-826d-43d0ff6b336c",
+        "text": "A primary root of a seedling measures $5\\ cm$ at the start of an experiment ($L_0$). If the root exhibits a constant arithmetic growth rate ($r$) of $2\\ cm$ per day, calculate the total length of the root ($L_t$) after a period of exactly $10$ days of uninterrupted development.",
+        "options": [
+          "25 cm",
+          "50 cm",
+          "15 cm",
+          "20 cm"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Plant Growth and Development",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify the type of growth. The question specifies 'arithmetic growth rate'.",
+          "Step 2: Recall the formula for arithmetic growth: $L_t = L_0 + rt$.",
+          "Step 3: List the given values: $L_0 = 5\\ cm$, $r = 2\\ cm/day$, $t = 10\\ days$.",
+          "Step 4: Substitute the values into the formula: $L_t = 5 + (2 \\times 10)$.",
+          "Step 5: Solve the equation: $L_t = 5 + 20 = 25\\ cm$."
+        ],
+        "examTip": "Arithmetic growth results in a linear graph, while geometric growth results in a sigmoid curve. Don't mix up the formulas ($L_t = L_0 + rt$ vs $W_1 = W_0 e^{rt}$).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"In arithmetic growth, only one daughter cell continues to divide while the other differentiates. This leads to a constant addition of length over time.\",\"memoryTrigger\":\"Arithmetic = Addition (Linear).\",\"visualPrompt\":\"Imagine a stack of bricks where exactly one brick is added every day in a straight line.\",\"commonTrap\":\"Using the geometric growth formula for a simple linear root growth problem.\"}",
+        "keyFormulas": [
+          "$L_t = L_0 + rt$ (Arithmetic Growth)",
+          "$W_1 = W_0 e^{rt}$ (Geometric Growth)"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-006",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "31b2c70d-13ef-4a4f-bbb8-658dedd05e56",
+        "text": "During the anatomical examination of a transverse section of a specific plant organ, a student observes that the vascular bundles are arranged in a ring, the cambium is present between xylem and phloem (open type), and the xylem is described as 'endarch'. Based on these characteristic features, which of the following is being examined?",
+        "options": [
+          "Monocot Root",
+          "Dicot Stem",
+          "Dicot Root",
+          "Monocot Stem"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Anatomy of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Feature 1: Ring arrangement of vascular bundles ::: This is the hallmark of Dicot Stems. (Monocot stems have scattered bundles).",
+          "Feature 2: Cambium present (Open) ::: Open vascular bundles are characteristic of Dicots (allowing secondary growth).",
+          "Feature 3: Endarch Xylem ::: In stems, the protoxylem lies towards the center (pith), which is the 'endarch' condition.",
+          "Synthesis ::: Ring arrangement + Open bundles + Endarch = Dicot Stem."
+        ],
+        "examTip": "Use the 'S-E-R' mnemonic: Stem = Endarch = Ring (for Dicots). For Roots, it is 'R-E-X': Root = Exarch.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Dicot stems exhibit a highly organized Eustele (ring), while monocots show an Atactostele (scattered). Endarch means 'Inner beginning' for protoxylem.\",\"memoryTrigger\":\"STEM-EN: Stem Endarch. ROOT-EX: Root Exarch.\",\"visualPrompt\":\"Imagine a pearl necklace (ring of bundles) inside a circular stem section.\",\"commonTrap\":\"Confusing Endarch (Stem) with Exarch (Root).\"}",
+        "keyFormulas": [
+          "$Endarch = Protoxylem\\ at\\ Pith$",
+          "$Exarch = Protoxylem\\ at\\ Periphery$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-008",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "03259e25-d35e-4114-9bd8-bece9da3ea5d",
+        "text": "Calculate the total number of meiotic divisions required to produce $200$ viable seeds in a typical angiosperm plant, assuming every meiotic product has the potential to contribute to a successful fertilization event where applicable.",
+        "options": [
+          "250",
+          "200",
+          "500",
+          "400"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Sexual Reproduction in Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Define seed requirements: 1 seed = 1 Male gamete + 1 Female gamete (from 1 Egg).",
+          "Calculate Male Meiosis: To get 200 male gametes, since 1 meiosis in microsporangium $\\rightarrow$ 4 pollen grains (each with male gametes), we need $200 / 4 = 50$ meiotic divisions.",
+          "Calculate Female Meiosis: To get 200 eggs, since 1 meiosis in megasporangium $\\rightarrow$ 1 functional megaspore (3 degenerate), we need $200 / 1 = 200$ meiotic divisions.",
+          "Sum the total: Total meiosis = Meiosis(male) + Meiosis(female) = $50 + 200 = 250$.",
+          "Final Answer: 250 divisions are required."
+        ],
+        "examTip": "Use the shortcut formula: Total Meiosis = $n + n/4$, where $n$ is the number of seeds/grains.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Meiosis in anthers produces four functional microspores. Meiosis in ovules produces four megaspores, but only one survives. Thus, producing seeds is 'cheaper' on the male side but 'expensive' on the female side.\",\"memoryTrigger\":\"$n + (n/4)$ for Seeds.\",\"visualPrompt\":\"Imagine 50 factories making 4 items each (200 total) and 200 factories making 1 item each (200 total).\",\"commonTrap\":\"Thinking that 1 meiosis produces 1 seed (selecting 200) or 4 seeds (selecting 50).\"}",
+        "keyFormulas": [
+          "$\\text{Total Meiosis} = N + \\frac{N}{4}$ (where $N$ = number of seeds)"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-005",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "3c046cc4-74eb-4a6a-ba94-3c4039414509",
+        "text": "Assertion (A): The 'Ex-situ' conservation approach, particularly 'Cryopreservation', is now increasingly used for the preservation of gametes of threatened species and for the storage of seeds of commercially important strains for indefinite periods.\\n\\nReason (R): In 'Ex-situ' conservation, the endangered species are protected from all adverse factors within their natural ecosystem by creating specialized 'Buffer Zones' and 'Transition Zones'.",
+        "options": [
+          "Both (A) and (R) are true, but (R) is not the correct explanation of (A).",
+          "(A) is false, but (R) is true.",
+          "Both (A) and (R) are true, and (R) is the correct explanation of (A).",
+          "(A) is true, but (R) is false."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biodiversity and Conservation",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze Assertion (A): Cryopreservation (liquid nitrogen at $-196^{\\circ}C$) is indeed a modern Ex-situ technique used for gametes and seeds of threatened/commercial species. This statement is TRUE.",
+          "Analyze Reason (R): Buffer Zones and Transition Zones are characteristics of 'Biosphere Reserves', which are a form of 'In-situ' conservation, not 'Ex-situ'.",
+          "Verify 'Ex-situ' definition: Ex-situ involves taking the organisms *out* of their natural habitat (e.g., Botanical gardens, Seed banks). R claims it happens 'within their natural ecosystem'.",
+          "Conclusion: (A) is true but (R) is false because the Reason describes In-situ zoning."
+        ],
+        "examTip": "Always check the 'Location' in conservation questions. In-situ = On-site (National Parks, Biosphere Reserves). Ex-situ = Off-site (Zoos, Banks, Gardens).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"In-situ conservation (National Parks, Sanctuaries, Biosphere Reserves) protects the whole ecosystem. Ex-situ (Cryopreservation, Tissue Culture, Seed Banks) focuses on specific genetic material or individuals away from their natural home.\",\"memoryTrigger\":\"In-situ = 'In the situation' (Home). Ex-situ = 'Exit the situation' (Lab).\",\"visualPrompt\":\"Imagine a tiger in a jungle (In-situ) vs. a tiger's sperm in a tank of liquid nitrogen (Ex-situ).\",\"commonTrap\":\"Thinking that because 'protection' is mentioned in the Reason, it must be correct. The trap is 'within their natural ecosystem'.\"}",
+        "keyFormulas": [
+          "$-196^{\\circ}C$ = Temperature for Cryopreservation using Liquid Nitrogen."
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-015",
+          "questionType": "assertion_reason_mcq"
+        }
+      },
+      {
+        "id": "4b5c582f-3c8e-4ece-b53e-9eb5b2e8ade4",
+        "text": "A laboratory technician is observing a population of $Allium\\ cepa$ root tip cells undergoing synchronous division. During the transition from $G_{1}$ to $S$ phase, the technician records that the initial DNA content is represented as $2C$ and the chromosome number is $2n$. Following the completion of the synthetic phase but prior to the onset of the prophase, what would be the predicted state of the genomic material regarding content and count?",
+        "options": [
+          "DNA content $2C$; Chromosome number $2n$",
+          "DNA content $4C$; Chromosome number $4n$",
+          "DNA content $4C$; Chromosome number $2n$",
+          "DNA content $2C$; Chromosome number $4n$"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Cell Cycle and Cell Division",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Initial State Identification ::: Identify the starting parameters in $G_{1}$ phase as $2C$ (DNA content) and $2n$ (diploid chromosome number).",
+          "Process Analysis ::: Analyze the $S$ (Synthesis) phase function: NCERT states that DNA replication occurs during this phase.",
+          "Quantitative Change ::: Recognize that DNA amount doubles because each chromosome replicates its DNA, so $2C \\times 2 = 4C$.",
+          "Structural Conservation ::: Understand that the chromosome number does NOT increase because the replicated sister chromatids remain attached at a single centromere, hence remaining $2n$.",
+          "Final Conclusion ::: The state in $G_{2}$ (post-S) is $4C$ and $2n$."
+        ],
+        "examTip": "Always count centromeres to find the chromosome number. If the number of centromeres hasn't changed, the chromosome number is constant, regardless of DNA doubling.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The S-phase is solely for DNA replication. Chromosome doubling only occurs during Anaphase when centromeres actually split.\",\"memoryTrigger\":\"S = Same (Chromosome count stays the SAME); D = Double (DNA DOUBLES).\",\"visualPrompt\":\"Imagine a single stick (chromosome) becoming an X-shape. It's still one 'object' (centromere) but has twice the 'wood' (DNA).\",\"commonTrap\":\"Students often think 'doubling' applies to everything, choosing $4n$ incorrectly.\"}",
+        "keyFormulas": [
+          "$\\text{Post-S DNA} = 2 \\times \\text{Pre-S DNA}$",
+          "$\\text{Post-S Chromosomes} = \\text{Pre-S Chromosomes}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-013",
+          "questionType": "SIMPLE_RECALL_MCQ"
+        }
+      },
+      {
+        "id": "73e22cd2-f4c4-4265-809d-e4739e69d419",
+        "text": "In a state-of-the-art molecular biology laboratory, a researcher initiates a Polymerase Chain Reaction (PCR) using a single template of double-stranded DNA (dsDNA). Assuming a theoretical efficiency of $100\\%$ for each cycle and neglecting any primer-dimer formation or depletion of dNTPs, calculate the total number of polynucleotide strands (single strands) present in the reaction mixture after the completion of $25$ thermal cycles, and identify the number of these strands that contain the original 'parental' template sequence.",
+        "options": [
+          "$2^{25}$ total strands and $2$ parental strands",
+          "$2^{25}$ total strands and $4$ parental strands",
+          "$2^{26}$ total strands and $2$ parental strands",
+          "$2^{26}$ total strands and $0$ parental strands"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biotechnology Principles and Processes",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify the initial state ::: The starting material is 1 double-stranded DNA molecule, which consists of 2 single polynucleotide strands (parental strands).",
+          "Step 2: Apply the exponential growth formula ::: After $n$ cycles of PCR, the number of double-stranded DNA molecules is $2^n$. For $n = 25$, the number of dsDNA molecules is $2^{25}$.",
+          "Step 3: Calculate total single strands ::: Each dsDNA molecule consists of 2 single strands. Therefore, total single strands = $2 \\times 2^{25} = 2^{26}$.",
+          "Step 4: Track parental strands ::: Semi-conservative replication dictates that the two original template strands (the very first strands added) are never destroyed; they are simply partitioned into two different dsDNA molecules. Thus, the number of 'parental' strands remains exactly 2, regardless of the number of cycles.",
+          "Step 5: Final synthesis ::: Total strands = $2^{26}$; Parental strands = 2. This matches option 1."
+        ],
+        "examTip": "Always differentiate between 'DNA molecules' ($2^n$) and 'DNA strands' ($2 \\times 2^n$). NEET often uses these terms interchangeably in easy questions, but rigourous questions like this demand precise terminology.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"PCR is a method of 'in vitro' gene cloning. In each cycle, the DNA amount doubles. The original template strands serve as the initial primers for the first synthesis but remain distinct entities in the pool.\",\"memoryTrigger\":\"PCR = $2^n$ (Molecules). Strands = Double the molecules.\",\"visualPrompt\":\"Imagine a tree where the trunk (parental strands) splits but never disappears, while branches (new strands) multiply exponentially.\",\"commonTrap\":\"Students often select $2^{25}$ because they forget a dsDNA molecule has two strands.\"}",
+        "keyFormulas": [
+          "$N_t = N_o \\times 2^n$ where $N_t$ is the final number of molecules.",
+          "Total\\ Strands = 2 \\times N_t$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-002",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "47f2b2b0-4ba5-4784-9c4f-bad014f1091f",
+        "text": "Assertion (A): $C_{4}$ plants show a much higher rate of photosynthesis and biomass productivity compared to $C_{3}$ plants when $CO_{2}$ levels are limiting.\\nReason (R): $C_{4}$ plants have evolved a mechanism to increase the concentration of $CO_{2}$ at the enzyme site of RuBisCO, thereby minimizing the oxygenase activity.\\nIn light of the above statements, choose the correct answer:",
+        "options": [
+          "(A) is false but (R) is true.",
+          "Both (A) and (R) are true but (R) is NOT the correct explanation of (A).",
+          "(A) is true but (R) is false.",
+          "Both (A) and (R) are true and (R) is the correct explanation of (A)."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Photosynthesis in Higher Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Assertion ::: $C_4$ plants (like maize, sorghum) are indeed more productive because they lack the wasteful process of photorespiration.",
+          "Evaluate Reason ::: $C_4$ plants use Kranz anatomy to shuttle $CO_2$ (as malic acid) into bundle sheath cells where RuBisCO is located.",
+          "Check Mechanism ::: In bundle sheath cells, $CO_2$ is released, raising local concentration. This ensures RuBisCO acts as a carboxylase, not an oxygenase.",
+          "Determine Relationship ::: The reason explains WHY they are more productive (no photorespiration due to $CO_2$ concentration mechanism).",
+          "Conclusion ::: Both true, R explains A."
+        ],
+        "examTip": "Whenever you see $C_4$ vs $C_3$, immediately think 'Photorespiration'. $C_4$ is the 'Elite' version that solved the RuBisCO oxygenation problem.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"RuBisCO has an affinity for both $O_2$ and $CO_2$. $C_4$ plants ensure $CO_2$ wins by pumping it into internal cells.\",\"memoryTrigger\":\"C4 = CO2 Concentrating Compressor.\",\"visualPrompt\":\"Imagine a VIP (CO2) being escorted by a bodyguard (Malic acid) through a crowded room (Mesophyll) to a private lounge (Bundle Sheath) to meet the Star (RuBisCO).\",\"commonTrap\":\"Thinking $C_4$ plants have a different 'type' of RuBisCO. They don't; they just change its environment.\"}",
+        "keyFormulas": [
+          "$6 CO_2 + 30 ATP + 12 NADPH \\rightarrow 1 \\text{ Glucose (C4 plant)}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-004",
+          "questionType": "ASSERTION_REASON_MCQ"
+        }
+      },
+      {
+        "id": "df6a59f9-b291-471e-bd6d-bbd1bcbfa8fc",
+        "text": "Assertion (A): The split-gene arrangement in eukaryotes is considered an ancient feature of the genome.\\nReason (R): The presence of introns is reminiscent of antiquity, and the process of splicing represents the dominance of the RNA-world.",
+        "options": [
+          "(a) Both (A) and (R) are true, and (R) is the correct explanation of (A).",
+          "(c) (A) is true, but (R) is false.",
+          "(d) (A) is false, but (R) is true.",
+          "(b) Both (A) and (R) are true, but (R) is NOT the correct explanation of (A)."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Molecular Basis of Inheritance",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Evaluate Assertion (A). NCERT states that the split-gene arrangement (introns and exons) is indeed an ancient feature. This is true.",
+          "Step 2: Evaluate Reason (R). NCERT explicitly mentions that introns are 'reminiscent of antiquity' and splicing represents the 'dominance of the RNA-world'. This is also true.",
+          "Step 3: Determine if R explains A. Why is it called ancient? Because it contains features from the RNA-world era (introns/splicing). Thus, R provides the justification for why A is considered ancient.",
+          "Step 4: Select option (a)."
+        ],
+        "examTip": "Assertion-Reason questions in Botany often come directly from the summary or concluding paragraphs of NCERT chapters. Pay close attention to 'evolutionary' statements.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Eukaryotic genes are 'interrupted' by non-coding sequences called introns. Splicing removes these, leaving only exons. This system likely evolved in an early RNA-based life form.\",\"memoryTrigger\":\"I-A: Introns are Ancient; S-R: Splicing is RNA-world.\",\"visualPrompt\":\"Imagine a film strip where the 'deleted scenes' (introns) are still part of the original reel but are cut out before the movie (protein) is shown.\",\"commonTrap\":\"Thinking introns are a 'modern' complexity; they are actually evolutionary 'leftovers'.\"}",
+        "keyFormulas": [
+          "None"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-001",
+          "questionType": "ASSERTION_REASON_MCQ"
+        }
+      },
+      {
+        "id": "0f8f124f-b612-4ef5-b05e-40aefc0bc84c",
+        "text": "In a laboratory experiment involving a plant species with a diploid chromosome number of $2n = 24$, a researcher successfully induces autotetraploidy in the maternal parent using colchicine. This tetraploid female is then crossed with a wild-type diploid male of the same species. Calculate the chromosome number present in the cells of the scutellum of the resulting seeds and the Primary Endosperm Nucleus (PEN) respectively.",
+        "options": [
+          "36 and 60",
+          "36 and 48",
+          "24 and 36",
+          "48 and 72"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Sexual Reproduction in Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Determine parental ploidy: Tetraploid female is $4n$, so $n = 12$, therefore $4n = 48$. Diploid male is $2n$, so $2n = 24$.",
+          "Identify gametic contribution: The female gamete (egg) will be $2n$ ($24$ chromosomes). The male gamete (sperm) will be $n$ ($12$ chromosomes).",
+          "Calculate Scutellum ploidy: The scutellum is part of the embryo. Embryo ploidy = Egg ($2n$) + Sperm ($n$) = $3n$. Calculation: $3 \\times 12 = 36$.",
+          "Calculate PEN ploidy: The PEN is formed by Triple Fusion. PEN = Central Cell (two polar nuclei, each $2n$ in a $4n$ plant) + Sperm ($n$). Central cell = $2n + 2n = 4n$. PEN = $4n + n = 5n$.",
+          "Final PEN calculation: $5 \\times 12 = 60$. Thus, the values are 36 and 60."
+        ],
+        "examTip": "Always identify the ploidy of the 'Central Cell' first in polyploidy crosses; it is always double the ploidy of the egg cell in that specific plant.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"In angiosperms, the embryo is $2n$ (usually) and endosperm is $3n$. In a cross, the female contributes two genomes to the endosperm and one to the embryo, while the male contributes one to each.\",\"memoryTrigger\":\"Embryo = Mother(1) + Father(1); Endosperm = Mother(2) + Father(1).\",\"visualPrompt\":\"Imagine a 2:1 ratio of maternal to paternal DNA in the endosperm 'soup' and a 1:1 ratio in the embryo 'baby'.\",\"commonTrap\":\"Students often assume the endosperm is always $3n$ regardless of parental ploidy, or forget that scutellum is part of the embryo ($2n$/$3n$ dependent).\"}",
+        "keyFormulas": [
+          "$\\text{Embryo ploidy} = n_{egg} + n_{sperm}$",
+          "$\\text{PEN ploidy} = 2(n_{egg}) + n_{sperm}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-005",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "90d85583-1a97-4084-bc7c-7dbcd5a5e3a1",
+        "text": "An ecologist is investigating the species-area relationship in a newly discovered tropical rainforest fragment. According to the Alexander von Humboldt model, represented by the equation $\\log S = \\log C + Z \\log A$, the researcher finds that for a specific taxomomic group, the value of the regression coefficient ($Z$) is $0.6$. If the area of the study site ($A$) is increased by a factor of $1000$ (three orders of magnitude), by what factor will the species richness ($S$) increase, assuming the constant $C$ remains unchanged?",
+        "options": [
+          "$63.10$",
+          "$1.80$",
+          "$100.00$",
+          "$31.62$"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biodiversity and Conservation",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Species-Area Relationship formula: $S = C \\cdot A^Z$.",
+          "Set up the ratio for initial and final states: Let initial area be $A_1$ and final area be $A_2 = 1000 A_1$.",
+          "Express the change in species richness: $\\frac{S_2}{S_1} = \\frac{C \\cdot (A_2)^Z}{C \\cdot (A_1)^Z} = \\left(\\frac{A_2}{A_1}\\right)^Z$.",
+          "Substitute the given values: $\\frac{S_2}{S_1} = (1000)^{0.6}$.",
+          "Calculate the result: $(10^3)^{0.6} = 10^{1.8}$. Since $10^{1.5} \\approx 31.6$ and $10^2 = 100$, the value $10^{1.8} \\approx 63.095$. Therefore, the factor is $63.10$."
+        ],
+        "examTip": "Whenever $Z > 1$, species richness increases faster than the area. In continental scales, $Z$ ranges from $0.6$ to $1.2$. Always convert logarithmic forms to exponential forms for quick factor calculations.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The species-area relationship is non-linear on a normal scale (rectangular hyperbola) but linear on a log-log scale. The steeper the slope ($Z$), the higher the rate of species addition as area increases.\",\"memoryTrigger\":\"Log-Log is Linear (LLL). Z-slope: Small area = Small Z ($0.1$); Huge continent = Huge Z ($1.2$).\",\"visualPrompt\":\"Imagine a graph where the x-axis is Area and y-axis is Species. A flat line means adding space adds no new species; a steep vertical line means every new inch has a new species.\",\"commonTrap\":\"Confusing the factor of area increase with the factor of species increase. If area increases by $10^3$, species richness does NOT increase by $10^3$ unless $Z=1$.\"}",
+        "keyFormulas": [
+          "$\\log S = \\log C + Z \\log A$",
+          "$S = C \\cdot A^Z$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-015",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "fb4c4f82-9b42-4100-809b-fc1b7700b51f",
+        "text": "In a hypothetical population census of a forest, the initial population of a rare orchid species is $200$. Over a period of one year, $40$ new orchids were produced via vegetative propagation, and $10$ orchids died due to fungal infection. Calculate the 'Birth Rate' and 'Death Rate' per capita for this population, and determine the Vital Index of the population.",
+        "options": [
+          "$0.2$, $0.05$ and $150\\%$",
+          "$40$, $10$ and $400\\%$",
+          "$0.2$, $0.05$ and $400\\%$",
+          "$0.4$, $0.1$ and $400\\%$"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Organisms and Populations",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Calculate Birth Rate ($b$) ::: Birth rate is (No. of births / Initial population). $b = 40 / 200 = 0.2$ offspring per orchid per year.",
+          "Step 2: Calculate Death Rate ($d$) ::: Death rate is (No. of deaths / Initial population). $d = 10 / 200 = 0.05$ deaths per orchid per year.",
+          "Step 3: Define Vital Index ::: Vital Index is the ratio of births to deaths expressed as a percentage: $(\\text{Births} / \\text{Deaths}) \\times 100$.",
+          "Step 4: Calculate Vital Index ::: $(40 / 10) \\times 100 = 4 \\times 100 = 400\\%$.",
+          "Step 5: Verify results ::: $b = 0.2, d = 0.05, VI = 400\\%$. This matches Option 1."
+        ],
+        "examTip": "Birth and death rates in ecology are 'per capita' values (rates per individual), whereas in demography they are often 'per 1000'. Always divide by the initial population size ($N_o$).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Population growth is determined by the balance of Natality, Mortality, Immigration, and Emigration. The per capita rate provides a normalized measure of population health.\",\"memoryTrigger\":\"Rate = (Change / Initial). Vital Index = (B/D) x 100.\",\"visualPrompt\":\"Imagine a bank account. Birth rate is the interest rate, death rate is the service fee. The Vital Index tells you if the account is growing or shrinking.\",\"commonTrap\":\"Confusing absolute numbers ($40$ births) with rates ($0.2$).\"}",
+        "keyFormulas": [
+          "Birth\\ Rate = \\frac{\\Delta N_{births}}{N_{initial}}",
+          "Death\\ Rate = \\frac{\\Delta N_{deaths}}{N_{initial}}",
+          "Vital\\ Index = \\left( \\frac{Births}{Deaths} \\right) \\times 100"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-010",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "17f62622-c095-43f4-931d-ea81ebd324ce",
+        "text": "In a controlled laboratory environment mimicking the stromal conditions of a $C_3$ plant, a botanist quantifies the total energy requirement for the net synthesis of one molecule of glucose ($\\u03b2-D-glucopyranose$). If the process strictly follows the Calvin-Benson cycle, calculate the total number of $ATP$ and $NADPH + H^+$ molecules consumed specifically during the stages of reduction and regeneration combined, excluding the carboxylation phase.",
+        "options": [
+          "15 ATP and 12 NADPH",
+          "12 ATP and 12 NADPH",
+          "6 ATP and 0 NADPH",
+          "18 ATP and 12 NADPH"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Photosynthesis in Higher Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify the standard stoichiometry for 1 CO$_2$ fixation in the $C_3$ cycle. For every molecule of $CO_2$, 3 $ATP$ and 2 $NADPH$ are required.",
+          "Step 2: Calculate the total for 1 Glucose ($C_6H_{12}O_6$). Since glucose has 6 carbons, the cycle must turn 6 times. Total energy = $6 \\times 3$ ATP = 18 ATP, and $6 \\times 2$ NADPH = 12 NADPH.",
+          "Step 3: Analyze the phase-wise distribution. In the Reduction phase, 2 ATP and 2 NADPH are used per $CO_2$ ($12 ATP/12 NADPH$ for glucose).",
+          "Step 4: Analyze the Regeneration phase. 1 ATP is used per $CO_2$ to regenerate RuBP ($6 ATP$ for glucose). No NADPH is used here.",
+          "Step 5: Sum the values for reduction and regeneration: $(12 + 6) ATP = 18 ATP$ and $(12 + 0) NADPH = 12 NADPH$."
+        ],
+        "examTip": "Always remember the ratio 3:2 (ATP:NADPH) for $C_3$ and 5:2 for $C_4$ plants per $CO_2$ fixed. NEET often asks for 'net' vs 'per CO$_2$' - read carefully.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The Calvin cycle consumes energy to convert low-energy $CO_2$ into high-energy carbohydrates. The 'Reduction' step is NADPH-heavy, while 'Regeneration' is purely ATP-dependent.\",\"memoryTrigger\":\"C3-32: $C_3$ uses 3 ATP and 2 NADPH per $CO_2$.\",\"visualPrompt\":\"Imagine a wheel spinning 6 times to spit out one glucose brick; every spin requires 3 coins (ATP) and 2 batteries (NADPH).\",\"commonTrap\":\"Confusing the energy requirements of $C_3$ plants with $C_4$ plants (which require 30 ATP per glucose).\"}",
+        "keyFormulas": [
+          "$6 CO_2 + 18 ATP + 12 NADPH \\rightarrow 1 Glucose + 18 ADP + 12 NADP$",
+          "$Energy\\ Per\\ CO_2 = 3 ATP : 2 NADPH$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-004",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "ad89147c-e1a4-4f12-88b6-892535cfe95e",
+        "text": "Two leaves, Leaf A and Leaf B, are measured for their surface area. Leaf A grows from $5\\ cm^2$ to $10\\ cm^2$ in one week, while Leaf B grows from $50\\ cm^2$ to $55\\ cm^2$ in the same period. Calculate the Relative Growth Rate ($RGR$) for Leaf A and Leaf B respectively.",
+        "options": [
+          "50% and 5%",
+          "100% and 5%",
+          "100% and 10%",
+          "200% and 10%"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Plant Growth and Development",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Define Relative Growth Rate ($RGR$). $RGR = (\\text{Growth in given time} / \\text{Initial parameter}) \\times 100$.",
+          "Step 2: Calculate for Leaf A. Initial size = $5\\ cm^2$. Growth = $10 - 5 = 5\\ cm^2$. $RGR = (5 / 5) \\times 100 = 100\\%$.",
+          "Step 3: Calculate for Leaf B. Initial size = $50\\ cm^2$. Growth = $55 - 50 = 5\\ cm^2$. $RGR = (5 / 50) \\times 100 = 10\\%$.",
+          "Step 4: Compare results. Leaf A has 100% and Leaf B has 10%."
+        ],
+        "examTip": "Absolute growth rate (AGR) is just the change in size ($5\\ cm^2$ for both), but Relative growth rate (RGR) accounts for the starting size. Smaller plants/leaves usually have much higher RGR.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Relative Growth Rate normalizes growth by the initial size, allowing for a comparison of efficiency between organisms of different sizes.\",\"memoryTrigger\":\"RGR = (New - Old) / Old.\",\"visualPrompt\":\"Imagine a baby growing 2 inches and a giant growing 2 inches. The baby's growth is more significant relative to its size.\",\"commonTrap\":\"Thinking that because both grew by 5 cm², their growth rates are the same.\"}",
+        "keyFormulas": [
+          "$RGR = \\frac{Final - Initial}{Initial} \\times 100$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-006",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "fda50392-d734-484c-867c-72fa75099791",
+        "text": "A geneticist performs a dihybrid cross between two pea plants heterozygous for both axial flower position ($Aa$) and green pod color ($Gg$). If the total number of seeds produced in the $F_2$ generation is $2560$, calculate the specific number of individuals expected to be homozygous for axial flowers and heterozygous for green pods.",
+        "options": [
+          "480",
+          "320",
+          "640",
+          "160"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Principles of Inheritance and Variation",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the required genotype: Homozygous for axial ($AA$) and heterozygous for green pods ($Gg$). Genotype = $AAGg$.",
+          "Determine individual probabilities: For a monohybrid cross $Aa \\times Aa$, the probability of $AA$ is $1/4$. For $Gg \\times Gg$, the probability of $Gg$ is $1/2$ (or $2/4$).",
+          "Apply the product rule: Since genes assort independently, $P(AAGg) = P(AA) \\times P(Gg) = 1/4 \\times 1/2 = 1/8$.",
+          "Calculate the number of individuals: Total $F_2 = 2560$. Expected $AAGg = 2560 \\times (1/8)$.",
+          "Final Division: $2560 / 8 = 320$."
+        ],
+        "examTip": "In $F_2$ dihybrid ratios ($/16$), homozygous-heterozygous combinations (like $AABb$ or $aaBb$) always appear with a frequency of $2/16$, which simplifies to $1/8$.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The $9:3:3:1$ ratio is for phenotypes. Genotypically, there are 9 different genotypes in a dihybrid cross with a ratio of $1:2:1:2:4:2:1:2:1$.\",\"memoryTrigger\":\"Dihybrid Genotype Ratio: 121-242-121 (The symmetrical sequence).\",\"visualPrompt\":\"Imagine a $4 \\\\times 4$ Punnett square; the $AAGg$ genotypes are found in exactly 2 cells.\",\"commonTrap\":\"Confusing the $3:1$ phenotypic ratio with the $1:2:1$ genotypic ratio for one of the traits.\"}",
+        "keyFormulas": [
+          "$P(Genotype) = P(Trait 1) \\times P(Trait 2)$",
+          "$\\text{Number} = P(Genotype) \\times \\text{Total Population}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-009",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "9349f833-04ea-4eb3-930f-3356a0bb47f6",
+        "text": "Match the types of placentation (Column I) with their corresponding examples (Column II) as per the $NCERT$ syllabus:\\n\\n**Column I**\\n(A) Marginal\\n(B) Axile\\n(C) Parietal\\n(D) Free Central\\n\\n**Column II**\\n(p) Mustard\\n(q) China Rose\\n(r) Pea\\n(s) Primrose",
+        "options": [
+          "(d) A-s, B-r, C-p, D-q",
+          "(b) A-r, B-p, C-q, D-s",
+          "(a) A-r, B-q, C-p, D-s",
+          "(c) A-p, B-q, C-r, D-s"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Morphology of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Marginal ::: Placenta forms a ridge along the ventral suture (Ex: Pea). A-r.",
+          "Axile ::: Placenta is axial and ovules are attached to it in a multilocular ovary (Ex: China Rose, Tomato, Lemon). B-q.",
+          "Parietal ::: Ovules develop on the inner wall of the ovary (Ex: Mustard, Argemone). C-p.",
+          "Free Central ::: Ovules are borne on central axis and septa are absent (Ex: Dianthus, Primrose). D-s.",
+          "Combine ::: A-r, B-q, C-p, D-s matches option (a)."
+        ],
+        "examTip": "Free Central = DP (Dianthus, Primrose). Parietal = MA (Mustard, Argemone). These are the most frequent match-pairs.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Placentation is the arrangement of ovules within the ovary. The type depends on the position of the placenta.\",\"memoryTrigger\":\"MAP (Marginal Pea), ACT (Axile China-rose Tomato), PMA (Parietal Mustard Argemone), FDP (Free central Dianthus Primrose).\",\"visualPrompt\":\"Imagine a pea pod (Marginal) vs a sliced lemon (Axile).\",\"commonTrap\":\"Confusing Free Central with Axile (Key difference: Septa absent in Free Central).\"}",
+        "keyFormulas": [
+          "$Parietal \\rightarrow Peripheral\\ wall$",
+          "$Free\\ Central \\rightarrow No\\ septa$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-007",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "6c87e654-12b9-4770-aa51-9ebfe99529f2",
+        "text": "During aerobic respiration in a mitochondria-rich plant cell, precisely two molecules of pyruvic acid ($CH_3COCOOH$) are completely oxidized through the Link reaction and the Krebs cycle (TCA cycle). Calculate the net yield of $ATP$ molecules generated exclusively through substrate-level phosphorylation (SLP) during these specific stages.",
+        "options": [
+          "2 ATP/GTP",
+          "38 ATP/GTP",
+          "30 ATP/GTP",
+          "4 ATP/GTP"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Respiration in Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Analyze the Link Reaction (Pyruvate to Acetyl CoA). This step produces 1 $CO_2$ and 1 $NADH$, but 0 ATP via Substrate Level Phosphorylation.",
+          "Step 2: Analyze the Krebs Cycle (TCA cycle). One turn of the cycle (for one Acetyl CoA) produces 1 GTP (equivalent to 1 ATP) via SLP during the conversion of Succinyl-CoA to Succinic acid.",
+          "Step 3: Factor in the number of Pyruvic acid molecules. The question specifies 2 molecules of pyruvic acid.",
+          "Step 4: Calculate total SLP: $2 \\text{ molecules} \\times 1 \\text{ ATP per turn} = 2 \\text{ ATP/GTP}$."
+        ],
+        "examTip": "Distinguish between 'Substrate Level Phosphorylation' and 'Oxidative Phosphorylation'. SLP is direct ATP/GTP production without the ETC.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Substrate-level phosphorylation (SLP) involves the direct transfer of a phosphate group to ADP/GDP from a reactive intermediate. In the Krebs cycle, this occurs exactly once per turn.\",\"memoryTrigger\":\"S-S Link: Succinyl-CoA to Succinate is the ONLY step for SLP in Krebs.\",\"visualPrompt\":\"Imagine a hand passing a hot potato (phosphate) directly to a basket (ADP), bypassing the long conveyor belt (ETC).\",\"commonTrap\":\"Including the ATP produced from NADH and FADH2 in the Electron Transport Chain.\"}",
+        "keyFormulas": [
+          "$1\\ Pyruvate \\xrightarrow{Krebs} 1\\ GTP\\ (SLP)$",
+          "$Total\\ ATP\\ (Aerobic) = SLP + Oxidative\\ Phosphorylation$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-017",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "9e31f0a9-1a44-4ad3-8eec-9d3eab1300eb",
+        "text": "The Fluid Mosaic Model, proposed by Singer and Nicolson in $1972$, describes the structure of the cell membrane. According to this model, the 'quasi-fluid' nature of lipids enables the lateral movement of proteins within the overall bilayer. This ability to move within the membrane is measured as its fluidity. Which component is responsible for the 'mosaic' part of the name?",
+        "options": [
+          "Phospholipids",
+          "Carbohydrates",
+          "Proteins",
+          "Cholesterol"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Cell: The Unit of Life",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze the model name ::: 'Fluid Mosaic Model'.",
+          "Fluid component ::: The phospholipid bilayer provides the fluid matrix.",
+          "Mosaic component ::: The 'mosaic' refers to the irregular distribution of proteins (integral and peripheral) within or on the lipid sea.",
+          "Conclusion ::: Proteins represent the mosaic pattern."
+        ],
+        "examTip": "Fluid = Lipids; Mosaic = Proteins. Don't let the word 'Quasi-fluid' confuse you; it just refers to the lipid properties.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Lipids provide a sea-like fluid environment, and proteins are like icebergs floating in that sea (mosaic pattern).\",\"memoryTrigger\":\"Protein-Icebergs in a Lipid-Sea.\",\"visualPrompt\":\"A tiled floor (mosaic) where some tiles (proteins) can actually slide around.\",\"commonTrap\":\"Thinking the 'mosaic' refers to the different types of lipids.\"}",
+        "keyFormulas": [
+          "$RBC\\ Membrane = 52\\%\\ Protein + 40\\%\\ Lipid$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-014",
+          "questionType": "theory_conceptual"
+        }
+      },
+      {
+        "id": "461f6489-20ff-493a-b2ca-1c2daa1f2623",
+        "text": "During a taxonomic survey, a botanist organizes several plant species based on their morphological affinities. Match the following taxonomic categories with their respective suffixes according to the rules of the International Code of Botanical Nomenclature (ICBN): \\n\\n**Column I** \\n(A) Family \\n(B) Order \\n(C) Class \\n(D) Division \\n\\n**Column II** \\n(i) -phyta \\n(ii) -opsida \\n(iii) -ales \\n(iv) -aceae",
+        "options": [
+          "(A)-(iv), (B)-(ii), (C)-(iii), (D)-(i)",
+          "(A)-(iii), (B)-(iv), (C)-(i), (D)-(ii)",
+          "(A)-(i), (B)-(ii), (C)-(iii), (D)-(iv)",
+          "(A)-(iv), (B)-(iii), (C)-(ii), (D)-(i)"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "The Living World",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Recall Family Suffix ::: Family names usually end in '-aceae' (e.g., Solanaceae).",
+          "Recall Order Suffix ::: Order names usually end in '-ales' (e.g., Polymoniales).",
+          "Recall Class Suffix ::: Class names often end in '-opsida', '-ae', or '-phyceae' (e.g., Bryopsida).",
+          "Recall Division Suffix ::: Division names end in '-phyta' (e.g., Spermatophyta).",
+          "Match the codes ::: A-iv, B-iii, C-ii, D-i matches option 1."
+        ],
+        "examTip": "Remember 'FOA' (Family-Order-Ales-Aceae) - Order comes before Family in hierarchy but suffix '-ales' is for Order and '-aceae' is for Family.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Each taxonomic rank has a standardized ending to provide immediate information about the level of classification.\",\"memoryTrigger\":\"Aceae is for Family (The Ace of the Family). Order the Ales (Order -ales).\",\"visualPrompt\":\"Imagine a ladder where each step has a specific colored tag (suffix).\",\"commonTrap\":\"Confusing '-ales' (Order) with '-aceae' (Family).\"}",
+        "keyFormulas": [
+          "Family = -aceae",
+          "Order = -ales"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-014",
+          "questionType": "MATCH_FOLLOWING_MCQ"
+        }
+      },
+      {
+        "id": "df18e374-988d-44ba-869f-742b6c7a3aa5",
+        "text": "In a hypothetical diploid plant cell, the total genomic DNA content is measured as $8.8 \\times 10^{9}$ base pairs. If the average distance between two consecutive base pairs is strictly $0.34$ nm, calculate the total length of DNA present in the nucleus of a single somatic cell of this plant species.",
+        "options": [
+          "5.984 meters",
+          "0.748 meters",
+          "1.496 meters",
+          "2.992 meters"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Molecular Basis of Inheritance",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify the given data. Total base pairs (bp) in a diploid cell = $8.8 \\times 10^{9}$ bp. Distance between base pairs = $0.34$ nm.",
+          "Step 2: Convert the distance between base pairs into meters. $0.34$ nm = $0.34 \\times 10^{-9}$ m.",
+          "Step 3: Apply the formula for DNA length: $Length = \\text{Total bp} \\times \\text{Distance per bp}$.",
+          "Step 4: Substitute the values: $Length = (8.8 \\times 10^{9}) \\times (0.34 \\times 10^{-9})$ meters.",
+          "Step 5: Perform the multiplication: $8.8 \\times 0.34 = 2.992$ meters. The powers of 10 ($10^9$ and $10^{-9}$) cancel each other out."
+        ],
+        "examTip": "Always verify if the given DNA content is for a haploid ($n$) or diploid ($2n$) cell. NEET often provides haploid genome size ($3.3 \\times 10^9$ bp for humans) and asks for the diploid length ($2.2$ m).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The B-DNA model proposed by Watson and Crick defines specific spatial parameters: $0.34$ nm per base pair and $3.4$ nm per turn of the helix.\",\"memoryTrigger\":\"L-B-D: Length = Base-pairs $\\\\times$ Distance.\",\"visualPrompt\":\"Imagine a long thread (DNA) being coiled tightly into a small ball (nucleus). The calculation reveals just how long that 'thread' actually is.\",\"commonTrap\":\"Confusing haploid content with diploid content. Somatic cells are diploid ($2n$), whereas gametes are haploid ($n$).\"}",
+        "keyFormulas": [
+          "$Length = \\text{Number of base pairs} \\times 0.34 \\times 10^{-9}$ m",
+          "$\\text{Number of nucleosomes} = \\frac{\\text{Total bp}}{200}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-001",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "0fa1ea47-8ec3-4240-859b-9f55508c1cfb",
+        "text": "Match the following enzymes/factors involved in the molecular machinery of a cell with their specific functional roles:\\n\\nColumn I:\\n(A) DNA Polymerase III\\n(B) Aminoacyl-tRNA synthetase\\n(C) Peptidyl transferase\\n(D) SnRNPs\\n\\nColumn II:\\n(i) Splicing of hnRNA\\n(ii) Synthesis of leading and lagging strands\\n(iii) Charging of tRNA\\n(iv) Peptide bond formation\\n\\nChoose the correct option:",
+        "options": [
+          "(a) A-(ii), B-(iii), C-(iv), D-(i)",
+          "(c) A-(ii), B-(i), C-(iv), D-(iii)",
+          "(d) A-(iv), B-(iii), C-(ii), D-(i)",
+          "(b) A-(iii), B-(ii), C-(i), D-(iv)"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Molecular Basis of Inheritance",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify DNA Polymerase III - Responsible for adding deoxynucleotides to both leading and lagging strands during replication (A-ii).",
+          "Step 2: Identify Aminoacyl-tRNA synthetase - Catalyzes the attachment of an amino acid to its cognate tRNA, a process called 'charging' (B-iii).",
+          "Step 3: Identify Peptidyl transferase - A ribozyme in the large subunit of the ribosome that forms peptide bonds (C-iv).",
+          "Step 4: Identify SnRNPs (Small nuclear Ribonucleoproteins) - Essential components of the spliceosome that remove introns (D-i).",
+          "Step 5: Match the identified pairs to the options."
+        ],
+        "examTip": "In Match-the-following, use the 'Elimination Method'. If you are certain about two, you can usually find the correct option immediately.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Genetic information flows from DNA to RNA to Protein. Each step is governed by highly specific enzymes: Pol III for DNA, SnRNPs for RNA maturation, and tRNA synthetases/ribozymes for Protein.\",\"memoryTrigger\":\"S-S: SnRNPs for Splicing; P-P: Peptidyl for Peptide bond.\",\"visualPrompt\":\"Imagine an assembly line where each worker (enzyme) has only one specific tool and task.\",\"commonTrap\":\"Confusing DNA Polymerase I (repair/primer removal) with DNA Polymerase III (main synthesis).\"}",
+        "keyFormulas": [
+          "None applicable"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-001",
+          "questionType": "MATCH_FOLLOWING_MCQ"
+        }
+      },
+      {
+        "id": "f5d17db2-b699-4c01-a44e-fc942ae406a0",
+        "text": "A student was examining a specimen of *Rhizophora* in a swampy area. They observed certain roots that grow vertically upwards from the soil to facilitate the exchange of gases. This morphological modification is an exception to the general rule of positively geotropic root growth. Identify the correct technical term and function for these roots.",
+        "options": [
+          "Pneumatophores for respiration",
+          "Stilt roots for absorption",
+          "Prop roots for mechanical support",
+          "Adventitious roots for storage"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Morphology of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify Environment ::: Swampy/Marshy areas (Halophytes).",
+          "Observe Growth Pattern ::: Vertically upwards (Negatively geotropic).",
+          "Functional Analysis ::: Oxygen availability is low in waterlogged soil; hence, roots need to breathe.",
+          "Naming ::: NCERT defines these specifically as Pneumatophores.",
+          "Example Check ::: *Rhizophora* is the classic example provided in the text."
+        ],
+        "examTip": "In morphology, 'vertically upwards' always points to Pneumatophores. Don't confuse them with 'Stilt roots' which grow downwards from lower nodes.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Most roots grow towards gravity (+ve geotropism). Pneumatophores are the exception, growing against gravity to find oxygen.\",\"memoryTrigger\":\"Pneumatophore: 'Pneumo' (Air) + 'Phore' (Bearer).\",\"visualPrompt\":\"Visualize spikes coming out of the mud around a tree in a swamp, acting like 'snorkels'.\",\"commonTrap\":\"Confusing Pneumatophores with Prop roots of Banyan (which grow down).\"}",
+        "keyFormulas": [
+          "Negatively Geotropic = Pneumatophore"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-007",
+          "questionType": "EXCEPTION_BASED_MCQ"
+        }
+      },
+      {
+        "id": "9fa58b47-f8ae-4747-a114-c6f5dfe8376c",
+        "text": "Calculate the total number of ATP molecules required for the synthesis of 2 molecules of glucose in a $C_{3}$ plant pathway (Calvin Cycle), assuming no photorespiratory losses. Use the standard stoichiometric requirements provided in the NCERT syllabus ($CO_{2}$ : ATP : NADPH ratio per cycle).",
+        "options": [
+          "18 ATP",
+          "60 ATP",
+          "36 ATP",
+          "30 ATP"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Photosynthesis in Higher Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Determine single $CO_2$ requirement ::: For 1 $CO_2$ molecule, the Calvin cycle requires 3 ATP and 2 NADPH.",
+          "Determine Glucose requirement ::: 1 Glucose molecule contains 6 Carbons, requiring 6 turns of the cycle.",
+          "Calculate for 1 Glucose ::: $6 \\text{ turns} \\times 3 \\text{ ATP/turn} = 18 \\text{ ATP}$.",
+          "Calculate for 2 Glucose molecules ::: $2 \\text{ molecules} \\times 18 \\text{ ATP/molecule} = 36 \\text{ ATP}$.",
+          "Final Result ::: 36 ATP."
+        ],
+        "examTip": "Always check if the question asks for 1 Glucose, 2 Glucose, or 1 $CO_2$ fixed. Also, check if it's a $C_3$ (18 ATP/glucose) or $C_4$ (30 ATP/glucose) plant.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The Calvin cycle (C3) uses 3 ATP per CO2 (2 for reduction, 1 for regeneration). 6 CO2 = 18 ATP per glucose.\",\"memoryTrigger\":\"C3 = 18 (Adult/Basic); C4 = 30 (Premium/Extra).\",\"visualPrompt\":\"Imagine a factory line where every carbon 'cog' added costs 3 ATP 'coins'. 12 cogs (for 2 glucose) cost 36 coins.\",\"commonTrap\":\"Forgetting to double the value for 2 glucose molecules.\"}",
+        "keyFormulas": [
+          "$\\text{ATP (C3)} = 3 \\times \\text{Number of Carbons Fixed}$",
+          "$\\text{ATP (C4)} = 5 \\times \\text{Number of Carbons Fixed}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-004",
+          "questionType": "CALCULATION_MCQ"
+        }
+      },
+      {
+        "id": "17b5decc-04f4-49e8-85af-69c13727f794",
+        "text": "A diploid cell in a plant species contains a DNA amount of $C = 20\\ pg$ (picograms) at the $G_1$ phase of the cell cycle. If the haploid number of chromosomes for this species is $n = 12$, calculate the DNA amount and the total number of chromatids present in the cell during the $G_2$ phase.",
+        "options": [
+          "$20\\ pg$ DNA and $24$ chromatids",
+          "$40\\ pg$ DNA and $48$ chromatids",
+          "$80\\ pg$ DNA and $48$ chromatids",
+          "$40\\ pg$ DNA and $24$ chromatids"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Cell: The Unit of Life",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Determine DNA amount in $G_2$ ::: In $S$ phase, DNA replicates. If $G_1 = 20\\ pg$ (2C), then $G_2 = 40\\ pg$ (4C).",
+          "Determine Chromosome number ::: The cell is diploid ($2n$). Since $n=12$, the diploid number $2n = 24$.",
+          "Calculate Chromatids in $G_2$ ::: During $G_1$, each chromosome has 1 chromatid ($24$ total). After $S$ phase (in $G_2$), each chromosome has 2 sister chromatids. Total chromatids = $24 \\times 2 = 48$.",
+          "Result ::: $40\\ pg$ DNA and $48$ chromatids."
+        ],
+        "examTip": "DNA doubles in S phase ($2C \\rightarrow 4C$), but Chromosome number remains the same ($2n \\rightarrow 2n$). Each chromosome in $G_2$ has 2 chromatids.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"S phase replicates DNA, doubling the mass ($C$) but the chromosomes are still held together at the centromere, so the count ($n$) doesn't change until Anaphase.\",\"memoryTrigger\":\"$G_1$: 2C, 2n | $S$: DNA doubles | $G_2$: 4C, 2n.\",\"visualPrompt\":\"Imagine 24 sticks in $G_1$. After $S$ phase, they become 24 'X' shapes (each 'X' has 2 chromatids).\",\"commonTrap\":\"Thinking chromosome number doubles in S phase (It doesn't!).\"}",
+        "keyFormulas": [
+          "$DNA\\ in\\ G_2 = 2 \\times DNA\\ in\\ G_1$",
+          "$Chromatids\\ in\\ G_2 = 2 \\times Chromosome\\ number$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-014",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "2667b0bd-16fe-49e8-a203-8b48c97e039f",
+        "text": "Which of the following statements correctly defines the fundamental difference between a 'Virus' and a 'Viroid' based on their structural composition as per NCERT? \\n\\nI. Viruses contain a protein coat (capsid) surrounding the genetic material, whereas viroids lack any protein coat. \\nII. The RNA of viroids is of high molecular weight compared to viruses. \\nIII. Viroids only cause diseases in animals, whereas viruses infect all living organisms. \\nIV. Viroids are larger in size than viruses.",
+        "options": [
+          "All of the above",
+          "I and II only",
+          "I only",
+          "I, II and IV"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Biological Classification",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Statement I Analysis ::: True. Viroids are 'naked' RNA discovered by T.O. Diener.",
+          "Statement II Analysis ::: False. Viroid RNA is specifically mentioned in NCERT as having 'low molecular weight'.",
+          "Statement III Analysis ::: False. Viroids (like Potato Spindle Tuber disease) are primarily known for plant infections.",
+          "Statement IV Analysis ::: False. Viroids are smaller than viruses.",
+          "Selection ::: Only Statement I is correct."
+        ],
+        "examTip": "Viroids = 'Void' of protein. Also, remember 'Low molecular weight RNA' - it's a very common 'False' trap to say 'High'.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Viroids are just the genetic material (RNA) without the protective 'box' (capsid) that viruses have.\",\"memoryTrigger\":\"Viroid = Virus-minus-protein-roid.\",\"visualPrompt\":\"Imagine a candy (Virus) with a wrapper (Capsid) vs just the sugar syrup (Viroid).\",\"commonTrap\":\"Selecting Statement II because 'RNA' sounds complex. Remember: Small size = Low molecular weight.\"}",
+        "keyFormulas": [
+          "Viroid = RNA - Protein coat"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-019",
+          "questionType": "theory_conceptual"
+        }
+      },
+      {
+        "id": "3224c46f-4d51-4c79-8040-ea7a1d4cabe6",
+        "text": "In a hypothetical scenario involving the root system of a terrestrial angiosperm, an observer notes the presence of respiratory roots known as pneumatophores. These structures are specifically evolved to grow vertically upwards (negatively geotropic) to facilitate gas exchange in oxygen-deficient saline marshy environments. Which of the following plants would most likely exhibit this morphological adaptation as per the $NCERT$ guidelines?",
+        "options": [
+          "Opuntia",
+          "Rhizophora",
+          "Asparagus",
+          "Solanum nigrum"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Morphology of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the modification ::: The question describes 'pneumatophores', which are specialized respiratory roots.",
+          "Habitat Analysis ::: Pneumatophores are characteristic of halophytes (plants growing in swampy/salty areas) where oxygen is limited in the soil.",
+          "Match with NCERT Examples ::: According to NCERT Morphology of Flowering Plants, Rhizophora is the classic example of a plant growing in swampy areas that possesses pneumatophores.",
+          "Eliminate other options ::: Opuntia has phylloclades (stem modification), Asparagus has fasciculated fleshy roots for storage, and Solanum nigrum has a standard taproot system."
+        ],
+        "examTip": "When you see 'negatively geotropic roots' or 'swampy/marshy areas', immediately look for Rhizophora or the term Pneumatophore.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Roots normally grow downwards (positive geotropism), but pneumatophores grow upwards to obtain oxygen via small pores called lenticels.\",\"memoryTrigger\":\"Pneumo = Air/Gas (like Pneumonia or Pneumatic), Phore = Bearing. Rhizophora 'Rises' for air.\",\"visualPrompt\":\"Imagine spikes coming out of the mud around a tree in a swampy coastal area.\",\"commonTrap\":\"Confusing pneumatophores (roots) with phylloclades or cladodes (stems).\"}",
+        "keyFormulas": [
+          "$Pneumatophores = Negative\\ Geotropism$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-007",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "656249fc-9f11-4c7f-b4c7-d559ddc215f7",
+        "text": "An ecologist is studying energy dynamics in a grassland ecosystem. The Gross Primary Productivity (GPP) is measured at $40,000\\ kcal/m^2/yr$. If the autotrophs utilize $25\\%$ of this energy for their own respiration, and the 10% Law of energy transfer applies strictly to subsequent trophic levels, calculate the Net Primary Productivity (NPP) and the energy available to the tertiary consumers (top carnivores) respectively.",
+        "options": [
+          "$10,000\\ kcal/m^2/yr$ and $300\\ kcal/m^2/yr$",
+          "$30,000\\ kcal/m^2/yr$ and $300\\ kcal/m^2/yr$",
+          "$40,000\\ kcal/m^2/yr$ and $40\\ kcal/m^2/yr$",
+          "$30,000\\ kcal/m^2/yr$ and $30\\ kcal/m^2/yr$"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Ecosystem",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Calculate NPP ::: $NPP = GPP - R$. Given $R = 25\\%$ of $GPP$. So, $NPP = 40,000 - (0.25 \\times 40,000) = 40,000 - 10,000 = 30,000\\ kcal/m^2/yr$.",
+          "Step 2: Define the trophic chain ::: Producers (T1) $\\rightarrow$ Primary Consumers (T2) $\\rightarrow$ Secondary Consumers (T3) $\\rightarrow$ Tertiary Consumers (T4).",
+          "Step 3: Energy at T1 (Producers) ::: This is the NPP = $30,000\\ kcal$.",
+          "Step 4: Energy transfer to T2 (Herbivores) ::: $10\\%$ of $30,000 = 3,000\\ kcal$.",
+          "Step 5: Energy transfer to T3 (Secondary Consumers) ::: $10\\%$ of $3,000 = 300\\ kcal$.",
+          "Step 6: Energy transfer to T4 (Tertiary Consumers) ::: $10\\%$ of $300 = 30\\ kcal$.",
+          "Step 7: Match with options ::: NPP = $30,000$; Tertiary energy = $30$. Option 1 matches."
+        ],
+        "examTip": "Energy transfer is always calculated from the NPP (Net Primary Productivity), not GPP, because respiration energy is lost to the environment as heat and is not available to the next level.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"GPP is total photosynthesis. NPP is what's left for the ecosystem. Lindeman's Law (10% law) states only 10% of energy is transferred to the next trophic level.\",\"memoryTrigger\":\"G-R-N (GPP - Respiration = NPP).\",\"visualPrompt\":\"Imagine a leaking bucket. GPP is the water going in, Respiration is the leak, and NPP is the water available to be poured into the next (smaller) bucket.\",\"commonTrap\":\"Starting the 10% calculation from GPP instead of NPP.\"}",
+        "keyFormulas": [
+          "$NPP = GPP - R$",
+          "$E_{n+1} = E_n \\times 0.1$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-011",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "7295f5d6-fea5-406e-aa59-4b5559041104",
+        "text": "A molecular biologist performs a Polymerase Chain Reaction (PCR) starting with 4 initial double-stranded DNA templates. If the thermal cycler is programmed for 6 complete cycles of denaturation, annealing, and extension with optimal efficiency, what is the total number of newly synthesized DNA strands (individual single strands) produced at the end of the reaction?",
+        "options": [
+          "256 strands",
+          "512 strands",
+          "504 strands",
+          "128 strands"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Biotechnology Principles and Processes",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify initial templates. $N_0 = 4$ double-stranded DNA molecules.",
+          "Step 2: Use the formula for amplification: $N = N_0 \\times 2^n$, where $n$ is the number of cycles.",
+          "Step 3: Calculate total double-stranded molecules after 6 cycles: $4 \\times 2^6 = 4 \\times 64 = 256$ double-stranded molecules.",
+          "Step 4: Convert double-stranded molecules to total single strands: $256 \\times 2 = 512$ total strands.",
+          "Step 5: The question asks for 'newly synthesized' strands. Initial strands = $4 \\times 2 = 8$ strands. Newly synthesized = Total strands - Initial strands = $512 - 8 = 504$."
+        ],
+        "examTip": "Distinguish between 'total DNA molecules', 'total strands', and 'newly synthesized strands'. Subtraction of initial templates is critical if the word 'newly' is used.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"PCR uses Taq polymerase to double the DNA count every cycle. Each cycle consists of Denaturation ($94^\\\\circ C$), Annealing ($50-60^\\\\circ C$), and Extension ($72^\\\\circ C$).\",\"memoryTrigger\":\"2 to the power of 'n' cycles.\",\"visualPrompt\":\"Visualize a tree branching out; every node splits into two at every level (cycle).\",\"commonTrap\":\"Forgetting to double the count when asked for 'strands' instead of 'molecules'.\"}",
+        "keyFormulas": [
+          "$N = N_0 \\times 2^n$ (Total double-stranded molecules)",
+          "$\\text{Total Strands} = 2 \\times (N_0 \\times 2^n)$",
+          "$\\text{New Strands} = \\text{Total Strands} - 2N_0$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-002",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "dce2af08-e99b-4fd9-a247-92a834bdc5a0",
+        "text": "Polymeric substances are critical structural and storage components in plant biology. Within the context of homopolysaccharides mentioned in the NCERT curriculum, which of the following molecules represents an EXCEPTION to the category of 'polymers of glucose'?",
+        "options": [
+          "Cellulose",
+          "Inulin",
+          "Glycogen",
+          "Starch"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Biomolecules",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze Option 1 ::: Cellulose is a homopolymer of $\\beta$-glucose (structural component).",
+          "Analyze Option 2 ::: Starch is a homopolymer of $\\alpha$-glucose (storage in plants).",
+          "Analyze Option 3 ::: Glycogen is a homopolymer of $\\alpha$-glucose (storage in animals/fungi).",
+          "Analyze Option 4 ::: Inulin is a polymer, but its monomer is Fructose, not Glucose.",
+          "Conclusion ::: Inulin is the exception to the 'glucose polymer' group."
+        ],
+        "examTip": "Inulin (with an 'n') is a fructose polymer. Insulin (with an 's') is a protein hormone. Do not confuse them!",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Most common biological polysaccharides are glucose-based. Inulin is a rare but notable fructose-based one.\",\"memoryTrigger\":\"Fru-In (Fructose Inulin).\",\"visualPrompt\":\"A chain of hexangular rings (glucose) vs a chain of pentangular rings (fructose in Inulin).\",\"commonTrap\":\"Confusing Inulin with Insulin.\"}",
+        "keyFormulas": [
+          "$\\text{Inulin} = (\\text{Fructose})_n$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-012",
+          "questionType": "EXCEPTION_BASED_MCQ"
+        }
+      },
+      {
+        "id": "f0bf4c1d-6b0c-46d3-968c-df9277a41e82",
+        "text": "In a sophisticated Sewage Treatment Plant (STP) using the Activated Sludge Process, the 'Biological Oxygen Demand' (BOD) of the primary effluent was measured at $450 \\text{ mg/L}$. After treatment in the aeration tank until the 'flocs' achieved maximum growth, the BOD dropped to $25 \\text{ mg/L}$. Match the following components of this process with their specific characteristics or outcomes as per NCERT protocol:\\n\\n**Column I**\\n(A) Primary Sludge\\n(B) Activated Sludge\\n(C) Flocs\\n(D) Anaerobic Sludge Digesters\\n\\n**Column II**\\n(i) Masses of bacteria associated with fungal filaments to form mesh-like structures\\n(ii) All solids that settle during the physical removal of particles\\n(iii) A small part of this is used as inoculum in the aeration tank\\n(iv) Site where biogas (methane, hydrogen sulphide, and $CO_2$) is produced\\n\\nIdentify the correct option:",
+        "options": [
+          "(A)-(iv), (B)-(iii), (C)-(i), (D)-(ii)",
+          "(A)-(ii), (B)-(i), (C)-(iii), (D)-(iv)",
+          "(A)-(ii), (B)-(iii), (C)-(iv), (D)-(i)",
+          "(A)-(ii), (B)-(iii), (C)-(i), (D)-(iv)"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Microbes in Human Welfare",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify 'Primary Sludge'. This refers to the physical settlement during primary treatment. Matches (ii).",
+          "Step 2: Identify 'Activated Sludge'. This is the sediment from the settling tank after aeration, where a part is pumped back as inoculum. Matches (iii).",
+          "Step 3: Identify 'Flocs'. NCERT defines these specifically as bacterial masses with fungal filaments. Matches (i).",
+          "Step 4: Identify 'Anaerobic Sludge Digesters'. This is where the bulk of activated sludge is pumped and biogas is produced. Matches (iv).",
+          "Step 5: Combine matches: A-ii, B-iii, C-i, D-iv."
+        ],
+        "examTip": "Pay close attention to the difference between 'Primary Sludge' and 'Activated Sludge'. Primary is physical (sand/grit), Activated is biological (flocs).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The goal of STP is to reduce BOD. High BOD = High polluting potential. Aerobic bacteria (Flocs) consume organic matter in the aeration tank, then they are digested anaerobically to produce biogas.\",\"memoryTrigger\":\"Flocs = Filament + Bacteria. Activated Sludge = Inoculum. Digesters = Biogas.\",\"visualPrompt\":\"Imagine a bubbling tank (aeration) followed by a quiet settling tank, then a sealed 'digester' tank without air where gas is collected from the top.\",\"commonTrap\":\"Confusing where biogas is produced. Biogas is produced in the *Anaerobic Sludge Digester*, not the aeration tank.\"}",
+        "keyFormulas": [
+          "$\\text{BOD} \\propto \\text{Organic matter in water}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-004",
+          "questionType": "match_following_mcq"
+        }
+      },
+      {
+        "id": "7f7ee115-d6be-4512-9223-62d991056e19",
+        "text": "In the family Cyperaceae, a researcher observes a 'reduction' in the efficiency of microsporogenesis. If a specific species of *Cyperus* requires the production of $360$ functional pollen grains for an pollination study, calculate the minimum number of Microspore Mother Cells (MMCs) that must undergo meiotic division.",
+        "options": [
+          "1440",
+          "90",
+          "360",
+          "180"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Sexual Reproduction in Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Recall the biological exception: In most angiosperms, 1 MMC produces 4 functional pollen grains. However, in *Cyperus* (Cyperaceae), 3 out of 4 microspores degenerate.",
+          "Identify the ratio: For *Cyperus*, 1 MMC $\\rightarrow$ 1 functional pollen grain (similar to megasporogenesis).",
+          "Apply the requirement: To get 360 functional pollen grains, we need a 1:1 ratio of MMCs.",
+          "Calculate: $360 \\text{ Pollen} \\times 1 \\text{ MMC/Pollen} = 360 \\text{ MMCs}$.",
+          "Conclusion: The number of meiotic divisions required is 360."
+        ],
+        "examTip": "Whenever 'Cyperus' or 'Cyperaceae' is mentioned in a pollen calculation, use the 1:1 rule instead of the standard 1:4 rule.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Usually, microsporogenesis yields 4 products per meiosis. In Cyperaceae, three nuclei are pushed to the side and degenerate, leaving only one functional microspore, mimicking the megasporogenesis pattern.\",\"memoryTrigger\":\"Cyperus = Single (1 MMC = 1 Pollen).\",\"visualPrompt\":\"Imagine a tetrad where three cells shrink and disappear, leaving one large, healthy pollen grain.\",\"commonTrap\":\"Dividing 360 by 4 to get 90 (the standard rule) or multiplying by 4 to get 1440.\"}",
+        "keyFormulas": [
+          "$\\text{Standard Pollen} = \\text{MMCs} \\times 4$",
+          "$\\text{Cyperaceae Pollen} = \\text{MMCs} \\times 1$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-005",
+          "questionType": "exception_based_mcq"
+        }
+      },
+      {
+        "id": "72099cdb-0a48-4f87-94a1-d32ea3274528",
+        "text": "Calculate the Respiratory Quotient ($RQ$) for the complete aerobic oxidation of Tripalmitin ($C_{51}H_{98}O_6$), a common storage lipid found in seeds. Use the standard balanced equation: $2(C_{51}H_{98}O_6) + 145 O_2 \\rightarrow 102 CO_2 + 98 H_2O + Energy$.",
+        "options": [
+          "1.4",
+          "1.0",
+          "0.7",
+          "0.9"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Respiration in Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Define Respiratory Quotient ($RQ$). $RQ = \\text{Volume of } CO_2 \\text{ evolved} / \\text{Volume of } O_2 \\text{ consumed}$.",
+          "Step 2: From the balanced equation, identify the moles of $CO_2$ produced. There are $102$ moles of $CO_2$.",
+          "Step 3: From the equation, identify the moles of $O_2$ consumed. There are $145$ moles of $O_2$.",
+          "Step 4: Perform the calculation: $RQ = 102 / 145$.",
+          "Step 5: Solve the division: $102 / 145 \\approx 0.703$."
+        ],
+        "examTip": "RQ values are: Carbohydrates = 1.0, Fats (Lipids) \\u2248 0.7, Proteins \\u2248 0.9, Organic Acids > 1.0. Memorize these standard values for quick answers.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"RQ depends on the oxygen content of the substrate. Fats are oxygen-poor, so they require more external $O_2$ for oxidation, leading to an $RQ < 1$.\",\"memoryTrigger\":\"Fat is 0.7 (F is near 7). Protein is 0.9 (P looks like 9). Carb is 1.0 (C is 1st choice).\",\"visualPrompt\":\"Imagine a balloon expanding with $CO_2$ and shrinking with $O_2$; for fats, the $O_2$ intake is much bigger than the $CO_2$ output.\",\"commonTrap\":\"Inverting the ratio ($145/102$) or confusing Tripalmitin with a carbohydrate.\"}",
+        "keyFormulas": [
+          "$RQ = \\frac{\\text{moles of } CO_2}{\\text{moles of } O_2}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-017",
+          "questionType": "calculation"
+        }
+      }
+    ]
+  }
+}

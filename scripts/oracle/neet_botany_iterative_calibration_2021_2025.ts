@@ -1,11 +1,11 @@
 /**
- * NEET ubotany Iterative Calibration (2021-2025)
+ * NEET Botany Iterative Calibration (2021-2025)
  * REI v16 - Full 50-Question Paper Generation & Calibration
  *
  * This script:
  * 1. Uses 2021 as baseline
  * 2. For each year (2022-2025):
- *    - Generates predicted 50-question paper
+ *    - Generates predicted 50-question paper (45 for 2025)
  *    - Compares with actual paper question-by-question
  *    - Adjusts REI parameters iteratively to achieve 80%+ match
  * 3. Outputs final calibrated parameters and comprehensive reports
@@ -50,15 +50,15 @@ if (!GEMINI_API_KEY) {
 }
 
 const EXAM_CONTEXT = 'NEET';
-const SUBJECT = 'ubotany';
-const TOTAL_QUESTIONS = 50; // NEET has 50 ubotany questions per year
+const SUBJECT = 'Botany';
+const TOTAL_QUESTIONS = 50; // NEET has 50 Botany questions per year (45 in 2025)
 
 const OFFICIAL_SCANS: Record<number, string> = {
-  2021: 'ca38a537-5516-469a-abd4-967a76b32028', // NEET 2021 Combined Paper [23:55] (50 ubotany Qs)
-  2022: 'b19037fb-980a-41e1-89a0-d28a5e1c0033', // NEET  Combined Paper [12:31] (50 ubotany Qs)
-  2023: 'e3767338-1664-4e03-b0f6-1fab41ff5838', // NEET 2023 Combined Paper [09:30] (50 ubotany Qs)
-  2024: '95fa7fc6-4ebd-4183-b61a-b1d5a39cfec5', // NEET  Combined Paper [14:55] (50 ubotany Qs)
-  2025: '4f682118-d0ce-4f6f-95c7-6141e496579f'  // NEET 2025 Combined Paper [13:52] (50 ubotany Qs)
+  2021: 'ca38a537-5516-469a-abd4-967a76b32028', // NEET 2021 Combined Paper [23:55] (50 Botany Qs)
+  2022: 'b19037fb-980a-41e1-89a0-d28a5e1c0033', // NEET 2022 Combined Paper [12:31] (49 Botany Qs)
+  2023: 'e3767338-1664-4e03-b0f6-1fab41ff5838', // NEET 2023 Combined Paper [09:30] (50 Botany Qs)
+  2024: '95fa7fc6-4ebd-4183-b61a-b1d5a39cfec5', // NEET 2024 Combined Paper [14:55] (50 Botany Qs)
+  2025: '4f682118-d0ce-4f6f-95c7-6141e496579f'  // NEET 2025 Combined Paper [13:52] (45 Botany Qs)
 };
 
 const MAX_ITERATIONS_PER_YEAR = 10;
@@ -68,7 +68,7 @@ const TARGET_MATCH_RATE = 0.80;
  * Main orchestrator function
  */
 async function runIterativeCalibration() {
-  console.log('\n🔄 NEET PHYSICS ITERATIVE CALIBRATION (2021-2025)');
+  console.log('\n🔄 NEET BOTANY ITERATIVE CALIBRATION (2021-2025)');
   console.log('═══════════════════════════════════════════════════\n');
 
   // Load identity bank and engine config
@@ -185,7 +185,7 @@ async function runIterativeCalibration() {
   }
 
   // Generate main calibration report
-  const reportPath = path.join(outputDir, 'NEET_PHYSICS_CALIBRATION_REPORT_2021_2025.md');
+  const reportPath = path.join(outputDir, 'NEET_BOTANY_CALIBRATION_REPORT_2021_2025.md');
   generateCalibrationReport(multiYearReport, reportPath);
 
   // Generate per-year iteration logs
@@ -216,7 +216,7 @@ async function runIterativeCalibration() {
     solve_tension_multiplier: currentState.parameters.solveTensionMultiplier,
     projection_buffer: currentState.parameters.projectionBuffer,
     last_updated: new Date().toISOString(),
-    calibration_note: 'Calibrated using iterative RWC (2021-2025) - NEET ubotany'
+    calibration_note: 'Calibrated using iterative RWC (2021-2025) - NEET Botany'
   };
 
   const updatedEngineConfigPath = path.join(
@@ -239,7 +239,7 @@ async function runIterativeCalibration() {
   console.log(`   - Main Report: ${reportPath}`);
   console.log(`   - Identity Bank: ${identityBankPath}`);
   console.log(`   - Engine Config: ${updatedEngineConfigPath}`);
-  console.log(`   - Iteration Logs: ${outputDir}/NEET_PHYSICS_*_ITERATION_LOG.md\n`);
+  console.log(`   - Iteration Logs: ${outputDir}/NEET_BOTANY_*_ITERATION_LOG.md\n`);
 }
 
 /**
@@ -252,7 +252,7 @@ async function extract2021Baseline(identities: any[]) {
     .from('questions')
     .select('text, topic, difficulty, options, correct_option_index, solution_steps, subject')
     .eq('scan_id', OFFICIAL_SCANS[2021])
-    .eq('subject', 'ubotany')
+    .eq('subject', 'Botany')
     .order('question_order');
 
   if (!questions || questions.length === 0) {
@@ -302,7 +302,7 @@ async function calibrateYear(
     .from('questions')
     .select('text, topic, difficulty, options, correct_option_index, solution_steps, subject')
     .eq('scan_id', OFFICIAL_SCANS[year])
-    .eq('subject', 'ubotany')
+    .eq('subject', 'Botany')
     .order('question_order');
 
   if (!actualQuestions || actualQuestions.length === 0) {
@@ -596,44 +596,46 @@ function buildGenerationContext(
 }
 
 /**
- * Normalize DB chapter names to Official NTA NEET 2026 Unit Names
- * Source: https://nta.ac.in/Download/Notice/Notice_20260108180635.pdf
+ * Normalize DB chapter names to Official NTA NEET 2026 Botany Chapter Names
+ * Source: NTA NEET 2026 Syllabus (Class 11 + Class 12 Biology)
  */
 function normalizeToNTAUnit(dbTopic: string): string {
   const mapping: Record<string, string> = {
-    'units and measurements': 'PHYSICS AND MEASUREMENT',
-    'motion in a straight line': 'KINEMATICS',
-    'motion in a plane': 'KINEMATICS',
-    'laws of motion': 'LAWS OF MOTION',
-    'work, energy and power': 'WORK, ENERGY, AND POWER',
-    'system of particles and rotational motion': 'ROTATIONAL MOTION',
-    'gravitation': 'GRAVITATION',
-    'mechanical properties of solids': 'PROPERTIES OF SOLIDS AND LIQUIDS',
-    'mechanical properties of fluids': 'PROPERTIES OF SOLIDS AND LIQUIDS',
-    'thermal properties of matter': 'PROPERTIES OF SOLIDS AND LIQUIDS',
-    'thermodynamics': 'THERMODYNAMICS',
-    'kinetic theory of gases': 'KINETIC THEORY OF GASES',
-    'kinetic theory': 'KINETIC THEORY OF GASES',
-    'oscillations': 'OSCILLATIONS AND WAVES',
-    'waves': 'OSCILLATIONS AND WAVES',
-    'electric charges and fields': 'ELECTROSTATICS',
-    'electrostatic potential and capacitance': 'ELECTROSTATICS',
-    'current electricity': 'CURRENT ELECTRICITY',
-    'moving charges and magnetism': 'MAGNETIC EFFECTS OF CURRENT AND MAGNETISM',
-    'magnetism and matter': 'MAGNETIC EFFECTS OF CURRENT AND MAGNETISM',
-    'electromagnetic induction': 'ELECTROMAGNETIC INDUCTION AND ALTERNATING CURRENTS',
-    'alternating current': 'ELECTROMAGNETIC INDUCTION AND ALTERNATING CURRENTS',
-    'electromagnetic waves': 'ELECTROMAGNETIC WAVES',
-    'ray optics and optical instruments': 'OPTICS',
-    'wave optics': 'OPTICS',
-    'dual nature of radiation and matter': 'DUAL NATURE OF MATTER AND RADIATION',
-    'atoms': 'ATOMS AND NUCLEI',
-    'nuclei': 'ATOMS AND NUCLEI',
-    'semiconductor electronics: materials, devices and simple circuits': 'ELECTRONIC DEVICES',
-    'communication systems': 'REMOVED_FROM_NEET_2026'
+    // Class 11 Botany
+    'the living world': 'The Living World',
+    'biological classification': 'Biological Classification',
+    'plant kingdom': 'Plant Kingdom',
+    'plant kingdom - bryophytes': 'Plant Kingdom',
+    'plant kingdom - pteridophytes': 'Plant Kingdom',
+    'plant kingdom - gymnosperms': 'Plant Kingdom',
+    'plant kingdom - angiosperms': 'Plant Kingdom',
+    'morphology of flowering plants': 'Morphology of Flowering Plants',
+    'anatomy of flowering plants': 'Anatomy of Flowering Plants',
+    'cell: the unit of life': 'Cell: The Unit of Life',
+    'cell - the unit of life': 'Cell: The Unit of Life',
+    'cell cycle and cell division': 'Cell Cycle and Cell Division',
+    'transport in plants': 'Transport in Plants',
+    'mineral nutrition': 'Mineral Nutrition',
+    'photosynthesis in higher plants': 'Photosynthesis in Higher Plants',
+    'respiration in plants': 'Respiration in Plants',
+    'plant growth and development': 'Plant Growth and Development',
+    // Class 12 Botany
+    'reproduction in organisms': 'Reproduction in Organisms',
+    'sexual reproduction in flowering plants': 'Sexual Reproduction in Flowering Plants',
+    'principles of inheritance and variation': 'Principles of Inheritance and Variation',
+    'molecular basis of inheritance': 'Molecular Basis of Inheritance',
+    'evolution': 'Evolution',
+    'organisms and populations': 'Organisms and Populations',
+    'ecosystem': 'Ecosystem',
+    'biodiversity and conservation': 'Biodiversity and its Conservation',
+    'biodiversity and its conservation': 'Biodiversity and its Conservation',
+    'biotechnology: principles and processes': 'Biotechnology: Principles and Processes',
+    'biotechnology and its applications': 'Biotechnology and its Applications',
+    'strategies for enhancement in food production': 'Strategies for Enhancement in Food Production',
+    'biomolecules': 'Biomolecules'
   };
 
-  return mapping[dbTopic.toLowerCase()] || dbTopic.toUpperCase();
+  return mapping[dbTopic.toLowerCase()] || dbTopic;
 }
 
 /**

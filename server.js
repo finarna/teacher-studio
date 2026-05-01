@@ -621,7 +621,7 @@ app.get('/api/flashcards/:scanId', async (req, res) => {
 
 /**
  * POST /api/generate-flagship-pdf
- * Body: { paperId: 'neet-physics-set-a' | 'neet-physics-set-b' | 'neet-chemistry-set-a' | 'neet-chemistry-set-b' }
+ * Body: { paperId: 'neet-physics-set-a' | 'neet-physics-set-b' | 'neet-chemistry-set-a' | 'neet-chemistry-set-b' | 'neet-botany-set-a' | 'neet-botany-set-b' | 'neet-zoology-set-a' | 'neet-zoology-set-b' }
  * Returns: PDF binary stream
  */
 app.post('/api/generate-flagship-pdf', async (req, res) => {

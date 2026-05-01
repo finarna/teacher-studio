@@ -19,9 +19,9 @@
         "text": "A proton and an alpha particle, having the same linear momentum, enter a region of uniform magnetic field $B$ perpendicularly. If $r_p$ and $r_\\alpha$ are the radii of their respective circular paths, the ratio $r_p : r_\\alpha$ is:",
         "options": [
           "$1 : 1$",
+          "$4 : 1$",
           "$1 : 2$",
-          "$2 : 1$",
-          "$4 : 1$"
+          "$2 : 1$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -36,30 +36,30 @@
           "Charge Comparison ::: The charge of a proton is $q_p = +e$. The charge of an alpha particle (Helium nucleus) is $q_\\alpha = +2e$.",
           "Calculate Ratio ::: $\\frac{r_p}{r_\\alpha} = \\frac{q_\\alpha}{q_p} = \\frac{2e}{e} = 2$. Therefore, the ratio is $2:1$."
         ],
-        "examTip": "Always identify which quantity is 'constant' in the question (Momentum, Kinetic Energy, or Velocity). The formula for $r$ changes for each: $p/qB$, $\\sqrt{2}mK/qB$, or $mv/qB$.",
+        "examTip": "Always identify which quantity is 'constant' in the question (Momentum, Kinetic Energy, or Velocity). The formula for $r$ changes for each: $p/qB$, $\\sqrt{2mK}/qB$, or $mv/qB$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"In a magnetic field, the radius of curvature is a measure of how 'stiff' a particle's trajectory is. More momentum makes it harder to bend, while more charge makes the field's 'grip' stronger.\", \"memoryTrigger\": \"Alpha is Twice as Charged: So it gets pulled into a circle twice as tight (half the radius) for the same momentum.\", \"visualPrompt\": \"Imagine two cars turning a corner; the one with more 'grip' (charge) can make a tighter (smaller) turn.\", \"commonTrap\": \"Using mass ratio (4:1) instead of charge ratio. Mass only matters if velocity or kinetic energy is constant, not momentum.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"In a magnetic field, the radius of curvature is a measure of how 'stiff' a particle's trajectory is. More momentum makes it harder to bend, while more charge makes the field's 'grip' stronger.\",\"memoryTrigger\":\"Alpha is Twice as Charged: So it gets pulled into a circle twice as tight (half the radius) for the same momentum.\",\"visualPrompt\":\"Imagine two cars turning a corner; the one with more 'grip' (charge) can make a tighter (smaller) turn.\",\"commonTrap\":\"Using mass ratio (4:1) instead of charge ratio. Mass only matters if velocity or kinetic energy is constant, not momentum.\"}",
         "keyFormulas": [
           "$r = \\frac{mv}{qB}$",
           "$r = \\frac{p}{qB}$",
-          "$r = \\frac{\\sqrt}{2mK}{qB}$"
+          "$r = \\frac{\\sqrt{2mK}}{qB}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "2ce6ccd9-683a-467b-9e76-f3bae3bd6866",
         "text": "An electron in a hydrogen-like atom with atomic number $Z$ undergoes a transition from an orbit with principal quantum number $n$ to another orbit such that its de Broglie wavelength decreases to exactly half of its initial value. If the initial orbit was the fourth excited state, what is the final principal quantum number of the electron?",
         "options": [
           "2",
-          "1",
+          "5",
           "3",
-          "5"
+          "1"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -77,7 +77,7 @@
         ],
         "examTip": "Always clarify the difference between 'n-th orbit' and 'n-th excited state'. Excited state = $n+1$. Also, $\\lambda_{deBroglie} \\propto n$ is a direct result of Bohr's quantization condition $2\\pi r = n\\lambda$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The de Broglie wavelength of an electron in the $n^{th}$ orbit is such that the circumference is an integer multiple of the wavelength ($2\\\\pi r = n\\\\lambda$). Since $r_n = a_0 n^2$, then $n\\\\lambda = 2\\\\pi a_0 n^2$, implying $\\\\lambda \\\\propto n$.\", \"memoryTrigger\": \"Lamb-N: Lambda is proportional to N. (Simple linear relationship).\", \"visualPrompt\": \"Imagine a string tied in a circle. To form a standing wave, you can only fit 1, 2, or 3 full waves. Each wave is the de Broglie wavelength.\", \"commonTrap\": \"Using $\\\\lambda \\\\propto 1/v$ but forgetting how $v$ depends on $n$ ($v \\\\propto 1/n$).\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The de Broglie wavelength of an electron in the $n^{th}$ orbit is such that the circumference is an integer multiple of the wavelength ($2\\\\pi r = n\\\\lambda$). Since $r_n = a_0 n^2$, then $n\\\\lambda = 2\\\\pi a_0 n^2$, implying $\\\\lambda \\\\propto n$.\",\"memoryTrigger\":\"Lamb-N: Lambda is proportional to N. (Simple linear relationship).\",\"visualPrompt\":\"Imagine a string tied in a circle. To form a standing wave, you can only fit 1, 2, or 3 full waves. Each wave is the de Broglie wavelength.\",\"commonTrap\":\"Using $\\\\lambda \\\\propto 1/v$ but forgetting how $v$ depends on $n$ ($v \\\\propto 1/n$).\"}",
         "keyFormulas": [
           "$\\lambda = \\frac{h}{mv}$",
           "$2\\pi r = n\\lambda$",
@@ -85,11 +85,11 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-007",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "553adc1f-112b-4af1-95f8-530cfd34dd18",
@@ -97,8 +97,8 @@
         "options": [
           "$f' = f, \\lambda' = 1.5\\lambda$",
           "$f' = 1.5f, \\lambda' = \\lambda$",
-          "$f' = f, \\lambda' = \\lambda/1.5$",
-          "$f' = f/1.5, \\lambda' = \\lambda/1.5$"
+          "$f' = f/1.5, \\lambda' = \\lambda/1.5$",
+          "$f' = f, \\lambda' = \\lambda/1.5$"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -115,7 +115,7 @@
         ],
         "examTip": "Frequency is the 'identity' of the light. Wavelength and Speed are 'environmental' variables that change with the medium. Never change frequency during refraction!",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Refractive index $\\\\mu$ defines how much the wave 'slows down'. Since $v = f\\\\lambda$, and $f$ is constant (set by oscillations at the source), $\\\\lambda$ must decrease proportionally to $v$.\", \"memoryTrigger\": \"Frequency stays Firm (f is constant). Wavelength is Weak (changes in medium).\", \"visualPrompt\": \"Imagine a line of soldiers marching. If they hit mud (denser medium), they slow down and get closer together (shorter wavelength), but the 'beat' of the drum (frequency) remains the same.\", \"commonTrap\": \"Assuming frequency changes inversely with refractive index like speed does.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Refractive index $\\\\mu$ defines how much the wave 'slows down'. Since $v = f\\\\lambda$, and $f$ is constant (set by oscillations at the source), $\\\\lambda$ must decrease proportionally to $v$.\",\"memoryTrigger\":\"Frequency stays Firm (f is constant). Wavelength is Weak (changes in medium).\",\"visualPrompt\":\"Imagine a line of soldiers marching. If they hit mud (denser medium), they slow down and get closer together (shorter wavelength), but the 'beat' of the drum (frequency) remains the same.\",\"commonTrap\":\"Assuming frequency changes inversely with refractive index like speed does.\"}",
         "keyFormulas": [
           "$\\mu = c/v$",
           "$\\mu = \\lambda_{vac} / \\lambda_{med}$",
@@ -123,20 +123,20 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "606f95e3-5f22-4ae1-beb7-acc97b293b8d",
         "text": "A proton and an alpha particle are accelerated from rest through the same potential difference $V$. They subsequently enter a region of uniform magnetic field $B$ such that their velocity vectors are perpendicular to the magnetic field lines. Considering the fundamental relationship between the radius of the circular path $r$ and the accelerating potential $V$ given by $r = \\frac{1}{B}\\sqrt{\\frac{2mV}{q}}$, what is the ratio of the radius of the proton's path ($r_p$) to that of the alpha particle's path ($r_\\alpha$)?",
         "options": [
-          "1 : 1",
           "1 : $\\sqrt{2}$",
-          "$\\sqrt{2}$ : 1",
-          "1 : 2"
+          "1 : 2",
+          "1 : 1",
+          "$\\sqrt{2}$ : 1"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -147,32 +147,32 @@
         "solutionSteps": [
           "Step 1: Identify the given physical constants for the particles. For a proton ($p$), mass $m_p = m$ and charge $q_p = e$. For an alpha particle ($\\alpha$), mass $m_\\alpha = 4m$ and charge $q_\\alpha = 2e$.",
           "Step 2: Express the radius formula in terms of the ratio. Since $B$ and $V$ are constant for both particles, $r \\propto \\sqrt{\\frac{m}{q}}$.",
-          "Step 3: Set up the ratio equation: $\\frac{r_p}{r_\\alpha} = \\sqrt{\\frac{m_p / q_p}{m_\\alpha / q_\\alpha}}$.",
-          "Step 4: Substitute the values: $\\frac{r_p}{r_\\alpha} = \\sqrt{\\frac{m/e}{4m/2e}} = \\sqrt{\\frac{2}{4}} = \\sqrt{\\frac{1}{2}}$.",
+          "Step 3: Set up the ratio equation: $\\frac{r_p}{r_\\alpha} = \\sqrt{\\frac{m_p}{q_p} \\cdot \\frac{q_\\alpha}{m_\\alpha}}$.",
+          "Step 4: Substitute the values: $\\frac{r_p}{r_\\alpha} = \\sqrt{\\frac{m}{e} \\cdot \\frac{2e}{4m}} = \\sqrt{\\frac{2}{4}} = \\sqrt{\\frac{1}{2}}$.",
           "Step 5: Conclude the final ratio as $1 : \\sqrt{2}$."
         ],
-        "examTip": "Whenever 'accelerated through the same potential' is mentioned, always use the formula involving $V$ ($r = \\frac{\\sqrt{2}mqV}{qB}$) rather than momentum $p$ or velocity $v$ to save time in substitutions.",
+        "examTip": "Whenever 'accelerated through the same potential' is mentioned, always use the formula involving $V$ ($r = \\frac{\\sqrt{2mqV}}{qB}$) rather than momentum $p$ or velocity $v$ to save time in substitutions.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The radius of a charged particle in a magnetic field is a balance between centripetal force ($mv^2/r$) and Lorentz force ($qvB$). When energy is supplied by a potential $V$, $K = qV$, leading to the dependence $r \\\\propto \\\\sqrt{m/q}$.\", \"memoryTrigger\": \"Alpha is 'Double-Double': Twice the charge of proton, but four times (double-squared) the mass.\", \"visualPrompt\": \"Imagine two cars entering a turn; the heavier one (alpha) has more 'inertia' to resist the magnetic 'steering', but it also has more 'grip' (charge) to pull it in. The mass wins slightly, resulting in a wider turn.\", \"commonTrap\": \"Using $r \\\\propto m/q$ (which applies to constant velocity) instead of $r \\\\propto \\\\sqrt{m/q}$ (which applies to constant potential).\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The radius of a charged particle in a magnetic field is a balance between centripetal force ($mv^2/r$) and Lorentz force ($qvB$). When energy is supplied by a potential $V$, $K = qV$, leading to the dependence $r \\\\propto \\\\sqrt{m/q}$.\",\"memoryTrigger\":\"Alpha is 'Double-Double': Twice the charge of proton, but four times (double-squared) the mass.\",\"visualPrompt\":\"Imagine two cars entering a turn; the heavier one (alpha) has more 'inertia' to resist the magnetic 'steering', but it also has more 'grip' (charge) to pull it in. The mass wins slightly, resulting in a wider turn.\",\"commonTrap\":\"Using $r \\\\propto m/q$ (which applies to constant velocity) instead of $r \\\\propto \\\\sqrt{m/q}$ (which applies to constant potential).\"}",
         "keyFormulas": [
-          "$r = \\frac{mv}{qB} = \\frac{p}{qB} = \\frac{\\sqrt}{2mK}{qB} = \\frac{1}{B}\\sqrt{\\frac{2mV}{q}}$"
+          "$r = \\frac{mv}{qB} = \\frac{p}{qB} = \\frac{\\sqrt{2mK}}{qB} = \\frac{1}{B}\\sqrt{\\frac{2mV}{q}}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 0
       },
       {
         "id": "ba56768a-8c02-4a43-85e8-7b490947579d",
         "text": "Consider the phenomenon of Total Internal Reflection (TIR) at a glass-air interface. If $\\theta_{c,V}$ and $\\theta_{c,R}$ represent the critical angles for violet and red light respectively, which of the following logical deductions is correct based on the dispersive properties of glass?",
         "options": [
-          "$\\theta_{c,V} > \\theta_{c,R}$ because $\\mu_V > \\mu_R$",
+          "$\\theta_{c,V} < \\theta_{c,R}$ because frequency of red light is higher",
           "$\\theta_{c,V} < \\theta_{c,R}$ because $\\mu_V > \\mu_R$",
-          "$\\theta_{c,V} = \\theta_{c,R}$ as critical angle is independent of wavelength",
-          "$\\theta_{c,V} < \\theta_{c,R}$ because frequency of red light is higher"
+          "$\\theta_{c,V} > \\theta_{c,R}$ because $\\mu_V > \\mu_R$",
+          "$\\theta_{c,V} = \\theta_{c,R}$ as critical angle is independent of wavelength"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -189,27 +189,27 @@
         ],
         "examTip": "Think 'VIBGYOR'. Violet is the most 'sensitive'—it has the highest index, bends the most, and reaches the critical angle earliest (smallest angle).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Refractive index is not a constant for a material; it is a function of the color of light. Higher frequency (shorter wavelength) light 'sees' a denser medium than lower frequency light.\", \"memoryTrigger\": \"Red is Relaxed: Long $\\\\lambda$, Low $\\\\mu$, Large $\\\\theta_c$, Less bending.\", \"visualPrompt\": \"Imagine violet light 'struggling' more through the glass atoms, slowing down more, and thus getting trapped (TIR) at smaller angles.\", \"commonTrap\": \"Confusing the wavelength order of Red and Violet. Remember Red is at the long-wavelength end (~700nm).\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Refractive index is not a constant for a material; it is a function of the color of light. Higher frequency (shorter wavelength) light 'sees' a denser medium than lower frequency light.\",\"memoryTrigger\":\"Red is Relaxed: Long $\\\\lambda$, Low $\\\\mu$, Large $\\\\theta_c$, Less bending.\",\"visualPrompt\":\"Imagine violet light 'struggling' more through the glass atoms, slowing down more, and thus getting trapped (TIR) at smaller angles.\",\"commonTrap\":\"Confusing the wavelength order of Red and Violet. Remember Red is at the long-wavelength end (~700nm).\"}",
         "keyFormulas": [
           "$\\sin \\theta_c = \\frac{1}{\\mu}$",
           "$\\mu \\approx A + \\frac{B}{\\lambda^2}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "6711aa64-54c9-473e-a169-43ba64a130d7",
         "text": "In a Young's Double Slit Experiment (YDSE) conducted in a laboratory, the fringe width is measured to be $\\beta$ when the entire setup is in air. According to the relationship $\\beta = \\frac{\\lambda D}{d}$, if the distance between the slits is reduced to one-third of its original value and the distance between the slits and the screen is doubled, while the wavelength of light remains unchanged, the new fringe width $\\beta'$ will be:",
         "options": [
-          "$\\frac{2}{3}\\beta$",
+          "$5\\beta$",
           "$\\frac{3}{2}\\beta$",
-          "$6\\beta$",
-          "$5\\beta$"
+          "$\\frac{2}{3}\\beta$",
+          "$6\\beta$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -226,27 +226,27 @@
         ],
         "examTip": "In proportionality questions, quickly write $Ratio = (Factor_1 \\times Factor_2) / Factor_3$. Here, $Ratio = (1 \\times 2) / (1/3) = 6$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The fringe width $\\\\beta$ represents the spatial separation between two consecutive maxima. It is directly proportional to wavelength and screen distance, and inversely proportional to slit separation. This is a manifestation of the angular spread $\\\\theta \\\\approx \\\\lambda/d$.\", \"memoryTrigger\": \"Beta is 'Large Lambda, Big D, tiny d' ($\\\\beta = \\\\lambda D / d$).\", \"visualPrompt\": \"Imagine the slits as a nozzle; bringing the screen further ($D \\\\uparrow$) spreads the 'spray' (fringe) wider. Making the slits closer ($d \\\\downarrow$) also forces the 'spray' to diverge more due to diffraction.\", \"commonTrap\": \"Confusing the roles of $d$ (slit separation) and $a$ (individual slit width in diffraction).\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The fringe width $\\\\beta$ represents the spatial separation between two consecutive maxima. It is directly proportional to wavelength and screen distance, and inversely proportional to slit separation. This is a manifestation of the angular spread $\\\\theta \\\\approx \\\\lambda/d$.\",\"memoryTrigger\":\"Beta is 'Large Lambda, Big D, tiny d' ($\\\\beta = \\\\lambda D / d$).\",\"visualPrompt\":\"Imagine the slits as a nozzle; bringing the screen further ($D \\\\uparrow$) spreads the 'spray' (fringe) wider. Making the slits closer ($d \\\\downarrow$) also forces the 'spray' to diverge more due to diffraction.\",\"commonTrap\":\"Confusing the roles of $d$ (slit separation) and $a$ (individual slit width in diffraction).\"}",
         "keyFormulas": [
           "$\\beta = \\frac{\\lambda D}{d}$",
           "$\\Delta x = \\frac{xd}{D}$ (Path difference for a point x on screen)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "081ac91d-d8c6-476e-8fb4-49e14e264c7a",
-        "text": "The provided graph illustrates the variation of impedance ($Z$) with the angular frequency ($\\omega$) for a series $LCR$ circuit connected to an AC source. Based on the physical relationships encoded in the formula $Z = \\sqrt{R}^2 + (\\omega L - 1/\\omega C)^2$, identify which of the following statements is correctly inferred from the regions of the graph marked $A$ (where $\\omega < \\omega_r$) and $B$ (where $\\omega > \\omega_r$)?\\n\\n[Diagram Description: A U-shaped curve showing Impedance Z on the Y-axis and Angular Frequency $\\omega$ on the X-axis. The minimum point of the curve is at $\\omega_r$. Region A is the left slope of the U, and Region B is the right slope.]",
+        "text": "The provided graph illustrates the variation of impedance ($Z$) with the angular frequency ($\\omega$) for a series $LCR$ circuit connected to an AC source. Based on the physical relationships encoded in the formula $Z = \\sqrt{R^2 + (\\omega L - 1/\\omega C)^2}$, identify which of the following statements is correctly inferred from the regions of the graph marked $A$ (where $\\omega < \\omega_r$) and $B$ (where $\\omega > \\omega_r$)?\\n\\n[Diagram Description: A U-shaped curve showing Impedance Z on the Y-axis and Angular Frequency $\\omega$ on the X-axis. The minimum point of the curve is at $\\omega_r$. Region A is the left slope of the U, and Region B is the right slope.]",
         "options": [
-          "In region A, the circuit is predominantly capacitive, and current leads voltage.",
           "In region B, the circuit is predominantly capacitive, and voltage leads current.",
-          "In region A, the inductive reactance dominates over the capacitive reactance.",
-          "In region B, the phase angle $\\phi$ is negative, implying current leads voltage."
+          "In region A, the circuit is predominantly capacitive, and current leads voltage.",
+          "In region B, the phase angle $\\phi$ is negative, implying current leads voltage.",
+          "In region A, the inductive reactance dominates over the capacitive reactance."
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -255,7 +255,7 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Analyze the Impedance Formula ::: $Z = \\sqrt{R}^2 + (X_L - X_C)^2$. Impedance is minimum when $X_L = X_C$, which happens at $\\omega_r$.",
+          "Analyze the Impedance Formula ::: $Z = \\sqrt{R^2 + (X_L - X_C)^2}$. Impedance is minimum when $X_L = X_C$, which happens at $\\omega_r$.",
           "Evaluate Region A ($\\omega < \\omega_r$) ::: As $\\omega$ decreases below resonance, $X_L = \\omega L$ decreases while $X_C = 1/\\omega C$ increases. Thus, $X_C > X_L$. The circuit is 'Capacitive'.",
           "Determine Phase for Region A ::: In a capacitive circuit, current leads voltage (ICE: In Capacitance, Current leads).",
           "Evaluate Region B ($\\omega > \\omega_r$) ::: As $\\omega$ increases above resonance, $X_L$ increases and $X_C$ decreases. Thus, $X_L > X_C$. The circuit is 'Inductive'.",
@@ -264,7 +264,7 @@
         ],
         "examTip": "Memorize the acronyms ELI and ICE: ELI (Voltage leads in Inductor) and ICE (Current leads in Capacitor). On the left of resonance (low freq), $X_C$ is king because of the $1/\\omega$ relationship.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The series LCR circuit acts as a frequency-dependent resistor. At low frequencies, the capacitor acts like an open circuit (high $X_C$). At high frequencies, the inductor acts like an open circuit (high $X_L$).\", \"memoryTrigger\": \"Low frequency = C dominates. High frequency = L dominates. (Alphabetical: C comes before L).\", \"visualPrompt\": \"Imagine a seesaw. At low frequency, the 'Capacitor' side is heavy and down. At high frequency, the 'Inductor' side is heavy and down. Resonance is the perfect balance.\", \"commonTrap\": \"Thinking that because $\\\\omega$ is small, $X_C$ must be small. Remember $X_C = 1/(\\\\omega C)$, so small $\\\\omega$ means huge $X_C$.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The series LCR circuit acts as a frequency-dependent resistor. At low frequencies, the capacitor acts like an open circuit (high $X_C$). At high frequencies, the inductor acts like an open circuit (high $X_L$).\",\"memoryTrigger\":\"Low frequency = C dominates. High frequency = L dominates. (Alphabetical: C comes before L).\",\"visualPrompt\":\"Imagine a seesaw. At low frequency, the 'Capacitor' side is heavy and down. At high frequency, the 'Inductor' side is heavy and down. Resonance is the perfect balance.\",\"commonTrap\":\"Thinking that because $\\\\omega$ is small, $X_C$ must be small. Remember $X_C = 1/(\\\\omega C)$, so small $\\\\omega$ means huge $X_C$.\"}",
         "keyFormulas": [
           "$X_L = \\omega L$",
           "$X_C = \\frac{1}{\\omega C}$",
@@ -272,20 +272,20 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "diagram_based_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "126772f6-bf91-4542-84eb-29a29baebbdf",
-        "text": "A paramagnetic material sample is subjected to an external magnetic field. At a temperature of $27^{°}C$, the magnetic susceptibility of the material is measured to be $1.2 \\times 10^{-5}$. If the temperature of the sample is increased to $327^{°}C$ while maintaining a constant magnetic field, what will be the new magnetic susceptibility $\\chi'$ of the sample?",
+        "text": "A paramagnetic material sample is subjected to an external magnetic field. At a temperature of $27^{\\circ}\\text{C}$, the magnetic susceptibility of the material is measured to be $1.2 \\times 10^{-5}$. If the temperature of the sample is increased to $327^{\\circ}\\text{C}$ while maintaining a constant magnetic field, what will be the new magnetic susceptibility $\\chi'$ of the sample?",
         "options": [
-          "$0.6 \\times 10^{-5}$",
           "$2.4 \\times 10^{-5}$",
-          "$0.3 \\times 10^{-5}$",
-          "$4.8 \\times 10^{-5}$"
+          "$4.8 \\times 10^{-5}$",
+          "$0.6 \\times 10^{-5}$",
+          "$0.3 \\times 10^{-5}$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -294,8 +294,8 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Recall Curie's Law ::: For paramagnetic materials, susceptibility $\\chi$ is inversely proportional to absolute temperature $T$: $\\chi \\propto 1/T$ or $\\chi T = constant$.",
-          "Convert Temperatures to Kelvin ::: $T_1 = 27 + 273 = 300 K$. $T_2 = 327 + 273 = 600 K$.",
+          "Recall Curie's Law ::: For paramagnetic materials, susceptibility $\\chi$ is inversely proportional to absolute temperature $T$: $\\chi \\propto 1/T$ or $\\chi T = \\text{constant}$.",
+          "Convert Temperatures to Kelvin ::: $T_1 = 27 + 273 = 300 \\text{ K}$. $T_2 = 327 + 273 = 600 \\text{ K}$.",
           "Set up Proportionality ::: $\\frac{\\chi_2}{\\chi_1} = \\frac{T_1}{T_2}$.",
           "Substitute Values ::: $\\frac{\\chi_2}{1.2 \\times 10^{-5}} = \\frac{300}{600}$.",
           "Solve for $\\chi_2$ ::: $\\chi_2 = (1.2 \\times 10^{-5}) \\times \\frac{1}{2} = 0.6 \\times 10^{-5}$.",
@@ -303,26 +303,26 @@
         ],
         "examTip": "In thermal physics and magnetism, NEVER use Celsius in formulas. Always convert to Kelvin. Check if the question mentions 'Curie Temperature' (which would imply Ferromagnetism and $\\chi \\propto 1/(T-T_c)$).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Thermal agitation opposes the alignment of atomic magnetic dipoles with the external field. Higher temperature means more disorder, leading to lower susceptibility.\", \"memoryTrigger\": \"Para-T-Inverse: Para susceptibility is inverse to T.\", \"visualPrompt\": \"Imagine a crowd of people trying to face forward (dipole alignment). If you turn up the heat (temperature), they start jumping around randomly, and fewer of them stay facing forward.\", \"commonTrap\": \"Using Celsius directly ($27/327$) which leads to an incorrect ratio.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Thermal agitation opposes the alignment of atomic magnetic dipoles with the external field. Higher temperature means more disorder, leading to lower susceptibility.\",\"memoryTrigger\":\"Para-T-Inverse: Para susceptibility is inverse to T.\",\"visualPrompt\":\"Imagine a crowd of people trying to face forward (dipole alignment). If you turn up the heat (temperature), they start jumping around randomly, and fewer of them stay facing forward.\",\"commonTrap\":\"Using Celsius directly ($27/327$) which leads to an incorrect ratio.\"}",
         "keyFormulas": [
           "$\\chi = C/T$ - Curie's Law for paramagnets",
           "$T(K) = T(^{\\circ}\\text{C}) + 273$ - Kelvin conversion"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       },
       {
         "id": "ac0a6f80-a58e-4d47-bc2c-22c79f0c74fd",
         "text": "In a sophisticated experimental setup designed to probe Maxwell's corrections to Ampere's Law, a parallel-plate capacitor with circular plates of radius $R$ is being charged by a steady conduction current $I$. A thin dielectric slab with a time-dependent dielectric constant $\\kappa(t) = \\kappa_0(1 + \\alpha t)$ (where $\\alpha$ is a constant) is inserted between the plates. If the electric field $E$ between the plates is maintained at a constant value by an external modulating source, the magnitude of the displacement current density $J_d$ at a radial distance $r < R$ from the central axis of the plates is given by:",
         "options": [
           "$\\epsilon_0 \\kappa_0 \\alpha E$",
-          "$\\frac{1}{2} \\epsilon_0 \\kappa_0 \\alpha E$",
           "$\\epsilon_0 \\kappa_0 \\alpha E \\cdot \\frac{r}{R}$",
+          "$\\frac{1}{2} \\epsilon_0 \\kappa_0 \\alpha E$",
           "Zero, since the electric field is constant"
         ],
         "marks": 4,
@@ -340,26 +340,26 @@
         ],
         "examTip": "Don't blindly assume $I_d$ is zero just because $E$ is constant. If the medium's permittivity $\\epsilon$ changes with time, the flux $\\Phi_E = \\int \\vec{E} \\cdot d\\vec{A}$ still changes because $D$ or the effective flux in the medium changes.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Displacement current arises from any change in the electric displacement field $D$. In a vacuum, $D = \\\\epsilon_0 E$. In a medium, $D = \\\\epsilon_0 \\\\kappa E$. Even if $E$ is constant, if $\\\\kappa$ changes, $D$ changes, creating a displacement current.\", \"memoryTrigger\": \"D-Flux Drive: $I_d$ is the derivative of D-flux, not just E-flux.\", \"visualPrompt\": \"Imagine the plates of the capacitor. Even if the 'pressure' (E-field) is steady, if the 'stuffing' (dielectric) inside gets denser or thinner, the field lines must adjust, creating a 'ghost' current.\", \"commonTrap\": \"Selecting 'Zero' because $\\\\frac{dE}{dt} = 0$. Students forget that $I_d$ depends on $\\\\frac{d(\\\\kappa E)}{dt}$.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Displacement current arises from any change in the electric displacement field $D$. In a vacuum, $D = \\\\epsilon_0 E$. In a medium, $D = \\\\epsilon_0 \\\\kappa E$. Even if $E$ is constant, if $\\\\kappa$ changes, $D$ changes, creating a displacement current.\",\"memoryTrigger\":\"D-Flux Drive: $I_d$ is the derivative of D-flux, not just E-flux.\",\"visualPrompt\":\"Imagine the plates of the capacitor. Even if the 'pressure' (E-field) is steady, if the 'stuffing' (dielectric) inside gets denser or thinner, the field lines must adjust, creating a 'ghost' current.\",\"commonTrap\":\"Selecting 'Zero' because $\\\\frac{dE}{dt} = 0$. Students forget that $I_d$ depends on $\\\\frac{d(\\\\kappa E)}{dt}$.\"}",
         "keyFormulas": [
           "$I_d = \\frac{d\\Phi_D}{dt}$ where $\\Phi_D = \\int \\vec{D} \\cdot d\\vec{A}$",
           "$J_d = \\frac{\\partial D}{\\partial t}$ (Displacement current density)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-015",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 0
       },
       {
         "id": "b7de2751-f155-4c58-b262-87c8b0be83fe",
         "text": "A series LCR circuit, consisting of an inductor $L$, a capacitor $C$, and a resistor $R$, is driven by an alternating voltage source of frequency $f$. If the circuit is initially at resonance, and the capacitance is quadrupled while the inductance is kept constant, what specific adjustment must be made to the resistance $R$ to ensure that the Quality Factor ($Q$) of the circuit remains exactly the same as its initial value?",
         "options": [
-          "The resistance must be reduced to half of its original value.",
-          "The resistance must be doubled to compensate for the change.",
           "The resistance must be reduced to one-fourth of its original value.",
+          "The resistance must be doubled to compensate for the change.",
+          "The resistance must be reduced to half of its original value.",
           "The resistance must remain unchanged as $Q$ only depends on the $L/C$ ratio."
         ],
         "marks": 4,
@@ -377,27 +377,27 @@
         ],
         "examTip": "Focus on the square root in the $Q$-factor formula. If $L$ or $C$ changes by a factor $k$, the term changes by $\\sqrt{k}$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The Quality Factor measures the 'sharpness' of the resonance peak. It represents the ratio of energy stored to energy dissipated per cycle.\", \"memoryTrigger\": \"Q-factor formula: 'One over R, root L over C' (1/R $\\\\sqrt{L/C}$).\", \"visualPrompt\": \"Imagine a swing (oscillator). $R$ is the friction. Less friction ($R$) or a heavier seat ($L$) with a stiffer spring ($1/C$) makes the swing stay in motion longer (Higher $Q$).\", \"commonTrap\": \"Forgetting the square root over $C$ and concluding $R$ must be reduced to $R/4$.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The Quality Factor measures the 'sharpness' of the resonance peak. It represents the ratio of energy stored to energy dissipated per cycle.\",\"memoryTrigger\":\"Q-factor formula: 'One over R, root L over C' (1/R $\\\\sqrt{L/C}$).\",\"visualPrompt\":\"Imagine a swing (oscillator). $R$ is the friction. Less friction ($R$) or a heavier seat ($L$) with a stiffer spring ($1/C$) makes the swing stay in motion longer (Higher $Q$).\",\"commonTrap\":\"Forgetting the square root over $C$ and concluding $R$ must be reduced to $R/4$.\"}",
         "keyFormulas": [
           "$Q = \\frac{1}{R} \\sqrt{\\frac{L}{C}}$",
           "$\\omega_r = \\frac{1}{\\sqrt{LC}}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       },
       {
         "id": "693672ea-db6e-4239-b354-86c7a4a9dfb3",
-        "text": "A student connects a $10\\,\\mu\\text{F}$ capacitor to a $100\\,\\text{V}$ battery. After the capacitor is fully charged, the energy stored in it is $U_1$. If the same capacitor is then connected to a $200\\,\\text{V}$ battery, the new energy stored is $U_2$. According to the relationship between energy and potential, the ratio $U_2/U_1$ is:",
+        "text": "A student connects a $10\\mu\\text{F}$ capacitor to a $100\\text{V}$ battery. After the capacitor is fully charged, the energy stored in it is $U_1$. If the same capacitor is then connected to a $200\\text{V}$ battery, the new energy stored is $U_2$. According to the relationship between energy and potential, the ratio $U_2/U_1$ is:",
         "options": [
-          "2",
+          "1",
           "4",
-          "1/2",
-          "1"
+          "2",
+          "1/2"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -414,7 +414,7 @@
         ],
         "examTip": "Energy depends on the square of voltage. Doubling $V$ gives $4 \\times$ energy; tripling $V$ gives $9 \\times$ energy. This square dependency is a favorite for ratio questions.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Energy stored in a capacitor is the work done to move charges against the growing potential. Because $V$ increases as $Q$ increases ($V = Q/C$), the integration leads to a squared term for $V$.\", \"memoryTrigger\": \"Energy is a square-player ($V^2$).\", \"visualPrompt\": \"Imagine a spring; if you stretch it twice as much, you store four times the energy ($1/2 kx^2$). A capacitor behaves exactly like an 'electric spring'.\", \"commonTrap\": \"Thinking energy is linear with $V$ (choosing ratio 2).\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Energy stored in a capacitor is the work done to move charges against the growing potential. Because $V$ increases as $Q$ increases ($V = Q/C$), the integration leads to a squared term for $V$.\",\"memoryTrigger\":\"Energy is a square-player ($V^2$).\",\"visualPrompt\":\"Imagine a spring; if you stretch it twice as much, you store four times the energy ($1/2 kx^2$). A capacitor behaves exactly like an 'electric spring'.\",\"commonTrap\":\"Thinking energy is linear with $V$ (choosing ratio 2).\"}",
         "keyFormulas": [
           "$U = \\frac{1}{2}CV^2$",
           "$U = \\frac{1}{2}QV$",
@@ -422,20 +422,20 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "04f84112-82a5-4453-9821-1e53bccdbc54",
         "text": "A thin, hollow metallic sphere of radius $R$ is given a positive charge $Q$. Which of the following graphs correctly represents the variation of the electrostatic potential $V$ with the distance $r$ from the center of the sphere?",
         "options": [
-          "$V$ is constant for $r \\leq R$ and decreases as $1/r$ for $r > R$.",
-          "$V$ is zero for $r < R$ and increases linearly for $r > R$.",
           "$V$ increases linearly for $r \\leq R$ and is constant for $r > R$.",
-          "$V$ decreases as $1/r^2$ for all $r$."
+          "$V$ is constant for $r \\leq R$ and decreases as $1/r$ for $r > R$.",
+          "$V$ decreases as $1/r^2$ for all $r$.",
+          "$V$ is zero for $r < R$ and increases linearly for $r > R$."
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -452,7 +452,7 @@
         ],
         "examTip": "Potential is the 'work done'. If there's no force (Field=0), you don't do any extra work moving inside, so the potential doesn't change from its surface value.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"A conductor is an equipotential volume in electrostatics. Because the field is zero, no potential difference exists between any two points inside or on the surface.\", \"memoryTrigger\": \"Inside a shell: E is Zero, V is Hero (constant and surface-value).\", \"visualPrompt\": \"Imagine a flat plateau (potential inside) that then drops off like a slide (potential outside).\", \"commonTrap\": \"Choosing the graph where $V=0$ inside. That is true for the Electric Field, not Potential.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"A conductor is an equipotential volume in electrostatics. Because the field is zero, no potential difference exists between any two points inside or on the surface.\",\"memoryTrigger\":\"Inside a shell: E is Zero, V is Hero (constant and surface-value).\",\"visualPrompt\":\"Imagine a flat plateau (potential inside) that then drops off like a slide (potential outside).\",\"commonTrap\":\"Choosing the graph where $V=0$ inside. That is true for the Electric Field, not Potential.\"}",
         "keyFormulas": [
           "$V_{in} = \\frac{kQ}{R}$",
           "$V_{out} = \\frac{kQ}{r}$",
@@ -460,20 +460,20 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "579fbbb6-58ed-48e9-9c08-af47fe05bf3b",
-        "text": "In a precision electrostatic setup, two identical small conducting spheres carry charges $q_1 = +40 \\, \\,\\mu\\text{C}$ and $q_2 = -20 \\, \\,\\mu\\text{C}$ and are situated at a fixed distance $r$ in vacuum, exerting an attractive force $F$ on each other. If these spheres are briefly brought into contact and then returned to their original positions, what will be the magnitude of the new electrostatic force acting between them in terms of $F$?",
+        "text": "In a precision electrostatic setup, two identical small conducting spheres carry charges $q_1 = +40 \\, \\mu\\text{C}$ and $q_2 = -20 \\, \\mu\\text{C}$ and are situated at a fixed distance $r$ in vacuum, exerting an attractive force $F$ on each other. If these spheres are briefly brought into contact and then returned to their original positions, what will be the magnitude of the new electrostatic force acting between them in terms of $F$?",
         "options": [
+          "$F/1$",
           "$F/8$",
-          "$F/4$",
           "$F/2$",
-          "$F/1$"
+          "$F/4$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -483,35 +483,35 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Calculate Initial Force ::: Use Coulomb's Law: $F = k \\frac{|q_1 q_2|}{r^2} = k \\frac{40 \\times 20}{r^2} = \\frac{800k}{r^2}$ (taking magnitudes).",
-          "Determine Charge Redistribution ::: When touched, charges distribute equally since the spheres are identical. Total charge $Q_{total} = q_1 + q_2 = 40 + (-20) = +20 \\, \\,\\mu\\text{C}$.",
-          "Calculate Final Charge per Sphere ::: Each sphere gets $q' = Q_{total} / 2 = +10 \\, \\,\\mu\\text{C}$.",
+          "Determine Charge Redistribution ::: When touched, charges distribute equally since the spheres are identical. Total charge $Q_{total} = q_1 + q_2 = 40 + (-20) = +20 \\, \\mu\\text{C}$.",
+          "Calculate Final Charge per Sphere ::: Each sphere gets $q' = Q_{total} / 2 = +10 \\, \\mu\\text{C}$.",
           "Calculate New Force ::: $F' = k \\frac{|q' q'|}{r^2} = k \\frac{10 \\times 10}{r^2} = \\frac{100k}{r^2}$.",
           "Compare Forces ::: Find the ratio $\\frac{F'}{F} = \\frac{100k/r^2}{800k/r^2} = \\frac{100}{800} = \\frac{1}{8}$.",
           "Conclude ::: The new force $F' = F/8$."
         ],
         "examTip": "For identical spheres, the charge always divides by taking the algebraic sum. Don't forget to include the negative sign of the charge when adding them together!",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Charge flows from higher potential to lower potential until potentials are equal. For identical spheres, equal potential implies equal charge ($V = kq/R$).\", \"memoryTrigger\": \"Touch-Add-Divide: Sum the charges, divide by 2.\", \"visualPrompt\": \"Imagine two water tanks at different levels. Connect them with a pipe (contact); the water levels (potential/charge) equalize. Since the tanks are identical, they end up with the same amount.\", \"commonTrap\": \"Adding magnitudes (40+20=60) instead of algebraic sum (40-20=20).\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Charge flows from higher potential to lower potential until potentials are equal. For identical spheres, equal potential implies equal charge ($V = kq/R$).\",\"memoryTrigger\":\"Touch-Add-Divide: Sum the charges, divide by 2.\",\"visualPrompt\":\"Imagine two water tanks at different levels. Connect them with a pipe (contact); the water levels (potential/charge) equalize. Since the tanks are identical, they end up with the same amount.\",\"commonTrap\":\"Adding magnitudes (40+20=60) instead of algebraic sum (40-20=20).\"}",
         "keyFormulas": [
           "$F = k \\frac{q_1 q_2}{r^2}$ - Coulomb's Law",
           "$q_{new} = \\frac{q_1 + q_2}{2}$ - Charge sharing for identical conductors"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "afef11bf-d39f-496a-902f-e8d429d7d793",
-        "text": "An optician combines two thin lenses to correct a patient's vision. The first lens is a convex lens of focal length $f_1 = +25cm$ and the second is a concave lens of focal length $f_2 = -50cm$. When placed in contact, the net power ($P$) and the nature of the lens combination will be:",
+        "text": "An optician combines two thin lenses to correct a patient's vision. The first lens is a convex lens of focal length $f_1 = +25\\text{ cm}$ and the second is a concave lens of focal length $f_2 = -50\\text{ cm}$. When placed in contact, the net power ($P$) and the nature of the lens combination will be:",
         "options": [
           "$+2D$, Converging",
+          "$+4D$, Diverging",
           "$-2D$, Diverging",
-          "$+6D$, Converging",
-          "$+4D$, Diverging"
+          "$+6D$, Converging"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -520,7 +520,7 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Convert Focal Lengths to Meters ::: Power must be calculated in Diopters ($D = m^{-1}$). $f_1 = 0.25m$, $f_2 = -0.50m$.",
+          "Convert Focal Lengths to Meters ::: Power must be calculated in Diopters ($D = m^{-1}$). $f_1 = 0.25\\text{ m}$, $f_2 = -0.50\\text{ m}$.",
           "Calculate Individual Powers ::: $P_1 = 1/f_1 = 1/0.25 = +4D$. $P_2 = 1/f_2 = 1/(-0.50) = -2D$.",
           "Apply Power Summation Rule ::: For thin lenses in contact, $P_{net} = P_1 + P_2$.",
           "Compute Result ::: $P_{net} = (+4D) + (-2D) = +2D$.",
@@ -528,7 +528,7 @@
         ],
         "examTip": "Always convert cm to meters before calculating Power. Don't sum focal lengths directly ($f_1 + f_2$ is wrong); always sum reciprocals or powers.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Power represents the degree of convergence or divergence. Converging lenses have positive power, and diverging have negative. Their combined effect is simply the sum of their individual strengths.\", \"memoryTrigger\": \"Convex = Positive (+) = Converge. Concave = Negative (-) = Diverge.\", \"visualPrompt\": \"Imagine two people pulling on a rope in opposite directions. The stronger one (higher power lens) determines the final direction of the 'bend' of light.\", \"commonTrap\": \"Summing focal lengths $25 + (-50) = -25$ and then finding power. This is mathematically incorrect as $1/F = 1/f_1 + 1/f_2$.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Power represents the degree of convergence or divergence. Converging lenses have positive power, and diverging have negative. Their combined effect is simply the sum of their individual strengths.\",\"memoryTrigger\":\"Convex = Positive (+) = Converge. Concave = Negative (-) = Diverge.\",\"visualPrompt\":\"Imagine two people pulling on a rope in opposite directions. The stronger one (higher power lens) determines the final direction of the 'bend' of light.\",\"commonTrap\":\"Summing focal lengths $25 + (-50) = -25$ and then finding power. This is mathematically incorrect as $1/F = 1/f_1 + 1/f_2$.\"}",
         "keyFormulas": [
           "$P = 1/f$ (meters)",
           "$P = P_1 + P_2$ (lenses in contact)",
@@ -536,19 +536,19 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 0
       },
       {
         "id": "c01f27a5-f142-4957-aed6-b48ed3941c51",
         "text": "A solid conducting sphere of radius $R$ is given a positive charge $+Q$. Which of the following graphical representations correctly depicts the variation of the magnitude of the electric field $E$ with the distance $r$ from the center of the sphere? (Consider the region from $r=0$ to $r > R$)",
         "options": [
-          "A graph showing $E=0$ for $r < R$, and $E$ decreasing as $1/r^2$ for $r > R$ with a jump at $r=R$.",
-          "A graph showing $E$ increasing linearly from $r=0$ to $r=R$, then decreasing as $1/r^2$.",
           "A graph showing $E$ as a constant non-zero value for $r < R$, then decreasing as $1/r^2$.",
+          "A graph showing $E$ increasing linearly from $r=0$ to $r=R$, then decreasing as $1/r^2$.",
+          "A graph showing $E=0$ for $r < R$, and $E$ decreasing as $1/r^2$ for $r > R$ with a jump at $r=R$.",
           "A graph showing $E$ decreasing as $1/r$ for all values of $r$."
         ],
         "marks": 4,
@@ -567,27 +567,27 @@
         ],
         "examTip": "Always differentiate between a 'conducting sphere' (E=0 inside) and a 'non-conducting/uniform charge density sphere' (E increases linearly inside). This is the single most common trap in electrostatics graphs.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Electrostatic equilibrium in a conductor requires $E=0$ inside; otherwise, charges would continue to move. Thus, the field is 'shielded'.\", \"memoryTrigger\": \"Metal-Inside-Zero: Conductors have zero field inside.\", \"visualPrompt\": \"Imagine a hollow shell. Inside, it's a 'dead zone' for electric force. Outside, it looks just like a point charge sitting at the very center.\", \"commonTrap\": \"Choosing the linear increase (Option B), which only applies to non-conducting solid spheres.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Electrostatic equilibrium in a conductor requires $E=0$ inside; otherwise, charges would continue to move. Thus, the field is 'shielded'.\",\"memoryTrigger\":\"Metal-Inside-Zero: Conductors have zero field inside.\",\"visualPrompt\":\"Imagine a hollow shell. Inside, it's a 'dead zone' for electric force. Outside, it looks just like a point charge sitting at the very center.\",\"commonTrap\":\"Choosing the linear increase (Option B), which only applies to non-conducting solid spheres.\"}",
         "keyFormulas": [
           "$E_{in} = 0$ (for $r < R$)",
           "$E_{out} = \\frac{kQ}{r^2}$ (for $r \\geq R$)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "diagram_based_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       },
       {
         "id": "9f7245d8-8d3d-4271-92a2-b0a8eb2a9f95",
         "text": "In the context of semiconductor devices, a Zener diode is specifically designed to operate in the breakdown region. When used as a voltage regulator, if the input unregulated DC voltage increases while the load resistance $R_L$ remains constant, which of the following statements correctly describes the physical behavior of the circuit components?",
         "options": [
-          "The current through the Zener diode ($I_z$) increases, but the voltage across the load ($V_L$) remains constant.",
-          "The voltage across the series resistor ($V_s$) remains constant, and $V_L$ increases.",
           "Both $I_z$ and the current through the load ($I_L$) increase proportionally.",
-          "The Zener diode resistance increases to counteract the higher input voltage."
+          "The Zener diode resistance increases to counteract the higher input voltage.",
+          "The current through the Zener diode ($I_z$) increases, but the voltage across the load ($V_L$) remains constant.",
+          "The voltage across the series resistor ($V_s$) remains constant, and $V_L$ increases."
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -604,7 +604,7 @@
         ],
         "examTip": "For Zener regulator problems, remember: The Zener 'absorbs' the current fluctuations to keep the load 'safe' and 'steady'.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"A Zener diode has a very sharp breakdown voltage. Once $V_{in}$ exceeds this, the diode's dynamic resistance becomes almost zero, allowing it to shunt varying amounts of current while maintaining a stable voltage drop.\", \"memoryTrigger\": \"Zener is a 'Voltage Anchor'. No matter how high the tide (input voltage) goes, the boat (load) stays at the same level (Zener voltage).\", \"visualPrompt\": \"Imagine a water pipe with a pressure relief valve. As input pressure increases, the valve opens wider to let more water out the side, keeping the pressure in the main line (load) constant.\", \"commonTrap\": \"Thinking that $I_L$ increases because $V_{in}$ increased. $I_L$ is fixed by the Zener's clamp.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"A Zener diode has a very sharp breakdown voltage. Once $V_{in}$ exceeds this, the diode's dynamic resistance becomes almost zero, allowing it to shunt varying amounts of current while maintaining a stable voltage drop.\",\"memoryTrigger\":\"Zener is a 'Voltage Anchor'. No matter how high the tide (input voltage) goes, the boat (load) stays at the same level (Zener voltage).\",\"visualPrompt\":\"Imagine a water pipe with a pressure relief valve. As input pressure increases, the valve opens wider to let more water out the side, keeping the pressure in the main line (load) constant.\",\"commonTrap\":\"Thinking that $I_L$ increases because $V_{in}$ increased. $I_L$ is fixed by the Zener's clamp.\"}",
         "keyFormulas": [
           "$V_L = V_z$",
           "$I_s = I_z + I_L$",
@@ -612,20 +612,20 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": null,
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       },
       {
         "id": "0db5e900-54a1-47a5-bdc5-b390b69de40f",
-        "text": "The diagram provided below (conceptually described) represents an LCR series circuit connected to an AC source. The voltmeters $V_1, V_2,$ and $V_3$ are connected across the Inductor ($L$), Capacitor ($C$), and Resistor ($R$) respectively. If the readings of $V_1$ and $V_2$ are both $150 V$, and the source voltage is $200 V$, what is the reading of $V_3$ and the phase angle between the source voltage and current?",
+        "text": "The diagram provided below (conceptually described) represents an LCR series circuit connected to an AC source. The voltmeters $V_1, V_2,$ and $V_3$ are connected across the Inductor ($L$), Capacitor ($C$), and Resistor ($R$) respectively. If the readings of $V_1$ and $V_2$ are both $150 \\text{ V}$, and the source voltage is $200 \\text{ V}$, what is the reading of $V_3$ and the phase angle between the source voltage and current?",
         "options": [
-          "$200 V, \\phi = 0^°$",
-          "$200 V, \\phi = 90^°$",
-          "$100 V, \\phi = 0^°$",
-          "$0 V, \\phi = 45^°$"
+          "$200 \\text{ V}, \\phi = 90^\\circ$",
+          "$200 \\text{ V}, \\phi = 0^\\circ$",
+          "$100 \\text{ V}, \\phi = 0^\\circ$",
+          "$0 \\text{ V}, \\phi = 45^\\circ$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -634,35 +634,35 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Analyze the Voltages ::: In a series LCR, the total source voltage $V$ is given by $V = \\sqrt{V}_R^2 + (V_L - V_C)^2$.",
-          "Identify Resonance Condition ::: Given $V_L = 150 V$ and $V_C = 150 V$. Since $V_L = V_C$, the circuit is in a state of resonance.",
-          "Simplify the Formula ::: At resonance, $(V_L - V_C) = 0$, thus $V = \\sqrt{V}_R^2 + 0 = V_R$.",
-          "Find Voltmeter Reading ::: The reading of $V_3$ (which is $V_R$) must equal the source voltage: $V_3 = 200 V$.",
-          "Determine Phase Angle ::: At resonance, the circuit is purely resistive, meaning the voltage and current are in phase. Therefore, $\\phi = 0^°$."
+          "Analyze the Voltages ::: In a series LCR, the total source voltage $V$ is given by $V = \\sqrt{V_R^2 + (V_L - V_C)^2}$.",
+          "Identify Resonance Condition ::: Given $V_L = 150 \\text{ V}$ and $V_C = 150 \\text{ V}$. Since $V_L = V_C$, the circuit is in a state of resonance.",
+          "Simplify the Formula ::: At resonance, $(V_L - V_C) = 0$, thus $V = \\sqrt{V_R^2 + 0} = V_R$.",
+          "Find Voltmeter Reading ::: The reading of $V_3$ (which is $V_R$) must equal the source voltage: $V_3 = 200 \\text{ V}$.",
+          "Determine Phase Angle ::: At resonance, the circuit is purely resistive, meaning the voltage and current are in phase. Therefore, $\\phi = 0^\\circ$."
         ],
         "examTip": "Whenever $V_L = V_C$ in a series circuit, the total voltage is simply the voltage across the resistor. You don't need complex math!",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"In AC circuits, voltages are vectors (phasors). They do not add up arithmetically because of the phase differences between current and voltage in L, C, and R.\", \"memoryTrigger\": \"ELI the ICE man (Voltage leads in L, Current leads in C). At resonance, they cancel each other out.\", \"visualPrompt\": \"Imagine two people pulling a rope in opposite directions ($V_L$ and $V_C$). If they pull with equal force, the net movement depends only on the third person ($V_R$) pulling at right angles.\", \"commonTrap\": \"Adding voltages like DC ($150+150+V_R = 200$), which gives an impossible negative result.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"In AC circuits, voltages are vectors (phasors). They do not add up arithmetically because of the phase differences between current and voltage in L, C, and R.\",\"memoryTrigger\":\"ELI the ICE man (Voltage leads in L, Current leads in C). At resonance, they cancel each other out.\",\"visualPrompt\":\"Imagine two people pulling a rope in opposite directions ($V_L$ and $V_C$). If they pull with equal force, the net movement depends only on the third person ($V_R$) pulling at right angles.\",\"commonTrap\":\"Adding voltages like DC ($150+150+V_R = 200$), which gives an impossible negative result.\"}",
         "keyFormulas": [
           "$V = \\sqrt{V_R^2 + (V_L - V_C)^2}$",
           "$\\tan \\phi = \\frac{V_L - V_C}{V_R}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "diagram_based_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "d0326e2a-9054-415a-a8a2-32840a7c6b4b",
         "text": "In the circuit shown below (conceptualized), two long straight parallel wires carry currents $I_1$ and $I_2$ in the same direction. A graph is plotted showing the variation of the magnetic field $B$ at a point between the wires as a function of the distance $x$ from the first wire. Which of the following correctly describes the nature of this field distribution?",
         "options": [
-          "The magnetic field is zero exactly at the midpoint if $I_1 = I_2$.",
-          "The magnetic field is maximum at the midpoint and decreases towards the wires.",
           "The field vectors due to both wires add up constructively at all points between them.",
-          "The magnetic field never becomes zero between the wires regardless of the current magnitudes."
+          "The magnetic field never becomes zero between the wires regardless of the current magnitudes.",
+          "The magnetic field is maximum at the midpoint and decreases towards the wires.",
+          "The magnetic field is zero exactly at the midpoint if $I_1 = I_2$."
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -679,27 +679,27 @@
         ],
         "examTip": "Parallel currents attract because their fields *oppose* each other in the region between them, creating a 'low pressure' magnetic zone. Anti-parallel currents repel because their fields *add up* between them.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Magnetic fields are vectors. Between two parallel wires with same-direction currents, the field of the left wire points 'down' and the right wire points 'up'. They must cancel somewhere.\", \"memoryTrigger\": \"Same direction = Subtract in between. Opposite direction = Add in between.\", \"visualPrompt\": \"Visualize the magnetic field lines as 'elastic bands' circling the wires. Between the wires, the bands are moving in opposite directions and cancel out.\", \"commonTrap\": \"Thinking the fields add up because the currents are in the same direction. Remember: Same current direction $\\\\implies$ Opposing fields in the middle.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Magnetic fields are vectors. Between two parallel wires with same-direction currents, the field of the left wire points 'down' and the right wire points 'up'. They must cancel somewhere.\",\"memoryTrigger\":\"Same direction = Subtract in between. Opposite direction = Add in between.\",\"visualPrompt\":\"Visualize the magnetic field lines as 'elastic bands' circling the wires. Between the wires, the bands are moving in opposite directions and cancel out.\",\"commonTrap\":\"Thinking the fields add up because the currents are in the same direction. Remember: Same current direction $\\\\implies$ Opposing fields in the middle.\"}",
         "keyFormulas": [
           "$B = \\frac{\\mu_0 I}{2\\pi r}$",
           "$B_{net} = |B_1 - B_2|$ (for same direction currents)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "diagram_based_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "28d46c8c-c716-4d9f-8a7b-431791e9e36c",
         "text": "Two electric bulbs are rated $(P_1, V)$ and $(P_2, V)$ respectively. If they are connected in series across the same supply voltage $V$, which bulb will glow brighter and what is the relationship for the total power $P_s$ consumed by the combination, assuming the resistance of the bulbs remains constant?",
         "options": [
           "The bulb with the lower power rating glows brighter; $\\frac{1}{P_s} = \\frac{1}{P_1} + \\frac{1}{P_2}$.",
-          "The bulb with the higher power rating glows brighter; $P_s = P_1 + P_2$.",
           "The bulb with the lower power rating glows brighter; $P_s = P_1 + P_2$.",
-          "The bulb with the higher power rating glows brighter; $\\frac{1}{P_s} = \\frac{1}{P_1} + \\frac{1}{P_2}$."
+          "The bulb with the higher power rating glows brighter; $\\frac{1}{P_s} = \\frac{1}{P_1} + \\frac{1}{P_2}$.",
+          "The bulb with the higher power rating glows brighter; $P_s = P_1 + P_2$."
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -716,7 +716,7 @@
         ],
         "examTip": "Series Power = 'Parallel-like' formula ($\\frac{1}{P_1} + ...$). Parallel Power = 'Series-like' formula ($P_1 + P_2$). Lower watt bulb is the 'boss' in series (it takes more voltage).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"A bulb's rating tells you its resistance. When you put them in series, the one with more resistance 'wins' more voltage and thus more power. For parallel, the one with less resistance 'wins' more current and glows brighter.\", \"memoryTrigger\": \"Series: Low Watt = High Glow. Parallel: High Watt = High Glow.\", \"visualPrompt\": \"Think of two different sized water wheels in the same stream; the one that offers more resistance to the water flow (higher paddle area) will turn with more force if the flow rate is forced to be constant.\", \"commonTrap\": \"Using $P=V^2/R$ directly with the supply voltage $V$ for each bulb in series. $V$ is shared, not constant for each bulb!\"}",
+        "masteryMaterial": "{\"coreConcept\":\"A bulb's rating tells you its resistance. When you put them in series, the one with more resistance 'wins' more voltage and thus more power. For parallel, the one with less resistance 'wins' more current and glows brighter.\",\"memoryTrigger\":\"Series: Low Watt = High Glow. Parallel: High Watt = High Glow.\",\"visualPrompt\":\"Think of two different sized water wheels in the same stream; the one that offers more resistance to the water flow (higher paddle area) will turn with more force if the flow rate is forced to be constant.\",\"commonTrap\":\"Using $P=V^2/R$ directly with the supply voltage $V$ for each bulb in series. $V$ is shared, not constant for each bulb!\"}",
         "keyFormulas": [
           "$R = V^2/P_{rated}$",
           "$P_s = \\frac{P_1 P_2}{P_1 + P_2}$ (Series)",
@@ -724,20 +724,20 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 0
       },
       {
         "id": "55fb3c3e-8e45-42dc-9cc1-bc5157c4a285",
-        "text": "Consider two radioactive nuclei, $X$ and $Y$, utilized in a specialized medical diagnostic procedure. Nucleus $X$ has a mass number of 27, while nucleus $Y$ has a mass number of 125. Based on the empirical formula for nuclear radii $R = R_0 A^{1/3}$, where $R_0$ is a constant approximately equal to $1.2 fm$, what is the precise ratio of the nuclear radius of $X$ to that of $Y$?",
+        "text": "Consider two radioactive nuclei, $X$ and $Y$, utilized in a specialized medical diagnostic procedure. Nucleus $X$ has a mass number of 27, while nucleus $Y$ has a mass number of 125. Based on the empirical formula for nuclear radii $R = R_0 A^{1/3}$, where $R_0$ is a constant approximately equal to $1.2 \\text{ fm}$, what is the precise ratio of the nuclear radius of $X$ to that of $Y$?",
         "options": [
           "3 : 5",
           "9 : 25",
-          "27 : 125",
-          "5 : 3"
+          "5 : 3",
+          "27 : 125"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -747,33 +747,33 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Identify the Governing Formula ::: The radius of a nucleus is related to its mass number $A$ by the relation $R = R_0 A^{1/3}$.",
-          "Set up the Ratio ::: For two different nuclei $X$ and $Y$, the ratio of their radii is given by $\\frac{R_X}{R_Y} = \\frac{R_0 (A_X)^}{1/3}{R_0 (A_Y)^{1/3}} = \\left(\\frac{A_X}{A_Y}\\right)^{1/3}$.",
+          "Set up the Ratio ::: For two different nuclei $X$ and $Y$, the ratio of their radii is given by $\\frac{R_X}{R_Y} = \\frac{R_0 (A_X)^{1/3}}{R_0 (A_Y)^{1/3}} = \\left(\\frac{A_X}{A_Y}\\right)^{1/3}$.",
           "Substitute Given Values ::: Given $A_X = 27$ and $A_Y = 125$, we substitute these into the ratio: $\\frac{R_X}{R_Y} = \\left(\\frac{27}{125}\\right)^{1/3}$.",
           "Calculate the Cube Root ::: Since $27 = 3^3$ and $125 = 5^3$, the cube root yields $\\frac{3}{5}$.",
           "Finalize Result ::: The ratio $R_X : R_Y$ is $3 : 5$."
         ],
         "examTip": "Whenever you see mass numbers like 8, 27, 64, or 125, immediately think of cube roots ($2^3, 3^3, 4^3, 5^3$) as NEET frequently uses these to ensure clean calculations.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Nuclear density is constant for all nuclei because volume is directly proportional to the number of nucleons ($A$), leading to the $A^{1/3}$ dependence for radius.\", \"memoryTrigger\": \"R-A-Cube: Radius is the Cube root of A.\", \"visualPrompt\": \"Imagine packing marbles (nucleons) into a spherical jar. The total volume of the jar grows linearly with the number of marbles, so the width (radius) only grows as the cube root of the count.\", \"commonTrap\": \"Students often square the numbers (thinking of $A^2$) or leave it as the direct ratio (27:125) due to haste.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Nuclear density is constant for all nuclei because volume is directly proportional to the number of nucleons ($A$), leading to the $A^{1/3}$ dependence for radius.\",\"memoryTrigger\":\"R-A-Cube: Radius is the Cube root of A.\",\"visualPrompt\":\"Imagine packing marbles (nucleons) into a spherical jar. The total volume of the jar grows linearly with the number of marbles, so the width (radius) only grows as the cube root of the count.\",\"commonTrap\":\"Students often square the numbers (thinking of $A^2$) or leave it as the direct ratio (27:125) due to haste.\"}",
         "keyFormulas": [
           "$R = R_0 A^{1/3}$ - Standard nuclear radius formula",
           "$\\rho = \\frac{m \\cdot A}{\\frac{4}{3} \\pi R^3}$ - Constant nuclear density derivation"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-007",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 0
       },
       {
         "id": "f345ce23-e179-49f4-a929-75f5d45679c2",
         "text": "A long solenoid of radius $R$ has $n$ turns per unit length and carries a constant current $I$. The magnetic field at the center of the solenoid is $B = \\mu_0 n I$. If the solenoid is stretched such that its length is doubled but the total number of turns $N$ and the current $I$ remain constant, what is the new magnetic field $B'$ at the center?",
         "options": [
+          "$4B$",
           "$2B$",
           "$B/2$",
-          "$4B$",
           "$B/4$"
         ],
         "marks": 4,
@@ -791,27 +791,27 @@
         ],
         "examTip": "Always check if the question says 'turns per unit length ($n$)' or 'total turns ($N$)'. If $n$ is constant, $B$ is constant. If $N$ is constant, $B \\propto 1/L$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The magnetic field inside a solenoid depends solely on the 'density' of the turns ($n$) and the current ($I$). When the solenoid is stretched, the turns become less dense (fewer turns per meter), thus weakening the field.\", \"memoryTrigger\": \"B-in-Solenoid: 'Mu-n-I' (Sounds like 'Money'). If you stretch your 'money' (length), you have less 'density'.\", \"visualPrompt\": \"Imagine a slinky. When it's compressed, the wires are close together and the field is strong. When you pull it apart, the same amount of current is spread over a larger distance, weakening the effect at the center.\", \"commonTrap\": \"Thinking $B$ remains the same because the total number of turns $N$ didn't change.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The magnetic field inside a solenoid depends solely on the 'density' of the turns ($n$) and the current ($I$). When the solenoid is stretched, the turns become less dense (fewer turns per meter), thus weakening the field.\",\"memoryTrigger\":\"B-in-Solenoid: 'Mu-n-I' (Sounds like 'Money'). If you stretch your 'money' (length), you have less 'density'.\",\"visualPrompt\":\"Imagine a slinky. When it's compressed, the wires are close together and the field is strong. When you pull it apart, the same amount of current is spread over a larger distance, weakening the effect at the center.\",\"commonTrap\":\"Thinking $B$ remains the same because the total number of turns $N$ didn't change.\"}",
         "keyFormulas": [
           "$B = \\mu_0 n I$",
           "$n = N/L$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       },
       {
         "id": "8eb0e811-79d5-44aa-825f-ff14abd5996f",
         "text": "An electron (mass $m_e$, charge $e$) and a proton (mass $m_p$, charge $e$) are both accelerated from rest through the same accelerating potential difference $V$. According to the de Broglie hypothesis, if $\\lambda_e$ and $\\lambda_p$ represent their respective wavelengths, which expression correctly relates the two, assuming non-relativistic speeds?",
         "options": [
+          "$\\frac{\\lambda_e}{\\lambda_p} = 1$",
           "$\\frac{\\lambda_e}{\\lambda_p} = \\sqrt{\\frac{m_p}{m_e}}$",
-          "$\\frac{\\lambda_e}{\\lambda_p} = \\frac{m_p}{m_e}$",
           "$\\frac{\\lambda_e}{\\lambda_p} = \\sqrt{\\frac{m_e}{m_p}}$",
-          "$\\frac{\\lambda_e}{\\lambda_p} = 1$"
+          "$\\frac{\\lambda_e}{\\lambda_p} = \\frac{m_p}{m_e}$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -822,34 +822,34 @@
         "solutionSteps": [
           "de Broglie Equation ::: $\\lambda = \\frac{h}{p}$.",
           "Kinetic Energy to Potential ::: $K = eV$.",
-          "Momentum in terms of K.E. ::: $p = \\sqrt{2}mK = \\sqrt{2}meV$.",
-          "Combine Formulas ::: $\\lambda = \\frac{h}{\\sqrt{2}meV}$.",
+          "Momentum in terms of K.E. ::: $p = \\sqrt{2mK} = \\sqrt{2meV}$.",
+          "Combine Formulas ::: $\\lambda = \\frac{h}{\\sqrt{2meV}}$.",
           "Ratio Calculation ::: Since $h, e, V$ are constant for both: $\\lambda \\propto \\frac{1}{\\sqrt{m}}$.",
-          "Final Result ::: $\\frac{\\lambda_e}{\\lambda_p} = \\frac{1/\\sqrt{m}_e}{1/\\sqrt{m}_p} = \\sqrt{\\frac{m_p}{m_e}}$."
+          "Final Result ::: $\\frac{\\lambda_e}{\\lambda_p} = \\frac{1/\\sqrt{m_e}}{1/\\sqrt{m_p}} = \\sqrt{\\frac{m_p}{m_e}}$."
         ],
-        "examTip": "Always remember the shortcut $\\lambda \\propto 1/\\sqrt{m} \\cdot q$ for particles accelerated by the same voltage.",
+        "examTip": "Always remember the shortcut $\\lambda \\propto 1/\\sqrt{m \\cdot q}$ for particles accelerated by the same voltage.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Matter exhibits wave-like properties. The wavelength is inversely proportional to the momentum. For a constant potential, the more massive the particle, the shorter its 'matter wave'.\", \"memoryTrigger\": \"$\\\"\\\\lambda \\\\propto 1/\\\\sqrt{m}\\\"$: More Mass, Less Wave.\", \"visualPrompt\": \"Imagine a bowling ball and a ping-pong ball moving with the same energy. The bowling ball is sluggish (longer wavelength) is wrong; it has more momentum, thus a shorter wavelength.\", \"commonTrap\": \"Inverting the ratio or forgetting the square root.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Matter exhibits wave-like properties. The wavelength is inversely proportional to the momentum. For a constant potential, the more massive the particle, the shorter its 'matter wave'.\",\"memoryTrigger\":\"$\\\"\\\\lambda \\\\propto 1/\\\\sqrt{m}\\\"$: More Mass, Less Wave.\",\"visualPrompt\":\"Imagine a bowling ball and a ping-pong ball moving with the same energy. The bowling ball is sluggish (longer wavelength) is wrong; it has more momentum, thus a shorter wavelength.\",\"commonTrap\":\"Inverting the ratio or forgetting the square root.\"}",
         "keyFormulas": [
           "$\\lambda = \\frac{h}{p}$",
           "$\\lambda = \\frac{h}{\\sqrt{2mqV}}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-014",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "6b638ceb-2058-467a-9cda-848c75e759e9",
         "text": "The diagram below represents the intensity distribution of light in a single-slit diffraction experiment. According to the formula for the position of minima $a \\sin \\theta = n \\lambda$, how does the width of the central maximum change if the slit width $a$ is reduced to half its original size? \\n\\n[Imagine a graph showing a tall central peak at $\\theta=0$ and smaller secondary peaks on either side. The first minima occur at $\\pm \\theta_1$ where $\\sin \\theta_1 = \\lambda/a$.]",
         "options": [
+          "The central maximum disappears.",
           "The width of the central maximum is halved.",
           "The width of the central maximum is doubled.",
-          "The width of the central maximum remains unchanged.",
-          "The central maximum disappears."
+          "The width of the central maximum remains unchanged."
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -866,27 +866,27 @@
         ],
         "examTip": "In diffraction, width and aperture have an inverse relationship. Smaller the slit ($a$), wider the spread (central maximum).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Diffraction is the bending of waves around obstacles. For a smaller opening, the wave must 'squeeze' through more, causing it to diverge at a greater angle to satisfy the uncertainty principle/wave nature.\", \"memoryTrigger\": \"Narrow Slit = Wide Peak (N.S.W.P - No Small Way to Play).\", \"visualPrompt\": \"Imagine water waves passing through a gap. If the gap is huge, the waves go straight. If the gap is tiny, the waves circularize and spread out everywhere.\", \"commonTrap\": \"Applying the YDSE logic where $\\\\beta \\\\propto d$ (actually $\\\\beta \\\\propto 1/d$ there too, but students often confuse the two formulas).\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Diffraction is the bending of waves around obstacles. For a smaller opening, the wave must 'squeeze' through more, causing it to diverge at a greater angle to satisfy the uncertainty principle/wave nature.\",\"memoryTrigger\":\"Narrow Slit = Wide Peak (N.S.W.P - No Small Way to Play).\",\"visualPrompt\":\"Imagine water waves passing through a gap. If the gap is huge, the waves go straight. If the gap is tiny, the waves circularize and spread out everywhere.\",\"commonTrap\":\"Applying the YDSE logic where $\\\\beta \\\\propto d$ (actually $\\\\beta \\\\propto 1/d$ there too, but students often confuse the two formulas).\"}",
         "keyFormulas": [
           "$a \\sin \\theta = n \\lambda$ (Minima for diffraction)",
           "Linear width $W = \\frac{2\\lambda D}{a}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "diagram_based_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       },
       {
         "id": "80fc6f1a-5981-472c-ae8b-0c0e12253789",
         "text": "A specialized laboratory technician is investigating the transport properties of a cylindrical copper conductor. According to the microscopic model of metallic conduction, the resistivity is expressed as $\\rho = \\frac{m}{ne^2\\tau}$. If the ambient temperature of the laboratory increases significantly, causing the thermal agitation of the ions within the lattice to intensify, which of the following best describes the functional dependency of the relaxation time $\\tau$ and the resulting effect on the total resistance $R$ of the wire, assuming negligible thermal expansion?",
         "options": [
-          "$\\tau$ decreases as temperature increases, leading to an increase in resistivity $\\rho$ and resistance $R$.",
-          "$\\tau$ increases as temperature increases, leading to a decrease in resistivity $\\rho$ and resistance $R$.",
+          "$\\tau$ decreases, but the increase in $n$ (charge carrier density) in metals compensates for it, keeping $R$ constant.",
           "$\\tau$ remains constant as it only depends on the material density, keeping $R$ unchanged.",
-          "$\\tau$ decreases, but the increase in $n$ (charge carrier density) in metals compensates for it, keeping $R$ constant."
+          "$\\tau$ increases as temperature increases, leading to a decrease in resistivity $\\rho$ and resistance $R$.",
+          "$\\tau$ decreases as temperature increases, leading to an increase in resistivity $\\rho$ and resistance $R$."
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -903,18 +903,18 @@
         ],
         "examTip": "In metals, $\\tau$ is the 'victim' of temperature. Always remember that for conductors, the temperature coefficient $\\alpha$ is positive because $\\tau$ drops faster than any other parameter changes.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Resistivity in metals is primarily governed by the collision frequency. Higher temperature = more 'traffic' (vibrating ions) = shorter 'free time' (relaxation time) = higher resistance.\", \"memoryTrigger\": \"T-T-T: Temperature Up, Tau Down, Total Resistance Up.\", \"visualPrompt\": \"Imagine a pinball machine where the bumpers start vibrating faster; the ball (electron) hits them much more frequently and takes longer to reach the bottom.\", \"commonTrap\": \"Confusing metals with semiconductors. In semiconductors, $n$ increases drastically with $T$, overcoming the decrease in $\\\\tau$.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Resistivity in metals is primarily governed by the collision frequency. Higher temperature = more 'traffic' (vibrating ions) = shorter 'free time' (relaxation time) = higher resistance.\",\"memoryTrigger\":\"T-T-T: Temperature Up, Tau Down, Total Resistance Up.\",\"visualPrompt\":\"Imagine a pinball machine where the bumpers start vibrating faster; the ball (electron) hits them much more frequently and takes longer to reach the bottom.\",\"commonTrap\":\"Confusing metals with semiconductors. In semiconductors, $n$ increases drastically with $T$, overcoming the decrease in $\\\\tau$.\"}",
         "keyFormulas": [
           "$\\rho = \\frac{m}{ne^2\\tau}$ - Resistivity in terms of relaxation time",
           "$R_t = R_0(1 + \\alpha \\Delta T)$ - Temperature dependence of resistance"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "daa93263-433b-4fd5-8a80-445bf507cbda",
@@ -941,7 +941,7 @@
         ],
         "examTip": "Speed, Radius, and Time Period dependencies on '$n$' are the 'holy trinity' of Bohr model questions. Always remember: $v \\sim 1/n$, $r \\sim n^2$, $T \\sim n^3$, $f \\sim 1/n^3$.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The principal quantum number $n$ defines all physical properties of the orbit. As $n$ increases, the electron moves slower in a much larger path, leading to a cubic increase in the time taken for one lap.\", \"memoryTrigger\": \"T-N-3: Time goes with N-cubed.\", \"visualPrompt\": \"Think of planets: Pluto is further out and moves slower than Earth, so its 'year' is much, much longer.\", \"commonTrap\": \"Using $T \\\\propto n^2$ by forgetting that velocity also changes with $n$.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The principal quantum number $n$ defines all physical properties of the orbit. As $n$ increases, the electron moves slower in a much larger path, leading to a cubic increase in the time taken for one lap.\",\"memoryTrigger\":\"T-N-3: Time goes with N-cubed.\",\"visualPrompt\":\"Think of planets: Pluto is further out and moves slower than Earth, so its 'year' is much, much longer.\",\"commonTrap\":\"Using $T \\\\propto n^2$ by forgetting that velocity also changes with $n$.\"}",
         "keyFormulas": [
           "$T_n = T_0 \\frac{n^3}{Z^2}$",
           "$r_n = 0.529 \\frac{n^2}{Z} \\text{ \\AA}$",
@@ -949,19 +949,19 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-007",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 0
       },
       {
         "id": "127e7e43-b467-4624-bed9-384699341488",
-        "text": "A magnetic needle is free to oscillate in a vertical plane coincident with the magnetic meridian at a location where the true angle of dip is $\\phi$. If the needle is now constrained to oscillate in a vertical plane that makes an angle $\\theta$ with the magnetic meridian, the apparent dip $\\phi'$ is measured. If the needle is then moved to another vertical plane perpendicular to the first one (i.e., at an angle $90^° - \\theta$ with the meridian) and the apparent dip $\\phi''$ is measured, the relationship between the true dip and the apparent dips is defined by:",
+        "text": "A magnetic needle is free to oscillate in a vertical plane coincident with the magnetic meridian at a location where the true angle of dip is $\\phi$. If the needle is now constrained to oscillate in a vertical plane that makes an angle $\\theta$ with the magnetic meridian, the apparent dip $\\phi'$ is measured. If the needle is then moved to another vertical plane perpendicular to the first one (i.e., at an angle $90^\\circ - \\theta$ with the meridian) and the apparent dip $\\phi''$ is measured, the relationship between the true dip and the apparent dips is defined by:",
         "options": [
-          "$\\tan^2 \\phi = \\tan^2 \\phi' + \\tan^2 \\phi''$",
-          "$\\cot^2 \\phi = \\cot^2 \\phi' + \\cot^2 \\phi''$",
           "$\\sin^2 \\phi = \\sin^2 \\phi' + \\sin^2 \\phi''$",
+          "$\\cot^2 \\phi = \\cot^2 \\phi' + \\cot^2 \\phi''$",
+          "$\\tan^2 \\phi = \\tan^2 \\phi' + \\tan^2 \\phi''$",
           "$\\cos^2 \\phi = \\cos^2 \\phi' + \\cos^2 \\phi''$"
         ],
         "marks": 4,
@@ -973,33 +973,33 @@
         "solutionSteps": [
           "Relate True Dip to Field Components ::: In the magnetic meridian, $\\tan \\phi = \\frac{B_V}{B_H}$, where $B_V$ and $B_H$ are the vertical and horizontal components of Earth's magnetic field.",
           "Express Apparent Dip in the first plane ::: In a plane at angle $\\theta$, the vertical component remains $B_V$, but the horizontal component becomes $B_H \\cos \\theta$. Thus, $\\tan \\phi' = \\frac{B_V}{B_H \\cos \\theta}$.",
-          "Express Apparent Dip in the second plane ::: In the perpendicular plane (angle $90^° - \\theta$), the horizontal component becomes $B_H \\cos(90^° - \\theta) = B_H \\sin \\theta$. Thus, $\\tan \\phi'' = \\frac{B_V}{B_H \\sin \\theta}$.",
+          "Express Apparent Dip in the second plane ::: In the perpendicular plane (angle $90^\\circ - \\theta$), the horizontal component becomes $B_H \\cos(90^\\circ - \\theta) = B_H \\sin \\theta$. Thus, $\\tan \\phi'' = \\frac{B_V}{B_H \\sin \\theta}$.",
           "Rearrange for Cotangents ::: From step 2, $\\cot \\phi' = \\frac{B_H \\cos \\theta}{B_V}$. From step 3, $\\cot \\phi'' = \\frac{B_H \\sin \\theta}{B_V}$.",
           "Use Trigonometric Identity ::: Square and add: $\\cot^2 \\phi' + \\cot^2 \\phi'' = \\frac{B_H^2 \\cos^2 \\theta}{B_V^2} + \\frac{B_H^2 \\sin^2 \\theta}{B_V^2} = \\frac{B_H^2}{B_V^2}(\\cos^2 \\theta + \\sin^2 \\theta) = \\frac{B_H^2}{B_V^2}$.",
           "Final Substitution ::: Since $\\cot \\phi = \\frac{B_H}{B_V}$, we get $\\cot^2 \\phi = \\cot^2 \\phi' + \\cot^2 \\phi''$."
         ],
         "examTip": "Whenever you see two perpendicular planes for apparent dip, remember the 'Pythagorean-like' identity for cotangents. It saves 2 minutes of derivation during the exam.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Apparent dip occurs because the horizontal component of Earth's field is 'diluted' by a factor of $\\\\cos \\\\theta$ when measuring away from the meridian. The vertical component remains invariant regardless of the vertical plane chosen.\", \"memoryTrigger\": \"Cot-Squared Combo: For perpendicular planes, the sum of squared cotangents is constant.\", \"visualPrompt\": \"Imagine a compass needle. In the meridian, it points down at $\\\\phi$. As you rotate the compass horizontally, the needle appears to dip more and more until it is vertical at $90^\\\\circ$.\", \"commonTrap\": \"Using $\\\\tan^2 \\\\phi = \\\\tan^2 \\\\phi' + \\\\tan^2 \\\\phi''$. This is mathematically incorrect because the $\\\\cos^2 \\\\theta$ and $\\\\sin^2 \\\\theta$ terms are in the denominator for tangents.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Apparent dip occurs because the horizontal component of Earth's field is 'diluted' by a factor of $\\\\cos \\\\theta$ when measuring away from the meridian. The vertical component remains invariant regardless of the vertical plane chosen.\",\"memoryTrigger\":\"Cot-Squared Combo: For perpendicular planes, the sum of squared cotangents is constant.\",\"visualPrompt\":\"Imagine a compass needle. In the meridian, it points down at $\\\\phi$. As you rotate the compass horizontally, the needle appears to dip more and more until it is vertical at $90^\\\\circ$.\",\"commonTrap\":\"Using $\\\\tan^2 \\\\phi = \\\\tan^2 \\\\phi' + \\\\tan^2 \\\\phi''$. This is mathematically incorrect because the $\\\\cos^2 \\\\theta$ and $\\\\sin^2 \\\\theta$ terms are in the denominator for tangents.\"}",
         "keyFormulas": [
           "$\\tan \\phi = \\frac{B_V}{B_H}$",
-          "$\\tan \\phi_{app} = \\frac{\\tan \\phi_}{true}{\\cos \\theta}$",
+          "$\\tan \\phi_{app} = \\frac{\\tan \\phi_{true}}{\\cos \\theta}$",
           "$\\cot^2 \\phi = \\cot^2 \\phi_1 + \\cot^2 \\phi_2$ (for perpendicular planes)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "1f2b95b8-e0cf-4493-b831-88f8a5943c0d",
-        "text": "The binding energy per nucleon for a heavy nucleus $X$ ($A=240$) is $7.6MeV$, while for two middle-weight nuclei $Y$ and $Z$ ($A=120$ each), it is $8.5MeV$. If nucleus $X$ undergoes nuclear fission to produce $Y$ and $Z$ according to the reaction $X \\to Y + Z + Q$, where $Q$ is the energy released, calculate the total energy liberated in this single fission event.",
+        "text": "The binding energy per nucleon for a heavy nucleus $X$ ($A=240$) is $7.6\\text{ MeV}$, while for two middle-weight nuclei $Y$ and $Z$ ($A=120$ each), it is $8.5\\text{ MeV}$. If nucleus $X$ undergoes nuclear fission to produce $Y$ and $Z$ according to the reaction $X \\to Y + Z + Q$, where $Q$ is the energy released, calculate the total energy liberated in this single fission event.",
         "options": [
-          "216 MeV",
           "200 MeV",
+          "216 MeV",
           "180 MeV",
           "160 MeV"
         ],
@@ -1010,36 +1010,36 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Calculate Total BE of Parent Nucleus ::: $BE_{initial} = (BE/nucleon) \\times A = 7.6 MeV \\times 240$.",
-          "Calculation Step 1 ::: $7.6 \\times 240 = 1824 MeV$.",
-          "Calculate Total BE of Daughter Nuclei ::: $BE_{final} = 2 \\times (BE/nucleon of Y \\times A_Y) = 2 \\times (8.5 MeV \\times 120)$.",
-          "Calculation Step 2 ::: $BE_{final} = 2 \\times 1020 = 2040 MeV$.",
+          "Calculate Total BE of Parent Nucleus ::: $BE_{initial} = (BE/nucleon) \\times A = 7.6 \\text{ MeV} \\times 240$.",
+          "Calculation Step 1 ::: $7.6 \\times 240 = 1824 \\text{ MeV}$.",
+          "Calculate Total BE of Daughter Nuclei ::: $BE_{final} = 2 \\times (BE/nucleon \\text{ of } Y \\times A_Y) = 2 \\times (8.5 \\text{ MeV} \\times 120)$.",
+          "Calculation Step 2 ::: $BE_{final} = 2 \\times 1020 = 2040 \\text{ MeV}$.",
           "Calculate Energy Released ($Q$) ::: $Q = BE_{final} - BE_{initial} = 2040 - 1824$.",
-          "Final Result ::: $Q = 216 MeV$."
+          "Final Result ::: $Q = 216 \\text{ MeV}$."
         ],
         "examTip": "In fission/fusion, Energy Released = (Total Binding Energy of Products) - (Total Binding Energy of Reactants). Be careful not to use mass defect if BE values are given directly.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Stability is determined by BE/nucleon. Since product nuclei are closer to the peak of the BE curve (Iron-56), they are more tightly bound, and the excess energy is released.\", \"memoryTrigger\": \"Q = Final BE - Initial BE (FBI: Final - Binding - Initial).\", \"visualPrompt\": \"Imagine two small magnets coming together to form a more stable, tighter configuration; energy is released as they 'snap' together.\", \"commonTrap\": \"Subtracting BE/nucleon values (8.5 - 7.6 = 0.9) and forgetting to multiply by the total number of nucleons (240).\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Stability is determined by BE/nucleon. Since product nuclei are closer to the peak of the BE curve (Iron-56), they are more tightly bound, and the excess energy is released.\",\"memoryTrigger\":\"Q = Final BE - Initial BE (FBI: Final - Binding - Initial).\",\"visualPrompt\":\"Imagine two small magnets coming together to form a more stable, tighter configuration; energy is released as they 'snap' together.\",\"commonTrap\":\"Subtracting BE/nucleon values (8.5 - 7.6 = 0.9) and forgetting to multiply by the total number of nucleons (240).\"}",
         "keyFormulas": [
           "$Q = \\sum(BE)_{products} - \\sum(BE)_{reactants}$",
           "$Total BE = (BE/A) \\times A$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-007",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "51b2fe59-3328-4807-a568-3451b874e8c8",
         "text": "In an electromagnetic induction experiment, a long air-cored solenoid of length $l$, cross-sectional area $A$, and total number of turns $N$ possesses a self-inductance $L$. If the researcher rewinds the solenoid such that the total number of turns is doubled to $2N$ while the length of the solenoid is reduced to $l/2$ (keeping the area $A$ constant), what will be the new self-inductance $L'$ in terms of $L$?",
         "options": [
-          "$2L$",
-          "$4L$",
+          "$L/2$",
           "$8L$",
-          "$L/2$"
+          "$2L$",
+          "$4L$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1057,26 +1057,26 @@
         ],
         "examTip": "Always check if 'number of turns' refers to total turns ($N$) or turns per unit length ($n$). The formula changes significantly based on this distinction ($L = \\mu_0 n^2 A l$ vs $L = \\mu_0 N^2 A / l$).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Self-inductance measures the 'magnetic inertia' of a component. It increases quadratically with turns because more turns mean more flux linkage AND more field produced per ampere.\", \"memoryTrigger\": \"L-N-Square-Over-L: $L \\\\propto N^2/l$.\", \"visualPrompt\": \"Imagine stretching a spring. If you add more loops (turns) and squash it (shorter length), the 'density' of the magnetic field lines increases drastically, making the inductor much 'stronger'.\", \"commonTrap\": \"Only doubling $L$ because $N$ doubled, forgetting the square ($N^2$).\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Self-inductance measures the 'magnetic inertia' of a component. It increases quadratically with turns because more turns mean more flux linkage AND more field produced per ampere.\",\"memoryTrigger\":\"L-N-Square-Over-L: $L \\\\propto N^2/l$.\",\"visualPrompt\":\"Imagine stretching a spring. If you add more loops (turns) and squash it (shorter length), the 'density' of the magnetic field lines increases drastically, making the inductor much 'stronger'.\",\"commonTrap\":\"Only doubling $L$ because $N$ doubled, forgetting the square ($N^2$).\"}",
         "keyFormulas": [
           "$L = \\frac{\\mu_0 N^2 A}{l}$ - Inductance with total turns $N$",
           "$L = \\mu_0 n^2 A l$ - Inductance with turns per unit length $n$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "9c4cf82b-7397-47b5-a9d8-70ebcd284dcb",
         "text": "In a semiconductor physics experiment, the conductivity $\\sigma$ of an intrinsic semiconductor is studied. Using the relation $n_i = A T^{3/2} e^{-E_g / 2kT}$, how does the charge carrier concentration $n_i$ and the total conductivity $\\sigma = e(n_i \\mu_e + n_i \\mu_h)$ behave when the temperature $T$ of the sample is significantly increased?",
         "options": [
           "$n_i$ increases linearly and $\\sigma$ decreases.",
-          "$n_i$ increases exponentially and $\\sigma$ increases.",
           "$n_i$ decreases exponentially and $\\sigma$ increases.",
+          "$n_i$ increases exponentially and $\\sigma$ increases.",
           "$n_i$ remains constant and $\\sigma$ increases due to mobility."
         ],
         "marks": 4,
@@ -1094,7 +1094,7 @@
         ],
         "examTip": "Remember: Metals have a positive temperature coefficient of resistance ($R \\uparrow$ as $T \\uparrow$), while Semiconductors have a negative temperature coefficient ($R \\downarrow$ as $T \\uparrow$ or $\\sigma \\uparrow$ as $T \\uparrow$).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"In semiconductors, the forbidden energy gap $E_g$ acts as a barrier. Thermal energy ($kT$) provides the energy for electrons to jump from the valence band to the conduction band. Because this is a statistical process (Boltzmann distribution), the increase is exponential.\", \"memoryTrigger\": \"Semi-T-Up-Sigma-Up (Semiconductor: Temperature Up, Conductivity Up).\", \"visualPrompt\": \"Imagine a crowd (electrons) behind a wall (band gap). As the floor gets hotter (Temperature), more people start jumping over the wall, making the 'flow' (current/conductivity) much larger.\", \"commonTrap\": \"Confusing conductivity with resistivity. Resistivity $\\\\rho$ decreases, while conductivity $\\\\sigma$ increases.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"In semiconductors, the forbidden energy gap $E_g$ acts as a barrier. Thermal energy ($kT$) provides the energy for electrons to jump from the valence band to the conduction band. Because this is a statistical process (Boltzmann distribution), the increase is exponential.\",\"memoryTrigger\":\"Semi-T-Up-Sigma-Up (Semiconductor: Temperature Up, Conductivity Up).\",\"visualPrompt\":\"Imagine a crowd (electrons) behind a wall (band gap). As the floor gets hotter (Temperature), more people start jumping over the wall, making the 'flow' (current/conductivity) much larger.\",\"commonTrap\":\"Confusing conductivity with resistivity. Resistivity $\\\\rho$ decreases, while conductivity $\\\\sigma$ increases.\"}",
         "keyFormulas": [
           "$n_i^2 = N_c N_v e^{-E_g/kT}$",
           "$\\sigma = n_i e (\\mu_e + \\mu_h)$",
@@ -1102,20 +1102,20 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": null,
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       },
       {
         "id": "48156919-326e-4370-bb85-dbd4500aec82",
         "text": "In a sophisticated radio-frequency tuning circuit modeled as a series $LCR$ network, the resonance frequency is initially $\\omega_0$. To enhance the selectivity of the receiver without altering the resonant frequency, an engineer decides to simultaneously quadruple the inductance $L$ to $4L$ and adjust the capacitance to a new value $C'$. If the original resistance $R$ is also doubled to $2R$ to manage thermal stability, how does the bandwidth ($\\Delta \\omega$) of the circuit change relative to its initial state?",
         "options": [
-          "The bandwidth is halved.",
-          "The bandwidth remains unchanged.",
+          "The bandwidth increases by a factor of four.",
           "The bandwidth is doubled.",
-          "The bandwidth increases by a factor of four."
+          "The bandwidth remains unchanged.",
+          "The bandwidth is halved."
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1132,27 +1132,27 @@
         ],
         "examTip": "Always remember that 'selectivity' or 'sharpness' is inversely proportional to bandwidth. Bandwidth depends only on $R$ and $L$, not on $C$, which is a frequent trap in NEET questions.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Bandwidth is the range of frequencies over which the power is at least half the maximum power. It represents the 'spread' of the resonance curve. A smaller bandwidth means higher selectivity.\", \"memoryTrigger\": \"B-R-L: Bandwidth = R over L. (Remember 'BRL' sounds like 'Barrel' - narrower barrel, more focus).\", \"visualPrompt\": \"Imagine a mountain peak. If the mountain is thin (small bandwidth), you can pinpoint the top easily. If it's a wide hill (large bandwidth), the peak is harder to isolate.\", \"commonTrap\": \"Students often try to include $C$ in the bandwidth calculation because $C$ affects $\\\\omega_0$. However, $\\\\Delta \\\\omega$ is independent of $C$.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Bandwidth is the range of frequencies over which the power is at least half the maximum power. It represents the 'spread' of the resonance curve. A smaller bandwidth means higher selectivity.\",\"memoryTrigger\":\"B-R-L: Bandwidth = R over L. (Remember 'BRL' sounds like 'Barrel' - narrower barrel, more focus).\",\"visualPrompt\":\"Imagine a mountain peak. If the mountain is thin (small bandwidth), you can pinpoint the top easily. If it's a wide hill (large bandwidth), the peak is harder to isolate.\",\"commonTrap\":\"Students often try to include $C$ in the bandwidth calculation because $C$ affects $\\\\omega_0$. However, $\\\\Delta \\\\omega$ is independent of $C$.\"}",
         "keyFormulas": [
           "$\\Delta \\omega = \\frac{R}{L}$ (Bandwidth)",
           "$Q = \\frac{\\omega_0}{\\Delta \\omega} = \\frac{1}{R}\\sqrt{\\frac{L}{C}}$ (Quality Factor)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "56145cb4-57b5-4df5-97de-04bc23a19dea",
         "text": "An equilateral glass prism ($n=1.5$) is placed in air. A ray of light is incident normally on one of its refracting faces. Which of the following statements best describes the behavior of the ray at the second refracting face?",
         "options": [
-          "The ray emerges into the air, bending away from the normal.",
-          "The ray emerges into the air, bending towards the normal.",
+          "The ray passes through the second face undeviated.",
           "The ray undergoes total internal reflection as the incidence angle exceeds the critical angle.",
-          "The ray passes through the second face undeviated."
+          "The ray emerges into the air, bending away from the normal.",
+          "The ray emerges into the air, bending towards the normal."
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1162,33 +1162,33 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Analyze First Face ::: The ray is incident 'normally', meaning the angle of incidence $i_1 = 0$. By Snell's law, the angle of refraction $r_1 = 0$. The ray travels straight to the second face.",
-          "Geometry of Prism ::: For any prism, the refracting angle $A = r_1 + r_2$. Here, $A = 60^°$ (equilateral) and $r_1 = 0$. Therefore, the angle of incidence at the second face is $r_2 = 60^°$.",
-          "Calculate Critical Angle ::: The critical angle $\\theta_c$ for the glass-air interface is $\\sin \\theta_c = \\frac{1}{n} = \\frac{1}{1.5} = \\frac{2}{3} \\approx 0.666$. This corresponds to $\\theta_c \\approx 41.8^°$.",
-          "Compare Angles ::: The angle of incidence at the second face ($60^°$) is significantly greater than the critical angle ($41.8^°$).",
+          "Geometry of Prism ::: For any prism, the refracting angle $A = r_1 + r_2$. Here, $A = 60^\\circ$ (equilateral) and $r_1 = 0$. Therefore, the angle of incidence at the second face is $r_2 = 60^\\circ$.",
+          "Calculate Critical Angle ::: The critical angle $\\theta_c$ for the glass-air interface is $\\sin \\theta_c = \\frac{1}{n} = \\frac{1}{1.5} = \\frac{2}{3} \\approx 0.666$. This corresponds to $\\theta_c \\approx 41.8^\\circ$.",
+          "Compare Angles ::: The angle of incidence at the second face ($60^\\circ$) is significantly greater than the critical angle ($41.8^\\circ$).",
           "Conclusion ::: Since $i > \\theta_c$, the ray cannot refract into the air and must undergo Total Internal Reflection (TIR) at the second face."
         ],
-        "examTip": "For an equilateral prism, any ray incident normally on one face will always hit the second face at $60^°$. Since $60^°$ is greater than the critical angle for standard glass ($\\approx 42^°$), TIR is guaranteed.",
+        "examTip": "For an equilateral prism, any ray incident normally on one face will always hit the second face at $60^\\circ$. Since $60^\\circ$ is greater than the critical angle for standard glass ($\\approx 42^\\circ$), TIR is guaranteed.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Normal incidence at the first face 'transfers' the entire prism angle to the second face as the new incidence angle. If the prism is 'sharp' enough (large A) or 'dense' enough (high n), light gets trapped.\", \"memoryTrigger\": \"The 60-42 Rule: In a $60^\\\\circ$ glass prism, normal incidence always leads to a trap (TIR).\", \"visualPrompt\": \"Imagine the ray hitting the first wall like a ghost, then slamming into the second wall at a steep slant and bouncing back like a ball.\", \"commonTrap\": \"Assuming the ray always exits a prism. You must *always* check the critical angle condition at the second interface.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Normal incidence at the first face 'transfers' the entire prism angle to the second face as the new incidence angle. If the prism is 'sharp' enough (large A) or 'dense' enough (high n), light gets trapped.\",\"memoryTrigger\":\"The 60-42 Rule: In a $60^\\\\circ$ glass prism, normal incidence always leads to a trap (TIR).\",\"visualPrompt\":\"Imagine the ray hitting the first wall like a ghost, then slamming into the second wall at a steep slant and bouncing back like a ball.\",\"commonTrap\":\"Assuming the ray always exits a prism. You must *always* check the critical angle condition at the second interface.\"}",
         "keyFormulas": [
           "$A = r_1 + r_2$",
           "$\\sin \\theta_c = 1/n$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "b8d75643-92a4-42cd-adc5-887d3da3e07f",
-        "text": "In the circuit diagram shown below, a cell of EMF $\\varepsilon$ and internal resistance $r$ is connected to a variable external resistor $R$. As the student decreases the value of $R$ starting from a very high value towards zero, how does the potential difference $V$ across the terminals of the cell and the current $I$ through the circuit change? (Imagine a standard series circuit with a Voltmeter across the cell and an Ammeter in series).\\n\\n[Diagram: A single loop with a battery ($ε, r$), an ammeter, and a variable resistor $R$. A voltmeter is connected in parallel to the battery.]",
+        "text": "In the circuit diagram shown below, a cell of EMF $\\varepsilon$ and internal resistance $r$ is connected to a variable external resistor $R$. As the student decreases the value of $R$ starting from a very high value towards zero, how does the potential difference $V$ across the terminals of the cell and the current $I$ through the circuit change? (Imagine a standard series circuit with a Voltmeter across the cell and an Ammeter in series).\\n\\n[Diagram: A single loop with a battery ($\\u03b5, r$), an ammeter, and a variable resistor $R$. A voltmeter is connected in parallel to the battery.]",
         "options": [
-          "The current $I$ increases while the terminal potential difference $V$ decreases.",
           "Both the current $I$ and the terminal potential difference $V$ increase.",
           "The current $I$ decreases while the terminal potential difference $V$ increases.",
+          "The current $I$ increases while the terminal potential difference $V$ decreases.",
           "Both the current $I$ and the terminal potential difference $V$ decrease."
         ],
         "marks": 4,
@@ -1206,27 +1206,27 @@
         ],
         "examTip": "In a simple battery-resistor circuit: $R$ goes down $\\rightarrow$ Current goes UP $\\rightarrow$ 'Internal Loss' ($Ir$) goes UP $\\rightarrow$ 'External Voltage' ($V$) goes DOWN.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Think of the total voltage as a 'budget'. As the external current increases, the 'internal tax' (internal resistance) takes a bigger bite out of the budget, leaving less for the external circuit.\", \"memoryTrigger\": \"Low R = High I = Low V.\", \"visualPrompt\": \"Imagine a crowd (electrons) rushing through a door. If the outside resistance (R) is low, the crowd moves faster (high I), but they bump into the doorframe (internal resistance r) much more, losing energy before they get out.\", \"commonTrap\": \"Thinking $V$ increases because the 'resistor is getting smaller'. Remember $V$ is measured across the source, not just the resistor.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Think of the total voltage as a 'budget'. As the external current increases, the 'internal tax' (internal resistance) takes a bigger bite out of the budget, leaving less for the external circuit.\",\"memoryTrigger\":\"Low R = High I = Low V.\",\"visualPrompt\":\"Imagine a crowd (electrons) rushing through a door. If the outside resistance (R) is low, the crowd moves faster (high I), but they bump into the doorframe (internal resistance r) much more, losing energy before they get out.\",\"commonTrap\":\"Thinking $V$ increases because the 'resistor is getting smaller'. Remember $V$ is measured across the source, not just the resistor.\"}",
         "keyFormulas": [
           "$I = \\frac{\\varepsilon}{R+r}$",
           "$V = IR = \\varepsilon - Ir$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "diagram_based_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       },
       {
         "id": "84379656-104c-419b-a8ab-93f196ba24a8",
         "text": "During a laboratory experiment, a student measures the terminal potential difference $V$ across a cell of EMF $\\varepsilon$ and internal resistance $r$ while it is being discharged through an external resistance $R$. According to the relation $V = \\varepsilon - Ir$, which of the following statements regarding the physical relationship between $V$ and $I$ is correct?",
         "options": [
-          "The graph of $V$ versus $I$ is a straight line with a negative slope equal to the internal resistance $r$.",
-          "The terminal voltage $V$ is always greater than the EMF $\\varepsilon$ when current is drawn from the cell.",
+          "In an open circuit condition where $R = \\infty$, the terminal voltage $V$ becomes zero.",
           "If the external resistance $R$ is increased, the terminal voltage $V$ decreases.",
-          "In an open circuit condition where $R = \\infty$, the terminal voltage $V$ becomes zero."
+          "The graph of $V$ versus $I$ is a straight line with a negative slope equal to the internal resistance $r$.",
+          "The terminal voltage $V$ is always greater than the EMF $\\varepsilon$ when current is drawn from the cell."
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -1242,7 +1242,7 @@
         ],
         "examTip": "Always check the intercept and slope of the V-I graph. Intercept = EMF; Magnitude of Slope = Internal Resistance. This is a very frequent graphical concept.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"A real battery isn't perfect; it has 'friction' (internal resistance). When current flows, some energy is lost inside the battery, so the voltage available to the outside world (Terminal Voltage) is less than the total chemical energy (EMF).\", \"memoryTrigger\": \"Discharging is 'Subtract' ($V = \\\\varepsilon - Ir$); Charging is 'Add' ($V = \\\\varepsilon + Ir$).\", \"visualPrompt\": \"A water tank (EMF) where the exit pipe (Internal Resistance) is partially clogged; the more water you try to pull out, the lower the pressure at the nozzle.\", \"commonTrap\": \"Assuming terminal voltage is a fixed property of the battery. It depends on the current drawn!\"}",
+        "masteryMaterial": "{\"coreConcept\":\"A real battery isn't perfect; it has 'friction' (internal resistance). When current flows, some energy is lost inside the battery, so the voltage available to the outside world (Terminal Voltage) is less than the total chemical energy (EMF).\",\"memoryTrigger\":\"Discharging is 'Subtract' ($V = \\\\varepsilon - Ir$); Charging is 'Add' ($V = \\\\varepsilon + Ir$).\",\"visualPrompt\":\"A water tank (EMF) where the exit pipe (Internal Resistance) is partially clogged; the more water you try to pull out, the lower the pressure at the nozzle.\",\"commonTrap\":\"Assuming terminal voltage is a fixed property of the battery. It depends on the current drawn!\"}",
         "keyFormulas": [
           "$V = \\varepsilon - Ir$ - Discharging",
           "$V = \\varepsilon + Ir$ - Charging",
@@ -1250,20 +1250,20 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       },
       {
         "id": "5cb84e9e-25a3-42ff-a19c-6685bf139c9c",
-        "text": "An ideal transformer is connected to a primary voltage of $2.2 kV$ and provides power to a town at $220 V$. The town requires a total power of $110 kW$. Assuming there are no energy losses in the transformer, calculate the current in the primary coil and the turns ratio ($N_p/N_s$) of the transformer.",
+        "text": "An ideal transformer is connected to a primary voltage of $2.2 \\text{ kV}$ and provides power to a town at $220 \\text{ V}$. The town requires a total power of $110 \\text{ kW}$. Assuming there are no energy losses in the transformer, calculate the current in the primary coil and the turns ratio ($N_p/N_s$) of the transformer.",
         "options": [
-          "$50 A$ and $10:1$",
-          "$500 A$ and $1:10$",
-          "$5 A$ and $10:1$",
-          "$0.5 A$ and $100:1$"
+          "$5 \\text{ A}$ and $10:1$",
+          "$500 \\text{ A}$ and $1:10$",
+          "$0.5 \\text{ A}$ and $100:1$",
+          "$50 \\text{ A}$ and $10:1$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1273,34 +1273,34 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Identify the Turns Ratio ::: $\\frac{N_p}{N_s} = \\frac{V_p}{V_s} = \\frac{2200}{220} = 10$.",
-          "State Power Equality ::: For an ideal transformer, Input Power = Output Power = $110 kW = 110,000 W$.",
+          "State Power Equality ::: For an ideal transformer, Input Power = Output Power = $110 \\text{ kW} = 110,000 \\text{ W}$.",
           "Calculate Primary Current ::: $P = V_p I_p \\Rightarrow 110,000 = 2200 \\times I_p$.",
-          "Simplify for $I_p$ ::: $I_p = \\frac{110,000}{2200} = \\frac{1100}{22} = 50 A$.",
-          "Combine Results ::: $I_p = 50 A$ and $N_p/N_s = 10:1$."
+          "Simplify for $I_p$ ::: $I_p = \\frac{110,000}{2200} = \\frac{1100}{22} = 50 \\text{ A}$.",
+          "Combine Results ::: $I_p = 50 \\text{ A}$ and $N_p/N_s = 10:1$."
         ],
         "examTip": "In ideal transformers, Power is constant. Voltage and current are inversely proportional ($V_p/V_s = I_s/I_p$).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Transformers work on the principle of Mutual Induction. They can only change the voltage and current of AC, never DC.\", \"memoryTrigger\": \"VIP: $V_p I_p = V_s I_s$. Ratio: $V_p/V_s = N_p/N_s$.\", \"visualPrompt\": \"Imagine a seesaw: if one side (Voltage) goes up, the other side (Current) must go down to keep the total 'effort' (Power) balanced.\", \"commonTrap\": \"Confusing Step-up and Step-down ratios or thinking power increases in a step-up transformer.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Transformers work on the principle of Mutual Induction. They can only change the voltage and current of AC, never DC.\",\"memoryTrigger\":\"VIP: $V_p I_p = V_s I_s$. Ratio: $V_p/V_s = N_p/N_s$.\",\"visualPrompt\":\"Imagine a seesaw: if one side (Voltage) goes up, the other side (Current) must go down to keep the total 'effort' (Power) balanced.\",\"commonTrap\":\"Confusing Step-up and Step-down ratios or thinking power increases in a step-up transformer.\"}",
         "keyFormulas": [
           "$\\frac{V_p}{V_s} = \\frac{N_p}{N_s} = \\frac{I_s}{I_p}$",
           "$P = VI$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "fbbc8265-f0ea-4dc4-90ea-249f79158b9a",
         "text": "Consider a standard Young’s Double Slit Experiment (YDSE) setup where monochromatic light of wavelength $\\lambda$ in air produces an interference pattern on a distant screen. The fringe width is measured to be $\\beta$. If the entire apparatus is submerged in a transparent liquid of refractive index $n$, and the distance between the slits and the screen is simultaneously doubled to compensate for the change in wavelength, the new fringe width $\\beta'$ will be:",
         "options": [
           "$\\frac{2\\beta}{n}$",
-          "$\\frac{\\beta}{2n}$",
+          "$2n\\beta$",
           "$\\frac{n\\beta}{2}$",
-          "$2n\\beta$"
+          "$\\frac{\\beta}{2n}$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1317,27 +1317,27 @@
         ],
         "examTip": "When a medium changes, wavelength changes ($\\lambda \\propto 1/n$). Always write the ratio $\\frac{\\beta_2}{\\beta_1} = \\frac{\\lambda_2 D_2 d_1}{\\lambda_1 D_1 d_2}$ to avoid errors.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Fringe width is directly proportional to wavelength and screen distance, and inversely proportional to slit separation. Refractive index effectively 'shrinks' the wave.\", \"memoryTrigger\": \"$\\\\beta$ is 'Big' if $D$ is big or $\\\\lambda$ is big; $\\\\beta$ is 'Small' if $d$ is big or $n$ is big.\", \"visualPrompt\": \"Imagine waves traveling through honey versus air; they bunch up closer together (shorter wavelength) in the thicker medium.\", \"commonTrap\": \"Forgetting that $D$ is doubled while only focusing on the $1/n$ factor.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Fringe width is directly proportional to wavelength and screen distance, and inversely proportional to slit separation. Refractive index effectively 'shrinks' the wave.\",\"memoryTrigger\":\"$\\\\beta$ is 'Big' if $D$ is big or $\\\\lambda$ is big; $\\\\beta$ is 'Small' if $d$ is big or $n$ is big.\",\"visualPrompt\":\"Imagine waves traveling through honey versus air; they bunch up closer together (shorter wavelength) in the thicker medium.\",\"commonTrap\":\"Forgetting that $D$ is doubled while only focusing on the $1/n$ factor.\"}",
         "keyFormulas": [
           "$\\beta = \\frac{\\lambda D}{d}$",
-          "$\\lambda_{med} = \\frac{\\lambda_}{air}{n}$"
+          "$\\lambda_{med} = \\frac{\\lambda_{air}}{n}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 0
       },
       {
         "id": "5f47d4c3-ef46-4f19-a5e0-ba49c295a1dd",
         "text": "The diagram below represents a ray of light $AO$ incident on a convex lens at its optical center $O$. Which of the following paths (1, 2, 3, or 4) correctly represents the refracted ray? (Path 1: Bends towards focus, Path 2: Undeviated straight line, Path 3: Bends away from principal axis, Path 4: Reflects back).",
         "options": [
-          "Path 1",
+          "Path 4",
           "Path 2",
-          "Path 3",
-          "Path 4"
+          "Path 1",
+          "Path 3"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -1354,27 +1354,27 @@
         ],
         "examTip": "The optical center is the 'safe zone' for rays. No matter the angle, if it hits $O$, it stays straight. Don't confuse this with the Focus or Center of Curvature.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"At the optical center of a thin lens, the two surfaces are effectively parallel and very close. Any refraction at the first surface is exactly compensated by refraction at the second surface, resulting in zero net deviation.\", \"memoryTrigger\": \"Center = Straight. (The letter 'O' looks like a hole that light just passes through).\", \"visualPrompt\": \"Imagine a window pane held perfectly perpendicular to your view; you see straight through it.\", \"commonTrap\": \"Bending the ray towards the focus even when it passes through the center.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"At the optical center of a thin lens, the two surfaces are effectively parallel and very close. Any refraction at the first surface is exactly compensated by refraction at the second surface, resulting in zero net deviation.\",\"memoryTrigger\":\"Center = Straight. (The letter 'O' looks like a hole that light just passes through).\",\"visualPrompt\":\"Imagine a window pane held perfectly perpendicular to your view; you see straight through it.\",\"commonTrap\":\"Bending the ray towards the focus even when it passes through the center.\"}",
         "keyFormulas": [
           "$\\frac{1}{f} = \\frac{1}{v} - \\frac{1}{u}$ (Lens formula context)",
           "Magnification $m = v/u$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "diagram_based_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "b1b83ce0-09e0-4d25-a56e-c6eee522102b",
-        "text": "The binding energy per nucleon for a heavy nucleus $A$ (mass number 240) is $7.6 MeV$. It undergoes fission into two middle-weight nuclei $B$ and $C$, each with mass number 120. If the binding energy per nucleon for $B$ and $C$ is $8.5 MeV$, what is the total gain in binding energy (energy released) during this single fission event?",
+        "text": "The binding energy per nucleon for a heavy nucleus $A$ (mass number 240) is $7.6 \\text{ MeV}$. It undergoes fission into two middle-weight nuclei $B$ and $C$, each with mass number 120. If the binding energy per nucleon for $B$ and $C$ is $8.5 \\text{ MeV}$, what is the total gain in binding energy (energy released) during this single fission event?",
         "options": [
-          "$216 MeV$",
-          "$0.9 MeV$",
-          "$108 MeV$",
-          "$180 MeV$"
+          "$108 \\text{ MeV}$",
+          "$180 \\text{ MeV}$",
+          "$0.9 \\text{ MeV}$",
+          "$216 \\text{ MeV}$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1384,35 +1384,35 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Calculate Initial Binding Energy ::: Total $BE_{initial} = (BE/A)_{parent} \\times A_{parent} = 7.6 \\times 240$.",
-          "Perform Multiplication ::: $7.6 \\times 240 = 1824 MeV$.",
+          "Perform Multiplication ::: $7.6 \\times 240 = 1824 \\text{ MeV}$.",
           "Calculate Final Binding Energy ::: Total $BE_{final} = 2 \\times [(BE/A)_{fragment} \\times A_{fragment}] = 2 \\times [8.5 \\times 120]$.",
-          "Perform Multiplication ::: $BE_{final} = 2 \\times 1020 = 2040 MeV$.",
+          "Perform Multiplication ::: $BE_{final} = 2 \\times 1020 = 2040 \\text{ MeV}$.",
           "Find Energy Released ::: $Q$-value $= BE_{final} - BE_{initial} = 2040 - 1824$.",
-          "Conclude ::: $Q = 216 MeV$."
+          "Conclude ::: $Q = 216 \\text{ MeV}$."
         ],
         "examTip": "In fission/fusion, Energy Released = Final Total Binding Energy minus Initial Total Binding Energy. Do not confuse this with mass defect formula ($Initial - Final$) - they are effectively the same but approach from different sides of the energy conservation coin.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Nuclei seek higher binding energy per nucleon for stability. Moving from $7.6$ to $8.5 \\\\text{ MeV}$ makes the nucleons more tightly bound, releasing the excess energy.\", \"memoryTrigger\": \"BE-Release: Final Total - Initial Total.\", \"visualPrompt\": \"Imagine a group of 240 people in a loose, unstable huddle (low BE). If they split into two tight, highly organized groups (high BE), the 'extra noise/activity' they had before is released as energy.\", \"commonTrap\": \"Only calculating the difference $8.5 - 7.6 = 0.9$ and picking option B.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Nuclei seek higher binding energy per nucleon for stability. Moving from $7.6$ to $8.5 \\\\text{ MeV}$ makes the nucleons more tightly bound, releasing the excess energy.\",\"memoryTrigger\":\"BE-Release: Final Total - Initial Total.\",\"visualPrompt\":\"Imagine a group of 240 people in a loose, unstable huddle (low BE). If they split into two tight, highly organized groups (high BE), the 'extra noise/activity' they had before is released as energy.\",\"commonTrap\":\"Only calculating the difference $8.5 - 7.6 = 0.9$ and picking option B.\"}",
         "keyFormulas": [
           "$E_{released} = (BE_{final}) - (BE_{initial})$",
           "$BE_{total} = (BE/A) \\times A$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-007",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "78c47c6a-e3e3-4c59-abd0-40c731d48821",
         "text": "A steady current $I$ is flowing through a non-uniform metallic conductor of varying cross-sectional area. If we consider two sections of the conductor, Section 1 with radius $r$ and Section 2 with radius $2r$, what is the ratio of the drift velocities $v_{d1} : v_{d2}$ of the electrons at these two sections based on the relationship $I = nAev_d$?",
         "options": [
+          "1 : 2",
           "4 : 1",
           "1 : 4",
-          "2 : 1",
-          "1 : 2"
+          "2 : 1"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -1425,31 +1425,31 @@
           "Use the Drift Velocity Formula ::: Recall $I = nAev_d$, where $n$ is charge density, $e$ is electron charge, and $A$ is cross-sectional area.",
           "Identify Constants ::: For the same conductor, $n$ and $e$ are constant. Therefore, $I \\propto A \\cdot v_d$, which implies $v_d \\propto \\frac{1}{A}$.",
           "Express Area in terms of Radius ::: Area $A = \\pi r^2$. Thus, $v_d \\propto \\frac{1}{r^2}$.",
-          "Calculate Ratio ::: $\\frac{v_}{d1}{v_{d2}} = \\frac{r_2^2}{r_1^2} = \\frac{(2r)^2}{r^2} = \\frac{4r^2}{r^2} = 4$."
+          "Calculate Ratio ::: $\\frac{v_{d1}}{v_{d2}} = \\frac{r_2^2}{r_1^2} = \\frac{(2r)^2}{r^2} = \\frac{4r^2}{r^2} = 4$."
         ],
         "examTip": "In series or non-uniform wires, Current stays constant. Drift velocity is inversely proportional to the area ($v_d \\propto 1/r^2$). Don't just look at the radius, look at the square of the radius!",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"For a steady current, the 'flow' is constant. If the pipe gets narrower, the water (electrons) must move faster. If it gets wider, they slow down. The speed changes exactly to compensate for the area change.\", \"memoryTrigger\": \"Narrower = Faster; Wider = Slower (Inversely proportional to Square of Radius).\", \"visualPrompt\": \"A river flowing through a wide valley versus a narrow gorge.\", \"commonTrap\": \"Thinking $v_d$ is constant throughout the wire just because current $I$ is constant.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"For a steady current, the 'flow' is constant. If the pipe gets narrower, the water (electrons) must move faster. If it gets wider, they slow down. The speed changes exactly to compensate for the area change.\",\"memoryTrigger\":\"Narrower = Faster; Wider = Slower (Inversely proportional to Square of Radius).\",\"visualPrompt\":\"A river flowing through a wide valley versus a narrow gorge.\",\"commonTrap\":\"Thinking $v_d$ is constant throughout the wire just because current $I$ is constant.\"}",
         "keyFormulas": [
           "$v_d = \\frac{I}{nAe}$ - Drift velocity definition",
           "$J = \\frac{I}{A} = nev_d$ - Current density"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "f1995a65-e05e-42bb-b322-2b2d0818d532",
         "text": "A biconvex lens of focal length $f$ is manufactured from a glass material having a refractive index of $1.5$. If this optical component is subsequently immersed in a transparent liquid medium with a refractive index of $1.25$, which of the following expressions correctly represents the new focal length $f'$ of the lens in terms of its focal length in air?",
         "options": [
-          "$f' = 1.25 f$",
+          "$f' = 5 f$",
           "$f' = 2.5 f$",
           "$f' = 4 f$",
-          "$f' = 5 f$"
+          "$f' = 1.25 f$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1466,27 +1466,27 @@
         ],
         "examTip": "Whenever a lens is immersed in a medium with refractive index $n_l$, if $n_l$ is closer to $n_g$, the focal length increases significantly. If $n_l = n_g$, the lens disappears ($f \\rightarrow \\infty$).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The bending power of a lens depends not just on its curvature but on the *difference* between its refractive index and that of the surrounding medium. Reducing this difference increases focal length.\", \"memoryTrigger\": \"The 'Closer-to-Glass' Rule: As the liquid's index approaches the glass's index, the focal length 'stretches' toward infinity.\", \"visualPrompt\": \"Imagine a glass lens in water; the light rays bend less sharply because the speed change at the interface is less dramatic than in air.\", \"commonTrap\": \"Students often use $(n_g - n_l)$ instead of $(\\\\frac{n_g}{n_l} - 1)$. Always remember the formula uses the relative index of the lens with respect to the medium.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The bending power of a lens depends not just on its curvature but on the *difference* between its refractive index and that of the surrounding medium. Reducing this difference increases focal length.\",\"memoryTrigger\":\"The 'Closer-to-Glass' Rule: As the liquid's index approaches the glass's index, the focal length 'stretches' toward infinity.\",\"visualPrompt\":\"Imagine a glass lens in water; the light rays bend less sharply because the speed change at the interface is less dramatic than in air.\",\"commonTrap\":\"Students often use $(n_g - n_l)$ instead of $(\\\\frac{n_g}{n_l} - 1)$. Always remember the formula uses the relative index of the lens with respect to the medium.\"}",
         "keyFormulas": [
           "$\\frac{1}{f} = (\\mu_{rel} - 1) (\\frac{1}{R_1} - \\frac{1}{R_2})$",
-          "$\\frac{f_}{med}{f_{air}} = \\frac{n_g - 1}{\\frac{n_g}{n_m} - 1}$"
+          "$\\frac{f_{med}}{f_{air}} = \\frac{n_g - 1}{\\frac{n_g}{n_m} - 1}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-002",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "d07aa6ea-d2e8-453d-95e0-84c3080a1d70",
         "text": "In a precision electrostatic experiment, a student charges a parallel plate air-filled capacitor of capacitance $C$ to a potential difference $V$ using a DC source. After disconnecting the source, the student carefully increases the separation between the plates to twice its original distance using insulating handles. If the initial energy stored in the capacitor was $U$, the final electrostatic energy stored in the system, neglecting fringe effects, will be:",
         "options": [
-          "$U/2$",
           "$U$",
-          "$2U$",
-          "$4U$"
+          "$U/2$",
+          "$4U$",
+          "$2U$"
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -1503,7 +1503,7 @@
         ],
         "examTip": "Always check if the battery is 'connected' or 'disconnected'. If disconnected, $Q$ is constant. If connected, $V$ is constant. This is the single most common fork in capacitor problems.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Energy density and work done in electric fields. When plates move apart, the external agent does work against the attractive force $F = Q^2 / (2\\\\epsilon_0 A)$, which is stored as additional potential energy.\", \"memoryTrigger\": \"Disconnected = Charge Trapped (Q is constant). Separation increases = Work done (+) = Energy increases.\", \"visualPrompt\": \"Imagine two oppositely charged magnets being pulled apart; you have to pull hard, and that 'effort' goes into the field.\", \"commonTrap\": \"Students often use $U = 1/2 CV^2$ and assume $V$ is constant, leading to the incorrect answer $U/2$.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Energy density and work done in electric fields. When plates move apart, the external agent does work against the attractive force $F = Q^2 / (2\\\\epsilon_0 A)$, which is stored as additional potential energy.\",\"memoryTrigger\":\"Disconnected = Charge Trapped (Q is constant). Separation increases = Work done (+) = Energy increases.\",\"visualPrompt\":\"Imagine two oppositely charged magnets being pulled apart; you have to pull hard, and that 'effort' goes into the field.\",\"commonTrap\":\"Students often use $U = 1/2 CV^2$ and assume $V$ is constant, leading to the incorrect answer $U/2$.\"}",
         "keyFormulas": [
           "$C = \\frac{\\epsilon_0 A}{d}$ (Parallel plate capacitance)",
           "$U = \\frac{Q^2}{2C}$ (Energy when $Q$ is constant)",
@@ -1511,18 +1511,18 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 2,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "35796428-4ca0-44ec-ae57-6f43a9d1a13a",
-        "text": "A series LCR circuit is connected to an alternating voltage source of variable frequency. At a frequency $f_1$, the current in the circuit leads the voltage by $45^°$. As the frequency is increased to $f_2$, the current is found to lag the voltage by $45^°$. What is the relationship between the resonant frequency $f_r$ and the two frequencies $f_1$ and $f_2$?",
+        "text": "A series LCR circuit is connected to an alternating voltage source of variable frequency. At a frequency $f_1$, the current in the circuit leads the voltage by $45^\\circ$. As the frequency is increased to $f_2$, the current is found to lag the voltage by $45^\\circ$. What is the relationship between the resonant frequency $f_r$ and the two frequencies $f_1$ and $f_2$?",
         "options": [
-          "$f_r = \\sqrt{f}_1 f_2$",
           "$f_r = \\frac{f_1 + f_2}{2}$",
+          "$f_r = \\sqrt{f_1 f_2}$",
           "$f_r = |f_1 - f_2|$",
           "$f_r = \\frac{f_1 f_2}{f_1 + f_2}$"
         ],
@@ -1534,30 +1534,30 @@
         "blooms": "Understand",
         "solutionSteps": [
           "Understand the Phase Condition ::: $\\tan \\phi = \\frac{X_L - X_C}{R}$.",
-          "At frequency $f_1$ (Lead) ::: Current leading means circuit is capacitive ($X_C > X_L$). Phase is $-45^°$, so $\\tan(-45^°) = -1 = \\frac{2\\pi f_1 L - 1/(2\\pi f_1 C)}{R}$. This gives $1/(2\\pi f_1 C) - 2\\pi f_1 L = R$.",
-          "At frequency $f_2$ (Lag) ::: Current lagging means circuit is inductive ($X_L > X_C$). Phase is $+45^°$, so $\\tan(45^°) = 1 = \\frac{2\\pi f_2 L - 1/(2\\pi f_2 C)}{R}$. This gives $2\\pi f_2 L - 1/(2\\pi f_2 C) = R$.",
+          "At frequency $f_1$ (Lead) ::: Current leading means circuit is capacitive ($X_C > X_L$). Phase is $-45^\\circ$, so $\\tan(-45^\\circ) = -1 = \\frac{2\\pi f_1 L - 1/(2\\pi f_1 C)}{R}$. This gives $1/(2\\pi f_1 C) - 2\\pi f_1 L = R$.",
+          "At frequency $f_2$ (Lag) ::: Current lagging means circuit is inductive ($X_L > X_C$). Phase is $+45^\\circ$, so $\\tan(45^\\circ) = 1 = \\frac{2\\pi f_2 L - 1/(2\\pi f_2 C)}{R}$. This gives $2\\pi f_2 L - 1/(2\\pi f_2 C) = R$.",
           "Relate to Resonance ::: At resonance $f_r$, $2\\pi f_r L = 1/(2\\pi f_r C)$, which implies $4\\pi^2 f_r^2 LC = 1$.",
           "Geometric Mean Derivation ::: By equating the two expressions for $R$ and simplifying, or utilizing the property of the resonance curve, the resonant frequency is the geometric mean of the two 'half-power' or symmetric phase frequencies: $f_r^2 = f_1 f_2$.",
-          "Conclusion ::: $f_r = \\sqrt{f}_1 f_2$."
+          "Conclusion ::: $f_r = \\sqrt{f_1 f_2}$."
         ],
         "examTip": "In any LCR circuit, the resonant frequency is the geometric mean of any two frequencies that yield the same impedance or the same magnitude of phase shift (one lead, one lag).",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The resonance curve is symmetric on a logarithmic frequency scale. This implies that the resonant frequency is the geometric mean of frequencies with equal power or phase magnitude.\", \"memoryTrigger\": \"LCR-GM: LCR resonance uses Geometric Mean.\", \"visualPrompt\": \"Visualize the bell curve of current vs frequency. The peak isn't exactly in the middle of a linear scale; it's skewed toward the geometric center.\", \"commonTrap\": \"Choosing the arithmetic mean $(f_1+f_2)/2$ because it 'looks' like the center.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The resonance curve is symmetric on a logarithmic frequency scale. This implies that the resonant frequency is the geometric mean of frequencies with equal power or phase magnitude.\",\"memoryTrigger\":\"LCR-GM: LCR resonance uses Geometric Mean.\",\"visualPrompt\":\"Visualize the bell curve of current vs frequency. The peak isn't exactly in the middle of a linear scale; it's skewed toward the geometric center.\",\"commonTrap\":\"Choosing the arithmetic mean $(f_1+f_2)/2$ because it 'looks' like the center.\"}",
         "keyFormulas": [
           "$f_r = \\sqrt{f_1 f_2}$",
           "$\\Delta f = f_2 - f_1 = \\frac{R}{2\\pi L}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-005",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "099fe5ba-f369-4026-8172-cbdc3192f280",
-        "text": "The magnetic susceptibility $\\chi$ of a ferromagnetic material above its Curie temperature $T_c$ follows the Curie-Weiss Law. For a specific sample, it is observed that the slope of the graph between $1/\\chi$ and absolute temperature $T$ is $2.0 \\times 10^3 \\, kg m^{-3} \\, K^{-1}$. If the Curie temperature is $500 \\, K$, what is the value of magnetic susceptibility at $T = 600 \\, K$? (Assume the constant $C$ in $\\chi = \\frac{C}{T - T_c}$ is the inverse of the given slope).",
+        "text": "The magnetic susceptibility $\\chi$ of a ferromagnetic material above its Curie temperature $T_c$ follows the Curie-Weiss Law. For a specific sample, it is observed that the slope of the graph between $1/\\chi$ and absolute temperature $T$ is $2.0 \\times 10^3 \\, \\text{kg m}^{-3} \\, \\text{K}^{-1}$. If the Curie temperature is $500 \\, \\text{K}$, what is the value of magnetic susceptibility at $T = 600 \\, \\text{K}$? (Assume the constant $C$ in $\\chi = \\frac{C}{T - T_c}$ is the inverse of the given slope).",
         "options": [
           "$5.0 \\times 10^{-6}$",
           "$2.0 \\times 10^{-4}$",
@@ -1574,12 +1574,12 @@
           "Relate $\\chi$ and $T$ via Curie-Weiss Law ::: The law is $\\chi = \\frac{C}{T - T_c}$, where $C$ is the Curie constant.",
           "Interpret the graph of $1/\\chi$ vs $T$ ::: Rearranging the formula gives $\\frac{1}{\\chi} = \\frac{1}{C}(T - T_c) = \\frac{1}{C}T - \\frac{T_c}{C}$.",
           "Determine the Curie constant $C$ ::: The slope of $1/\\chi$ vs $T$ is given as $m = \\frac{1}{C}$. Thus, $\\frac{1}{C} = 2.0 \\times 10^3$. This means $C = \\frac{1}{2.0 \\times 10^3} = 0.5 \\times 10^{-3} = 5.0 \\times 10^{-4}$.",
-          "Calculate $\\chi$ at $T = 600 \\, K$ ::: Substitute $T = 600, T_c = 500, C = 5.0 \\times 10^{-4}$ into the original formula: $\\chi = \\frac{5.0 \\times 10^}{-4}{600 - 500} = \\frac{5.0 \\times 10^}{-4}{100}$.",
+          "Calculate $\\chi$ at $T = 600 \\, \\text{K}$ ::: Substitute $T = 600, T_c = 500, C = 5.0 \\times 10^{-4}$ into the original formula: $\\chi = \\frac{5.0 \\times 10^{-4}}{600 - 500} = \\frac{5.0 \\times 10^{-4}}{100}$.",
           "Final Result ::: $\\chi = 5.0 \\times 10^{-6}$. Since magnetic susceptibility is the ratio of $M$ to $H$ (both in $A/m$), it is a dimensionless quantity."
         ],
         "examTip": "Always check the units. Susceptibility $\\chi$ and relative permeability $\\mu_r$ are dimensionless. If a value has units in the options, eliminate it unless it specifically refers to mass susceptibility.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"As temperature increases, thermal agitation overcomes the exchange coupling of magnetic domains in ferromagnets. Above $T_c$, the material becomes paramagnetic, but the susceptibility remains higher than typical paramagnets because of the $T - T_c$ term in the denominator (Curie-Weiss Law).\", \"memoryTrigger\": \"CW-Gap: Curie-Weiss accounts for the 'gap' between the current temperature and $T_c$.\", \"visualPrompt\": \"Imagine a graph of $1/\\\\chi$ starting at $T_c$ on the x-axis and rising linearly. The steeper the slope, the smaller the Curie constant.\", \"commonTrap\": \"Using $T$ instead of $T-T_c$. The Curie Law ($\\\\chi \\\\propto 1/T$) only applies to pure paramagnets, not ferromagnets above $T_c$.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"As temperature increases, thermal agitation overcomes the exchange coupling of magnetic domains in ferromagnets. Above $T_c$, the material becomes paramagnetic, but the susceptibility remains higher than typical paramagnets because of the $T - T_c$ term in the denominator (Curie-Weiss Law).\",\"memoryTrigger\":\"CW-Gap: Curie-Weiss accounts for the 'gap' between the current temperature and $T_c$.\",\"visualPrompt\":\"Imagine a graph of $1/\\\\chi$ starting at $T_c$ on the x-axis and rising linearly. The steeper the slope, the smaller the Curie constant.\",\"commonTrap\":\"Using $T$ instead of $T-T_c$. The Curie Law ($\\\\chi \\\\propto 1/T$) only applies to pure paramagnets, not ferromagnets above $T_c$.\"}",
         "keyFormulas": [
           "$\\chi = \\frac{C}{T - T_c}$ (Curie-Weiss Law)",
           "$\\chi = \\frac{C}{T}$ (Curie Law for Paramagnets)",
@@ -1587,11 +1587,11 @@
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 3,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 3
       },
       {
         "id": "b726f94b-72e0-4e88-bf31-86b46d279a5e",
@@ -1599,8 +1599,8 @@
         "options": [
           "KCL is based on the law of conservation of charge, while KVL is based on the law of conservation of energy.",
           "KCL is based on the law of conservation of energy, while KVL is based on the law of conservation of charge.",
-          "Both KCL and KVL are based on the law of conservation of energy only.",
-          "KCL is based on the law of conservation of momentum, while KVL is based on the law of conservation of charge."
+          "KCL is based on the law of conservation of momentum, while KVL is based on the law of conservation of charge.",
+          "Both KCL and KVL are based on the law of conservation of energy only."
         ],
         "marks": 4,
         "difficulty": "Easy",
@@ -1616,27 +1616,27 @@
         ],
         "examTip": "KCL-C (Current-Charge) and KVL-E (Voltage-Energy). Remember alphabetical order: C before E, Current before Voltage.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"Current is flow of charge; if it doesn't build up, charge is conserved (KCL). Voltage is energy per charge; if you return to the same spot, your potential energy must be the same (KVL).\", \"memoryTrigger\": \"C-C (Current-Charge), V-E (Voltage-Energy).\", \"visualPrompt\": \"KCL: A pipe junction where water doesn't leak. KVL: A roller coaster that returns to the starting platform.\", \"commonTrap\": \"Confusing the two or thinking they both represent the same conservation law.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"Current is flow of charge; if it doesn't build up, charge is conserved (KCL). Voltage is energy per charge; if you return to the same spot, your potential energy must be the same (KVL).\",\"memoryTrigger\":\"C-C (Current-Charge), V-E (Voltage-Energy).\",\"visualPrompt\":\"KCL: A pipe junction where water doesn't leak. KVL: A roller coaster that returns to the starting platform.\",\"commonTrap\":\"Confusing the two or thinking they both represent the same conservation law.\"}",
         "keyFormulas": [
           "$\\u2211 I_{in} = \\u2211 I_{out}$ (KCL)",
           "$\\u2211 V = 0$ (KVL)"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-003",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 0
       },
       {
         "id": "73275787-083f-4d9f-ab2a-459d39334d4b",
         "text": "A circular current-carrying loop of radius $R$ produces a magnetic field of magnitude $B_0$ at its center. If the same length of wire is now rewound to form a circular coil of $N$ turns and the same current $I$ is passed through it, the new magnetic field $B'$ at the center of the $N$-turn coil is given by:",
         "options": [
-          "$B' = N B_0$",
-          "$B' = N^2 B_0$",
           "$B' = \\frac{B_0}{N}$",
-          "$B' = \\frac{B_0}{N^2}$"
+          "$B' = N^2 B_0$",
+          "$B' = \\frac{B_0}{N^2}$",
+          "$B' = N B_0$"
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1653,27 +1653,27 @@
         ],
         "examTip": "Memorize the 'Length Constraint' shortcut: If length is constant, $B \\propto N^2$ and $B \\propto 1/r^2$. This saves 60 seconds of derivation.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"When you increase the number of turns using the same wire, you gain field strength from two factors: more turns (N) and a smaller radius (which increases field by another factor of N).\", \"memoryTrigger\": \"The Double Gain: More turns + Smaller circle = $N \\\\times N$ benefit.\", \"visualPrompt\": \"Imagine coiling a long rope. As you make more loops, the diameter of the loops must shrink to use the same rope.\", \"commonTrap\": \"Forgetting that the radius $R$ must change to accommodate more turns from the same wire.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"When you increase the number of turns using the same wire, you gain field strength from two factors: more turns (N) and a smaller radius (which increases field by another factor of N).\",\"memoryTrigger\":\"The Double Gain: More turns + Smaller circle = $N \\\\times N$ benefit.\",\"visualPrompt\":\"Imagine coiling a long rope. As you make more loops, the diameter of the loops must shrink to use the same rope.\",\"commonTrap\":\"Forgetting that the radius $R$ must change to accommodate more turns from the same wire.\"}",
         "keyFormulas": [
           "$B = \\frac{\\mu_0 N I}{2r}$",
           "$L = N(2\\pi r)$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 1,
         "metadata": {
           "identityId": "ID-NP-004",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 1
       },
       {
         "id": "0122a698-1841-4262-a6f9-42d7198b06b3",
-        "text": "In a sophisticated photoelectric effect apparatus, a physicist illuminates a clean metallic surface with monochromatic radiation of frequency $f$. The resulting stopping potential is recorded as $V_0$. If the experimental parameters are modified such that the frequency of the incident radiation is increased to $1.5f$ while the intensity of the light is simultaneously tripled, which of the following statements accurately describes the subsequent observations regarding the slope of the $V_0$ versus $f$ graph and the maximum kinetic energy $K_{max}$ of the photoelectrons?",
+        "text": "In a sophisticated photoelectric effect apparatus, a physicist illuminates a clean metallic surface with monochromatic radiation of frequency $f$. The resulting stopping potential is recorded as $V_0$. If the experimental parameters are modified such that the frequency of the incident radiation is increased to $1.5f$ while the intensity of the light is simultaneously tripled, which of the following statements accurately describes the subsequent observations regarding the slope of the $V_0$ versus $f$ graph and the maximum kinetic energy $K_{\\text{max}}$ of the photoelectrons?",
         "options": [
-          "The slope of the graph remains $\\frac{h}{e}$ and $K_{max}$ increases by more than $0.5hf$.",
-          "The slope of the graph triples due to intensity change and $K_{max}$ increases by exactly $0.5hf$.",
-          "The slope remains constant at $\\frac{h}{e}$ and $K_{max}$ remains unchanged as it depends only on work function.",
-          "The slope decreases because intensity affects the stopping potential, while $K_{max}$ increases linearly."
+          "The slope remains constant at $\\frac{h}{e}$ and $K_{\\text{max}}$ remains unchanged as it depends only on work function.",
+          "The slope of the graph triples due to intensity change and $K_{\\text{max}}$ increases by exactly $0.5hf$.",
+          "The slope of the graph remains $\\frac{h}{e}$ and $K_{\\text{max}}$ increases by more than $0.5hf$.",
+          "The slope decreases because intensity affects the stopping potential, while $K_{\\text{max}}$ increases linearly."
         ],
         "marks": 4,
         "difficulty": "Moderate",
@@ -1682,26 +1682,26 @@
         "examContext": "NEET",
         "blooms": "Understand",
         "solutionSteps": [
-          "Einstein's Photoelectric Equation ::: Recall $K_{max} = hf - \\phi$, where $\\phi$ is the work function.",
-          "Stopping Potential Relation ::: Substitute $K_{max} = eV_0$ to get $V_0 = (\\frac{h}{e})f - \\frac{\\phi}{e}$.",
+          "Einstein's Photoelectric Equation ::: Recall $K_{\\text{max}} = hf - \\phi$, where $\\phi$ is the work function.",
+          "Stopping Potential Relation ::: Substitute $K_{\\text{max}} = eV_0$ to get $V_0 = (\\frac{h}{e})f - \\frac{\\phi}{e}$.",
           "Slope Analysis ::: The slope of the $V_0$ vs $f$ graph is the constant $\\frac{h}{e}$, which is independent of intensity and the specific metal used.",
           "Energy Change Calculation ::: Let initial $K_1 = hf - \\phi$. The new energy $K_2 = h(1.5f) - \\phi = 1.5hf - \\phi$.",
           "Comparison ::: $K_2 - K_1 = (1.5hf - \\phi) - (hf - \\phi) = 0.5hf$. Since the question asks about the increase relative to the original state, the logic holds that the slope is fundamental and energy follows the frequency shift regardless of intensity (which only affects saturation current)."
         ],
         "examTip": "Remember that the slope of the stopping potential vs. frequency graph is a universal constant ($h/e$). Intensity only shifts the number of electrons (current), never their individual kinetic energy.",
         "studyTip": "",
-        "masteryMaterial": "{\"coreConcept\": \"The photoelectric effect proves the quantized nature of light. The equation $hf = \\\\phi + eV_0$ is a statement of energy conservation for a single photon-electron interaction.\", \"memoryTrigger\": \"S.I.F.: Stopping potential Is for Frequency; I.C.I.: Intensity is for Current.\", \"visualPrompt\": \"Imagine a rain of tennis balls (photons). Higher frequency means heavier balls (more energy per ball), while higher intensity means more balls falling per second.\", \"commonTrap\": \"Thinking that 'tripling intensity' will change the stopping potential or the kinetic energy.\"}",
+        "masteryMaterial": "{\"coreConcept\":\"The photoelectric effect proves the quantized nature of light. The equation $hf = \\\\phi + eV_0$ is a statement of energy conservation for a single photon-electron interaction.\",\"memoryTrigger\":\"S.I.F.: Stopping potential Is for Frequency; I.C.I.: Intensity is for Current.\",\"visualPrompt\":\"Imagine a rain of tennis balls (photons). Higher frequency means heavier balls (more energy per ball), while higher intensity means more balls falling per second.\",\"commonTrap\":\"Thinking that 'tripling intensity' will change the stopping potential or the kinetic energy.\"}",
         "keyFormulas": [
           "$K_{\\text{max}} = hf - \\phi$",
           "$V_0 = \\frac{h}{e}f - \\frac{\\phi}{e}$"
         ],
         "thingsToRemember": [],
         "questionVariations": [],
-        "correct_option_index": 0,
         "metadata": {
           "identityId": "ID-NP-014",
           "questionType": "simple_recall_mcq"
-        }
+        },
+        "correctOptionIndex": 2
       }
     ]
   }

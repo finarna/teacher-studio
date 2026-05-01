@@ -1,31 +1,69 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "subject": "Zoology",
   "exam": "NEET",
-  "generated_at": "2026-04-29T11:19:52.995Z",
+  "generated_at": "2026-05-01T10:16:29.583Z",
   "years_analyzed": "2021-2025",
-  "total_questions": 245,
+  "syllabus_year": 2026,
+  "total_questions_analyzed": 235,
+  "excluded_non_zoology": 30,
+  "total_official_topics": 29,
   "identities": [
     {
       "id": "ID-NZ-001",
       "name": "Structural Organisation in Animals",
       "topic": "Structural Organisation in Animals",
       "empiricalFrequency": {
-        "total_2021_2025": 23,
-        "avgPerYear": 4.6,
+        "total_2021_2025": 26,
+        "avgPerYear": 5.2,
         "distribution": {
-          "2021": 3,
+          "2021": 4,
           "2022": 4,
           "2023": 12,
           "2024": 3,
-          "2025": 1
+          "2025": 3
         }
       },
-      "confidence": 2,
-      "high_yield": true
+      "confidence": 0.99,
+      "high_yield": true,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "definitional_mcq",
+        "match_following_mcq"
+      ]
     },
     {
       "id": "ID-NZ-002",
+      "name": "Molecular Basis of Inheritance",
+      "topic": "Molecular Basis of Inheritance",
+      "empiricalFrequency": {
+        "total_2021_2025": 17,
+        "avgPerYear": 3.4,
+        "distribution": {
+          "2021": 5,
+          "2022": 5,
+          "2023": 0,
+          "2024": 2,
+          "2025": 5
+        }
+      },
+      "confidence": 0.99,
+      "high_yield": true,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "assertion_reason_mcq",
+        "diagram_based_mcq",
+        "reason_based_mcq",
+        "calculation_mcq"
+      ]
+    },
+    {
+      "id": "ID-NZ-003",
       "name": "Animal Kingdom",
       "topic": "Animal Kingdom",
       "empiricalFrequency": {
@@ -39,26 +77,16 @@
           "2025": 1
         }
       },
-      "confidence": 2,
-      "high_yield": true
-    },
-    {
-      "id": "ID-NZ-003",
-      "name": "Molecular Basis of Inheritance",
-      "topic": "Molecular Basis of Inheritance",
-      "empiricalFrequency": {
-        "total_2021_2025": 16,
-        "avgPerYear": 3.2,
-        "distribution": {
-          "2021": 5,
-          "2022": 5,
-          "2023": 0,
-          "2024": 2,
-          "2025": 4
-        }
-      },
-      "confidence": 2,
-      "high_yield": true
+      "confidence": 0.99,
+      "high_yield": true,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "exception_based_mcq",
+        "definitional_mcq"
+      ]
     },
     {
       "id": "ID-NZ-004",
@@ -75,11 +103,45 @@
           "2025": 2
         }
       },
-      "confidence": 2,
-      "high_yield": true
+      "confidence": 0.99,
+      "high_yield": true,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "sequence_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
       "id": "ID-NZ-005",
+      "name": "Human Health and Disease",
+      "topic": "Human Health and Disease",
+      "empiricalFrequency": {
+        "total_2021_2025": 13,
+        "avgPerYear": 2.6,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 3,
+          "2024": 5,
+          "2025": 3
+        }
+      },
+      "confidence": 0.99,
+      "high_yield": true,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq",
+        "definitional_mcq"
+      ]
+    },
+    {
+      "id": "ID-NZ-006",
       "name": "Reproductive Health",
       "topic": "Reproductive Health",
       "empiricalFrequency": {
@@ -93,44 +155,41 @@
           "2025": 1
         }
       },
-      "confidence": 1.5,
-      "high_yield": true
-    },
-    {
-      "id": "ID-NZ-006",
-      "name": "Human Health and Disease",
-      "topic": "Human Health and Disease",
-      "empiricalFrequency": {
-        "total_2021_2025": 12,
-        "avgPerYear": 2.4,
-        "distribution": {
-          "2021": 1,
-          "2022": 1,
-          "2023": 3,
-          "2024": 5,
-          "2025": 2
-        }
-      },
-      "confidence": 1.5,
-      "high_yield": true
+      "confidence": 0.99,
+      "high_yield": true,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
       "id": "ID-NZ-007",
-      "name": "Locomotion and Movement",
-      "topic": "Locomotion and Movement",
+      "name": "Biomolecules",
+      "topic": "Biomolecules",
       "empiricalFrequency": {
-        "total_2021_2025": 10,
-        "avgPerYear": 2,
+        "total_2021_2025": 11,
+        "avgPerYear": 2.2,
         "distribution": {
-          "2021": 3,
-          "2022": 3,
+          "2021": 2,
+          "2022": 2,
           "2023": 2,
-          "2024": 2,
-          "2025": 0
+          "2024": 3,
+          "2025": 2
         }
       },
-      "confidence": 1.5,
-      "high_yield": true
+      "confidence": 0.99,
+      "high_yield": true,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "definitional_mcq",
+        "exception_based_mcq"
+      ]
     },
     {
       "id": "ID-NZ-008",
@@ -147,11 +206,71 @@
           "2025": 0
         }
       },
-      "confidence": 1.5,
-      "high_yield": true
+      "confidence": 0.8399999999999999,
+      "high_yield": true,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "assertion_reason_mcq",
+        "definitional_mcq"
+      ]
     },
     {
       "id": "ID-NZ-009",
+      "name": "Locomotion and Movement",
+      "topic": "Locomotion and Movement",
+      "empiricalFrequency": {
+        "total_2021_2025": 10,
+        "avgPerYear": 2,
+        "distribution": {
+          "2021": 3,
+          "2022": 3,
+          "2023": 2,
+          "2024": 2,
+          "2025": 0
+        }
+      },
+      "confidence": 0.99,
+      "high_yield": true,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "match_following_mcq",
+        "definitional_mcq"
+      ]
+    },
+    {
+      "id": "ID-NZ-010",
+      "name": "Cell: The Unit of Life",
+      "topic": "Cell: The Unit of Life",
+      "empiricalFrequency": {
+        "total_2021_2025": 9,
+        "avgPerYear": 1.8,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 2,
+          "2024": 2,
+          "2025": 3
+        }
+      },
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "assertion_reason_mcq",
+        "definitional_mcq"
+      ]
+    },
+    {
+      "id": "ID-NZ-011",
       "name": "Biotechnology: Principles and Processes",
       "topic": "Biotechnology: Principles and Processes",
       "empiricalFrequency": {
@@ -165,11 +284,19 @@
           "2025": 2
         }
       },
-      "confidence": 1,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "definitional_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
-      "id": "ID-NZ-010",
+      "id": "ID-NZ-012",
       "name": "Biotechnology and its Applications",
       "topic": "Biotechnology and its Applications",
       "empiricalFrequency": {
@@ -183,62 +310,42 @@
           "2025": 1
         }
       },
-      "confidence": 1,
-      "high_yield": false
-    },
-    {
-      "id": "ID-NZ-011",
-      "name": "Organisms and Populations",
-      "topic": "Organisms and Populations",
-      "empiricalFrequency": {
-        "total_2021_2025": 8,
-        "avgPerYear": 1.6,
-        "distribution": {
-          "2021": 2,
-          "2022": 1,
-          "2023": 2,
-          "2024": 1,
-          "2025": 2
-        }
-      },
-      "confidence": 1,
-      "high_yield": false
-    },
-    {
-      "id": "ID-NZ-012",
-      "name": "Cell: The Unit of Life",
-      "topic": "Cell: The Unit of Life",
-      "empiricalFrequency": {
-        "total_2021_2025": 8,
-        "avgPerYear": 1.6,
-        "distribution": {
-          "2021": 1,
-          "2022": 1,
-          "2023": 2,
-          "2024": 2,
-          "2025": 2
-        }
-      },
-      "confidence": 1,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "definitional_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
       "id": "ID-NZ-013",
-      "name": "Biomolecules",
-      "topic": "Biomolecules",
+      "name": "Organisms and Populations",
+      "topic": "Organisms and Populations",
       "empiricalFrequency": {
-        "total_2021_2025": 8,
-        "avgPerYear": 1.6,
+        "total_2021_2025": 9,
+        "avgPerYear": 1.8,
         "distribution": {
           "2021": 2,
           "2022": 2,
           "2023": 2,
           "2024": 1,
-          "2025": 1
+          "2025": 2
         }
       },
-      "confidence": 1,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "calculation_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
       "id": "ID-NZ-014",
@@ -255,29 +362,19 @@
           "2025": 0
         }
       },
-      "confidence": 1,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
       "id": "ID-NZ-015",
-      "name": "Body Fluids and Circulation",
-      "topic": "Body Fluids and Circulation",
-      "empiricalFrequency": {
-        "total_2021_2025": 7,
-        "avgPerYear": 1.4,
-        "distribution": {
-          "2021": 1,
-          "2022": 1,
-          "2023": 2,
-          "2024": 2,
-          "2025": 1
-        }
-      },
-      "confidence": 1,
-      "high_yield": false
-    },
-    {
-      "id": "ID-NZ-016",
       "name": "Breathing and Exchange of Gases",
       "topic": "Breathing and Exchange of Gases",
       "empiricalFrequency": {
@@ -291,8 +388,42 @@
           "2025": 0
         }
       },
-      "confidence": 1,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "assertion_reason_mcq",
+        "match_following_mcq"
+      ]
+    },
+    {
+      "id": "ID-NZ-016",
+      "name": "Body Fluids and Circulation",
+      "topic": "Body Fluids and Circulation",
+      "empiricalFrequency": {
+        "total_2021_2025": 7,
+        "avgPerYear": 1.4,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 2,
+          "2024": 2,
+          "2025": 1
+        }
+      },
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
       "id": "ID-NZ-017",
@@ -309,8 +440,17 @@
           "2025": 1
         }
       },
-      "confidence": 1,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "assertion_reason_mcq",
+        "diagram_based_mcq",
+        "reason_based_mcq",
+        "calculation_mcq"
+      ]
     },
     {
       "id": "ID-NZ-018",
@@ -327,26 +467,42 @@
           "2025": 0
         }
       },
-      "confidence": 1,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "assertion_reason_mcq",
+        "reason_based_mcq",
+        "definitional_mcq"
+      ]
     },
     {
       "id": "ID-NZ-019",
-      "name": "General",
-      "topic": "General",
+      "name": "Excretory Products and their Elimination",
+      "topic": "Excretory Products and their Elimination",
       "empiricalFrequency": {
-        "total_2021_2025": 6,
-        "avgPerYear": 1.2,
+        "total_2021_2025": 5,
+        "avgPerYear": 1,
         "distribution": {
           "2021": 0,
           "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 6
+          "2023": 2,
+          "2024": 2,
+          "2025": 1
         }
       },
-      "confidence": 1,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
       "id": "ID-NZ-020",
@@ -363,65 +519,19 @@
           "2025": 3
         }
       },
-      "confidence": 1,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq",
+        "definitional_mcq"
+      ]
     },
     {
       "id": "ID-NZ-021",
-      "name": "Strategies for Enhancement in Food Production",
-      "topic": "Strategies for Enhancement in Food Production",
-      "empiricalFrequency": {
-        "total_2021_2025": 4,
-        "avgPerYear": 0.8,
-        "distribution": {
-          "2021": 2,
-          "2022": 2,
-          "2023": 0,
-          "2024": 0,
-          "2025": 0
-        }
-      },
-      "confidence": 0.7,
-      "high_yield": false
-    },
-    {
-      "id": "ID-NZ-022",
-      "name": "Environmental Issues",
-      "topic": "Environmental Issues",
-      "empiricalFrequency": {
-        "total_2021_2025": 4,
-        "avgPerYear": 0.8,
-        "distribution": {
-          "2021": 1,
-          "2022": 1,
-          "2023": 2,
-          "2024": 0,
-          "2025": 0
-        }
-      },
-      "confidence": 0.7,
-      "high_yield": false
-    },
-    {
-      "id": "ID-NZ-023",
-      "name": "Chemical Coordination and Integration",
-      "topic": "Chemical Coordination and Integration",
-      "empiricalFrequency": {
-        "total_2021_2025": 4,
-        "avgPerYear": 0.8,
-        "distribution": {
-          "2021": 1,
-          "2022": 1,
-          "2023": 1,
-          "2024": 1,
-          "2025": 0
-        }
-      },
-      "confidence": 0.7,
-      "high_yield": false
-    },
-    {
-      "id": "ID-NZ-024",
       "name": "Neural Control and Coordination",
       "topic": "Neural Control and Coordination",
       "empiricalFrequency": {
@@ -435,29 +545,96 @@
           "2025": 0
         }
       },
-      "confidence": 0.7,
-      "high_yield": false
+      "confidence": 0.8899999999999999,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
-      "id": "ID-NZ-025",
-      "name": "Excretory Products and their Elimination",
-      "topic": "Excretory Products and their Elimination",
+      "id": "ID-NZ-022",
+      "name": "Chemical Coordination and Integration",
+      "topic": "Chemical Coordination and Integration",
       "empiricalFrequency": {
         "total_2021_2025": 4,
         "avgPerYear": 0.8,
         "distribution": {
-          "2021": 0,
-          "2022": 0,
+          "2021": 1,
+          "2022": 1,
           "2023": 1,
-          "2024": 2,
-          "2025": 1
+          "2024": 1,
+          "2025": 0
         }
       },
-      "confidence": 0.7,
-      "high_yield": false
+      "confidence": 0.8399999999999999,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
     },
     {
-      "id": "ID-NZ-026",
+      "id": "ID-NZ-023",
+      "name": "Strategies for Enhancement in Food Production",
+      "topic": "Strategies for Enhancement in Food Production",
+      "empiricalFrequency": {
+        "total_2021_2025": 4,
+        "avgPerYear": 0.8,
+        "distribution": {
+          "2021": 2,
+          "2022": 2,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
+    },
+    {
+      "id": "ID-NZ-024",
+      "name": "Environmental Issues",
+      "topic": "Environmental Issues",
+      "empiricalFrequency": {
+        "total_2021_2025": 4,
+        "avgPerYear": 0.8,
+        "distribution": {
+          "2021": 1,
+          "2022": 1,
+          "2023": 2,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "calculation_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
+    },
+    {
+      "id": "ID-NZ-025",
       "name": "The Living World",
       "topic": "The Living World",
       "empiricalFrequency": {
@@ -471,47 +648,19 @@
           "2025": 1
         }
       },
-      "confidence": 0.7,
-      "high_yield": false
+      "confidence": 0.99,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "exception_based_mcq",
+        "definitional_mcq"
+      ]
     },
     {
-      "id": "ID-NZ-027",
-      "name": "Sexual Reproduction in Flowering Plants",
-      "topic": "Sexual Reproduction in Flowering Plants",
-      "empiricalFrequency": {
-        "total_2021_2025": 3,
-        "avgPerYear": 0.6,
-        "distribution": {
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 3
-        }
-      },
-      "confidence": 0.7,
-      "high_yield": false
-    },
-    {
-      "id": "ID-NZ-028",
-      "name": "Relations and Functions",
-      "topic": "Relations and Functions",
-      "empiricalFrequency": {
-        "total_2021_2025": 3,
-        "avgPerYear": 0.6,
-        "distribution": {
-          "2021": 0,
-          "2022": 0,
-          "2023": 0,
-          "2024": 0,
-          "2025": 3
-        }
-      },
-      "confidence": 0.7,
-      "high_yield": false
-    },
-    {
-      "id": "ID-NZ-029",
+      "id": "ID-NZ-026",
       "name": "Biological Classification",
       "topic": "Biological Classification",
       "empiricalFrequency": {
@@ -525,26 +674,102 @@
           "2025": 1
         }
       },
-      "confidence": 0.2,
-      "high_yield": false
+      "confidence": 0.9,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 11,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "match_following_mcq",
+        "exception_based_mcq",
+        "definitional_mcq"
+      ]
     },
     {
-      "id": "ID-NZ-030",
-      "name": "Biomolecules - Enzymes",
-      "topic": "Biomolecules - Enzymes",
+      "id": "ID-NZ-027",
+      "name": "Ecosystem",
+      "topic": "Ecosystem",
       "empiricalFrequency": {
-        "total_2021_2025": 2,
-        "avgPerYear": 0.4,
+        "total_2021_2025": 1,
+        "avgPerYear": 0.2,
         "distribution": {
           "2021": 0,
           "2022": 0,
           "2023": 0,
-          "2024": 1,
+          "2024": 0,
           "2025": 1
         }
       },
-      "confidence": 0.2,
-      "high_yield": false
+      "confidence": 0.66,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "calculation_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
+    },
+    {
+      "id": "ID-NZ-028",
+      "name": "Biodiversity and Conservation",
+      "topic": "Biodiversity and Conservation",
+      "empiricalFrequency": {
+        "total_2021_2025": 1,
+        "avgPerYear": 0.2,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 1
+        }
+      },
+      "confidence": 0.42,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "calculation_mcq",
+        "match_following_mcq",
+        "assertion_reason_mcq"
+      ]
+    },
+    {
+      "id": "ID-NZ-029",
+      "name": "Reproduction in Organisms",
+      "topic": "Reproduction in Organisms",
+      "empiricalFrequency": {
+        "total_2021_2025": 0,
+        "avgPerYear": 0,
+        "distribution": {
+          "2021": 0,
+          "2022": 0,
+          "2023": 0,
+          "2024": 0,
+          "2025": 0
+        }
+      },
+      "confidence": 0.3,
+      "high_yield": false,
+      "syllabus_topic": true,
+      "class": 12,
+      "preferred_formats": [
+        "simple_recall_mcq",
+        "diagram_based_mcq",
+        "sequence_mcq",
+        "assertion_reason_mcq"
+      ]
     }
-  ]
+  ],
+  "calibration": {
+    "status": "CALIBRATED_2021_2025",
+    "updated_at": "2026-05-01T11:10:31.175Z",
+    "final_match_rate": 0.5961666666666668,
+    "total_iterations": 15
+  },
+  "format_specificity_added": "2026-05-01T11:24:29.565Z",
+  "format_analysis_source": "Historical NEET Zoology patterns (2021-2025)"
 }

@@ -2546,7 +2546,7 @@ app.get('/debug-ai', (req, res) => {
 
 /**
  * POST /api/generate-flagship-pdf
- * Body: { paperId: 'neet-physics-set-a' | 'neet-physics-set-b' | 'neet-chemistry-set-a' | 'neet-chemistry-set-b' }
+ * Body: { paperId: 'neet-physics-set-a' | 'neet-physics-set-b' | 'neet-chemistry-set-a' | 'neet-chemistry-set-b' | 'neet-botany-set-a' | 'neet-botany-set-b' | 'neet-zoology-set-a' | 'neet-zoology-set-b' }
  * Calls Gemini to generate complete NEET-formatted HTML, then renders to PDF via Puppeteer.
  */
 app.post('/api/generate-flagship-pdf', async (req, res) => {

@@ -1,0 +1,1621 @@
+{
+  "test_name": "PLUS2AI OFFICIAL NEET ZOOLOGY PREDICTION 2026: SET A",
+  "subject": "Zoology",
+  "exam_context": "NEET",
+  "total_questions": 45,
+  "total_marks": 180,
+  "description": "SET A: Class 11 Physiology + Reproduction/Genetics Focus",
+  "strategic_focus": "Human physiology, structural organisation, reproduction mechanisms, molecular genetics, inheritance patterns",
+  "calibration": {
+    "ids": 1,
+    "rigor": 1.59,
+    "difficulty_distribution": "30/50/20",
+    "board_signature": "CONCEPTUAL_FACTUAL"
+  },
+  "test_config": {
+    "questions": [
+      {
+        "id": "80b492e3-12f2-4857-88cf-2831f20bdc17",
+        "text": "In a laboratory experiment, a myofibril is bathed in a solution containing a high concentration of a non-hydrolyzable analog of ATP ($ATP-\\gamma-S$). This analog can bind to the myosin head with high affinity but cannot be cleaved into $ADP$ and $P_i$. If the muscle fiber was initially in a relaxed state with $Ca^{2+}$ present, what would be the state of the cross-bridge cycle?",
+        "options": [
+          "Myosin heads would bind to actin but remain permanently attached, creating a state similar to rigor mortis.",
+          "The troponin-tropomyosin complex would fail to shift, preventing any interaction between myosin and actin.",
+          "Myosin heads would remain detached from actin because the 'cocking' mechanism requires ATP hydrolysis.",
+          "Myosin heads would be unable to detach from the actin filaments, but no 'power stroke' would occur."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Locomotion and Movement",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze the Cross-Bridge Cycle steps: (1) ATP binding causes detachment. (2) ATP hydrolysis 'cocks' the myosin head. (3) Binding to actin. (4) Power stroke ($P_i$ release). (5) $ADP$ release.",
+          "Identify the blockage point: The non-hydrolyzable analog binds to the myosin head. This causes the myosin to *detach* from actin (if it were attached).",
+          "Evaluate the 'Cocking' step: To move the myosin head into the high-energy 'cocked' position ready to bind actin, the ATP *must* be hydrolyzed into $ADP$ and $P_i$.",
+          "Apply the scenario: Since the analog cannot be hydrolyzed, the myosin head never gets 'energized'.",
+          "Conclusion: Even if $Ca^{2+}$ is present and actin sites are exposed, the myosin head stays in its low-energy, detached state."
+        ],
+        "examTip": "Remember: Binding of NEW ATP causes **detachment**. Hydrolysis of that ATP causes **cocking**. If it can't be hydrolyzed, it stays detached and un-cocked.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Myosin is an ATPase. The energy from ATP hydrolysis is stored in the myosin head to perform the mechanical work of the power stroke. Without hydrolysis, the 'spring' is never loaded.\",\"memoryTrigger\":\"ATP = 'Bye-bye Actin' (Detachment). Hydrolysis = 'Get Ready' (Cocking).\",\"visualPrompt\":\"Imagine a mousetrap. Binding ATP is like opening the trap to let the mouse go. Hydrolysis is like pulling the spring back to set the trap. If you can't pull the spring, the trap can't catch anything.\",\"commonTrap\":\"Confusing this with Rigor Mortis. Rigor Mortis occurs because there is *no ATP at all*, so myosin can't detach. In this scenario, ATP is present (the analog), so it detaches but can't proceed.\"}",
+        "keyFormulas": [
+          "$\\text{Sarcomere} = \\text{Distance between two Z-lines}$",
+          "$\\text{A-band length} = \\text{Constant during contraction}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-009",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 2
+      },
+      {
+        "id": "f808dc3d-e5d1-4b7d-824a-1604e6de9153",
+        "text": "A laboratory technician is examining a microscopic specimen of a vermiform organism recovered from a soil sample. The organism exhibits bilateral symmetry, a triploblastic organization, and a body cavity where the mesoderm is present as scattered pouches between the ectoderm and endoderm. During the anatomical observation, which of the following physiological or structural features is the technician most likely to observe in this specific organism belonging to Phylum Aschelminthes?",
+        "options": [
+          "The presence of cnidocytes for defense and anchorage.",
+          "A well-developed muscular pharynx for feeding.",
+          "A closed circulatory system with respiratory pigment dissolved in plasma.",
+          "A water vascular system used for locomotion and food capture."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Animal Kingdom",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identification of Body Cavity ::: The description 'mesoderm present as scattered pouches' explicitly defines a pseudocoelomate condition.",
+          "Phylum Correlation ::: Pseudocoelomates are exclusively found in Phylum Aschelminthes (Roundworms) as per NCERT classification.",
+          "Anatomical Verification ::: One of the key diagnostic features of Aschelminthes is the presence of a complete alimentary canal with a well-developed muscular pharynx.",
+          "Elimination of Distractors ::: Option B refers to Echinodermata; Option C refers to Cnidaria; Option D refers to Annelida.",
+          "Conclusion ::: Therefore, the muscular pharynx is the correct anatomical feature for this specimen."
+        ],
+        "examTip": "Whenever 'scattered pouches' of mesoderm is mentioned, immediately think Aschelminthes/Roundworms. Don't waste time on other clues.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Aschelminthes are the only major phylum possessing a pseudocoelom. Their body is circular in cross-section (roundworms) and they exhibit a complete digestive system.\",\"memoryTrigger\":\"AS-P-M: Aschelminthes are Pseudocoelomates with Muscular pharynx.\",\"visualPrompt\":\"Imagine a tube within a tube, where the middle layer (mesoderm) isn't a solid lining but looks like 'bubbles' or 'pouches' floating in the space.\",\"commonTrap\":\"Students often confuse Aschelminthes with Annelids. Remember: Annelids are Coelomates (true coelom) and have segments.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-003",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "c41359dc-8c81-4d47-b327-e422abf41988",
+        "text": "During the transmission of a nerve impulse, a specific phase is characterized by the rapid influx of $Na^+$ ions through voltage-gated channels, leading to a reversal of polarity across the axonal membrane. If a neurotoxin specifically blocks the inactivation gates of these $Na^+$ channels while leaving the activation gates functional, what would be the immediate effect on the action potential graph recorded by an oscilloscope?",
+        "options": [
+          "The resting membrane potential would become more negative (hyperpolarized).",
+          "The membrane would fail to repolarize, remaining in a prolonged state of depolarization.",
+          "The speed of impulse conduction would increase due to faster sodium entry.",
+          "The threshold stimulus required to trigger an action potential would increase significantly."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Neural Control and Coordination",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Phase identification ::: Depolarization is caused by the opening of $Na^+$ activation gates when the threshold is reached.",
+          "Normal mechanism ::: After a peak of $+30$ to $+40\\ mV$, $Na^+$ inactivation gates close to stop the influx, and $K^+$ channels open for repolarization.",
+          "Toxin effect ::: If inactivation gates are blocked (stay open), $Na^+$ continues to enter the cell down its electrochemical gradient.",
+          "Resultant state ::: The continuous influx prevents the interior from becoming negative again (repolarization), effectively 'stalling' the membrane in a positive/depolarized state.",
+          "Conclusion ::: This leads to a plateau in the action potential graph rather than a descent back to the baseline."
+        ],
+        "examTip": "Focus on the distinction between 'activation gates' (start the pulse) and 'inactivation gates' (end the $Na^+$ influx). Both must function for a discrete pulse.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Action potential involves: Resting ($-70\\\\ mV$, $K^+$ permeable) $\\\\rightarrow$ Depolarization ($-55\\\\ mV$ threshold $\\\\rightarrow$ $+30\\\\ mV$, $Na^+$ influx) $\\\\rightarrow$ Repolarization ($K^+$ efflux) $\\\\rightarrow$ Hyperpolarization (excess $K^+$ efflux).\",\"memoryTrigger\":\"S-I-P: Sodium In (Depolarization), Potassium Out (Repolarization).\",\"visualPrompt\":\"Imagine a swinging door that lets people in ($Na^+$); if the 'stop' latch fails, the room stays crowded.\",\"commonTrap\":\"Confusing hyperpolarization with prolonged depolarization. Hyperpolarization is caused by *too much* $K^+$ leaving, not $Na^+$ staying.\"}",
+        "keyFormulas": [
+          "$\\text{Resting Potential} \\approx -70\\ mV$",
+          "$\\text{Threshold} \\approx -55\\ mV$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-021",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "a0f2c7f0-4347-45df-bbdb-43f986dff1db",
+        "text": "During the process of human fertilization, once a sperm comes in contact with the **Zona Pellucida** layer of the ovum, it induces changes in the membrane that block the entry of additional sperm. Which of the following describes the correct terminology and physiological basis for this 'Prevention of Polyspermy'?",
+        "options": [
+          "Acrosomal Reaction; release of hyaluronidase to digest the corona radiata.",
+          "Capacitation; the process of sperm acquiring motility in the female tract.",
+          "Syngamy; the fusion of haploid pronuclei to form a diploid zygote.",
+          "Cortical Reaction; exocytosis of cortical granules to harden the zona pellucida."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Human Reproduction",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify the event described ::: The question describes the 'block to polyspermy' triggered by sperm contact with the Zona Pellucida.",
+          "Step 2: Evaluate 'Cortical Reaction' ::: This is the correct term. It involves the release of calcium ions which causes cortical granules to dump their contents, making the zona pellucida impenetrable (the 'Slow Block').",
+          "Step 3: Evaluate 'Acrosomal Reaction' ::: This happens *before* entry to help the sperm penetrate the layers, not to block others.",
+          "Step 4: Evaluate 'Capacitation' ::: This occurs in the female reproductive tract *before* fertilization to activate the sperm.",
+          "Step 5: Evaluate 'Syngamy' ::: This is the final step (fusion of nuclei), not the membrane block mechanism."
+        ],
+        "examTip": "Think of the Cortical Reaction as 'Deploying the Shield' after the first soldier enters the fort. The Acrosomal Reaction is the 'Drill' used to get through the door.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Fertilization is a multi-step sequence: Capacitation -> Acrosomal Reaction -> Fusion -> Cortical Reaction -> Completion of Meiosis II. The Cortical Reaction is the primary 'slow' block to polyspermy in mammals.\",\"memoryTrigger\":\"C for Cortical = C for Corrugated (Hardening) / C for Calcium.\",\"visualPrompt\":\"Imagine a bubble (Oocyte) that, when touched by a needle (Sperm), suddenly turns into a hard plastic shell to prevent other needles from entering.\",\"commonTrap\":\"Confusing Corona Radiata (outer) with Zona Pellucida (inner). Sperm must pass both.\"}",
+        "keyFormulas": [
+          "$Sperm + ZP3 Receptor \\rightarrow Acrosomal Reaction$",
+          "$\\uparrow [Ca^{2+}]_i \\rightarrow Cortical Granule Exocytosis$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-004",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "5904d43e-a93b-4a99-89a4-cdc2eeb65eaf",
+        "text": "A clinical researcher observes a muscle biopsy from a patient exhibiting a unique form of muscular fatigue. Upon physiological analysis, it is found that while the neural stimulus successfully triggers the release of $Ca^{2+}$ from the sarcoplasmic reticulum and the subsequent binding of ions to the $TpC$ subunit of troponin, the muscle fibers remain in a state of 'rigor' without undergoing the relaxation phase despite the cessation of the stimulus. Which of the following molecular scenarios most accurately explains this observation based on the sliding filament theory in $NCERT$ protocols?",
+        "options": [
+          "The troponin complex has lost its affinity for $Ca^{2+}$, preventing the masking of the myosin-binding sites on the thin filaments.",
+          "The intracellular concentration of $ATP$ is depleted, preventing the detachment of the myosin cross-bridge from the active site on actin.",
+          "Acetylcholinesterase is inhibited at the neuromuscular junction, leading to persistent depolarization of the sarcolemma.",
+          "The $Ca^{2+}-ATPase$ pumps on the sarcolemma are hyperactive, causing premature sequestration of calcium ions."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Locomotion and Movement",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Initial stimulus ::: Neural impulse leads to $Ca^{2+}$ release, which binds to Troponin C, shifting the tropomyosin and exposing the active sites on actin.",
+          "Cross-bridge formation ::: Myosin heads, having hydrolyzed $ATP$ into $ADP$ and $P_i$, bind to these exposed sites to form the cross-bridge.",
+          "Power stroke ::: Release of $ADP$ and $P_i$ causes the myosin head to pivot, pulling the actin filament towards the M-line.",
+          "Detachment mechanism ::: For the myosin head to detach and start a new cycle (or allow relaxation), a fresh molecule of $ATP$ must bind to the myosin head.",
+          "Rigor condition ::: In the absence of new $ATP$ (as seen in rigor mortis or extreme fatigue), the cross-bridge remains intact, preventing relaxation."
+        ],
+        "examTip": "Always remember that ATP is required for *detachment*, not just for the power stroke. If ATP is missing, the muscle 'locks' in the contracted state.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The cross-bridge cycle is a four-step process: binding, power stroke, detachment (via new ATP), and reactivation (via ATP hydrolysis). Relaxation requires both the active transport of $Ca^{2+}$ back into the SR and the binding of ATP to break the actin-myosin bond.\",\"memoryTrigger\":\"ABCD: ATP Brings Cross-bridge Detachment.\",\"visualPrompt\":\"Imagine a rowing team: the oar (myosin) stays in the water (actin) until the rower (ATP) pulls it out to reset for the next stroke.\",\"commonTrap\":\"Students often think ATP is only used for the 'push' (power stroke); in reality, the power stroke is the release of energy, while ATP binding is what releases the grip.\"}",
+        "keyFormulas": [
+          "$\\text{Contraction} = \\text{Decrease in } I\\text{-band} + H\\text{-zone}$",
+          "$\\text{A-band} = \\text{Constant length}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-009",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "80d11c6a-535c-414e-8975-fa07eedda56b",
+        "text": "Consider the following matching pairs of aquatic organisms and their unique physiological or morphological characteristics as per the NCERT classification for Chordata. Which of the following options correctly represents the matches?\\n\\n(A) $Petromyzon$ - (i) Poison sting\\n(B) $Trygon$ - (ii) Circular and sucking mouth\\n(C) $Exocoetus$ - (iii) Aquarium fish\\n(D) $Pterophyllum$ - (iv) Flying fish",
+        "options": [
+          "A-(iv), B-(iii), C-(ii), D-(i)",
+          "A-(ii), B-(i), C-(iv), D-(iii)",
+          "A-(i), B-(ii), C-(iii), D-(iv)",
+          "A-(ii), B-(iv), C-(i), D-(iii)"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Animal Kingdom",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Match Petromyzon ::: Petromyzon is a Lamprey (Cyclostomata), characterized by a circular and sucking mouth without jaws. So, A-(ii).",
+          "Match Trygon ::: Trygon is a Stingray (Chondrichthyes), possessing a poison sting on its tail. So, B-(i).",
+          "Match Exocoetus ::: Exocoetus is commonly known as the Flying fish (Osteichthyes). So, C-(iv).",
+          "Match Pterophyllum ::: Pterophyllum is known as the Angel fish, commonly kept in aquariums. So, D-(iii).",
+          "Combine results ::: The sequence is A-(ii), B-(i), C-(iv), D-(iii)."
+        ],
+        "examTip": "In Match the Following, find the most certain pair (like Petromyzon-Sucking mouth) and eliminate options. This saves 30-40 seconds.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Different classes of fish have evolved unique appendages and mouthparts suited to their niche (e.g., Cyclostomes for parasitism, Chondrichthyes for predation).\",\"memoryTrigger\":\"P-S: Petromyzon-Sucking; T-P: Trygon-Poison; E-F: Exocoetus-Flying; P-A: Pterophyllum-Aquarium.\",\"visualPrompt\":\"Visualize a lamprey's round mouth attaching to a host, and a stingray's tail whip.\",\"commonTrap\":\"Confusing Pterophyllum (Aquarium) with Betta (Fighting fish) - both are aquarium fish but Pterophyllum is the 'Angel fish'.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-003",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "c1f0c5aa-ebe6-4a14-bacc-b9df0ea37fbe",
+        "text": "A middle-aged patient complains of inflammation of joints. Clinical tests reveal an abnormal accumulation of uric acid crystals in the joint spaces, and a biopsy shows damage to the smooth, low-friction tissue covering the epiphyses of long bones. Which of the following correctly identifies the disorder and the specific tissue being damaged?",
+        "options": [
+          "Osteoarthritis; Synovial membrane which secretes the lubricating fluid.",
+          "Rheumatoid arthritis; Fibrous cartilage found in the intervertebral discs.",
+          "Gout; Articular (Hyaline) cartilage which reduces friction and absorbs shock.",
+          "Osteoporosis; Calcified matrix of the compact bone resulting in high fracture risk."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Locomotion and Movement",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze the first symptom: Accumulation of uric acid crystals in joints is the defining characteristic of 'Gout'.",
+          "Analyze the second symptom: Damage to 'smooth, low-friction tissue covering the epiphyses' describes the Articular Cartilage.",
+          "Identify the tissue type: According to NCERT, Articular cartilage in synovial joints is a type of Hyaline cartilage.",
+          "Evaluate the options: Option 1 correctly matches 'Gout' with the description of the damaged 'Articular (Hyaline) cartilage'.",
+          "Cross-check other options: Osteoarthritis is 'wear and tear' (often secondary to Gout/age), but Gout is specifically uric acid. Rheumatoid is autoimmune (synovial membrane attack)."
+        ],
+        "examTip": "Don't confuse Gout (Uric acid) with Rheumatoid arthritis (Autoimmune) or Osteoarthritis (Degenerative). Uric acid = Gout is a high-frequency NCERT fact.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Synovial joints are characterized by the presence of a fluid-filled synovial cavity between the articulating surfaces. The bones are capped with hyaline (articular) cartilage to prevent bone-on-bone contact.\",\"memoryTrigger\":\"Gout = 'U'ric 'U'tter pain. Hyaline = 'H'igh-quality glass (smooth surfaces).\",\"visualPrompt\":\"Imagine two ice-cubes sliding against each other with a thin layer of oil in between. If you throw sand (uric acid crystals) between them, the ice (cartilage) gets scratched and inflamed.\",\"commonTrap\":\"Thinking Gout only affects the big toe. While common, it can affect any synovial joint. Also, students often forget that articular cartilage is specifically Hyaline.\"}",
+        "keyFormulas": [
+          "$\\text{Total number of bones} = 206$",
+          "$\\text{Axial Skeleton} = 80\\text{ bones}$",
+          "$\\text{Appendicular Skeleton} = 126\\text{ bones}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-009",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 2
+      },
+      {
+        "id": "758bafbf-791d-44a3-bcdc-0ae17fbe3cea",
+        "text": "A clinical analysis of the ovarian cycle in a healthy female shows the following hormone levels: \\n- **Day 1-5:** Low levels of all hormones, shedding of the endometrium.\\n- **Day 12-13:** A sharp, exponential rise in $LH$ and a moderate peak in Estrogen.\\n- **Day 14:** Rupture of the Graafian follicle.\\n- **Day 21:** Peak levels of Progesterone and a secondary smaller peak of Estrogen.\\n\\nBased on this data, if an experimental drug was administered on Day 11 that specifically acted as a competitive antagonist to the **Estrogen receptors in the Hypothalamus**, what would be the most immediate physiological consequence on Day 14?",
+        "options": [
+          "Hyper-ovulation of multiple follicles due to lack of negative feedback.",
+          "Immediate onset of menstruation due to the withdrawal of progesterone support.",
+          "Failure of the 'Positive Feedback' loop, leading to the absence of the LH surge and no ovulation.",
+          "Transformation of the primary follicle into a Corpus Albicans without reaching the Graafian stage."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Human Reproduction",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Understand the normal 'Switch' ::: Usually, Estrogen provides negative feedback. However, on Day 12-13, high Estrogen levels *switch* to positive feedback on the hypothalamus/pituitary.",
+          "Step 2: Analyze the drug effect ::: A competitive antagonist to Estrogen receptors in the Hypothalamus prevents the brain from 'sensing' the high Estrogen levels.",
+          "Step 3: Predict the feedback failure ::: Because the hypothalamus cannot sense the high Estrogen, the 'Positive Feedback' signal to release a massive amount of GnRH (and subsequently LH) never happens.",
+          "Step 4: Determine the Day 14 outcome ::: Without the LH surge, the Graafian follicle will not rupture, and ovulation will fail to occur.",
+          "Step 5: Eliminate incorrects ::: Menstruation (Option 1) requires a drop in Progesterone, which isn't even high yet. Hyper-ovulation (Option 2) occurs with different drugs (like Clomiphene) but doesn't explain the immediate LH surge failure."
+        ],
+        "examTip": "Remember: Estrogen is usually 'Negative' but becomes 'Positive' just before ovulation. This is the only place in human physiology where a hormone surge is triggered by its own high levels in such a manner.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The Menstrual cycle consists of Follicular (Estrogen dominant) and Luteal (Progesterone dominant) phases. The LH surge is the 'Golden Key' to ovulation, triggered by an Estrogen threshold being crossed.\",\"memoryTrigger\":\"LH = Luteinizing = 'Let's Hurry' (the egg out). Surge on Day 14.\",\"visualPrompt\":\"Visualize a graph with a sudden 'Spike' in LH that looks like a mountain peak. If you cut the cable (Estrogen receptors), the climber (LH) can't reach the peak.\",\"commonTrap\":\"Confusing the function of Progesterone (maintains lining) with Estrogen (builds lining/triggers LH).\"}",
+        "keyFormulas": [
+          "\\uparrow Estrogen (Threshold) \\implies \\uparrow LH Surge \\implies Ovulation"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-004",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 2
+      },
+      {
+        "id": "86a4ec01-8ff3-46cc-bec7-0b4824be19a2",
+        "text": "Given below are two statements: one is labelled as Assertion (A) and the other is labelled as Reason (R).\\n\\n**Assertion (A):** In the diagnosis of Gouty Arthritis, a patient typically shows elevated levels of uric acid crystals in the synovial joints.\\n**Reason (R):** Osteoporosis is an age-related disorder characterized by decreased bone mass and increased chances of fractures, primarily caused by decreased levels of estrogen in elderly females.\\n\\nIn the light of the above statements, choose the correct answer from the options given below:",
+        "options": [
+          "Both (A) and (R) are true and (R) is the correct explanation of (A).",
+          "(A) is false but (R) is true.",
+          "(A) is true but (R) is false.",
+          "Both (A) and (R) are true, but (R) is NOT the correct explanation of (A)."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Locomotion and Movement",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Assertion ::: Gout is indeed the inflammation of joints due to the accumulation of uric acid crystals. Statement is True.",
+          "Evaluate Reason ::: Osteoporosis is defined as an age-related decrease in bone density linked to estrogen deficiency. Statement is True.",
+          "Determine relationship ::: Assertion discusses Gout (inflammation/crystals); Reason discusses Osteoporosis (bone density/estrogen).",
+          "Link Check ::: There is no causal or logical link between the mechanism of gout and the mechanism of osteoporosis in this context.",
+          "Final Selection ::: Both are true statements, but (R) does not explain (A)."
+        ],
+        "examTip": "In Assertion-Reason questions, read both statements independently first. If both are true, ask 'Because' after the Assertion. If the Reason doesn't answer 'Why?', select the option where (R) is not the explanation.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Gout = Uric acid. Osteoporosis = Estrogen/Bone mass. Myasthenia gravis = Autoimmune/Ach receptor. Tetany = Low $Ca^{2+}$. Muscular dystrophy = Genetic.\",\"memoryTrigger\":\"Gout-U (Gout-Uric acid). Osteo-E (Osteo-Estrogen).\",\"visualPrompt\":\"Imagine sharp needles in a joint (Gout) vs. a sponge becoming more porous with age (Osteoporosis).\",\"commonTrap\":\"Assuming that because both are 'bone/joint issues', the Reason must explain the Assertion.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-009",
+          "questionType": "theory_conceptual"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "55e177da-fd2f-4ea2-9209-c715f982f60a",
+        "text": "In the context of animal tissues and their functional integration, various types of junctions are found between the cells. A specific type of junction is responsible for stopping substances from leaking across a tissue, while another type facilitates rapid transfer of ions and small molecules between neighboring cells. Identify these junctions respectively.",
+        "options": [
+          "Gap junctions and Adhering junctions",
+          "Tight junctions and Gap junctions",
+          "Tight junctions and Adhering junctions",
+          "Adhering junctions and Tight junctions"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Structural Organisation in Animals",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Define Junction 1 ::: The junction that 'stops leakage' is defined by NCERT as the Tight Junction.",
+          "Define Junction 2 ::: The junction that 'facilitates communication/transfer of ions' is the Gap Junction.",
+          "Identify Adhering Junctions ::: These perform cementing to keep neighboring cells together (not the focus here).",
+          "Order Check ::: The question asks for 'respectively'. So, Tight Junction first, then Gap Junction.",
+          "Final Answer ::: Tight junctions and Gap junctions."
+        ],
+        "examTip": "Remember: 'Tight' = No leaks (like a tight lid). 'Gap' = A hole for things to go through (like a bridge).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Epithelial cells are held together by specialized junctions. Tight junctions seal cells, adhering junctions cement them, and gap junctions allow cytoplasmic communication.\",\"memoryTrigger\":\"T-S (Tight-Stop leakage), G-C (Gap-Communication/Connect).\",\"visualPrompt\":\"Imagine a Ziploc bag (Tight junction) vs. a shared doorway between two rooms (Gap junction).\",\"commonTrap\":\"Confusing Adhering junctions with Tight junctions. Adhering is for strength/cementing, NOT for preventing leaks.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-001",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "f9795b5f-36ff-4fc9-8848-7ac0872e8b40",
+        "text": "A patient is admitted to the emergency ward with profuse bleeding from a minor cut. A stat blood analysis reveals a significant reduction in the count of specific cell fragments that are produced from megakaryocytes in the bone marrow. Which of the following conditions is the patient most likely suffering from, and what is the primary function of these fragments?",
+        "options": [
+          "Leukopenia; reduction in immune response",
+          "Anemia; reduction in oxygen transport",
+          "Thrombocytopenia; reduction in blood coagulation",
+          "Polycythemia; increase in blood viscosity"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Body Fluids and Circulation",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Cell Type ::: 'Cell fragments produced from megakaryocytes' are Platelets (Thrombocytes).",
+          "Check Normal Range ::: NCERT states the normal count is $1,50,000$ to $3,50,000$ per $mm^3$.",
+          "Determine Clinical Outcome ::: A reduction in these cells (Thrombocytopenia) leads to clotting disorders.",
+          "Relate to Symptom ::: Profuse bleeding from a minor cut is a classic sign of impaired coagulation.",
+          "Select Match ::: Option 3 correctly identifies the condition and the impaired function."
+        ],
+        "examTip": "Keywords 'Megakaryocytes' and 'Cell fragments' are unique identifiers for Platelets in the NCERT textbook.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Platelets are not true cells but cytoplasmic fragments that release substances (like thromboplastins) to initiate the clotting cascade.\",\"memoryTrigger\":\"Mega-K (Megakaryocyte) makes 'Mini' fragments (Platelets).\",\"visualPrompt\":\"Imagine a dam wall getting a crack. Platelets are the quick-acting 'sandbags' that stop the leak before the 'concrete' (fibrin) sets.\",\"commonTrap\":\"Do not confuse the cell that makes them (Megakaryocyte) with the cell they help (Fibrinogen/Fibrin).\"}",
+        "keyFormulas": [
+          "$\\text{Normal Platelet Count} = 1.5 - 3.5 \\times 10^5 / mm^3$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-016",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 2
+      },
+      {
+        "id": "b357b15d-fd36-4ed5-83f0-d30975ea2e41",
+        "text": "Identify the correct match between the hormone, its source/target, and its primary physiological role within the human male reproductive system:\\n\\nColumn I (Hormone) | Column II (Target/Source) | Column III (Function)\\n--- | --- | ---\\n(A) $GnRH$ | (i) Posterior Pituitary | (x) Stimulates growth of mammary glands\\n(B) $LH$ | (ii) Leydig Cells | (y) Synthesis and secretion of Androgens\\n(C) $FSH$ | (iii) Sertoli Cells | (z) Secretion of factors for spermiogenesis\\n(D) $Inhibin$ | (iv) Sertoli Cells | (w) Negative feedback on $FSH$ secretion",
+        "options": [
+          "(A)-(iv)-(w), (B)-(ii)-(y), (C)-(iii)-(z)",
+          "(A)-(i)-(x), (B)-(ii)-(y), (C)-(iii)-(z)",
+          "(B)-(ii)-(y), (C)-(iii)-(w), (D)-(iv)-(z)",
+          "(B)-(ii)-(y), (C)-(iii)-(z), (D)-(iv)-(w)"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Human Reproduction",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Evaluate Hormone A (GnRH) ::: GnRH is released from the Hypothalamus and acts on the *Anterior* Pituitary, not Posterior. Role (x) is also incorrect for males. Thus, (A) is wrong.",
+          "Step 2: Evaluate Hormone B (LH) ::: LH (Luteinizing Hormone) acts on Leydig cells (L for L) to stimulate the production of testosterone (Androgens). Match: (B)-(ii)-(y) is correct.",
+          "Step 3: Evaluate Hormone C (FSH) ::: FSH acts on Sertoli cells (S for S) to stimulate the secretion of factors that help in the process of spermiogenesis. Match: (C)-(iii)-(z) is correct.",
+          "Step 4: Evaluate Hormone D (Inhibin) ::: Inhibin is secreted by Sertoli cells and provides negative feedback specifically to the Anterior Pituitary to suppress FSH. Match: (D)-(iv)-(w) is correct.",
+          "Step 5: Combine ::: The combination (B)-(ii)-(y), (C)-(iii)-(z), (D)-(iv)-(w) is the only accurate set."
+        ],
+        "examTip": "Use the 'L and S' mnemonic: **L**H acts on **L**eydig cells; **F**SH acts on **S**ertoli cells. This simple trick prevents 90% of confusion in this topic.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The Hypothalamic-Pituitary-Gonadal (HPG) axis controls reproduction. GnRH triggers LH and FSH. LH makes the fuel (Testosterone), and FSH drives the factory (Sertoli cells/Spermiogenesis).\",\"memoryTrigger\":\"Leydig = Lipid/Lust (Testosterone). Sertoli = Sperm Support.\",\"visualPrompt\":\"Imagine a factory: GnRH is the CEO, LH is the Power Supply (Leydig), and FSH is the Assembly Line Manager (Sertoli).\",\"commonTrap\":\"Thinking Inhibin suppresses both LH and FSH. In reality, it primarily targets FSH.\"}",
+        "keyFormulas": [
+          "$GnRH \\uparrow \\implies LH/FSH \\uparrow$",
+          "$Testosterone \\uparrow \\implies GnRH/LH \\downarrow$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-004",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "524361c2-4c6a-4539-b4fb-6b3711210be1",
+        "text": "Choose the correct sequence of events that occur during the transmission of a signal across a chemical synapse between two neurons:\\n\\n(I) Binding of neurotransmitter with specific receptors on the post-synaptic membrane.\\n(II) Arrival of the action potential at the axon terminal.\\n(III) Fusion of synaptic vesicles with the plasma membrane and release of neurotransmitters into the synaptic cleft.\\n(IV) Opening of ion channels on the post-synaptic membrane generating a new potential.\\n(V) Influx of $Ca^{2+}$ ions into the axon terminal.",
+        "options": [
+          "I $\\rightarrow$ II $\\rightarrow$ III $\\rightarrow$ IV $\\rightarrow$ V",
+          "II $\\rightarrow$ III $\\rightarrow$ V $\\rightarrow$ I $\\rightarrow$ IV",
+          "V $\\rightarrow$ II $\\rightarrow$ III $\\rightarrow$ IV $\\rightarrow$ I",
+          "II $\\rightarrow$ V $\\rightarrow$ III $\\rightarrow$ I $\\rightarrow$ IV"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Neural Control and Coordination",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Event 1 ::: The action potential (electrical signal) must first reach the end of the axon (Axon terminal - II).",
+          "Event 2 ::: The electrical signal triggers voltage-gated $Ca^{2+}$ channels to open, allowing $Ca^{2+}$ to enter the terminal (V).",
+          "Event 3 ::: $Ca^{2+}$ influx stimulates synaptic vesicles to move and fuse with the membrane, releasing neurotransmitter (Exocytosis - III).",
+          "Event 4 ::: The neurotransmitter diffuses across the cleft and binds to receptors on the next neuron (I).",
+          "Event 5 ::: Binding causes ion channels to open, leading to depolarization/hyperpolarization in the second neuron (IV)."
+        ],
+        "examTip": "Remember: Calcium is the 'middleman' that converts the electrical action potential into a chemical release. It always enters *after* the signal reaches the terminal.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"A chemical synapse uses neurotransmitters to bridge the gap. The process is: Electrical (Action Potential) $\\\\rightarrow$ Chemical (Ca entry & Neurotransmitter release) $\\\\rightarrow$ Electrical (Post-synaptic potential).\",\"memoryTrigger\":\"A-C-V-B-O: Action potential, Calcium, Vesicles, Binding, Opening.\",\"visualPrompt\":\"Imagine a ship (vesicle) docked at a pier (membrane) that only unloads its cargo (neurotransmitter) once a signal light (calcium) turns on.\",\"commonTrap\":\"Thinking the neurotransmitter itself enters the second neuron. It does NOT; it only binds to a receptor on the *outside*.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-021",
+          "questionType": "sequence_based"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "4740c162-e6f3-4c52-b2e0-5fc1d74b4f5b",
+        "text": "Arrange the following stages of human evolution in the correct chronological order of their appearance, and identify the characteristic that matches the most recent ancestor in this sequence: \\nStages: (A) *Homo erectus*, (B) *Australopithecus*, (C) *Homo habilis*, (D) *Ramapithecus*, (E) *Homo neanderthalensis*.",
+        "options": [
+          "Order: D → B → C → A → E; Characteristic: Buried their dead.",
+          "Order: B → D → C → A → E; Characteristic: Cranial capacity of $900cc$.",
+          "Order: D → C → B → A → E; Characteristic: Used hides to protect body.",
+          "Order: D → B → C → E → A; Characteristic: Ate meat regularly."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Evolution",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Chronological Sequence ::: Based on NCERT: 1. *Ramapithecus* (15 mya), 2. *Australopithecus* (2 mya), 3. *Homo habilis* (First human-like), 4. *Homo erectus* (1.5 mya), 5. *Homo neanderthalensis* (100,000-40,000 years ago). Sequence: D → B → C → A → E.",
+          "Identify Most Recent Ancestor ::: In the given list, *Homo neanderthalensis* (E) is the most recent.",
+          "Match Characteristic for (E) ::: NCERT states Neanderthals (1400cc) lived in central/east Asia and 'buried their dead'. They also used hides, but the 'buried their dead' is the most distinct behavioral hallmark listed in NCERT for them.",
+          "Verify Other Options ::: Option 1 matches both the sequence and the correct characteristic for the last stage in the sequence.",
+          "Final Check ::: (A) H. erectus had 900cc; (C) H. habilis probably did not eat meat. D is the oldest in this set."
+        ],
+        "examTip": "Memorize the sequence and the CC (Cranial Capacity) values as a table. This is the most 'Lethal-Speed' section for Evolution.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Human evolution followed a path of increasing brain complexity and bipedalism. Key transitions: Ramapithecus (man-like) → Australopithecus (grasslands) → H. habilis (tool maker) → H. erectus (fire/meat) → Neanderthal (culture/burial).\",\"memoryTrigger\":\"D-R-A-H-E-N-S (Dryo, Rama, Austra, Habilis, Erectus, Neanderthal, Sapiens).\",\"visualPrompt\":\"A timeline moving from the forest (Ramapithecus) to the savannah (Australopithecus) to cave-dwelling/culture (Neanderthals).\",\"commonTrap\":\"Confusing the order of *H. habilis* and *H. erectus*. Remember: 'Habilis' comes first (Handy man) before 'Erectus' (Upright man).\"}",
+        "keyFormulas": [
+          "Cranial Capacities: H. habilis (650-800cc), H. erectus (900cc), Neanderthal (1400cc)."
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-018",
+          "questionType": "theory_conceptual"
+        },
+        "correctOptionIndex": 0
+      },
+      {
+        "id": "e1b7cb20-7276-436c-8adb-b2c90795cc25",
+        "text": "During an anatomical study of *Rana tigrina* (Indian Bullfrog), a student observes the unique adaptations for its amphibious lifestyle. While the frog is submerged underwater, it lacks specialized structures like gills. According to NCERT, which of the following acts as the sole respiratory organ for the frog during its aquatic phase?",
+        "options": [
+          "External gills",
+          "Buccal cavity",
+          "Lungs (Pulmonary respiration)",
+          "Moist Skin (Cutaneous respiration)"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Structural Organisation in Animals",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Establish Environment ::: The question specifies the 'aquatic phase' (underwater) for an adult frog.",
+          "Recall Modes of Respiration ::: Frogs use skin, buccal cavity, and lungs.",
+          "Apply Environment Constraints ::: Lungs and buccal cavity require air; they are non-functional for oxygen uptake from water.",
+          "Identify Aquatic Mechanism ::: In water, skin acts as the aquatic respiratory organ through diffusion.",
+          "Verify with NCERT ::: NCERT states: 'In water, skin acts as aquatic respiratory organ (cutaneous respiration)'."
+        ],
+        "examTip": "For Frogs: Water = Skin only. Land = Skin + Buccal Cavity + Lungs.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Frog skin is highly vascularized and kept moist by mucus, allowing dissolved oxygen in water to diffuse directly into the blood.\",\"memoryTrigger\":\"S.B.L. (Skin, Buccal, Lungs) - Skin is the 'Stay-underwater' hero.\",\"visualPrompt\":\"Imagine a frog as a living 'permeable membrane'. Even when its mouth is shut and lungs are still, it 'breathes' through its entire body surface.\",\"commonTrap\":\"Thinking frogs use gills. Adult frogs *never* have gills; only tadpoles do.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-001",
+          "questionType": "theory_conceptual"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "b71d6b99-20a0-4fbb-8082-e18f39212306",
+        "text": "Given below are two statements: one is labelled as Assertion (A) and the other is labelled as Reason (R).\\n\\n**Assertion (A):** In Phylum Hemichordata, the organism $Balanoglossus$ was traditionally classified as a sub-phylum under Chordata but is now placed as a separate phylum under Non-Chordata.\\n**Reason (R):** $Balanoglossus$ possesses a rudimentary structure in the collar region called the stomochord, which is anatomically similar to the notochord found in chordates.\\n\\nIn the light of the above statements, choose the correct answer from the options given below:",
+        "options": [
+          "(A) is true but (R) is false.",
+          "Both (A) and (R) are true and (R) is the correct explanation of (A).",
+          "Both (A) and (R) are true but (R) is NOT the correct explanation of (A).",
+          "(A) is false but (R) is true."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Animal Kingdom",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Assertion ::: NCERT states Hemichordata was earlier a sub-phylum of Chordata but is now a separate phylum of Non-Chordata. Assertion is True.",
+          "Evaluate Reason ::: Hemichordates have a 'stomochord' in the collar region, once mistaken for a notochord. Reason is True.",
+          "Determine Relationship ::: The reason they were moved/separated is precisely because the stomochord was found to be distinct from a true notochord. Thus, (R) explains why (A) happened.",
+          "Final Selection ::: Both are true, and (R) is the correct explanation."
+        ],
+        "examTip": "For Assertion-Reason, read both independently first. If both are true, ask 'Why?' after the Assertion. If the Reason answers 'Why?', then it's the correct explanation.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Hemichordates are 'half-chordates' because they share some features (pharyngeal gill slits) but lack a true notochord, possessing a stomochord instead.\",\"memoryTrigger\":\"Hemi-Stomo: Hemichordates have Stomochord.\",\"visualPrompt\":\"Think of a 'worm-like' marine animal with a distinct 'collar'. The stomochord is just a small projection in that collar, not a full back-rod.\",\"commonTrap\":\"Thinking stomochord and notochord are the same thing. They are not; stomochord is a buccal diverticulum.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-003",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "334e9d97-e4a7-482d-9058-9c2a64d8bafe",
+        "text": "During an experimental study on renal physiology, a subject is administered a drug that selectively inhibits the $Na^{+}-K^{+}-2Cl^{-}$ symporter in the thick ascending limb of the Loop of Henle. Which of the following set of changes would most likely be observed in the medullary interstitium and the final urine composition?",
+        "options": [
+          "Reduced GFR due to myogenic autoregulation and total cessation of urea recycling in the collecting duct.",
+          "Increased hyperosmolarity of the medullary interstitium, enhanced water reabsorption in the DCT, and production of concentrated urine.",
+          "Increased secretion of $H^{+}$ ions in the PCT and a compensatory increase in the reabsorption of glucose.",
+          "Decreased medullary interstitial gradient, loss of counter-current multiplier efficiency, and production of dilute urine."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Excretory Products and Their Elimination",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze the site of action: The thick ascending limb (TAL) is the 'diluting segment' where electrolytes are actively reabsorbed but water is not.",
+          "Understand the symporter: The $Na^{+}-K^{+}-2Cl^{-}$ symporter is responsible for moving these ions into the medullary interstitium.",
+          "Evaluate the gradient: If the symporter is inhibited, fewer ions enter the medullary interstitium, leading to a breakdown of the corticomedullary osmotic gradient ($300$ to $1200\\text{ mOsmol/L}$).",
+          "Connect to the Collecting Duct: Without the high interstitial osmolarity, water cannot be drawn out of the collecting duct via osmosis, even if ADH is present.",
+          "Conclusion: The result is a failure to concentrate urine, leading to large volumes of dilute urine (diuresis)."
+        ],
+        "examTip": "The thick ascending limb is ALWAYS impermeable to water. If a question mentions 'active transport of salts' in the loop, think of the ascending limb and its role in the counter-current multiplier.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The Counter-Current Multiplier (Loop of Henle) and Exchanger (Vasa Recta) maintain a high osmolarity in the inner medulla. This gradient is the 'engine' that allows the Collecting Duct to reabsorb water and concentrate urine.\",\"memoryTrigger\":\"Ascending is for Salts (Active), Descending is for Water (Passive). If the 'Salt Pump' breaks, the 'Water Suction' fails.\",\"visualPrompt\":\"Imagine a sponge (medulla) that needs to be salty to suck water out of a pipe (collecting duct). If you wash the salt away, the sponge stays dry and the pipe stays full.\",\"commonTrap\":\"Thinking that inhibiting salt reabsorption makes the urine more concentrated because there are 'more salts in the urine'. In reality, the loss of the water-reabsorption gradient far outweighs the salt loss, resulting in dilute urine.\"}",
+        "keyFormulas": [
+          "$\\text{Net Filtration Pressure (NFP)} = GHP - (BCOP + CHP)$",
+          "$1200\\text{ mOsmol/L}$ = Max medullary osmolarity in humans."
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-019",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "172fb236-6b24-4214-b64a-39b4cb0ff5e9",
+        "text": "Given below are two statements: one is labeled as Assertion (A) and the other is labeled as Reason (R). \\n\\n**Assertion (A):** The process of evolution of different species in a given geographical area starting from a point and literally radiating to other areas of geography (habitats) is called adaptive radiation.\\n**Reason (R):** When more than one adaptive radiation appeared to have occurred in an isolated geographical area, representing different habitats, one can call this convergent evolution. \\n\\nIn light of the above statements, choose the most appropriate answer from the options given below:",
+        "options": [
+          "Both (A) and (R) are correct but (R) is NOT the correct explanation of (A).",
+          "Both (A) and (R) are correct and (R) is the correct explanation of (A).",
+          "(A) is correct but (R) is incorrect.",
+          "(A) is incorrect but (R) is correct."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Evolution",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Assertion (A) ::: This is the verbatim NCERT definition of adaptive radiation. It focuses on the divergence from a common point to diverse habitats (e.g., Darwin's Finches). Statement is correct.",
+          "Evaluate Reason (R) ::: This statement is also a verbatim NCERT fact. If multiple lineages (like marsupials and placentals) evolve similar adaptations in the same isolated area (like Australia), it results in convergence. Statement is correct.",
+          "Determine Logical Connection ::: Assertion defines *what* adaptive radiation is. Reason describes what happens when *multiple* such events occur/converge. While both are true, the Reason does not explain *why* or *how* the process in the Assertion happens (it describes a different outcome/phenomenon).",
+          "Final Conclusion ::: Both are true, but R is not the explanation of A."
+        ],
+        "examTip": "In Assertion-Reason questions, replace the period after the Assertion with 'BECAUSE'. If the sentence flows logically, R is the explanation. Here, it does not flow logically.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Adaptive radiation is divergent evolution. Convergent evolution happens when different radiations lead to similar phenotypes in response to similar environmental pressures.\",\"memoryTrigger\":\"AR-D (Adaptive Radiation is Divergent). Multiple AR = Convergence.\",\"visualPrompt\":\"Imagine a hand (common ancestor) spreading fingers (adaptive radiation). Now imagine another hand from a different species placing its fingers next to the first (convergent evolution).\",\"commonTrap\":\"Thinking that because both involve 'Australia', the reason must explain the assertion. Look for the 'Cause-Effect' link.\"}",
+        "keyFormulas": [
+          "Not applicable for this conceptual question."
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-018",
+          "questionType": "theory_conceptual"
+        },
+        "correctOptionIndex": 0
+      },
+      {
+        "id": "12cd3e05-893a-4cd6-afe3-6134a96b5e51",
+        "text": "Identify the set of statements that accurately characterizes the mechanisms of evolution and historical evidence as per the Neo-Darwinian synthesis: \\n(i) The rate of appearance of new forms is linked to the life cycle or the life span of the organism, where microbes that divide fast have the ability to regenerate within a short period. \\n(ii) Adaptive radiation in Australian marsupials represents a process of convergent evolution where a number of marsupials, each evolved from an ancestral stock, show similarities to placental mammals. \\n(iii) The operation of natural selection is most evident when the frequency of a recessive allele $q$ remains constant in a population of $100$ individuals over ten generations. \\n(iv) According to Hugo de Vries, mutations are random and directionless, whereas Darwinian variations are small and directional. \\n(v) The skull of an adult chimpanzee is more like an adult human skull than a baby chimpanzee skull.",
+        "options": [
+          "(i), (ii), and (iv) only",
+          "(i) and (iv) only",
+          "(i), (iv), and (v) only",
+          "(ii), (iii), and (v) only"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Evolution",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analysis of Statement (i) ::: Correct. NCERT explicitly states that the rate of appearance of new forms is linked to life span. Microbes with shorter generation times evolve faster (e.g., antibiotic resistance).",
+          "Analysis of Statement (ii) ::: Incorrect. Adaptive radiation within a single geographical area (Australia) is a process of divergent evolution. When compared *to* placental mammals in other continents, it represents convergent evolution, but the phrasing 'Adaptive radiation... represents convergent evolution' is logically flawed in this specific context of its own ancestral stock.",
+          "Analysis of Statement (iii) ::: Incorrect. If allele frequencies remain constant ($p^2 + 2pq + q^2 = 1$), it implies the population is in Hardy-Weinberg equilibrium, meaning natural selection is *not* operating significantly.",
+          "Analysis of Statement (iv) ::: Correct. This is a foundational distinction in NCERT: de Vries proposed large, random 'Saltation', while Darwin proposed gradual, directional changes.",
+          "Analysis of Statement (v) ::: Incorrect. NCERT (Human Evolution section) notes that the skull of a *baby* chimpanzee is more like an adult human skull than an adult chimpanzee skull is."
+        ],
+        "examTip": "Watch for the 'Baby Chimpanzee' trap. It is a high-frequency NCERT detail used to test visual-conceptual accuracy in human evolution chapters.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Neo-Darwinism combines Darwin's natural selection with de Vries' mutation theory and population genetics. Evolution is seen as a change in allele frequencies over generations (Genetic Drift/Selection).\",\"memoryTrigger\":\"M-R-D: Mutations are Random and Directionless. D-S-D: Darwinian variations are Small and Directional.\",\"visualPrompt\":\"Imagine a fitness landscape where Darwin takes tiny steps (directional) while de Vries takes giant leaps (saltation) in random directions.\",\"commonTrap\":\"Confusing 'Adaptive Radiation' with 'Convergent Evolution'. Remember: Multiple radiations in isolated areas compared to each other = Convergence; One radiation from one ancestor = Divergence.\"}",
+        "keyFormulas": [
+          "$p^2 + 2pq + q^2 = 1$ (Hardy-Weinberg Equilibrium)",
+          "$p + q = 1$ (Allele Frequency sum)"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-018",
+          "questionType": "theory_conceptual"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "bbbac84c-83fd-4523-9e6f-289e5a22f29a",
+        "text": "A student is tracing the anatomical pathway of a food bolus in a common Indian Bullfrog ($Rana \\; tigrina$). Starting from the ingestion point at the mouth, what is the correct chronological sequence of structures through which the food passes before the undigested waste is finally egested through the cloacal aperture?",
+        "options": [
+          "Mouth $\\rightarrow$ Buccal cavity $\\rightarrow$ Oesophagus $\\rightarrow$ Pharynx $\\rightarrow$ Stomach $\\rightarrow$ Rectum $\\rightarrow$ Intestine $\\rightarrow$ Cloaca",
+          "Mouth $\\rightarrow$ Pharynx $\\rightarrow$ Buccal cavity $\\rightarrow$ Stomach $\\rightarrow$ Oesophagus $\\rightarrow$ Rectum $\\rightarrow$ Intestine $\\rightarrow$ Cloaca",
+          "Mouth $\\rightarrow$ Oesophagus $\\rightarrow$ Buccal cavity $\\rightarrow$ Pharynx $\\rightarrow$ Stomach $\\rightarrow$ Intestine $\\rightarrow$ Rectum $\\rightarrow$ Cloaca",
+          "Mouth $\\rightarrow$ Buccal cavity $\\rightarrow$ Pharynx $\\rightarrow$ Oesophagus $\\rightarrow$ Stomach $\\rightarrow$ Intestine $\\rightarrow$ Rectum $\\rightarrow$ Cloaca"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Structural Organisation in Animals",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Initial Intake ::: Food enters the Mouth and passes into the Buccal cavity.",
+          "Transition ::: From the buccal cavity, it moves into the Pharynx and then into the Oesophagus (a short tube).",
+          "Digestion Phase ::: The Oesophagus leads to the Stomach where digestion begins, then to the small Intestine.",
+          "Egestion Phase ::: Undigested waste moves to the Rectum and finally exits through the common chamber called the Cloaca.",
+          "Verification ::: Match the sequence: Mouth $\\rightarrow$ Buccal cavity $\\rightarrow$ Pharynx $\\rightarrow$ Oesophagus $\\rightarrow$ Stomach $\\rightarrow$ Intestine $\\rightarrow$ Rectum $\\rightarrow$ Cloaca."
+        ],
+        "examTip": "In frog anatomy, the 'Cloaca' is always the terminal point for digestive, excretory, and reproductive products. Use this as your 'anchor' point in sequence questions.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The digestive system of a frog consists of the alimentary canal and digestive glands. The alimentary canal is short because frogs are carnivores.\",\"memoryTrigger\":\"MBP-O-SIRC: Mouth, Buccal, Pharynx, Oesophagus, Stomach, Intestine, Rectum, Cloaca.\",\"visualPrompt\":\"Imagine a straight line where the stomach is a wide pouch and the cloaca is the 'all-in-one' exit door at the end.\",\"commonTrap\":\"Confusing the order of Pharynx and Oesophagus. Remember: Pharynx is the throat area immediately after the mouth cavity.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-001",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "a752d043-7d1a-4aed-98fd-de9f6cebf578",
+        "text": "An infertile couple is advised to undergo Assisted Reproductive Technology ($ART$). The male partner has a very low sperm count ($oligozoospermia$), and the female partner has blocked fallopian tubes but a healthy uterus. Which combination of $ART$ procedures would be most appropriate for this couple to achieve pregnancy?",
+        "options": [
+          "$AI$ (Artificial Insemination) directly into the fallopian tubes.",
+          "$ZIFT$ (Zygote Intra-Fallopian Transfer) only.",
+          "$ICSI$ (Intra-Cytoplasmic Sperm Injection) followed by $IUT$ (Intra-Uterine Transfer).",
+          "$GIFT$ (Gamete Intra-Fallopian Transfer) followed by natural fertilization."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Reproductive Health",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze Male Infertility ::: Low sperm count (oligozoospermia) suggests that natural fertilization or simple AI might fail. $ICSI$ is the most effective for very low counts as a single sperm is injected.",
+          "Analyze Female Infertility ::: Blocked fallopian tubes mean that fertilization cannot occur in vivo, and the embryo cannot travel to the uterus via the tubes.",
+          "Evaluate $GIFT/ZIFT$ ::: Both require functional fallopian tubes (GIFT for fertilization, ZIFT for transport). Since tubes are blocked, these are ruled out.",
+          "Determine Transfer Site ::: If the embryo is cultured in vitro, it must be transferred directly to the uterus ($IUT$) if it's beyond the 8-blastomere stage, bypassing the blocked tubes."
+        ],
+        "examTip": "If tubes are blocked, any 'FT' (Fallopian Transfer) is impossible. Look for 'UT' (Uterine Transfer).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"In-vitro fertilization (IVF) is followed by Embryo Transfer (ET). If the embryo is $\\\\leq 8$ blastomeres, it goes to the tube ($ZIFT$); if $> 8$, it goes to the uterus ($IUT$). $ICSI$ is a specialized IVF for male infertility.\",\"memoryTrigger\":\"Blocked Tubes? $\\\\rightarrow$ No 'F' (Fallopian). Use 'U' (Uterine).\",\"visualPrompt\":\"Imagine a bridge (fallopian tube) is collapsed. You must take a helicopter (IUT) to drop the package (embryo) directly into the city (uterus).\",\"commonTrap\":\"Choosing $GIFT$ for blocked tubes. $GIFT$ is for women who cannot produce ova but *can* provide a suitable environment for fertilization in the tube.\"}",
+        "keyFormulas": [
+          "N/A"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-006",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 2
+      },
+      {
+        "id": "88316b10-39de-4182-b9b7-712acbda159b",
+        "text": "A mountaineer ascending Mt. Everest experiences physiological changes as the atmospheric $pO_2$ decreases. In the systemic tissues of a human body, specific conditions facilitate the dissociation of oxygen from hemoglobin to ensure oxygen delivery to cells. Which of the following set of conditions in the tissues promotes this dissociation according to the Oxygen-Hemoglobin dissociation curve?",
+        "options": [
+          "Low $pO_2$, Low $pCO_2$, Low $H^+$ concentration",
+          "Low $pO_2$, High $pCO_2$, High $H^+$ concentration",
+          "High $pO_2$, High $pCO_2$, High Temperature",
+          "High $pO_2$, Low $pCO_2$, Low Temperature"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Breathing and Exchange of Gases",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Define the Goal ::: The question asks for conditions promoting 'dissociation' (unloading of $O_2$ in tissues).",
+          "Recall Sigmoid Curve Shift ::: Dissociation is represented by a rightward shift of the $O_2$-Hb curve.",
+          "Identify Tissue Environment ::: Tissues have low $O_2$ (used in metabolism) and high $CO_2$ (waste product).",
+          "Apply Bohr Effect ::: High $pCO_2$ leads to high $H^+$ (acidity), which decreases Hb affinity for $O_2$.",
+          "Synthesize Conditions ::: Low $pO_2$, High $pCO_2$, High $H^+$ (low pH), and High Temperature all favor dissociation."
+        ],
+        "examTip": "Tissues are 'High and Hot' (High $CO_2$, High $H^+$, High Temp) to get rid of $O_2$. Alveoli are 'Low and Cold'.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Hemoglobin's affinity for oxygen is not fixed; it is 'loosened' by the metabolic byproducts of the tissues that need oxygen most.\",\"memoryTrigger\":\"CADET, face Right! (CO2, Acid, DPG, Exercise, Temperature - all shift curve Right/Dissociate).\",\"visualPrompt\":\"Think of Hemoglobin as a delivery truck. In the busy, hot, crowded 'Tissue City', it drops off its packages (O2) more easily.\",\"commonTrap\":\"Confusing 'Low pH' with 'Low H+ concentration'. Remember: High $H^+$ = Low pH (Acidic).\"}",
+        "keyFormulas": [
+          "$CO_2 + H_2O \\rightleftharpoons H_2CO_3 \\rightleftharpoons H^+ + HCO_3^-$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-015",
+          "questionType": "theory_conceptual"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "f76061e7-6f52-41a7-a874-4023d73f2e5c",
+        "text": "During a field excursion to a freshwater lake, a group of students identifies a sessile organism firmly attached to a submerged rock. The organism displays a primitive level of organization and is characterized by a water transport system where water enters through minute pores called $\\text{ostia}$ into a central $\\text{spongocoel}$ and exits via an $\\text{osculum}$. If the organism is identified as $\\textit{Spongilla}$ based on its habitat, which of the following cell types is exclusively responsible for maintaining the water current and lining the internal cavities?",
+        "options": [
+          "Archaeocytes",
+          "Choanocytes (Collar cells)",
+          "Theocytes",
+          "Pinacocytes"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Animal Kingdom",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Organism ::: The organism is $\\textit{Spongilla}$, which belongs to Phylum Porifera. The key habitat marker is 'freshwater'.",
+          "Analyze the Canal System ::: Poriferans possess a water canal system where water flow is essential for food gathering, respiratory exchange, and waste removal.",
+          "Locate the Flagellated Cells ::: According to NCERT, the $\\text{spongocoel}$ and the canals are lined by specialized flagellated cells.",
+          "Determine the Cell Type ::: These cells are called $\\text{choanocytes}$ or collar cells. Their flagellar beating creates the necessary water current.",
+          "Final Selection ::: $\\text{Choanocytes}$ are the diagnostic cells for this function in sponges."
+        ],
+        "examTip": "Always remember that while most sponges are marine, $\\textit{Spongilla}$ is the classic freshwater exception mentioned in NCERT. Focus on the 'flagellated' keyword for choanocytes.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Phylum Porifera (Sponges) represent the cellular level of organization. Their survival depends on the Water Canal System. Water enters via Ostia $\\\\rightarrow$ Spongocoel $\\\\rightarrow$ Osculum. This flow is powered by Choanocytes.\",\"memoryTrigger\":\"C-C-C: Choanocytes Create Current.\",\"visualPrompt\":\"Imagine a chimney (osculum) on a house with thousands of tiny windows (ostia). Inside the house, people with fans (choanocytes) are pushing air out of the chimney.\",\"commonTrap\":\"Do not confuse Choanocytes with Cnidocytes. Cnidocytes are stinging cells found in Cnidarians (Coelenterates).\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-003",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "5ea3e1d7-9839-4390-bba1-1641a504ca51",
+        "text": "While examining a histological slide of a human lung during a laboratory session, a student identifies a specific tissue layer forming the wall of the alveoli. This tissue consists of a single, extremely thin layer of flattened cells with irregular boundaries, specifically adapted for the rapid diffusion of respiratory gases. According to the NCERT classification of animal tissues, which of the following structures also features this identical type of epithelium?",
+        "options": [
+          "Endothelium of blood vessels",
+          "Ducts of salivary glands",
+          "Proximal convoluted tubule of the nephron",
+          "Inner lining of the stomach and intestine"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Structural Organisation in Animals",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identification of Tissue ::: The description 'single thin layer of flattened cells with irregular boundaries' defines Simple Squamous Epithelium.",
+          "Functional Correlation ::: Simple Squamous Epithelium is found where diffusion or filtration occurs, such as the air sacs (alveoli) of lungs.",
+          "Mapping to NCERT Examples ::: NCERT explicitly lists 'walls of blood vessels' and 'air sacs of lungs' as primary locations for this tissue.",
+          "Elimination ::: Columnar epithelium lines the stomach; Cuboidal lines PCT; Compound/stratified epithelium lines salivary gland ducts.",
+          "Conclusion ::: Therefore, the endothelium of blood vessels matches the tissue type identified."
+        ],
+        "examTip": "Focus on the functional keyword: 'Diffusion' always points to Simple Squamous, while 'Secretion/Absorption' points to Cuboidal or Columnar.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Simple Squamous Epithelium is the thinnest possible barrier in the animal body, designed for passive transport mechanisms.\",\"memoryTrigger\":\"Squamous = 'Squashed' (flat) cells for 'Fast' diffusion.\",\"visualPrompt\":\"Imagine a floor made of thin, irregular tiles (like fried eggs seen from above) that allow things to seep through the gaps or the tiles themselves easily.\",\"commonTrap\":\"Do not confuse Squamous with Cuboidal in the kidney; remember that PCT has microvilli (brush border) and is cuboidal, not squamous.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-001",
+          "questionType": "theory_conceptual"
+        },
+        "correctOptionIndex": 0
+      },
+      {
+        "id": "0ef74a07-57b0-47b6-8b72-ed0acba72bb4",
+        "text": "During the standard human menstrual cycle of 28 days, a critical 'molecular hand-off' occurs between the follicular and luteal phases. Which of the following statements regarding the transition immediately following the $LH$ surge is biologically accurate according to the NCERT framework?",
+        "options": [
+          "The $Corpus$ $luteum$ begins secreting massive amounts of estrogen as its primary hormone to thicken the perimetrium for implantation.",
+          "The primary oocyte, arrested in Prophase-I, completes its first meiotic division within the Graafian follicle just prior to its rupture.",
+          "The rapid rise in progesterone levels during the LH surge causes the thinning of the cervical mucus to facilitate sperm entry.",
+          "The secondary oocyte is released from the ovary accompanied by the second polar body and a thick layer of $theca$ $externa$."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Human Reproduction",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Oogenesis Timing ::: Meiosis I is initiated during fetal life but arrested in Prophase-I. It is completed only just before ovulation within the mature Graafian follicle.",
+          "Identify the Product of Meiosis I ::: Completion of Meiosis I results in a large haploid secondary oocyte and a tiny first polar body.",
+          "Analyze Post-Ovulation Hormones ::: After ovulation, the ruptured follicle transforms into the $Corpus$ $luteum$, which primarily secretes $Progesterone$ (not just estrogen) to maintain the $endometrium$ (not perimetrium).",
+          "Check Membrane Anatomy ::: The secondary oocyte is surrounded by the $zona$ $pellucida$ and $corona$ $radiata$, not $theca$ $externa$."
+        ],
+        "examTip": "Watch out for 'Perimetrium' vs 'Endometrium' and 'Primary' vs 'Secondary' oocyte. Meiosis I completes *before* ovulation; Meiosis II completes *after* fertilization.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The first meiotic division is completed just before ovulation, yielding a secondary oocyte ($n$) and the 1st polar body. The second meiotic division is only completed if a sperm enters the oocyte.\",\"memoryTrigger\":\"1st Meiosis = 1st Surge (LH). 2nd Meiosis = 2nd Person (Sperm).\",\"visualPrompt\":\"Imagine a cell waiting at a finish line (ovulation). It must shed half its 'weight' (polar body) to cross the line.\",\"commonTrap\":\"Thinking Meiosis I is completed at puberty. No, it is completed *individually* for each follicle during its specific cycle.\"}",
+        "keyFormulas": [
+          "$Primary$ $Oocyte$ $(2n) \\xrightarrow{Pre-ovulation} Secondary$ $Oocyte$ $(n) + 1st$ $Polar$ $Body$ $(n)$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-004",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "19eb3448-251d-42ba-8519-6968aceda05a",
+        "text": "Arrange the following physiological events in the correct chronological sequence starting from a state of **Iodine deficiency** in the diet:\\n\\n1. Increased secretion of Thyroid Stimulating Hormone ($TSH$) from the Adenohypophysis.\\n2. Hypertrophy of the thyroid gland (Goitre).\\n3. Decreased synthesis of Thyroxine ($T_4$) and Triiodothyronine ($T_3$).\\n4. Increased secretion of Thyrotropin Releasing Hormone ($TRH$) from the Hypothalamus.\\n5. Stimulation of the Hypophyseal Portal System.",
+        "options": [
+          "4 $\\rightarrow$ 5 $\\rightarrow$ 1 $\\rightarrow$ 3 $\\rightarrow$ 2",
+          "3 $\\rightarrow$ 1 $\\rightarrow$ 4 $\\rightarrow$ 5 $\\rightarrow$ 2",
+          "3 $\\rightarrow$ 4 $\\rightarrow$ 5 $\\rightarrow$ 1 $\\rightarrow$ 2",
+          "1 $\\rightarrow$ 3 $\\rightarrow$ 4 $\\rightarrow$ 5 $\\rightarrow$ 2"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Chemical Coordination and Integration",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Start with the root cause ::: Iodine deficiency immediately leads to an inability of the follicular cells to synthesize $T_3$ and $T_4$ (Step 3).",
+          "Step 2: Negative Feedback response ::: Low circulating $T_3/T_4$ levels are sensed by the Hypothalamus, which increases $TRH$ secretion (Step 4).",
+          "Step 3: Signal transport ::: $TRH$ travels through the Hypophyseal Portal System to reach the Anterior Pituitary (Step 5).",
+          "Step 4: Pituitary response ::: The Adenohypophysis releases more $TSH$ into the bloodstream (Step 1).",
+          "Step 5: Physical outcome ::: High $TSH$ levels constantly stimulate the thyroid gland to work harder, leading to overgrowth/hypertrophy or Goitre (Step 2).",
+          "Step 6: Final Sequence ::: 3 $\\rightarrow$ 4 $\\rightarrow$ 5 $\\rightarrow$ 1 $\\rightarrow$ 2."
+        ],
+        "examTip": "In 'Sequence' questions, always look for the 'Physical Sign' (like Goitre or Ovulation) at the very end. This helps eliminate 50% of the options instantly.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Thyroid hormones require Iodine. Low hormones remove the 'brakes' (negative feedback) on the hypothalamus and pituitary. The resulting high TSH acts as a growth factor for the thyroid gland.\",\"memoryTrigger\":\"Low Iodine -> Low T3/T4 -> High TRH -> High TSH -> Big Neck.\",\"visualPrompt\":\"Imagine a thermostat (Hypothalamus) turning the heater (Thyroid) up to MAX because it feels cold (Low T3), but the heater has no fuel (Iodine), so it just gets hot and expands without making heat.\",\"commonTrap\":\"Starting the sequence with TRH. The prompt asks to start 'from the state of Iodine deficiency', which first causes low $T_3$.\"}",
+        "keyFormulas": [
+          "Iodine + Tyrosine \\rightarrow Thyroid Hormones"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-022",
+          "questionType": "sequence_based"
+        },
+        "correctOptionIndex": 2
+      },
+      {
+        "id": "d75c2595-904b-40ce-87c8-4fcde9324cde",
+        "text": "A 45-year-old individual undergoes a clinical evaluation where the Electrocardiogram (ECG) reveals a consistent delay in the $P-R$ interval exceeding $0.20$ seconds, though every $P$ wave is followed by a $QRS$ complex. Simultaneously, the patient's stroke volume is measured at $60\\text{ mL}$ with a heart rate of $80\\text{ bpm}$. Which of the following physiological deductions regarding the cardiac cycle and hemodynamics is most accurate based on NCERT-defined cardiac parameters?",
+        "options": [
+          "The delay indicates a conduction slowdown at the Atrioventricular (AV) node, but the Cardiac Output remains within the standard resting range of $5\\text{ Litres}$.",
+          "The prolonged $P-R$ interval suggests a block at the Purkinje fibers, leading to a significant decrease in the ejection fraction from the left ventricle.",
+          "The clinical finding represents a normal physiological variation where the atrial systole contributes to $70\\%$ of ventricular filling.",
+          "The $P-R$ interval delay indicates an accelerated SA node discharge, which will eventually increase the Cardiac Output to $7.2\\text{ L/min}$."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Body Fluids and Circulation",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the ECG anomaly: The $P-R$ interval represents the time from the beginning of atrial excitation to the beginning of ventricular excitation. A delay ($>0.20s$) specifically points to a slowing of the impulse through the $AV$ node.",
+          "Calculate Cardiac Output ($CO$): $CO = \\text{Stroke Volume } (SV) \\times \\text{Heart Rate } (HR)$.",
+          "Apply values: $CO = 60\\text{ mL} \\times 80\\text{ bpm} = 4800\\text{ mL/min} = 4.8\\text{ L/min}$.",
+          "Compare with NCERT standard: NCERT defines the average cardiac output as approximately $5000\\text{ mL}$ or $5\\text{ Litres}$. $4.8\\text{ L}$ is considered within the standard resting range.",
+          "Evaluate options: Option 1 correctly identifies the $AV$ node delay and the near-normal cardiac output calculation."
+        ],
+        "examTip": "Always verify the unit conversion in Cardiac Output questions. $5000\\text{ mL}$ is exactly $5\\text{ Litres}$, and NEET often uses $4.8-5.2\\text{ L}$ as the 'normal' range.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The $P-R$ interval is the 'Atrioventricular delay', allowing the atria to contract and empty blood into the ventricles before ventricular contraction begins. Cardiac output is the volume of blood pumped by each ventricle per minute.\",\"memoryTrigger\":\"P-R Delay = AV Node 'Rest' Stop. CO = SV x HR (The Heart's Math).\",\"visualPrompt\":\"Imagine a relay race where the baton (impulse) is held slightly longer at the second runner (AV node) to ensure the first runner (Atria) has finished their lap (Systole).\",\"commonTrap\":\"Confusing the $P-R$ interval with the $Q-T$ interval. Remember $P$ is Atria, $QRS$ is Ventricle; the gap between them is the $AV$ node transit time.\"}",
+        "keyFormulas": [
+          "$CO = SV \\times HR$",
+          "$\\text{Pulse Pressure} = \\text{Systolic} - \\text{Diastolic}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-016",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 0
+      },
+      {
+        "id": "b0ff33e3-a4bc-472a-97c9-31538178c30b",
+        "text": "Match the following anatomical structures of the human brain (Column I) with their specific functional characteristics or locations (Column II) as per the $NCERT$ nomenclature:\\n\\n| Column I | Column II |\\n| :--- | :--- |\\n| (A) Corpora quadrigemina | (i) Connects the two cerebral hemispheres |\\n| (B) Hypothalamus | (ii) Four lobes on the dorsal portion of the midbrain |\\n| (C) Corpus callosum | (iii) Contains centers for thermoregulation and hunger |\\n| (D) Medulla oblongata | (iv) Controls gastric secretions and cardiovascular reflexes |",
+        "options": [
+          "(A)-(iv), (B)-(iii), (C)-(ii), (D)-(i)",
+          "(A)-(ii), (B)-(iv), (C)-(i), (D)-(iii)",
+          "(A)-(iii), (B)-(ii), (C)-(i), (D)-(iv)",
+          "(A)-(ii), (B)-(iii), (C)-(i), (D)-(iv)"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Neural Control and Coordination",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify A ::: Corpora quadrigemina consists of four round swellings (lobes) on the dorsal part of the midbrain (NCERT literal).",
+          "Identify B ::: Hypothalamus is at the base of the thalamus and regulates body temperature, thirst, and hunger.",
+          "Identify C ::: Corpus callosum is the large tract of nerve fibers connecting the left and right cerebral hemispheres.",
+          "Identify D ::: Medulla oblongata is part of the hindbrain and contains vital centers for respiration, gastric secretion, and cardiovascular control.",
+          "Synthesize match ::: A-ii, B-iii, C-i, D-iv."
+        ],
+        "examTip": "In Match-Following questions, find the most certain pair first (usually Corpus Callosum or Hypothalamus) to eliminate options quickly.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The brain is divided into Forebrain (Cerebrum, Thalamus, Hypothalamus), Midbrain, and Hindbrain (Pons, Cerebellum, Medulla). The brainstem includes the Midbrain, Pons, and Medulla.\",\"memoryTrigger\":\"Hypo-Thermo: Hypothalamus controls Thermoregulation. Callosum Connects: Corpus Callosum connects hemispheres.\",\"visualPrompt\":\"Imagine the Medulla as the 'Basement Control Room' for basic survival and the Hypothalamus as the 'Thermostat'.\",\"commonTrap\":\"Confusing the location of the Corpora quadrigemina (Midbrain) with the Cerebellum (Hindbrain).\"}",
+        "keyFormulas": [
+          "$\\text{Brainstem} = \\text{Midbrain} + \\text{Pons} + \\text{Medulla}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-021",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "ae3b0596-3e36-481c-8036-45b689dfc414",
+        "text": "Match the following immunoglobulins/immune components (List I) with their definitive functional characteristics or biological locales (List II):\\n\\nList I:\\nA. Secretory IgA\\nB. IgG\\nC. IgE\\nD. Interferon-$\\gamma$\\nE. Perforins\\n\\nList II:\\ni. Opsonization and placental transfer\\nii. Cytotoxic T-cell mediated pore formation\\niii. Mucosal immunity and colostrum presence\\niv. Activation of macrophages and MHC expression\\nv. Type-I hypersensitivity and helminthic response",
+        "options": [
+          "A-iii, B-i, C-v, D-iv, E-ii",
+          "A-i, B-iii, C-v, D-ii, E-iv",
+          "A-iii, B-v, C-i, D-iv, E-ii",
+          "A-iii, B-i, C-v, D-ii, E-iv"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Human Health and Disease",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify Secretory IgA ::: Found in secretions like saliva, tears, and colostrum. Matches (iii).",
+          "Identify IgG ::: Most abundant, crosses placenta, acts as an opsonin. Matches (i).",
+          "Identify IgE ::: Mediates allergic reactions (Type-I hypersensitivity) and acts against parasites. Matches (v).",
+          "Identify Interferon-gamma ::: A cytokine that activates macrophages. Matches (iv).",
+          "Identify Perforins ::: Proteins released by $T_C$ and NK cells to create pores in target membranes. Matches (ii)."
+        ],
+        "examTip": "IgG is 'Gone' to the fetus (placenta). IgA is 'Attached' to secretions. IgE is for 'Eeeek!' (allergies).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The immune system uses specialized proteins (antibodies) for recognition and specialized chemicals (cytokines/perforins) for execution of the immune response.\",\"memoryTrigger\":\"GAMED (IgG, IgA, IgM, IgE, IgD) - Order of abundance.\",\"visualPrompt\":\"Imagine IgA as a shield at the gate (mucosa), IgG as a soldier traveling across the bridge (placenta), and IgE as an alarm bell (allergy).\",\"commonTrap\":\"Confusing the role of Perforins (pores) with Granzymes (apoptosis induction).\"}",
+        "keyFormulas": [
+          "Ab Abundance: G > A > M > D > E"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-005",
+          "questionType": "match_following_mcq"
+        },
+        "correctOptionIndex": 0
+      },
+      {
+        "id": "26beba36-b9af-4651-9403-4aa12d836e8e",
+        "text": "During a histology practical, a student observes a tissue section through a microscope. The section reveals a single, extremely thin layer of flattened cells with irregular boundaries, appearing like a pavement. This specific tissue is primarily involved in forming a diffusion boundary. In which of the following locations in the human body is this tissue most likely to be found according to the NCERT syllabus for Structural Organisation?",
+        "options": [
+          "Walls of blood vessels and air sacs of lungs.",
+          "Inner lining of the stomach and intestine.",
+          "Ducts of glands and tubular parts of nephrons.",
+          "Inner surface of the fallopian tubes and bronchioles."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Structural Organisation in Animals",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify Tissue Type ::: 'Single thin layer', 'flattened cells', and 'irregular boundaries' describe Squamous Epithelium.",
+          "Determine Function ::: Squamous epithelium typically forms a 'diffusion boundary'.",
+          "Locate in Body ::: According to NCERT, squamous epithelium is found in the walls of blood vessels and air sacs (alveoli) of the lungs.",
+          "Eliminate Others ::: Option B is Columnar; Option C is Ciliated; Option D is Cuboidal.",
+          "Final Answer ::: Walls of blood vessels and air sacs."
+        ],
+        "examTip": "Keywords for Squamous: Flattened, irregular boundaries, diffusion. Keywords for Cuboidal: Cube-like, secretion, absorption. Keywords for Columnar: Tall, slender, nuclei at base.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Simple squamous epithelium consists of a single layer of flat cells. Its thinness allows for passive transport (diffusion) of gases and fluids.\",\"memoryTrigger\":\"S-S-D: Squamous-Single-Diffusion.\",\"visualPrompt\":\"Think of 'floor tiles' (Pavement epithelium). They are very thin to let things seep through the cracks or across the surface easily.\",\"commonTrap\":\"Confusing the location of squamous with cuboidal in the kidney (Nephron). Squamous is in Bowman's capsule (filtration), while Cuboidal is in the tubules (secretion/absorption).\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-001",
+          "questionType": "structure_based"
+        },
+        "correctOptionIndex": 0
+      },
+      {
+        "id": "a34a177a-5b62-4658-8b53-520425d3bb1c",
+        "text": "A student listening to heart sounds using a stethoscope hears the classic 'Lubb-Dupp' rhythm. The first heart sound ('Lubb') is louder and of longer duration than the second. Clinically, this 'Lubb' sound is produced simultaneously with which event of the cardiac cycle?",
+        "options": [
+          "Opening of the Atrioventricular (AV) valves during atrial systole",
+          "Opening of the Semilunar valves during ventricular ejection",
+          "Closure of the Tricuspid and Bicuspid valves at the start of ventricular systole",
+          "Closure of the Semilunar valves at the start of ventricular diastole"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Body Fluids and Circulation",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Sound ::: The first heart sound is 'Lubb' ($S_1$).",
+          "Associate with Valve Action ::: NCERT states heart sounds are associated with the 'closure' of valves.",
+          "Determine Valve Type ::: $S_1$ (Lubb) is caused by the closure of AV valves (Tricuspid and Bicuspid).",
+          "Identify Timing ::: AV valves close when ventricular pressure rises at the start of ventricular systole to prevent backflow.",
+          "Final Match ::: Option 3 correctly identifies both the valve and the phase."
+        ],
+        "examTip": "Lubb = First = AV valves = Systole start. Dupp = Second = Semilunar valves = Diastole start.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Sounds are produced by the sudden closure of valves which causes blood turbulence and vibration of the heart walls.\",\"memoryTrigger\":\"Lubb-AV (Like-AV), Dupp-SL (D-SL).\",\"visualPrompt\":\"Imagine a door slamming shut to stop water from flowing back into a room—the sound happens when the door hits the frame (closure).\",\"commonTrap\":\"Thinking sounds are produced by valves 'opening'. Opening is a quiet, passive process; only 'closure' makes the sound.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-016",
+          "questionType": "theory_conceptual"
+        },
+        "correctOptionIndex": 2
+      },
+      {
+        "id": "4eae8456-8134-4ab7-98a2-0f948b398deb",
+        "text": "During a routine clinical spirometry test, a healthy adult male is instructed to undergo a normal respiratory cycle. Following a relaxed, quiet expiration, the individual is then asked to forcibly exhale as much additional air as possible from the lungs. This specific additional volume of air exhaled forcefully is physiologically defined as:",
+        "options": [
+          "Residual Volume ($RV$)",
+          "Functional Residual Capacity ($FRC$)",
+          "Expiratory Reserve Volume ($ERV$)",
+          "Expiratory Capacity ($EC$)"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Breathing and Exchange of Gases",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze the Phase ::: The subject starts after a 'normal expiration'.",
+          "Define the Action ::: 'Forcibly exhale additional air' indicates the use of expiratory muscles beyond tidal breathing.",
+          "Recall NCERT Definitions ::: $ERV$ is defined as the additional volume of air, a person can expire by a forcible expiration.",
+          "Differentiate from Capacities ::: Expiratory Capacity ($EC$) would include Tidal Volume ($TV + ERV$), but the question asks for the 'additional volume'.",
+          "Verify Volume Range ::: For a healthy adult, $ERV$ averages $1000\\text{ mL}$ to $1100\\text{ mL}$."
+        ],
+        "examTip": "Always identify the 'starting point' of the breath. If it starts after 'normal expiration', the additional volume is $ERV$. If it starts after 'normal inspiration', it's $EC$.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Expiratory Reserve Volume is the 'backup' air we can push out using our internal intercostal and abdominal muscles.\",\"memoryTrigger\":\"ERV: 'Extra' 'Release' 'Volume' after normal breathing.\",\"visualPrompt\":\"Imagine a sponge. You let it expand and contract naturally (TV). Then you squeeze it as hard as you can (ERV). The water that stays even after squeezing is RV.\",\"commonTrap\":\"Confusing $ERV$ with $FRC$. $FRC$ is the total air remaining ($ERV + RV$), while $ERV$ is just what you can push out.\"}",
+        "keyFormulas": [
+          "$EC = TV + ERV$",
+          "$FRC = ERV + RV$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-015",
+          "questionType": "theory_conceptual"
+        },
+        "correctOptionIndex": 2
+      },
+      {
+        "id": "cbbf8de2-eb3c-4945-b1b6-bc1d5400d269",
+        "text": "Post-fertilization, the zygote undergoes a series of rapid mitotic divisions called cleavage as it moves through the isthmus of the oviduct. If a zygote contains 16 blastomeres, which of the following statements correctly identifies its developmental stage and its immediate anatomical destination for the next phase of development?",
+        "options": [
+          "It is a $blastocyst$ and it will immediately undergo gastrulation within the fallopian tube.",
+          "It is a $trophoblast$ and its inner cell mass will differentiate into the three germ layers while still in the isthmus.",
+          "It is a $gastrula$ and it will move to the ampulla for further nutrient absorption from the mother.",
+          "It is a $morula$ and it will continue to divide into a blastocyst before embedding itself into the endometrium."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Human Reproduction",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Stage ::: The embryo with 8 to 16 blastomeres is specifically called a $morula$ (NCERT definition).",
+          "Trace the Pathway ::: Cleavage begins as the zygote moves from the $ampulla$ through the $isthmus$ toward the $uterus$.",
+          "Predict Next Step ::: The $morula$ continues to divide and transforms into a $blastocyst$ as it enters the uterus.",
+          "Identify Implantation Stage ::: The $blastocyst$ stage is the one that actually embeds in the $endometrium$ (Implantation)."
+        ],
+        "examTip": "Sequence: Zygote $\\rightarrow$ Morula (8-16) $\\rightarrow$ Blastocyst $\\rightarrow$ Implantation. Implantation happens at the Blastocyst stage, NOT the Morula stage.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Cleavage divisions increase cell number without increasing overall size (volume). The $morula$ (mulberry-like) is the solid ball, while the $blastocyst$ has a fluid-filled cavity ($blastocoel$).\",\"memoryTrigger\":\"M-B-G: Morula (8-16), Blastocyst (Implantation), Gastrula (Germ layers).\",\"visualPrompt\":\"Imagine a snowball rolling down a hill (fallopian tube). It doesn't get bigger, it just gets more packed with smaller crystals (blastomeres).\",\"commonTrap\":\"Confusing the site of fertilization (Ampulla) with the site of early cleavage (moving through Isthmus).\"}",
+        "keyFormulas": [
+          "N/A"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-004",
+          "questionType": "sequence_mcq"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "29eedcc5-f157-49ef-8275-6a222c64df28",
+        "text": "Assertion (A): The evolution of the 'Marsupial Radiation' in Australia and the 'Placental Radiation' in North America represents a classic instance of convergent evolution at the community level.\\nReasoning (R): Similar selection pressures in distinct geographical isolated regions led to the independent evolution of analogous structural features in different lineages, such that a placental wolf and a Tasmanian wolf appear morphologically similar despite disparate ancestries.",
+        "options": [
+          "Both (A) and (R) are true, but (R) is NOT the correct explanation of (A).",
+          "(A) is true, but (R) is false.",
+          "(A) is false, but (R) is true.",
+          "Both (A) and (R) are true, and (R) is the correct explanation of (A)."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Evolution",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Assertion (A) ::: Marsupial radiation in Australia produced forms (like the Marsupial mole, Tasmanian wolf) that parallel placental mammals elsewhere. This is defined as convergent evolution when comparing the two radiations. Statement is true.",
+          "Evaluate Reasoning (R) ::: Convergent evolution occurs when unrelated species evolve similar traits because they occupy similar ecological niches and face similar pressures. The placental/Tasmanian wolf comparison is a textbook example. Statement is true.",
+          "Determine Logical Link ::: The reason (independent evolution of analogous features due to similar pressures) directly explains why the two radiations are considered 'convergent'. The link is valid."
+        ],
+        "examTip": "Whenever you see two different 'radiations' (like placental vs marsupial) being compared, the answer is usually convergent evolution. If you look at only one radiation, it is adaptive radiation.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Adaptive radiation happens when one ancestor populates many niches (Divergent). When this happens in two different places, the species in niche 'A' in place 1 will look like species in niche 'A' in place 2 (Convergent).\",\"memoryTrigger\":\"Australia = Marsupial Playground. Different playgrounds, same games (convergent).\",\"visualPrompt\":\"Picture a 'biological mirror' across the ocean—each placental mammal has a marsupial 'twin' in Australia.\",\"commonTrap\":\"Thinking that because they are both 'wolves', they are closely related (Homology). They are Analogous.\"}",
+        "keyFormulas": [
+          "Convergent = Analogous + Different Ancestry",
+          "Divergent = Homologous + Common Ancestry"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-018",
+          "questionType": "assertion_reasoning"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "bdd53cd4-1e58-4c84-8bee-4d1a05279135",
+        "text": "The human placenta is an ultra-sophisticated endocrine organ that establishes a physiological connection between the mother and the fetus. Which of the following sets of hormones is produced *exclusively* during the state of pregnancy in humans, and which among them is also secreted by the ovary during the later stages of gestation?",
+        "options": [
+          "$hPL$, $Oxytocin$, and $Cortisol$; with $Oxytocin$ being the one also secreted by the ovary.",
+          "$hCG$, $hPL$, and $Relaxin$; with $Relaxin$ being the one also secreted by the ovary.",
+          "$hCG$, $hPL$, and $Progestogens$; with $hPL$ being the one also secreted by the ovary.",
+          "$hCG$, $Estrogen$, and $Progesterone$; with $hCG$ being the one also secreted by the ovary."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Human Reproduction",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify Pregnancy-Specific Hormones ::: According to NCERT, $hCG$ (human Chorionic Gonadotropin), $hPL$ (human Placental Lactogen), and $Relaxin$ are produced only during pregnancy.",
+          "Determine Placental Origin ::: $hCG$ and $hPL$ are exclusively placental products.",
+          "Determine Ovarian Contribution ::: NCERT specifically mentions that $Relaxin$ is also secreted by the $ovary$ (specifically the $corpus$ $luteum$ of pregnancy).",
+          "Compare other hormones ::: Estrogen, Progesterone, Cortisol, and Prolactin levels increase during pregnancy, but they are *not* produced only during pregnancy (they exist in non-pregnant states too)."
+        ],
+        "examTip": "Memorize the 'Trio': hCG, hPL, Relaxin. They are the 'Pregnancy Only' club. Be careful: Progesterone is NOT in this club because it's in the normal cycle too.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"While many hormones increase during pregnancy (like thyroxine, cortisol), only $hCG$, $hPL$, and $Relaxin$ are unique markers of the pregnant state. $Relaxin$ helps in softening the pelvic ligaments for parturition.\",\"memoryTrigger\":\"H-H-R (hCG, hPL, Relaxin). The 'Double H' is Placenta-only, 'R' is shared with the Ovary.\",\"visualPrompt\":\"Imagine three new 'employees' hired only for a special project (pregnancy). Two work only at the new branch (placenta), one also works at the old office (ovary).\",\"commonTrap\":\"Thinking $Estrogen$ and $Progesterone$ are only produced during pregnancy. They are essential for the menstrual cycle too!\"}",
+        "keyFormulas": [
+          "N/A"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-004",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "3b1ede39-6f4b-4ced-b9cc-52cac68e0e13",
+        "text": "In a marine biology documentary, an organism is shown swimming gracefully using eight external rows of ciliated comb plates. The narrator mentions that this organism exhibits bioluminescence and captures prey using specialized cells, but notably lacks the stinging cells (cnidocytes) found in jellyfish. According to NCERT, which of the following is a characteristic feature of this organism's phylum?",
+        "options": [
+          "Presence of a water vascular system for locomotion",
+          "Exclusively marine habitat and diploblastic nature",
+          "Organ level of organization and triploblastic body plan",
+          "Presence of radula for feeding"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Animal Kingdom",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Organism ::: 'Eight external rows of ciliated comb plates' is the classic description of Phylum Ctenophora (Comb jellies).",
+          "Check Habitat ::: NCERT states Ctenophores are 'exclusively marine'.",
+          "Analyze Body Plan ::: They exhibit radial symmetry and are diploblastic (two germ layers).",
+          "Verify Digestion ::: Both extracellular and intracellular digestion occur.",
+          "Compare Options ::: Option 1 matches 'exclusively marine' and 'diploblastic'. Option 2 belongs to Echinodermata. Option 3 is for higher phyla (starting from Platyhelminthes/Aschelminthes). Option 4 belongs to Mollusca.",
+          "Final Selection ::: Option 0 is the correct NCERT-aligned trait."
+        ],
+        "examTip": "Remember the 'Exclusively Marine' trio: Ctenophora, Echinodermata, and Hemichordata. This is a very frequent 'Easy' mark separator.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Phylum Ctenophora (Comb Jellies) are known for: 1. Comb plates (8 rows, cilia). 2. Bioluminescence. 3. Being exclusively marine. 4. Being diploblastic and radially symmetrical.\",\"memoryTrigger\":\"Cteno-8: 8 rows of comb plates.\",\"visualPrompt\":\"Imagine a transparent walnut floating in the ocean that glows in the dark and has 8 shimmering tracks on its surface.\",\"commonTrap\":\"Confusing them with Cnidarians because both are radially symmetrical. Remember: Ctenophores have NO cnidocytes (stinging cells).\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-003",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "3f2428e9-48fb-4761-b4b5-ab171cfdbf64",
+        "text": "A research scientist is studying a mutant cell line where the enzyme phosphodiesterase ($PDE$) is non-functional. Upon stimulating these cells with a peptide hormone like Glucagon, which normally utilizes the Second Messenger system, which of the following cellular outcomes is most likely to be observed due to the sustained levels of intracellular $cAMP$?",
+        "options": [
+          "Immediate translocation of the hormone-receptor complex into the nucleus for gene transcription.",
+          "Rapid degradation of the G-protein alpha subunit to prevent further signal transduction.",
+          "Inactivation of phosphorylase kinase due to lack of dephosphorylation.",
+          "Persistent activation of Protein Kinase A (PKA) leading to continuous glycogenolysis."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Chemical Coordination and Integration",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify the hormone mechanism ::: Glucagon is a peptide hormone. It binds to membrane-bound receptors and acts via the $cAMP$ second messenger system.",
+          "Step 2: Define the role of Phosphodiesterase ($PDE$) ::: In normal physiology, $PDE$ breaks down $cAMP$ into $5'-AMP$, thereby terminating the signal.",
+          "Step 3: Analyze the mutation effect ::: If $PDE$ is non-functional, $cAMP$ levels remain high even after the hormone is removed from the receptor.",
+          "Step 4: Determine the downstream effect ::: High $cAMP$ continuously activates Protein Kinase A ($PKA$), which phosphorylates phosphorylase kinase, leading to the persistent breakdown of glycogen into glucose (glycogenolysis).",
+          "Step 5: Differentiate from steroid mechanisms ::: Options involving nuclear translocation describe lipid-soluble hormones (like cortisol or estrogen), not peptide hormones like glucagon."
+        ],
+        "examTip": "Whenever you see 'Phosphodiesterase' or 'cAMP' in NEET, immediately associate it with the termination of peptide hormone action. Inhibiting PDE is like 'jamming the accelerator' of the cell's metabolic engine.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Hormones like Glucagon and Epinephrine do not enter the cell. They bind to G-Protein Coupled Receptors (GPCR), activating Adenylate Cyclase to convert ATP to $cAMP$. $cAMP$ acts as the second messenger, amplifying the signal via a kinase cascade.\",\"memoryTrigger\":\"CAMP: Cyclic-AMP-Membrane-Protein (reminds you it's for membrane-bound receptors). PDE is the 'Eraser' of the signal.\",\"visualPrompt\":\"Imagine a relay race where the first runner (Hormone) hands a baton (Signal) to the second runner (cAMP) through a fence (Cell Membrane). Phosphodiesterase is the official who takes the baton away to end the race.\",\"commonTrap\":\"Confusing the mechanism of Glucagon (peptide) with Cortisol (steroid). Steroids don't need cAMP; they go straight to the nucleus.\"}",
+        "keyFormulas": [
+          "$ATP \\xrightarrow{Adenylate\\ Cyclase} cAMP$",
+          "$cAMP \\xrightarrow{Phosphodiesterase} 5'-AMP$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-022",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "85797f05-92e2-4a4a-ba38-1293017e51ab",
+        "text": "Consider a situation of severe dehydration where blood volume drops and blood pressure falls significantly. In response, the Juxtaglomerular (JG) cells release Renin. Trace the most accurate physiological sequence of the hormonal response and its effect on the kidney nephron to restore homeostasis.",
+        "options": [
+          "Renin $\\rightarrow$ Angiotensin II $\\rightarrow$ Hypothalamus $\\rightarrow$ ANF release $\\rightarrow$ Vasoconstriction of afferent arteriole $\\rightarrow$ Decreased GFR.",
+          "Renin $\\rightarrow$ Angiotensin I $\\rightarrow$ Lung ACE $\\rightarrow$ Aldosterone release $\\rightarrow$ Increased water reabsorption in PCT.",
+          "Renin $\\rightarrow$ Liver $\\rightarrow$ Prothrombin activation $\\rightarrow$ Increased blood viscosity $\\rightarrow$ Direct increase in Hydrostatic pressure.",
+          "Renin $\\rightarrow$ Angiotensinogen $\\rightarrow$ Angiotensin I $\\rightarrow$ Angiotensin II $\\rightarrow$ Adrenal Cortex $\\rightarrow$ Aldosterone $\\rightarrow$ Increased $Na^{+}$ reabsorption in DCT."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Excretory Products and Their Elimination",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Trigger: Low BP/Blood Volume stimulates JG cells.",
+          "Renin Action: Renin converts Angiotensinogen (from liver) into Angiotensin I.",
+          "Conversion: Angiotensin I is converted to Angiotensin II by ACE (mostly in lungs).",
+          "Angiotensin II Effects: (a) Powerful vasoconstrictor (increases BP). (b) Stimulates Adrenal Cortex to release Aldosterone.",
+          "Aldosterone Action: Promotes reabsorption of $Na^{+}$ and water from the distal parts of the tubule (DCT and Collecting Duct).",
+          "Conclusion: This increases blood volume and GFR, completing the feedback loop."
+        ],
+        "examTip": "Aldosterone acts on the **Distal** parts (DCT/CD), not the PCT. The PCT handles bulk reabsorption independently of RAAS.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"RAAS is a hormonal system that regulates blood pressure and fluid balance. Angiotensin II is the 'active worker' (vasoconstriction), while Aldosterone is the 'resource manager' (sodium retention).\",\"memoryTrigger\":\"Renin-Ang-Ang-Aldo (The sequence). Aldo acts on the 'D' (Distal).\",\"visualPrompt\":\"Imagine a thermostat. When the temperature (BP) drops, it triggers a heater (Renin) that eventually turns on a fan (Aldosterone) to circulate more warmth (reabsorb water).\",\"commonTrap\":\"Confusing Renin (Kidney enzyme) with Rennin (Digestive enzyme in infants). Always check the 'n' count!\"}",
+        "keyFormulas": [
+          "$\\text{Angiotensinogen} \\xrightarrow{\\text{Renin}} \\text{Angiotensin I}$",
+          "$\\text{Angiotensin I} \\xrightarrow{\\text{ACE}} \\text{Angiotensin II}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-019",
+          "questionType": "sequence"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "a4845fef-1b14-45b3-917a-0d5d059fe360",
+        "text": "A patient visits an ophthalmologist complaining of difficulty in seeing objects clearly in dim light (night blindness) but has no issues in bright light. Upon examination of the retinal physiology, the doctor notes a deficiency in a specific photopigment. Which of the following statements correctly identifies the cell type and the biochemical component most likely involved in this condition?",
+        "options": [
+          "Cones are affected; they are concentrated in the fovea centralis and are responsible for high visual acuity.",
+          "Rods are affected; they contain the purplish-red protein rhodopsin, which requires Vitamin A for its synthesis.",
+          "Rods are affected; they contain three types of photopigments that respond to red, green, and blue light.",
+          "Cones are affected; they contain the pigment iodopsin, which is responsible for daylight (photopic) vision."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Neural Control and Coordination",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze the symptom ::: 'Difficulty in dim light' (night blindness) points to a defect in scotopic vision.",
+          "Identify cell type ::: Rods are responsible for scotopic (twilight/dim light) vision, while cones are for photopic (daylight/color) vision.",
+          "Identify the pigment ::: Rods contain rhodopsin (visual purple).",
+          "Biochemical link ::: Rhodopsin is a derivative of Vitamin A (retinal + opsin).",
+          "Evaluate options ::: Option 1 correctly links Rods, Rhodopsin, and Vitamin A."
+        ],
+        "examTip": "Remember: 'R' is for Rods and 'R' is for Rhodopsin and 'R' is for 'Rest' (dim/night). 'C' is for Cones and 'C' is for Color and 'C' is for 'Clear light'.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Rods (Scotopic, Rhodopsin, High sensitivity/Low acuity) vs Cones (Photopic, Color, Low sensitivity/High acuity). Rhodopsin contains Opsins (protein) and Retinal (aldehyde of Vitamin A).\",\"memoryTrigger\":\"CONES = COLOR. RODS = ROugh light (dim).\",\"visualPrompt\":\"Imagine a camera sensor with two types of pixels: one that only sees in black and white but is super sensitive (Rods) and one that needs bright light to see colors (Cones).\",\"commonTrap\":\"Confusing the location: Cones are dense in the fovea; Rods are absent in the fovea but present in the periphery.\"}",
+        "keyFormulas": [
+          "$\\text{Rhodopsin} = \\text{Opsin} + \\text{Retinal}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-021",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "961d220d-2c22-4fa7-ac6f-4a9063ca05fb",
+        "text": "Regarding the structural architecture of a typical IgG molecule and the kinetics of the immune response, which of the following analytical observations is INCORRECT?\\nI. The antigen-binding site (Paratope) is formed by the variable regions of both the heavy and light chains.\\nII. The 'hinge region' allows for flexibility in binding antigens at various distances and is rich in proline and cysteine residues.\\nIII. The secondary immune response is characterized by a high titer of IgM and a prolonged lag phase compared to the primary response.\\nIV. The $F_c$ (crystallizable) fragment of the antibody determines the biological activity (isotype) and mediates binding to host cell receptors.",
+        "options": [
+          "IV only",
+          "I and II only",
+          "II and III only",
+          "III only"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Human Health and Disease",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze Statement I ::: The paratope is indeed the N-terminal variable region of both H and L chains. True.",
+          "Analyze Statement II ::: The hinge region provides flexibility and contains disulfide bonds (cysteine) and proline. True.",
+          "Analyze Statement III ::: The secondary response (Anamnestic) is characterized by a high titer of **IgG** (not IgM) and a very **short** lag phase (not prolonged). False.",
+          "Analyze Statement III (cont.) ::: The primary response is characterized by IgM and a longer lag phase. The question asks for the incorrect statement.",
+          "Analyze Statement IV ::: The $F_c$ region (constant region) determines if the antibody binds to mast cells, crosses the placenta, etc. True."
+        ],
+        "examTip": "Secondary response = 'Memory' response. Memory is fast and strong (High IgG). Primary response = Slow and weak (IgM).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Antibodies are Y-shaped proteins. The tips (variable regions) grab the enemy (antigen). The stem (constant region) talks to the rest of the immune system. Secondary responses are faster because of memory B-cells.\",\"memoryTrigger\":\"Variable = Variation (grabs different antigens). Constant = Consistent (talks to same host cells).\",\"visualPrompt\":\"A Y-shaped clamp where the claws can change shape, but the handle stays the same to fit into the soldier's (macrophage) holster.\",\"commonTrap\":\"Confusing the 'Anamnestic' response (secondary) with the 'Primary' response. 'Anamnestic' means 'not-forgetting'.\"}",
+        "keyFormulas": [
+          "Antibody Structure: H_2L_2"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-005",
+          "questionType": "property_based"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "83df9d34-5982-48d8-898b-023b7fe6c372",
+        "text": "In a hypothetical panmictic population equilibrium conforming to the Hardy-Weinberg principle, the frequency of a recessive allele $(a)$ governing a deleterious metabolic trait is observed to be $0.4$. If an abrupt environmental shift imposes a directional selection pressure such that the reproductive fitness of the homozygous recessive phenotype $(\\text{aa})$ is reduced by $50\\%$ in a single generation, while other genotypes remain unaffected, calculate the frequency of the dominant allele $(A)$ in the offspring generation $(\\text{F}_1)$. Note: Assume the population size is sufficiently large to negate genetic drift.",
+        "options": [
+          "$0.548$",
+          "$0.714$",
+          "$0.652$",
+          "$0.600$"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Evolution",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Initial State Determination ::: Calculate initial genotype frequencies using $p+q=1$. Given $q=0.4$, therefore $p=0.6$. Initial frequencies: $p^2 (AA) = 0.36$, $2pq (Aa) = 0.48$, and $q^2 (aa) = 0.16$.",
+          "Apply Selection Pressure ::: The fitness ($w$) of $aa$ is $0.5$ (reduced by $50\\%$), while $w$ for $AA$ and $Aa$ is $1.0$. Multiply frequencies by fitness: $AA = 0.36 \\times 1 = 0.36$; $Aa = 0.48 \\times 1 = 0.48$; $aa = 0.16 \\times 0.5 = 0.08$.",
+          "Normalize Frequencies ::: Calculate the mean fitness $(\\bar{w}) = 0.36 + 0.48 + 0.08 = 0.92$. The new genotype frequencies are: $AA' = \\frac{0.36}{0.92} \\approx 0.391$, $Aa' = \\frac{0.48}{0.92} \\approx 0.522$, $aa' = \\frac{0.08}{0.92} \\approx 0.087$.",
+          "Calculate Final Allele Frequency ::: The new frequency of allele $A$ ($p'$) is $p^2 + \\frac{1}{2}(2pq)$. Using normalized values: $p' = 0.391 + \\frac{0.522}{2} = 0.391 + 0.261 = 0.652$."
+        ],
+        "examTip": "When fitness is reduced, always normalize the remaining population to $1.0$ (mean fitness) before calculating the new allele frequency. Do not simply subtract from the allele count.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The Hardy-Weinberg law provides a null model. Selection, expressed through fitness coefficients, breaks this equilibrium. Directional selection favors one phenotype, shifting allele frequencies $p$ and $q$ predictably over generations.\",\"memoryTrigger\":\"Fitness (w) + Selection (s) = 1.0. If selection is $0.2$, fitness is $0.8$.\",\"visualPrompt\":\"Imagine a sieve where the 'aa' grains are too big/small and half get filtered out; the remaining mix in the jar has a higher ratio of 'A' grains.\",\"commonTrap\":\"Students often calculate the new allele frequency by simply removing $50\\\\%$ of the 'a' alleles from the total pool without normalizing the denominator.\"}",
+        "keyFormulas": [
+          "$\\bar{w} = p^2w_{AA} + 2pqw_{Aa} + q^2w_{aa}$",
+          "$p' = \\frac{p^2w_{AA} + pqw_{Aa}}{\\bar{w}}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-018",
+          "questionType": "calculation"
+        },
+        "correctOptionIndex": 2
+      },
+      {
+        "id": "9259657b-66b7-4894-86df-b37a440030ec",
+        "text": "A patient presents with a condition where their blood fails to clot efficiently despite having normal levels of Calcium ions and Vitamin K. Genetic analysis reveals a mutation in the gene encoding for 'Factor VIII'. Which of the following pathways or steps in the coagulation cascade is primarily disrupted, and what is the immediate physiological consequence?",
+        "options": [
+          "Platelet aggregation is inhibited because Factor VIII is required for the release of ADP and Thromboxane A2.",
+          "The intrinsic pathway of blood clotting is impaired, leading to a failure in the activation of Factor X and subsequent thrombin formation.",
+          "The extrinsic pathway is blocked due to the absence of Tissue Factor, preventing the conversion of Prothrombin to Thrombin.",
+          "The conversion of Fibrinogen to Fibrin is directly halted because Factor VIII is the enzyme that catalyzes this reaction."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Body Fluids and Circulation",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify Factor VIII: Factor VIII (Anti-hemophilic factor) is a key component of the 'Intrinsic Pathway' of blood coagulation.",
+          "Analyze the pathway: The intrinsic pathway is triggered by internal vascular damage. Factor VIII acts as a cofactor for Factor IXa to activate Factor X.",
+          "Evaluate the 'Common Pathway': Factor X activation is the critical 'gateway' to the common pathway where Prothrombin is converted to Thrombin.",
+          "Identify the consequence: Without Factor X activation via the intrinsic route, the production of Thrombin is severely delayed or reduced, leading to poor fibrin formation.",
+          "Conclusion: Option 1 correctly identifies the intrinsic pathway impairment and the downstream effect on Factor X."
+        ],
+        "examTip": "NCERT mentions 'a cascade process involving many factors present in plasma in an inactive state'. While specific factor numbers (like VIII) are often seen in pyqs/modules, focus on the 'Cascade' concept and the role of Thrombin/Fibrin.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Blood clotting is a cascade of enzyme activations. The ultimate goal is to convert soluble Fibrinogen into insoluble Fibrin threads using the enzyme Thrombin. Thrombin itself is activated from Prothrombin by Thrombokinase (Prothrombinase).\",\"memoryTrigger\":\"Factors 8, 9, 11, 12 = Intrinsic. Factor 7 = Extrinsic. Factor 10 = The X-roads (Common).\",\"visualPrompt\":\"Imagine a series of falling dominoes. If you remove one in the middle (Factor VIII), the final domino (Fibrin) will never fall.\",\"commonTrap\":\"Confusing Factor VIII with Vitamin K. Vitamin K is a co-factor for the *synthesis* of factors (2, 7, 9, 10) in the liver, while Factor VIII is a protein circulating in the blood.\"}",
+        "keyFormulas": [
+          "$\\text{Plasma} - \\text{Clotting Factors} = \\text{Serum}$",
+          "$\\text{Prothrombin} \\xrightarrow{\\text{Thrombokinase}} \\text{Thrombin}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-016",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 1
+      },
+      {
+        "id": "65ebab24-800a-43d6-9525-49d5df823531",
+        "text": "Identify the CORRECT sequence of physiological and molecular events occurring during the 'Eclipse Phase' and subsequent maturation of the Human Immunodeficiency Virus (HIV) within a $T_H$-lymphocyte:\\nI. Synthesis of viral DNA via RNA-dependent DNA polymerase.\\nII. Cleavage of polyprotein precursors by viral protease.\\nIII. Integration of provirus into the host genome via Integrase.\\nIV. Binding of gp120 to CD4 receptors and CCR5/CXCR4 coreceptors.\\nV. Transcription of viral RNA from the integrated DNA template.",
+        "options": [
+          "IV $\\rightarrow$ I $\\rightarrow$ III $\\rightarrow$ V $\\rightarrow$ II",
+          "I $\\rightarrow$ IV $\\rightarrow$ III $\\rightarrow$ II $\\rightarrow$ V",
+          "IV $\\rightarrow$ I $\\rightarrow$ II $\\rightarrow$ III $\\rightarrow$ V",
+          "IV $\\rightarrow$ III $\\rightarrow$ I $\\rightarrow$ V $\\rightarrow$ II"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Human Health and Disease",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Attachment and Entry ::: Step IV (gp120 binding) is the mandatory first step for viral entry into the host cell.",
+          "Reverse Transcription ::: Step I (Synthesis of viral DNA) occurs in the cytoplasm immediately after uncoating.",
+          "Integration ::: Step III (Integrase activity) must happen for the virus to become a 'provirus' within the nucleus.",
+          "Transcription and Translation ::: Step V (Transcription) uses host machinery to create viral mRNA/genomic RNA.",
+          "Proteolytic Processing ::: Step II (Protease cleavage) occurs during or after budding to create mature, infectious virions."
+        ],
+        "examTip": "Remember 'R-I-T-A-P': Reverse transcription, Integration, Transcription, Assembly, Proteolysis. Protease usually acts last to make the virus 'mature'.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"HIV is a retrovirus that converts its RNA genome into DNA. This DNA must integrate into the host's DNA to use the host's transcriptional machinery. The final step of maturation involves cutting long protein chains into functional units.\",\"memoryTrigger\":\"The order of enzyme action: RT -> Integrase -> Protease (RIP).\",\"visualPrompt\":\"Imagine a spy (HIV) entering a building (cell), photocopying blueprints (RT), filing them in the main office (Integration), and then the office workers making parts that the spy's friend trims (Protease) to make more spies.\",\"commonTrap\":\"Confusion between integration and transcription order. Integration MUST precede transcription of viral components.\"}",
+        "keyFormulas": [
+          "RNA \\xrightarrow{RT} DNA_{viral}",
+          "DNA_{viral} + DNA_{host} \\xrightarrow{Integrase} Provirus"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-005",
+          "questionType": "sequence_based"
+        },
+        "correctOptionIndex": 0
+      },
+      {
+        "id": "150d049a-f8c6-4521-b982-6dcd5258bdcb",
+        "text": "A laboratory technician is examining a parasite recovered from the intestine of a patient suffering from stunted growth and abdominal discomfort. The specimen is elongated, cylindrical, and tapers at both ends. Microscopic cross-sectioning reveals a body cavity that is not lined by mesoderm; instead, the mesoderm is present as scattered pouches between the ectoderm and endoderm. Based on these anatomical findings and NCERT criteria, which phylum does this organism belong to?",
+        "options": [
+          "Annelida",
+          "Arthropoda",
+          "Platyhelminthes",
+          "Aschelminthes"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Animal Kingdom",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze the Body Shape ::: The description 'elongated, cylindrical, and tapers at both ends' matches the morphology of roundworms.",
+          "Evaluate the Body Cavity ::: The key phrase 'not lined by mesoderm; mesoderm as scattered pouches' is the definitive NCERT definition of a $\\text{pseudocoelom}$.",
+          "Correlate with Taxonomy ::: Animals with a pseudocoelom are classified under Phylum Aschelminthes.",
+          "Verify Other Options ::: Platyhelminthes are acoelomate (no cavity); Annelida and Arthropoda are true coelomates (body cavity lined by mesoderm).",
+          "Final Conclusion ::: The organism belongs to Aschelminthes (e.g., $\\textit{Ascaris}$)."
+        ],
+        "examTip": "The 'scattered pouches' phrase is the single most important diagnostic for Pseudocoelomates in NEET. If you see it, look for Aschelminthes immediately.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The $\\\\text{Pseudocoelom}$ is a 'false' body cavity because it is not entirely lined by mesoderm. This is a unique evolutionary transition found in Aschelminthes (Roundworms).\",\"memoryTrigger\":\"Pseudo-Ash: Aschelminthes are the only Pseudocoelomates in the standard NCERT syllabus.\",\"visualPrompt\":\"Imagine a sandwich where the meat (mesoderm) is just in little nuggets scattered around, rather than being a full slice between the bread.\",\"commonTrap\":\"Confusing 'scattered pouches' with 'segmented body'. Aschelminthes are unsegmented; Annelids are segmented.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-003",
+          "questionType": "structure_based"
+        },
+        "correctOptionIndex": 3
+      },
+      {
+        "id": "c3482fd7-01c2-4b9b-8e78-ffb29dfe20f8",
+        "text": "Given below are two statements:\\n\\n**Assertion (A):** In a patient suffering from severe acute hemorrhage, there is a rapid increase in the secretion of Aldosterone from the Zona Glomerulosa of the adrenal cortex.\\n**Reason (R):** The primary and most potent stimulator for Aldosterone secretion is the direct action of Adrenocorticotropic Hormone ($ACTH$) on the adrenal cortical cells during stress.\\n\\nIn light of the above statements, choose the correct answer from the options given below:",
+        "options": [
+          "(A) is true but (R) is false",
+          "Both (A) and (R) are true but (R) is NOT the correct explanation of (A)",
+          "(A) is false but (R) is true",
+          "Both (A) and (R) are true and (R) is the correct explanation of (A)"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Chemical Coordination and Integration",
+        "subject": "Zoology",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Analyze Assertion (A) ::: Hemorrhage leads to a drop in blood volume and blood pressure. This triggers the RAAS (Renin-Angiotensin-Aldosterone System). Aldosterone is indeed secreted to conserve $Na^{+}$ and water. So, (A) is true.",
+          "Step 2: Analyze Reason (R) ::: Is $ACTH$ the 'primary and most potent' stimulator of Aldosterone? No. While $ACTH$ has a small permissive effect, the primary stimulators are Angiotensin II and high plasma $K^{+}$ levels.",
+          "Step 3: Evaluate the logic ::: Since the Reason (R) is factually incorrect regarding the 'primary' stimulation of Aldosterone, it cannot explain the Assertion.",
+          "Step 4: Conclusion ::: (A) is true, (R) is false."
+        ],
+        "examTip": "In 'Assertion-Reason' questions involving the Adrenal Cortex, remember the 3G rule: Glomerulosa (Mineral), Fasciculata (Glucocorticoid), Reticularis (Gonadocorticoid). Only Fasciculata is heavily dependent on ACTH.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Aldosterone (the main mineralocorticoid) regulates electrolyte balance. Its secretion is primarily controlled by the Renin-Angiotensin system and serum potassium, making it somewhat independent of the Hypothalamic-Pituitary axis compared to Cortisol.\",\"memoryTrigger\":\"Salt (Glomerulosa), Sugar (Fasciculata), Sex (Ricularis) - The deeper you go, the sweeter/better it gets.\",\"visualPrompt\":\"Imagine a pressure gauge (Juxtaglomerular cells) that sends a signal (Renin) to activate a series of enzymes (Angiotensin) to finally open a salt-saving valve (Aldosterone).\",\"commonTrap\":\"Assuming ACTH is the 'Master' of the whole Adrenal Gland. It mainly masters Cortisol.\"}",
+        "keyFormulas": [
+          "\\downarrow BP \\implies Renin \\uparrow \\implies Angiotensin II \\uparrow \\implies Aldosterone \\uparrow"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "metadata": {
+          "identityId": "ID-NZ-022",
+          "questionType": "application"
+        },
+        "correctOptionIndex": 0
+      }
+    ]
+  }
+}

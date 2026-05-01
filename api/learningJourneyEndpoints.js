@@ -2288,7 +2288,9 @@ async function prepareOfficialTest(userId, setId, supabase, subject, examContext
   const isMath = subjectLower === 'math';
   const isPhysics = subjectLower === 'physics';
   const isChem = subjectLower === 'chemistry' || subjectLower === 'chem';
-  const isBio = subjectLower === 'biology' || subjectLower === 'bio';
+  const isBotany = subjectLower.includes('botany');
+  const isZoology = subjectLower.includes('zoology');
+  const isBio = subjectLower.includes('bio') && !isBotany && !isZoology;
 
   let nId = setId.toUpperCase();
   let normalizedSetId = 'SET-A';
@@ -2314,6 +2316,21 @@ async function prepareOfficialTest(userId, setId, supabase, subject, examContext
         sourceFile = normalizedSetId === 'SET-B' ? 'flagship_neet_chemistry_2026_set_b.json' : 'flagship_neet_chemistry_2026_set_a.json';
       } else {
         sourceFile = normalizedSetId === 'SET-B' ? 'flagship_chemistry_final_b.json' : 'flagship_chemistry_final.json';
+      }
+    } else if (isBotany) {
+      if (eContext === 'NEET') {
+        sourceFile = normalizedSetId === 'SET-B' ? 'flagship_neet_botany_2026_set_b.json' : 'flagship_neet_botany_2026_set_a.json';
+      } else {
+        // Fallback to biology files for non-NEET contexts
+        sourceFile = normalizedSetId === 'SET-B' ? 'flagship_biology_final_b.json' : 'flagship_biology_final.json';
+      }
+    } else if (isZoology) {
+      if (eContext === 'NEET') {
+        sourceFile = normalizedSetId === 'SET-B'
+          ? 'flagship_neet_zoology_2026_set_b.json'
+          : 'flagship_neet_zoology_2026_set_a.json';
+      } else {
+        sourceFile = normalizedSetId === 'SET-B' ? 'flagship_biology_final_b.json' : 'flagship_biology_final.json';
       }
     } else if (isBio) {
       if (eContext === 'NEET') {
@@ -2597,10 +2614,12 @@ export async function getOfficialTests(req, res) {
     const isMath = subjectLower.includes('math');
     const isPhysics = subjectLower.includes('physics');
     const isChem = subjectLower.includes('chem');
-    const isBio = subjectLower.includes('bio');
+    const isBotany = subjectLower.includes('botany');
+    const isZoology = subjectLower.includes('zoology');
+    const isBio = subjectLower.includes('bio') && !isBotany && !isZoology; // Biology but not Botany/Zoology
     const eContext = (examContext || '').toUpperCase();
 
-    if (isMath || isPhysics || isChem || isBio) {
+    if (isMath || isPhysics || isChem || isBio || isBotany || isZoology) {
       let flagships = [];
 
       if (isMath) {
@@ -2632,6 +2651,30 @@ export async function getOfficialTests(req, res) {
             { id: 'SET-B', file: 'flagship_chemistry_final_b.json', label: 'Chemistry Set-B Prediction' }
           ];
         }
+      } else if (isBotany) {
+        if (eContext === 'NEET') {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_neet_botany_2026_set_a.json', label: 'Botany Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_neet_botany_2026_set_b.json', label: 'Botany Set-B Prediction' }
+          ];
+        } else {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_biology_final.json', label: 'Botany Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_biology_final_b.json', label: 'Botany Set-B Prediction' }
+          ];
+        }
+      } else if (isZoology) {
+        if (eContext === 'NEET') {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_neet_zoology_2026_set_a.json', label: 'Zoology Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_neet_zoology_2026_set_b.json', label: 'Zoology Set-B Prediction' }
+          ];
+        } else {
+          flagships = [
+            { id: 'SET-A', file: 'flagship_biology_final.json', label: 'Zoology Set-A Prediction' },
+            { id: 'SET-B', file: 'flagship_biology_final_b.json', label: 'Zoology Set-B Prediction' }
+          ];
+        }
       } else if (isBio) {
         if (eContext === 'NEET') {
           flagships = [
@@ -2646,7 +2689,7 @@ export async function getOfficialTests(req, res) {
         }
       }
 
-      const normalizedSubject = isMath ? 'Mathematics' : isPhysics ? 'Physics' : isChem ? 'Chemistry' : 'Biology';
+      const normalizedSubject = isMath ? 'Mathematics' : isPhysics ? 'Physics' : isChem ? 'Chemistry' : isBotany ? 'Botany' : isZoology ? 'Zoology' : 'Biology';
 
       for (const set of flagships) {
         try {
@@ -2672,7 +2715,7 @@ export async function getOfficialTests(req, res) {
               duration_minutes: 80,
               created_at: new Date().toISOString(),
               is_virtual: true,
-              official_set_id: `${prefix}-${set.id}`, // Locked subject-specific set ID
+              official_set_id: set.id, // Just "SET-A" or "SET-B" for frontend compatibility
               label: set.label
             });
           }

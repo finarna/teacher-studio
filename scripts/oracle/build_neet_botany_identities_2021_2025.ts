@@ -24,8 +24,77 @@ const NEET_SCANS_2021_2025 = {
   2025: '4f682118-d0ce-4f6f-95c7-6141e496579f',
 };
 
+// Official NTA NEET 2026 Botany Syllabus (Class 11 + Class 12)
+const NTA_OFFICIAL_CHAPTERS = [
+  // Class 11 Botany
+  'The Living World',
+  'Biological Classification',
+  'Plant Kingdom',
+  'Morphology of Flowering Plants',
+  'Anatomy of Flowering Plants',
+  'Cell: The Unit of Life',
+  'Cell Cycle and Cell Division',
+  'Transport in Plants',
+  'Mineral Nutrition',
+  'Photosynthesis in Higher Plants',
+  'Respiration in Plants',
+  'Plant Growth and Development',
+  // Class 12 Botany
+  'Reproduction in Organisms',
+  'Sexual Reproduction in Flowering Plants',
+  'Principles of Inheritance and Variation',
+  'Molecular Basis of Inheritance',
+  'Evolution',
+  'Organisms and Populations',
+  'Ecosystem',
+  'Biodiversity and its Conservation',
+  'Biotechnology: Principles and Processes',
+  'Biotechnology and its Applications',
+  'Strategies for Enhancement in Food Production',
+  'Biomolecules'
+];
+
+// Topics that are NOT Botany (Physics/Zoology topics wrongly tagged)
+const NON_BOTANY_TOPICS = [
+  'Alternating Current',  // This is Physics
+  'Human Health and Disease',  // This is Zoology
+  'Human Reproduction',  // This is Zoology
+  'Reproductive Health'  // This is Zoology
+];
+
+// Topic normalization map
+const TOPIC_MAP: Record<string, string> = {
+  'Plant Kingdom - Bryophytes': 'Plant Kingdom',
+  'Plant Kingdom - Pteridophytes': 'Plant Kingdom',
+  'Plant Kingdom - Gymnosperms': 'Plant Kingdom',
+  'Plant Kingdom - Angiosperms': 'Plant Kingdom',
+  'Cell - The Unit of Life': 'Cell: The Unit of Life',
+  'Cell Cycle and Cell Division': 'Cell Cycle and Cell Division',
+  'Photosynthesis in Higher Plants': 'Photosynthesis in Higher Plants',
+  'Respiration in Plants': 'Respiration in Plants',
+  'Plant Growth and Development': 'Plant Growth and Development',
+  'Transport in Plants': 'Transport in Plants',
+  'Mineral Nutrition': 'Mineral Nutrition',
+  'Sexual Reproduction in Flowering Plants': 'Sexual Reproduction in Flowering Plants',
+  'Principles of Inheritance and Variation': 'Principles of Inheritance and Variation',
+  'Molecular Basis of Inheritance': 'Molecular Basis of Inheritance',
+  'Evolution': 'Evolution',
+  'Organisms and Populations': 'Organisms and Populations',
+  'Ecosystem': 'Ecosystem',
+  'Biodiversity and Conservation': 'Biodiversity and its Conservation',
+  'Biotechnology: Principles and Processes': 'Biotechnology: Principles and Processes',
+  'Biotechnology and its Applications': 'Biotechnology and its Applications',
+  'Strategies for Enhancement in Food Production': 'Strategies for Enhancement in Food Production',
+  'Biomolecules': 'Biomolecules',
+  'Morphology of Flowering Plants': 'Morphology of Flowering Plants',
+  'Anatomy of Flowering Plants': 'Anatomy of Flowering Plants',
+  'Biological Classification': 'Biological Classification',
+  'The Living World': 'The Living World',
+  'Reproduction in Organisms': 'Reproduction in Organisms'
+};
+
 async function buildBotanyIdentities() {
-  console.log('\n🌱 BUILDING NEET CHEMISTRY IDENTITY BANK (2021-2025)\n');
+  console.log('\n🌱 BUILDING NEET BOTANY IDENTITY BANK (2021-2025)\n');
   console.log('='.repeat(70));
 
   const topicFrequency: Record<string, number[]> = {};
@@ -42,7 +111,17 @@ async function buildBotanyIdentities() {
     console.log(`📅 ${year}: ${questions?.length || 0} Botany questions`);
 
     questions?.forEach(q => {
-      const topic = q.topic || 'Unknown';
+      const rawTopic = q.topic || 'Unknown';
+
+      // Skip non-Botany topics (wrongly tagged Physics/Zoology questions)
+      if (NON_BOTANY_TOPICS.some(nonBot => rawTopic.includes(nonBot))) {
+        console.log(`   ⚠️  Skipping non-Botany topic: ${rawTopic}`);
+        return;
+      }
+
+      // Normalize topic to NTA official name
+      const topic = TOPIC_MAP[rawTopic] || rawTopic;
+
       if (!topicFrequency[topic]) {
         topicFrequency[topic] = [0, 0, 0, 0, 0]; // [2021, 2022, 2023, 2024, 2025]
       }
@@ -62,25 +141,37 @@ async function buildBotanyIdentities() {
     };
   });
 
-  // Sort by frequency
-  const sortedTopics = Object.entries(topicDetails)
-    .map(([topic, stats]) => ({ topic, ...stats }))
-    .sort((a, b) => b.count - a.count);
+  // Ensure all NTA official chapters are included (add missing ones with 0 frequency)
+  NTA_OFFICIAL_CHAPTERS.forEach(chapter => {
+    if (!topicDetails[chapter]) {
+      topicDetails[chapter] = {
+        count: 0,
+        avgPerYear: 0,
+        years: [0, 0, 0, 0, 0]
+      };
+    }
+  });
 
-  console.log('\n📊 TOP 30 CHEMISTRY TOPICS (2021-2025):\n');
-  console.log('Rank | Topic                                    | Total | Avg/Yr | Distribution');
-  console.log('-'.repeat(95));
+  // Filter to only NTA official chapters and sort by frequency
+  const ntaTopics = NTA_OFFICIAL_CHAPTERS.map(chapter => ({
+    topic: chapter,
+    ...topicDetails[chapter]
+  })).sort((a, b) => b.count - a.count);
 
-  sortedTopics.slice(0, 30).forEach((t, idx) => {
-    const topicStr = t.topic.substring(0, 40).padEnd(40);
+  console.log('\n📊 NTA OFFICIAL BOTANY CHAPTERS (2021-2025):\n');
+  console.log('Rank | Topic                                            | Total | Avg/Yr | Distribution');
+  console.log('-'.repeat(105));
+
+  ntaTopics.forEach((t, idx) => {
+    const topicStr = t.topic.substring(0, 48).padEnd(48);
     const dist = t.years.join('-');
     console.log(
       `${String(idx + 1).padStart(4)} | ${topicStr} | ${String(t.count).padStart(5)} | ${t.avgPerYear.toFixed(1).padStart(6)} | ${dist}`
     );
   });
 
-  // Generate identity bank with calibrated confidences
-  const identities = sortedTopics.slice(0, 30).map((t, idx) => {
+  // Generate identity bank with calibrated confidences (all NTA official chapters)
+  const identities = ntaTopics.map((t, idx) => {
     const id = `ID-NB-${String(idx + 1).padStart(3, '0')}`;
 
     // Calculate confidence based on frequency
@@ -117,6 +208,9 @@ async function buildBotanyIdentities() {
     };
   });
 
+  // Calculate total questions analyzed
+  const totalQuestionsAnalyzed = identities.reduce((sum, id) => sum + id.empiricalFrequency.total_2021_2025, 0);
+
   // Save identity bank
   const identityBank = {
     version: '2.0',
@@ -124,7 +218,7 @@ async function buildBotanyIdentities() {
     exam: 'NEET',
     generated_at: new Date().toISOString(),
     years_analyzed: '2021-2025',
-    total_questions: 245,
+    total_questions: totalQuestionsAnalyzed,
     identities
   };
 
@@ -140,7 +234,7 @@ async function buildBotanyIdentities() {
     subject: 'Botany',
     exam: 'NEET',
     years_analyzed: 5,
-    total_questions: 245,
+    total_questions: totalQuestionsAnalyzed,
     generated_at: new Date().toISOString(),
     identityConfidences: Object.fromEntries(
       identities.map(id => [id.id, id.confidence])

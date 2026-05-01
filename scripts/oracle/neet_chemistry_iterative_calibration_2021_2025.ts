@@ -1,5 +1,5 @@
 /**
- * NEET uchemistry Iterative Calibration (2021-2025)
+ * NEET Chemistry Iterative Calibration (2021-2025)
  * REI v16 - Full 50-Question Paper Generation & Calibration
  *
  * This script:
@@ -50,15 +50,15 @@ if (!GEMINI_API_KEY) {
 }
 
 const EXAM_CONTEXT = 'NEET';
-const SUBJECT = 'uchemistry';
-const TOTAL_QUESTIONS = 50; // NEET has 50 uchemistry questions per year
+const SUBJECT = 'Chemistry';
+const TOTAL_QUESTIONS = 50; // NEET has 50 Chemistry questions per year (45 in 2025)
 
 const OFFICIAL_SCANS: Record<number, string> = {
-  2021: 'ca38a537-5516-469a-abd4-967a76b32028', // NEET 2021 Combined Paper [23:55] (50 uchemistry Qs)
-  2022: 'b19037fb-980a-41e1-89a0-d28a5e1c0033', // NEET  Combined Paper [12:31] (50 uchemistry Qs)
-  2023: 'e3767338-1664-4e03-b0f6-1fab41ff5838', // NEET 2023 Combined Paper [09:30] (50 uchemistry Qs)
-  2024: '95fa7fc6-4ebd-4183-b61a-b1d5a39cfec5', // NEET  Combined Paper [14:55] (50 uchemistry Qs)
-  2025: '4f682118-d0ce-4f6f-95c7-6141e496579f'  // NEET 2025 Combined Paper [13:52] (50 uchemistry Qs)
+  2021: 'ca38a537-5516-469a-abd4-967a76b32028', // NEET 2021 Combined Paper [23:55] (50 Chemistry Qs)
+  2022: 'b19037fb-980a-41e1-89a0-d28a5e1c0033', // NEET 2022 Combined Paper [12:31] (50 Chemistry Qs)
+  2023: 'e3767338-1664-4e03-b0f6-1fab41ff5838', // NEET 2023 Combined Paper [09:30] (50 Chemistry Qs)
+  2024: '95fa7fc6-4ebd-4183-b61a-b1d5a39cfec5', // NEET 2024 Combined Paper [14:55] (50 Chemistry Qs)
+  2025: '4f682118-d0ce-4f6f-95c7-6141e496579f'  // NEET 2025 Combined Paper [13:52] (45 Chemistry Qs)
 };
 
 const MAX_ITERATIONS_PER_YEAR = 10;
@@ -68,8 +68,8 @@ const TARGET_MATCH_RATE = 0.80;
  * Main orchestrator function
  */
 async function runIterativeCalibration() {
-  console.log('\n🔄 NEET PHYSICS ITERATIVE CALIBRATION (2021-2025)');
-  console.log('═══════════════════════════════════════════════════\n');
+  console.log('\n🔄 NEET CHEMISTRY ITERATIVE CALIBRATION (2021-2025)');
+  console.log('═══════════════════════════════════════════════════════\n');
 
   // Load identity bank and engine config
   const identityBankPath = path.join(
@@ -185,7 +185,7 @@ async function runIterativeCalibration() {
   }
 
   // Generate main calibration report
-  const reportPath = path.join(outputDir, 'NEET_PHYSICS_CALIBRATION_REPORT_2021_2025.md');
+  const reportPath = path.join(outputDir, 'NEET_CHEMISTRY_CALIBRATION_REPORT_2021_2025.md');
   generateCalibrationReport(multiYearReport, reportPath);
 
   // Generate per-year iteration logs
@@ -216,7 +216,7 @@ async function runIterativeCalibration() {
     solve_tension_multiplier: currentState.parameters.solveTensionMultiplier,
     projection_buffer: currentState.parameters.projectionBuffer,
     last_updated: new Date().toISOString(),
-    calibration_note: 'Calibrated using iterative RWC (2021-2025) - NEET uchemistry'
+    calibration_note: 'Calibrated using iterative RWC (2021-2025) - NEET Chemistry'
   };
 
   const updatedEngineConfigPath = path.join(
@@ -239,7 +239,7 @@ async function runIterativeCalibration() {
   console.log(`   - Main Report: ${reportPath}`);
   console.log(`   - Identity Bank: ${identityBankPath}`);
   console.log(`   - Engine Config: ${updatedEngineConfigPath}`);
-  console.log(`   - Iteration Logs: ${outputDir}/NEET_PHYSICS_*_ITERATION_LOG.md\n`);
+  console.log(`   - Iteration Logs: ${outputDir}/NEET_CHEMISTRY_*_ITERATION_LOG.md\n`);
 }
 
 /**
@@ -252,7 +252,7 @@ async function extract2021Baseline(identities: any[]) {
     .from('questions')
     .select('text, topic, difficulty, options, correct_option_index, solution_steps, subject')
     .eq('scan_id', OFFICIAL_SCANS[2021])
-    .eq('subject', 'uchemistry')
+    .eq('subject', 'Chemistry')
     .order('question_order');
 
   if (!questions || questions.length === 0) {
@@ -302,7 +302,7 @@ async function calibrateYear(
     .from('questions')
     .select('text, topic, difficulty, options, correct_option_index, solution_steps, subject')
     .eq('scan_id', OFFICIAL_SCANS[year])
-    .eq('subject', 'uchemistry')
+    .eq('subject', 'Chemistry')
     .order('question_order');
 
   if (!actualQuestions || actualQuestions.length === 0) {

@@ -1,0 +1,1657 @@
+{
+  "test_name": "PLUS2AI OFFICIAL NEET BOTANY PREDICTION 2026: SET B",
+  "subject": "Botany",
+  "exam_context": "NEET",
+  "total_questions": 45,
+  "total_marks": 180,
+  "description": "SET B: Conceptual/Qualitative Emphasis - Focus on conceptual understanding and qualitative reasoning",
+  "strategic_focus": "Conceptual clarity, qualitative analysis, cause-effect relationships, theoretical understanding",
+  "calibration": {
+    "ids": 0.9,
+    "rigor": 1.638,
+    "difficulty_distribution": "68/32/20",
+    "board_signature": "CONCEPTUAL_FACTUAL"
+  },
+  "test_config": {
+    "questions": [
+      {
+        "id": "e8bc6746-bcc1-49ca-8052-31dec7399e2c",
+        "text": "In a human population study, a couple with blood types 'A' and 'B' respectively, already have a child with blood type 'O'. Based on the principles of multiple allelism and codominance governing ABO blood groups, what are the most likely genotypes of the parents?",
+        "options": [
+          "$I^A I^A$ and $I^B i$",
+          "$I^A I^A$ and $I^B I^B$",
+          "$I^A i$ and $I^B i$",
+          "$I^A i$ and $I^B I^B$"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Principles of Inheritance and Variation",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify the child's genotype. Blood type 'O' is recessive and can only occur with genotype 'ii'.",
+          "Step 2: Recognize that the child must receive one 'i' allele from each parent.",
+          "Step 3: Analyze Parent 1 (Type A). Possible genotypes are $I^A I^A$ or $I^A i$. Since they must provide an 'i' allele, they must be $I^A i$.",
+          "Step 4: Analyze Parent 2 (Type B). Possible genotypes are $I^B I^B$ or $I^B i$. Since they must provide an 'i' allele, they must be $I^B i$.",
+          "Step 5: Verify: $I^A i \\times I^B i$ can produce $I^A I^B$ (AB), $I^A i$ (A), $I^B i$ (B), and $ii$ (O)."
+        ],
+        "examTip": "If a child has type O, both parents MUST carry the small 'i' allele, regardless of their own blood type (unless there is a rare Bombay phenotype mutation, which is not in NCERT).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"ABO blood groups are controlled by the gene I, which has three alleles: $I^A$, $I^B$, and $i$. $I^A$ and $I^B$ are codominant, while both are dominant over $i$.\",\"memoryTrigger\":\"ABO: A and B are bosses (Codominant), O is the silent partner (Recessive).\",\"visualPrompt\":\"Imagine a child getting one suitcase (allele) from each parent. If the child has two 'O' suitcases, each parent must have had at least one 'O' suitcase to give.\",\"commonTrap\":\"Assuming that because the parent is 'Type A', they cannot have an 'i' allele.\"}",
+        "keyFormulas": [
+          "\\text{Total Genotypes} = \\frac{n(n+1)}{2} \\text{ where } n = \\text{alleles (3 for ABO)}"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-009",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "eb823206-a870-4bf9-93ea-ab5ba5c435ae",
+        "text": "During the process of gene expression in a eukaryotic cell, the DNA sequence of the 'coding strand' for a specific structural gene is identified as $5'- \\text{ATGCATGCATGC} -3'$. Which of the following sequences would correctly represent the mRNA transcript produced after the action of RNA polymerase II?",
+        "options": [
+          "$3'- \\text{UACGUACGUACG} -5'$",
+          "$5'- \\text{UACGUACGUACG} -3'$",
+          "$3'- \\text{AUGCAUGCAUGC} -5'$",
+          "$5'- \\text{AUGCAUGCAUGC} -3'$"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Molecular Basis of Inheritance",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Identify the 'coding strand' vs. 'template strand'. The coding strand has the same sequence as the mRNA (except T is replaced by U).",
+          "Step 2: Note the polarity of the coding strand: $5' \\to 3'$.",
+          "Step 3: The mRNA is also synthesized in the $5' \\to 3'$ direction.",
+          "Step 4: Copy the sequence of the coding strand directly, replacing all 'T' (Thymine) with 'U' (Uracil).",
+          "Step 5: Original: $5'-\\text{ATGCATGCATGC}-3'$. mRNA: $5'-\\text{AUGCAUGCAUGC}-3'$."
+        ],
+        "examTip": "Cheat Code: Coding Strand = mRNA (replace T with U). Template Strand = Complementary to mRNA (anti-parallel).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"In transcription, only one DNA strand (template) is copied. The other strand (coding) is called so because its sequence matches the mRNA, which codes for proteins.\",\"memoryTrigger\":\"Coding is the Copy: Coding strand = mRNA (replace T with U).\",\"visualPrompt\":\"Imagine three lines: 1. Template (DNA), 2. mRNA, 3. Coding (DNA). mRNA and Coding are twins, Template is the mirror image.\",\"commonTrap\":\"Complementing the coding strand instead of the template strand.\"}",
+        "keyFormulas": [
+          "$\\text{mRNA sequence} = \\text{Coding strand sequence (T } \\to \\text{ U)}$",
+          "$\\text{mRNA sequence} = \\text{Complement of Template strand}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-001",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "0b714999-a83a-4c0f-86c8-d7936132232b",
+        "text": "A molecular biologist wants to isolate a specific DNA sequence using the restriction endonuclease $EcoRI$. To ensure successful cleavage, the biologist must look for which specific palindromic nucleotide sequence on the double-stranded DNA?",
+        "options": [
+          "$5' - CCCGGG - 3'$ and $3' - GGGCCC - 5'$",
+          "$5' - GGATCC - 3'$ and $3' - CCTAGG - 5'$",
+          "$5' - AGCT - 3'$ and $3' - TCGA - 5'$",
+          "$5' - GAATTC - 3'$ and $3' - CTTAAG - 5'$"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Biotechnology: Principles and Processes",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Recall $EcoRI$ origin ::: Isolated from *Escherichia coli* RY 13.",
+          "Identify recognition site ::: The specific 6-base pair palindromic sequence for $EcoRI$ is $GAATTC$.",
+          "Check directionality ::: DNA is antiparallel. If the top strand is $5'-GAATTC-3'$, the bottom must read $3'-CTTAAG-5'$.",
+          "Verify Palindrome ::: Reading $5' \\rightarrow 3'$ on both strands gives 'GAATTC'.",
+          "Match Option ::: Option 0 is the exact sequence given in NCERT."
+        ],
+        "examTip": "The most commonly tested restriction enzymes are $EcoRI$ ($GAATTC$) and $HindII$ (the first one discovered). Always check the $5'$ to $3'$ orientation.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Restriction enzymes recognize specific palindromic sequences where the sequence of base pairs reads the same on the two strands when the orientation of reading is kept the same.\",\"memoryTrigger\":\"EcoRI: 'G-double A-double T-C'.\",\"visualPrompt\":\"Imagine a word like 'MADAM' in DNA language.\",\"commonTrap\":\"Confusing $EcoRI$ with $BamHI$ ($GGATCC$).\"}",
+        "keyFormulas": [
+          "Palindromic sequence rule: $5' \\rightarrow 3'$ (Strand 1) = $5' \\rightarrow 3'$ (Strand 2)"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-002",
+          "questionType": "structure_based"
+        }
+      },
+      {
+        "id": "b2c8e055-1b2f-4f61-a102-dffa37e53b62",
+        "text": "In the classification of Chlorophyceae, sexual reproduction shows significant variation. While most species utilize flagellated motile gametes, which of the following organisms is a notable exception, exhibiting isogamy with non-flagellated (non-motile) gametes that are similar in size?",
+        "options": [
+          "Volvox",
+          "Fucus",
+          "Spirogyra",
+          "Ulothrix"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Plant Kingdom",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1 ::: Identify the group: Chlorophyceae (Green Algae).",
+          "Step 2 ::: Recall the types of sexual reproduction: Isogamous, Anisogamous, and Oogamous.",
+          "Step 3 ::: Distinguish between flagellated isogamy ($Ulothrix$) and non-flagellated isogamy ($Spirogyra$).",
+          "Step 4 ::: Evaluate the options: $Volvox$ and $Fucus$ are Oogamous. $Ulothrix$ has flagellated gametes.",
+          "Step 5 ::: Select $Spirogyra$ as the correct exception for non-motile isogamy."
+        ],
+        "examTip": "For Algae, remember the 'Three S's': $Spirogyra$ is Simple (Isogamous) and Static (Non-motile gametes). $Ulothrix$ is 'U-move' (Motile gametes).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Isogamy involves gametes that are morphologically identical. In $Spirogyra$, the gametes move via conjugation tubes rather than using flagella, a unique feature among common green algae.\",\"memoryTrigger\":\"Spirogyra = Spiral + Static (Non-motile).\",\"visualPrompt\":\"Visualize two ladders (Spirogyra filaments) side-by-side with bridges forming between them for gamete transfer.\",\"commonTrap\":\"Picking $Ulothrix$ because it is also isogamous, forgetting that its gametes are flagellated.\"}",
+        "keyFormulas": [
+          "$\\text{Isogamy} = \\text{Same size gametes}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-003",
+          "questionType": "EXCEPTION_BASED_MCQ"
+        }
+      },
+      {
+        "id": "389654c1-4cf0-4f8e-bb65-ab573a8f32a9",
+        "text": "A researcher is investigating a vascular plant specimen collected from a shaded, moist habitat. Upon microscopic examination of the sporangia, the researcher observes the production of two distinct types of spores: large megaspores and significantly smaller microspores. If the megaspores are observed to germinate and develop into female gametophytes that are retained on the parent sporophyte for variable periods, which of the following evolutionary transitions is most likely being initiated in this lineage according to NCERT botanical principles?",
+        "options": [
+          "The shift towards homospory for increased reproductive efficiency",
+          "The loss of vascular tissues like xylem and phloem",
+          "The development of the precursor to the seed habit",
+          "The transition from diplontic to haplontic life cycles"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Plant Kingdom",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identification of Heterospory ::: The presence of two types of spores (megaspores and microspores) is defined as heterospory, as seen in genera like $Selaginella$ and $Salvinia$.",
+          "Gametophyte Retention ::: In heterosporous plants, the female gametophyte is retained on the parent sporophyte, which provides nourishment and protection.",
+          "Zygote Development ::: The development of the zygote into a young embryo takes place within the female gametophyte while still attached to the parent plant.",
+          "Evolutionary Significance ::: This retention and internal development are recognized in NCERT as a crucial precursor to the seed habit, a significant step in evolution.",
+          "Conclusion ::: Therefore, the scenario describes the evolutionary initiation of the seed habit."
+        ],
+        "examTip": "Whenever you see 'two types of spores' and 'retention of female gametophyte', immediately think 'Precursor to Seed Habit' in Pteridophytes.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Heterospory leads to the differentiation of sexes. The female gametophyte staying on the parent sporophyte is the botanical equivalent of 'pregnancy', ensuring the embryo's survival.\",\"memoryTrigger\":\"H-P-S: Heterospory -> Parent-retention -> Seed habit.\",\"visualPrompt\":\"Imagine a small plant holding onto its 'baby' (embryo) instead of throwing it into the wind (homospory).\",\"commonTrap\":\"Don't confuse heterospory with heterogamy or anisogamy; heterospory specifically refers to spore size and function.\"}",
+        "keyFormulas": [
+          "$Heterospory \\rightarrow Seed Habit$ (Evolutionary vector)",
+          "$Pteridophyte \\neq Seed$, but $Heterosporous \\ Pteridophyte = Precursor$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-003",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "3f95eecf-8f76-4330-8094-c0391a58f315",
+        "text": "The biotechnology-based approach to control the infestation of tobacco roots by the nematode $Meloidogyne incognita$ involves the process of RNA interference ($RNAi$). Which of the following statements correctly describes the 'Source of complementary RNA' used to trigger this silencing mechanism according to the NCERT syllabus?",
+        "options": [
+          "Proteins produced by $Agrobacterium$ tumefaciens that bind to nematode mRNA.",
+          "RNA from the nematode's own digestive enzymes.",
+          "Synthetic double-stranded DNA injected directly into the tobacco leaf.",
+          "Infection by viruses having RNA genomes or mobile genetic elements like transposons."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Biotechnology and its Applications",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Mechanism of $RNAi$ ::: $RNAi$ involves silencing of a specific $mRNA$ due to a complementary $dsRNA$ molecule that binds to and prevents translation of the $mRNA$ (silencing).",
+          "Induction ::: The complementary $RNA$ can come from various sources.",
+          "Specific Sources ::: According to NCERT, the source of this complementary $RNA$ could be from an infection by viruses having $RNA$ genomes or mobile genetic elements (transposons) that replicate via an $RNA$ intermediate.",
+          "Application ::: In the tobacco plant, $Agrobacterium$ vectors are used to introduce nematode-specific genes which produce both sense and anti-sense $RNA$, forming $dsRNA$.",
+          "Conclusion ::: Option (b) matches the cellular origin described in the text."
+        ],
+        "examTip": "RNAi occurs in all eukaryotic organisms as a method of cellular defense. It targets mRNA, not DNA.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"RNA interference ($RNAi$) is a biological process in which RNA molecules inhibit gene expression or translation. It is triggered by double-stranded RNA ($dsRNA$), which is then processed to silence matching $mRNA$ sequences.\",\"memoryTrigger\":\"RNAi = RNA interrupt. Sources: Viruses (RNA) or 'Jumping Genes' (Transposons).\",\"visualPrompt\":\"Imagine a factory assembly line ($mRNA$ to protein). $RNAi$ is like a 'Stop Work' order that specifically matches the blueprint of one particular part, preventing its manufacture.\",\"commonTrap\":\"Confusing $Agrobacterium$ as the source of $RNA$. $Agrobacterium$ is only the delivery vector (the truck), not the $RNA$ itself (the cargo).\"}",
+        "keyFormulas": [
+          "$\\text{Sense RNA} + \\text{Antisense RNA} \\rightarrow \\text{dsRNA}$",
+          "$\\text{dsRNA} \\rightarrow \\text{mRNA silencing}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-016",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "3805c7d1-3806-4c85-8f63-b42216ae447b",
+        "text": "Consider the diagrammatic representation of the Meselson and Stahl experiment. If *Escherichia coli* cells are grown for several generations in a medium containing $^{15}NH_4Cl$ and then transferred to a medium with $^{14}NH_4Cl$ for two generations (40 minutes), what would be the observed distribution of DNA density in the centrifuge tube using $CsCl$ density gradient centrifugation?",
+        "options": [
+          "Only 'Hybrid' DNA",
+          "Equal amounts of 'Hybrid' and 'Light' DNA",
+          "75% 'Hybrid' and 25% 'Light' DNA",
+          "Only 'Light' DNA"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Molecular Basis of Inheritance",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Initial State ::: Generation 0 has $100\\%$ Heavy DNA ($^{15}N/^{15}N$).",
+          "Generation 1 (20 mins) ::: Each heavy strand acts as a template for a light strand ($^{14}N$). Result: $100\\%$ Hybrid DNA ($^{15}N/^{14}N$).",
+          "Generation 2 (40 mins) ::: The 2 Hybrid molecules separate. The 2 heavy strands make 2 hybrid molecules. The 2 light strands make 2 light molecules.",
+          "Result Calculation ::: 2 Hybrid : 2 Light = $1:1$ ratio or $50\\%$ each.",
+          "Final Answer ::: Equal amounts of 'Hybrid' and 'Light' DNA."
+        ],
+        "examTip": "For Meselson-Stahl: At $n$ generations, total molecules = $2^n$. Hybrid molecules ALWAYS remain 2 (if starting from 1 heavy parent). The rest are Light.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"DNA replication is semi-conservative: one strand of the parent is conserved in each daughter molecule. Density gradients separate these based on heavy vs light nitrogen isotopes.\",\"memoryTrigger\":\"Gen 1: All Hybrid. Gen 2: 50/50 Hybrid/Light. Gen 3: 25/75 Hybrid/Light.\",\"visualPrompt\":\"Imagine two dark blue strands separating and each building a light blue partner.\",\"commonTrap\":\"Assuming the heavy $^{15}N$ eventually 'disappears'; it remains in the hybrid molecules.\"}",
+        "keyFormulas": [
+          "Total Molecules = $2^n$",
+          "Hybrid Molecules = 2 (constant)",
+          "Light Molecules = $2^n - 2$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-001",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "82f734d1-6d69-4ac3-a879-7ac5f1606084",
+        "text": "In the context of Biotechnology: Principles and Processes, the term 'Competent Host' refers to the ability of a cell to take up foreign DNA. \\n\\nScenario: A student is using the $Agrobacterium$ mediated transformation method to transfer a gene of interest into a dicot plant. Which of the following components or steps is MANDATORY for the success of this specific vector-mediated gene transfer, but would NOT be required if the student was using the 'Biolistics' (Gene Gun) method?",
+        "options": [
+          "The use of a recombinant plasmid containing an antibiotic resistance marker.",
+          "The use of gold or tungsten micro-particles coated with DNA.",
+          "The presence of the $T-DNA$ region flanked by left and right borders.",
+          "The application of a high-voltage electrical pulse (electroporation)."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biotechnology and its Applications",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze Agrobacterium Method ::: This is a 'Vector-mediated' method. $Agrobacterium tumefaciens$ uses its $Ti$ (Tumor-inducing) plasmid to transfer a specific segment called $T-DNA$ into the plant genome.",
+          "Mandatory Agrobacterium requirement ::: For the transfer to occur via $Agrobacterium$, the gene must be placed within the $T-DNA$ region, which is defined by specific border sequences (Left and Right borders). Without these, the $Vir$ genes cannot excise and transfer the DNA.",
+          "Analyze Biolistics ::: This is a 'Vector-less' or 'Direct' method. DNA is physically bombarded into cells using heavy metal micro-particles. It does not require $T-DNA$ borders or $Ti$ plasmid machinery.",
+          "Compare and Contrast ::: While both might use markers (d), only $Agrobacterium$ requires $T-DNA$ borders (b). Gold particles (a) are specific to the gene gun.",
+          "Conclusion ::: Option (b) is mandatory for $Agrobacterium$ but not for Gene Gun."
+        ],
+        "examTip": "$Agrobacterium$ is the 'Natural Genetic Engineer' of plants. It only transfers the $T-DNA$ part of the $Ti$ plasmid. Make sure you know the difference between $Ti$ plasmid and $T-DNA$.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"$Agrobacterium tumefaciens$ is a soil bacterium that naturally infects dicots. It transfers $T-DNA$ which usually causes tumors (Crown gall), but scientists 'disarm' it by removing tumor genes and adding useful genes.\",\"memoryTrigger\":\"Agro = T-DNA (The Delivery Truck).\",\"visualPrompt\":\"Imagine a delivery truck ($Agrobacterium$) that only unloads the cargo ($T-DNA$) between the two 'border' doors of the truck.\",\"commonTrap\":\"Thinking $Agrobacterium$ can infect monocots easily (it primarily targets dicots, though modifications exist).\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-016",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "65718168-53c6-4a73-b979-bee79f6deda4",
+        "text": "A field biologist studying a tropical C4 plant, such as $Sorghum$, observes the initial carboxylation reaction occurring within the mesophyll cells. If the atmospheric $CO_2$ is accepted by a 3-carbon molecule, what is the specific 4-carbon compound generated as the first stable product of this pathway before it undergoes de-carboxylation in the bundle sheath cells?",
+        "options": [
+          "Phosphoglyceric acid (PGA)",
+          "Oxaloacetic acid (OAA)",
+          "Aspartic acid",
+          "Malic acid"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Photosynthesis in Higher Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1 ::: Identify the pathway mentioned in the scenario ($C_4$ pathway/Hatch-Slack pathway).",
+          "Step 2 ::: Locate the primary $CO_2$ acceptor in $C_4$ plants, which is Phosphoenolpyruvate (PEP), a 3-carbon molecule.",
+          "Step 3 ::: Apply the enzyme PEP carboxylase (PEPcase) to catalyze the reaction between $CO_2$ and PEP.",
+          "Step 4 ::: Conclude that the reaction results in the formation of Oxaloacetic acid (OAA), a 4-carbon keto acid, which is the first stable product.",
+          "Step 5 ::: Differentiate OAA from secondary products like Malic or Aspartic acid which are formed later via reduction/amination."
+        ],
+        "examTip": "Always look for the term 'first stable product' in photosynthesis questions. For $C_3$ it is 3-PGA, for $C_4$ it is OAA. Don't confuse the primary acceptor (PEP) with the first product (OAA).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"In $C_4$ plants, the initial carbon fixation is spatially separated from the Calvin cycle to minimize photorespiration. The enzyme PEPcase has a high affinity for $CO_2$, ensuring efficiency even at low concentrations.\",\"memoryTrigger\":\"C4 = OAA (4 letters for 4 carbons); C3 = PGA (3 letters for 3 carbons).\",\"visualPrompt\":\"Imagine a relay race: PEP (the runner) catches $CO_2$ (the baton) in the mesophyll and transforms into OAA to run into the bundle sheath cell.\",\"commonTrap\":\"Confusing the primary acceptor (PEP) with the first product (OAA).\"}",
+        "keyFormulas": [
+          "$PEP (3C) + CO_2 \\xrightarrow{PEPcase} OAA (4C)$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-004",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "77fec2cf-954f-4498-a159-9f05599affee",
+        "text": "In the regulatory architecture of the $lac$ operon as conceptualized by Jacob and Monod, the $i$ gene (inhibitor/regulatory gene) functions constitutively to synthesize a repressor protein. If a specific point mutation renders the repressor protein completely unable to interact with the operator site, while the environment is devoid of glucose and rich in lactose, what will be the immediate functional status of the structural genes $z, y,$ and $a$?",
+        "options": [
+          "Only the 'z' gene will be expressed due to catabolite repression.",
+          "Structural genes will remain permanently switched off.",
+          "Continuous (constitutive) expression of structural genes.",
+          "Expression will occur only if an inducer binds to the mutated repressor."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Molecular Basis of Inheritance",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify Gene Roles ::: The $i$ gene produces the repressor. The operator ($o$) is the 'switch' where the repressor binds to block RNA Polymerase.",
+          "Analyze the Mutation ::: The prompt states the repressor cannot bind to the operator. This is a 'loss-of-function' for the repression mechanism.",
+          "Determine Operator Status ::: If the repressor cannot bind, the operator site remains 'open' or 'unblocked' at all times.",
+          "Check RNA Polymerase Access ::: Without a repressor blocking the path, RNA Polymerase can freely bind to the promoter and transcribe the structural genes.",
+          "Evaluate Inducer Role ::: In this mutated state, the presence or absence of lactose (allolactose inducer) becomes irrelevant because the repressor wasn't binding to start with. Result: Constitutive expression."
+        ],
+        "examTip": "Remember that the $i$ gene doesn't stand for 'inducer', it stands for 'inhibitor'. It works all the time (constitutively). If the 'police' (repressor) can't 'lock the gate' (operator), the 'factory' (structural genes) runs 24/7.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The lac operon is an inducible system under negative control. Normally, the repressor keeps it OFF. Lactose (the inducer) turns it ON by inactivating the repressor. If the repressor is pre-inactivated by mutation, the system stays ON regardless.\",\"memoryTrigger\":\"POJA: Promoter, Operator, $z, y, a$. The repressor sits on 'O' like an 'Obstacle'.\",\"visualPrompt\":\"Think of a spring-loaded trap. The repressor is the latch. If the latch is broken and can't catch the bar, the trap (transcription) is always sprung/open.\",\"commonTrap\":\"Confusing the $i$ gene mutation with an operator mutation. Both can lead to constitutive expression, but the mechanism is different.\"}",
+        "keyFormulas": [
+          "Negative Regulation: Repressor + Operator = OFF",
+          "Induction: Inducer + Repressor = Inactive Repressor = ON"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-001",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "805f6b17-68dc-4314-b722-0e6d7836f5e8",
+        "text": "In a eukaryotic cell, the endomembrane system functions in a highly coordinated manner. If a protein is synthesized by a ribosome attached to the Rough Endoplasmic Reticulum (RER), it is subsequently transported to the Golgi apparatus. According to the structural and functional relationship described in NCERT, at which face of the Golgi apparatus does the protein enter, and where does it undergo biochemical modification before being dispatched?",
+        "options": [
+          "Enters at the trans face; modified in the vesicles; exits from the cis face.",
+          "Enters at the concave face; modified in the tubules; exits from the convex face.",
+          "Enters at the cis face; modified in the cisternae; exits from the trans face.",
+          "Enters at the maturing face; modified in the lumen; exits from the forming face."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Cell: The Unit of Life",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Define Golgi Polarity ::: The Golgi apparatus has a distinct polarity with a 'cis' (forming/convex) face and a 'trans' (maturing/concave) face.",
+          "Route of Entry ::: Materials from the ER fuse with the 'cis' face of the Golgi apparatus.",
+          "Processing Site ::: As the materials move through the 'cisternae', they undergo various modifications (like glycosylation).",
+          "Route of Exit ::: After modification, the finished products are discharged from the 'trans' face.",
+          "Conclusion ::: Entry = cis/forming; Processing = cisternae; Exit = trans/maturing."
+        ],
+        "examTip": "Cis = Come-in (Entry); Trans = Transport-out (Exit). Always remember the Golgi is the 'Post Office' of the cell.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The Golgi is not just a stack; it's a directional processing line. The 'cis' face is physically close to the ER to receive cargo, while the 'trans' face points toward the plasma membrane for delivery.\",\"memoryTrigger\":\"Cis-start, Trans-terminal.\",\"visualPrompt\":\"Imagine a factory where raw materials enter the 'Back Door' (Cis), get painted in the middle (Cisternae), and leave through the 'Loading Dock' (Trans).\",\"commonTrap\":\"Confusing 'maturing' with 'forming'. Forming = Cis (where things begin); Maturing = Trans (where things finish).\"}",
+        "keyFormulas": [
+          "$RER \\rightarrow Cis-Golgi \\rightarrow Cisternae \\rightarrow Trans-Golgi \\rightarrow Secretion$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-014",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "55ad12db-713f-44fc-bb18-68c992d3b79c",
+        "text": "Assertion (A): Competitive inhibitors like malonate do not alter the maximum velocity ($V_{max}$) of an enzyme-catalyzed reaction, even though they increase the apparent $K_{m}$.\\nReason (R): In the presence of a competitive inhibitor, the inhibitor and substrate compete for the same catalytic site; thus, a sufficiently high concentration of substrate can displace the inhibitor to achieve the same saturation point.",
+        "options": [
+          "(b) Both (A) and (R) are true but (R) is NOT the correct explanation of (A).",
+          "(d) (A) is false but (R) is true.",
+          "(c) (A) is true but (R) is false.",
+          "(a) Both (A) and (R) are true and (R) is the correct explanation of (A)."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Biomolecules",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Assertion (A) ::: Competitive inhibition involves a structural analog (Malonate) competing with the substrate (Succinate) for the active site of the enzyme (Succinate dehydrogenase). $V_{max}$ remains unchanged because the enzyme's total capacity is the same if substrate is abundant. $K_{m}$ increases because more substrate is needed to reach half-saturation. (True)",
+          "Evaluate Reason (R) ::: The mechanism of competitive inhibition is based on the 'competition' for the active site. Increasing $[S]$ shifts the equilibrium towards $ES$ complex formation over $EI$ complex formation. (True)",
+          "Link (A) and (R) ::: Does the displacement by high $[S]$ explain why $V_{max}$ is eventually reached? Yes, it explains why the maximum capacity of the enzyme is not permanently reduced. (Correct Explanation)"
+        ],
+        "examTip": "For A-R questions, read (A), then add 'BECAUSE' and read (R). If it makes logical sense, option (a) is your target.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Competitive inhibitors are 'look-alikes'. They can be outvoted by a 'mob' of true substrates.\",\"memoryTrigger\":\"C-V-K: Competitive, $V_{max}$ constant, $K_{m}$ up.\",\"visualPrompt\":\"A game of musical chairs where a guest (inhibitor) takes a seat, but if 100 players (substrates) rush in, the guest is likely to be pushed out.\",\"commonTrap\":\"Confusing competitive with non-competitive. In non-competitive, the inhibitor binds elsewhere (allosteric), so $V_{max}$ drops regardless of substrate concentration.\"}",
+        "keyFormulas": [
+          "$V = \\frac{V_{max}[S]}{K_{m} + [S]}$",
+          "Apparent $K_{m} = K_{m}(1 + \\frac{[I]}{K_{i}})$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-012",
+          "questionType": "ASSERTION_REASON_MCQ"
+        }
+      },
+      {
+        "id": "87894be2-e40e-410f-b80e-d30f28b5f1be",
+        "text": "An environmental engineer monitors the influent and effluent of a secondary sewage treatment plant. At the commencement of the 'Aeration' phase, the Biochemical Oxygen Demand (BOD) is measured at $X$ units. After the formation of 'flocs' and vigorous agitation, the rate of dissolved oxygen (DO) consumption by the microbial community drastically decreases to a near-stable baseline. Which of the following statements most accurately synthesizes the relationship between the microbial flocs, BOD, and the 'BOD test' outcome?",
+        "options": [
+          "The formation of 'flocs' (masses of fungi associated with anaerobic bacteria) increases the BOD because they require more oxygen to digest the inorganic minerals.",
+          "As long as the BOD of sewage is high, the rate of oxygen consumption by 'flocs' is low, as the microbes prefer to use nitrate as an electron acceptor.",
+          "The 'BOD test' measures the rate of uptake of oxygen by microorganisms; thus, a decrease in DO consumption rate indicates that the majority of organic matter has been oxidized.",
+          "A high BOD value in the final effluent is desirable as it indicates a high concentration of beneficial aerobic microbes ready for discharge into natural water bodies."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Microbes in Human Welfare",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Define BOD ::: Biochemical Oxygen Demand is the amount of oxygen consumed if all organic matter in one liter of water were oxidized by bacteria.",
+          "Understand the Aeration Tank process ::: Aerobic microbes grow into 'flocs' (bacteria associated with fungal filaments to form mesh-like structures).",
+          "Relate Microbes to Organic Matter ::: These microbes consume the major part of the organic matter in the effluent as they grow.",
+          "Identify the 'End Point' ::: This significantly reduces the BOD. Once the BOD is low, it indicates the water is less polluted.",
+          "Evaluate the DO consumption rate ::: If the microbes have 'nothing left to eat' (organic matter is gone), their respiration rate (DO consumption) drops. This is the logic for Option 1."
+        ],
+        "examTip": "Always remember the inverse relationship: Higher BOD = More Organic Waste = More Polluting Potential. The BOD test is an 'indirect' measure of organic matter.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Secondary treatment is biological. It relies on 'flocs'—a symbiotic mesh of bacteria and fungi. They eat the organic pollutants. When the food is gone, the 'hunger' for oxygen (BOD) vanishes.\",\"memoryTrigger\":\"High BOD = Dirty Water. Low BOD = Clean Water. Flocs = Bacteria + Fungi.\",\"visualPrompt\":\"Imagine a party (Sewage). The guests (Microbes) are eating food (Organic waste). When the food is plenty, the noise/activity (Oxygen consumption) is high. When the food is finished, the party gets quiet (BOD drops).\",\"commonTrap\":\"Confusing 'Flocs' as anaerobic. Flocs are strictly aerobic as they are used in the aeration tank.\"}",
+        "keyFormulas": [
+          "$\\text{Pollution} \\propto \\text{Organic Matter} \\propto \\text{BOD} \\propto \\frac{1}{\\text{Dissolved Oxygen (initially)}}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-004",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "fa531a80-e195-4f8f-9c15-0d09e2d6795e",
+        "text": "In the context of Biological Classification, the term 'Taxon' is defined as a unit of classification. Which of the following statements represents a 'Hard' conceptual nuance regarding the relationship between a 'Taxon' and a 'Taxonomic Category'?",
+        "options": [
+          "Taxon and Category are synonymous and can be used interchangeably for any rank like Genus or Species.",
+          "The number of taxa in a classification system is always equal to the number of categories.",
+          "A taxon is an abstract grouping, whereas a category represents a real biological object.",
+          "A category represents a rank or level in the hierarchy, while a taxon represents a group of real organisms assigned to that rank."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biological Classification",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Define Category ::: A category is a part of the overall taxonomic arrangement. It is an abstract term representing a 'rank' (e.g., Species, Genus, Order).",
+          "Define Taxon ::: A taxon is a taxonomic group of any rank that represents a 'real' biological entity (e.g., *Mangifera indica*, Mammals, Monocotyledons).",
+          "Distinguish ::: While 'Species' is a category (a placeholder/rank), 'Humans' or '*Sapiens*' is a taxon (the real organisms occupying that rank).",
+          "Evaluate Options ::: Option (b) perfectly captures this distinction between the rank (category) and the physical group (taxon)."
+        ],
+        "examTip": "Categories are the 'shelves' in a library (Genus, Order), while Taxa are the actual 'books' on the shelves (*Solanum*, Diptera).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Classification hierarchy: Kingdom -> Phylum -> Class -> Order -> Family -> Genus -> Species. Each step is a Category. The organisms at that step (e.g., Chordata) are the Taxon.\",\"memoryTrigger\":\"Category = Rank; Taxon = Thing.\",\"visualPrompt\":\"Think of a military rank (General = Category) vs. a specific person holding it (Dwight Eisenhower = Taxon).\",\"commonTrap\":\"Thinking 'Taxon' only refers to the Species level. It refers to any level (e.g., 'Kingdom Plantae' is a taxon at the 'Kingdom' category level).\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-019",
+          "questionType": "theory_conceptual"
+        }
+      },
+      {
+        "id": "8be12cfb-45ce-4f83-969d-743918a6b33d",
+        "text": "In the taxonomic hierarchy, the 'Generalization Index' ($G$) is defined as the number of shared morphological and molecular characteristics between two organisms. When comparing *Solanum tuberosum* (Potato) and *Solanum melongena* (Brinjal) with *Felis catus* (Cat), an analytical trend is observed. Which of the following represents the correct mathematical and conceptual relationship as one moves from the rank of 'Species' up to 'Kingdom'?",
+        "options": [
+          "The value of $G$ increases as we move from Species to Kingdom because the 'Definition of Life' is the most specific shared characteristic.",
+          "The relationship is parabolic: $G$ is highest at the 'Genus' level and lowest at both 'Species' and 'Kingdom' levels due to polyphylogeny.",
+          "The value of $G$ remains constant because taxonomic categories are purely artificial constructs with no biological basis for 'similarity'.",
+          "The value of $G$ decreases exponentially because the number of common characteristics goes on decreasing as we go up from species to kingdom."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "The Living World",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the direction of the hierarchy ::: Species $\\to$ Genus $\\to$ Family $\\to$ Order $\\to$ Class $\\to$ Phylum/Division $\\to$ Kingdom.",
+          "Analyze the shared traits ::: According to NCERT, 'As we go higher from species to kingdom, the number of common characteristics goes on decreasing'.",
+          "Define the relationship ::: If 'Generalization Index' ($G$) = shared characteristics, then $G$ must decrease as we move towards the Kingdom level.",
+          "Contrast the extremes ::: Two organisms in the same species (e.g., two potato plants) have maximum shared traits. Two organisms in the same kingdom (e.g., a potato and a banyan tree) have very few shared traits (e.g., basic cell structure, photosynthesis).",
+          "Verify the options ::: Option 1 correctly identifies that $G$ decreases as we ascend the hierarchy."
+        ],
+        "examTip": "Lower the taxa, more the characteristics that the members within the taxon share. Higher the category, greater is the difficulty of determining the relationship to other taxa at the same level.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Taxonomic hierarchy is a nested system. Each higher level is a broader 'container'. Naturally, to fit more diverse things into one container (Kingdom), you have to use a very broad/vague definition, meaning fewer specific traits are shared.\",\"memoryTrigger\":\"Keep Pots Clean Or Family Gets Sick (Kingdom $\\\\to$ Species). Down the ladder = More Similarity.\",\"visualPrompt\":\"Imagine a pyramid. The tip (Species) is very narrow and holds identical things. The base (Kingdom) is huge and holds everything, but they barely have anything in common except being in the pyramid.\",\"commonTrap\":\"Students sometimes think 'Higher level = More evolved = More traits'. This is wrong. Taxonomic 'Level' refers to grouping, not evolutionary complexity.\"}",
+        "keyFormulas": [
+          "$\\text{Common Characteristics} \\propto \\frac{1}{\\text{Taxonomic Level Rank}}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-014",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "b7af58a6-bffb-4db4-85d0-9972e24ecb9e",
+        "text": "A recombinant DNA molecule is constructed by ligating a gene of interest into the $BamHI$ site located within the tetracycline resistance ($tet^R$) gene of the plasmid vector $pBR322$. If this engineered plasmid is transformed into $E. coli$ cells, what will be the growth phenotype of the successfully transformed recombinant cells on selective media?",
+        "options": [
+          "Growth on medium containing tetracycline but not on medium containing ampicillin.",
+          "Failure to grow on both ampicillin and tetracycline containing media.",
+          "Growth on medium containing both ampicillin and tetracycline.",
+          "Growth on medium containing ampicillin but not on medium containing tetracycline."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Biotechnology Principles and Processes",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Vector ::: $pBR322$ has two main selectable markers: $amp^R$ (ampicillin resistance) and $tet^R$ (tetracycline resistance).",
+          "Ligation Site ::: The $BamHI$ restriction site is located specifically within the $tet^R$ gene sequence.",
+          "Insertional Inactivation ::: When a foreign DNA is inserted at the $BamHI$ site, the $tet^R$ gene is disrupted (inactivated). The $amp^R$ gene remains intact.",
+          "Phenotype Analysis ::: The recombinant cell will express $amp^R$ (resistant to ampicillin) but will lose $tet^R$ (sensitive to tetracycline).",
+          "Conclusion ::: Recombinants grow on ampicillin plates but die on tetracycline plates. This is used to differentiate them from non-recombinants."
+        ],
+        "examTip": "In $pBR322$, $BamHI$ and $Sal I$ are in $tet^R$. $Pst I$ and $Pvu I$ are in $amp^R$. Remember: B-S is Tet, P-P is Amp.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Insertional inactivation is the loss of a gene's function due to the insertion of foreign DNA into its coding sequence. In $pBR322$, this allows researchers to distinguish between recombinants and non-recombinants through differential plating.\",\"memoryTrigger\":\"Tet-Bam-Sal (T-B-S: Think 'The Big Screen' is on Tet); Amp-Pst-Pvu (A-P-P: 'Apple' is Amp).\",\"visualPrompt\":\"Imagine a lock ($tet^R$ gene) and its key (tetracycline resistance). If you stick a piece of chewing gum (foreign DNA) into the lock at the $BamHI$ notch, the key won't work anymore.\",\"commonTrap\":\"Confusing 'Transformants' with 'Recombinants'. Non-recombinants are also transformants but they grow on both antibiotics.\"}",
+        "keyFormulas": [
+          "$\\text{Recombinant} = \\text{Marker 1}^{+} + \\text{Marker 2}^{-}$",
+          "$\\text{Non-recombinant} = \\text{Marker 1}^{+} + \\text{Marker 2}^{+}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-002",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "022bc064-3834-40b6-bbb3-bf198abb6912",
+        "text": "Match the placentation types in Column-I with their characteristic features and anatomical examples in Column-II, then select the option representing the correct association as per NCERT nomenclature:\\n\\n\\begin{itemize} \\n\\item[A.] Marginal \\n\\item[B.] Parietal \\n\\item[C.] Free Central \\n\\item[D.] Basal \\n\\end{itemize}\\n\\n\\begin{itemize} \\n\\item[p.] Ovules on central axis, septa absent; e.g., Dianthus \\n\\item[q.] Placenta at the base of ovary, single ovule; e.g., Marigold \\n\\item[r.] Placenta forms a ridge along ventral suture; e.g., Pea \\n\\item[s.] Ovules develop on inner wall, ovary becomes two-chambered due to false septum; e.g., Mustard \\n\\end{itemize}",
+        "options": [
+          "(d) A-p, B-s, C-r, D-q",
+          "(a) A-r, B-s, C-p, D-q",
+          "(b) A-r, B-p, C-s, D-q",
+          "(c) A-s, B-r, C-p, D-q"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Morphology of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify A (Marginal) ::: NCERT defines this as placenta forming a ridge along the ventral suture, characteristic of legumes like Pea. Matches with (r).",
+          "Identify B (Parietal) ::: This involves ovules on the inner wall and often features a 'replum' or false septum in Mustard (Brassicaceae). Matches with (s).",
+          "Identify C (Free Central) ::: Septa are absent, and ovules are on the central axis, seen in Dianthus and Primrose. Matches with (p).",
+          "Identify D (Basal) ::: A single ovule at the base of the ovary, typical of Asteraceae like Marigold and Sunflower. Matches with (q).",
+          "Combine results ::: A-r, B-s, C-p, D-q corresponds to option (a)."
+        ],
+        "examTip": "Remember 'PDF' for Free Central: Primrose and Dianthus are Free. For Basal, think 'Sun-Mar' (Sunflower/Marigold).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Placentation is the arrangement of ovules within the ovary, reflecting evolutionary adaptations for seed dispersal.\",\"memoryTrigger\":\"MAP (Marginal-Pea), MAPS (Parietal-Mustard/Argemone), D-P (Free Central-Dianthus/Primrose).\",\"visualPrompt\":\"Visualize a pea pod (Marginal) versus a sliced tomato (Axile) to distinguish suture vs. central axis.\",\"commonTrap\":\"Confusing Free Central with Axile. In Axile, septa are present (Tomato/Lemon); in Free Central, septa are absent.\"}",
+        "keyFormulas": [
+          "$\\text{Parietal} + \\text{False Septum} = \\text{Brassicaceae}$",
+          "$\\text{Basal} + \\text{Single Ovule} = \\text{Asteraceae}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-007",
+          "questionType": "MATCH_FOLLOWING_MCQ"
+        }
+      },
+      {
+        "id": "2efc7ef7-cd5a-4182-aa39-dba2b5f9f295",
+        "text": "In the physiological process of 'Bolting', which specific phytohormone is responsible for the rapid internode elongation prior to flowering in plants like cabbage and beet, and what is its primary effect on the seed germination process?",
+        "options": [
+          "Cytokinins; they promote cell division and delay leaf senescence.",
+          "Abscisic Acid; it induces seed dormancy and closure of stomata during stress.",
+          "Gibberellins; they promote the synthesis of hydrolases like $\\alpha$-amylase to mobilize food reserves.",
+          "Auxins; they induce apical dominance and inhibit the growth of lateral buds."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Plant Growth and Development",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Define Bolting ::: Bolting is the sudden elongation of internodes just prior to flowering in rosette plants like cabbage.",
+          "Identify the hormone for Bolting ::: Gibberellins ($GA$) are specifically responsible for this phenomenon.",
+          "Relate to Seed Germination ::: Gibberellins play a crucial role in breaking seed dormancy by inducing enzymes (like $\\alpha$-amylase) that break down starch for the embryo.",
+          "Check other options ::: Auxin (Apical dominance), Cytokinin (Cell division), ABA (Dormancy inducer - antagonistic to GA).",
+          "Conclusion ::: Option (a) correctly identifies the hormone and its germination function."
+        ],
+        "examTip": "G.A. stands for 'Growth Always' or 'Germination Activator'. It is the direct antagonist to ABA (Abscisic Acid) in seed dormancy.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Gibberellins ($GA_{3}$ being the most common) promote organ elongation and mobilize stored nutrients during germination.\",\"memoryTrigger\":\"G-B-G: Gibberellins, Bolting, Germination.\",\"visualPrompt\":\"Visualize a cabbage 'shooting up' like a rocket (bolting) or a seed 'waking up' and eating its packed lunch (amylase breaking starch).\",\"commonTrap\":\"Confusing GA with Auxin for elongation. GA affects internodes; Auxins are more associated with apical growth and tropisms.\"}",
+        "keyFormulas": [
+          "$\\text{Bolting} = \\text{Gibberellin treatment}$",
+          "$\\text{Antagonism}: GA \\neq ABA$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-006",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "64bddee6-15c3-48cc-afa4-711cb308fc31",
+        "text": "A marine biologist discovers a multicellular alga that is olive green to brown in color. Chemical analysis reveals the presence of chlorophyll $a$, chlorophyll $c$, carotenoids, and a specific xanthophyll pigment called fucoxanthin. Which of the following describes the most likely storage polysaccharide and the nature of the flagella in the motile stages of this organism?",
+        "options": [
+          "Laminarin or mannitol; two unequal, laterally attached flagella.",
+          "Floridean starch; absence of flagella in all life stages.",
+          "Starch; two equal, apical flagella.",
+          "Glycogen; multiple cilia covering the surface."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Plant Kingdom",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Class ::: The pigments chlorophyll $a, c$ and fucoxanthin are characteristic of Phaeophyceae (Brown Algae).",
+          "Storage Product ::: NCERT states that Brown Algae store food as complex carbohydrates, specifically 'laminarin' or 'mannitol'.",
+          "Flagellar Characteristics ::: The motile stages (zoospores) of Phaeophyceae have two 'unequal' and 'laterally attached' flagella.",
+          "Eliminate Others ::: Floridean starch is for Rhodophyceae; Starch is for Chlorophyceae.",
+          "Conclusion ::: Option (a) matches the characteristics of Phaeophyceae."
+        ],
+        "examTip": "Create a table for Algae: Green (a,b, Starch, 2-8 Equal Apical), Brown (a,c, Fucoxanthin, Laminarin, 2 Unequal Lateral), Red (a,d, Phycoerythrin, Floridean, Absent).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Classification in Algae is primarily based on photosynthetic pigments. Brown algae (Phaeophyceae) are uniquely adapted to deep-water light with fucoxanthin.\",\"memoryTrigger\":\"Brown-Man-Lam: Brown algae have Mannitol and Laminarin.\",\"visualPrompt\":\"Imagine a brown seaweed (Kelp) with two different sized 'flippers' (flagella) on its side (lateral).\",\"commonTrap\":\"Confusing the flagella of Green algae (Equal, Apical) with Brown algae (Unequal, Lateral).\"}",
+        "keyFormulas": [
+          "Phaeophyceae = Chl a + c + Fucoxanthin",
+          "Storage = Mannitol / Laminarin"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-003",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "8cd73824-ed8e-42c1-a1a2-e361ec20e3cf",
+        "text": "During an analysis of the cell cycle in a root tip cell, a scientist measures the DNA content and chromosome number. If the cell is in the $G_1$ phase and has a DNA content of $2C$ and a chromosome number of $2n$, what will be the DNA content and chromosome number at the end of the $S$ phase and during the $G_2$ phase, respectively?",
+        "options": [
+          "S phase: $2C, 2n$; $G_2$ phase: $4C, 2n$",
+          "S phase: $4C, 2n$; $G_2$ phase: $4C, 2n$",
+          "S phase: $4C, 4n$; $G_2$ phase: $4C, 4n$",
+          "S phase: $4C, 2n$; $G_2$ phase: $2C, 2n$"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Cell Cycle and Cell Division",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analyze S phase (DNA) ::: During the S (Synthesis) phase, DNA replication occurs. Therefore, the DNA content doubles from $2C$ to $4C$.",
+          "Analyze S phase (Chromosomes) ::: Although DNA doubles, the chromosome number remains the same because the replicated sister chromatids stay attached at the centromere. So, $2n$ remains $2n$.",
+          "Analyze G2 phase ::: The $G_2$ phase follows the S phase. No further DNA replication or chromosome division occurs here. Thus, the values remain $4C$ and $2n$.",
+          "Conclusion ::: Both S and $G_2$ phases have $4C$ DNA and $2n$ chromosomes.",
+          "Verify with NCERT ::: NCERT specifically states: 'If the initial amount of DNA is denoted as $2C$ then it increases to $4C$. However, there is no increase in the chromosome number'."
+        ],
+        "examTip": "DNA doubles in S phase ($2C \\rightarrow 4C$), but Chromosome number only doubles during Anaphase of Mitosis when sister chromatids separate.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The S phase is for DNA copy, not chromosome count. Think of a chromosome as a folder. In S phase, you put a second copy of every paper inside the same folder. You have more paper (DNA), but still the same number of folders (chromosomes).\",\"memoryTrigger\":\"S = Synthesis of DNA, Same chromosome number.\",\"visualPrompt\":\"A single chromatid chromosome becoming a two-chromatid chromosome (X-shape). It's still one chromosome.\",\"commonTrap\":\"Assuming that doubling DNA must double the chromosome number.\"}",
+        "keyFormulas": [
+          "$G_1 \\rightarrow S \\rightarrow G_2$",
+          "DNA: $2C \\rightarrow 4C \\rightarrow 4C$",
+          "Chromosomes: $2n \\rightarrow 2n \\rightarrow 2n$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-013",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "29eabbad-f0bd-4fe2-a10c-a1806a4054ad",
+        "text": "Identify the correct set of associations regarding the morphological and reproductive nuances of various fungal classes as per the NCERT classification system. Consider the nature of mycelium, the presence or absence of septation, and the specific site of karyogamy and meiosis in the following pairings:\\n\\nColumn I: \\n(A) Phycomycetes \\n(B) Ascomycetes \\n(C) Basidiomycetes \\n(D) Deuteromycetes\\n\\nColumn II:\\n(i) Exogenous asexual spores (Conidia) on branched/unbranched conidiophores; Septate and branched mycelium.\\n(ii) Endogenous asexual spores (Zoospores/Aplanospores); Aseptate and coenocytic mycelium.\\n(iii) Asexual spores generally not found; Plasmogamy by fusion of somatic cells; Exogenous basidiospores.\\n(iv) Only asexual or vegetative phases known; Septate and branched mycelium; No sexual stage identified.",
+        "options": [
+          "(A)-(iii), (B)-(i), (C)-(ii), (D)-(iv)",
+          "(A)-(ii), (B)-(i), (C)-(iii), (D)-(iv)",
+          "(A)-(ii), (B)-(iv), (C)-(i), (D)-(iii)",
+          "(A)-(i), (B)-(ii), (C)-(iv), (D)-(iii)"
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biological Classification",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Analysis of Phycomycetes ::: These are 'Lower Fungi' characterized by a coenocytic (multinucleate) and aseptate mycelium. They produce asexual spores endogenously in sporangia (Zoospores or Aplanospores). This matches (ii).",
+          "Analysis of Ascomycetes ::: Known as 'Sac Fungi', they possess septate/branched mycelium. Asexual spores (Conidia) are produced exogenously on special stalks called conidiophores. This matches (i).",
+          "Analysis of Basidiomycetes ::: Known as 'Club Fungi', they rarely produce asexual spores. Sexual reproduction occurs via somatogamy (fusion of somatic cells), leading to a dikaryophase and eventually exogenous basidiospores. This matches (iii).",
+          "Analysis of Deuteromycetes ::: Known as 'Fungi Imperfecti' because the sexual (perfect) stage is absent or unknown. They reproduce only by asexual conidia and have septate mycelium. This matches (iv).",
+          "Synthesis ::: Combining these specific traits leads to the sequence (A)-(ii), (B)-(i), (C)-(iii), (D)-(iv)."
+        ],
+        "examTip": "Focus on the 'site' of spore production—Ascomycetes produce sexual spores (ascospores) endogenously but asexual spores (conidia) exogenously. Basidiomycetes are unique as they produce sexual spores (basidiospores) exogenously.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Fungal classification is based on mycelium morphology, spore formation mode, and fruiting bodies. Key distinction: Endogenous vs Exogenous spores.\",\"memoryTrigger\":\"P-A-C (Phycomycetes - Aseptate - Coenocytic); ABC (Ascomycetes, Basidiomycetes, Deuteromycetes - Branched & Septate).\",\"visualPrompt\":\"Imagine a hollow tube (Phycomycetes) vs. a tube with partition walls (Ascomycetes/Basidiomycetes).\",\"commonTrap\":\"Confusing endogenous ascospores (sexual) with exogenous conidia (asexual) in Ascomycetes.\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-019",
+          "questionType": "MATCH_FOLLOWING_MCQ"
+        }
+      },
+      {
+        "id": "0738d375-e69f-48c5-bd17-461227b6ba70",
+        "text": "A plant specimen is found growing in a swampy, saline area. The specimen exhibits modified roots that grow vertically upwards (negatively geotropic) to obtain oxygen for respiration. Additionally, the plant shows 'vivipary'. Which of the following combinations of features and examples is correct for this plant?",
+        "options": [
+          "Stilt roots for mechanical strength; Found in Zea mays.",
+          "Pneumatophores for respiration; Found in Rhizophora.",
+          "Haustorial roots for nutrition; Found in Cuscuta.",
+          "Prop roots for support; Found in Ficus benghalensis."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Morphology of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Habitat Analysis ::: Swampy, saline areas (halophytic environment) are oxygen-poor.",
+          "Root Modification ::: Vertically upward-growing roots are called pneumatophores. They have pores called lenticels (or pneumathodes) for gas exchange.",
+          "Geotropism ::: Standard roots are positively geotropic (grow down). These are negatively geotropic (grow up).",
+          "Reproductive Strategy ::: 'Vivipary' is the germination of seeds while still attached to the parent plant, common in mangroves to prevent seeds from drowning in salt water.",
+          "Identification ::: $Rhizophora$ is the classic NCERT example for pneumatophores."
+        ],
+        "examTip": "Negative Geotropism + Swamp = Pneumatophores = Rhizophora. Don't confuse them with 'Stilt roots' which also appear in mangroves but grow downwards for support.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Halophytes like $Rhizophora$ adapt to anaerobic soil by developing pneumatophores. These roots allow oxygen to reach the submerged root system.\",\"memoryTrigger\":\"Pneumatophores = 'Pneumonia' (breathing problem) -> roots need to breathe.\",\"visualPrompt\":\"Imagine a field of spikes or fingers sticking out of the mud around a tree; these are the 'breathing' roots.\",\"commonTrap\":\"Confusing Pneumatophores with Prop roots (Banyan) or Stilt roots (Maize/Sugarcane). Only Pneumatophores grow upwards.\"}",
+        "keyFormulas": [
+          "$\\text{Pneumatophores} = \\text{Negative Geotropism}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-007",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "bbb5970a-e766-45b8-8e41-f07ad87dd839",
+        "text": "In a laboratory analysis of a double-stranded DNA molecule isolated from a specific strain of *Escherichia coli*, a researcher determines that the total count of nitrogenous bases in the sample is $4000$. If the biochemical assay confirms that Guanine constitutes $22\\%$ of the total base composition, what would be the total number of Adenine residues present in this genomic fragment?",
+        "options": [
+          "1120",
+          "880",
+          "440",
+          "2240"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Molecular Basis of Inheritance",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Apply Chargaff's rule for double-stranded DNA, which states that $[A] = [T]$ and $[G] = [C]$.",
+          "Step 2: Given Guanine $(G) = 22\\%$, therefore Cytosine $(C)$ must also be $22\\%$.",
+          "Step 3: Calculate the combined percentage of $G + C$: $22\\% + 22\\% = 44\\%$.",
+          "Step 4: Determine the percentage of $A + T$ by subtracting from the total: $100\\% - 44\\% = 56\\%$. Since $A = T$, the percentage of Adenine $(A) = \\frac{56\\%}{2} = 28\\%$.",
+          "Step 5: Calculate the actual number of Adenine bases: $28\\% \\text{ of } 4000 = 0.28 \\times 4000 = 1120$."
+        ],
+        "examTip": "In Chargaff's rule problems, always remember that $A+G = T+C = 50\\%$. You can find the answer faster by calculating $50\\% - \\text{Given } \\%$ for the non-complementary base.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Chargaff's rules state that in any double-stranded DNA, the ratio of Adenine to Thymine and Guanine to Cytosine is constant and equal to one. This is a direct consequence of the base-pairing mechanism.\",\"memoryTrigger\":\"Pure (Purines) As (A) Gold (G): Adenine and Guanine are Purines. Complementary pairs are A-T and G-C.\",\"visualPrompt\":\"Imagine a ladder where the total number of left-hand rungs (A+G) must equal the total number of right-hand rungs (T+C) to keep the ladder's width constant.\",\"commonTrap\":\"Using Chargaff's rule for single-stranded DNA or RNA is the most common mistake.\"}",
+        "keyFormulas": [
+          "$[A] + [G] = [T] + [C] = 50\\%$",
+          "$\\text{Number of bases} = (\\% \\text{ of base}) \\times \\text{Total nucleotides}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-001",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "e6b1d187-2c48-43f0-9deb-fa207bc43662",
+        "text": "During a laboratory investigation of a dicotyledonous stem, a student observes that the vascular cambium is more active on the inner side than on the outer side. If the environmental conditions are such that the activity of the cambium varies significantly between spring and winter, which of the following statements regarding the resulting wood is physically and biologically accurate?",
+        "options": [
+          "Spring wood is characterized by a higher density and narrower xylary elements compared to autumn wood.",
+          "Autumn wood is formed when the cambium is very active, resulting in vessels with wider cavities.",
+          "Heartwood is functionally active in water conduction because it is peripheral and light-colored.",
+          "The transition from spring wood to autumn wood within an annual ring is typically gradual, but the transition from autumn wood to the next spring wood is sharp."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Anatomy of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Cambial Activity ::: In dicot stems, vascular cambium is more active on the inner side, producing more secondary xylem than secondary phloem.",
+          "Spring Wood vs Autumn Wood ::: In spring, the cambium is highly active and produces many xylary elements with wide vessels (low density). In autumn/winter, the cambium is less active, producing fewer xylary elements with narrow vessels (high density).",
+          "Annual Rings ::: An annual ring consists of one band of spring wood and one band of autumn wood. The change within a season (Spring to Autumn) is gradual as temperature drops.",
+          "Transition Boundary ::: The boundary between autumn wood (end of year 1) and spring wood (start of year 2) is sharp because of the sudden increase in cambial activity after winter dormancy.",
+          "Heartwood vs Sapwood ::: Heartwood is central, dark, and inactive in conduction due to tyloses/depositions. Sapwood is peripheral and active."
+        ],
+        "examTip": "Remember: 'Spring is Wide' (Wide vessels, less dense) and 'Autumn is Narrow' (Narrow vessels, more dense).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Secondary growth is driven by the vascular cambium. Seasonal variations in temperate regions create distinct rings: Spring wood (early wood) is light and porous; Autumn wood (late wood) is dark and dense.\",\"memoryTrigger\":\"S-S-S: Spring, Speed (active), Spacious (wide vessels). A-A-A: Autumn, Abated (less active), Atrophied (narrow vessels).\",\"visualPrompt\":\"Imagine a drinking straw. In spring, the straws are wide for fast flow. In autumn, the straws are narrow and thick-walled for strength.\",\"commonTrap\":\"Confusing density with vessel width. Wide vessels lead to LOW density wood.\"}",
+        "keyFormulas": [
+          "$\\text{Annual Ring} = \\text{Spring Wood} + \\text{Autumn Wood}$",
+          "$\\text{Density} \\propto 1/\\text{Vessel Diameter}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-008",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "41a790cd-72f6-43f0-958d-96b01136ca66",
+        "text": "Consider the logistic growth model for a population density $N$ at time $t$, given by the differential equation $\\frac{dN}{dt} = rN \\left( \\frac{K-N}{K} \\right)$. \\n\\nAssertion (A): The absolute rate of population increase (growth rate) reaches its theoretical maximum when the current population density is exactly half of the carrying capacity ($N = K/2$).\\nReason (R): At the carrying capacity ($N = K$), the environmental resistance factor $\\left( \\frac{K-N}{K} \\right)$ becomes zero, resulting in a zero growth rate despite a high population density.",
+        "options": [
+          "(A) is true but (R) is false.",
+          "Both (A) and (R) are true and (R) is the correct explanation of (A).",
+          "(A) is false but (R) is true.",
+          "Both (A) and (R) are true but (R) is NOT the correct explanation of (A)."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Organisms and Populations",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Examine the Growth Rate Function ::: Let $f(N) = \\frac{dN}{dt} = rN - \\frac{rN^2}{K}$. This is a downward-opening parabola.",
+          "Calculate the Extremum ::: To find the maximum of $f(N)$, take the derivative with respect to $N$: $f'(N) = r - \\frac{2rN}{K}$. Set $f'(N) = 0$ to find the peak. Solving gives $N = K/2$. Assertion (A) is true.",
+          "Evaluate the Reason ::: When $N = K$, the term $(K-N)/K$ becomes $(K-K)/K = 0$. Thus, $dN/dt = rN(0) = 0$. This correctly describes why growth stops at the carrying capacity. Reason (R) is true.",
+          "Determine the Link ::: While (R) explains why growth is zero at $K$, it does not explain 'why' the maximum occurs at $K/2$. The maximum at $K/2$ is a mathematical consequence of the parabolic nature of the density-dependent growth equation, specifically the balancing of the linear 'rN' term and the quadratic 'resistance' term. Therefore, (R) is not the causal explanation for (A)."
+        ],
+        "examTip": "In Assertion-Reason questions, always check if the Reason contains the word 'because' or 'due to' that actually explains the mechanism in the Assertion. Just because both are true doesn't mean it's (a).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Logistic growth incorporates limited resources. The term $(K-N)/K$ is called 'Environmental Resistance'. The Sigmoid curve starts slow (lag), speeds up (log/acceleration), and then slows down (deceleration) as it hits K.\",\"memoryTrigger\":\"Max rate at Halfway (K/2).\",\"visualPrompt\":\"Imagine a bell curve if you plot 'Rate vs N', but an S-curve if you plot 'N vs time'.\",\"commonTrap\":\"Confusing 'highest growth rate' (at K/2) with 'highest population number' (at K).\"}",
+        "keyFormulas": [
+          "$\\frac{dN}{dt} = rN\\left(\\frac{K-N}{K}\\right)$ (Logistic Growth)",
+          "$N_t = \\frac{K}{1 + e^{a-rt}}$ (Integrated form - not in NCERT but helpful for visualization)"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-010",
+          "questionType": "ASSERTION_REASON_MCQ"
+        }
+      },
+      {
+        "id": "3fbaea56-de14-4536-88d9-9ae602e9c0ec",
+        "text": "In a comparative biogeographical study of avian diversity across two distinct spatial scales—a localized archipelago in the Pacific (Scale $\\alpha$) and the entire Neotropical continental landmass (Scale $\\beta$)—ecologists utilized the species-area relationship defined by the equation $\\log S = \\log C + Z \\log A$. If the habitat in Scale $\\beta$ is subjected to anthropogenic fragmentation, reducing the contiguous area $A$, which of the following analytical deductions regarding the regression coefficient $Z$ and species richness $S$ aligns with the observations of Alexander von Humboldt and modern ecological theory?",
+        "options": [
+          "The constant $Z$ for Scale $\\beta$ remains identical to Scale $\\alpha$ ($0.1$ to $0.2$), as the slope of the species-area relationship is independent of the geographic scale or taxonomic group.",
+          "The $Z$ value for Scale $\\alpha$ is significantly steeper than Scale $\\beta$ because small islands possess a higher 'carrying capacity' per unit area for endemic species.",
+          "A reduction in area $A$ in Scale $\\beta$ results in an exponential increase in $S$ because the value of $C$ (the Y-intercept) compensates for the loss of habitat diversity.",
+          "The value of $Z$ for Scale $\\beta$ typically ranges between $0.6$ and $1.2$, indicating that species richness $S$ decreases more precipitously for every unit of area $A$ lost compared to Scale $\\alpha$."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biodiversity and Conservation",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the formula ::: The Species-Area relationship is $S = CA^Z$ or $\\log S = \\log C + Z \\log A$, where $Z$ is the slope of the regression line.",
+          "Analyze the scale dependency ::: NCERT specifies that for small areas (Scale $\\alpha$), $Z$ values are remarkably similar regardless of the taxonomic group (0.1 to 0.2).",
+          "Evaluate large-scale dynamics ::: For very large areas like entire continents (Scale $\\beta$), the slope of the regression line is much steeper, with $Z$ values in the range of $0.6$ to $1.2$.",
+          "Interpret the physical meaning of $Z$ ::: A steeper slope (higher $Z$) means that for a given change in area $A$, the change in species richness $S$ is much larger. Therefore, habitat fragmentation in a continent leads to a more drastic loss of species.",
+          "Conclusion ::: Option 1 correctly identifies the $Z$ range for continents and the ecological consequence of a steep slope."
+        ],
+        "examTip": "When you see 'large area' or 'entire continent' in a Species-Area question, immediately look for $Z$ values $> 0.6$. The slope 'steepens' as the area increases because you are sampling across different ecosystems/biomes.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The regression coefficient $Z$ represents the 'richness-accumulation rate'. In small areas, you find more individuals of the same species. In vast areas (continents), you cross into new habitats, adding entirely different species rapidly, hence the steeper slope.\",\"memoryTrigger\":\"Small Area = Small Slope (0.1); Big Continent = Big Slope (Up to 1.2).\",\"visualPrompt\":\"Imagine a graph: for a small backyard, the line is almost flat. For the whole of Asia, the line shoots up like a mountain because every extra mile adds a totally new ecosystem.\",\"commonTrap\":\"Students often think $Z$ is a universal constant (like gravity) because it's $0.1-0.2$ for most 'normal' studies. However, scale is the 'hidden variable' that changes $Z$.\"}",
+        "keyFormulas": [
+          "$\\log S = \\log C + Z \\log A$ (Log-log scale)",
+          "$S = CA^Z$ (Rectangular hyperbola on a linear scale)"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-015",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "4c085470-22e9-4a5d-b446-ad35f989df44",
+        "text": "Given below are two statements:\\n\\nAssertion (A): In some plants like *Asteraceae* and grasses, seeds are produced without the process of fertilization.\\nReason (R): Apomixis is a form of asexual reproduction that mimics sexual reproduction to produce seeds.\\n\\nIn the light of the above statements, choose the correct answer from the options given below:",
+        "options": [
+          "Both (A) and (R) are true and (R) is the correct explanation of (A)",
+          "Both (A) and (R) are true but (R) is NOT the correct explanation of (A)",
+          "(A) is false but (R) is true",
+          "(A) is true but (R) is false"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Sexual Reproduction in Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Evaluate Assertion (A) ::: According to NCERT, certain species of *Asteraceae* and grasses have evolved a special mechanism to produce seeds without fertilization. This is a true statement.",
+          "Evaluate Reason (R) ::: The definition of apomixis is the production of seeds without fertilization, making it asexual, yet it produces a seed which is the characteristic of sexual reproduction ('mimicry'). This is a true statement.",
+          "Relationship Check ::: Does the reason explain why the assertion is happening? Yes, the assertion describes the phenomenon seen in specific families, and the reason defines that phenomenon (Apomixis).",
+          "Conclusion ::: Both are true and (R) explains (A)."
+        ],
+        "examTip": "Whenever 'Asteraceae' and 'seeds without fertilization' are mentioned together, the answer is always Apomixis. The 'mimicry' part is the most common reason-statement used by NTA.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Apomixis is a reproductive process that bypasses meiosis and syngamy, leading to the development of a seed directly from diploid maternal tissue or an unfertilized egg.\",\"memoryTrigger\":\"Apomixis: 'Apo' (away from) + 'mixis' (mixing/fertilization).\",\"visualPrompt\":\"Imagine a photocopy machine (apomixis) producing an identical seed without needing a second parent.\",\"commonTrap\":\"Confusing apomixis (seeds) with parthenocarpy (fruits).\"}",
+        "keyFormulas": [
+          "Apomixis = Seed development - Fertilization"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-005",
+          "questionType": "theory_conceptual"
+        }
+      },
+      {
+        "id": "2fc64243-8ac4-40b1-9ea4-6038def50108",
+        "text": "A systematic botanist identifies a floral specimen exhibiting a polypetalous corolla characterized by a large posterior standard petal overlapping two lateral wings, which in turn overlap two smallest anterior fused petals forming a keel-like structure. If this plant also possesses a syncarpous ovary with marginal placentation and diadelphous stamens, which of the following botanical descriptions most accurately represents the floral formula of this specimen?",
+        "options": [
+          "$\\text{\\%} \\, \\text{K}_{(5)} \\, \\text{C}_{1+2+(2)} \\, \\text{A}_{(9)+1} \\, \\underline{\\text{G}}_1$",
+          "$\\oplus \\, \\text{P}_{(3+3)} \\, \\text{A}_{3+3} \\, \\underline{\\text{G}}_{(3)}$",
+          "$\\text{\\%} \\, \\text{K}_{(5)} \\, \\text{C}_{1+2+2} \\, \\text{A}_{10} \\, \\underline{\\text{G}}_1$",
+          "$\\oplus \\, \\text{K}_{(5)} \\, \\text{C}_{1+2+(2)} \\, \\text{A}_{(9)+1} \\, \\underline{\\text{G}}_1$"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Morphology of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Symmetry Identification ::: The description 'posterior standard petal overlapping wings... overlapping keel' describes papilionaceous or vexillary aestivation. This is characteristic of zygomorphic flowers, denoted by the symbol $\\%$.",
+          "Calyx and Corolla ::: The corolla follows the pattern $1+2+(2)$, where the keel petals are fused. Fabaceae typically has a gamosepalous calyx $\\text{K}_{(5)}$.",
+          "Androecium ::: The 'diadelphous' condition means stamens are in two bundles. In Fabaceae, this is usually $(9)+1$.",
+          "Gynoecium ::: Marginal placentation and a monocarpellary superior ovary are characteristic of Fabaceae, represented as $\\underline{\\text{G}}_1$.",
+          "Conclusion ::: Option (b) correctly synthesizes all these morphological traits into the standardized NCERT floral formula."
+        ],
+        "examTip": "Always identify the symmetry symbol first to eliminate 50% of options. 'Vexillary' is a dead giveaway for Zygomorphic (%) and Fabaceae.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Fabaceae (formerly Papilionoideae) is characterized by zygomorphic symmetry, papilionaceous corolla, diadelphous stamens, and a monocarpellary superior ovary with marginal placentation.\",\"memoryTrigger\":\"Vexillary = 'V' for Very unique (1+2+2 arrangement); Diadelphous = '9+1' (Team of 9 and 1 lone wolf).\",\"visualPrompt\":\"Imagine a pea flower: the big 'Standard' petal is like a hood, 'Wings' on the side, and the 'Keel' at the bottom like a boat's hull.\",\"commonTrap\":\"Confusing the 'percent' symbol (%) for zygomorphic with the 'plus' (+) symbol for actinomorphic. Also, forgetting brackets represent fusion.\"}",
+        "keyFormulas": [
+          "$\\text{\\%}$ : Zygomorphic (Bilateral symmetry)",
+          "$\\text{A}_{(9)+1}$ : Diadelphous stamens",
+          "$\\text{C}_{1+2+(2)}$ : Vexillary aestivation"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-007",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "d597e304-9583-4dbe-ba19-4b30aacf7929",
+        "text": "During the processing of pro-insulin into mature, functional insulin in the human body, which of the following events is considered an 'EXCEPTIONAL' feature that differentiates the recombinant DNA-produced insulin (like Eli Lilly's) from the naturally synthesized version in pancreatic $\\beta$-cells prior to final secretion?",
+        "options": [
+          "The use of mammalian cell lines to ensure proper post-translational glycosylation of the insulin molecule.",
+          "The formation of disulfide bridges between Peptide A and Peptide B.",
+          "The synthesis of Peptide A and Peptide B as separate chains in different host cells to be linked post-translationally.",
+          "The requirement of a proteolytic cleavage to remove the extra stretch called C-peptide."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biotechnology and its Applications",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Natural Processing ::: In humans, insulin is synthesized as a pro-hormone containing A, B, and C peptides. The C-peptide is removed during maturation. Disulfide bonds link A and B.",
+          "The rDNA Challenge ::: *E. coli* (the original host used by Eli Lilly) does not have the machinery to process pro-insulin (remove C-peptide).",
+          "The Eli Lilly Innovation ::: To bypass the C-peptide removal problem, they synthesized DNA sequences for Chain A and Chain B separately, inserted them into different *E. coli* batches, and combined the extracted chains by creating disulfide bonds in vitro.",
+          "Identify the Exception ::: Natural insulin is made as one long chain (pro-insulin). rDNA insulin (initially) was made as two separate chains. This 'separate synthesis' is the exception to the natural 'single chain' rule.",
+          "Evaluate glycosylation ::: Insulin is not a glycoprotein; glycosylation (option d) is irrelevant here."
+        ],
+        "examTip": "The C-peptide is NOT present in mature insulin. In rDNA technology, the biggest hurdle wasn't making the protein, but getting rid of the C-peptide without human enzymes.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Insulin: 51 amino acids. A chain (21), B chain (30). Linked by 2 inter-chain and 1 intra-chain disulfide bonds. C-peptide is a 'spacer' for correct folding.\",\"memoryTrigger\":\"C-peptide is 'C-ya' (See ya!) in mature insulin.\",\"visualPrompt\":\"Imagine a paperclip (C-peptide) holding two strings (A and B) together while you glue them (disulfide bonds), then throwing the paperclip away.\",\"commonTrap\":\"Thinking rDNA insulin is made as pro-insulin and then processed. (It's usually made as separate A/B chains in bacteria).\"}",
+        "keyFormulas": [],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-016",
+          "questionType": "EXCEPTION_BASED_MCQ"
+        }
+      },
+      {
+        "id": "197be60a-3f60-4ccc-bc69-781aebe59f91",
+        "text": "Match the following anatomical and physiological components of the $C_4$ photosynthetic pathway (Kranz Anatomy) listed in Column I with their respective primary functions or locations in Column II, and select the correct option.\\n\\n\\begin{itemize}\\n    \\item[A.] PEP carboxylase \\quad p. Primary $CO_2$ fixation in Mesophyll\\n    \\item[B.] RuBisCO \\quad q. Decarboxylation in Bundle Sheath\\n    \\item[C.] Malic acid \\quad r. Calvin Cycle in Bundle Sheath\\n    \\item[D.] Plasmodesmata \\quad s. Transport of $C_4$ acids\\n\\end{itemize}",
+        "options": [
+          "A-p, B-r, C-q, D-s",
+          "A-r, B-p, C-s, D-q",
+          "A-p, B-q, C-r, D-s",
+          "A-s, B-r, C-p, D-q"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Photosynthesis in Higher Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify A ::: PEP carboxylase is the primary $CO_2$ fixing enzyme located in the mesophyll cells of $C_4$ plants (A-p).",
+          "Identify B ::: RuBisCO is absent in mesophyll but present in bundle sheath cells where it carries out the $C_3$ (Calvin) cycle (B-r).",
+          "Identify C ::: Malic acid (a 4-carbon acid) is formed in mesophyll and transported to bundle sheath where it undergoes decarboxylation to release $CO_2$ (C-q).",
+          "Identify D ::: Plasmodesmata are the cytoplasmic bridges through which organic acids are transported between mesophyll and bundle sheath cells (D-s).",
+          "Consolidate ::: A-p, B-r, C-q, D-s matches option 0."
+        ],
+        "examTip": "In $C_4$ plants, remember: 'M' for Mesophyll has 'P' (PEPcase) and 'B' for Bundle Sheath has 'R' (RuBisCO). Alphabetically, M comes before B and P comes before R.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"The $C_4$ pathway is an adaptation to avoid photorespiration by concentrating $CO_2$ around RuBisCO in the bundle sheath cells.\",\"memoryTrigger\":\"C4 = spatial separation; CAM = temporal separation.\",\"visualPrompt\":\"Imagine a relay race: Mesophyll catches the baton ($CO_2$) and hands it off to the Bundle Sheath via a tunnel (plasmodesmata).\",\"commonTrap\":\"Thinking RuBisCO is in the mesophyll of $C_4$ plants.\"}",
+        "keyFormulas": [
+          "$CO_2 + PEP \\xrightarrow{PEPcase} OAA$",
+          "$Malate \\xrightarrow{Bundle Sheath} Pyruvate + CO_2$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-004",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "1651e1fd-db7f-45e9-aa32-87bd6e3e62c3",
+        "text": "In the process of agarose gel electrophoresis used in biotechnology, DNA fragments are separated based on their size. If a researcher forgets to add Ethidium bromide to the gel and instead attempts to view the DNA under normal visible light, which of the following will be the most likely outcome?",
+        "options": [
+          "DNA bands will be completely invisible as DNA does not absorb or emit visible light.",
+          "Dark blue bands will be visible due to the phosphorescence of the sugar-phosphate backbone.",
+          "Bright orange bands will be visible because DNA is naturally pigmented.",
+          "The DNA fragments will move towards the cathode instead of the anode."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Biotechnology Principles and Processes",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "DNA Visibility ::: Pure DNA is colorless and cannot be seen under normal light or even UV light without a staining agent.",
+          "Role of Ethidium Bromide ($EtBr$) ::: $EtBr$ is an intercalating agent that binds between DNA bases.",
+          "Fluorescence ::: When bound to DNA and exposed to UV radiation, $EtBr$ fluoresces a bright orange color.",
+          "Visible Light vs UV ::: Visible light does not excite $EtBr$ sufficiently, and without $EtBr$, there is no signal at all.",
+          "Conclusion ::: Without $EtBr$ and UV light, the bands are invisible. Adding a loading dye (like Bromophenol blue) helps track the run, but doesn't stain the DNA itself for visualization."
+        ],
+        "examTip": "Remember: DNA + $EtBr$ + UV = Orange. Missing any of these three components results in zero visibility of DNA bands.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"DNA is negatively charged and moves towards the anode. Smaller fragments move faster/further. Visualization requires a fluorophore ($EtBr$) and a specific excitation source (UV light).\",\"memoryTrigger\":\"E-B-U-O: Ethidium Bromide + UV = Orange.\",\"visualPrompt\":\"Imagine a race in the dark. You can't see the runners (DNA) unless they are wearing glowing vests ($EtBr$) and you turn on a blacklight (UV).\",\"commonTrap\":\"Confusing 'Loading Dye' (visible) with 'Staining Dye' (EtBr). Loading dye tells you when to stop the power; EtBr tells you where the DNA is.\"}",
+        "keyFormulas": [
+          "$\\text{Velocity} \\propto 1/\\log(\\text{Molecular Weight})$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-002",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "9b8cc7f0-36a2-46dc-9ebb-46bd4d58d8ca",
+        "text": "During a high-precision laboratory simulation of the Meselson and Stahl density gradient centrifugation experiment, a population of $Escherichia coli$ cells was cultured in a heavy isotope medium ($^{15}NH_4Cl$) until the double-stranded DNA was fully labeled. Subsequently, these cells were transferred to a standard light medium ($^{14}NH_4Cl$) for exactly three generations (60 minutes). Based on the semi-conservative replication model, what is the expected ratio of DNA molecules containing only the light isotope ($^{14}N/^{14}N$) to those containing the hybrid isotope ($^{15}N/^{14}N$) in the final resulting population?",
+        "options": [
+          "1 : 3",
+          "1 : 1",
+          "7 : 1",
+          "3 : 1"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Molecular Basis of Inheritance",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Generation 0 Start ::: We begin with 100% heavy DNA ($^{15}N/^{15}N$). Total molecules = 1.",
+          "Generation 1 (20 mins) ::: After one round of replication in $^{14}N$, the two strands separate. Each acts as a template for a new $^{14}N$ strand. Result: 2 Hybrid molecules ($^{15}N/^{14}N$).",
+          "Generation 2 (40 mins) ::: These 2 hybrid molecules produce 4 molecules. The 2 original $^{15}N$ strands still form 2 hybrids, and the 2 $^{14}N$ strands form 2 light molecules. Result: 2 Hybrid, 2 Light.",
+          "Generation 3 (60 mins) ::: Following the formula $2^n$ (where $n=3$), total molecules = $2^3 = 8$. The number of hybrid molecules remains constant at 2. Therefore, Light molecules = $8 - 2 = 6$.",
+          "Ratio Calculation ::: The ratio of Light ($^{14}N/^{14}N$) to Hybrid ($^{15}N/^{14}N$) is $6 : 2$, which simplifies to $3 : 1$."
+        ],
+        "examTip": "In semi-conservative replication problems, the number of hybrid DNA molecules always remains exactly 2, regardless of how many generations pass. Simply calculate the total molecules using $2^n$ and subtract 2 to find the light DNA count.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"DNA replication is semi-conservative: each daughter DNA molecule retains one parental strand and gains one newly synthesized strand. In $^{14}N$ medium, the 'new' strand is always light, while the 'original' $^{15}N$ strands are eventually diluted among a growing population of light strands.\",\"memoryTrigger\":\"The 'Rule of Two': No matter the generation, if you start with one heavy DNA, you will only ever have TWO hybrid molecules in subsequent light-medium replications.\",\"visualPrompt\":\"Imagine a pair of red shoes. Every time you duplicate them, you must use one old shoe (red) and one new shoe (blue). You will only ever have two pairs that have one red shoe each; all other pairs will be entirely blue.\",\"commonTrap\":\"Students often calculate the ratio of Hybrid to Light ($1:3$) instead of Light to Hybrid ($3:1$). Always read the order of terms in the ratio carefully.\"}",
+        "keyFormulas": [
+          "$Total\\ Molecules = 2^n$ where $n = generations$",
+          "$Hybrid\\ Molecules = 2$ (constant after Gen 1)",
+          "$Light\\ Molecules = 2^n - 2$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-001",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "21032307-e1a5-4fc3-8080-7da629df9c99",
+        "text": "Identify the EXCEPTIONAL case in the life cycle of algae where a member belonging to the class Phaeophyceae (Brown Algae) exhibits a 'Diplontic' life cycle, unlike the majority of its class which are 'Haplodiplontic' or 'Haplontic'?",
+        "options": [
+          "Fucus",
+          "Chlamydomonas",
+          "Polysiphonia",
+          "Ectocarpus"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Plant Kingdom",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Recall Brown Algae life cycles ::: Most Brown algae like *Ectocarpus* and *Kelps* are Haplodiplontic.",
+          "Identify the exception ::: NCERT explicitly mentions *Fucus* as a brown alga that is Diplontic.",
+          "Evaluate options ::: *Ectocarpus* (Haplodiplontic), *Polysiphonia* (Haplodiplontic Red Algae), *Chlamydomonas* (Haplontic Green Algae).",
+          "Conclusion ::: *Fucus* is the correct exceptional case."
+        ],
+        "examTip": "In Plant Kingdom, exceptions are the rule for exams. Remember: 'Fucus is Fast (Diplontic)' and 'Ecto-Poly-Kelp are Haplodiplontic'.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Most algae have a haplontic life cycle. However, Ectocarpus, Polysiphonia, and Kelps are haplo-diplontic, while Fucus is a rare diplontic alga.\",\"memoryTrigger\":\"Fucus = Diplontic (F-D pair).\",\"visualPrompt\":\"Imagine a life cycle circle where almost the entire circle is the $2n$ (sporophytic) phase, like in humans.\",\"commonTrap\":\"Confusing Fucus with Ectocarpus.\"}",
+        "keyFormulas": [
+          "Diplontic = 2n phase is dominant",
+          "Haplontic = n phase is dominant"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-003",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "8aaf64ef-541e-4435-9eb2-5b7e71dfc3cc",
+        "text": "A student is analyzing an enzymatic reaction where the substrate is Succinate and the enzyme is Succinate Dehydrogenase. Upon the addition of a substance called Malonate, which closely resembles Succinate in molecular structure, the rate of reaction significantly decreases. Based on the competitive inhibition model described in NCERT, what happens to the $K_m$ value of the enzyme for the substrate, and how can the inhibition be overcome?",
+        "options": [
+          "The $K_m$ decreases; the inhibition is irreversible regardless of substrate concentration.",
+          "The $K_m$ increases; the inhibition can be overcome by increasing the substrate concentration.",
+          "The $K_m$ remains constant; the inhibition is overcome by adding more enzyme.",
+          "The $K_m$ increases; the inhibition is overcome by lowering the temperature."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Biomolecules",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Inhibitor ::: Malonate is a classic competitive inhibitor of Succinate Dehydrogenase because it competes with Succinate for the active site.",
+          "Effect on $V_{max}$ ::: In competitive inhibition, $V_{max}$ remains unchanged because high substrate concentration can out-compete the inhibitor.",
+          "Effect on $K_m$ ::: Because more substrate is needed to reach $\\frac{1}{2} V_{max}$ in the presence of an inhibitor, the apparent $K_m$ increases.",
+          "Overcoming Inhibition ::: Competitive inhibition is reversible; by increasing the concentration of the substrate (Succinate), the probability of the enzyme binding to the substrate increases, overcoming the inhibitor.",
+          "Conclusion ::: $K_m$ increases, and it is overcome by increasing substrate concentration."
+        ],
+        "examTip": "Competitive Inhibition: $K_m$ Up, $V_{max}$ Same. Non-Competitive: $K_m$ Same, $V_{max}$ Down.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Competitive inhibitors 'fool' the enzyme because they look like the substrate. They don't change the enzyme's maximum capacity ($V_{max}$), just its 'affinity' (apparent $K_m$) by getting in the way.\",\"memoryTrigger\":\"Competition = $K_m$ Climbs (Up).\",\"visualPrompt\":\"Imagine a musical chairs game where 'imposters' (inhibitors) sit in chairs, but if you bring in 1000 real players (substrates), the imposters won't stand a chance.\",\"commonTrap\":\"Thinking $V_{max}$ decreases. $V_{max}$ only decreases in non-competitive inhibition where the inhibitor 'breaks' the enzyme's efficiency.\"}",
+        "keyFormulas": [
+          "$V = \\frac{V_{max} [S]}{K_m + [S]}$",
+          "Competitive: $K_m^{app} = K_m (1 + \\frac{[I]}{K_i})$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 1,
+        "metadata": {
+          "identityId": "ID-NB-012",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "9d84b8f1-c35c-4522-8e6e-5bfde959666c",
+        "text": "Phyllotaxy is the pattern of arrangement of leaves on the stem. Which of the following plants exhibits an 'EXCEPTION' to the alternate phyllotaxy commonly seen in the family representing the 'Potato family', instead showing a 'Whorled' arrangement where more than two leaves arise at each node?",
+        "options": [
+          "Alstonia",
+          "Guava",
+          "Mustard",
+          "Calotropis"
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Morphology of Flowering Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Define Phyllotaxy types ::: Alternate (one leaf/node), Opposite (two leaves/node), Whorled (>two leaves/node).",
+          "Analyze options ::: Mustard is Alternate. Calotropis and Guava are Opposite.",
+          "Identify the 'Whorled' representative ::: NCERT explicitly mentions Alstonia as the example for Whorled phyllotaxy.",
+          "Verify the 'Exception' logic ::: While Solanaceae (Potato family) shows alternate phyllotaxy, the question asks for a plant that shows a 'Whorled' arrangement specifically.",
+          "Conclusion ::: Alstonia is the only correct fit for the whorled description provided."
+        ],
+        "examTip": "Whorled = 'Whole circle'. Only one major example in NCERT: Alstonia. Opposite = Calotropis and Guava (C.G.).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Leaves are arranged to minimize shading of lower leaves. Whorled phyllotaxy is the most complex of these arrangements.\",\"memoryTrigger\":\"A-W: Alstonia is Whorled. C-O-G: Calotropis and Guava are Opposite.\",\"visualPrompt\":\"Imagine Alstonia leaves arranged like the petals of a flower or the spokes of a wheel at every node.\",\"commonTrap\":\"Confusing 'Opposite' (Calotropis) with 'Whorled'. In opposite, leaves are in pairs; in whorled, they are in a cluster of 3 or more.\"}",
+        "keyFormulas": [
+          "$\\text{Alternate} = 1 \\text{ leaf/node}$",
+          "$\\text{Opposite} = 2 \\text{ leaves/node}$",
+          "$\\text{Whorled} > 2 \\text{ leaves/node}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-007",
+          "questionType": "EXCEPTION_BASED_MCQ"
+        }
+      },
+      {
+        "id": "b0051452-abd5-46ce-87c5-c5692bb32386",
+        "text": "A patient diagnosed with an autosomal recessive disorder, Phenylketonuria (PKU), is found to lack a specific hepatic enzyme. If a couple, both of whom are carriers (heterozygous) for the PKU allele, plans to have children, what is the mathematical probability that their first child will be a phenotypically normal carrier of the trait?",
+        "options": [
+          "$50\\%$",
+          "$25\\%$",
+          "$100\\%$",
+          "$75\\%$"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Principles of Inheritance and Variation",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Define genotypes for carriers. Since PKU is autosomal recessive, let 'A' be normal and 'a' be the PKU allele. Carriers are 'Aa'.",
+          "Step 2: Set up the cross: $Aa \\times Aa$.",
+          "Step 3: Determine the zygotic combinations using a Punnett square: $AA, Aa, Aa, aa$.",
+          "Step 4: Identify the requested phenotype/genotype: 'phenotypically normal carrier' means the genotype 'Aa'.",
+          "Step 5: Calculate the frequency of 'Aa' in the progeny: 2 out of 4, which is $2/4 = 1/2 = 50\\%$."
+        ],
+        "examTip": "Differentiate between 'carrier' (Aa) and 'affected' (aa). In a cross between two carriers, the ratio is always 1 (Normal) : 2 (Carrier) : 1 (Affected).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Autosomal recessive traits only express the phenotype in the homozygous recessive condition. Heterozygotes are carriers who do not show symptoms but can pass the allele to offspring.\",\"memoryTrigger\":\"Carrier = Half-affected genotype (Aa), but zero-affected phenotype.\",\"visualPrompt\":\"Imagine a 4-square grid. The diagonal always holds the 2 carriers in a heterozygote cross.\",\"commonTrap\":\"Confusing 'phenotypically normal' (includes $AA$ and $Aa$) with 'carrier' (only $Aa$).\"}",
+        "keyFormulas": [
+          "\\text{Carrier Probability in } Aa \\times Aa = 2/4",
+          "\\text{Affected Probability in } Aa \\times Aa = 1/4"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-009",
+          "questionType": "calculation"
+        }
+      },
+      {
+        "id": "0c18bc45-9e85-49ab-b6eb-bbd5c020bdd0",
+        "text": "In the historical 'Transforming Principle' experiment conducted by Frederick Griffith using *Streptococcus pneumoniae*, which of the following observations specifically led to the conclusion that a 'transforming substance' was transferred between bacterial strains?",
+        "options": [
+          "Mice injected with S-strain (virulent) bacteria died.",
+          "Mice injected with heat-killed S-strain bacteria survived.",
+          "Mice injected with a mixture of heat-killed S-strain and live R-strain bacteria died.",
+          "Mice injected with R-strain (non-virulent) bacteria survived."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Molecular Basis of Inheritance",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1: Recall the four steps of Griffith's experiment (1928).",
+          "Step 2: Step 1 (Live S) -> Mouse dies. Step 2 (Live R) -> Mouse lives.",
+          "Step 3: Step 3 (Heat-killed S) -> Mouse lives. This shows heat kills the bacteria's ability to cause disease.",
+          "Step 4: Step 4 (Heat-killed S + Live R) -> Mouse dies. This is the unexpected result.",
+          "Step 5: Griffith recovered live S-strain from the dead mice in Step 4, concluding that something from the dead S-strain transformed the live R-strain into S-strain."
+        ],
+        "examTip": "The 'Transformation' is only evident when two non-lethal components (Heat-killed S and Live R) are combined to produce a lethal effect.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Transformation is the uptake of foreign genetic material by a bacterium. In Griffith's case, the R-strain took up DNA for the polysaccharide capsule from the heat-killed S-strain.\",\"memoryTrigger\":\"S = Smooth = Scary (Virulent). R = Rough = Rested (Non-virulent).\",\"visualPrompt\":\"Imagine a dead soldier (Heat-killed S) giving his armor (DNA) to a live civilian (R-strain), making the civilian a soldier.\",\"commonTrap\":\"Thinking Griffith proved DNA was the genetic material. He only proved a 'transforming principle' existed; Avery et al. proved it was DNA.\"}",
+        "keyFormulas": [
+          "$\\text{Heat-Killed S} + \\text{Live R} = \\text{Live S}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-001",
+          "questionType": "theory_conceptual"
+        }
+      },
+      {
+        "id": "45310260-b15d-418e-ae93-3596eb6d14c5",
+        "text": "During a laboratory session, a student observes a cell undergoing meiosis. The student notes the appearance of recombination nodules on the homologous chromosomes where crossing over occurs. If the enzyme recombinase is active during this phase, which specific sub-stage of Prophase I is the student observing, and what is the physical significance of this event regarding genetic variation?",
+        "options": [
+          "Leptotene; it is characterized by the compaction of chromatin into chromosomes.",
+          "Zygotene; it marks the beginning of synaptonemal complex formation.",
+          "Pachytene; it facilitates the exchange of genetic material between non-sister chromatids.",
+          "Diplotene; it involves the dissolution of the synaptonemal complex."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Cell Cycle and Cell Division",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Stage ::: The presence of 'recombination nodules' and 'crossing over' are hallmark features of the Pachytene stage.",
+          "Enzyme Activity ::: NCERT specifies that 'crossing over' is an enzyme-mediated process involving the enzyme 'recombinase'.",
+          "Biological Significance ::: Crossing over results in the exchange of genetic material between non-sister chromatids of two homologous chromosomes.",
+          "Variation Link ::: This exchange leads to recombination of genetic material, which is a primary source of variation in sexually reproducing populations.",
+          "Conclusion ::: The stage is Pachytene, and the significance is the exchange of genetic material."
+        ],
+        "examTip": "For Meiosis I: Leptotene (Link) -> Zygotene (Zipper/Synapsis) -> Pachytene (Patch/Cross) -> Diplotene (Dissolve) -> Diakinesis (Detach).",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Pachytene is the 'business end' of Prophase I. It is where genetic 'shuffling' happens via the physical breakage and rejoining of DNA strands.\",\"memoryTrigger\":\"Pachytene = Packing & Patching (Recombination).\",\"visualPrompt\":\"Imagine two distinct threads of different colors being cut and swapped at specific 'knots' (nodules).\",\"commonTrap\":\"Students often confuse Zygotene (Synapsis) with Pachytene (Crossing over). Remember: You must 'zip' (Zygotene) before you can 'swap' (Pachytene).\"}",
+        "keyFormulas": [
+          "Recombination Frequency $\\propto$ Distance between genes (though more genetic than cell bio focus)",
+          "Meiosis I = $2n \\rightarrow n$ (Reductional Division)"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-013",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "a4425dff-db68-44d4-a3f6-78562a227902",
+        "text": "A student identifies two pteridophytes, $Selaginella$ and $Salvinia$, which produce two different kinds of spores (macro and micro). This condition is considered a significant evolutionary step toward the 'seed habit' because:",
+        "options": [
+          "They produce seeds without a fruit wall, unlike angiosperms.",
+          "The megaspores are released immediately after formation to germinate in soil.",
+          "The sporophyte is dependent on the gametophyte for nutrition.",
+          "The female gametophyte is retained on the parent sporophyte for variable periods."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Plant Kingdom",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1 ::: Define the condition described: Heterospory (production of two types of spores).",
+          "Step 2 ::: Identify the genera mentioned: $Selaginella$ and $Salvinia$ are the classic NCERT examples of heterosporous pteridophytes.",
+          "Step 3 ::: Relate heterospory to the seed habit. The key requirement for a seed is that the embryo develops within the parent.",
+          "Step 4 ::: Recall the specific NCERT line: 'The development of zygotes into young embryos takes place within the female gametophytes which are retained on the parent sporophytes'.",
+          "Step 5 ::: Select the option that reflects this retention and internal development."
+        ],
+        "examTip": "Heterospory + Retention of female gametophyte = Seed Habit Precursor. These three terms are almost always linked in NEET questions.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Most pteridophytes are homosporous (one type of spore). Heterosporous plants produce small microspores (male) and large megaspores (female). In $Selaginella$, the female gametophyte doesn't fall off; it stays on the plant, allowing the embryo to develop safely—similar to how a seed works.\",\"memoryTrigger\":\"S&S (Selaginella & Salvinia) = Seeds of Success (Heterospory).\",\"visualPrompt\":\"Imagine a mother plant holding onto her 'baby' (embryo) instead of throwing the 'egg' (spore) onto the ground.\",\"commonTrap\":\"Thinking $Selaginella$ actually produces seeds. It only shows the *precursor* to the habit.\"}",
+        "keyFormulas": [
+          "$\\text{Heterospory} \\rightarrow \\text{Retention of Megagametophyte} \\rightarrow \\text{Seed Habit}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-003",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "16bc8bfe-834f-4b3b-8c05-1dd59f8e548c",
+        "text": "An agricultural scientist is analyzing the decomposition rate of different organic substrates. Substrate X consists of fallen leaves rich in nitrogen and water-soluble sugars, while Substrate Y consists of woody debris high in lignin and chitin. Which of the following statements correctly predicts the decomposition rate under identical climatic conditions?",
+        "options": [
+          "Substrate X will decompose faster because it is rich in nitrogen and low in lignin.",
+          "Substrate X will decompose slower because water-soluble sugars inhibit microbial growth.",
+          "Both substrates will decompose at the same rate as climatic factors are identical.",
+          "Substrate Y will decompose faster due to the structural complexity of chitin."
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Ecosystem",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1 ::: Recall the factors affecting decomposition rate: chemical composition of detritus and climatic factors.",
+          "Step 2 ::: Identify the chemical rule: Decomposition is *slower* if detritus is rich in lignin and chitin.",
+          "Step 3 ::: Identify the converse rule: Decomposition is *faster* if detritus is rich in nitrogen and water-soluble substances like sugars.",
+          "Step 4 ::: Compare Substrate X (N-rich) and Substrate Y (Lignin-rich).",
+          "Step 5 ::: Conclude that X is faster and Y is slower based on NCERT guidelines."
+        ],
+        "examTip": "Lignin and Chitin are like 'biological armor'. They are hard to break down, so they always slow down the decomposition clock.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Decomposition is an oxygen-consuming process. Its rate is determined by the 'quality' of detritus. Nitrogen-rich materials are 'tasty' for microbes, whereas lignin is 'tough' and slows them down.\",\"memoryTrigger\":\"N-S-F (Nitrogen-Sugar-Fast); L-C-S (Lignin-Chitin-Slow).\",\"visualPrompt\":\"Imagine a microbe trying to eat a soft fruit (Sugar - Fast) versus trying to eat a piece of plastic (Lignin - Slow).\",\"commonTrap\":\"Thinking that higher complexity always means faster biological activity.\"}",
+        "keyFormulas": [
+          "$\\text{Decomposition Rate} \\propto \\frac{1}{\\text{Lignin/Chitin Content}}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-011",
+          "questionType": "property_based"
+        }
+      },
+      {
+        "id": "f50ac5cd-63ec-4b71-bd12-007fff487fe9",
+        "text": "In a laboratory simulation of cellular metabolism, a researcher observes that the conversion of Succinyl-CoA to Succinic acid in the mitochondrial matrix is coupled with the synthesis of a high-energy phosphate bond. If the total $NADH + H^{+}$ produced during one complete turn of the Krebs cycle is $x$, and the total $FADH_{2}$ produced is $y$, which of the following statements correctly identifies the nature of this specific step and its quantitative relationship to the total decarboxylation events per acetyl group entry?",
+        "options": [
+          "The step involves Cytochrome c oxidase; the total decarboxylation events are equivalent to $x + y$.",
+          "The step is an oxidative decarboxylation; the number of $CO_{2}$ molecules released is $x - 1$.",
+          "The step represents substrate-level phosphorylation; the number of $CO_{2}$ molecules released per turn is equal to $2y + 0$.",
+          "The step represents substrate-level phosphorylation; the number of $CO_{2}$ molecules released is equal to $x - 1$."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Respiration in Plants",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the specific reaction ::: The conversion of Succinyl-CoA to Succinic acid is the only step in the TCA cycle where substrate-level phosphorylation occurs, producing GTP (which is converted to ATP).",
+          "Quantify Krebs Cycle intermediates ::: In one turn of the TCA cycle (per Acetyl CoA), $3$ molecules of $NADH + H^{+}$ ($x=3$) and $1$ molecule of $FADH_{2}$ ($y=1$) are produced.",
+          "Calculate Decarboxylation events ::: During the TCA cycle, decarboxylation occurs twice (Isocitrate to $\\alpha$-ketoglutarate and $\\alpha$-ketoglutarate to Succinyl-CoA), releasing $2$ molecules of $CO_{2}$.",
+          "Verify the mathematical relationship ::: Since $x = 3$, and $CO_{2}$ released $= 2$, the relationship $CO_{2} = x - 1$ (i.e., $2 = 3 - 1$) holds true.",
+          "Conclusion ::: Option (c) correctly identifies the process as substrate-level phosphorylation and satisfies the quantitative logic."
+        ],
+        "examTip": "Always track the 'Carbon Currency'. In TCA, 2 carbons enter as Acetyl-CoA and 2 carbons leave as $CO_{2}$. Substrate-level phosphorylation happens exactly once per turn between two 4-carbon compounds.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Substrate-level phosphorylation is the direct transfer of a phosphate group to ADP/GDP without the involvemnt of an electron transport chain and oxygen.\",\"memoryTrigger\":\"S-S Link: Succinyl-CoA to Succinate is the 'S'ubstrate-level 'S'tep.\",\"visualPrompt\":\"Imagine a conveyor belt where a heavy box (CoA) is swapped for a gold coin (GTP) while the object (Succinate) remains the same size.\",\"commonTrap\":\"Confusing the 3 NADH of the cycle with the 1 NADH of the Link reaction. The question specifies 'one complete turn of the Krebs cycle'.\"}",
+        "keyFormulas": [
+          "$1 \\text{ Acetyl-CoA} \\rightarrow 2CO_{2} + 3NADH + 1FADH_{2} + 1ATP/GTP$",
+          "$1 \\text{ Glucose} \\rightarrow 2 \\text{ turns of TCA cycle}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-017",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "a8b4bd9d-a163-4433-b776-49396e615ba9",
+        "text": "A student identifies a biomolecule in a plant extract that is a substituted methane. The molecule contains an amino group, an acidic group, a hydrogen, and a variable R group. If the R group is a 'hydroxymethyl' moiety, which amino acid is this, and what unique property does it exhibit in a solution of specific pH where it exists as a 'Zwitterion'?",
+        "options": [
+          "It is Serine; it possesses both positive and negative charges on the same molecule with net zero charge.",
+          "It is Glycine; it is the simplest amino acid and is optically inactive.",
+          "It is Cysteine; it contains sulfur and forms disulfide bridges.",
+          "It is Alanine; it contains a methyl group and acts only as a cation in acidic medium."
+        ],
+        "marks": 4,
+        "difficulty": "Moderate",
+        "topic": "Biomolecules",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the R-group ::: The question states the R group is 'hydroxymethyl' ($-CH_{2}OH$).",
+          "Correlate with Amino Acid ::: In NCERT, Serine is the amino acid where $R = -CH_{2}OH$. (Glycine has $R=H$, Alanine has $R=CH_{3}$).",
+          "Define Zwitterion ::: A Zwitterion is a dipolar ion where the amino group is protonated ($-NH_{3}^{+}$) and the carboxyl group is deprotonated ($-COO^{-}$), resulting in a net charge of zero.",
+          "Evaluate options ::: Option (a) correctly identifies Serine and the Zwitterion property.",
+          "Conclusion ::: Serine with its hydroxymethyl group is the correct answer."
+        ],
+        "examTip": "Memoize the 3 NCERT R-groups: $H$ (Glycine), $CH_{3}$ (Alanine), $CH_{2}OH$ (Serine). These are high-yield for structure questions.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Amino acids are amphoteric. At a specific pH (isoelectric point), they exist as Zwitterions with balanced charges.\",\"memoryTrigger\":\"S-H-O: Serine has Hydroxyl (in hydroxymethyl).\",\"visualPrompt\":\"Imagine a molecule with a 'plus' sign on one end and a 'minus' sign on the other, like a battery that is internally short-circuited.\",\"commonTrap\":\"Confusing Serine with Alanine. Alanine has a simple methyl group ($-CH_{3}$), not hydroxymethyl.\"}",
+        "keyFormulas": [
+          "$\\text{General structure: } R-CH(NH_{2})-COOH$",
+          "$\\text{Zwitterion: } R-CH(NH_{3}^{+})-COO^{-}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 0,
+        "metadata": {
+          "identityId": "ID-NB-012",
+          "questionType": "structure_based"
+        }
+      },
+      {
+        "id": "fb012b61-0c15-49fb-a5d1-99a87a765ed1",
+        "text": "In a controlled experimental cross involving *Pisum sativum*, a researcher observes the inheritance of seed shape. If a plant homozygous for round seeds ($RR$) is crossed with a plant homozygous for wrinkled seeds ($rr$), and the resulting $F_1$ generation is allowed to undergo self-pollination, what is the expected probability of obtaining a progeny in the $F_2$ generation that possesses a genotype identical to the $F_1$ parent, according to the principles of Mendelian segregation?",
+        "options": [
+          "0.25",
+          "1.00",
+          "0.50",
+          "0.75"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Principles of Inheritance and Variation",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Parental Genotypes ::: Identify the parents as $RR$ (Round) and $rr$ (Wrinkled).",
+          "$F_1$ Generation ::: The cross $RR \\times rr$ yields $100\\%$ $Rr$ (Round) progeny.",
+          "Self-pollination ::: $Rr \\times Rr$ (the $F_1$ genotype selfed) produces the $F_2$ generation.",
+          "Punnett Square Analysis ::: The genotypic ratio in $F_2$ is $1 RR : 2 Rr : 1 rr$.",
+          "Probability Calculation ::: The $F_1$ genotype is $Rr$. In the $F_2$ population, $Rr$ constitutes $\\frac{2}{4}$ or $0.50$ of the total progeny."
+        ],
+        "examTip": "Whenever a question asks for the probability of a genotype 'identical to the $F_1$' in a monohybrid $F_2$ cross, it is almost always referring to the heterozygote, which is always $50\\%$.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Mendel's Law of Segregation states that alleles separate during gamete formation so that each gamete receives only one allele. In a monohybrid cross of heterozygotes, the resulting genotypic ratio is always $1:2:1$.\",\"memoryTrigger\":\"F2 Genotype Ratio: $1-2-1$ (Homo-Hetero-Homo).\",\"visualPrompt\":\"Imagine a 4-box square where the diagonal consists of the matching $F_1$ heterozygotes.\",\"commonTrap\":\"Confusing 'phenotypic ratio' ($3:1$) with 'genotypic ratio' ($1:2:1$).\"}",
+        "keyFormulas": [
+          "Genotypic Ratio = $1 : 2 : 1$ for $F_2$ Monohybrid",
+          "Probability = $\\frac{\\text{Favorable Outcomes}}{\\text{Total Outcomes}}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-009",
+          "questionType": "application"
+        }
+      },
+      {
+        "id": "44827565-35df-41c6-84bb-e537ad2e9ac1",
+        "text": "On a logarithmic scale, the relationship between species richness ($S$) and area ($A$) for a wide variety of taxa is a straight line described by the equation $\\log S = \\log C + Z \\log A$. \\n\\nWhich of the following statements correctly interprets the ecological significance of the 'slope of the line' ($Z$) based on the scale of the area being analyzed?",
+        "options": [
+          "The value of $Z$ is independent of the taxonomic group or the specific region when the area analyzed is exceptionally large (like an entire continent).",
+          "For small areas like a single province, $Z$ values are remarkably steep, ranging from $0.6$ to $1.2$.",
+          "In very large areas like entire continents, the slope of the regression line is much steeper, with $Z$ values falling in the range of $0.6$ to $1.2$.",
+          "For frugivorous birds and mammals in tropical forests of different continents, the slope is found to be roughly $0.15$."
+        ],
+        "marks": 4,
+        "difficulty": "Hard",
+        "topic": "Biodiversity and Conservation",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Identify the Equation ::: The species-area relationship $S = CA^Z$ becomes linear on a log-log scale: $\\log S = \\log C + Z \\log A$. $Z$ is the slope.",
+          "Analyze Z for Small Areas ::: NCERT states that for small areas (e.g., plants in Britain, birds in California), the value of $Z$ is remarkably similar across taxa, usually $0.1$ to $0.2$.",
+          "Analyze Z for Large Areas ::: When the analysis spans much larger areas like entire continents, the slope ($Z$) becomes much steeper ($0.6$ to $1.2$). This is a critical distinction.",
+          "Verify Specific Cases ::: For frugivorous (fruit-eating) birds and mammals in tropical forests, $Z$ is specifically noted as $1.15$ (not $0.15$).",
+          "Conclusion ::: Statement (c) correctly identifies that $Z$ is steeper ($0.6-1.2$) for continental scales."
+        ],
+        "examTip": "Remember the specific number $1.15$ for tropical frugivores. NTA loves to swap $0.15$ and $1.15$ to trap students who only remember the digits.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"As area increases, species richness increases, but only up to a limit. The steepness ($Z$) indicates how 'fast' new species are added as you expand the search area.\",\"memoryTrigger\":\"Small Area = Small Z (0.1). Big Area = Big Z (1.1).\",\"visualPrompt\":\"A flat line vs. a steep mountain. The continent is the mountain.\",\"commonTrap\":\"Thinking $Z$ is always $0.1-0.2$ regardless of scale.\"}",
+        "keyFormulas": [
+          "$S = CA^Z$",
+          "$\\log S = \\log C + Z \\log A$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 2,
+        "metadata": {
+          "identityId": "ID-NB-015",
+          "questionType": "DIAGRAM_BASED_MCQ"
+        }
+      },
+      {
+        "id": "04bf34c7-7c1a-4bb9-acce-6c7af35816f2",
+        "text": "Match the ecosystem type in Column I with the characteristic shape of its Pyramid of Biomass in Column II and select the correct option:\\n\\nColumn I (Ecosystem)\\nA. Grassland Ecosystem\\nB. Aquatic (Sea) Ecosystem\\nC. Tree Ecosystem (Number)\\nD. General Energy Flow\\n\\nColumn II (Shape)\\n(i) Always Upright\\n(ii) Usually Upright\\n(iii) Inverted\\n(iv) Spindle-shaped",
+        "options": [
+          "A-(i), B-(ii), C-(iii), D-(iv)",
+          "A-(ii), B-(iv), C-(iii), D-(i)",
+          "A-(iii), B-(i), C-(ii), D-(iv)",
+          "A-(ii), B-(iii), C-(iv), D-(i)"
+        ],
+        "marks": 4,
+        "difficulty": "Easy",
+        "topic": "Ecosystem",
+        "subject": "Botany",
+        "examContext": "NEET",
+        "blooms": "Understand",
+        "solutionSteps": [
+          "Step 1 ::: Recall that the Pyramid of Energy is *always* upright regardless of the ecosystem (D-i).",
+          "Step 2 ::: Analyze the Pyramid of Biomass in the sea; since phytoplankton have a very low standing crop compared to fishes, it is inverted (B-iii).",
+          "Step 3 ::: Evaluate a grassland; producers out-weigh herbivores, making it usually upright (A-ii).",
+          "Step 4 ::: Consider the Pyramid of Numbers for a single tree; many birds feed on one tree, and parasites feed on birds, leading to a spindle shape (C-iv).",
+          "Step 5 ::: Match the combinations: A-ii, B-iii, C-iv, D-i."
+        ],
+        "examTip": "If you are unsure, always start with 'Pyramid of Energy'. It is the only one that is 'Always Upright' (10% law), which often eliminates two or more options immediately.",
+        "studyTip": "",
+        "masteryMaterial": "{\"coreConcept\":\"Ecological pyramids represent trophic levels. While most are upright, the biomass in aquatic systems is inverted because the reproductive rate of producers (phytoplankton) is high enough to support a larger biomass of consumers despite a small standing crop.\",\"memoryTrigger\":\"Sea-Biomass-Inverted (SBI - like the bank); Energy-Always-Up (EAU).\",\"visualPrompt\":\"Imagine a tiny base of phytoplankton supporting a huge whale (inverted triangle).\",\"commonTrap\":\"Confusing 'Pyramid of Numbers' with 'Pyramid of Biomass' for the aquatic ecosystem.\"}",
+        "keyFormulas": [
+          "$10\\% \\text{ Law of Energy Transfer}$"
+        ],
+        "thingsToRemember": [],
+        "questionVariations": [],
+        "correctOptionIndex": 3,
+        "metadata": {
+          "identityId": "ID-NB-011",
+          "questionType": "MATCH_FOLLOWING_MCQ"
+        }
+      }
+    ]
+  }
+}

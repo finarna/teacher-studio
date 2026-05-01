@@ -12,6 +12,10 @@ import neetPhysicsSetA from '../flagship_neet_physics_2026_set_a.json';
 import neetPhysicsSetB from '../flagship_neet_physics_2026_set_b.json';
 import neetChemistrySetA from '../flagship_neet_chemistry_2026_set_a.json';
 import neetChemistrySetB from '../flagship_neet_chemistry_2026_set_b.json';
+import neetBotanySetA from '../flagship_neet_botany_2026_set_a.json';
+import neetBotanySetB from '../flagship_neet_botany_2026_set_b.json';
+import neetZoologySetA from '../flagship_neet_zoology_2026_set_a.json';
+import neetZoologySetB from '../flagship_neet_zoology_2026_set_b.json';
 
 export interface Question {
     id: string;
@@ -136,70 +140,39 @@ export const getPredictedPapers = (): PaperSet[] => {
             questions: (neetChemistrySetB as any).test_config?.questions || []
         },
         {
-            id: 'neet-biology-a',
-            title: 'PLUS2AI OFFICIAL NEET BIOLOGY PREDICTION 2026: SET-A',
-            subject: 'Biology',
+            id: 'neet-botany-a',
+            title: 'PLUS2AI OFFICIAL NEET BOTANY PREDICTION 2026: SET-A',
+            subject: 'Botany',
             setName: 'A',
             examContext: 'NEET',
-            questions: (biologySetA as any).test_config?.questions || (biologySetA as any).questions || []
+            questions: (neetBotanySetA as any).test_config?.questions || []
         },
         {
-            id: 'neet-biology-b',
-            title: 'PLUS2AI OFFICIAL NEET BIOLOGY PREDICTION 2026: SET-B',
-            subject: 'Biology',
+            id: 'neet-botany-b',
+            title: 'PLUS2AI OFFICIAL NEET BOTANY PREDICTION 2026: SET-B',
+            subject: 'Botany',
             setName: 'B',
             examContext: 'NEET',
-            questions: (biologySetB as any).test_config?.questions || (biologySetB as any).questions || []
+            questions: (neetBotanySetB as any).test_config?.questions || []
+        },
+        {
+            id: 'neet-zoology-a',
+            title: 'PLUS2AI OFFICIAL NEET ZOOLOGY PREDICTION 2026: SET-A',
+            subject: 'Zoology',
+            setName: 'A',
+            examContext: 'NEET',
+            questions: (neetZoologySetA as any).test_config?.questions || []
+        },
+        {
+            id: 'neet-zoology-b',
+            title: 'PLUS2AI OFFICIAL NEET ZOOLOGY PREDICTION 2026: SET-B',
+            subject: 'Zoology',
+            setName: 'B',
+            examContext: 'NEET',
+            questions: (neetZoologySetB as any).test_config?.questions || []
         }
     ];
 
-    // Create a consolidated "Full Length Mock paper" (Mock 1)
-    const mock1Questions = [
-        ...papers.find(p => p.id === 'math-b')?.questions.slice(0, 20) || [],
-        ...papers.find(p => p.id === 'physics-b')?.questions.slice(0, 20) || [],
-        ...papers.find(p => p.id === 'chemistry-b')?.questions.slice(0, 20) || []
-    ];
-
-    papers.push({
-        id: 'mock-1',
-        title: 'PLUS2AI OFFICIAL KCET FULL-LENGTH MOCK 2026',
-        subject: 'PCM Consolidated',
-        setName: 'M1',
-        examContext: 'KCET',
-        questions: mock1Questions
-    });
-
-    // Mock 2: PCB (Physics/Chemistry/Biology)
-    const mock2Questions = [
-        ...papers.find(p => p.id === 'physics-a')?.questions.slice(30, 50) || [],
-        ...papers.find(p => p.id === 'chemistry-b')?.questions.slice(30, 50) || [],
-        ...papers.find(p => p.id === 'biology-b')?.questions.slice(30, 50) || []
-    ];
-
-    papers.push({
-        id: 'mock-2',
-        title: 'PLUS2AI OFFICIAL KCET FULL-LENGTH MOCK 2026',
-        subject: 'PCB Consolidated',
-        setName: 'M2',
-        examContext: 'KCET',
-        questions: mock2Questions
-    });
-
-    // Mock 3: NEET PCB Consolidated
-    const mockNeet1Questions = [
-        ...papers.find(p => p.id === 'neet-physics-a')?.questions.slice(0, 25) || [],
-        ...papers.find(p => p.id === 'neet-chemistry-a')?.questions.slice(0, 25) || [],
-        ...papers.find(p => p.id === 'neet-biology-a')?.questions.slice(0, 40) || []
-    ];
-
-    papers.push({
-        id: 'mock-neet-1',
-        title: 'PLUS2AI OFFICIAL NEET FULL-LENGTH MOCK 2026',
-        subject: 'PCB Consolidated',
-        setName: 'N1',
-        examContext: 'NEET',
-        questions: mockNeet1Questions
-    });
 
     return papers;
 };
