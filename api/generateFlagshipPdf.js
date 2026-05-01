@@ -114,13 +114,36 @@ ${JSON.stringify(qData, null, 2)}
   - \`.math-table td\`: border: 0.5pt solid #cbd5e1; padding: 8px; vertical-align: top;
   - \`.katex\`: font-size: 1.08em !important; margin: 0 2px;
   - \`.katex-display\`: margin: 1em 0 !important;
+  - \`@page { size: A4; margin: 15mm 15mm 22mm 15mm; }\`
+  - \`.footer-content { position: fixed; bottom: -10mm; left: 0; right: 0; text-align: center; font-size: 8pt; color: #666; border-top: 0.5pt solid #ccc; padding-top: 5px; font-family: 'Inter', sans-serif; }\`
 
-### Header & Instructions
-- Replicate the official NEET first page: Plus2AI Logo, QR code, Serial No, Info Table, Legal Disclaimer, and Instructions.
+### FIRST PAGE LAYOUT (MANDATORY BLOCKS)
 
-### Watermark & Footer
-- SVG repeating background: "Plus2AI · Exam DNA · 2026" (opacity 0.03, rotate -35deg).
-- Institutional footer on every page using @page.
+1. **HEADER**:
+   - Centered **Plus2AI** logo (Plus2 dark green, AI orange, large bold).
+   - Top-right QR Code (55px) with "learn.dataziv.com" below it.
+   - Title: "NATIONAL ELIGIBILITY CUM ENTRANCE TEST (NEET) 2026" (Centered, 11pt, bold).
+   - Large Subtitle: "${subject.toUpperCase()} <span style='color:#ff6b2b'>SIMULATION</span>" (30pt, heavy bold).
+
+2. **IDENTIFIERS**:
+   - Serial No Box: "Serial No: P2-2026-${subject.slice(0, 4).toUpperCase()}-${set}" (Centered, bordered box).
+   - Info Table: 2-col bordered table. Left: Subject Code & Duration (45 mins). Right: Version Code (REI-v17) & Max Marks (180).
+
+3. **CANDIDATE ENTRY**:
+   - Dotted line for "CANDIDATE NAME".
+   - "NTA REG. NO:" with 8 empty grid boxes.
+
+4. **LEGAL DISCLAIMER**:
+   - Bordered box titled "LEGAL DISCLAIMER & TERMS OF USAGE".
+   - Text: "IMPORTANT: This document is an AI-generated simulation... Intended strictly for practice... Plus2AI assumes no legal liability..."
+
+5. **INSTRUCTIONS**:
+   - Bordered box titled "IMPORTANT INSTRUCTIONS TO CANDIDATES".
+   - 6 items: (1) 45 questions check, (2) OMR Version/Serial entry, (3) 4 marks each / -1 wrong, (4) OMR pen use, (5) No gadgets, (6) Plus2AI DNA Model REI v17 note.
+
+### FOOTER RULE
+- Every page (including first) MUST have this footer: 
+- "Reproduction strictly prohibited. © 2026 Plus2AI. | NEET 2026 Simulation - SET ${set} | Page X of Y" (where X is page number).
 
 ### Output format
 Return ONLY the raw HTML. No markdown code fences. Start with <!DOCTYPE html>.`;
