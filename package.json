@@ -43,6 +43,7 @@
     "ioredis": "^5.9.2",
     "lucide-react": "^0.562.0",
     "pdfjs-dist": "^4.10.38",
+    "puppeteer": "^24.42.0",
     "razorpay": "^2.9.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

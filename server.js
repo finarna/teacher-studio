@@ -616,6 +616,20 @@ app.get('/api/flashcards/:scanId', async (req, res) => {
 });
 
 // ============================================================================
+// FLAGSHIP PDF GENERATION (Gemini + Puppeteer)
+// ============================================================================
+
+/**
+ * POST /api/generate-flagship-pdf
+ * Body: { paperId: 'neet-physics-set-a' | 'neet-physics-set-b' | 'neet-chemistry-set-a' | 'neet-chemistry-set-b' }
+ * Returns: PDF binary stream
+ */
+app.post('/api/generate-flagship-pdf', async (req, res) => {
+    const { handleGenerateFlagshipPdf } = await import('./api/generateFlagshipPdf.js');
+    return handleGenerateFlagshipPdf(req, res);
+});
+
+// ============================================================================
 
 // 404 Handler
 app.use((req, res) => {

@@ -29,131 +29,60 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
         setPapers(allPapers.filter(p => p.examContext === selectedExamContext || p.id.startsWith('mock-')));
     }, [selectedExamContext]);
 
+    // ── Map PaperSet → server paperId ────────────────────────────────────────
+    const getPaperId = (paper: PaperSet): string | null => {
+        const subj = (paper.subject || '').toLowerCase();
+        const set  = (paper.setName || '').toUpperCase();
+        if (subj.includes('physics')   && set === 'A') return 'neet-physics-set-a';
+        if (subj.includes('physics')   && set === 'B') return 'neet-physics-set-b';
+        if (subj.includes('chemistry') && set === 'A') return 'neet-chemistry-set-a';
+        if (subj.includes('chemistry') && set === 'B') return 'neet-chemistry-set-b';
+        return null;
+    };
+
+    // ── Server-side Gemini + Puppeteer PDF download ───────────────────────────
     const handleProDownload = async (paper: PaperSet) => {
-        const html2pdf = window.html2pdf;
-        if (!html2pdf) {
-            alert('Pro PDF engine loading... Please wait a second and try again.');
+        const paperId = getPaperId(paper);
+
+        if (!paperId) {
+            // Fallback: alert if paper isn't in registry
+            alert(`Pro PDF not yet available for ${paper.subject} Set ${paper.setName}. Coming soon!`);
             return;
         }
 
-        setSelectedPaper(paper);
         setIsGenerating(true);
 
-        // FONT GUARD: Wait for all fonts (including KaTeX) to be ready
         try {
-            if (document.fonts && document.fonts.ready) {
-                await document.fonts.ready;
+            const res = await fetch('http://localhost:9001/api/generate-flagship-pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paperId }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: 'Unknown server error' }));
+                throw new Error(err.error || `Server error ${res.status}`);
             }
-        } catch (e) {
-            console.warn('Font loading check failed, proceeding with delay fallback', e);
+
+            // Stream PDF blob and trigger browser download
+            const blob = await res.blob();
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = `Plus2AI_NEET_2026_${paper.subject}_SET_${paper.setName}_Prediction.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+        } catch (err: any) {
+            console.error('Gemini PDF generation error:', err);
+            alert(`PDF generation failed: ${err.message}\n\nMake sure the server is running on port 9001.`);
+        } finally {
+            setIsGenerating(false);
         }
-
-        // Standard delay for high-fidelity stabilization
-        setTimeout(async () => {
-            if (!paperRef.current) return;
-
-            const paperElement = paperRef.current.querySelector('.paper-container');
-            if (!paperElement) return;
-
-            const opt = {
-                margin: 0,
-                filename: `Plus2AI_${paper.subject}_${paper.examContext || 'KCET'}_2026_SET_${paper.setName}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 1.35, // Optimal safety scale for long 45-question papers
-                    useCORS: true,
-                    letterRendering: true,
-                    allowTaint: false,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    scrollY: -window.scrollY,
-                    scrollX: -window.scrollX,
-                    width: paperElement.scrollWidth,
-                    height: paperElement.scrollHeight,
-                    onclone: (clonedDoc: Document) => {
-                        // FORCE visibility and height on ALL parent containers
-                        const containers = clonedDoc.querySelectorAll('html, body, #root, .print-area, .paper-container, .questions-grid');
-                        containers.forEach(el => {
-                            (el as HTMLElement).style.display = 'block';
-                            (el as HTMLElement).style.height = 'auto';
-                            (el as HTMLElement).style.minHeight = 'auto';
-                            (el as HTMLElement).style.maxHeight = 'none';
-                            (el as HTMLElement).style.overflow = 'visible';
-                            (el as HTMLElement).style.visibility = 'visible';
-                        });
-
-                        // Standard KaTeX/SVG hardening
-                        const allSvgs = clonedDoc.querySelectorAll('svg');
-                        allSvgs.forEach((svg: Element) => {
-                            const htmlSvg = svg as SVGElement;
-                            // Force visibility
-                            htmlSvg.style.display = 'inline-block';
-                            htmlSvg.style.visibility = 'visible';
-                            htmlSvg.style.opacity = '1';
-                            htmlSvg.style.overflow = 'visible';
-
-                            // Ensure SVG has dimensions
-                            const width = htmlSvg.getAttribute('width');
-                            const height = htmlSvg.getAttribute('height');
-                            if (width) htmlSvg.style.width = width;
-                            if (height) htmlSvg.style.height = height;
-
-                            // Ensure all paths within SVG are visible
-                            const paths = htmlSvg.querySelectorAll('path');
-                            paths.forEach((path: Element) => {
-                                const htmlPath = path as SVGPathElement;
-                                htmlPath.style.visibility = 'visible';
-                                htmlPath.style.display = 'block';
-                            });
-                        });
-
-                        // Make sure all KaTeX elements are visible
-                        const katexElements = clonedDoc.querySelectorAll('.katex');
-                        katexElements.forEach((el: Element) => {
-                            const htmlEl = el as HTMLElement;
-                            htmlEl.style.display = 'inline-block';
-                            htmlEl.style.visibility = 'visible';
-                            htmlEl.style.opacity = '1';
-                        });
-
-                        // Ensure no hidden overflow on math containers
-                        const mathContainers = clonedDoc.querySelectorAll('.katex-html, .katex-mathml');
-                        mathContainers.forEach((el: Element) => {
-                            const htmlEl = el as HTMLElement;
-                            htmlEl.style.overflow = 'visible';
-                            htmlEl.style.display = 'inline-block';
-                        });
-                    }
-                },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['css', 'legacy'] }
-            };
-
-            try {
-                await html2pdf().set(opt).from(paperElement).toPdf().get('pdf').then((pdf: any) => {
-                    const totalPages = pdf.internal.getNumberOfPages();
-                    const pageWidth = pdf.internal.pageSize.getWidth();
-                    const pageHeight = pdf.internal.pageSize.getHeight();
-
-                    for (let i = 1; i <= totalPages; i++) {
-                        pdf.setPage(i);
-                        pdf.setFontSize(8.5);
-                        pdf.setTextColor(40);
-                        const footerLine = `Reproduction strictly prohibited. © 2026 Plus2AI. | ${paper.examContext || 'KCET'} 2026 Simulation - SET ${paper.setName} | Page ${i} of ${totalPages}`;
-                        pdf.text(footerLine, pageWidth / 2, pageHeight - 8, { align: 'center' });
-                        pdf.setDrawColor(180);
-                        pdf.setLineWidth(0.3);
-                        pdf.line(20, pageHeight - 11, pageWidth - 20, pageHeight - 11);
-                    }
-                }).save();
-            } catch (err) {
-                console.error('PDF Generation failed:', err);
-            } finally {
-                setIsGenerating(false);
-                setSelectedPaper(null);
-            }
-        }, 35000); // Increased from 2s to 35s for complex NEET papers
     };
+
 
     const handleQuickPrint = (paper: PaperSet) => {
         setSelectedPaper(paper);
@@ -221,10 +150,11 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
 
                     {isGenerating && (
                         <div className="no-print fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] flex items-center justify-center">
-                            <div className="bg-white p-8 rounded-2xl shadow-2xl text-center">
+                            <div className="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm">
                                 <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-slate-900">Generating PDF</h3>
-                                <p className="text-slate-500">Wait while we render your high-fidelity mock paper...</p>
+                                <h3 className="text-xl font-bold text-slate-900">Gemini is Generating Your PDF</h3>
+                                <p className="text-slate-500 mt-1 text-sm">Formatting all 45 questions with NEET-standard layout, math rendering, watermarks, and branding...</p>
+                                <p className="text-xs text-slate-400 mt-2">This takes ~30–60 seconds. Please wait.</p>
                             </div>
                         </div>
                     )}
@@ -318,7 +248,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
                                     onClick={() => handleProDownload(paper)}
                                     className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-md active:scale-[0.98]"
                                 >
-                                    <Sparkles size={16} className="text-amber-400" /> Download Pro PDF
+                                    <Sparkles size={16} className="text-amber-400" /> Generate AI PDF
                                 </button>
                                 <button
                                     onClick={() => handleQuickPrint(paper)}
