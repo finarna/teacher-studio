@@ -75,8 +75,11 @@ function buildGeminiPrompt(paperData, subject, set, color) {
 
 3. **VISUAL DIFFERENTIATION**:
    - **Question Numbers**: Bold, using the accent color (${color}).
-   - **Options**: Displayed in a grid (2x2 for short options, 1x4 for long ones). Labels (A), (B), (C), (D) must be bold and in the accent color.
-   - **Match-the-Column**: Format as a clean 2-column table with borders. Column I on left, Column II on right. This is vital for Chemistry/Physics.
+   - **Options**: Use a flexible layout.
+     - Short options: 2-column grid.
+     - Long options (or if math symbols are complex): **SINGLE COLUMN (1x4)** to prevent overlap.
+     - Labels (A), (B), (C), (D) must be bold and in the accent color, with a fixed width to ensure alignment.
+   - **Match-the-Column**: Format as a clean 2-column table with borders. Column I on left, Column II on right.
 
 4. **PAGE BREAKS**:
    - Enforce \`break-inside: avoid\` on all question blocks. 
@@ -98,17 +101,25 @@ ${JSON.stringify(qData, null, 2)}
 - Include Google Fonts: Inter (400, 500, 600, 700) and Public Sans (700, 900).
 - Include KaTeX CSS/JS and Auto-render extension.
 - Custom CSS:
-  - \`body\`: font-family 'Inter', sans-serif;
-  - \`.question-block\`: margin-bottom: 24px; padding: 15px; border: 0.5pt solid #e5e7eb; border-radius: 6px; break-inside: avoid;
-  - \`.math-table\`: border-collapse: collapse; width: 100%; margin: 10px 0;
-  - \`.math-table td, .math-table th\`: border: 0.5pt solid #ccc; padding: 6px;
-  - \`.option-grid\`: display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; margin-top: 10px; padding-left: 20px;
+  - \`body\`: font-family 'Inter', sans-serif; line-height: 1.6; color: #111;
+  - \`.question-block\`: margin-bottom: 28px; padding: 18px; border: 0.5pt solid #e2e8f0; border-radius: 8px; break-inside: avoid; background: #fff;
+  - \`.topic-pill\`: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px;
+  - \`.question-num\`: font-weight: 800; color: ${color}; font-size: 10.5pt;
+  - \`.question-text\`: font-weight: 400; font-size: 9.8pt; margin-bottom: 12px;
+  - \`.option-grid\`: display: flex; flex-direction: column; gap: 6px; margin-top: 12px; padding-left: 15px;
+  - \`.option-row\`: display: flex; align-items: flex-start; gap: 10px;
+  - \`.option-label\`: font-weight: 700; color: ${color}; min-width: 28px; flex-shrink: 0;
+  - \`.option-text\`: font-size: 9.2pt;
+  - \`.math-table\`: border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 9pt;
+  - \`.math-table td\`: border: 0.5pt solid #cbd5e1; padding: 8px; vertical-align: top;
+  - \`.katex\`: font-size: 1.08em !important; margin: 0 2px;
+  - \`.katex-display\`: margin: 1em 0 !important;
 
 ### Header & Instructions
 - Replicate the official NEET first page: Plus2AI Logo, QR code, Serial No, Info Table, Legal Disclaimer, and Instructions.
 
 ### Watermark & Footer
-- SVG repeating background: "Plus2AI · Exam DNA · 2026" (opacity 0.04, rotate -35deg).
+- SVG repeating background: "Plus2AI · Exam DNA · 2026" (opacity 0.03, rotate -35deg).
 - Institutional footer on every page using @page.
 
 ### Output format
