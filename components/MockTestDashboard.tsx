@@ -62,7 +62,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
         console.log('[PDF] setIsGenerating=true, calling server...');
 
         try {
-            const res = await fetch('http://localhost:9001/api/generate-flagship-pdf', {
+            const res = await fetch('/api/generate-flagship-pdf', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ paperId }),
@@ -90,7 +90,7 @@ export const MockTestDashboard: React.FC<{ onBack: () => void }> = ({ onBack }) 
 
         } catch (err: any) {
             console.error('[PDF] ❌ Gemini PDF generation error:', err);
-            alert(`PDF generation failed: ${err.message}\n\nMake sure the server is running on port 9001.`);
+            alert(`PDF generation failed: ${err.message}\n\nPlease ensure the backend service is reachable.`);
         } finally {
             setIsGenerating(false);
         }
