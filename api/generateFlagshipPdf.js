@@ -24,8 +24,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ── Paper Registry ────────────────────────────────────────────────────────────
 export const PAPER_REGISTRY = {
-  'neet-physics-set-a':   { file: 'flagship_neet_physics_2026_set_a.json',   subject: 'Physics',   set: 'A', color: '#1e40af' },
-  'neet-physics-set-b':   { file: 'flagship_neet_physics_2026_set_b.json',   subject: 'Physics',   set: 'B', color: '#1e40af' },
+  'neet-physics-set-a': { file: 'flagship_neet_physics_2026_set_a.json', subject: 'Physics', set: 'A', color: '#1e40af' },
+  'neet-physics-set-b': { file: 'flagship_neet_physics_2026_set_b.json', subject: 'Physics', set: 'B', color: '#1e40af' },
   'neet-chemistry-set-a': { file: 'flagship_neet_chemistry_2026_set_a.json', subject: 'Chemistry', set: 'A', color: '#065f46' },
   'neet-chemistry-set-b': { file: 'flagship_neet_chemistry_2026_set_b.json', subject: 'Chemistry', set: 'B', color: '#065f46' },
 };
@@ -51,7 +51,7 @@ function buildGeminiPrompt(paperData, subject, set, color) {
     correctOptionIndex: q.correctOptionIndex
   }));
 
-  return `You are an expert NEET exam paper formatter and senior front-end designer. Your goal is to generate a COMPLETE, PRODUCTION-READY HTML document that mirrors a premium, institutional NTA examination paper. **OPTIMIZE FOR COMPACTNESS** to keep the page count low (~15 pages). Use multi-column layouts for short options and minimize whitespace.
+  return \`You are an expert NEET exam paper formatter and senior front-end designer. Your goal is to generate a COMPLETE, PRODUCTION-READY HTML document that mirrors a premium, institutional NTA examination paper.
 
 ## CORE DIRECTIVES (CRITICAL)
 
@@ -98,23 +98,24 @@ ${JSON.stringify(qData, null, 2)}
     });
   </script>\`
 - Custom CSS:
-  - \`body\`: font-family 'Inter', sans-serif; line-height: 1.48; color: #111;
-  - \`.question-block\`: margin-bottom: 20px; padding: 12px 18px; border: 0.5pt solid #cbd5e1; border-radius: 8px; break-inside: avoid; background: #fff;
-  - \`.topic-pill\`: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px; font-weight: 600; text-transform: uppercase;
-  - \`.question-num\`: font-weight: 800; color: ${color}; font-size: 10.5pt; margin-right: 6px;
-  - \`.question-text\`: font-weight: 400; font-size: 9.5pt; margin-bottom: 12px; color: #0f172a;
-  - \`.option-grid\`: display: grid; grid-template-columns: 1fr 1fr; gap: 6px 35px; margin-top: 10px; padding-left: 10px;
-  - \`.option-row\`: display: flex; align-items: flex-start; gap: 8px; break-inside: avoid;
+  - \`body\`: font-family 'Inter', sans-serif; line-height: 1.6; color: #111;
+  - \`body::before\`: content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; opacity: 0.02; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='500'><text x='200' y='250' fill='black' font-family='sans-serif' font-weight='900' font-size='35' transform='rotate(-35, 200, 250)' text-anchor='middle'>Plus2AI DNA</text></svg>"); background-repeat: repeat;
+  - \`.question-block\`: margin-bottom: 28px; padding: 20px; border: 0.5pt solid #e2e8f0; border-radius: 8px; break-inside: avoid; background: #fff;
+  - \`.topic-pill\`: font-size: 7.5pt; color: #64748b; margin-bottom: 8px; border-bottom: 1px dotted #e2e8f0; padding-bottom: 4px;
+  - \`.question-num\`: font-weight: 800; color: ${color}; font-size: 10.5pt;
+  - \`.question-text\`: font-weight: 400; font-size: 10.2pt; margin-bottom: 12px;
+  - \`.option-grid\`: display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-left: 15px;
+  - \`.option-row\`: display: flex; align-items: flex-start; gap: 10px;
   - \`.option-label\`: font-weight: 700; color: ${color}; min-width: 28px; flex-shrink: 0;
-  - \`.option-text\`: font-size: 9pt; color: #334155;
-  - \`.math-table\`: border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 9pt; break-inside: avoid;
-  - \`.math-table td\`: border: 0.5pt solid #e2e8f0; padding: 10px; vertical-align: top;
+  - \`.option-text\`: font-size: 9.8pt;
+  - \`.math-table\`: border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 9pt;
+  - \`.math-table td\`: border: 0.5pt solid #cbd5e1; padding: 10px; vertical-align: top;
   - \`.math-table tr:nth-child(even)\` { background: #f8fafc; }
-  - \`.katex\`: font-size: 1.05em !important;
-  - \`.katex-display\`: margin: 0.8em 0 !important;
-  - \`.diagram-container\`: margin: 12px auto; text-align: center; max-width: 100%; border: 0.5pt dashed #e2e8f0; padding: 10px; border-radius: 6px; break-inside: avoid;
-  - \`.diagram-description\`: font-style: italic; font-size: 8.5pt; color: #64748b; background: #f8fafc; border-left: 3px solid ${color}; padding: 8px 15px; margin: 8px 0; border-radius: 0 4px 4px 0;
-  - \`@page { size: A4; margin: 12mm 12mm 18mm 12mm; }\`
+  - \`.katex\`: font-size: 1.08em !important; margin: 0 2px;
+  - \`.katex-display\`: margin: 1em 0 !important;
+  - \`.diagram-container\`: margin: 15px auto; text-align: center; max-width: 100%; border: 0.5pt dashed #e2e8f0; padding: 12px; border-radius: 6px;
+  - \`.diagram-description\`: font-style: italic; font-size: 8.5pt; color: #475569; background: #f8fafc; border-left: 3px solid ${color}; padding: 10px 15px; margin: 10px 0; border-radius: 0 4px 4px 0;
+  - \`@page { size: A4; margin: 15mm 15mm 25mm 15mm; }\`
 
 ### FIRST PAGE LAYOUT (MANDATORY BLOCKS)
 
@@ -143,20 +144,11 @@ ${JSON.stringify(qData, null, 2)}
    - Bordered box titled "IMPORTANT INSTRUCTIONS TO CANDIDATES".
    - 6 items: (1) 45 questions check, (2) OMR Version/Serial entry, (3) 4 marks each / -1 wrong, (4) OMR pen use, (5) No gadgets, (6) Plus2AI DNA Model REI v17 note.
 
-- **WATERMARK**: Include the following CSS to ensure the watermark repeats on EVERY page:
-  \`body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 9999;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250' transform='rotate(-35)'><text x='0' y='125' fill='black' font-family='sans-serif' font-weight='900' font-size='24'>Plus2AI DNA</text></svg>");
-    background-repeat: repeat;
-    opacity: 0.018;
-  }\`
+### WATERMARK & DIAGRAMS
+- **WATERMARK**: Include a \`<div class="watermark">\` at the very start of the body. **REPEAT** the text "Plus2AI DNA" inside 15 separate \`<div class="watermark-item">Plus2AI DNA</div>\` elements to fill the grid.
 - **DIAGRAMS**: If a question includes a "Diagram Description", **GENERATE a supplementary inline SVG**.
   - Use clean lines, labeled axes, and clear markers.
-  - Place the SVG inside a .diagram-container.
+  - Place the SVG inside a \`.diagram-container\`.
 
 ### IMPORTANT: NO CONTENT FOOTERS
 - **DO NOT** include any footer, page numbers, or bottom lines in the HTML body. 
@@ -197,9 +189,9 @@ async function renderPdf(html, subject, set) {
     const page = await browser.newPage();
     // Set a larger viewport to ensure charts/SVG render well
     await page.setViewport({ width: 1200, height: 1600 });
-    
+
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 90000 });
-    
+
     // Give KaTeX and any SVGs time to settle
     await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 3000)));
 
