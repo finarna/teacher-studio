@@ -123,10 +123,10 @@ ${JSON.stringify(qData, null, 2)}
 
 1. **HEADER**:
    - Centered **Plus2AI** logo (Plus2 dark green, AI orange, large bold).
-   - Top-right: **TWO Dynamic QR Codes** (50px each, side-by-side).
-     - QR 1: `https://learn.dataziv.com` with label "Learning Portal" below it.
-     - QR 2: `https://plus2ai.com` with label "Plus2AI Official" below it.
-     - Use \`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=[URL]\` for the images.
+    - Top-right: **TWO Dynamic QR Codes** (50px each, side-by-side).
+      - QR 1: https://learn.dataziv.com with label "Learning Portal" below it.
+      - QR 2: https://plus2ai.com with label "Plus2AI Official" below it.
+      - Use https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=[URL] for the images.
    - Title: "NATIONAL ELIGIBILITY CUM ENTRANCE TEST (NEET) 2026" (Centered, 11pt, bold).
    - Large Subtitle: "${subject.toUpperCase()} <span style='color:#ff6b2b'>SIMULATION</span>" (30pt, heavy bold).
 
